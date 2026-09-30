@@ -12,11 +12,19 @@
 export const CHAMADAS = ['MANDA O TEU', 'MANDA O ARROTÃO AÍ', 'SOLTA O BICHO'] as const;
 
 export const COMENTARIOS_PRIMEIRA_VEZ = [
-  'SEGURA E ARROTA',
+  'Tua dignidade já era mesmo.',
+  'Ninguém precisa saber que você tentou.',
+  'Primeira vez sempre dói mais no orgulho.',
+  'Relaxa. Todo mundo começa horrível.',
+  'Vamos ver do que tu é capaz.',
 ] as const;
 
 export const COMENTARIOS_DE_VOLTA = [
-  'SEGURA E ARROTA',
+  'De novo? Tá viciado.',
+  'Volta aqui pra consertar aquela nota.',
+  'Sabia que tu não ia aguentar ficar de fora.',
+  'Bateu a saudade da humilhação?',
+  'Volta pra tentar de novo, coé.',
 ] as const;
 
 /**

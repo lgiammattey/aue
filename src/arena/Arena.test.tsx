@@ -35,7 +35,8 @@ import { ALVOS_DE_ORIGEM } from '../nucleo/origem/origens';
 import { COMENTARIOS_DE_VOLTA, COMENTARIOS_PRIMEIRA_VEZ } from '../nucleo/fala/idle';
 import { CHAMOU_VOCE, GANHOU_COMENTARIO, PRA_BATER, chamouVoce } from '../nucleo/fala/versus';
 import { formatarNota } from '../shared/formato/nota';
-import { DICA_DO_MICROFONE } from '../nucleo/fala/erros';
+import { DICA_DO_MICROFONE, falaDoErro } from '../nucleo/fala/erros';
+import type { CasoDeErro } from '../nucleo/arena/estados';
 import { TETO_DE_GRAVACAO_MS } from '../nucleo/gravacao/regras';
 import {
   LIMIAR_DA_ESPERA_LONGA_MS,
@@ -256,6 +257,23 @@ const MUDO: AudioCapturado = {
   duracaoMs: 2200,
   resumo: { rms: 0.0004, pico: 0.001 },
 };
+
+/**
+ * Erro é comportamento, não uma frase congelada no teste. A fonte de copy já
+ * tem sua própria suíte; aqui importa que a Arena entre em ERROR e ofereça a
+ * saída que a fala canônica descreve para aquele caso.
+ */
+async function esperarErro(caso: CasoDeErro, comNota = false) {
+  await waitFor(() =>
+    expect(document.querySelector('.arena')?.getAttribute('data-estado')).toBe('ERROR'),
+  );
+
+  if (!comNota) {
+    return screen.findByRole('button', { name: falaDoErro(caso).saida });
+  }
+
+  return screen.findByRole('button', { name: 'Ver minha nota' });
+}
 
 /** Um aparelho de mentira, com os fios à mostra para o teste puxar. */
 function montarDubles(opcoes: Opcoes = {}) {
@@ -543,11 +561,8 @@ describe('a Arena no IDLE', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Arrotar' }));
 
-    const voltar = await screen.findByRole('button', { name: 'Tentar de novo' });
-    expect(screen.getByText('Sem microfone não tem jogo.')).toBeDefined();
-
-    fireEvent.click(voltar);
-    expect(screen.getByRole('button', { name: 'Arrotar' })).toBeDefined();
+    await esperarErro('microfoneNegado');
+    expect(screen.queryByRole('button', { name: 'Arrotar' })).toBeNull();
   });
 
   it('gravador que não liga vira erro que não culpa a pessoa', async () => {
@@ -695,8 +710,7 @@ describe('a conferida da saída', () => {
 
     fireEvent.click(parar);
 
-    expect(await screen.findByText('Não veio nada.')).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeDefined();
+    await esperarErro('semSom');
   });
 
   it('gravador que quebra ao parar não vira "sem som"', async () => {
@@ -835,8 +849,7 @@ describe('o julgamento', () => {
     const dubles = montarDubles({ aoParar: ARROTO, juizDemoraMs: 60_000 });
     await ateANota(dubles);
 
-    expect(screen.getByText('Deu ruim aqui dentro.')).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeDefined();
+    await esperarErro('falhaNaAnalise');
   });
 
   it('motor que recusa o áudio não vira nota', async () => {
@@ -977,7 +990,7 @@ describe('a nota', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Vou mandar outro!' }));
 
-    expect(await screen.findByText('Sem microfone não tem jogo.')).toBeDefined();
+    await esperarErro('microfoneNegado', true);
   });
 
   it('nada do arroto é guardado no aparelho', async () => {
@@ -2009,9 +2022,7 @@ describe('a conferida da saída', () => {
 
     fireEvent.click(parar);
 
-    expect(await screen.findByText('Isso não foi arroto.')).toBeDefined();
-    expect(screen.getByText('Gritar não vale. Bater na mesa também não.')).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeDefined();
+    await esperarErro('naoEhArroto');
   });
 
   it('sem som nem chega a perguntar ao detector', async () => {
@@ -2021,7 +2032,7 @@ describe('a conferida da saída', () => {
 
     fireEvent.click(parar);
 
-    expect(await screen.findByText('Não veio nada.')).toBeDefined();
+    await esperarErro('semSom');
     expect(dubles.detector.conferidas).toBe(0);
   });
 
@@ -2031,7 +2042,7 @@ describe('a conferida da saída', () => {
     const parar = await ateGravar(dubles);
 
     fireEvent.click(parar);
-    await screen.findByText('Isso não foi arroto.');
+    await esperarErro('naoEhArroto');
 
     expect(screen.queryByRole('button', { name: /Cerveja/ })).toBeNull();
     expect(dubles.pontuador.chamadas).toBe(0);
@@ -2501,7 +2512,7 @@ describe('o peso do erro na tela', () => {
     const parar = await ateGravar(dubles);
 
     fireEvent.click(parar);
-    await screen.findByText('Não veio nada.');
+    await esperarErro('semSom');
 
     const arena = document.querySelector('.arena');
     expect(arena?.getAttribute('data-peso')).toBe('leve');
@@ -2516,7 +2527,7 @@ describe('o peso do erro na tela', () => {
     render(<Arena adaptadores={adaptadores} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Arrotar' }));
-    await screen.findByText('Sem microfone não tem jogo.');
+    await esperarErro('microfoneNegado');
 
     expect(document.querySelector('.arena')?.getAttribute('data-peso')).toBe('parede');
     expect(screen.getByText(DICA_DO_MICROFONE)).toBeDefined();
@@ -2568,7 +2579,7 @@ describe('o peso do erro na tela', () => {
     const parar = await ateGravar(dubles);
 
     fireEvent.click(parar);
-    await screen.findByText('Não veio nada.');
+    await esperarErro('semSom');
 
     expect(document.querySelector('.palco-nota')).toBeNull();
     expect(document.querySelector('.arena')?.getAttribute('data-com-nota')).toBe('nao');
@@ -2618,7 +2629,7 @@ describe('o peso do erro na tela', () => {
     dubles.captura.pedir = async () => ({ ok: false, motivo: 'negado' });
     fireEvent.click(screen.getByRole('button', { name: 'Vou mandar outro!' }));
 
-    await screen.findByText('Sem microfone não tem jogo.');
+    await esperarErro('microfoneNegado', true);
     fireEvent.click(screen.getByRole('button', { name: 'Ver minha nota' }));
 
     expect(await screen.findByText('Tá maluco.')).toBeDefined();

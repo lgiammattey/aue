@@ -24,6 +24,25 @@ export default defineConfig({
   test: {
     environment: 'node',
     /*
+     * Arquivos que pedem jsdom por cabeçalho continuam sendo os únicos a
+     * receber DOM. A URL não-opaca só dá a esses arquivos um origin, que é o
+     * requisito do jsdom para expor `localStorage`; o ambiente padrão segue
+     * Node para a suíte de regra pura.
+     */
+    environmentOptions: {
+      jsdom: {
+        url: 'https://aue.test/',
+      },
+    },
+    /*
+     * Node 24 expõe um `localStorage` experimental próprio. Ele ocupa o
+     * global antes de o jsdom instalar o armazenamento do documento e deixa
+     * `window.localStorage` indefinido nos arquivos que pedem jsdom. Desligar
+     * só essa API experimental nos workers deixa o DOM por arquivo intacto e
+     * permite que o origin acima forneça o storage correto.
+     */
+    execArgv: ['--no-experimental-webstorage'],
+    /*
      * `.tsx` entrou junto com o `.ts`: o `BotaoDeDesafiar.test.tsx` escreve JSX
      * e, com o padrão anterior, o arquivo simplesmente não era coletado — o
      * `npm test` passava verde sem nunca ter rodado o teste que trava o gate do

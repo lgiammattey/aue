@@ -1984,3 +1984,205 @@
     animation: none;
   }
 }
+
+/* Pele hi-fi da primeira leva (#210). A grade e a máquina continuam as mesmas:
+   isto só recoloca a hierarquia da prancha nos dados reais da Arena. */
+.arena {
+  --aue-ink: oklch(10% 0.02 258);
+  --aue-paper: oklch(96% 0.015 92);
+  --aue-screen: oklch(14% 0.025 258);
+  --aue-lime: oklch(86% 0.2 128);
+  --aue-muted-dark: oklch(68% 0.025 258);
+  --aue-muted-light: oklch(42% 0.03 258);
+  min-height: 100dvh;
+  isolation: isolate;
+}
+
+.arena[data-estado='RECORDING'],
+.arena[data-estado='JUDGING'],
+.arena[data-estado='REMATCH'],
+.arena[data-estado='ERROR'] {
+  --bg: var(--aue-screen);
+  --surface: color-mix(in oklch, var(--aue-screen) 86%, white);
+  --surface-2: color-mix(in oklch, var(--aue-screen) 74%, white);
+  --fg: var(--aue-paper);
+  --muted: var(--aue-muted-dark);
+  --border: oklch(100% 0 0 / 0.14);
+  --accent: var(--aue-lime);
+  color-scheme: dark;
+}
+
+.arena[data-estado='IDLE'],
+.arena[data-estado='ORIGIN'],
+.arena[data-estado='RESULT'],
+.arena[data-estado='CHALLENGE'],
+.arena[data-estado='VERSUS'],
+.arena[data-estado='SCOREBOARD'] {
+  --bg: var(--aue-paper);
+  --surface: oklch(100% 0 0 / 0.55);
+  --surface-2: oklch(92% 0.012 92);
+  --fg: var(--aue-ink);
+  --muted: var(--aue-muted-light);
+  --border: oklch(18% 0.02 258 / 0.2);
+  --accent: var(--aue-lime);
+  --accent-on: var(--aue-ink);
+  color-scheme: light;
+}
+
+/* phone-arena */
+.arena[data-estado='IDLE'] { --altura-do-palco: clamp(230px, 36svh, 310px); }
+.arena[data-estado='IDLE'] .bolha-wrap { width: min(232px, 64vw, var(--altura-do-palco)); filter: drop-shadow(0 25px 28px oklch(76% .22 128 / .22)); }
+.arena[data-estado='IDLE'] .grito { max-width: 8ch; font-size: clamp(42px, 13vw, 56px); line-height: .86; letter-spacing: -.035em; color: var(--aue-ink); }
+.arena[data-estado='IDLE'] .gatilho-microfone { width: 100%; padding: 0; }
+.arena[data-estado='IDLE'] .gatilho-bola { width: 100%; height: 58px; border-radius: 18px; }
+.arena[data-estado='IDLE'] .gatilho-bola svg { width: 30px; height: 30px; }
+.arena[data-estado='IDLE'] .gatilho-rotulo { order: -1; margin-bottom: -58px; z-index: 1; pointer-events: none; color: var(--aue-ink); }
+.arena[data-estado='IDLE'] .gatilho-bola::after { display: none; }
+.arena[data-estado='IDLE'] .acao::after { content: 'O microfone só liga quando você tocar.'; order: 2; margin-top: 8px; color: var(--muted); font-size: 10px; line-height: 1.35; text-align: center; }
+
+/* phone-recording e phone-rematch-countdown */
+.arena[data-estado='RECORDING'] .grito,
+.arena[data-estado='JUDGING'] .grito,
+.arena[data-estado='REMATCH'] .grito,
+.arena[data-estado='ERROR'] .grito { font-size: clamp(42px, 12vw, 49px); line-height: .88; letter-spacing: -.035em; }
+.arena[data-estado='RECORDING'] .bolha-wrap,
+.arena[data-estado='REMATCH'] .bolha-wrap { width: min(218px, 61vw, var(--altura-do-palco)); filter: drop-shadow(0 25px 32px oklch(76% .22 128 / .24)); }
+.arena[data-estado='RECORDING'] .gatilho-microfone,
+.arena[data-estado='REMATCH'] .gatilho-microfone { width: 100%; padding: 0; }
+.arena[data-estado='RECORDING'] .gatilho-bola,
+.arena[data-estado='REMATCH'] .gatilho-bola { width: 100%; height: 58px; border-radius: 18px; color: var(--aue-ink); background: var(--aue-paper); }
+.arena[data-estado='RECORDING'] .gatilho-rotulo,
+.arena[data-estado='REMATCH'] .gatilho-rotulo { order: -1; margin-bottom: -58px; z-index: 1; color: var(--aue-ink); pointer-events: none; }
+.arena[data-estado='REMATCH'] .contagem-da-revanche { color: var(--aue-lime); font-size: clamp(124px, 39vw, 174px); }
+
+/* Origem é a grade de pílulas, sem inventar opções. */
+.arena[data-estado='ORIGIN'] .grito { font-size: clamp(34px, 10vw, 44px); line-height: .9; color: var(--aue-ink); }
+.arena[data-estado='ORIGIN'] .origens { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.arena[data-estado='ORIGIN'] .origem { min-height: 52px; flex-direction: row; justify-content: flex-start; border-radius: 999px; background: transparent; color: var(--aue-ink); font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; }
+.arena[data-estado='ORIGIN'] .origem span { font-size: 18px; }
+
+/* phone-score e phone-challenge-received: nota gigante sobre mancha lime. */
+.arena[data-estado='RESULT'], .arena[data-estado='CHALLENGE'] { --altura-do-palco: clamp(218px, 34svh, 288px); }
+.arena[data-estado='RESULT'] .bolha-wrap, .arena[data-estado='CHALLENGE'] .bolha-wrap { visibility: hidden; }
+.arena[data-estado='RESULT'] .palco-nota, .arena[data-estado='CHALLENGE'] .palco-nota { position: relative; gap: 12px; isolation: isolate; }
+.arena[data-estado='RESULT'] .palco-nota::before, .arena[data-estado='CHALLENGE'] .palco-nota::before { content: ''; position: absolute; z-index: -1; width: min(178px, 47vw); height: min(132px, 35vw); right: -24px; top: 32px; border-radius: 56% 44% 48% 52% / 40% 59% 41% 60%; background: var(--aue-lime); opacity: .76; transform: rotate(18deg); }
+.arena[data-estado='RESULT'] .rotulo-da-nota, .arena[data-estado='CHALLENGE'] .rotulo-da-nota { color: var(--aue-muted-light); }
+.arena[data-estado='RESULT'] .nota, .arena[data-estado='CHALLENGE'] .nota { color: var(--aue-ink); font-size: clamp(124px, 39vw, 174px); line-height: .7; letter-spacing: -.08em; }
+.arena[data-estado='RESULT'] .grito, .arena[data-estado='CHALLENGE'] .grito, .arena[data-estado='VERSUS'] .grito, .arena[data-estado='SCOREBOARD'] .grito { color: var(--aue-ink); font-size: clamp(32px, 10vw, 44px); line-height: .88; letter-spacing: -.035em; }
+.arena[data-estado='RESULT'] .medidas { flex-direction: row; justify-content: space-between; gap: 0; padding: 14px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.arena[data-estado='RESULT'] .medida { flex: 1; text-align: center; }
+.arena[data-estado='RESULT'] .medida + .medida { border-left: 1px solid var(--border); }
+.arena[data-estado='RESULT'] .medida-topo { justify-content: center; flex-direction: column; gap: 6px; font-family: var(--font-mono); font-size: 9px; letter-spacing: .04em; color: var(--aue-muted-light); }
+.arena[data-estado='RESULT'] .medida-topo b { font-family: var(--font-display); font-size: 24px; color: var(--aue-ink); }
+.arena[data-estado='RESULT'] .trilho { display: none; }
+
+/* phone-create-x1, phone-challenge-received e phone-x1-result usam CTAs pretos. */
+.arena[data-estado='RESULT'] .botao-principal, .arena[data-estado='CHALLENGE'] .botao-principal, .arena[data-estado='VERSUS'] .botao-principal, .arena[data-estado='SCOREBOARD'] .botao-principal { background: var(--aue-ink); color: var(--aue-paper); outline-color: var(--aue-ink); }
+.arena[data-estado='CHALLENGE'] .link-linha, .arena[data-estado='VERSUS'] .botao-tocar { border-radius: 16px; background: transparent; border-color: var(--border); color: var(--aue-ink); }
+.arena[data-estado='CHALLENGE'] .link-copiar { border-radius: 12px; background: var(--aue-ink); color: var(--aue-paper); }
+.arena[data-estado='VERSUS'] .bolha-wrap { width: min(168px, 46vw, var(--altura-do-palco)); opacity: .18; }
+.arena[data-estado='VERSUS'] .versus-nota, .arena[data-estado='SCOREBOARD'] .versus-lider .versus-nota, .arena[data-estado='SCOREBOARD'] .versus-lider span, .arena[data-estado='SCOREBOARD'] .placar-na-frente { color: var(--aue-lime); }
+.arena[data-estado='SCOREBOARD'] .placar-vitorias, .arena[data-estado='SCOREBOARD'] .versus-nota, .arena[data-estado='SCOREBOARD'] .placar-nome-da-briga { color: var(--aue-ink); }
+
+/* Foco ganha um anel próprio acima da pele de cada CTA. */
+.arena[data-estado='IDLE'] .gatilho-microfone:focus-visible .gatilho-bola {
+  outline: 3px solid var(--aue-ink);
+  outline-offset: 5px;
+}
+
+.arena[data-estado='RECORDING'] .gatilho-microfone:focus-visible .gatilho-bola,
+.arena[data-estado='REMATCH'] .gatilho-microfone:focus-visible .gatilho-bola {
+  outline: 3px solid var(--aue-lime);
+  outline-offset: 5px;
+}
+
+/* phone-create-x1: o que existe no desafio ocupa a composição, sem preview falso. */
+.arena[data-estado='CHALLENGE'] .reacao {
+  align-items: stretch;
+  text-align: left;
+}
+
+.arena[data-estado='CHALLENGE'] .faixa-entrando {
+  align-items: stretch;
+  gap: 14px;
+}
+
+.arena[data-estado='CHALLENGE'] .grito,
+.arena[data-estado='CHALLENGE'] .comentario {
+  text-align: center;
+  max-width: none;
+}
+
+.arena[data-estado='CHALLENGE'] .link-do-desafio,
+.arena[data-estado='CHALLENGE'] .player {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+/* phone-challenge-received: o rival e a nota reais recebem a mancha e o player. */
+.arena[data-estado='VERSUS'] .reacao {
+  align-items: stretch;
+  text-align: center;
+}
+
+.arena[data-estado='VERSUS'] .faixa-entrando {
+  position: relative;
+  align-items: center;
+  gap: 12px;
+}
+
+.arena[data-estado='VERSUS'] .versus-caixa {
+  position: relative;
+  z-index: 0;
+  padding: 8px 0;
+}
+
+.arena[data-estado='VERSUS'] .versus-caixa::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 116px;
+  height: 92px;
+  left: calc(50% + 8px);
+  top: 8px;
+  border-radius: 59% 41% 52% 48% / 46% 61% 39% 54%;
+  background: var(--aue-lime);
+  opacity: .68;
+  transform: rotate(-13deg);
+}
+
+.arena[data-estado='VERSUS'] .versus-nota {
+  color: var(--aue-ink);
+  font-size: clamp(88px, 28vw, 124px);
+  line-height: .7;
+  letter-spacing: -.08em;
+}
+
+.arena[data-estado='VERSUS'] .tocar {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* phone-x1-result: duas colunas do round, vencedor lime e placar separado. */
+.arena[data-estado='SCOREBOARD'] .placar-linha-da-briga {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.arena[data-estado='SCOREBOARD'] .placar-nome-da-briga:last-child { text-align: right; }
+.arena[data-estado='SCOREBOARD'] .placar-vitorias { font-size: clamp(72px, 23vw, 102px); line-height: .68; }
+.arena[data-estado='SCOREBOARD'] .placar-x { font-family: var(--font-display); font-size: 28px; }
+.arena[data-estado='SCOREBOARD'] .versus-caixa { padding-top: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .arena[data-estado='IDLE'] .bolha-wrap,
+  .arena[data-estado='RECORDING'] .bolha-wrap,
+  .arena[data-estado='REMATCH'] .bolha-wrap {
+    animation: none;
+    filter: none;
+  }
+}

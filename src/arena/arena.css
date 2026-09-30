@@ -2032,7 +2032,7 @@
 /* phone-arena */
 .arena[data-estado='IDLE'] { --altura-do-palco: clamp(230px, 36svh, 310px); }
 .arena[data-estado='IDLE'] .bolha-wrap { width: min(232px, 64vw, var(--altura-do-palco)); filter: drop-shadow(0 25px 28px oklch(76% .22 128 / .22)); }
-.arena[data-estado='IDLE'] .grito { max-width: 8ch; font-size: clamp(42px, 13vw, 56px); line-height: .86; letter-spacing: -.035em; }
+.arena[data-estado='IDLE'] .grito { max-width: 8ch; font-size: clamp(42px, 13vw, 56px); line-height: .86; letter-spacing: -.035em; color: var(--aue-ink); }
 .arena[data-estado='IDLE'] .gatilho-microfone { width: 100%; padding: 0; }
 .arena[data-estado='IDLE'] .gatilho-bola { width: 100%; height: 58px; border-radius: 18px; }
 .arena[data-estado='IDLE'] .gatilho-bola svg { width: 30px; height: 30px; }

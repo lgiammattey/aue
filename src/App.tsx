@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import './App.css';
 
 import { ChallengeView } from './features/audio/ChallengeView';
 import { TelaDesktop } from './features/desktop/TelaDesktop';
@@ -9,6 +11,8 @@ import { ComoArrotar } from './features/publico/ComoArrotar';
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { useDispositivo } from './shared/desktop/useDispositivo';
 import { Arena } from './arena/Arena';
+import { adaptadoresWeb } from './arena/adaptadores';
+import { CascaPessoal } from './pessoal/CascaPessoal';
 
 
 /**
@@ -45,6 +49,7 @@ function EntradaPorLink() {
 
 function EntradaPrincipal() {
   const { ehDesktop } = useDispositivo();
+  const [adaptadores] = useState(adaptadoresWeb);
 
   /*
     A ARENA ENTRA POR AQUI, E SÓ COM A CHAVE LIGADA.
@@ -61,7 +66,7 @@ function EntradaPrincipal() {
     celular, e o desktop segue sendo a ponte que manda a pessoa para o telefone.
   */
   if (ehDesktop) return <TelaDesktop />;
-  return <Arena />;
+  return <CascaPessoal adaptadores={adaptadores} />;
 }
 
 export function App() {

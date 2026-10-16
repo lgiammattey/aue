@@ -2033,9 +2033,14 @@
 .arena[data-estado='IDLE'] { --altura-do-palco: clamp(230px, 36svh, 310px); }
 .arena[data-estado='IDLE'] .bolha-wrap { width: min(232px, 64vw, var(--altura-do-palco)); filter: drop-shadow(0 25px 28px oklch(76% .22 128 / .22)); }
 .arena[data-estado='IDLE'] .grito { max-width: 8ch; font-size: clamp(42px, 13vw, 56px); line-height: .86; letter-spacing: -.035em; color: var(--aue-ink); }
+.arena[data-estado='IDLE'] .wordmark,
+.arena[data-estado='IDLE'] .wordmark i { color: var(--aue-ink); }
+.arena[data-estado='IDLE'] .palco { align-items: center; }
+.arena[data-estado='IDLE'] .reacao { justify-content: start; }
+.arena[data-estado='IDLE'] .faixa-entrando { gap: 8px; }
 .arena[data-estado='IDLE'] .gatilho-microfone { width: 100%; padding: 0; }
 .arena[data-estado='IDLE'] .gatilho-bola { width: 100%; height: 58px; border-radius: 18px; }
-.arena[data-estado='IDLE'] .gatilho-bola svg { width: 30px; height: 30px; }
+.arena[data-estado='IDLE'] .gatilho-bola svg { display: none; }
 .arena[data-estado='IDLE'] .gatilho-rotulo { order: -1; margin-bottom: -58px; z-index: 1; pointer-events: none; color: var(--aue-ink); }
 .arena[data-estado='IDLE'] .gatilho-bola::after { display: none; }
 .arena[data-estado='IDLE'] .acao::after { content: 'O microfone só liga quando você tocar.'; order: 2; margin-top: 8px; color: var(--muted); font-size: 10px; line-height: 1.35; text-align: center; }

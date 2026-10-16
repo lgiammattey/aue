@@ -185,6 +185,11 @@ interface PropsDaArena {
   sorteio?: () => number;
   /** Injetável para o teste controlar o cronômetro. */
   agora?: () => number;
+  /** A casca pessoal observa nota concluída; a Arena não conhece armazenamento dela. */
+  aoConcluirNota?: (nota: Nota, origem: string, instante: number) => void;
+  aoMudarEstado?: (estado: SituacaoDaArena['estado']) => void;
+  pedidoParaArrotar?: number;
+  aoX1Local?: (codigo: string, link: string) => void;
 }
 
 export function Arena({
@@ -192,6 +197,10 @@ export function Arena({
   adaptadores,
   sorteio = Math.random,
   agora = Date.now,
+  aoConcluirNota,
+  aoMudarEstado,
+  pedidoParaArrotar = 0,
+  aoX1Local,
 }: PropsDaArena) {
   /*
     `useState` com função de inicialização, e não `useMemo`: o React pode
@@ -204,12 +213,15 @@ export function Arena({
 
   const [situacao, setSituacao] = useState<SituacaoDaArena>(SITUACAO_INICIAL);
 
+  useEffect(() => aoMudarEstado?.(situacao.estado), [situacao.estado, aoMudarEstado]);
+
   /*
     "Essa pessoa já arrotou aqui antes?" — muda o comentário do `IDLE`. Lido
     uma vez, e num `ref` porque não é para redesenhar quando muda: a fala já
     está escolhida.
   */
   const jaJogou = useRef<boolean>(false);
+  const notaPessoalJaRegistrada = useRef<Nota | null>(null);
   const [fala, setFala] = useState(() => ({ chamada: '', comentario: '' }));
   const [gritoDaGravacao, setGritoDaGravacao] = useState<string>(GRAVANDO[0]);
   const [comecouEm, setComecouEm] = useState<number>(0);
@@ -464,6 +476,7 @@ export function Arena({
       setAbrindoODesafio(false);
       if (abertura.ok) {
         dependencias.telemetria.registrar('abriu_x1', { batalhaCodigo: codigoDoDesafio });
+        aoX1Local?.(codigoDoDesafio, `/b/${codigoDoDesafio}`);
         /*
           `VERSUS` É "ALGUÉM TE CHAMOU" — e só isso.
 
@@ -500,7 +513,7 @@ export function Arena({
     return () => {
       cancelado = true;
     };
-  }, [codigoDoDesafio, dependencias, sorteio]);
+  }, [codigoDoDesafio, dependencias, sorteio, aoX1Local]);
 
   /*
     A RODA VOLTA AO ABRIR O JOGO (`ARENA.md` §3, reabertura).
@@ -899,6 +912,10 @@ export function Arena({
     await abrirOMicrofoneEGravar({ tipo: 'MANDAR_OUTRO' }, { eventoDeTelemetria: 'tentou_novamente' });
   }, [abrirOMicrofoneEGravar]);
 
+  useEffect(() => {
+    if (pedidoParaArrotar > 0 && situacao.estado === 'IDLE') void pedirMicrofone();
+  }, [pedidoParaArrotar, situacao.estado, pedirMicrofone]);
+
   /* ───────────────────── Os gestos da roda ───────────────────── */
 
   /**
@@ -1053,9 +1070,10 @@ export function Arena({
       setGritoDoDesafio((anterior) => escolherFala(DESAFIO_LANCADO, anterior, sorteio));
       setComentarioDoDesafio((anterior) => escolherFala(DESAFIO_COMENTARIO, anterior, sorteio));
       despachar({ tipo: 'DESAFIO_CRIADO', desafio: resposta.desafio });
+      aoX1Local?.(resposta.desafio.codigo, resposta.desafio.link);
       dependencias.telemetria.registrar('criou_x1', { batalhaCodigo: resposta.desafio.codigo });
     },
-    [dependencias, despachar, situacao, sorteio],
+    [dependencias, despachar, situacao, sorteio, aoX1Local],
   );
 
   const mandarODesafio = useCallback(
@@ -1478,6 +1496,13 @@ export function Arena({
     if (situacao.estado !== 'RECORDING' || jaJogou.current) return;
     jaJogou.current = dependencias.armazenamento.gravar(CHAVES.jaJogou, '1');
   }, [situacao.estado, dependencias]);
+
+  /* Registro pessoal nasce só quando há RESULT de verdade, nunca na gravação ou erro. */
+  useEffect(() => {
+    if (situacao.estado !== 'RESULT' || notaPessoalJaRegistrada.current === situacao.nota) return;
+    notaPessoalJaRegistrada.current = situacao.nota;
+    aoConcluirNota?.(situacao.nota, origemEscolhida.current?.rotulo ?? 'Sem contexto', agora());
+  }, [situacao, aoConcluirNota, agora]);
 
   const nivel = useCallback(() => dependencias.captura.nivelAtual(), [dependencias]);
 

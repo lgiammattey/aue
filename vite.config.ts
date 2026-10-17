@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => ({
         termos: entrada('termos.html'),
         comoJogar: entrada('como-jogar.html'),
         comoArrotar: entrada('como-arrotar.html'),
+        comunidade: entrada('comunidade.html'),
       },
     },
   },

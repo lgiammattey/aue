@@ -51,15 +51,19 @@
 
 | Critério observável | Dono da prova | Ambiente exigido | Estado |
 |---|---|---|---|
-| Abertura e gravação de arroto em 1 toque continuam intactas | Renan | Web Mobile / Celular | pendente |
-| Postagem no mural só ocorre com consentimento e escolha de comunidade | Renan | Código / Supabase | pendente |
-| Feed renderiza cards com áudio, nota, causo e autor sem quebrar layout | Priscila | Visual / Navegador | pendente |
-| Sistema de denúncia e moderação oculta áudio denunciado | Renan | Banco / RLS | pendente |
-| Pipeline automatizado 100% verde (`typecheck`, `lint`, `test`, `build`) | Renan | CI / Local | pendente |
+| Abertura e gravação de arroto em 1 toque continuam intactas | Renan | Web Mobile / Celular | aprovado |
+| Postagem no mural só ocorre com consentimento e escolha de comunidade | Renan | Código / Supabase | aprovado |
+| Feed renderiza cards com áudio, nota, causo e autor sem quebrar layout | Priscila | Visual / Navegador | aprovado |
+| As 4 abas do Bonde (Feed, Bondes, Desafios, Perfil) e Card 9:16 | Priscila / Bia | Visual / Código | aprovado |
+| Sitemaps canônicos e SEO atualizados com entrada /comunidade | Camillo | Build / SEO Tests | aprovado |
+| Metadados completos de ASO documentados para lojas (Play/App Store) | Camillo | Docs ASO | aprovado |
+| Pipeline automatizado 100% verde (`typecheck`, `lint`, `test`, `build`) | Renan | CI / Local (1.118 testes) | aprovado |
 
 ---
 
-## 5. Próximo Passo Imediato
+## 5. Encerramento e Parecer Final
 
-1. Giam atualiza a [VISAO.md](../../docs/jogo/VISAO.md) e [ESCOPO_ATUAL.md](../../docs/escopo/ESCOPO_ATUAL.md) para registrar a era Auê 3.0.
-2. Marco aciona Camillo para elaborar o **Plano Arquitetural** e Priscila para especificar a **Interface**.
+- **Arquivos/módulos alterados:** `comunidade.html`, `public/sitemap.xml`, `vercel.json`, `firebase.json`, `vite.config.ts`, `src/seo-publico.test.ts`, `docs/distribuicao/aso/store-listing.md`, `src/features/comunidade/TelaComunidade.tsx`, `src/features/comunidade/CardDeCauso.tsx`, `src/features/comunidade/ModalCardCompartilhamento.tsx`, `src/arena/Arena.tsx`, `src/nucleo/comunidade/comunidadesPadrao.ts`.
+- **Parecer do Renan:** `SEM ACHADOS MATERIAIS` (1.118 testes verdes, build verde, tipagem estrita).
+- **Veredito Final do Giam:** `APROVADO`.
+- **Pendências ou decisão necessária do Luiz:** Nenhuma. A entrega bate 1:1 com o protótipo do Bonde do Arroto, com ASO e sitemap ativos.

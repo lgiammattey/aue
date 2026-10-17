@@ -7,6 +7,7 @@ interface CardDeCausoProps {
   onReagir: (causoId: string, reacao: TipoDeReacao) => void;
   onDuvidar?: (causo: CausoPostado) => void;
   onDenunciar?: (causoId: string) => void;
+  onCompartilhar?: (causo: CausoPostado) => void;
 }
 
 export const CardDeCauso: React.FC<CardDeCausoProps> = ({
@@ -14,6 +15,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   onReagir,
   onDuvidar,
   onDenunciar,
+  onCompartilhar,
 }) => {
   const [tocando, setTocando] = useState(false);
   const [menuAberto, setMenuAberto] = useState(false);
@@ -171,7 +173,20 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
             onClick={() => onDuvidar(causo)}
             aria-label={`Duvidar de ${causo.autorNome}`}
           >
-            ⚡ DUVIDO BATER
+            ⚡ DUVIDO
+          </button>
+        )}
+
+        {onCompartilhar && (
+          <button
+            type="button"
+            className="btn-reaction"
+            onClick={() => onCompartilhar(causo)}
+            aria-label="Compartilhar card 9:16"
+            title="Compartilhar card"
+            style={{ padding: '6px 10px' }}
+          >
+            📤
           </button>
         )}
       </footer>

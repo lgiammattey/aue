@@ -81,4 +81,40 @@ describe('TelaComunidade (Auê 3.0)', () => {
     expect(await screen.findByText('Arrotei no silêncio da biblioteca.')).toBeDefined();
     expect(screen.getByText(/Luiz da Laudo/)).toBeDefined();
   });
+
+  it('navega entre as 4 abas (Feed, Bondes, Desafios, Perfil)', async () => {
+    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    render(<TelaComunidade porta={adapter} />);
+
+    // Toca na aba Bondes
+    const btnAbaBondes = screen.getByRole('button', { name: /Bondes/i });
+    fireEvent.click(btnAbaBondes);
+    expect(screen.getByRole('heading', { name: 'Ache seu Bonde' })).toBeDefined();
+
+    // Toca na aba Desafios
+    const btnAbaDesafios = screen.getByRole('button', { name: /Desafios/i });
+    fireEvent.click(btnAbaDesafios);
+    expect(screen.getByRole('heading', { name: 'Duelos no X1' })).toBeDefined();
+
+    // Toca na aba Perfil
+    const btnAbaPerfil = screen.getByRole('button', { name: /Perfil/i });
+    fireEvent.click(btnAbaPerfil);
+    expect(screen.getByText('@voce_arrota')).toBeDefined();
+    expect(screen.getByText('7V · 3D')).toBeDefined();
+  });
+
+  it('abre o modal do card 9:16 ao tocar no botão de compartilhar de um causo', async () => {
+    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    render(<TelaComunidade porta={adapter} />);
+
+    const botoesShare = await screen.findAllByRole('button', { name: 'Compartilhar card 9:16' });
+    expect(botoesShare.length).toBeGreaterThan(0);
+
+    fireEvent.click(botoesShare[0]);
+
+    // Modal 9:16 aberto
+    expect(screen.getByRole('heading', { name: 'CARD 9:16' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'MANDAR NO WHATSAPP' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'COPIAR LINK DO DESAFIO' })).toBeDefined();
+  });
 });

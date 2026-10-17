@@ -45,6 +45,7 @@ const ENTRADAS: ReadonlyArray<{ caminho: string; arquivo: string; temOpenGraph: 
   { caminho: '/', arquivo: '../index.html', temOpenGraph: true },
   { caminho: '/como-jogar', arquivo: '../como-jogar.html', temOpenGraph: true },
   { caminho: '/como-arrotar', arquivo: '../como-arrotar.html', temOpenGraph: true },
+  { caminho: '/comunidade', arquivo: '../comunidade.html', temOpenGraph: true },
   /*
     As duas legais ficam SEM Open Graph, e é decisão, não esquecimento: ninguém
     compartilha termo de uso no grupo do WhatsApp. Cada bloco `og:` a mais é

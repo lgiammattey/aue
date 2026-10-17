@@ -46,6 +46,7 @@ import { ORIGEM_CANONICA } from '../shared/enderecoPublico';
 import { formatarNota } from '../shared/formato/nota';
 import {
   CHAMAR_PRO_X1,
+  POSTAR_NO_BONDE,
   DEIXA_PRA_LA,
   DESAFIO_COMENTARIO,
   DESAFIO_LANCADO,
@@ -2077,6 +2078,13 @@ export function Arena({
               <button type="button" className="botao botao-secundario" onClick={compartilharANota}>
                 {COMPARTILHAR}
               </button>
+              <a
+                href="/comunidade"
+                className="botao botao-secundario"
+                style={{ textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                {POSTAR_NO_BONDE}
+              </a>
               {codigoDaDisputa.current ? null : (
                 <button type="button" className="botao botao-secundario" onClick={mandarOutro}>
                   {MANDAR_OUTRO}

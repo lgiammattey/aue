@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=Google+Sans+Flex:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>body{margin:0}a{color:var(--fg)}a:hover{color:var(--muted)}</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:56px">
+<header>
+<div style="font-family:Anton,Impact,sans-serif;font-size:44px;text-transform:uppercase;line-height:1">Auê! Design System</div>
+<p style="color:var(--muted);font-size:16px;margin:10px 0 0;max-width:620px;text-wrap:pretty">Os tokens e componentes usados neste protótipo. Tema escuro e claro, fundo chapado, sem cards, sem gradiente. Verde ácido só em até 2 lugares por estado.</p>
+<div style="display:flex;gap:16px;margin-top:12px;font-size:15px;align-items:center"><button onClick="{{ toggleTheme }}" style="height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--border-strong);background:transparent;color:var(--fg);font:inherit;font-size:14px;cursor:pointer">{{ themeLabel }}</button><a href="Bonde do Arroto.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Bonde</a><a href="Jornada.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Jornada</a><a href="Arena.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Arena</a><a href="Landing.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Landing</a></div>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">01 · Cor</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px">
+<sc-for list="{{ colors }}" as="c" hint-placeholder-count="10">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="height:64px;border-radius:12px;border:1px solid var(--border);background:{{ c.bg }}"></div>
+<div style="font-size:14px;font-weight:600">{{ c.name }}</div>
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ c.hex }}</div>
+<div style="font-size:12px;color:var(--muted);text-wrap:pretty">{{ c.use }}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px;border-top:1px solid var(--border);padding-top:32px">
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">02 · Tipografia</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<sc-for list="{{ types }}" as="t" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr);gap:24px;align-items:baseline">
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ t.label }}</div>
+<div style="{{ t.style }}">{{ t.sample }}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px;border-top:1px solid var(--border);padding-top:32px">
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">03 · Espaço e raio</div>
+<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end">
+<sc-for list="{{ spaces }}" as="s" hint-placeholder-count="8">
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+<div style="width:{{ s.px }}px;height:{{ s.px }}px;background:var(--fg)"></div>
+<div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--muted)">{{ s.px }}px</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:24px">
+<sc-for list="{{ radii }}" as="r" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="width:96px;height:64px;border:1px solid var(--fg);border-radius:{{ r.px }}px"></div>
+<div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--muted)">{{ r.name }} · {{ r.label }}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px;border-top:1px solid var(--border);padding-top:32px">
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">04 · Componentes</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:40px 32px">
+<div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:14px;color:var(--muted)">Botão · primário, contorno, fantasma</div>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" hint-size="100%,56px">Arrotar</x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" hint-size="100%,56px">Revanche</x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="fantasma" hint-size="100%,48px">Compartilhar</x-import></div>
+<div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:14px;color:var(--muted)">Métrica · Força, Fôlego, Grave</div>
+<x-import component-from-global-scope="AuDesignSystem_226135.Metrica" rotulo="Força" valor="82" percentual="82" hint-size="100%,40px"></x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Metrica" rotulo="Fôlego" valor="64" percentual="64" hint-size="100%,40px"></x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Metrica" rotulo="Grave" valor="91" percentual="91" hint-size="100%,40px"></x-import></div>
+<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start"><div style="font-size:14px;color:var(--muted)">Bolha · modo idle</div>
+<x-import component-from-global-scope="AuDesignSystem_226135.BolhaAue" modo="idle" size="180" hint-size="180px,180px"></x-import></div>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { light: false };
+  renderVals() {
+    const L = this.state.light;
+    const vars = L ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', '--fg-soft': 'rgba(10,10,8,.04)', '--overlay-scrim': 'rgba(245,243,234,.92)', '--page-bg': '#f5f3ea', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
+    const rootStyle = { ...vars, minHeight: '100vh', background: L ? '#f5f3ea' : 'var(--page-bg)', color: 'var(--fg)', fontFamily: '"Google Sans Flex", var(--font-body)', padding: '40px 32px', boxSizing: 'border-box' };
+    const C = (n, d, l, u) => ({ name: n, hex: L ? l : d, bg: 'var(' + n + ')', use: u });
+    const colors = [C('--bg','#0a0a08','#f5f3ea','Fundo único'),C('--surface','#171712','#ebe9de','Superfície'),C('--surface-2','#1f1f18','#dedcd0','Superfície 2'),C('--fg','#f5f3ea','#0a0a08','Texto'),C('--muted','#93917f','#57554a','Texto secundário'),C('--border','#2b2a22','#d6d4c6','Filete 1px'),C('--border-strong','#74725f','#85836f','Contorno de botão e campo'),C('--ind','#c6ff00','#0a0a08','Indicador ativo (aba, toggle)'),C('--accent','#c6ff00','#c6ff00','CTA, Score, Bolha. Máx. 2'),C('--accent-on','#0a0a08','#0a0a08','Texto sobre accent'),C('--gold','#f4c430','#f4c430','Recorde'),C('--danger','#ff3d3f','#c4161a','Só erro técnico'),C('--silver','#c7cad1','#c7cad1','Pódio 2º'),C('--bronze','#c98a4b','#c98a4b','Pódio 3º')];
+    const A = "font-family:Anton,Impact,sans-serif;";
+    const types = [['Display 2xl · Anton',A+'font-size:92px;line-height:1','87'],['Display lg · Anton',A+'font-size:40px;line-height:1.1','Caralho. Veio forte.'],['Wordmark · Anton',A+'font-size:26px;letter-spacing:.02em','AUÊ!'],['Título de overlay · Anton',A+'font-size:22px','COMPARTILHAR'],['Body lg · 700','font-weight:700;font-size:20px;text-transform:uppercase','Arrotar'],['Body md · 400','font-size:16px','Corpo de texto e pílula de origem.'],['Body xs · 400','font-size:13px;color:var(--muted)','Rótulo de métrica e dica.'],['Caption · 700','font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em','Auê Score'],['Mono','font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)','eyebrow · timestamp · link']].map(a => ({ label: a[0], style: a[1], sample: a[2] }));
+    return { rootStyle, colors, types, themeLabel: L ? 'Tema: claro' : 'Tema: escuro', toggleTheme: () => this.setState(s => ({ light: !s.light })), spaces: [8,16,24,32,40,48,56,64].map(px => ({ px })), radii: [{name:'sm',px:12,label:'chip'},{name:'md',px:18,label:'botão'},{name:'lg',px:24,label:'overlay'},{name:'full',px:48,label:'pílula'}] };
+  }
+}
+</script>
+</body>
+</html>

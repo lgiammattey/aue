@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>@keyframes bdaFade{from{opacity:0}to{opacity:1}}@keyframes bdaPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}@keyframes bdaHeart{0%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.92)}100%{transform:scale(1)}}@keyframes bdaUp{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}@keyframes bdaIn{from{opacity:0;transform:translateY(-8px);background:var(--fg-soft)}to{opacity:1;transform:none}}button,a{transition:background-color .15s ease,color .15s ease,border-color .15s ease,opacity .15s ease,transform .1s ease}button:active:not([disabled]){transform:scale(.96)}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}body{margin:0}a{color:var(--fg)}a:hover{color:var(--muted)}input::placeholder{color:var(--muted)}</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:24px;box-sizing:border-box">
+<div style="width:100%;max-width:450px;animation:bdaPop .3s cubic-bezier(.2,.8,.2,1);border:1px solid var(--border);border-radius:28px;padding:48px 40px 36px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center">
+<a href="Landing.dc.html" style="text-decoration:none;font-family:var(--font-display);font-size:34px;line-height:1;background:var(--accent);color:var(--accent-on);padding:6px 12px;border-radius:10px" style-hover="color:var(--accent-on)">Auê!</a>
+<h1 style="font-weight:400;font-size:24px;margin:16px 0 8px;text-align:center">{{ titulo }}</h1>
+<sc-if value="{{ showChip }}"><button onClick="{{ back }}" style="display:flex;align-items:center;gap:8px;height:32px;padding:0 12px 0 4px;border-radius:999px;border:1px solid var(--border-strong);background:none;color:var(--fg);font-size:14px;cursor:pointer;margin-top:4px" style-hover="background:var(--surface)"><span style="width:24px;height:24px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">{{ chipIni }}</span>{{ email }}</button></sc-if>
+<sc-if value="{{ sub }}"><span style="font-size:16px;text-align:center">{{ sub }}</span></sc-if>
+<div style="width:100%;display:flex;flex-direction:column;gap:16px;margin-top:32px">
+<sc-for list="{{ fields }}" as="f" hint-placeholder-count="1">
+<input value="{{ f.value }}" onInput="{{ f.input }}" type="{{ f.type }}" placeholder="{{ f.label }}" autocomplete="{{ f.ac }}" style="{{ inputStyle }}" style-focus="border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)"></input>
+</sc-for>
+<sc-if value="{{ err }}"><span style="color:var(--danger);font-size:14px;margin-top:-8px">{{ err }}</span></sc-if>
+<sc-if value="{{ showShow }}"><label style="display:flex;align-items:center;gap:12px;font-size:14px;cursor:pointer"><input type="checkbox" checked="{{ showPass }}" onChange="{{ toggleShow }}" style="width:18px;height:18px;accent-color:var(--fg);margin:0"></input>Mostrar senha</label></sc-if>
+<sc-if value="{{ showForgot }}"><a href="#" onClick="{{ forgot }}" style="font-weight:600;font-size:14px;align-self:flex-start">{{ forgotLabel }}</a></sc-if>
+</div>
+<sc-if value="{{ showGuest }}"><span style="font-size:14px;color:var(--muted);line-height:1.5;margin-top:32px;width:100%">Não quer conta agora? <a href="Arena.dc.html" style="font-weight:600">Arrota como convidado</a>. Pra postar e salvar o placar, precisa de conta.</span></sc-if>
+<div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:40px">
+<button onClick="{{ alt }}" style="height:40px;padding:0 12px;margin-left:-12px;border:0;border-radius:999px;background:none;color:var(--fg);font-weight:700;font-size:14px;cursor:pointer" style-hover="background:var(--surface)">{{ altLabel }}</button>
+<button onClick="{{ next }}" style="height:40px;padding:0 24px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-on);font-weight:700;font-size:14px;cursor:pointer" style-hover="background:var(--accent-strong)" style-active="transform:translateY(2px) scale(.985)">{{ cta }}</button>
+</div>
+</div>
+</div>
+<footer style="width:100%;max-width:450px;display:flex;justify-content:space-between;padding:0 16px 24px;box-sizing:border-box;font-size:12px;color:var(--muted)">
+<button onClick="{{ toggleTheme }}" style="border:0;background:none;color:var(--muted);font-size:12px;cursor:pointer;padding:0" style-hover="color:var(--fg)">{{ themeLabel }}</button>
+<span style="display:flex;gap:20px"><a href="#" style="color:var(--muted)">Ajuda</a><a href="#" style="color:var(--muted)">Privacidade</a><a href="#" style="color:var(--muted)">Termos</a></span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { theme: 'dark', step: 'email', email: '', pass: '', nick: '', err: '', show: false };
+  componentDidMount() { try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); } catch (x) {} }
+  go = () => { window.location.href = 'Bonde do Arroto.dc.html'; };
+  renderVals() {
+    const s = this.state, light = s.theme === 'light', st = s.step;
+    const vars = light ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
+    const set = (k) => (e) => this.setState({ [k]: e.target.value, err: '' });
+    const pt = s.show ? 'text' : 'password';
+    const fields = { email: [{ label: 'E-mail', value: s.email, type: 'email', ac: 'username', input: set('email') }], pass: [{ label: 'Digite sua senha', value: s.pass, type: pt, ac: 'current-password', input: set('pass') }], signup: [{ label: 'Apelido (ex: voce_arrota)', value: s.nick, type: 'text', ac: 'nickname', input: set('nick') }, { label: 'E-mail', value: s.email, type: 'email', ac: 'username', input: set('email') }, { label: 'Senha', value: s.pass, type: pt, ac: 'new-password', input: set('pass') }] }[st];
+    const okMail = s.email.includes('@') && s.email.includes('.');
+    return {
+      rootStyle: { ...vars, minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+      titulo: { email: 'Fazer login', pass: 'Olá', signup: 'Criar conta' }[st],
+      sub: { email: 'Ir para o Auê!', pass: '', signup: 'Ir para o Auê!' }[st],
+      showChip: st === 'pass', chipIni: (s.email[0] || 'V').toUpperCase(), email: s.email, back: () => this.setState({ step: 'email', pass: '', err: '' }),
+      fields, inputStyle: { height: 56, borderRadius: 6, border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--fg)', padding: '0 14px', fontSize: 16, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', width: '100%' },
+      err: s.err, showShow: st !== 'email', showPass: s.show, toggleShow: () => this.setState({ show: !s.show }),
+      showForgot: st !== 'signup', forgotLabel: st === 'email' ? 'Esqueceu o e-mail?' : 'Esqueceu a senha?', forgot: (e) => { e.preventDefault(); this.setState({ err: 'Recuperação de conta chega depois.' }); },
+      showGuest: st === 'email',
+      altLabel: st === 'signup' ? 'Já tenho conta' : st === 'email' ? 'Criar conta' : 'Tentar de outro jeito', alt: () => this.setState({ step: st === 'signup' ? 'email' : st === 'email' ? 'signup' : 'email', err: '', pass: '' }),
+      cta: st === 'signup' ? 'Criar' : st === 'pass' ? 'Entrar' : 'Avançar',
+      next: () => {
+        if (st === 'email') return okMail ? this.setState({ step: 'pass', err: '' }) : this.setState({ err: 'Digite um e-mail válido.' });
+        if (st === 'pass') return s.pass.length < 6 ? this.setState({ err: 'Senha com no mínimo 6 caracteres.' }) : this.go();
+        if (!s.nick.trim()) return this.setState({ err: 'Escolhe um apelido.' });
+        if (!okMail) return this.setState({ err: 'Digite um e-mail válido.' });
+        if (s.pass.length < 6) return this.setState({ err: 'Senha com no mínimo 6 caracteres.' });
+        this.go();
+      },
+      themeLabel: light ? 'Tema escuro' : 'Tema claro',
+      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); try { localStorage.setItem('bda-theme', t); } catch (x) {} }
+    };
+  }
+}
+</script>
+</body>
+</html>

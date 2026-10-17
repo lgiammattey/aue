@@ -1,0 +1,41 @@
+/*
+  O Auê NÃO carrega fonte por @font-face/@import de CSS — decisão do próprio
+  time (ver comentário no topo de `src/index.css` do app real): @import de
+  fonte no CSS entra numa fila que só começa depois do CSS inteiro baixar.
+  O app carrega Anton + Archivo por <link> no <head>, com dois <link
+  rel="preconnect"> antes.
+
+  Este design system replica exatamente esse padrão. Todo HTML que usa
+  --font-display ou --font-body precisa destas quatro linhas no <head>,
+  ANTES deste stylesheet:
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  Anton só tem peso 400 (mono-peso por design — DESIGN.md §3). Archivo carrega
+  400/500/600/700. `--font-mono` fica no fallback do sistema
+  (`ui-monospace`) — o app real nunca carrega uma fonte mono própria, a pista
+  mono já é restrita a eyebrow/contador/timestamp e o system mono basta.
+
+  Um @font-face para Anton abaixo, com a URL real do Google Fonts, para os
+  cards deste sistema que não podem depender de um <link> externo carregar a
+  tempo do primeiro paint.
+*/
+@font-face{
+  font-family:'Anton';
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url(https://fonts.gstatic.com/s/anton/v27/1Ptgg87LROyAm0K0.ttf) format('truetype');
+}
+
+/* Fallback @font-face for cards that can't depend on the <link> above loading
+   in time — same families as the tokens, served from jsDelivr's Fontsource
+   mirror so first paint never waits on a user font upload. */
+@font-face{font-family:'Archivo';font-style:normal;font-weight:400;font-display:swap;src:url(https://cdn.jsdelivr.net/fontsource/fonts/archivo@latest/latin-400-normal.woff2) format('woff2');}
+@font-face{font-family:'Archivo';font-style:normal;font-weight:500;font-display:swap;src:url(https://cdn.jsdelivr.net/fontsource/fonts/archivo@latest/latin-500-normal.woff2) format('woff2');}
+@font-face{font-family:'Archivo';font-style:normal;font-weight:600;font-display:swap;src:url(https://cdn.jsdelivr.net/fontsource/fonts/archivo@latest/latin-600-normal.woff2) format('woff2');}
+@font-face{font-family:'Archivo';font-style:normal;font-weight:700;font-display:swap;src:url(https://cdn.jsdelivr.net/fontsource/fonts/archivo@latest/latin-700-normal.woff2) format('woff2');}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.woff2) format('woff2');}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:700;font-display:swap;src:url(https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-700-normal.woff2) format('woff2');}

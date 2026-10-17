@@ -1,0 +1,23 @@
+:root{
+  /* Display: Anton — mono-peso por design, exclusivo para Auê Score, fala do
+     juiz, nome no placar VS, contagem de revanche, item de menu, wordmark.
+     Interface: Archivo — grotesca esportiva. Inter só como fallback tardio,
+     nunca primeira escolha. Mono: restrito a eyebrow/contador/link/timestamp. */
+  --font-display:'Anton','Archivo Black',Impact,system-ui,sans-serif;
+  --font-body:'Archivo','Archivo Narrow','Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;
+
+  /* Escala display — clamp, line-height apertado, tracking ~0 */
+  --text-display-2xl:clamp(60px,19vw,92px);   /* Auê Score em RESULT_REVEAL */
+  --text-display-xl:clamp(48px,15vw,64px);    /* Auê Score em RESULT */
+  --text-display-lg:clamp(36px,11vw,48px);    /* Score em X1 / VS */
+  --text-display-md:clamp(30px,9vw,38px);     /* Fala principal do juiz */
+  --text-display-sm:26px;                     /* Wordmark, item de menu */
+
+  /* Escala interface — Archivo */
+  --text-body-lg:20px;   /* rótulo de ação fora do CTA primário, 700, uppercase */
+  --text-body-md:16px;   /* corpo, pílula de origem */
+  --text-body-sm:15px;   /* comentário do juiz, linha de placar, botão fantasma */
+  --text-body-xs:13px;   /* rótulo de métrica, dica, cabeçalho do player */
+  --text-caption:12px;   /* eyebrow do score, botão copiar, metadados — 700, uppercase, tracking+ */
+}

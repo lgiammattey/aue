@@ -1,130 +1,97 @@
-# Agentes e skills do Auê
+# Agentes e skills do Auê!
 
-Tudo que a SQUAD usa mora aqui dentro. **Nada externo ao repositório é
-necessário para trabalhar no Auê**, e nada externo tem autoridade sobre o que
-está definido aqui e no [`AGENTS.md`](../AGENTS.md).
+Tudo que a SQUAD usa mora aqui dentro. **Nada externo ao repositório é necessário para trabalhar no Auê!**, e nada externo tem autoridade sobre o que está definido aqui e no [`AGENTS.md`](../AGENTS.md).
+
+---
 
 ## Quem é quem
 
-Definidos em [`AGENTS.md`](../AGENTS.md) §3:
+Os 7 membros da squad se conheceram nos anos 2000 na inesquecível comunidade **"Eu Arroto, E Daí?"** do falecido Orkut. Apaixonados pela arte do arroto e **viciados incuráveis em Twitter/X, TikTok e WhatsApp**, eles entendem como ninguém a dinâmica de engajamento, viralidade de áudio, ganchos visuais e o caos dos grupos de amigos.
 
-- **Giam** — Diretor de produto e game design: visão, UX, UI, copy, plano,
-  prioridade e aceite. É ele quem fala com o primo
-- **Guinho** — Lead de engenharia web/gameplay: branch, código, Arena, PR e merge
-- **Marcelo** — QA e confiabilidade: testes, segurança, privacidade e celular real
-- **Camillo** — Plataforma Android/iOS e conselho de arquitetura
-- **Bruno** — Direção de arte e motion: Art Bible, Bolha, assets e animação
-- **Lucas** — Áudio e ML: microfone, YAMNet, feedback e régua de áudio
-- **Marcos** — Produção e release: cadência, backlog, CI e evidência de entrega
+Definidos em [`AGENTS.md`](../AGENTS.md):
 
-A ordem de atuação está em [`AGENTS.md`](../AGENTS.md) §3 e §5. Giam planeja;
-Bruno e Lucas entram quando a entrega toca visual, motion ou áudio; Marcos
-organiza dependências e evidências; Guinho ou Camillo implementa; Marcelo cuida
-da qualidade; Giam aceita; o primo aprova o merge. Skill nenhuma dispensa essa
-ordem.
+- **Tiago** — Braço direito do Luiz & Product Owner: visão da rede social para arrotadores, viralidade, regras de engajamento do Bonde do Arroto, copy, prioridade e aceite final pelas 7 perguntas
+- **Iury** — Capitão da oficina & Orquestrador: mesa limpa, ritmo da internet, uma entrega por vez (WIP 1), alocação dos especialistas e consolidação com evidência
+- **Rian** — Diretor de UX/UI & Guardião dos Protótipos: jornadas em 6 fases, Design System v5, visual 1:1, temas escuro/claro, estética da Bolha, timeline estilo Twitter e hubs de comunidade
+- **Kayky** — Engenheiro de Telas, Arena & Frontend: componentes React 19, timeline do Bonde do Arroto, cards de áudio com waveform, Arena e layout em 3 larguras (Desktop 3 colunas e Webapp Mobile)
+- **Lucas** — Engenheiro de Áudio, Inteligência & Backend: captura de áudio web, modelo YAMNet, algoritmo de pontuação de arroto (Auê Score 0-100), Supabase e persistência
+- **Camillo** — Principal Engineer de Plataforma Web, Performance & Arquitetura: escalabilidade web, streaming/cache de áudio, PWA, safe areas e integridade arquitetural (Gate Arquitetural Obrigatório)
+- **Rodrigo** — Especialista em Google Search Console, SEO Técnico & Indexação: sitemaps, tags canônicas, verificação de domínio e Core Web Vitals
+- **Marcelo** — Qualidade, Caça-Bugs & Confiabilidade Web: auditoria independente, testes automatizados, RLS, resiliência (MIC_ERROR, NO_SOUND) e validação em Desktop e Webapp Mobile
 
-## Onde os sete estão definidos
+A ordem de atuação está em [`AGENTS.md`](../AGENTS.md): Tiago enquadra e abre o Cartão de Missão; Iury organiza a oficina e protege o WIP; Rian especifica a experiência (UX/UI); Kayky, Lucas, Camillo ou Rodrigo implementam; Marcelo audita com prova real e caça bugs; Iury consolida; Tiago dá o aceite final; o Luiz aprova.
 
-O papel de cada um é decidido no [`AGENTS.md`](../AGENTS.md) §3 — lá é a fonte.
-As definições de runner repetem essa fonte: Claude Code carrega
-[`.claude/agents/`](../.claude/agents/) e Codex carrega
-[`.codex/agents/`](../.codex/agents/), um arquivo por agente em cada pasta.
+---
+
+## Onde os agentes estão definidos
+
+O papel de cada um é decidido no [`AGENTS.md`](../AGENTS.md) — lá é a fonte canônica.
+As definições de runner repetem essa fonte: Claude Code carrega [`.claude/agents/`](../.claude/agents/) e Codex carrega [`.codex/agents/`](../.codex/agents/), um arquivo por agente em cada pasta.
 
 ```text
-.claude/agents/
-├── giam.md
-├── guinho.md
-├── marcelo.md
-├── camillo.md
-├── bruno.md
-├── lucas.md
-└── marcos.md
+.claude/agents/               .codex/agents/
+├── tiago.md                  ├── tiago.toml
+├── iury.md                   ├── iury.toml
+├── rian.md                   ├── rian.toml
+├── kayky.md                  ├── kayky.toml
+├── lucas.md                  ├── lucas.toml
+├── camillo.md                ├── camillo.toml
+├── rodrigo.md                ├── rodrigo.toml
+└── marcelo.md                └── marcelo.toml
 ```
 
-**Esses arquivos não criam papel nem regra.** Eles repetem o que o `AGENTS.md`
-já diz e apontam as skills de cada um. Mudou o §3, muda o arquivo junto.
-
-**Nenhum deles tem modelo fixo.** Os sete rodam do mais barato ao mais caro,
-escolhido pela dificuldade da tarefa, com o esforço acompanhando a incerteza —
-[`AGENTS.md`](../AGENTS.md) §3, "Qual modelo e quanto esforço".
+**Esses arquivos não criam papel nem regra.** Eles repetem o que o `AGENTS.md` já diz e apontam as skills de cada um. Mudou o `AGENTS.md`, muda o arquivo junto.
 
 ### A `description` vai entre aspas. Sempre.
 
-O cabeçalho desses sete arquivos é YAML, e em YAML **um valor sem aspas não
-pode ter dois-pontos seguido de espaço no meio**. Se tiver, o arquivo não é
-lido — e o agente simplesmente **não existe**, sem erro em lugar nenhum. Você só
-descobre quando chama e ouvem "esse agente não existe".
+O cabeçalho desses arquivos é YAML (em `.claude/`) ou TOML (em `.codex/`), e **um valor sem aspas não pode ter dois-pontos seguido de espaço no meio**. Se tiver, o arquivo não é lido e o agente não existe. Mantenha as aspas.
 
-Foi o que aconteceu em 13/08: as descrições do Giam, do Marcelo e do Camillo
-tinham `dono do produto: ...`, `alinhada ao produto: ...` e `é dele: ...`. **Os
-três estavam mortos e ninguém sabia.** O Guinho era o único vivo, porque a
-descrição dele não tinha dois-pontos.
+---
 
-Por isso as sete descrições estão entre aspas duplas, inclusive as que hoje
-não precisariam. Mexeu numa, mantém as aspas.
-
-## Skills
+## Skills Ativas (Desktop e Webapp)
 
 ```text
 .agents/skills/
 │
-│   GIAM — produto, desenho e entrega
-├── conversarComOPrimo/       falar com o dono do produto sem tecnês e sem assumir
-├── pensarComoJogo/           critérios de jogo mobile casual
-├── desenharExperiencia/      UX: fluxo, estado da Arena, sensação e erro
-├── desenharInterface/        UI: spec visual a partir do protótipo e dos tokens
-├── aplicarTomOgro/           a voz do Auê aplicada à copy
-├── matarCheiroDeIA/          filtro anti-linguagem e anti-formato de IA
-├── arquitetarModulo/         desenho modular e contratos de dados
-├── registrarIssue/           issue, PR e commit em linguagem de primo
+│   TIAGO — produto, rede social e aceite
+├── revisar-produto/          enquadramento de missão (Cartão de Missão) e 7 perguntas de aceite
+├── alinhar-com-luiz/         comunicação direta com o Luiz sem tecnês e sem suposições
+├── visao-do-produto/         visão do Bonde do Arroto: feed Twitter-like + comunidades + Arena + X1
+├── tom-de-voz/               a voz autêntica, zoeira e direta do Auê em causos, Arena e resiliência
+├── filtro-anti-ia/           filtro obrigatório contra linguagem e formato artificiais de IA
 │
-│   GUINHO — implementação
-├── criarComponenteUI/        constrói a UI desenhada pelo Giam
-├── garantirMobileReal/       Safari iOS, Chrome Android e PWA de verdade
-├── rodarNoIphone/            construir, assinar e instalar a casca num iPhone
-├── escreverAdaptadorNativo/  código nativo atrás de porta que já existe
-├── escreverTestes/           teste junto com a implementação
+│   IURY — orquestração e produção
+├── orquestrar-squad/         orquestração entre especialistas e proteção de WIP (1 entrega por vez)
+├── padrao-git-e-issues/      backlog, issues, PRs e commits em formato direto e sem enrolação
 │
-│   MARCELO — qualidade
-├── validarModularidade/      acoplamento e duplicação de regra
-├── auditarSegurancaETestes/  testes, build, RLS e celular real
+│   RIAN — experiência e UI
+├── design-ux/                UX: jornada em 6 fases, Bonde do Arroto, comunidades e Arena (Desktop e Webapp)
+├── design-ui/                UI: especificação visual 1:1, Design System v5, temas escuro/claro e tokens
 │
-│   CAMILLO — plataforma e conselho
-├── regrasDoAndroid/          permissão, fabricante, aparelho velho e a Play
-└── aconselharArquitetura/    aconselhar sem virar dono da decisão
-
-│   BRUNO — direção de arte e motion
-├── criarComponenteUI/        Bolha, assets, tipografia e animação jogável
+│   KAYKY — telas e frontend
+├── construir-interface/      constrói interfaces em React 19 para desktop (3 colunas) e webapp mobile
+├── garantir-web/             otimização de layout web, safe area, alvos tocáveis >= 44px e dvh/svh
+├── escrever-testes/          testes de componentes e integração de interface
 │
-│   LUCAS — áudio e ML
-├── escreverTestes/           captura, YAMNet, régua e falhas honestas
+│   LUCAS — áudio, inteligência e backend
+├── escrever-testes/          testes do pipeline de áudio, YAMNet e Auê Score
+├── modelar-dados-e-api/      schema de feed social, comunidades e contratos Supabase
 │
-│   MARCOS — produção e release
-└── registrarIssue/            backlog, dependências, CI e evidência
+│   CAMILLO — plataforma web e arquitetura
+├── conselho-arquitetura/     conselho de engenharia, streaming de áudio e sustentabilidade técnica
+├── modelar-dados-e-api/      desenho modular e contratos de dados
+│
+│   RODRIGO — search console e seo técnico
+├── google-search-console/    sitemaps, indexação, verificação de domínio e Core Web Vitals
+│
+│   MARCELO — qualidade e segurança
+├── auditar-modularidade/     detecção de acoplamento indevido, chamadas proibidas e duplicação
+└── auditar-qualidade/        testes, build, RLS de posts/comunidades, resiliência e validação cross-browser
 ```
 
-## O dom comum
+---
 
-Os sete agentes entendem o mesmo jogo antes de aplicar sua especialidade:
+## O Dom Comum
 
-`ARROTAR → NOTA → DESAFIAR → RESPONDER → REVANCHE`.
-
-Todos protegem a Bolha, a tensão, o impacto e a vontade de tentar de novo. A
-brincadeira pode ser solta e dinâmica; erro, privacidade, segurança e escopo
-continuam sendo tratados com precisão.
-
-Skill não é propriedade privada: o Guinho usa `registrarIssue` no PR dele, o
-Marcelo usa `aplicarTomOgro` e `matarCheiroDeIA` para checar o texto
-entregue, e o Camillo usa `escreverAdaptadorNativo`, `escreverTestes` e
-`registrarIssue` iguais às do Guinho — a fronteira e a voz não mudam de dono por
-causa da plataforma. O que a coluna diz é **quem responde por aquilo**.
-
-O aceite da entrega, papel do Giam, não tem skill: o procedimento é
-[`AGENTS.md`](../AGENTS.md) §5.5.
-
-Cada skill é um `SKILL.md` com frontmatter (`name`, `description`) e um
-procedimento. **Skill é procedimento, não fonte de verdade** — cada uma aponta
-para a fonte canônica do assunto e não repete a regra.
-
-`otimizarMonetizacao` foi removida no reposicionamento de 2026-08-09: monetização
-saiu da visão do produto.
+Construir a melhor rede social de arrotadores da internet: o **Bonde do Arroto**, integrando a diversão imediata da **Arena** com o engajamento diário de um feed estilo Twitter/X e comunidades temáticas estilo Orkut.
+Tudo roda 100% online na web moderna, responsivo para Desktop e otimizado como Webapp Mobile.

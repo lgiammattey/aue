@@ -1,0 +1,13 @@
+:root{
+  /* Notch, home indicator, câmera-ilha — Capacitor/iOS nativo e Android com
+     gestos. Todo shell de tela cheia soma estes insets ao padding, nunca
+     ignora. 0px em navegadores sem suporte (fallback seguro). */
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+
+  /* Alvo tocável mínimo — 44pt (iOS HIG) / 48dp (Material) convergem em
+     44px CSS como piso comum. Nunca menor, em nenhuma plataforma. */
+  --hit-target-min:44px;
+}

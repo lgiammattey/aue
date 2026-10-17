@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>body{margin:0}a{color:var(--fg)}a:hover{color:var(--muted)}</style>
+</helmet>
+<div style="min-height:100vh;background:var(--page-bg);color:var(--fg);font-family:var(--font-body);padding:40px 32px;box-sizing:border-box">
+<div style="max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:40px">
+<div>
+<span style="font-family:var(--font-display);font-size:36px;text-transform:uppercase">Bonde do Arroto · Jornada</span>
+<p style="color:var(--muted);font-size:16px;margin:8px 0 0;max-width:640px;text-wrap:pretty">Fluxo de referência para construção. Cada caixa é uma tela ou estado; as ramificações mostram a decisão da pessoa. O loop de revanche nunca termina em "pronto".</p>
+<div style="display:flex;gap:16px;margin-top:12px;font-size:15px"><a href="Landing.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Landing</a><a href="Login.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Login</a><a href="Bonde do Arroto.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Bonde</a><a href="Arena.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Arena</a><a href="Versões Webapp.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Versões</a></div>
+<div style="display:flex;gap:20px;margin-top:20px;font-family:ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">
+<span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border:1px solid var(--border-strong);border-radius:4px"></span>Tela / estado</span>
+<span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border:1px dashed var(--fg);border-radius:14px"></span>Decisão</span>
+<span style="display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border:1px solid var(--border-strong);border-radius:4px;background:var(--surface-2)"></span>Resiliência</span>
+</div>
+</div>
+<sc-for list="{{ phases }}" as="ph" hint-placeholder-count="5">
+<section style="display:grid;grid-template-columns:minmax(160px,200px) minmax(0,1fr);gap:24px;border-top:1px solid var(--border);padding-top:24px">
+<div>
+<div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Fase {{ ph.n }}</div>
+<div style="font-family:var(--font-display);font-size:24px;text-transform:uppercase;margin-top:4px">{{ ph.title }}</div>
+<div style="color:var(--muted);font-size:14px;margin-top:6px;text-wrap:pretty">{{ ph.goal }}</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:10px">
+<sc-for list="{{ ph.steps }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="{{ s.box }}">
+<div style="font-family:ui-monospace,monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">{{ s.tag }}</div>
+<b style="font-size:15px">{{ s.name }}</b>
+<div style="color:var(--muted);font-size:13px;line-height:1.35;text-wrap:pretty">{{ s.desc }}</div>
+<sc-if value="{{ s.link }}"><a href="{{ s.link }}" style="font-size:12px;margin-top:2px;color:var(--fg)" style-hover="color:var(--muted)">Abrir</a></sc-if>
+</div>
+<sc-if value="{{ s.arrow }}"><span style="color:var(--muted);font-size:18px">→</span></sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+<div style="border-top:1px solid var(--border);padding-top:24px;display:flex;align-items:center;gap:12px;font-size:15px"><span style="font-family:var(--font-display);font-size:24px">↺</span><span style="color:var(--muted)">Revanche volta para a Arena IDLE com o mesmo oponente, em qualquer desfecho.</span></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const base = { padding: 14, width: 190, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 4, border: '1px solid var(--border-strong)', borderRadius: 12, background: 'var(--bg)' };
+    const sty = { t: base, d: { ...base, border: '1px dashed var(--fg)', borderRadius: 24, padding: '14px 18px' }, r: { ...base, background: 'var(--surface-2)', border: '1px solid var(--border)' } };
+    const tg = { t: 'Tela', d: 'Decisão', r: 'Resiliência' };
+    const mk = (k, name, desc, link) => ({ k, name, desc, link: link || '' });
+    const P = [
+      ['Descoberta', 'Chegar e entender o jogo em segundos.', [mk('t', 'Landing desktop', 'Explica o jogo e manda pro celular. Nunca tenta ser a Arena.', 'Landing.dc.html'), mk('d', 'Celular ou desktop?', 'Celular segue direto. Desktop lê e abre no aparelho.'), mk('t', 'Login', 'Entrar ou criar conta. Sem cadastro longo.', 'Login.dc.html')]],
+      ['Bonde', 'Ver o que rola e escolher o que fazer.', [mk('t', 'Feed', 'Posts de texto e áudio com nota. Filtros: todos e seguindo.', 'Bonde do Arroto.dc.html'), mk('d', 'O que fazer?', 'Postar, comunidades, desafios, perfil ou ir pra Arena.'), mk('t', 'Comunidades', 'Entrar e sair. Bonde do Arroto é a praça central.'), mk('t', 'Perfil', 'Melhor nota, histórico X1, editar perfil.')]],
+      ['Arena', 'Arrotar e receber a nota. O núcleo do jogo.', [mk('t', 'IDLE', 'Bolha parada. Uma ação: Arrotar.', 'Arena.dc.html'), mk('t', 'RECORDING', 'Bolha viva, dirigida pelo áudio.'), mk('t', 'VALIDATING', 'Checa se houve arroto de verdade.'), mk('t', 'JUDGING', 'Juiz pensa. A espera é a piada.'), mk('t', 'RESULT', 'Auê Score 0–100, fala do juiz e métricas.')]],
+      ['Resiliência', 'Falar a verdade primeiro quando algo falha.', [mk('r', 'MIC_ERROR', 'Mic bloqueado. Explica como liberar e tenta de novo.'), mk('r', 'NO_SOUND', 'Não ouvi nada. Tenta de novo, sem punir a nota.'), mk('r', 'Falha no envio', 'Deu ruim no envio. Batalha não criada. Tenta de novo.')]],
+      ['Depois da nota', 'Transformar o resultado em post, duelo ou nova tentativa.', [mk('d', 'E agora?', 'Postar no Bonde, chamar pro X1, compartilhar ou arrotar de novo.'), mk('t', 'Postar no Bonde', 'Escolhe a comunidade, nota vai junto no áudio.', 'Bonde do Arroto.dc.html'), mk('t', 'Compartilhar card', 'Gera PNG 9:12 com nota e link.')]],
+      ['X1', 'Duelo 1x1 por link, ou presencial.', [mk('t', 'CHALLENGE_CREATED', 'Link do X1 criado. Compartilha com o oponente.'), mk('t', 'WAITING_OPPONENT', 'Espera o outro arrotar. Cronômetro visível.'), mk('t', 'SCOREBOARD', 'Placar versus com as duas notas.'), mk('d', 'Resultado', 'Vitória, derrota ou empate. Nunca usa vermelho.'), mk('t', 'REMATCH', 'Contagem da revanche. Volta pra IDLE.')]]
+    ];
+    return { phases: P.map((p, i) => ({ n: i + 1, title: p[0], goal: p[1], steps: p[2].map((s, j) => ({ box: sty[s.k], tag: tg[s.k], name: s.name, desc: s.desc, link: s.link, arrow: j < p[2].length - 1 })) })) };
+  }
+}
+</script>
+</body>
+</html>

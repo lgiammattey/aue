@@ -1,0 +1,21 @@
+:root{
+  /* Feedback não-visual — taxonomia que o app nativo (Capacitor/iOS/Android)
+     deve disparar nos mesmos gatilhos em que a UI muda. Documentado aqui
+     porque faz parte do contrato do componente, mesmo sem arquivo de áudio
+     no design system. Nomes usados em --data-haptic / --data-sound nos
+     componentes (ver guidelines/game-feel.card.html). */
+
+  /* Háptico: light = confirmação silenciosa; medium = ação com peso;
+     heavy = resultado/impacto; error = bloqueio. Nunca mais de 1 por gesto. */
+  --haptic-light:tap-confirmar; /* @kind other */
+  --haptic-medium:acao-com-peso; /* @kind other */
+  --haptic-heavy:resultado-impacto; /* @kind other */
+  --haptic-error:bloqueio; /* @kind other */
+
+  /* Som: cada gatilho tem no máx. 1 som, curto (<400ms), nunca música de
+     fundo contínua — o jogo é sobre o som que o JOGADOR faz, não o app. */
+  --sound-tap:blip-curto; /* @kind other */
+  --sound-reveal:estouro-nota; /* @kind other */
+  --sound-victory:fanfarra-curta; /* @kind other */
+  --sound-error:negativo-seco; /* @kind other */
+}

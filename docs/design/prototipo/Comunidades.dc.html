@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>@keyframes bdaFade{from{opacity:0}to{opacity:1}}@keyframes bdaPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}@keyframes bdaHeart{0%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.92)}100%{transform:scale(1)}}@keyframes bdaUp{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}@keyframes bdaIn{from{opacity:0;transform:translateY(-8px);background:var(--fg-soft)}to{opacity:1;transform:none}}button,a{transition:background-color .15s ease,color .15s ease,border-color .15s ease,opacity .15s ease,transform .1s ease}button:active:not([disabled]){transform:scale(.96)}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}body{margin:0}a{color:var(--fg);text-decoration:none}a:hover{color:var(--muted)}button{font-family:inherit}input::placeholder,textarea::placeholder{color:var(--muted)}</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="max-width:1200px;margin:0 auto;display:flex;justify-content:center;align-items:flex-start">
+
+<sc-if value="{{ showLeft }}" hint-placeholder-val="{{ true }}">
+<header style="{{ leftStyle }}">
+<div style="display:flex;flex-direction:column;gap:4px;align-items:{{ navAlign }}">
+<div style="height:52px;display:flex;align-items:center;padding:0 12px;font-family:var(--font-display);font-size:26px;letter-spacing:.02em">{{ brand }}</div>
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<a href="{{ t.href }}" style="{{ t.style }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg><sc-if value="{{ wide }}"><span>{{ t.label }}</span></sc-if></a>
+</sc-for>
+<button onClick="{{ openCreate }}" style="{{ postBtn }}" style-hover="background:var(--accent-strong)" style-active="transform:translateY(2px) scale(.985)">{{ postLabel }}</button>
+</div>
+<button onClick="{{ toggleTheme }}" style="{{ themeBtn }}" style-hover="background:var(--surface)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ themeIcon }}"></path></svg><sc-if value="{{ wide }}"><span>{{ themeLabel }}</span></sc-if></button>
+</header>
+</sc-if>
+
+<main style="{{ mainStyle }}">
+
+<sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+<div style="position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border)">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:53px;gap:12px">
+<span style="font-weight:700;font-size:20px">Comunidades</span>
+<div style="display:flex;gap:8px">
+<button onClick="{{ openCreate }}" aria-label="Criar comunidade" style="width:36px;height:36px;border-radius:50%;border:0;background:none;color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:var(--surface)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+<sc-if value="{{ mobile }}"><button onClick="{{ toggleTheme }}" aria-label="Alternar tema" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border-strong);background:none;color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ themeIcon }}"></path></svg></button></sc-if>
+</div>
+</div>
+<div style="display:flex">
+<sc-for list="{{ ltabs }}" as="f" hint-placeholder-count="2"><button onClick="{{ f.go }}" style="{{ f.style }}" style-hover="background:var(--surface)"><span style="{{ f.inner }}">{{ f.label }}</span></button></sc-for>
+</div>
+</div>
+<div style="padding:12px 16px;border-bottom:1px solid var(--border)"><input value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar comunidades" style="width:100%;height:44px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);color:var(--fg);padding:0 18px;font-size:15px;font-family:inherit;outline:none;box-sizing:border-box"></input></div>
+<sc-if value="{{ isDiscover }}"><div style="padding:16px 16px 8px;font-weight:800;font-size:20px">Categorias</div>
+<div style="display:flex;gap:8px;padding:0 16px 16px;flex-wrap:wrap;border-bottom:1px solid var(--border)">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
+</div></sc-if>
+<sc-for list="{{ list }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.open }}" style="animation:bdaFade .25s ease-out;padding:16px;border-bottom:1px solid var(--border);display:flex;gap:12px;cursor:pointer" style-hover="background:var(--fg-soft)">
+<div style="width:64px;height:64px;flex:none;border-radius:16px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:24px">{{ c.ini }}</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b style="font-size:17px">{{ c.name }}</b><button onClick="{{ c.toggle }}" style="{{ c.style }}">{{ c.label }}</button></div>
+<span style="color:var(--muted);font-size:14px">{{ c.cat }} · {{ c.members }} membros</span>
+<p style="margin:4px 0 0;font-size:15px;line-height:1.4;text-wrap:pretty">{{ c.desc }}</p>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ emptyList }}"><div style="padding:48px 32px;text-align:center"><div style="font-weight:800;font-size:28px;line-height:1.1">{{ emptyTitle }}</div><div style="color:var(--muted);font-size:15px;margin-top:8px">{{ emptySub }}</div></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isDetail }}">
+<div style="position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:0 16px;height:53px">
+<button onClick="{{ back }}" aria-label="Voltar" style="width:36px;height:36px;margin-left:-8px;border-radius:50%;border:0;background:none;color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:var(--surface)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></button>
+<div style="line-height:1.2"><div style="font-weight:700;font-size:20px">{{ cur.name }}</div><div style="color:var(--muted);font-size:13px">{{ cur.members }} membros</div></div>
+</div>
+<div style="height:140px;background:var(--surface-2);display:flex;align-items:flex-end;padding:16px"><span style="font-family:var(--font-display);font-size:64px;line-height:1;color:var(--muted)">{{ cur.ini }}</span></div>
+<div style="padding:16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><b style="font-size:22px">{{ cur.name }}</b><div style="color:var(--muted);font-size:14px;margin-top:2px">{{ cur.cat }} · {{ cur.members }} membros · criada em {{ cur.year }}</div></div><button onClick="{{ cur.toggle }}" style="{{ cur.style }}">{{ cur.label }}</button></div>
+<p style="margin:0;font-size:15px;line-height:1.4;text-wrap:pretty">{{ cur.desc }}</p>
+</div>
+<div style="display:flex;border-bottom:1px solid var(--border)">
+<sc-for list="{{ dtabs }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.go }}" style="{{ f.style }}" style-hover="background:var(--surface)"><span style="{{ f.inner }}">{{ f.label }}</span></button></sc-for>
+</div>
+<sc-if value="{{ dPosts }}">
+<sc-if value="{{ cur.joined }}"><div style="display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border)">
+<div style="width:44px;height:44px;flex:none;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">VC</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+<textarea value="{{ draft }}" onInput="{{ setDraft }}" placeholder="Postar em {{ cur.name }}" rows="2" style="background:none;border:0;outline:none;resize:none;color:var(--fg);font-family:inherit;font-size:19px;padding:8px 0"></textarea>
+<div style="display:flex;justify-content:flex-end;border-top:1px solid var(--border);padding-top:10px"><button onClick="{{ sendPost }}" style="height:36px;padding:0 20px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-on);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--accent-strong)" style-active="transform:translateY(2px) scale(.985)">Postar</button></div>
+</div></div></sc-if>
+<sc-for list="{{ cposts }}" as="p" hint-placeholder-count="3">
+<article style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px" style-hover="background:var(--fg-soft)">
+<div style="width:44px;height:44px;flex:none;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">{{ p.ini }}</div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;gap:4px;align-items:baseline;flex-wrap:wrap"><b style="font-size:15px">{{ p.name }}</b><span style="color:var(--muted);font-size:15px">@{{ p.handle }} · {{ p.when }}</span></div>
+<p style="margin:0;font-size:15px;line-height:1.4;text-wrap:pretty">{{ p.text }}</p>
+<sc-if value="{{ p.score }}"><div style="display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:16px;padding:10px 12px"><span style="width:36px;height:36px;border-radius:50%;background:var(--fg);color:var(--bg);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></span><span style="flex:1;font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ p.dur }}</span><span style="font-family:var(--font-display);font-size:24px;line-height:1;background:var(--accent);color:var(--accent-on);border-radius:12px;padding:6px 10px">{{ p.score }}</span></div></sc-if>
+<button onClick="{{ p.like }}" style="{{ p.lStyle }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="{{ p.fill }}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.8-8 11-8 11z"></path></svg>{{ p.likes }}</button>
+</div></article>
+</sc-for>
+</sc-if>
+<sc-if value="{{ dRank }}"><sc-for list="{{ rank }}" as="r" hint-placeholder-count="5"><div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px"><span style="width:24px;font-family:ui-monospace,monospace;font-size:13px;color:var(--muted)">{{ r.pos }}</span><div style="width:40px;height:40px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">{{ r.ini }}</div><div style="flex:1;line-height:1.3"><b style="font-size:15px">{{ r.name }}</b><div style="color:var(--muted);font-size:14px">@{{ r.handle }}</div></div><span style="font-family:var(--font-display);font-size:28px">{{ r.nota }}</span></div></sc-for></sc-if>
+<sc-if value="{{ dAbout }}"><div style="padding:16px;display:flex;flex-direction:column;gap:20px">
+<div><b style="font-size:20px">Regras</b><ol style="margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.4"><sc-for list="{{ rules }}" as="r" hint-placeholder-count="3"><li>{{ r }}</li></sc-for></ol></div>
+<div><b style="font-size:20px">Moderação</b><div style="color:var(--muted);font-size:15px;margin-top:6px">@danigas e @marigrave</div></div>
+</div></sc-if>
+</sc-if>
+
+<div style="height:{{ bottomPad }}px"></div>
+</main>
+
+<sc-if value="{{ showRight }}">
+<aside style="width:320px;flex:none;position:sticky;top:0;padding:12px 0 12px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;max-height:100vh;overflow-y:auto">
+<section style="background:var(--surface);border-radius:16px;overflow:hidden">
+<div style="padding:12px 16px;font-weight:700;font-size:20px">Comunidades em alta</div>
+<sc-for list="{{ trending }}" as="c" hint-placeholder-count="3"><div onClick="{{ c.open }}" style="padding:10px 16px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center" style-hover="background:var(--fg-soft)"><div><b style="font-size:15px">{{ c.name }}</b><div style="color:var(--muted);font-size:13px">+{{ c.today }} posts hoje</div></div></div></sc-for>
+</section>
+<section style="background:var(--surface);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px">
+<b style="font-size:20px">Cria a sua</b><span style="color:var(--muted);font-size:15px;line-height:1.35">Tem um tipo de gás que ninguém cobre? Abre a comunidade.</span>
+<button onClick="{{ openCreate }}" style="height:40px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font-weight:700;font-size:15px;cursor:pointer;margin-top:4px" style-active="transform:translateY(2px) scale(.985)">Criar comunidade</button>
+</section>
+</aside>
+</sc-if>
+</div>
+
+<sc-if value="{{ mobile }}">
+<nav style="position:fixed;left:0;right:0;bottom:0;height:56px;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--border);background:var(--bg);z-index:6">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" aria-label="{{ t.label }}" style="display:flex;align-items:center;justify-content:center;color:{{ t.color }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg></a></sc-for>
+</nav>
+</sc-if>
+
+<sc-if value="{{ creating }}">
+<div style="{{ scrimStyle }}"><div style="{{ sheetStyle }}">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-display);font-size:22px">CRIAR COMUNIDADE</span><button onClick="{{ closeAll }}" style="background:none;border:0;color:var(--muted);font-size:14px;cursor:pointer">Fechar</button></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">Nome<input value="{{ nf.name }}" onInput="{{ nfName }}" maxlength="30" style="{{ fieldStyle }}"></input></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">Categoria<select value="{{ nf.cat }}" onChange="{{ nfCat }}" style="{{ fieldStyle }}"><sc-for list="{{ catOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">Descrição<textarea value="{{ nf.desc }}" onInput="{{ nfDesc }}" maxlength="120" rows="3" style="{{ fieldStyle }};height:auto;padding:12px 14px;resize:none"></textarea></label>
+<button onClick="{{ createComm }}" style="height:48px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-on);font-weight:700;font-size:16px;cursor:pointer" style-hover="background:var(--accent-strong)" style-active="transform:translateY(2px) scale(.985)">Criar</button>
+</div></div>
+</sc-if>
+
+<sc-if value="{{ toast }}"><div style="position:fixed;left:50%;transform:translateX(-50%);animation:bdaUp .22s cubic-bezier(.2,.8,.2,1);bottom:80px;z-index:30;background:var(--fg);color:var(--bg);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;max-width:90vw">{{ toast }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    theme: 'dark', w: 1200, ltab: 'suas', cat: 'Todas', q: '', sel: null, dtab: 'posts', draft: '', creating: false, toast: '', nf: { name: '', cat: 'Cerveja', desc: '' },
+    joined: ['Bonde do Arroto', 'Cerveja Gelada'], liked: {},
+    comms: [
+      { name: 'Bonde do Arroto', ini: 'BA', cat: 'Oficial', members: '48,2 mil', year: 2026, today: 340, desc: 'A comunidade oficial do Auê!. A praça central: todo mundo arrota aqui.' },
+      { name: 'Cerveja Gelada', ini: 'CG', cat: 'Cerveja', members: '12,9 mil', year: 2026, today: 120, desc: 'Arroto de long neck, chope e lata.' },
+      { name: 'Refri & Cia', ini: 'RC', cat: 'Refri', members: '9,4 mil', year: 2026, today: 86, desc: 'Gás de refrigerante. Grave é lei.' },
+      { name: 'Histórias de Arroto', ini: 'HA', cat: 'Histórias', members: '21,7 mil', year: 2026, today: 210, desc: 'Casos, vexames e lendas de família.' },
+      { name: 'Churrasco Raiz', ini: 'CR', cat: 'Comida', members: '7,1 mil', year: 2026, today: 54, desc: 'Pós-picanha. Respeito.' }
+    ],
+    posts: [
+      { id: 1, name: 'Dani Gás', handle: 'danigas', ini: 'DG', when: '4min', text: 'Terminei a long neck de uma vez e saiu um que fez a vizinha bater na parede.', score: 94, dur: '0:07', likes: 128 },
+      { id: 2, name: 'Tio Beto', handle: 'tiobeto', ini: 'TB', when: '32min', text: 'Churrasco de família, silêncio na hora da oração, e o meu cunhado solta um em ré maior.', likes: 412 },
+      { id: 3, name: 'Rafa Fôlego', handle: 'rafafolego', ini: 'RF', when: '1h', text: 'Quem aguenta 10 segundos? Tô esperando o X1.', score: 81, dur: '0:11', likes: 77 },
+      { id: 4, name: 'Mari Grave', handle: 'marigrave', ini: 'MG', when: '3h', text: 'Grave de elevador. Dá pra sentir no peito.', score: 68, dur: '0:05', likes: 54 }
+    ],
+    extra: {}
+  };
+  componentDidMount() {
+    try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); const j0 = JSON.parse(localStorage.getItem('bda-joined') || 'null'), j = j0 && j0.map(x => x === 'Bonde Geral' ? 'Bonde do Arroto' : x); if (j) this.setState({ joined: j }); } catch (x) {}
+    this._rs = () => this.setState({ w: window.innerWidth }); this._rs(); window.addEventListener('resize', this._rs);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._rs); clearTimeout(this._t); }
+  say = (t) => { this.setState({ toast: t }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2200); };
+  saveJ(j) { try { localStorage.setItem('bda-joined', JSON.stringify(j)); } catch (x) {} }
+  toggle(c) { const j = this.state.joined, on = j.includes(c.name), n = on ? j.filter(x => x !== c.name) : [...j, c.name]; this.setState({ joined: n }); this.saveJ(n); this.say(on ? 'Saiu de ' + c.name : 'Você entrou em ' + c.name); }
+  renderVals() {
+    const s = this.state, light = s.theme === 'light', w = s.w, mobile = w < 700, wide = w >= 1060, showRight = w >= 1000;
+    const vars = light ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', '--fg-soft': 'rgba(10,10,8,.04)', '--overlay-scrim': 'rgba(245,243,234,.92)', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
+    const navB = { display: 'flex', alignItems: 'center', gap: 16, height: 52, padding: wide ? '0 20px 0 12px' : 0, width: wide ? 'auto' : 52, justifyContent: wide ? 'flex-start' : 'center', borderRadius: 999, color: 'var(--fg)', fontSize: 20, boxSizing: 'border-box' };
+    const items = [['Início', 'M3 11l9-8 9 8v10h-6v-6H9v6H3z', 'Bonde do Arroto.dc.html'], ['Auê', 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3', 'Arena.dc.html'], ['Comunidades', 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2', '#'], ['Desafios', 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3', 'Bonde do Arroto.dc.html'], ['Perfil', 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0', 'Bonde do Arroto.dc.html']];
+    const pill = (on) => ({ flex: 1, height: 52, border: 0, background: 'none', color: on ? 'var(--fg)' : 'var(--muted)', fontWeight: on ? 700 : 500, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' });
+    const ul = (on) => ({ height: 52, display: 'flex', alignItems: 'center', borderBottom: on ? '4px solid var(--ind)' : '4px solid transparent', boxSizing: 'border-box' });
+    const btn = (j) => ({ height: 34, padding: '0 18px', flex: 'none', borderRadius: 999, cursor: 'pointer', fontWeight: 700, fontSize: 14, border: j ? '1px solid var(--border-strong)' : '0', background: j ? 'transparent' : 'var(--fg)', color: j ? 'var(--fg)' : 'var(--bg)' });
+    const dec = (c) => { const j = s.joined.includes(c.name); return { ...c, joined: j, label: j ? 'Dentro' : 'Entrar', style: btn(j), toggle: (e) => { e.stopPropagation(); this.toggle(c); }, open: () => this.setState({ sel: c.name, dtab: 'posts' }) }; };
+    const all = s.comms.map(dec);
+    const cats = ['Todas', ...Array.from(new Set(s.comms.map(c => c.cat)))];
+    const q = s.q.trim().toLowerCase();
+    let list = all.filter(c => (s.ltab === 'suas' ? c.joined : (s.cat === 'Todas' || c.cat === s.cat)) && (!q || (c.name + c.desc).toLowerCase().includes(q)));
+    const cur = all.find(c => c.name === s.sel) || all[0];
+    const ex = s.extra[cur.name] || [];
+    const seed = cur.name.length;
+    const cposts = [...ex, ...s.posts.map((p, i) => ({ ...p, id: 'b' + p.id }))].map(p => { const l = s.liked[p.id]; return { ...p, likes: p.likes + (l ? 1 : 0), fill: l ? 'currentColor' : 'none', lStyle: { background: 'none', border: 0, color: l ? 'var(--fg)' : 'var(--muted)', fontWeight: l ? 700 : 400, fontSize: 13, padding: '6px 8px 6px 0', cursor: 'pointer', display: 'flex', gap: 6, alignItems: 'center' }, like: () => this.setState(st => ({ liked: { ...st.liked, [p.id]: !st.liked[p.id] } })) }; });
+    const rankBase = [['Dani Gás', 'danigas', 'DG', 94], ['Rafa Fôlego', 'rafafolego', 'RF', 81], ['Tio Beto', 'tiobeto', 'TB', 74], ['Mari Grave', 'marigrave', 'MG', 68], ['Você', 'voce_arrota', 'VC', 88]].sort((a, b) => b[3] - a[3]);
+    const dtab = s.dtab;
+    const stage = s.sel ? 'detail' : 'list';
+    return {
+      rootStyle: { ...vars, minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' },
+      mobile, wide, showLeft: !mobile, showRight, brand: wide ? 'AUÊ!' : 'A!', navAlign: wide ? 'stretch' : 'center',
+      leftStyle: { width: wide ? 275 : 76, flex: 'none', position: 'sticky', top: 0, height: '100vh', padding: wide ? '0 12px 12px' : '0 8px 12px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' },
+      mainStyle: { width: '100%', maxWidth: 600, flex: '1 1 0', minWidth: 0, borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', minHeight: '100vh', boxSizing: 'border-box' },
+      tabs: items.map(([l, d, href]) => { const on = l === 'Comunidades'; return { label: l, d, href, sw: on ? 2.4 : 1.8, color: on ? 'var(--fg)' : 'var(--muted)', style: { ...navB, fontWeight: on ? 700 : 400 } }; }),
+      postBtn: wide ? { height: 52, marginTop: 16, border: 0, borderRadius: 999, background: 'var(--accent)', color: 'var(--accent-on)', fontWeight: 700, fontSize: 17, cursor: 'pointer' } : { width: 52, height: 52, marginTop: 16, border: 0, borderRadius: '50%', background: 'var(--accent)', color: 'var(--accent-on)', fontWeight: 700, fontSize: 26, cursor: 'pointer' },
+      postLabel: wide ? 'Criar comunidade' : '+',
+      themeIcon: light ? 'M21 13A9 9 0 1111 3a7 7 0 0010 10z' : 'M12 17a5 5 0 100-10 5 5 0 000 10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1',
+      themeLabel: light ? 'Tema escuro' : 'Tema claro', themeBtn: { ...navB, height: 44, fontSize: 15, color: 'var(--muted)', border: 0, background: 'none', cursor: 'pointer' },
+      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); try { localStorage.setItem('bda-theme', t); } catch (x) {} },
+      bottomPad: mobile ? 72 : 40,
+      isList: stage === 'list', isDetail: stage === 'detail',
+      ltabs: [['suas', 'Suas'], ['desc', 'Descobrir']].map(([k, l]) => ({ label: l, style: pill(s.ltab === k), inner: ul(s.ltab === k), go: () => this.setState({ ltab: k }) })),
+      isDiscover: s.ltab === 'desc', cats: cats.map(c => ({ label: c, go: () => this.setState({ cat: c }), style: { height: 34, padding: '0 16px', borderRadius: 999, cursor: 'pointer', fontWeight: 600, fontSize: 14, border: '1px solid var(--border-strong)', background: s.cat === c ? 'var(--fg)' : 'transparent', color: s.cat === c ? 'var(--bg)' : 'var(--fg)' } })),
+      q: s.q, setQ: (e) => this.setState({ q: e.target.value }),
+      list, emptyList: !list.length, emptyTitle: s.ltab === 'suas' && !q ? 'Você ainda não entrou em nenhuma' : 'Nada encontrado', emptySub: s.ltab === 'suas' && !q ? 'Vai em Descobrir e acha seu bonde.' : 'Tenta outro nome ou categoria.',
+      cur, back: () => this.setState({ sel: null }),
+      dtabs: [['posts', 'Posts'], ['rank', 'Ranking'], ['about', 'Sobre']].map(([k, l]) => ({ label: l, style: pill(dtab === k), inner: ul(dtab === k), go: () => this.setState({ dtab: k }) })),
+      dPosts: dtab === 'posts', dRank: dtab === 'rank', dAbout: dtab === 'about',
+      draft: s.draft, setDraft: (e) => this.setState({ draft: e.target.value }),
+      sendPost: () => { const t = s.draft.trim(); if (!t) return this.say('Escreve alguma coisa.'); const p = { id: 'n' + Date.now(), name: 'Você', handle: 'voce_arrota', ini: 'VC', when: 'agora', text: t, likes: 0 }; this.setState(st => ({ extra: { ...st.extra, [cur.name]: [p, ...(st.extra[cur.name] || [])] }, draft: '' })); },
+      cposts, rank: rankBase.map(([name, handle, ini, nota], i) => ({ pos: i + 1, name, handle, ini, nota })),
+      rules: ['Arroto de verdade. Sem áudio dublado.', 'A piada é com o arroto, não com a pessoa.', 'Sem spam de link.'],
+      trending: [...all].sort((a, b) => b.today - a.today).slice(0, 3),
+      creating: s.creating, openCreate: () => this.setState({ creating: true }), closeAll: () => this.setState({ creating: false }),
+      scrimStyle: { position: 'fixed', inset: 0, background: 'var(--overlay-scrim)', backdropFilter: 'blur(2px)', animation: 'bdaFade .18s ease-out', display: 'flex', alignItems: mobile ? 'flex-end' : 'center', justifyContent: 'center', zIndex: 20, padding: mobile ? 0 : 16, boxSizing: 'border-box' },
+      sheetStyle: { width: '100%', maxWidth: 560, background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: mobile ? '24px 24px 0 0' : 24, padding: '20px 16px 24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 14, boxShadow: '0 8px 32px rgba(0,0,0,.35)', animation: 'bdaPop .22s cubic-bezier(.2,.8,.2,1)' },
+      fieldStyle: { height: 44, borderRadius: 12, border: '1px solid var(--border-strong)', background: 'var(--bg)', color: 'var(--fg)', padding: '0 14px', fontSize: 15, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
+      nf: s.nf, catOpts: ['Cerveja', 'Refri', 'Comida', 'Histórias', 'Geral'].map(v => ({ v })),
+      nfName: (e) => this.setState({ nf: { ...s.nf, name: e.target.value } }), nfCat: (e) => this.setState({ nf: { ...s.nf, cat: e.target.value } }), nfDesc: (e) => this.setState({ nf: { ...s.nf, desc: e.target.value } }),
+      createComm: () => { const n = s.nf; if (!n.name.trim()) return this.say('Dá um nome.'); if (s.comms.some(c => c.name.toLowerCase() === n.name.trim().toLowerCase())) return this.say('Já existe com esse nome.'); const c = { name: n.name.trim(), ini: n.name.trim().split(/\s+/).map(x => x[0]).join('').slice(0, 2).toUpperCase(), cat: n.cat, members: '1', year: 2026, today: 0, desc: n.desc.trim() || 'Nova comunidade.' }; const j = [...s.joined, c.name]; this.saveJ(j); this.setState({ comms: [...s.comms, c], joined: j, creating: false, nf: { name: '', cat: 'Cerveja', desc: '' }, sel: c.name, dtab: 'posts' }); this.say('Comunidade criada.'); },
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

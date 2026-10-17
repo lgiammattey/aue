@@ -1,102 +1,42 @@
-# Loop principal — Auê
+# Loop Principal do Auê!
 
-O Game Design Document [`AUÊ!-2.md`](AUÊ!-2.md) detalha este loop em produto,
-regras de score, X1, Roda e revanche. Este arquivo permanece como a referência
-compacta da sequência operacional.
-
-O jogo inteiro é um loop de cinco tempos:
-
-```text
-ARROTAR → RECEBER NOTA → DESAFIAR → RESPONDER → REVANCHE
-                                                    │
-                                                    └──► volta pra ARROTAR
-```
-
-Se uma mudança não fortalece um desses cinco tempos, ela provavelmente não é
-para agora.
+A jornada completa e suas decisões estão em [`JORNADA.md`](JORNADA.md). Este documento consolida a mecânica do loop operacional entre o feed social e a máquina da Arena.
 
 ---
 
-## 1. ARROTAR
+## O Ciclo Viral e Social
 
-A pessoa abre e arrota. Um toque.
-
-- sem cadastro, sem onboarding, sem formulário antes do primeiro arroto;
-- microfone é a única permissão pedida, e só quando é necessário;
-- a captura tem teto de tempo e para sozinha;
-- durante a gravação a Bolha reage ao áudio real — é o retorno que diz "tô te
-  ouvindo".
-
-Estados: `RECORDING` (e `ORIGIN`, que segura o áudio e pergunta de onde veio).
-
-## 2. RECEBER NOTA
-
-O juiz ouve, decide se aquilo foi arroto mesmo e devolve o **Auê Score**.
-
-- detecção real de arroto antes da nota: conversa, sopro e silêncio não viram
-  número;
-- a espera é curta e tem teatro — o julgamento é parte da piada;
-- a nota entra grande, contando, e só depois abrem as métricas;
-- a reação do juiz é escrita em cima da faixa da nota.
-
-Estados: `JUDGING`, `RESULT`.
-
-## 3. DESAFIAR
-
-Nota parada é brinquedo de um minuto. O jogo começa aqui.
-
-- a saída principal do resultado é **chamar alguém no X1**;
-- o desafio vira um **link privado**, que se manda no grupo;
-- quem desafia assina — o nome é cobrado no ato de humilhar, nunca antes;
-- compartilhar sem desafiar existe como alternativa, não como caminho
-  principal: é plateia, não briga.
-
-Estados: `CHALLENGE`.
-
-## 4. RESPONDER
-
-O amigo abre o link e cai direto no jogo.
-
-- sem cadastro e sem instalar nada;
-- **ouve o arroto que o desafiou antes de responder** — responder no escuro é
-  jogar contra um número, não contra alguém;
-- grava a resposta, recebe a própria nota;
-- os dois entram no placar.
-
-Estados: `VERSUS`, depois `RECORDING → ORIGIN → JUDGING → RESULT`, depois
-`SCOREBOARD`.
-
-## 5. REVANCHE
-
-O placar não é o fim, é o convite.
-
-- vitória e derrota terminam com a mesma pergunta: "vai deixar assim?";
-- a revanche não recomeça o jogo, continua a mesma disputa;
-- cada linha do placar toca o arroto daquela pessoa — a nota do outro deixa de
-  ser número e vira prova;
-- o link volta para os participantes, e o loop reinicia.
-
-Estados: `SCOREBOARD`, `REMATCH`.
+```text
+ARROTAR NA ARENA → RECEBER NOTA → PUBLICAR NO BONDE / DESAFIAR X1 → DEBATER NO FEED → COMUNIDADE
+        ▲                                                                                │
+        └────────────────────────── REVANCHE OU NOVO DUELO ──────────────────────────────┘
+```
 
 ---
 
-## O que o loop exige do produto
+## Os Momentos do Loop
 
-| Tempo | Exigência dura |
-|---|---|
-| Arrotar | um toque, microfone tratado, teto de duração |
-| Receber nota | detecção real de arroto, score reprodutível, revelação com peso |
-| Desafiar | link privado, imprevisível, que abre em qualquer celular |
-| Responder | zero atrito para quem chega pelo link, e o áudio do adversário audível |
-| Revanche | estado da disputa preservado entre as rodadas |
+### 1. Descoberta & Entrada Rápida
+- **Landing (`Landing.dc.html`):** Headline provocativa *"Tá rolando agora / Entra no bonde hoje"*. Login social em 1 clique (Google/Apple) ou criação direta com apelido.
+- **Arrotar sem conta:** Permite jogar na Arena imediatamente antes de criar conta. A conta só é pedida para postar no Bonde e salvar o histórico.
 
-## O loop paralelo: disputa local
+### 2. Arrotar na Arena
+- **IDLE:** Bolha viva aguardando a iniciativa do jogador.
+- **RECORDING:** Captura do áudio no navegador com visualização áudio-reativa (até 9 segundos).
+- **VALIDATING & JUDGING:** YAMNet analisa se o som é arroto genuíno; juiz faz o suspense cômico (*"Tô julgando essa porra."*).
+- **RESULT_REVEAL & RESULT:** Revelação brutal do Auê Score (0 a 100), fala do juiz, métricas acústicas (Força, Fôlego, Grave) e player para ouvir a própria gravação.
 
-Mesmo aparelho, gente em volta. Não é outro produto, é o mesmo loop com o
-"desafiar/responder" acontecendo por passar o celular na mão em vez de por link.
+### 3. Publicar Causo ou Chamar pro X1
+- **Postar no Bonde:** Escolhe a comunidade temática e envia o causo com o áudio e a nota anexados.
+- **Chamar pro X1:** Gera link exclusivo do desafio (ex: `aue.gg/x1/9f2a`) para humilhar o oponente pelo WhatsApp ou rede.
+- **Compartilhar Card (9:12):** Exporta card gráfico estilizado com a nota, fala do juiz e link do confronto.
 
-```text
-ARROTAR → NOTA → PASSA O CELULAR → ARROTAR → NOTA → PLACAR → REVANCHE
-```
+### 4. Duelo X1 & Placar
+- O oponente abre o link no celular sem instalar aplicativo.
+- Ouve o arroto desafiante e grava a própria resposta.
+- **Placar Versus:** Comparação lado a lado das duas notas com player de áudio para os dois competidores.
 
-Ver [`REGRAS.md`](REGRAS.md).
+### 5. Revanche Contínua (O Loop Nunca Termina)
+- Vitória, derrota ou empate (`DRAW`).
+- **Nunca usa vermelho** para a nota do perdedor; vermelho é reservado para falha técnica.
+- Botão **Revanche** engatilha contagem regressiva `3, 2, 1` e joga ambos de volta para a Arena `IDLE`, perpetuando a rivalidade.

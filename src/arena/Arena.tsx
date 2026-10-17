@@ -172,6 +172,8 @@ import './arena.css';
  * `docs/design/prototipo-arena/arena.html` (como se parece e se move),
  * `docs/technical/adr/0001-arquitetura-oficial-do-aue.md` (as camadas).
  */
+import { atualizarMaiorScoreLocal } from '../plataforma/web/perfil';
+
 interface PropsDaArena {
   /**
    * O código do link, quando a Arena foi aberta por um desafio.
@@ -186,6 +188,8 @@ interface PropsDaArena {
   sorteio?: () => number;
   /** Injetável para o teste controlar o cronômetro. */
   agora?: () => number;
+  /** Callback opcional quando o arrotador toca em POSTAR_NO_BONDE */
+  onPostarNoBonde?: (resultado: { nota: number; resultadoId?: string; duracao?: number; origem?: string; audioUrl?: string }) => void;
 }
 
 export function Arena({
@@ -193,6 +197,7 @@ export function Arena({
   adaptadores,
   sorteio = Math.random,
   agora = Date.now,
+  onPostarNoBonde,
 }: PropsDaArena) {
   /*
     `useState` com função de inicialização, e não `useMemo`: o React pode
@@ -2078,13 +2083,29 @@ export function Arena({
               <button type="button" className="botao botao-secundario" onClick={compartilharANota}>
                 {COMPARTILHAR}
               </button>
-              <a
-                href="/comunidade"
-                className="botao botao-secundario"
-                style={{ textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                {POSTAR_NO_BONDE}
-              </a>
+              {onPostarNoBonde ? (
+                <button
+                  type="button"
+                  className="botao botao-secundario"
+                  onClick={() => {
+                    atualizarMaiorScoreLocal(situacao.nota.nota);
+                    onPostarNoBonde({
+                      nota: situacao.nota.nota,
+                      duracao: situacao.nota.medidas.folego,
+                    });
+                  }}
+                >
+                  {POSTAR_NO_BONDE}
+                </button>
+              ) : (
+                <a
+                  href="/feed"
+                  className="botao botao-secundario"
+                  style={{ textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  {POSTAR_NO_BONDE}
+                </a>
+              )}
               {codigoDaDisputa.current ? null : (
                 <button type="button" className="botao botao-secundario" onClick={mandarOutro}>
                   {MANDAR_OUTRO}

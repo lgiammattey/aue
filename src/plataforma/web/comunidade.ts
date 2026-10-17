@@ -8,9 +8,55 @@ import type {
   FiltrosDoFeed,
   PedidoDePostagemDeCauso,
   PortaDeComunidade,
+  RespostaDeCauso,
   ResultadoDaPostagem,
   TipoDeReacao,
 } from '../../portas/comunidade';
+
+const CHAVE_CAUSOS = 'aue.causos.v1';
+const CHAVE_MINHAS_COMUNIDADES = 'aue.minhas_comunidades.v1';
+
+function lerCausosLocais(): CausoPostado[] {
+  try {
+    if (typeof localStorage === 'undefined') return [];
+    const bruto = localStorage.getItem(CHAVE_CAUSOS);
+    if (!bruto) return [];
+    const parsed = JSON.parse(bruto);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function salvarCausosLocais(causos: readonly CausoPostado[]): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(CHAVE_CAUSOS, JSON.stringify(causos));
+  } catch {
+    // ignora erro no safari privado
+  }
+}
+
+function lerMinhasComunidadesLocais(): string[] {
+  try {
+    if (typeof localStorage === 'undefined') return ['bonde-geral', 'eu-arroto-e-dai'];
+    const bruto = localStorage.getItem(CHAVE_MINHAS_COMUNIDADES);
+    if (!bruto) return ['bonde-geral', 'eu-arroto-e-dai'];
+    const parsed = JSON.parse(bruto);
+    return Array.isArray(parsed) ? parsed : ['bonde-geral', 'eu-arroto-e-dai'];
+  } catch {
+    return ['bonde-geral', 'eu-arroto-e-dai'];
+  }
+}
+
+function salvarMinhasComunidadesLocais(slugs: readonly string[]): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(CHAVE_MINHAS_COMUNIDADES, JSON.stringify(slugs));
+  } catch {
+    // ignora erro no safari privado
+  }
+}
 
 /**
  * Adaptador Web da Porta de Comunidade e Feed do Auê 3.0.
@@ -25,11 +71,13 @@ export function criarComunidadeWeb(
     forcarOffline?: boolean;
   } = {},
 ): PortaDeComunidade {
-  // Estado local em memória para offline ou sessão local
+  const causosSalvos = lerCausosLocais();
+  // Estado local em memória sincronizado com armazenamento local
   const causosMemoria: CausoPostado[] = [
-    ...(opcoes.causosIniciais ?? CAUSOS_PADRAO),
+    ...(causosSalvos.length > 0 ? causosSalvos : (opcoes.causosIniciais ?? CAUSOS_PADRAO)),
   ];
   const denunciasLocais = new Set<string>();
+  const minhasComunidadesMemoria = new Set<string>(lerMinhasComunidadesLocais());
 
   return {
     async listarComunidades(): Promise<readonly Comunidade[]> {
@@ -88,6 +136,7 @@ export function criarComunidadeWeb(
                   comunidadeId: comuEncontrada.id,
                   comunidadeSlug: comuEncontrada.slug,
                   autorNome: 'Arrotador Anônimo',
+                  autorHandle: 'arrotador_anonimo',
                   conteudo: p.content || '',
                   resultadoId: p.result_id ?? undefined,
                   nota: resultado?.score ?? undefined,
@@ -96,6 +145,8 @@ export function criarComunidadeWeb(
                   audioUrl: resultado?.audio_url ?? undefined,
                   reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
                   minhaReacao: null,
+                  curtidas: 0,
+                  reposts: 0,
                   totalComentarios: 0,
                   criadoEm: p.created_at,
                 };
@@ -128,6 +179,7 @@ export function criarComunidadeWeb(
       }
 
       const comu = obterComunidadePorSlug(pedido.comunidadeSlug) ?? COMUNIDADES_PADRAO[0];
+      const autorHandle = pedido.autorHandle || (pedido.autorNome || 'arrotador').toLowerCase().replace(/\s+/g, '_');
 
       // Se conectado ao Supabase
       if (!opcoes.forcarOffline && !configuracaoAusente) {
@@ -158,16 +210,27 @@ export function criarComunidadeWeb(
             id: data.id,
             comunidadeId: comu.id,
             comunidadeSlug: comu.slug,
-            autorNome: pedido.autorNome || 'Arrotador',
+            autorNome: pedido.autorNome || 'Você',
+            autorHandle,
             conteudo: data.content,
             resultadoId: pedido.resultadoId,
+            nota: pedido.nota,
+            audioUrl: pedido.audioUrl,
+            duracaoSegundos: pedido.duracaoSegundos,
+            origem: pedido.origem,
             reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
             minhaReacao: null,
+            curtidas: 0,
+            curtidoPorMim: false,
+            reposts: 0,
+            repostadoPorMim: false,
             totalComentarios: 0,
             criadoEm: data.created_at,
+            meu: true,
           };
 
           causosMemoria.unshift(novoCauso);
+          salvarCausosLocais(causosMemoria);
           return { ok: true, causo: novoCauso };
         } catch (err: unknown) {
           const detalhe = err instanceof Error ? err.message : String(err);
@@ -180,16 +243,27 @@ export function criarComunidadeWeb(
         id: `causo-local-${Date.now()}`,
         comunidadeId: comu.id,
         comunidadeSlug: comu.slug,
-        autorNome: pedido.autorNome || 'Arrotador',
+        autorNome: pedido.autorNome || 'Você',
+        autorHandle,
         conteudo: pedido.conteudo.trim(),
         resultadoId: pedido.resultadoId,
+        nota: pedido.nota,
+        audioUrl: pedido.audioUrl,
+        duracaoSegundos: pedido.duracaoSegundos,
+        origem: pedido.origem,
         reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
         minhaReacao: null,
+        curtidas: 0,
+        curtidoPorMim: false,
+        reposts: 0,
+        repostadoPorMim: false,
         totalComentarios: 0,
         criadoEm: new Date().toISOString(),
+        meu: true,
       };
 
       causosMemoria.unshift(novoCauso);
+      salvarCausosLocais(causosMemoria);
       return { ok: true, causo: novoCauso };
     },
 
@@ -206,26 +280,116 @@ export function criarComunidadeWeb(
       let novaMinhaReacao: TipoDeReacao | null = reacao;
 
       if (causo.minhaReacao === reacao) {
-        // Remover reação
         novasReacoes[reacao] = Math.max(0, novasReacoes[reacao] - 1);
         novaMinhaReacao = null;
       } else {
-        // Adicionar reação e remover anterior se houver
         if (causo.minhaReacao) {
           novasReacoes[causo.minhaReacao] = Math.max(0, novasReacoes[causo.minhaReacao] - 1);
         }
         novasReacoes[reacao] = (novasReacoes[reacao] || 0) + 1;
       }
 
-      // Atualiza referência no array local
       const idx = causosMemoria.indexOf(causo);
       causosMemoria[idx] = {
         ...causo,
         reacoes: novasReacoes,
         minhaReacao: novaMinhaReacao,
       };
+      salvarCausosLocais(causosMemoria);
 
       return { ok: true, reacoes: novasReacoes };
+    },
+
+    async alternarCurtida(causoId: string): Promise<{ readonly ok: boolean; readonly curtidas: number; readonly curtido: boolean }> {
+      const causo = causosMemoria.find((c) => c.id === causoId);
+      if (!causo) {
+        return { ok: false, curtidas: 0, curtido: false };
+      }
+
+      const novoCurtido = !causo.curtidoPorMim;
+      const novasCurtidas = novoCurtido ? (causo.curtidas || 0) + 1 : Math.max(0, (causo.curtidas || 0) - 1);
+
+      const idx = causosMemoria.indexOf(causo);
+      causosMemoria[idx] = {
+        ...causo,
+        curtidas: novasCurtidas,
+        curtidoPorMim: novoCurtido,
+      };
+      salvarCausosLocais(causosMemoria);
+
+      return { ok: true, curtidas: novasCurtidas, curtido: novoCurtido };
+    },
+
+    async alternarRepost(causoId: string): Promise<{ readonly ok: boolean; readonly reposts: number; readonly repostado: boolean }> {
+      const causo = causosMemoria.find((c) => c.id === causoId);
+      if (!causo) {
+        return { ok: false, reposts: 0, repostado: false };
+      }
+
+      const novoRepost = !causo.repostadoPorMim;
+      const novosReposts = novoRepost ? (causo.reposts || 0) + 1 : Math.max(0, (causo.reposts || 0) - 1);
+
+      const idx = causosMemoria.indexOf(causo);
+      causosMemoria[idx] = {
+        ...causo,
+        reposts: novosReposts,
+        repostadoPorMim: novoRepost,
+      };
+      salvarCausosLocais(causosMemoria);
+
+      return { ok: true, reposts: novosReposts, repostado: novoRepost };
+    },
+
+    async listarRespostas(causoId: string): Promise<readonly RespostaDeCauso[]> {
+      const causo = causosMemoria.find((c) => c.id === causoId);
+      return causo?.comentarios ?? [];
+    },
+
+    async adicionarResposta(
+      causoId: string,
+      conteudo: string,
+      autorNome: string,
+      autorHandle?: string,
+    ): Promise<RespostaDeCauso | null> {
+      if (!conteudo || !conteudo.trim()) return null;
+      const causo = causosMemoria.find((c) => c.id === causoId);
+      if (!causo) return null;
+
+      const novaResposta: RespostaDeCauso = {
+        id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        causoId,
+        autorNome: autorNome || 'Você',
+        autorHandle: autorHandle || (autorNome || 'voce').toLowerCase().replace(/\s+/g, '_'),
+        conteudo: conteudo.trim(),
+        criadoEm: new Date().toISOString(),
+      };
+
+      const lista = [...(causo.comentarios ?? []), novaResposta];
+      const idx = causosMemoria.indexOf(causo);
+      causosMemoria[idx] = {
+        ...causo,
+        totalComentarios: lista.length,
+        comentarios: lista,
+      };
+      salvarCausosLocais(causosMemoria);
+
+      return novaResposta;
+    },
+
+    async entrarComunidade(slug: string): Promise<boolean> {
+      minhasComunidadesMemoria.add(slug);
+      salvarMinhasComunidadesLocais(Array.from(minhasComunidadesMemoria));
+      return true;
+    },
+
+    async sairComunidade(slug: string): Promise<boolean> {
+      minhasComunidadesMemoria.delete(slug);
+      salvarMinhasComunidadesLocais(Array.from(minhasComunidadesMemoria));
+      return true;
+    },
+
+    async listarMinhasComunidades(): Promise<readonly string[]> {
+      return Array.from(minhasComunidadesMemoria);
     },
 
     async denunciarCauso(causoId: string, motivo: string): Promise<boolean> {

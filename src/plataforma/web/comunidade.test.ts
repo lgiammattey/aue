@@ -82,6 +82,8 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
       conteudo: 'Teste de reacao',
       reacoes: { fogo: 2, nojo: 0, trofeu: 1 },
       minhaReacao: null,
+      curtidas: 5,
+      reposts: 2,
       totalComentarios: 0,
       criadoEm: new Date().toISOString(),
     };
@@ -112,5 +114,62 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
 
     const feedDepois = await adapter.listarFeed();
     expect(feedDepois.some((c) => c.id === idParaOcultar)).toBe(false);
+  });
+
+  it('alterna curtidas estilo twitter (incrementa e decrementa)', async () => {
+    const causoTeste: CausoPostado = {
+      id: 'causo-curtida',
+      comunidadeId: 'comu-1',
+      comunidadeSlug: 'bonde-geral',
+      autorNome: 'Tiago',
+      conteudo: 'Bora arrotar',
+      reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
+      minhaReacao: null,
+      curtidas: 10,
+      curtidoPorMim: false,
+      reposts: 0,
+      totalComentarios: 0,
+      criadoEm: new Date().toISOString(),
+    };
+
+    const adapter = criarComunidadeWeb({
+      causosIniciais: [causoTeste],
+      forcarOffline: true,
+    });
+
+    const c1 = await adapter.alternarCurtida('causo-curtida');
+    expect(c1.ok).toBe(true);
+    expect(c1.curtidas).toBe(11);
+    expect(c1.curtido).toBe(true);
+
+    const c2 = await adapter.alternarCurtida('causo-curtida');
+    expect(c2.ok).toBe(true);
+    expect(c2.curtidas).toBe(10);
+    expect(c2.curtido).toBe(false);
+  });
+
+  it('permite adicionar e listar respostas reais a um causo', async () => {
+    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    const feed = await adapter.listarFeed();
+    const causoId = feed[0].id;
+
+    const resp = await adapter.adicionarResposta(causoId, 'Isso foi absurdo!', 'Luiz', 'luiz_prod');
+    expect(resp).not.toBeNull();
+    expect(resp?.conteudo).toBe('Isso foi absurdo!');
+    expect(resp?.autorHandle).toBe('luiz_prod');
+
+    const respostas = await adapter.listarRespostas(causoId);
+    expect(respostas.some((r) => r.conteudo === 'Isso foi absurdo!')).toBe(true);
+  });
+
+  it('permite entrar e sair de comunidades com persistência', async () => {
+    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    await adapter.entrarComunidade('churrasco-raiz');
+    let minhas = await adapter.listarMinhasComunidades();
+    expect(minhas.includes('churrasco-raiz')).toBe(true);
+
+    await adapter.sairComunidade('churrasco-raiz');
+    minhas = await adapter.listarMinhasComunidades();
+    expect(minhas.includes('churrasco-raiz')).toBe(false);
   });
 });

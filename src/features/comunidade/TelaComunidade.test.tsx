@@ -7,6 +7,7 @@ import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 describe('TelaComunidade (Auê 3.0)', () => {
   afterEach(() => {
     cleanup();
+    localStorage.clear();
   });
   it('renderiza header, chips de comunidades e feed inicial', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
@@ -20,7 +21,7 @@ describe('TelaComunidade (Auê 3.0)', () => {
     expect(screen.getByRole('button', { name: /Na reunião da firma/i })).toBeDefined();
 
     // Aguarda causos no feed
-    expect(await screen.findByText(/Betão da TI/)).toBeDefined();
+    expect((await screen.findAllByText(/Betão da TI/)).length).toBeGreaterThanOrEqual(1);
   });
 
   it('permite alternar reações no causo pelo feed', async () => {
@@ -99,7 +100,7 @@ describe('TelaComunidade (Auê 3.0)', () => {
     // Toca na aba Perfil
     const btnAbaPerfil = screen.getByRole('button', { name: /Perfil/i });
     fireEvent.click(btnAbaPerfil);
-    expect(screen.getByText('@voce_arrota')).toBeDefined();
+    expect(screen.getAllByText('@voce_arrota').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('7V · 3D')).toBeDefined();
   });
 

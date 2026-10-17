@@ -16,11 +16,21 @@ export interface Comunidade {
   readonly totalMembros?: number;
 }
 
+export interface RespostaDeCauso {
+  readonly id: string;
+  readonly causoId: string;
+  readonly autorNome: string;
+  readonly autorHandle: string;
+  readonly conteudo: string;
+  readonly criadoEm: string;
+}
+
 export interface CausoPostado {
   readonly id: string;
   readonly comunidadeId: string;
   readonly comunidadeSlug: string;
   readonly autorNome: string;
+  readonly autorHandle?: string;
   readonly conteudo: string;
   /** Vínculo opcional com a nota do juiz de IA */
   readonly resultadoId?: string;
@@ -30,16 +40,27 @@ export interface CausoPostado {
   readonly origem?: string;
   readonly reacoes: Readonly<Record<TipoDeReacao, number>>;
   readonly minhaReacao?: TipoDeReacao | null;
+  readonly curtidas: number;
+  readonly curtidoPorMim?: boolean;
+  readonly reposts: number;
+  readonly repostadoPorMim?: boolean;
   readonly totalComentarios: number;
+  readonly comentarios?: readonly RespostaDeCauso[];
   readonly criadoEm: string;
+  readonly meu?: boolean;
 }
 
 export interface PedidoDePostagemDeCauso {
   readonly comunidadeSlug: string;
   readonly conteudo: string;
   readonly autorNome: string;
+  readonly autorHandle?: string;
   /** Identificador do resultado da Arena (se houver arroto atrelado) */
   readonly resultadoId?: string;
+  readonly nota?: number;
+  readonly audioUrl?: string;
+  readonly duracaoSegundos?: number;
+  readonly origem?: string;
   /**
    * TRAVA LGPD: Para postar um arroto na comunidade pública, o jogador precisa
    * autorizar expressamente. Sem isso, a porta rejeita na hora.
@@ -74,6 +95,27 @@ export interface PortaDeComunidade {
     causoId: string,
     reacao: TipoDeReacao,
   ): Promise<{ readonly ok: boolean; readonly reacoes: Readonly<Record<TipoDeReacao, number>> }>;
+
+  /** Alterna curtida principal (estilo coração do Twitter) */
+  alternarCurtida(causoId: string): Promise<{ readonly ok: boolean; readonly curtidas: number; readonly curtido: boolean }>;
+
+  /** Alterna repostagem de um causo no feed */
+  alternarRepost(causoId: string): Promise<{ readonly ok: boolean; readonly reposts: number; readonly repostado: boolean }>;
+
+  /** Lista respostas de um causo (threads) */
+  listarRespostas(causoId: string): Promise<readonly RespostaDeCauso[]>;
+
+  /** Adiciona uma resposta a um causo */
+  adicionarResposta(causoId: string, conteudo: string, autorNome: string, autorHandle?: string): Promise<RespostaDeCauso | null>;
+
+  /** Entra em uma comunidade */
+  entrarComunidade(slug: string): Promise<boolean>;
+
+  /** Sai de uma comunidade */
+  sairComunidade(slug: string): Promise<boolean>;
+
+  /** Lista slugs de comunidades que o jogador participa */
+  listarMinhasComunidades(): Promise<readonly string[]>;
 
   /** Denuncia um post e oculta o áudio/conteúdo */
   denunciarCauso(causoId: string, motivo: string): Promise<boolean>;

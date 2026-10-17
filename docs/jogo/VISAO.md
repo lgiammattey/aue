@@ -4,35 +4,22 @@ O desenho completo de produto está em [`AUÊ!-2.md`](AUÊ!-2.md). Esta visão �
 versão curta e normativa do que cabe no jogo; detalhes adicionais do GDD devem
 respeitar a precedência definida em `AGENTS.md`.
 
-## O que é
+## O que é o Auê 3.0
 
-**Auê é um jogo mobile casual, web-first.**
+**Auê é a união do jogo casual de arroto em 1 toque com a comunidade de causos.**
 
-> **Arrote. Receba a nota. Humilhe seus amigos.**
+> **Arrote. Receba a nota. Compartilhe o causo. Humilhe seus amigos.**
 
-Abre no navegador do celular, arrota, ganha um número na cara e manda pro grupo.
-Não tem cadastro, não tem tutorial, não tem tela de boas-vindas. A primeira coisa
-que a pessoa vê já é o botão de arrotar.
+O Auê 3.0 junta três forças:
+1. **O Jogo (A Arena):** abre no celular, arrota em 1 toque, ganha a nota de 0 a 100 do juiz de IA e desafia no X1 pelo WhatsApp. Sem burocracia e sem enrolação.
+2. **As Comunidades (Estilo Reddit / Orkut):** espaços temáticos com a essência da lendária *"Eu arroto, e daí?"*, onde as pessoas se reúnem em torno de vergonhas e histórias reais (*"Na reunião da firma"*, *"Primeiro encontro"*, *"Arroto trovão"*).
+3. **O Feed de Causos (Estilo Twitter / X):** timeline dinâmica e moderna onde o arroto ganha contexto com histórias curtas, áudios reproduzíveis direto no card e o botão "Duvido" para puxar duelo.
 
-## O que não é
-
-Nada disso faz parte do produto — nem agora, nem como épico futuro:
-
-- feed;
-- seguidores;
-- comunidades;
-- campeonatos e ligas;
-- temporadas;
-- assinatura ou monetização;
-- XP e níveis;
-- conquistas;
-- ranking global;
-- perfil social;
-- notificações.
-
-Existe código de algumas dessas coisas no repositório, herdado da fase anterior.
-Ele está desligado por flag e está na fila para sair — ver
-[`../escopo/BACKLOG.md`](../escopo/BACKLOG.md). Código legado não é roadmap.
+## O que NÃO é o Auê 3.0
+- Não é rede social corporativa com algoritmo viciante ou feed infinito de enrolação.
+- Não é app de dancinha ou fotos posadas: o conteúdo é o arroto, a nota e o causo bem contado.
+- Não publica áudio de ninguém sem autorização explícita na hora do envio.
+- Não tem assinatura, marketplace nem paywall para jogar ou rir dos causos.
 
 ## Web-first, nativo depois
 

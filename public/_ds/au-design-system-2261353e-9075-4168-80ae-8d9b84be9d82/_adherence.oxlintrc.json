@@ -1,0 +1,379 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/bolha/**",
+              "components/botao/**",
+              "components/cronometro/**",
+              "components/gatilho/**",
+              "components/hud/**",
+              "components/metrica/**",
+              "components/nota/**",
+              "components/origem/**",
+              "components/overlay/**",
+              "components/pilulas/**",
+              "components/placar/**",
+              "components/podio/**",
+              "ui_kits/arena/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Anton|Archivo|JetBrains Mono))/i]",
+        "message": "Font not provided by the design system. Available: Anton, Archivo, JetBrains Mono."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BlocoVersus'] > JSXAttribute > JSXIdentifier[name!=/^(?:esquerda|direita|empate|key|ref|className|style|children)$/]",
+        "message": "<BlocoVersus> doesn't accept that prop. Declared props: esquerda, direita, empate."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BolhaAue'] > JSXAttribute > JSXIdentifier[name!=/^(?:modo|nivel|size|reducedMotion|key|ref|className|style|children)$/]",
+        "message": "<BolhaAue> doesn't accept that prop. Declared props: modo, nivel, size, reducedMotion."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='BolhaAue'] > JSXAttribute[name.name='modo'] > Literal[value!=/^(?:idle|asking|recording|holding|checking|judging|cradle|waiting|playing|flat|dead|victory|defeat)$/]",
+        "message": "<BolhaAue> modo must be one of 'idle' | 'asking' | 'recording' | 'holding' | 'checking' | 'judging' | 'cradle' | 'waiting' | 'playing' | 'flat' | 'dead' | 'victory' | 'defeat'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Botao'] > JSXAttribute > JSXIdentifier[name!=/^(?:variante|tamanho|disabled|onClick|type|children|key|ref|className|style|children)$/]",
+        "message": "<Botao> doesn't accept that prop. Declared props: variante, tamanho, disabled, onClick, type, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Botao'] > JSXAttribute[name.name='variante'] > Literal[value!=/^(?:primario|contorno|fantasma)$/]",
+        "message": "<Botao> variante must be one of 'primario' | 'contorno' | 'fantasma'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Botao'] > JSXAttribute[name.name='tamanho'] > Literal[value!=/^(?:grande|compacto)$/]",
+        "message": "<Botao> tamanho must be one of 'grande' | 'compacto'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Botao'] > JSXAttribute[name.name='type'] > Literal[value!=/^(?:button|submit)$/]",
+        "message": "<Botao> type must be one of 'button' | 'submit'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Cronometro'] > JSXAttribute > JSXIdentifier[name!=/^(?:segundos|maximo|key|ref|className|style|children)$/]",
+        "message": "<Cronometro> doesn't accept that prop. Declared props: segundos, maximo."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='EscolhaDeOrigem'] > JSXAttribute > JSXIdentifier[name!=/^(?:onEscolher|escolhida|key|ref|className|style|children)$/]",
+        "message": "<EscolhaDeOrigem> doesn't accept that prop. Declared props: onEscolher, escolhida."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='GatilhoDeMicrofone'] > JSXAttribute > JSXIdentifier[name!=/^(?:jaGravou|permissao|onClick|size|key|ref|className|style|children)$/]",
+        "message": "<GatilhoDeMicrofone> doesn't accept that prop. Declared props: jaGravou, permissao, onClick, size."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='GatilhoDeMicrofone'] > JSXAttribute[name.name='permissao'] > Literal[value!=/^(?:concedida|pedindo|negada)$/]",
+        "message": "<GatilhoDeMicrofone> permissao must be one of 'concedida' | 'pedindo' | 'negada'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Hud'] > JSXAttribute > JSXIdentifier[name!=/^(?:x1Aberto|onMenu|oculto|key|ref|className|style|children)$/]",
+        "message": "<Hud> doesn't accept that prop. Declared props: x1Aberto, onMenu, oculto."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='LinhaDoPlacar'] > JSXAttribute > JSXIdentifier[name!=/^(?:nome|nota|lider|tocando|semAudio|onPlay|key|ref|className|style|children)$/]",
+        "message": "<LinhaDoPlacar> doesn't accept that prop. Declared props: nome, nota, lider, tocando, semAudio, onPlay."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Metrica'] > JSXAttribute > JSXIdentifier[name!=/^(?:rotulo|valor|percentual|key|ref|className|style|children)$/]",
+        "message": "<Metrica> doesn't accept that prop. Declared props: rotulo, valor, percentual."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='NotaNaBolha'] > JSXAttribute > JSXIdentifier[name!=/^(?:impacto|valor|rotulo|tamanho|key|ref|className|style|children)$/]",
+        "message": "<NotaNaBolha> doesn't accept that prop. Declared props: impacto, valor, rotulo, tamanho."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='NotaNaBolha'] > JSXAttribute[name.name='tamanho'] > Literal[value!=/^(?:revelacao|resultado|x1)$/]",
+        "message": "<NotaNaBolha> tamanho must be one of 'revelacao' | 'resultado' | 'x1'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Overlay'] > JSXAttribute > JSXIdentifier[name!=/^(?:titulo|onFechar|children|key|ref|className|style|children)$/]",
+        "message": "<Overlay> doesn't accept that prop. Declared props: titulo, onFechar, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='PilulaDeLink'] > JSXAttribute > JSXIdentifier[name!=/^(?:link|onCopiar|key|ref|className|style|children)$/]",
+        "message": "<PilulaDeLink> doesn't accept that prop. Declared props: link, onCopiar."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Player'] > JSXAttribute > JSXIdentifier[name!=/^(?:rotulo|duracao|progresso|tocando|onTogglePlay|key|ref|className|style|children)$/]",
+        "message": "<Player> doesn't accept that prop. Declared props: rotulo, duracao, progresso, tocando, onTogglePlay."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Colocacao'] > JSXAttribute > JSXIdentifier[name!=/^(?:nome|nota|posicao|key|ref|className|style|children)$/]",
+        "message": "<Colocacao> doesn't accept that prop. Declared props: nome, nota, posicao."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "BlocoVersus": {
+        "replaces": []
+      },
+      "BolhaAue": {
+        "replaces": []
+      },
+      "Botao": {
+        "replaces": []
+      },
+      "Cronometro": {
+        "replaces": []
+      },
+      "EscolhaDeOrigem": {
+        "replaces": []
+      },
+      "GatilhoDeMicrofone": {
+        "replaces": []
+      },
+      "Hud": {
+        "replaces": []
+      },
+      "LinhaDoPlacar": {
+        "replaces": []
+      },
+      "Metrica": {
+        "replaces": []
+      },
+      "NotaNaBolha": {
+        "replaces": []
+      },
+      "Overlay": {
+        "replaces": []
+      },
+      "PilulaDeLink": {
+        "replaces": []
+      },
+      "Player": {
+        "replaces": []
+      },
+      "Colocacao": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--accent",
+      "--accent-on",
+      "--accent-soft",
+      "--accent-strong",
+      "--bg",
+      "--border",
+      "--bronze",
+      "--danger",
+      "--danger-strong",
+      "--duration-base",
+      "--duration-fast",
+      "--duration-impact",
+      "--duration-instant",
+      "--duration-reveal",
+      "--duration-slow",
+      "--easing-decelerate",
+      "--easing-emphasize",
+      "--easing-impact",
+      "--easing-standard",
+      "--fg",
+      "--fg-soft",
+      "--font-body",
+      "--font-display",
+      "--font-mono",
+      "--glow-blur-max",
+      "--glow-color-padrao",
+      "--glow-color-recorde",
+      "--glow-duration-excepcional",
+      "--glow-duration-fall",
+      "--glow-duration-pico",
+      "--glow-duration-recorde",
+      "--glow-duration-rise",
+      "--glow-intensity-erro",
+      "--glow-intensity-excepcional",
+      "--glow-intensity-gravando-min",
+      "--glow-intensity-pico",
+      "--glow-intensity-preparacao",
+      "--glow-intensity-recorde",
+      "--glow-intensity-repouso",
+      "--glow-intensity-resultado-max",
+      "--glow-intensity-resultado-min",
+      "--glow-opacity-max",
+      "--glow-scale-max",
+      "--gold",
+      "--gold-strong",
+      "--haptic-error",
+      "--haptic-heavy",
+      "--haptic-light",
+      "--haptic-medium",
+      "--hit-target-min",
+      "--muted",
+      "--overlay-scrim",
+      "--page-bg",
+      "--radius-full",
+      "--radius-lg",
+      "--radius-md",
+      "--radius-shell",
+      "--radius-sm",
+      "--safe-bottom",
+      "--safe-left",
+      "--safe-right",
+      "--safe-top",
+      "--shadow-modal",
+      "--shadow-sheet",
+      "--shadow-shell",
+      "--silver",
+      "--sound-error",
+      "--sound-reveal",
+      "--sound-tap",
+      "--sound-victory",
+      "--space-1",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-7",
+      "--space-8",
+      "--surface",
+      "--surface-2",
+      "--text-body-lg",
+      "--text-body-md",
+      "--text-body-sm",
+      "--text-body-xs",
+      "--text-caption",
+      "--text-display-2xl",
+      "--text-display-lg",
+      "--text-display-md",
+      "--text-display-sm",
+      "--text-display-xl"
+    ],
+    "tokenKinds": {
+      "--bg": "color",
+      "--surface": "color",
+      "--surface-2": "color",
+      "--fg": "color",
+      "--muted": "color",
+      "--border": "color",
+      "--accent": "color",
+      "--accent-strong": "color",
+      "--accent-on": "color",
+      "--gold": "color",
+      "--gold-strong": "color",
+      "--danger": "color",
+      "--danger-strong": "color",
+      "--silver": "color",
+      "--bronze": "color",
+      "--accent-soft": "color",
+      "--fg-soft": "color",
+      "--page-bg": "color",
+      "--overlay-scrim": "color",
+      "--font-display": "font",
+      "--font-body": "font",
+      "--font-mono": "font",
+      "--text-display-2xl": "font",
+      "--text-display-xl": "font",
+      "--text-display-lg": "font",
+      "--text-display-md": "font",
+      "--text-display-sm": "font",
+      "--text-body-lg": "font",
+      "--text-body-md": "font",
+      "--text-body-sm": "font",
+      "--text-body-xs": "font",
+      "--text-caption": "font",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-7": "spacing",
+      "--space-8": "spacing",
+      "--radius-sm": "radius",
+      "--radius-md": "radius",
+      "--radius-lg": "radius",
+      "--radius-shell": "radius",
+      "--radius-full": "radius",
+      "--safe-top": "color",
+      "--safe-right": "color",
+      "--safe-bottom": "color",
+      "--safe-left": "color",
+      "--hit-target-min": "spacing",
+      "--duration-instant": "other",
+      "--duration-fast": "other",
+      "--duration-base": "other",
+      "--duration-slow": "other",
+      "--duration-reveal": "other",
+      "--easing-standard": "other",
+      "--easing-decelerate": "other",
+      "--easing-emphasize": "other",
+      "--duration-impact": "other",
+      "--easing-impact": "other",
+      "--shadow-sheet": "shadow",
+      "--shadow-modal": "shadow",
+      "--shadow-shell": "shadow",
+      "--glow-color-padrao": "color",
+      "--glow-color-recorde": "color",
+      "--glow-blur-max": "other",
+      "--glow-opacity-max": "other",
+      "--glow-scale-max": "other",
+      "--glow-intensity-repouso": "other",
+      "--glow-intensity-preparacao": "other",
+      "--glow-intensity-gravando-min": "other",
+      "--glow-intensity-pico": "other",
+      "--glow-intensity-resultado-min": "other",
+      "--glow-intensity-resultado-max": "other",
+      "--glow-intensity-recorde": "other",
+      "--glow-intensity-excepcional": "other",
+      "--glow-intensity-erro": "other",
+      "--glow-duration-rise": "color",
+      "--glow-duration-fall": "color",
+      "--glow-duration-pico": "other",
+      "--glow-duration-recorde": "color",
+      "--glow-duration-excepcional": "other",
+      "--haptic-light": "other",
+      "--haptic-medium": "other",
+      "--haptic-heavy": "other",
+      "--haptic-error": "other",
+      "--sound-tap": "other",
+      "--sound-reveal": "other",
+      "--sound-victory": "other",
+      "--sound-error": "other"
+    },
+    "fontFamilies": [
+      "Anton",
+      "Archivo",
+      "JetBrains Mono"
+    ]
+  }
+}

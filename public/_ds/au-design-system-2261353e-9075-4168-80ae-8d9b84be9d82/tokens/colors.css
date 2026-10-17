@@ -1,0 +1,32 @@
+:root{
+  /* Base — DESIGN.md §2.1 */
+  --bg:#0a0a08;
+  --surface:#171712;
+  --surface-2:#1f1f18;
+  --fg:#f5f3ea;
+  --muted:#93917f;
+  --border:#2b2a22;
+
+  /* Accent — verde ácido elétrico. Orçamento: máx. 2 aparições simultâneas
+     por estado (Bolha viva > Auê Score > CTA primário). Nunca no wordmark,
+     métrica, pílula de link ou player. */
+  --accent:#c6ff00;
+  --accent-strong:#a8d900;
+  --accent-on:#0a0a08;
+
+  /* Semânticos */
+  --gold:#f4c430;
+  --gold-strong:#d9ac1c;
+  --danger:#ff3d3f;
+  --danger-strong:#e11a1c;
+  --silver:#c7cad1;
+  --bronze:#c98a4b;
+
+  /* Derivados — sempre color-mix sobre os tokens acima. Nunca hex novo. */
+  --accent-soft:color-mix(in oklch, var(--accent) 14%, transparent);
+  --fg-soft:color-mix(in oklch, var(--fg) 6%, transparent);
+  --page-bg:color-mix(in oklch, var(--bg) 60%, black);
+  --overlay-scrim:color-mix(in oklch, var(--bg) 94%, transparent);
+
+  color-scheme:dark;
+}

@@ -41,6 +41,7 @@ export function MenuDoJogo({ onFechar }: Props) {
           link da política para outra pessoa.
         */}
         <nav className="menu-links">
+          <a href="/comunidade">COMUNIDADE & MURAL</a>
           <a href="/privacidade">{PRIVACIDADE}</a>
           <a href="/termos">{TERMOS}</a>
         </nav>

@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Auê 3.0 — Protótipo de Comunidades e Feed de Causos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a08;
+        --surface: #171712;
+        --surface-2: #1f1f18;
+        --surface-hover: #26261e;
+        --fg: #f5f3ea;
+        --muted: #93917f;
+        --border: #2b2a22;
+        --border-focus: #4a483b;
+        --accent: #c6ff00;
+        --accent-hover: #b0e600;
+        --gold: #f4c430;
+        --danger: #ff3d3f;
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-pill: 9999px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--fg);
+        font-family: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.4;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Container mobile simulado ou viewport real */
+      .app-shell {
+        width: 100%;
+        max-width: 480px;
+        min-height: 100vh;
+        background-color: var(--bg);
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        padding-bottom: 90px;
+      }
+
+      /* Header Superior */
+      .top-header {
+        position: sticky;
+        top: 0;
+        background: rgba(10, 10, 8, 0.88);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+        z-index: 40;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .wordmark {
+        font-family: 'Anton', sans-serif;
+        font-size: 26px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--accent);
+        display: flex;
+        align-items: baseline;
+      }
+
+      .wordmark i {
+        font-style: normal;
+        color: var(--fg);
+        font-size: 16px;
+        margin-left: 4px;
+        background: var(--surface-2);
+        padding: 2px 6px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+      }
+
+      .btn-arrotar-top {
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        padding: 8px 14px;
+        border-radius: var(--radius-pill);
+        font-weight: 800;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: transform 0.1s, background 0.1s;
+      }
+
+      .btn-arrotar-top:active {
+        transform: scale(0.96);
+      }
+
+      /* Barra de Comunidades (Chips horizontais estilo Orkut/Reddit) */
+      .communities-bar {
+        padding: 12px 16px;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .communities-bar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .community-chip {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--fg);
+        padding: 8px 14px;
+        border-radius: var(--radius-pill);
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .community-chip.active {
+        background: var(--fg);
+        color: var(--bg);
+        border-color: var(--fg);
+        font-weight: 700;
+      }
+
+      .community-chip:hover:not(.active) {
+        background: var(--surface-2);
+      }
+
+      /* Feed de Causos */
+      .feed-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Card de Causo (Estilo Twitter + Nota de Jogo) */
+      .causo-card {
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: var(--bg);
+        transition: background 0.15s ease;
+      }
+
+      .causo-card:hover {
+        background: rgba(23, 23, 18, 0.4);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .user-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: var(--radius-pill);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+      }
+
+      .author-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .author-name {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--fg);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .tag-comu {
+        font-size: 11px;
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .post-time {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      /* O Causo em Texto */
+      .causo-texto {
+        font-size: 15px;
+        color: var(--fg);
+        line-height: 1.45;
+        font-weight: 400;
+      }
+
+      /* O Player de Áudio com a Nota do Juiz */
+      .audio-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .score-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--surface-2);
+        padding: 4px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        min-width: 60px;
+      }
+
+      .score-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+
+      .score-value {
+        font-family: 'Anton', sans-serif;
+        font-size: 24px;
+        line-height: 1;
+        color: var(--accent);
+      }
+
+      .waveform-player {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn-play {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-pill);
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: transform 0.1s;
+      }
+
+      .btn-play:active {
+        transform: scale(0.92);
+      }
+
+      .waveform {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        height: 24px;
+      }
+
+      .bar {
+        flex: 1;
+        background: var(--border-focus);
+        border-radius: 2px;
+        min-height: 4px;
+        transition: height 0.15s ease, background 0.15s ease;
+      }
+
+      .bar.active {
+        background: var(--accent);
+      }
+
+      .duration {
+        font-size: 11px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+      }
+
+      /* Rodapé do Card (Reações, Comentários e Botão DUVIDO) */
+      .card-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 4px;
+      }
+
+      .reactions-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-reaction {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+        padding: 5px 8px;
+        border-radius: var(--radius-pill);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.1s;
+      }
+
+      .btn-reaction:hover {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--fg);
+      }
+
+      .btn-reaction.active {
+        background: var(--surface-2);
+        border-color: var(--accent);
+        color: var(--fg);
+      }
+
+      .btn-duvido {
+        background: var(--surface-2);
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        padding: 6px 12px;
+        border-radius: var(--radius-pill);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.12s;
+      }
+
+      .btn-duvido:active {
+        background: var(--accent);
+        color: var(--bg);
+      }
+
+      /* Botão Flutuante Inferior para Arrotar (Arena) */
+      .fab-arrotar {
+        position: fixed;
+        bottom: 24px;
+        right: calc(50% - 240px + 20px);
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        padding: 14px 22px;
+        border-radius: var(--radius-pill);
+        font-family: 'Anton', sans-serif;
+        font-size: 18px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 8px 24px rgba(198, 255, 0, 0.35);
+        cursor: pointer;
+        z-index: 50;
+        transition: transform 0.1s;
+      }
+
+      @media (max-width: 500px) {
+        .fab-arrotar {
+          right: 20px;
+        }
+      }
+
+      .fab-arrotar:active {
+        transform: scale(0.95);
+      }
+
+      /* Modal de Novo Causo */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        display: none;
+        place-items: center;
+        padding: 16px;
+      }
+
+      .modal-overlay.open {
+        display: grid;
+      }
+
+      .modal-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 440px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .modal-title {
+        font-family: 'Anton', sans-serif;
+        font-size: 22px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--fg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .btn-close {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .input-causo {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 12px;
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 14px;
+        resize: none;
+        min-height: 90px;
+      }
+
+      .input-causo:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .select-comu {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 10px 12px;
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      .lgpd-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .lgpd-check input {
+        margin-top: 2px;
+        accent-color: var(--accent);
+      }
+
+      .btn-publicar {
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        padding: 12px;
+        border-radius: var(--radius-pill);
+        font-family: 'Anton', sans-serif;
+        font-size: 16px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- Topo -->
+      <header class="top-header">
+        <div class="logo-group">
+          <div class="wordmark">Auê<i>3.0</i></div>
+        </div>
+        <button class="btn-arrotar-top" id="btn-novo-causo">
+          <span>✍️</span> Escrever Causo
+        </button>
+      </header>
+
+      <!-- Barra de Comunidades -->
+      <nav class="communities-bar" id="comus-list">
+        <button class="community-chip active" data-slug="todos">
+          🔥 Todos os Causos
+        </button>
+        <button class="community-chip" data-slug="eu-arroto-e-dai">
+          🦍 Eu arroto, e daí?
+        </button>
+        <button class="community-chip" data-slug="reuniao-da-firma">
+          💼 Na reunião da firma
+        </button>
+        <button class="community-chip" data-slug="primeiro-encontro">
+          💔 Primeiro encontro
+        </button>
+        <button class="community-chip" data-slug="trovao-da-madrugada">
+          ⚡ Arroto trovão
+        </button>
+        <button class="community-chip" data-slug="cerveja-e-churrasco">
+          🍺 Cerveja & Churrasco
+        </button>
+      </nav>
+
+      <!-- Feed de Causos -->
+      <main class="feed-container" id="feed-list">
+        <!-- Card 1 -->
+        <article class="causo-card" data-comu="reuniao-da-firma">
+          <div class="card-header">
+            <div class="user-meta">
+              <div class="avatar">🦍</div>
+              <div class="author-info">
+                <span class="author-name">Giam do Refluxo</span>
+                <span class="tag-comu">💼 Na reunião da firma</span>
+              </div>
+            </div>
+            <span class="post-time">há 12 min</span>
+          </div>
+
+          <p class="causo-texto">
+            Soltei esse monstro bem na hora em que o diretor perguntou quem tinha ficado responsável pelo prazo de entrega. Bateu 91 pontos no juiz e ainda culpei o ar condicionado do andar.
+          </p>
+
+          <div class="audio-box">
+            <div class="score-badge">
+              <span class="score-label">Nota IA</span>
+              <span class="score-value">91.4</span>
+            </div>
+            <div class="waveform-player">
+              <button class="btn-play" onclick="tocarSimulacao(this)">▶</button>
+              <div class="waveform">
+                <div class="bar" style="height: 12px"></div>
+                <div class="bar" style="height: 18px"></div>
+                <div class="bar" style="height: 24px"></div>
+                <div class="bar" style="height: 20px"></div>
+                <div class="bar" style="height: 14px"></div>
+                <div class="bar" style="height: 8px"></div>
+              </div>
+              <span class="duration">2.4s</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="reactions-group">
+              <button class="btn-reaction" onclick="reagir(this)">🔥 142</button>
+              <button class="btn-reaction" onclick="reagir(this)">🤢 38</button>
+              <button class="btn-reaction">💬 19</button>
+            </div>
+            <button class="btn-duvido" onclick="abrirDuelo('91.4', 'Giam do Refluxo')">
+              ⚔️ DUVIDO BATER
+            </button>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="causo-card" data-comu="eu-arroto-e-dai">
+          <div class="card-header">
+            <div class="user-meta">
+              <div class="avatar">⚡</div>
+              <div class="author-info">
+                <span class="author-name">Camillo Marreta</span>
+                <span class="tag-comu">🦍 Eu arroto, e daí?</span>
+              </div>
+            </div>
+            <span class="post-time">há 45 min</span>
+          </div>
+
+          <p class="causo-texto">
+            A clássica técnica de puxar ar pelo esôfago antes de abrir a latinha de refrigerante. Minha dignidade já acabou na faculdade, mas o recorde de gravidade ninguém tira.
+          </p>
+
+          <div class="audio-box">
+            <div class="score-badge">
+              <span class="score-label">Nota IA</span>
+              <span class="score-value">96.8</span>
+            </div>
+            <div class="waveform-player">
+              <button class="btn-play" onclick="tocarSimulacao(this)">▶</button>
+              <div class="waveform">
+                <div class="bar" style="height: 16px"></div>
+                <div class="bar" style="height: 22px"></div>
+                <div class="bar" style="height: 24px"></div>
+                <div class="bar" style="height: 24px"></div>
+                <div class="bar" style="height: 18px"></div>
+                <div class="bar" style="height: 10px"></div>
+              </div>
+              <span class="duration">3.1s</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="reactions-group">
+              <button class="btn-reaction active" onclick="reagir(this)">🏆 289</button>
+              <button class="btn-reaction" onclick="reagir(this)">🔥 87</button>
+              <button class="btn-reaction">💬 44</button>
+            </div>
+            <button class="btn-duvido" onclick="abrirDuelo('96.8', 'Camillo Marreta')">
+              ⚔️ DUVIDO BATER
+            </button>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="causo-card" data-comu="primeiro-encontro">
+          <div class="card-header">
+            <div class="user-meta">
+              <div class="avatar">🍕</div>
+              <div class="author-info">
+                <span class="author-name">Guinho Tático</span>
+                <span class="tag-comu">💔 Primeiro encontro</span>
+              </div>
+            </div>
+            <span class="post-time">há 2h</span>
+          </div>
+
+          <p class="causo-texto">
+            Ela pediu pizza com borda de catupiry e água com gás. Tentei engolir o arroto pra parecer educado, mas o bicho voltou em dobro e ecoou na pizzaria inteira. Pelo menos ela riu.
+          </p>
+
+          <div class="audio-box">
+            <div class="score-badge">
+              <span class="score-label">Nota IA</span>
+              <span class="score-value">84.0</span>
+            </div>
+            <div class="waveform-player">
+              <button class="btn-play" onclick="tocarSimulacao(this)">▶</button>
+              <div class="waveform">
+                <div class="bar" style="height: 10px"></div>
+                <div class="bar" style="height: 14px"></div>
+                <div class="bar" style="height: 18px"></div>
+                <div class="bar" style="height: 12px"></div>
+                <div class="bar" style="height: 8px"></div>
+                <div class="bar" style="height: 6px"></div>
+              </div>
+              <span class="duration">1.8s</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="reactions-group">
+              <button class="btn-reaction" onclick="reagir(this)">🔥 64</button>
+              <button class="btn-reaction" onclick="reagir(this)">💔 52</button>
+              <button class="btn-reaction">💬 12</button>
+            </div>
+            <button class="btn-duvido" onclick="abrirDuelo('84.0', 'Guinho Tático')">
+              ⚔️ DUVIDO BATER
+            </button>
+          </div>
+        </article>
+      </main>
+
+      <!-- Botão Flutuante (Entrada Rápida para a Arena) -->
+      <button class="fab-arrotar" onclick="alert('⚡ Abre a Arena do Auê: 1 toque, o juiz avalia seu arroto de 0 a 100 e gera o duelo!')">
+        <span>⚡</span> Arrotar
+      </button>
+
+      <!-- Modal de Escrever Causo -->
+      <div class="modal-overlay" id="modal-causo">
+        <div class="modal-card">
+          <div class="modal-title">
+            <span>Contar Causo</span>
+            <button class="btn-close" id="btn-close-modal">&times;</button>
+          </div>
+
+          <select class="select-comu" id="select-comu">
+            <option value="eu-arroto-e-dai">🦍 Eu arroto, e daí?</option>
+            <option value="reuniao-da-firma">💼 Na reunião da firma</option>
+            <option value="primeiro-encontro">💔 Primeiro encontro</option>
+            <option value="trovao-da-madrugada">⚡ Arroto trovão</option>
+            <option value="cerveja-e-churrasco">🍺 Cerveja & Churrasco</option>
+          </select>
+
+          <input
+            type="text"
+            id="autor-nome"
+            placeholder="Seu apelido de guerra (ex: Zé do Trovão)"
+            style="width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; color: var(--fg);"
+          />
+
+          <textarea
+            class="input-causo"
+            id="causo-texto"
+            placeholder="Conte a história do arroto... Onde foi? Quem ouviu? Qual foi o estrago?"
+          ></textarea>
+
+          <label class="lgpd-check">
+            <input type="checkbox" id="check-lgpd" checked />
+            <span>Autorizo publicar meu arroto e história publicamente no mural do Auê.</span>
+          </label>
+
+          <button class="btn-publicar" onclick="publicarCauso()">
+            Publicar na Comunidade
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Filtro de Comunidades
+      const chips = document.querySelectorAll('.community-chip');
+      const cards = document.querySelectorAll('.causo-card');
+
+      chips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          chips.forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
+          const slug = chip.dataset.slug;
+
+          cards.forEach((card) => {
+            if (slug === 'todos' || card.dataset.comu === slug) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Modal
+      const modal = document.getElementById('modal-causo');
+      document.getElementById('btn-novo-causo').addEventListener('click', () => {
+        modal.classList.add('open');
+      });
+      document.getElementById('btn-close-modal').addEventListener('click', () => {
+        modal.classList.remove('open');
+      });
+
+      // Publicar Causo
+      function publicarCauso() {
+        const nome = document.getElementById('autor-nome').value.trim() || 'Anônimo Ogro';
+        const texto = document.getElementById('causo-texto').value.trim();
+        const comuSelect = document.getElementById('select-comu');
+        const comuNome = comuSelect.options[comuSelect.selectedIndex].text;
+        const comuSlug = comuSelect.value;
+        const autorizado = document.getElementById('check-lgpd').checked;
+
+        if (!autorizado) {
+          alert('Você precisa autorizar a publicação pública do causo!');
+          return;
+        }
+
+        if (!texto) {
+          alert('Escreva o causo da vergonha antes de publicar!');
+          return;
+        }
+
+        const feed = document.getElementById('feed-list');
+        const novoCard = document.createElement('article');
+        novoCard.className = 'causo-card';
+        novoCard.dataset.comu = comuSlug;
+        novoCard.innerHTML = `
+          <div class="card-header">
+            <div class="user-meta">
+              <div class="avatar">✨</div>
+              <div class="author-info">
+                <span class="author-name">${nome}</span>
+                <span class="tag-comu">${comuNome}</span>
+              </div>
+            </div>
+            <span class="post-time">agora mesmo</span>
+          </div>
+          <p class="causo-texto">${texto}</p>
+          <div class="audio-box">
+            <div class="score-badge">
+              <span class="score-label">Nota IA</span>
+              <span class="score-value">89.0</span>
+            </div>
+            <div class="waveform-player">
+              <button class="btn-play" onclick="tocarSimulacao(this)">▶</button>
+              <div class="waveform">
+                <div class="bar" style="height: 12px"></div>
+                <div class="bar" style="height: 20px"></div>
+                <div class="bar" style="height: 22px"></div>
+                <div class="bar" style="height: 16px"></div>
+                <div class="bar" style="height: 10px"></div>
+              </div>
+              <span class="duration">2.0s</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <div class="reactions-group">
+              <button class="btn-reaction" onclick="reagir(this)">🔥 1</button>
+              <button class="btn-reaction" onclick="reagir(this)">🤢 0</button>
+              <button class="btn-reaction">💬 0</button>
+            </div>
+            <button class="btn-duvido" onclick="abrirDuelo('89.0', '${nome}')">
+              ⚔️ DUVIDO BATER
+            </button>
+          </div>
+        `;
+
+        feed.insertBefore(novoCard, feed.firstChild);
+        modal.classList.remove('open');
+        document.getElementById('causo-texto').value = '';
+      }
+
+      // Reações
+      function reagir(btn) {
+        btn.classList.toggle('active');
+      }
+
+      // Desafio X1
+      function abrirDuelo(nota, nome) {
+        alert(`⚔️ DUELO X1!\nVocê aceitou o desafio de bater a nota ${nota} de ${nome}.\nAbre a Arena do Auê para arrotar agora!`);
+      }
+
+      // Simulação de Áudio com WebAudio
+      function tocarSimulacao(btn) {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(110, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 1.2);
+
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start();
+          osc.stop(ctx.currentTime + 1.2);
+
+          btn.textContent = '⏸';
+          setTimeout(() => {
+            btn.textContent = '▶';
+          }, 1200);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    </script>
+  </body>
+</html>

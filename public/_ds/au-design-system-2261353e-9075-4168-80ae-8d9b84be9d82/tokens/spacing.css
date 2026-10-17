@@ -1,0 +1,18 @@
+:root{
+  /* Grid base 8px. Densidade baixa por padrão: margem lateral do shell =
+     --space-5, respiro vertical entre blocos >= --space-4. */
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:24px;
+  --space-6:32px;
+  --space-7:40px;
+  --space-8:48px;
+
+  --radius-sm:12px;    /* chips, badges */
+  --radius-md:18px;    /* input, célula, caixa, botão primário */
+  --radius-lg:24px;    /* raio padrão de superfícies — overlay, sheet, banner */
+  --radius-shell:32px; /* shell do jogo no desktop, só ali */
+  --radius-full:999px; /* pílula, player, avatar, indicador, barra de métrica */
+}

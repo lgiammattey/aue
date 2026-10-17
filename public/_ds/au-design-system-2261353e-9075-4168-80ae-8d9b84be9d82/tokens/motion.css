@@ -1,0 +1,24 @@
+:root{
+  /* Motion transmite estado e feedback — nunca decoração. --duration-reveal
+     é a única espera longa que o jogo tem direito de ter: ali a espera É a
+     piada. */
+  --duration-instant:100ms; /* @kind other */
+  --duration-fast:160ms; /* @kind other */
+  --duration-base:240ms; /* @kind other */
+  --duration-slow:400ms; /* @kind other */
+  --duration-reveal:900ms; /* @kind other */
+
+  --easing-standard:cubic-bezier(0.2,0.8,0.2,1); /* @kind other */
+  --easing-decelerate:cubic-bezier(0,0,0.2,1); /* @kind other */
+  --easing-emphasize:cubic-bezier(0.34,1.56,0.64,1); /* @kind other */
+
+  /* Impacto — só para o momento em que uma nota/resultado aparece (Auê
+     Score revelado, vitória, X1 decidido). Overshoot maior que emphasize:
+     é o "soco" do jogo, usa 1x por resultado, nunca em UI de navegação. */
+  --duration-impact:260ms; /* @kind other */
+  --easing-impact:cubic-bezier(0.2,1.8,0.4,1); /* @kind other */
+
+  --shadow-sheet:0 -8px 24px rgba(0,0,0,.45);
+  --shadow-modal:0 12px 32px rgba(0,0,0,.5);
+  --shadow-shell:0 40px 90px -24px rgba(0,0,0,.65);
+}

@@ -1,0 +1,45 @@
+:root{
+  /* Energia Visual / Glow & Motion — camada aditiva sobre o visual dark/flat.
+     Regra central: quanto mais relevante o acontecimento no jogo, mais a
+     interface ganha vida. Glow nunca é decoração fixa — é proporcional a um
+     estado (repouso, preparação, gravando, pico, resultado, erro). Todo
+     valor solto de blur/opacidade/duração/escala em componente é proibido:
+     compor sempre a partir destes tokens. Ver guidelines/glow.card.html. */
+
+  /* Cor — o glow usa as cores semânticas que já existem, nunca um hex novo.
+     Padrão = accent (energia comum, viva). Recorde = gold (mesma cor que já
+     marca vitória/líder/pódio — glow não inventa hierarquia nova de cor). */
+  --glow-color-padrao:var(--accent);
+  --glow-color-recorde:var(--gold);
+
+  /* Intensidade — 0 a 1, o único número que os componentes calculam (do
+     nível de áudio, da nota, ou fixo por estado). Tudo abaixo deriva disso
+     via calc()/color-mix(), nunca um px ou uma opacidade soltos no lugar. */
+  --glow-blur-max:36px;      /* @kind other */
+  --glow-opacity-max:0.55;   /* @kind other */
+  --glow-scale-max:0.06;     /* @kind other */
+
+  /* Pisos por estado — a intensidade nunca é um valor livre, é uma destas
+     8 constantes ou uma interpolação dirigida por áudio/nota entre elas.
+     repouso=flat · preparacao=halo sutil · gravando-min=piso durante a
+     gravação · pico=pulso único · resultado-min/-max=faixa do resultado
+     comum · recorde=resultado alto · excepcional=nota 100 · erro=removido. */
+  --glow-intensity-repouso:0;          /* @kind other */
+  --glow-intensity-preparacao:0.12;    /* @kind other */
+  --glow-intensity-gravando-min:0.15;  /* @kind other */
+  --glow-intensity-pico:1;             /* @kind other */
+  --glow-intensity-resultado-min:0.2;  /* @kind other */
+  --glow-intensity-resultado-max:0.75; /* @kind other */
+  --glow-intensity-recorde:0.92;       /* @kind other */
+  --glow-intensity-excepcional:1;      /* @kind other */
+  --glow-intensity-erro:0;             /* @kind other */
+
+  /* Duração — ataque rápido (a luz responde no instante do som), soltura
+     mais lenta (a luz nunca corta seca, ela decai). Reusa os easings de
+     tokens/motion.css, nunca cria um novo. */
+  --glow-duration-rise:var(--duration-fast);     /* sobe: resposta ao áudio */
+  --glow-duration-fall:var(--duration-slow);     /* desce: decaimento natural */
+  --glow-duration-pico:220ms;                    /* @kind other */
+  --glow-duration-recorde:var(--duration-reveal);/* bloom do resultado alto acompanha a revelação */
+  --glow-duration-excepcional:1400ms;            /* @kind other */
+}

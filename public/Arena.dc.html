@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>body{margin:0}a{color:var(--fg);text-decoration:none}a:hover{color:var(--muted)}button{font-family:inherit}</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="max-width:1200px;margin:0 auto;display:flex;justify-content:center;align-items:flex-start">
+
+<sc-if value="{{ showLeft }}" hint-placeholder-val="{{ true }}">
+<header style="{{ leftStyle }}">
+<div style="display:flex;flex-direction:column;gap:4px;align-items:{{ navAlign }}">
+<div style="height:52px;display:flex;align-items:center;padding:0 12px;font-family:var(--font-display);font-size:26px;letter-spacing:.02em">{{ brand }}</div>
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<a href="{{ t.href }}" style="{{ t.style }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg><sc-if value="{{ wide }}"><span>{{ t.label }}</span></sc-if></a>
+</sc-for>
+</div>
+<button onClick="{{ toggleTheme }}" style="{{ themeBtn }}" style-hover="background:var(--surface)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ themeIcon }}"></path></svg><sc-if value="{{ wide }}"><span>{{ themeLabel }}</span></sc-if></button>
+</header>
+</sc-if>
+
+<main style="{{ mainStyle }}">
+<div style="height:53px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--border)">
+<span style="font-weight:700;font-size:20px">Arena</span>
+<div style="display:flex;align-items:center;gap:12px">
+<span style="font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">{{ stateLabel }}</span>
+<sc-if value="{{ mobile }}"><button onClick="{{ toggleTheme }}" aria-label="Alternar tema" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ themeIcon }}"></path></svg></button></sc-if>
+</div>
+</div>
+
+<div style="{{ gridStyle }}">
+<div style="display:grid;place-items:center;position:relative">
+<sc-if value="{{ showBolha }}"><x-import component-from-global-scope="AuDesignSystem_226135.BolhaAue" modo="{{ bolhaModo }}" size="{{ bolhaSize }}" nivel="{{ nivel }}" hint-size="220px,220px"></x-import></sc-if>
+<sc-if value="{{ showNota }}"><div style="position:absolute"><x-import component-from-global-scope="AuDesignSystem_226135.NotaNaBolha" valor="{{ nota }}" rotulo="{{ notaRotulo }}" tamanho="{{ notaTam }}" hint-size="120px,100px"></x-import></div></sc-if>
+<sc-if value="{{ showVersus }}"><div style="width:100%"><x-import component-from-global-scope="AuDesignSystem_226135.BlocoVersus" esquerda="{{ vsL }}" direita="{{ vsR }}" empate="{{ isDraw }}" hint-size="100%,140px"></x-import></div></sc-if>
+<sc-if value="{{ showCount }}"><x-import component-from-global-scope="AuDesignSystem_226135.ContagemDaRevanche" numero="{{ contagem }}" hint-size="120px,120px"></x-import></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:16px;text-align:center" aria-live="polite">
+<sc-if value="{{ showTitulo }}"><h2 style="font-family:var(--font-display);font-size:clamp(30px,7vw,40px);font-weight:400;margin:0;line-height:1.1">{{ titulo }}</h2></sc-if>
+<sc-if value="{{ sub }}"><p style="color:var(--muted);font-size:15px;margin:0;max-width:34ch">{{ sub }}</p></sc-if>
+<sc-if value="{{ showTimer }}"><x-import component-from-global-scope="AuDesignSystem_226135.Cronometro" segundos="{{ secs }}" hint-size="120px,60px"></x-import></sc-if>
+<sc-if value="{{ showResultado }}">
+<div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="AuDesignSystem_226135.Player" rotulo="Seu arroto" duracao="0:07" progresso="{{ 0.3 }}" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.ListaDeMetricas" metricas="{{ metricas }}" hint-size="100%,120px"></x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.EscolhaDeOrigem" onEscolher="{{ noop }}" hint-size="100%,64px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showLink }}"><x-import component-from-global-scope="AuDesignSystem_226135.PilulaDeLink" link="aue.gg/x1/9f2a" onCopiar="{{ copiar }}" hint-size="100%,48px"></x-import></sc-if>
+<sc-if value="{{ showPlacar }}"><div style="width:100%;max-width:420px">
+<x-import component-from-global-scope="AuDesignSystem_226135.LinhaDoPlacar" nome="Você" nota="{{ nota }}" lider="{{ youLead }}" onPlay="{{ noop }}" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.LinhaDoPlacar" nome="Luiz" nota="{{ rivalNota }}" lider="{{ rivalLead }}" onPlay="{{ noop }}" hint-size="100%,56px"></x-import>
+</div></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding:20px 24px 24px;width:100%;max-width:440px;margin:0 auto;box-sizing:border-box">
+<sc-if value="{{ isIdle }}"><x-import component-from-global-scope="AuDesignSystem_226135.GatilhoDeMicrofone" jaGravou="{{ jaGravou }}" onClick="{{ rec }}" hint-size="100%,200px"></x-import></sc-if>
+<sc-if value="{{ isRec }}"><x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" onClick="{{ parar }}" hint-size="100%,60px">Parar</x-import></sc-if>
+<sc-if value="{{ isResult }}">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" tamanho="compacto" onClick="{{ x1 }}" hint-size="100%,52px">Chamar pro X1</x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" tamanho="compacto" onClick="{{ postar }}" hint-size="100%,52px">Postar no bonde</x-import>
+</div>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="fantasma" onClick="{{ rec }}" hint-size="100%,52px">Mandar outro</x-import>
+</sc-if>
+<sc-if value="{{ isCreated }}"><x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" onClick="{{ esperar }}" hint-size="100%,60px">Mandar pro infeliz</x-import></sc-if>
+<sc-if value="{{ isWaiting }}">
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" onClick="{{ empate }}" hint-size="100%,60px">Simular empate</x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" onClick="{{ placar }}" hint-size="100%,60px">Simular resposta</x-import>
+</sc-if>
+<sc-if value="{{ isEnd }}">
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" onClick="{{ revanche }}" hint-size="100%,60px">Revanche</x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="fantasma" onClick="{{ sair }}" hint-size="100%,52px">Sair</x-import>
+</sc-if>
+</div>
+<div style="height:{{ bottomPad }}px"></div>
+</div>
+</main>
+
+<sc-if value="{{ showRight }}">
+<aside style="width:320px;flex:none;position:sticky;top:0;padding:12px 0 12px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;max-height:100vh;overflow-y:auto">
+<section style="background:var(--surface);border-radius:16px;overflow:hidden">
+<div style="padding:12px 16px;font-weight:700;font-size:20px">Ranking de hoje</div>
+<sc-for list="{{ ranking }}" as="r" hint-placeholder-count="5"><div style="padding:10px 16px;display:flex;align-items:center;gap:12px"><span style="width:20px;font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ r.pos }}</span><span style="flex:1;font-size:15px;font-weight:{{ r.w }}">{{ r.name }}</span><span style="font-family:var(--font-display);font-size:22px">{{ r.nota }}</span></div></sc-for>
+</section>
+<section style="background:var(--surface);border-radius:16px;overflow:hidden">
+<div style="padding:12px 16px;font-weight:700;font-size:20px">X1 abertos</div>
+<sc-for list="{{ opens }}" as="o" hint-placeholder-count="2"><div style="padding:10px 16px;line-height:1.35"><b style="font-size:15px">@{{ o.a }} x @{{ o.b }}</b><div style="color:var(--muted);font-size:13px">{{ o.t }}</div></div></sc-for>
+</section>
+</aside>
+</sc-if>
+</div>
+
+<sc-if value="{{ mobile }}">
+<nav style="position:fixed;left:0;right:0;bottom:0;height:56px;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--border);background:var(--bg);z-index:6">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" aria-label="{{ t.label }}" style="display:flex;align-items:center;justify-content:center;color:{{ t.color }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg></a></sc-for>
+</nav>
+</sc-if>
+
+<sc-if value="{{ toast }}"><div style="position:fixed;left:50%;transform:translateX(-50%);bottom:80px;z-index:30;background:var(--fg);color:var(--bg);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600">{{ toast }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { theme: 'dark', w: 1200, e: 'IDLE', secs: 0, nota: 91, jaGravou: false, contagem: 3, toast: '', draw: false, best: 88 };
+  componentDidMount() {
+    try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); } catch (x) {}
+    this._rs = () => this.setState({ w: window.innerWidth }); this._rs(); window.addEventListener('resize', this._rs);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._rs); clearInterval(this._r); (this._ts || []).forEach(clearTimeout); clearTimeout(this._t); }
+  say = (t) => { this.setState({ toast: t }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2200); };
+  after(ms, fn) { (this._ts = this._ts || []).push(setTimeout(fn, ms)); }
+  go = (e) => this.setState({ e });
+  rec = () => {
+    clearInterval(this._r); this.setState({ e: 'RECORDING', secs: 0, jaGravou: true });
+    this._r = setInterval(() => { if (this.state.secs >= 9) { this.parar(); return; } this.setState(s => ({ secs: s.secs + 1 })); }, 1000);
+  };
+  parar = () => {
+    clearInterval(this._r); this.go('VALIDATING');
+    this.after(900, () => this.go('JUDGING'));
+    this.after(2400, () => { const n = Math.floor(60 + Math.random() * 40); this.setState(s => ({ nota: n, e: 'RESULT_REVEAL', best: Math.max(s.best, n) })); });
+    this.after(3900, () => this.go('RESULT'));
+  };
+  revanche = () => {
+    this.setState({ e: 'REMATCH', contagem: 3 });
+    this.after(620, () => this.setState({ contagem: 2 })); this.after(1240, () => this.setState({ contagem: 1 })); this.after(1860, () => this.rec());
+  };
+  renderVals() {
+    const s = this.state, e = s.e, w = s.w, light = s.theme === 'light';
+    const mobile = w < 700, wide = w >= 1060, showRight = w >= 1000;
+    const vars = light ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#6b6957', '--border': '#d6d4c6', '--fg-soft': 'rgba(10,10,8,.04)', '--overlay-scrim': 'rgba(245,243,234,.92)', colorScheme: 'light' } : { colorScheme: 'dark' };
+    const navB = { display: 'flex', alignItems: 'center', gap: 16, height: 52, padding: wide ? '0 20px 0 12px' : 0, width: wide ? 'auto' : 52, justifyContent: wide ? 'flex-start' : 'center', borderRadius: 999, color: 'var(--fg)', fontSize: 20, boxSizing: 'border-box' };
+    const items = [['Início', 'M3 11l9-8 9 8v10h-6v-6H9v6H3z', 'Bonde do Arroto.dc.html'], ['Arena', 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3', '#'], ['Bondes', 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2', 'Bonde do Arroto.dc.html'], ['Desafios', 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3', 'Bonde do Arroto.dc.html'], ['Perfil', 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0', 'Bonde do Arroto.dc.html']];
+    const labels = { IDLE: 'Pronto', RECORDING: 'Gravando', VALIDATING: 'Conferindo', JUDGING: 'Julgando', RESULT_REVEAL: 'Nota', RESULT: 'Resultado', CHALLENGE_CREATED: 'X1 criado', WAITING_OPPONENT: 'Esperando', SCOREBOARD: 'Placar', DRAW: 'Empate', REMATCH: 'Revanche' };
+    const modos = { IDLE: ['idle', 220], RECORDING: ['recording', 260], VALIDATING: ['checking', 200], JUDGING: ['judging', 180], CHALLENGE_CREATED: ['holding', 176], WAITING_OPPONENT: ['waiting', 176] };
+    const bm = modos[e] || ['idle', 220];
+    const n = s.nota, rv = n - 13;
+    const fala = n >= 85 ? 'Tá maluco.' : n >= 60 ? 'Caralho, veio forte.' : 'Foi isso?';
+    const titles = { IDLE: 'Bora?', JUDGING: 'Tô julgando essa porra.', RESULT_REVEAL: fala, RESULT: fala, DRAW: 'Ninguém ganhou.' };
+    const subs = { IDLE: 'Solta o primeiro e vê quanto dá.', VALIDATING: 'Conferindo…', RESULT: 'Manda isso no bonde e vê se alguém peita.', CHALLENGE_CREATED: 'Link pronto. Manda pro infeliz.', WAITING_OPPONENT: 'Ninguém aceitou ainda.' };
+    const rank = [['Dani Gás', 94], ['Você', s.best], ['Rafa Fôlego', 81], ['Mari Grave', 68], ['Tio Beto', 61]].sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const stageH = { IDLE: 'clamp(200px,30vh,264px)', RESULT: 'clamp(170px,24vh,200px)', SCOREBOARD: 'clamp(150px,23vh,196px)', DRAW: 'clamp(150px,23vh,196px)', CHALLENGE_CREATED: 'clamp(160px,25vh,200px)', WAITING_OPPONENT: 'clamp(160px,25vh,200px)' }[e] || 'clamp(230px,38vh,308px)';
+    return {
+      rootStyle: { ...vars, minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' },
+      mobile, wide, showLeft: !mobile, showRight, brand: wide ? 'BONDE DO ARROTO' : 'BA', navAlign: wide ? 'stretch' : 'center',
+      leftStyle: { width: wide ? 275 : 76, flex: 'none', position: 'sticky', top: 0, height: '100vh', padding: wide ? '0 12px 12px' : '0 8px 12px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' },
+      mainStyle: { width: '100%', maxWidth: 600, flex: '1 1 0', minWidth: 0, borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', minHeight: '100vh', boxSizing: 'border-box' },
+      gridStyle: { minHeight: 'calc(100vh - 53px)', display: 'grid', gridTemplateRows: `minmax(0,${stageH}) 1fr auto`, padding: '16px 24px 0', boxSizing: 'border-box', transition: 'grid-template-rows var(--duration-slow) var(--easing-standard)' },
+      tabs: items.map(([l, d, href]) => { const on = l === 'Arena'; return { label: l, d, href, sw: on ? 2.4 : 1.8, color: on ? 'var(--fg)' : 'var(--muted)', style: { ...navB, fontWeight: on ? 700 : 400 } }; }),
+      themeIcon: light ? 'M21 13A9 9 0 1111 3a7 7 0 0010 10z' : 'M12 17a5 5 0 100-10 5 5 0 000 10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1',
+      themeLabel: light ? 'Tema escuro' : 'Tema claro', themeBtn: { ...navB, height: 44, fontSize: 15, color: 'var(--muted)', border: 0, background: 'none', cursor: 'pointer' },
+      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); try { localStorage.setItem('bda-theme', t); } catch (x) {} },
+      bottomPad: mobile ? 72 : 8, stateLabel: labels[e] || '',
+      showBolha: !!modos[e], bolhaModo: bm[0], bolhaSize: bm[1],
+      nivel: () => (Math.sin(Date.now() / 250) + 1) / 2,
+      showNota: e === 'RESULT_REVEAL' || e === 'RESULT', nota: n, notaRotulo: e === 'RESULT' ? 'Valendo' : 'De pé', notaTam: e === 'RESULT' ? 'resultado' : 'revelacao',
+      showVersus: e === 'SCOREBOARD' || e === 'DRAW', isDraw: e === 'DRAW',
+      vsL: e === 'DRAW' ? { nome: 'Você', nota: 88 } : { nome: 'Você', nota: n, venceu: true }, vsR: e === 'DRAW' ? { nome: 'Luiz', nota: 88 } : { nome: 'Luiz', nota: rv },
+      showCount: e === 'REMATCH', contagem: s.contagem,
+      showTitulo: !!titles[e], titulo: titles[e] || '', sub: subs[e] || '',
+      showTimer: e === 'RECORDING', secs: s.secs,
+      showResultado: e === 'RESULT', metricas: [{ rotulo: 'Força', valor: 82, percentual: 82 }, { rotulo: 'Fôlego', valor: '4,2s', percentual: 60 }, { rotulo: 'Grave', valor: 71, percentual: 71 }],
+      noop: () => {}, showLink: e === 'CHALLENGE_CREATED', copiar: async () => { this.say('Link copiado.'); return true; },
+      showPlacar: e === 'SCOREBOARD', youLead: true, rivalLead: false, rivalNota: rv,
+      isIdle: e === 'IDLE', jaGravou: s.jaGravou, rec: this.rec, isRec: e === 'RECORDING', parar: this.parar,
+      isResult: e === 'RESULT', x1: () => this.go('CHALLENGE_CREATED'), postar: () => this.say('Postado no Bonde Geral com nota ' + n + '.'),
+      isCreated: e === 'CHALLENGE_CREATED', esperar: () => this.go('WAITING_OPPONENT'),
+      isWaiting: e === 'WAITING_OPPONENT', empate: () => this.setState({ e: 'DRAW' }), placar: () => this.go('SCOREBOARD'),
+      isEnd: e === 'SCOREBOARD' || e === 'DRAW', revanche: this.revanche, sair: () => this.setState({ e: 'IDLE' }),
+      ranking: rank.map(([name, nota], i) => ({ pos: i + 1, name, nota, w: name === 'Você' ? 700 : 400 })),
+      opens: [{ a: 'voce_arrota', b: 'rafafolego', t: 'Quem segura mais · esperando' }, { a: 'danigas', b: 'marigrave', t: 'Long neck vs guaraná · 2h' }],
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

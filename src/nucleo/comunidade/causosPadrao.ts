@@ -1,0 +1,82 @@
+import type { CausoPostado } from '../../portas/comunidade';
+
+/**
+ * Causos de exemplo oficiais para evitar cold start no feed.
+ *
+ * Se a rede falhar ou a tabela de posts estiver sem itens recentes,
+ * a pessoa vê causos reais com o tom do Auê em vez de um feed morto.
+ */
+export const CAUSOS_PADRAO: readonly CausoPostado[] = [
+  {
+    id: 'causo-seed-1',
+    comunidadeId: 'comu-eu-arroto-e-dai',
+    comunidadeSlug: 'eu-arroto-e-dai',
+    autorNome: 'Betão da TI',
+    conteudo: 'Mandei ver na call com o diretor financeiro achando que tava mutado. O microfone do headset captou cada harmônico. Silêncio de 10 segundos no Teams.',
+    nota: 91,
+    duracaoSegundos: 3.4,
+    origem: 'refrigerante',
+    reacoes: {
+      fogo: 42,
+      nojo: 4,
+      trofeu: 29,
+    },
+    minhaReacao: null,
+    totalComentarios: 14,
+    criadoEm: '2026-10-17T14:30:00.000Z',
+  },
+  {
+    id: 'causo-seed-2',
+    comunidadeId: 'comu-primeiro-encontro',
+    comunidadeSlug: 'primeiro-encontro',
+    autorNome: 'Julinho Sem Filtro',
+    conteudo: 'Primeiro encontro no rodízio de pizza. Pedi guaraná em lata e tomei de golada. O estrago foi em estéreo. Ela foi no banheiro e nunca mais voltou.',
+    nota: 84,
+    duracaoSegundos: 2.8,
+    origem: 'cerveja',
+    reacoes: {
+      fogo: 19,
+      nojo: 63,
+      trofeu: 8,
+    },
+    minhaReacao: null,
+    totalComentarios: 31,
+    criadoEm: '2026-10-17T12:15:00.000Z',
+  },
+  {
+    id: 'causo-seed-3',
+    comunidadeId: 'comu-cerveja-e-churrasco',
+    comunidadeSlug: 'cerveja-e-churrasco',
+    autorNome: 'Tiozão da Brasa',
+    conteudo: 'Domingão depois da maminha com farofa e a quinta latinha trincando. Soltei na varanda e o pinscher da vizinha correu pra debaixo do sofá.',
+    nota: 97,
+    duracaoSegundos: 4.1,
+    origem: 'comida',
+    reacoes: {
+      fogo: 112,
+      nojo: 2,
+      trofeu: 88,
+    },
+    minhaReacao: null,
+    totalComentarios: 27,
+    criadoEm: '2026-10-17T10:00:00.000Z',
+  },
+  {
+    id: 'causo-seed-4',
+    comunidadeId: 'comu-reuniao-da-firma',
+    comunidadeSlug: 'reuniao-da-firma',
+    autorNome: 'Marcão do RH',
+    conteudo: 'Reunião geral de alinhamento de metas. Bateu aquele refluxo pós-almoço e o fone bluetooth conectou sozinho no som do projetor.',
+    nota: 78,
+    duracaoSegundos: 2.1,
+    origem: 'cafe',
+    reacoes: {
+      fogo: 34,
+      nojo: 15,
+      trofeu: 12,
+    },
+    minhaReacao: null,
+    totalComentarios: 9,
+    criadoEm: '2026-10-17T09:20:00.000Z',
+  },
+] as const;

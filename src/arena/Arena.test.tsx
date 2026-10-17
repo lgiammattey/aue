@@ -543,7 +543,7 @@ describe('a Arena no IDLE', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Toque para começar' }));
 
-    const voltar = await screen.findByRole('button', { name: 'TENTAR DE NOVO' });
+    const voltar = await screen.findByRole('button', { name: 'ABRIR AJUSTES' });
     expect(screen.getByText('PERMISSÃO DE MICROFONE NECESSÁRIA')).toBeDefined();
 
     fireEvent.click(voltar);
@@ -836,7 +836,7 @@ describe('o julgamento', () => {
     await ateANota(dubles);
 
     expect(screen.getByText('Deu ruim aqui dentro.')).toBeDefined();
-    expect(screen.getByRole('button', { name: 'TENTAR DE NOVO' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeDefined();
   });
 
   it('motor que recusa o áudio não vira nota', async () => {
@@ -2010,7 +2010,7 @@ describe('a conferida da saída', () => {
     fireEvent.click(parar);
 
     expect(await screen.findByText('NÃO É ARROTO.')).toBeDefined();
-    expect(screen.getByText('Gritar não vale. Bater na mesa também não.')).toBeDefined();
+    expect(screen.getByText('TENTA OUTRA VEZ.')).toBeDefined();
     expect(screen.getByRole('button', { name: 'TENTAR DE NOVO' })).toBeDefined();
   });
 

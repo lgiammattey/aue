@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 
 import { ChallengeView } from './features/audio/ChallengeView';
 import { TelaDesktop } from './features/desktop/TelaDesktop';
@@ -6,6 +6,7 @@ import { PoliticaDePrivacidade } from './features/legal/PoliticaDePrivacidade';
 import { TermosDeUso } from './features/legal/TermosDeUso';
 import { ComoJogar } from './features/publico/ComoJogar';
 import { ComoArrotar } from './features/publico/ComoArrotar';
+import { TelaComunidade } from './features/comunidade/TelaComunidade';
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { useDispositivo } from './shared/desktop/useDispositivo';
 import { Arena } from './arena/Arena';
@@ -64,6 +65,11 @@ function EntradaPrincipal() {
   return <Arena />;
 }
 
+function EntradaComunidade() {
+  const navigate = useNavigate();
+  return <TelaComunidade onArrotar={() => navigate('/')} />;
+}
+
 export function App() {
   return (
     <>
@@ -117,6 +123,8 @@ export function App() {
             Ver `src/features/publico/ComoArrotar.tsx`.
           */}
           <Route path="/como-arrotar" element={<ComoArrotar />} />
+          <Route path="/comunidade" element={<EntradaComunidade />} />
+          <Route path="/feed" element={<EntradaComunidade />} />
           <Route path="*" element={<EntradaPrincipal />} />
         </Routes>
       </Router>

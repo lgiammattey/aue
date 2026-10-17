@@ -138,31 +138,27 @@ metadados sociais suficientes para o link render no grupo.
 paridade entre a regra em TypeScript e a versionada em SQL. Fluxo real validado
 em celular quando a mudança tocar a jornada.
 
+### 2.17 Comunidades temáticas e Feed de Causos (Auê 3.0)
+
+Aprovado por decisão de produto pelo Luiz em 17/10/2026:
+
+- **Hubs temáticos de comunidade:** com a pioneira *"Eu arroto, e daí?"* e categorias de vergonhas e histórias reais (*"Na reunião da firma"*, *"Primeiro encontro"*, *"Arroto trovão"*);
+- **Feed dinâmico estilo Twitter/Reddit:** cards com reprodução de áudio, nota do juiz de IA em destaque, o texto do causo e o botão de desafio direto ("Duvido");
+- **Consentimento e Opt-in:** gravação privada continua padrão; publicação na comunidade exige ação consciente e aceite explícito;
+- **Moderação ativa:** sistema de denúncia e ocultação server-side para áudios públicos.
+
 ---
 
 ## 3. Fora do escopo
 
-Não estão no produto, e **não são épicos futuros**:
+Continuam fora do produto, e **não pertencem a esta fase**:
 
-feed · seguidores · comunidades · campeonatos e ligas · temporadas · assinatura
-e monetização · XP e níveis · conquistas · ranking global · perfil social ·
-notificações push · mensagens privadas · login social obrigatório.
+algoritmo viciante de recomendação · seguidores obrigatórios · campeonatos e ligas
+formais · temporadas · assinatura e monetização · paywall · XP e níveis · conquistas ·
+mensagens privadas (chat) · login social obrigatório para arrotar.
 
-App de loja saiu desta lista — mas **empacotar não é escopo aberto**. O que vale
-é o §2.13, e o que ele não cita continua fora.
-
-Esse código **saiu do repositório** na
-[#109](https://github.com/gmmattey/aue/issues/109), junto com as flags que o
-escondiam. Não tem mais o que ligar: não existe tela, não existe flag, não
-existe variável de ambiente.
-
-O banco não foi tocado — as tabelas, views e RPCs continuam lá, sem ninguém
-chamando. A lista e a decisão ("mantém, não apaga") estão em
-[`docs/technical/banco-sem-consumidor.md`](../technical/banco-sem-consumidor.md).
-
-Se uma dessas coisas voltar um dia, volta como decisão de produto e código
-novo — não desenterrando ramo antigo. `src/shared/aFlagMorta.test.ts` reprova o
-build se um dos nomes reaparecer sem essa decisão.
+Comunidades e feed voltaram como decisão explícita do Auê 3.0, respeitando o
+gate arquitetural do Camillo, a especificação da Priscila e o Cartão de Missão 0001.
 
 ---
 

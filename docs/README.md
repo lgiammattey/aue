@@ -44,6 +44,7 @@ diz onde cada coisa mora.
 | De onde veio o produto? | [`jogo/HISTORIA.md`](jogo/HISTORIA.md) |
 | Que stack é essa e por quê? | [`technical/adr/0001-arquitetura-oficial-do-aue.md`](technical/adr/0001-arquitetura-oficial-do-aue.md) |
 | Como o jogo vira app de loja? | [`technical/adr/0002-o-aue-nas-lojas.md`](technical/adr/0002-o-aue-nas-lojas.md) |
+| Como funciona a comunidade e o feed no 3.0? | [`technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md`](technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md) |
 | Posso trocar isso ou preciso de decisão formal? | [`technical/adr/`](technical/adr/) |
 | Como o código está organizado hoje? | [`technical/arquitetura.md`](technical/arquitetura.md) + o código |
 | Por que essa gravação não virou nota? | [`technical/deteccao-de-arroto-yamnet.md`](technical/deteccao-de-arroto-yamnet.md) |
@@ -56,6 +57,7 @@ diz onde cada coisa mora.
 | Como nomear um objeto novo do banco? | [`schema/nomenclatura.md`](schema/nomenclatura.md) |
 | Qual é o domínio de dados? | [`schema/banco_de_dados.md`](schema/banco_de_dados.md) |
 | Como desfazer uma migração? | [`../supabase/rollback/README.md`](../supabase/rollback/README.md) + backup + estado real |
+| Como está o mercado de concorrentes? | [`pesquisa/analise-competitiva-arroto-2026-08.md`](pesquisa/analise-competitiva-arroto-2026-08.md) |
 
 ## Precedência
 
@@ -87,8 +89,9 @@ docs/
 ├── escopo/      ESCOPO_ATUAL · BACKLOG
 ├── technical/   adr/ · arquitetura · ambientes · deploy · yamnet · moderação · banco sem consumidor
 ├── schema/      nomenclatura · banco_de_dados
+├── pesquisa/    análise competitiva de mercado de áudio e arroto
 ├── production-pack/  pacote de produção v1.0 · QA · crescimento · release · referência visual
-└── _arquivo/    a visão anterior, sem autoridade nenhuma
+└── _arquivo/    a visão anterior (incluindo design-artifacts), sem autoridade nenhuma
 ```
 
 ## Uma última regra

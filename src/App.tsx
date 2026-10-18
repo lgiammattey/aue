@@ -1,15 +1,18 @@
-import { BrowserRouter as Router, Routes, Route, useParams, useNavigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, useParams, useNavigate, useLocation } from 'react-router-dom';
 
-import { ChallengeView } from './features/audio/ChallengeView';
-import { PoliticaDePrivacidade } from './features/legal/PoliticaDePrivacidade';
-import { TermosDeUso } from './features/legal/TermosDeUso';
-import { ComoJogar } from './features/publico/ComoJogar';
-import { ComoArrotar } from './features/publico/ComoArrotar';
-import { TelaComunidade } from './features/comunidade/TelaComunidade';
-import { TelaLanding } from './features/comunidade/TelaLanding';
-import { TelaLogin } from './features/comunidade/TelaLogin';
-import { TelaVersoesWebapp } from './features/comunidade/TelaVersoesWebapp';
-import { TelaHistoria } from './features/comunidade/TelaHistoria';
+const ChallengeView = lazy(() => import('./features/audio/ChallengeView').then((m) => ({ default: m.ChallengeView })));
+const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePrivacidade').then((m) => ({ default: m.PoliticaDePrivacidade })));
+const TermosDeUso = lazy(() => import('./features/legal/TermosDeUso').then((m) => ({ default: m.TermosDeUso })));
+const ComoJogar = lazy(() => import('./features/publico/ComoJogar').then((m) => ({ default: m.ComoJogar })));
+const ComoArrotar = lazy(() => import('./features/publico/ComoArrotar').then((m) => ({ default: m.ComoArrotar })));
+const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade').then((m) => ({ default: m.TelaComunidade })));
+const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then((m) => ({ default: m.TelaLanding })));
+const TelaLogin = lazy(() => import('./features/comunidade/TelaLogin').then((m) => ({ default: m.TelaLogin })));
+const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
+const TelaPerfil = lazy(() => import('./features/perfil/TelaPerfil').then((m) => ({ default: m.TelaPerfil })));
+const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
+const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
 
@@ -61,25 +64,8 @@ function EntradaArena() {
       {/* Botão de retorno rápido para o Feed */}
       <button
         type="button"
+        className="voltar-pro-feed"
         onClick={() => navigate('/feed')}
-        style={{
-          position: 'fixed',
-          top: '16px',
-          left: '16px',
-          zIndex: 9999,
-          background: 'var(--surface-2, #1c1c1e)',
-          color: 'var(--fg, #ffffff)',
-          border: '1px solid var(--border-strong, #3a3a3c)',
-          borderRadius: '999px',
-          padding: '8px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          cursor: 'pointer',
-          fontWeight: 700,
-          fontSize: '13px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-        }}
         aria-label="Voltar para o Feed"
       >
         <span aria-hidden="true">←</span>
@@ -88,6 +74,8 @@ function EntradaArena() {
 
       <Arena
         onPostarNoBonde={(resultado) => {
+          // Sem o arroto inteiro não há o que publicar com nota e áudio: o Bonde
+          // avisa em vez de postar um causo "com nota" que o servidor não conhece.
           navigate('/feed', { state: { resultadoRecente: resultado } });
         }}
       />
@@ -97,11 +85,14 @@ function EntradaArena() {
 
 function EntradaPrincipal() {
   const navigate = useNavigate();
+  const { state } = useLocation();
   return (
     <TelaComunidade
       initialTab="feed"
+      resultadoRecente={state?.resultadoRecente}
       onArrotar={() => navigate('/arena')}
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
+      aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
     />
   );
 }
@@ -113,22 +104,39 @@ function EntradaHistoria() {
 
 function EntradaBondes() {
   const navigate = useNavigate();
-  return <TelaComunidade initialTab="comm" onArrotar={() => navigate('/arena')} />;
+  return (
+    <TelaComunidade initialTab="comm" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')} />
+  );
 }
 
 function EntradaDesafios() {
   const navigate = useNavigate();
-  return <TelaComunidade initialTab="desafios" onArrotar={() => navigate('/arena')} />;
+  return (
+    <TelaComunidade initialTab="desafios" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')} />
+  );
 }
 
 function EntradaPerfil() {
-  const navigate = useNavigate();
-  return <TelaComunidade initialTab="feed" onArrotar={() => navigate('/arena')} />;
+  return <EntradaDoPerfil />;
 }
 
 function EntradaPerfilHandle() {
+  const { handle } = useParams<{ handle: string }>();
+  return <EntradaDoPerfil handle={handle} />;
+}
+
+function EntradaDoPerfil({ handle }: { handle?: string }) {
   const navigate = useNavigate();
-  return <TelaComunidade initialTab="feed" onArrotar={() => navigate('/arena')} />;
+  return (
+    <TelaPerfil
+      handle={handle}
+      aoVoltar={() => navigate('/feed')}
+      aoArrotar={() => navigate('/arena')}
+      aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
+      aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
+      aoEntrar={(modo) => navigate(modo === 'cadastro' ? '/login?modo=cadastro' : '/login')}
+    />
+  );
 }
 
 function EntradaComunidadeSlug() {
@@ -139,6 +147,7 @@ function EntradaComunidadeSlug() {
       initialTab="comm"
       comunidadeSlugInicial={slug}
       onArrotar={() => navigate('/arena')}
+      aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
     />
   );
 }
@@ -148,6 +157,7 @@ export function App() {
     <>
       <AvisoDeOffline />
       <Router>
+        <Suspense fallback={null}>
         <Routes>
           {/*
             Auê 3.0 / Bonde do Arroto - Feed, Comunidade e Desafios (com o Jogo Auê)
@@ -166,6 +176,7 @@ export function App() {
           <Route path="/comunidade" element={<EntradaBondes />} />
           <Route path="/landing" element={<TelaLanding />} />
           <Route path="/login" element={<TelaLogin />} />
+          <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />
           <Route path="/versoes" element={<TelaVersoesWebapp />} />
           <Route path="/historia/:id" element={<EntradaHistoria />} />
           <Route path="/conto/:id" element={<EntradaHistoria />} />
@@ -183,6 +194,7 @@ export function App() {
           {/* Fallback */}
           <Route path="*" element={<EntradaPrincipal />} />
         </Routes>
+        </Suspense>
       </Router>
     </>
   );

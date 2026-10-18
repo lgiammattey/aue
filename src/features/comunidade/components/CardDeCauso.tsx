@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { CausoPostado } from '../../../portas/comunidade';
+import { ArvoreDeComentarios } from './ArvoreDeComentarios';
 
 interface CardDeCausoProps {
   causo: CausoPostado;
@@ -8,7 +9,11 @@ interface CardDeCausoProps {
   aoDuvidar: (causo: CausoPostado) => void;
   aoCompartilhar: (causo: CausoPostado) => void;
   aoResponder: (causoId: string, texto: string, respostaAId?: string) => void;
+  /** Pede os comentários ao servidor quando a conversa abre. */
+  aoAbrirConversa?: (causoId: string) => void | Promise<void>;
   aoDenunciar: (id: string) => void;
+  /** Só aparece nos meus causos. */
+  aoApagar?: (causo: CausoPostado) => void | Promise<void>;
   aoAbrirPerfil?: (handle: string, nome?: string) => void;
   aoAbrirHistoria?: (id: string) => void;
 }
@@ -20,7 +25,9 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   aoDuvidar,
   aoCompartilhar,
   aoResponder,
+  aoAbrirConversa,
   aoDenunciar,
+  aoApagar,
   aoAbrirPerfil,
   aoAbrirHistoria,
 }) => {
@@ -38,15 +45,33 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
     };
   });
 
-  const togglePlay = () => {
-    if (!causo.audioUrl) return;
-    const audio = new Audio(causo.audioUrl);
-    if (!tocando) {
-      audio.play().catch(() => {});
-      setTocando(true);
-      audio.onended = () => setTocando(false);
-    } else {
+  const playerRef = useRef<HTMLAudioElement | null>(null);
+  const [erroDeAudio, setErroDeAudio] = useState(false);
+
+  useEffect(() => () => playerRef.current?.pause(), []);
+
+  const togglePlay = async () => {
+    if (!causo.enderecoDoAudio) return;
+    if (tocando) {
+      playerRef.current?.pause();
       setTocando(false);
+      return;
+    }
+    setErroDeAudio(false);
+    // O endereço é assinado e vence em minutos: pedido na hora de tocar.
+    const endereco = await causo.enderecoDoAudio();
+    if (!endereco) {
+      setErroDeAudio(true);
+      return;
+    }
+    const player = new Audio(endereco);
+    player.onended = () => setTocando(false);
+    playerRef.current = player;
+    try {
+      await player.play();
+      setTocando(true);
+    } catch {
+      setErroDeAudio(true);
     }
   };
 
@@ -92,6 +117,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   });
 
   const comentarios = causo.comentarios || [];
+  const totalDeComentarios = Math.max(causo.totalComentarios ?? 0, comentarios.length);
 
   return (
     <article
@@ -202,6 +228,29 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                 >
                   Denunciar causo
                 </button>
+                {causo.meu && aoApagar && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuAberto(false);
+                      void aoApagar(causo);
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--danger, #ff4d4f)',
+                      padding: '8px 12px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      width: '100%',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    Apagar meu causo
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -254,8 +303,19 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           </span>
         )}
 
+        {causo.somenteNesteAparelho && (
+          <span role="note" style={{ color: 'var(--muted)', fontSize: '12px' }}>
+            Só neste aparelho. Não foi para o servidor.
+          </span>
+        )}
+        {erroDeAudio && (
+          <span role="alert" style={{ color: 'var(--danger, #ff4d4f)', fontSize: '13px' }}>
+            Não deu para tocar esse arroto agora.
+          </span>
+        )}
+
         {/* Player com waveform de 28 barras, duração mono e badge Anton 24px */}
-        {(causo.nota !== undefined || causo.audioUrl) && (
+        {(causo.nota !== undefined || causo.temAudio) && (
           <div
             style={{
               display: 'flex',
@@ -270,7 +330,8 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
             <button
               type="button"
               onClick={togglePlay}
-              aria-label="Tocar"
+              disabled={!causo.enderecoDoAudio}
+              aria-label={tocando ? 'Pausar' : 'Tocar'}
               style={{
                 width: '40px',
                 height: '40px',
@@ -331,7 +392,11 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           {/* Reply */}
           <button
             type="button"
-            onClick={() => setThreadAberta((v) => !v)}
+            onClick={() => {
+              const abrindo = !threadAberta;
+              setThreadAberta(abrindo);
+              if (abrindo && !causo.comentarios) void aoAbrirConversa?.(causo.id);
+            }}
             style={actBtnStyle(threadAberta)}
             aria-label="Responder"
           >
@@ -348,7 +413,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
             >
               <path d="M21 12a8 8 0 01-11.6 7.1L3 21l1.9-6.4A8 8 0 1121 12z" />
             </svg>
-            <span>{comentarios.length}</span>
+            <span>{totalDeComentarios}</span>
           </button>
 
           {/* Repost */}
@@ -453,63 +518,11 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               gap: '12px',
             }}
           >
-            {comentarios.length > 0 ? (
-              comentarios.map((r) => {
-                const rIni = (r.autorNome?.trim().split(/\s+/).length > 1
-                  ? (r.autorNome.trim().split(/\s+/)[0][0] + r.autorNome.trim().split(/\s+/)[1][0])
-                  : (r.autorNome?.slice(0, 2) || 'VC')
-                ).toUpperCase();
-
-                return (
-                  <div
-                    key={r.id}
-                    style={{
-                      display: 'flex',
-                      gap: '10px',
-                    }}
-                  >
-                    <div
-                      onClick={() => aoAbrirPerfil?.(r.autorHandle, r.autorNome)}
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        flex: 'none',
-                        borderRadius: '50%',
-                        background: 'var(--surface-2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: '11px',
-                        color: 'var(--fg)',
-                        cursor: aoAbrirPerfil ? 'pointer' : 'default',
-                      }}
-                      title={`Ver perfil de @${r.autorHandle}`}
-                    >
-                      {rIni}
-                    </div>
-                    <div style={{ minWidth: 0, lineHeight: 1.4, flex: 1 }}>
-                      <span
-                        onClick={() => aoAbrirPerfil?.(r.autorHandle, r.autorNome)}
-                        style={{ cursor: aoAbrirPerfil ? 'pointer' : 'default' }}
-                      >
-                        <b style={{ fontSize: '14px' }}>{r.autorNome}</b>{' '}
-                        <span style={{ color: 'var(--muted)', fontSize: '13px' }}>
-                          @{r.autorHandle} · agora
-                        </span>
-                      </span>
-                      <div style={{ fontSize: '14px', textWrap: 'pretty', color: 'var(--fg)' }}>
-                        {r.conteudo}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <span style={{ color: 'var(--muted)', fontSize: '14px' }}>
-                Sem respostas. Seja o primeiro.
-              </span>
-            )}
+            <ArvoreDeComentarios
+              comentarios={comentarios}
+              aoResponder={(texto, respostaAId) => aoResponder(causo.id, texto, respostaAId)}
+              aoAbrirPerfil={aoAbrirPerfil}
+            />
 
             <form onSubmit={enviarResposta} style={{ display: 'flex', gap: '8px' }}>
               <input

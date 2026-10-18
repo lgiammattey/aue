@@ -36,18 +36,78 @@ export const PoliticaDePrivacidade: React.FC = () => {
         app faz, o errado é o app.
       </p>
 
-      <Secao titulo="O Auê não pede cadastro">
+      <Secao titulo="Conta é opcional">
         <p>
-          Não existe login, senha, e-mail ou formulário. Ao abrir o site, o app
-          cria automaticamente uma identidade anônima para o seu aparelho, só
-          para conseguir guardar a sua gravação e ligá-la à sua batalha. Essa
-          identidade não tem nome, e-mail nem qualquer dado seu.
+          Dá para jogar sem conta. Ao abrir o site, o app cria uma identidade
+          anônima para o seu aparelho, só para guardar a sua gravação e ligá-la à
+          sua batalha. Ela não tem nome, e-mail nem qualquer dado seu.
         </p>
         <p>
-          Se você limpar os dados do navegador, essa identidade se perde e você
-          passa a ser tratado como uma pessoa nova. As gravações antigas
-          continuam existindo, mas deixam de ser reconhecidas como suas — o que
-          inclui perder a possibilidade de apagá-las pelo app.
+          Se limpar os dados do navegador, essa identidade anônima se perde e você
+          passa a ser tratado como uma pessoa nova. As gravações antigas continuam
+          existindo, mas deixam de ser reconhecidas como suas, o que inclui perder
+          a possibilidade de apagá-las pelo app.
+        </p>
+        <p>
+          Quem quiser pode <strong>criar uma conta com e-mail e senha</strong>. A
+          conta aproveita a identidade que você já tinha: seus arrotos, causos e
+          comentários continuam seus. O e-mail serve para confirmar a conta, para
+          você entrar de outro aparelho e para recuperar a senha. Nada além disso.
+        </p>
+      </Secao>
+
+      <Secao titulo="O que guardamos de quem cria conta">
+        <ul style={{ margin: 0, paddingLeft: '1.2em', display: 'grid', gap: 6 }}>
+          <li>
+            <strong>E-mail e senha.</strong> Ficam no serviço de autenticação do
+            Supabase, nosso provedor de banco de dados. A senha é guardada
+            embaralhada (hash); nem a equipe do Auê consegue ler a sua senha. O
+            e-mail nunca aparece no seu perfil nem para outros jogadores.
+          </li>
+          <li>
+            <strong>Dados do perfil.</strong> Apelido, @, bio e cidade, quando você
+            preenche. São públicos (veja abaixo).
+          </li>
+          <li>
+            <strong>O que você faz no jogo.</strong> Seus resultados, causos,
+            comentários, reações e quem você segue.
+          </li>
+        </ul>
+        <p>
+          O e-mail não é usado para propaganda e não é vendido nem repassado a
+          terceiros. Hoje o Auê não manda e-mail de novidade; os e-mails que saem
+          são os de confirmação de conta e de nova senha.
+        </p>
+      </Secao>
+
+      <Secao titulo="O que é público no Bonde">
+        <p>
+          Tudo o que você coloca no Bonde pode ser visto por qualquer pessoa, sem
+          conta:
+        </p>
+        <ul style={{ margin: 0, paddingLeft: '1.2em', display: 'grid', gap: 6 }}>
+          <li>seu perfil: apelido, @, bio, cidade, título, quando entrou, quantidade de causos, seguidores e a sua melhor nota <em>entre os causos publicados</em>;</li>
+          <li>seus causos, comentários e respostas;</li>
+          <li>a nota e o áudio de um causo, <strong>só se você marcou a autorização de publicar o arroto</strong> na hora de postar.</li>
+        </ul>
+        <p>
+          <strong>Gravar para jogar não é autorizar a publicação.</strong> Um
+          arroto gravado para um duelo ou para testar a nota não vai para o Bonde.
+          Ele só vira público quando você toca em publicar e marca o aceite.
+          Notas de jogos que você não publicou não aparecem no seu perfil.
+        </p>
+        <p>
+          Duas coisas que você precisa saber: a lista de quem segue quem e de quem
+          reagiu a quê pode ser consultada tecnicamente por qualquer pessoa com
+          conhecimento para isso, mesmo que nenhuma tela do app a mostre; e
+          conteúdo público pode ser copiado, printado ou ouvido por quem tiver o
+          endereço do áudio antes de você apagar.
+        </p>
+        <p>
+          <strong>Apagar o que você publicou:</strong> no menu de cada causo seu
+          há <strong>"Apagar meu causo"</strong>. Ele apaga o texto, os comentários
+          e, se houver, o arquivo de áudio. Se o servidor não apagar, o app diz que
+          não apagou.
         </p>
       </Secao>
 
@@ -116,9 +176,10 @@ export const PoliticaDePrivacidade: React.FC = () => {
         <p>
           <strong>O arquivo continua guardado.</strong> Ele não é apagado no
           sétimo dia nem depois: não existe prazo de exclusão automática, e
-          inventar um aqui seria mentira. As gravações ficam para formar um
-          acervo de arrotos que deve alimentar um feed público no futuro. Quando
-          isso acontecer, será anunciado — e esta página será atualizada antes.
+          inventar um aqui seria mentira. O áudio de um arroto só aparece
+          no Bonde se você publicar com o aceite. Mudar isso, como usar gravações
+          para outra finalidade, só acontece com aviso aqui antes. Nenhuma
+          gravação é usada para treinar modelo.
         </p>
         <p>
           Na prática: apagar é com você, e o botão está onde você vê o seu
@@ -158,10 +219,14 @@ export const PoliticaDePrivacidade: React.FC = () => {
 
       <Secao titulo="Denúncia e moderação">
         <p>
-          Toda gravação tem um botão de denúncia. Quando três pessoas diferentes
-          denunciam a mesma gravação, ela é escondida automaticamente e deixa de
-          tocar para qualquer pessoa. Uma decisão tomada à mão sobre uma gravação
-          não é desfeita por denúncias posteriores.
+          Toda gravação e todo causo têm um botão de denúncia. Quando três pessoas
+          diferentes denunciam o mesmo conteúdo, ele é escondido automaticamente e
+          deixa de aparecer para qualquer pessoa. Uma decisão tomada à mão sobre
+          uma gravação não é desfeita por denúncias posteriores.
+        </p>
+        <p>
+          A denúncia guarda quem denunciou e o motivo, só para a moderação. Quem
+          foi denunciado não é avisado de quem foi.
         </p>
       </Secao>
 
@@ -203,7 +268,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
           <li>Não usa Google Analytics nem nenhuma ferramenta de rastreamento.</li>
           <li>Não tem pixel de rede social.</li>
           <li>Não pede acesso a contatos, câmera, localização ou arquivos.</li>
-          <li>Não vende, aluga nem compartilha gravações com terceiros.</li>
+          <li>Não vende, aluga nem compartilha gravações nem e-mails com terceiros.</li>
         </ul>
       </Secao>
 
@@ -219,9 +284,11 @@ export const PoliticaDePrivacidade: React.FC = () => {
       <Secao titulo="Seus direitos">
         <p>
           A Lei Geral de Proteção de Dados garante a você acesso, correção e
-          exclusão dos seus dados. Como o Auê não guarda nenhum dado de
-          identificação, o pedido prático é a exclusão de uma gravação — possível
-          pelo próprio app logo após gravar, ou pelo contato abaixo.
+          exclusão dos seus dados. Na prática: o perfil você corrige direto na
+          tela de perfil; causos e áudios você apaga pelo próprio app; e o que o
+          app não alcança, como <strong>excluir a conta inteira</strong> (e-mail,
+          perfil e histórico), é por pedido pelo contato abaixo. Ainda não existe
+          botão para isso.
         </p>
         {contato ? (
           <p>
@@ -229,9 +296,10 @@ export const PoliticaDePrivacidade: React.FC = () => {
             <a href={`mailto:${contato}`} style={{ color: 'var(--accent)' }}>
               {contato}
             </a>
-            . Informe o link da batalha e a posição da gravação — sem eles, não há
-            como localizar o áudio, justamente porque não guardamos nada que
-            identifique você.
+            . Para conta, escreva do e-mail cadastrado. Para um áudio sem conta,
+            informe o link da batalha e a posição da gravação — sem eles, não há
+            como localizar o áudio, porque a identidade anônima não guarda nada
+            que identifique você.
           </p>
         ) : (
           /*

@@ -5,6 +5,10 @@
  * Zero React, zero Supabase, zero DOM (ADR 0001 §2 e ADR 0004).
  */
 
+import type { TipoDeOrigem } from '../nucleo/origem/origens';
+import type { AudioCapturado } from './captura';
+import type { Nota } from './pontuacao';
+
 export type TipoDeReacao = 'fogo' | 'nojo' | 'trofeu';
 
 export interface Comunidade {
@@ -13,7 +17,6 @@ export interface Comunidade {
   readonly nome: string;
   readonly descricao: string;
   readonly icone: string;
-  readonly totalMembros?: number;
 }
 
 export interface RespostaDeCauso {
@@ -25,6 +28,8 @@ export interface RespostaDeCauso {
   readonly criadoEm: string;
   /** Identificador da resposta-pai quando for resposta aninhada (estilo Twitter) */
   readonly respostaAId?: string;
+  /** Profundidade: 0 responde o causo; 1 e 2 respondem outro comentário. */
+  readonly nivel?: 0 | 1 | 2;
 }
 
 export interface CausoPostado {
@@ -33,12 +38,23 @@ export interface CausoPostado {
   readonly comunidadeSlug: string;
   readonly autorNome: string;
   readonly autorHandle?: string;
+  readonly autorAvatarUrl?: string;
   readonly conteudo: string;
   /** Vínculo opcional com a nota do juiz de IA */
   readonly resultadoId?: string;
   readonly nota?: number;
-  readonly audioUrl?: string;
+  /**
+   * Endereço para tocar o áudio, ou `null` quando não há o que tocar.
+   *
+   * É função de propósito: a URL assinada vence em minutos, então quem toca
+   * pede na hora em vez de guardar.
+   */
+  readonly enderecoDoAudio?: () => Promise<string | null>;
+  /** Há áudio publicado neste causo (mesmo que ainda não assinado). */
+  readonly temAudio?: boolean;
   readonly duracaoSegundos?: number;
+  /** O causo existe só neste aparelho: não chegou ao servidor. */
+  readonly somenteNesteAparelho?: boolean;
   readonly videoUrl?: string;
   readonly imagemUrl?: string;
   readonly origem?: string;
@@ -61,10 +77,16 @@ export interface PedidoDePostagemDeCauso {
   readonly autorHandle?: string;
   /** Identificador do resultado da Arena (se houver arroto atrelado) */
   readonly resultadoId?: string;
-  readonly nota?: number;
-  readonly audioUrl?: string;
-  readonly duracaoSegundos?: number;
-  readonly origem?: string;
+  /**
+   * O arroto da Arena que vai junto com o causo. O adaptador guarda o resultado
+   * e sobe o áudio **só depois** da trava de consentimento; a nota publicada é a
+   * que o servidor calcula, nunca a que o cliente afirma.
+   */
+  readonly arroto?: {
+    readonly nota: Nota;
+    readonly origem: TipoDeOrigem;
+    readonly audio: AudioCapturado;
+  };
   /**
    * TRAVA LGPD: Para postar um arroto na comunidade pública, o jogador precisa
    * autorizar expressamente. Sem isso, a porta rejeita na hora.
@@ -82,6 +104,10 @@ export type ResultadoDaPostagem =
 export interface FiltrosDoFeed {
   readonly comunidadeSlug?: string;
   readonly limite?: number;
+  /** Só causos desta pessoa (id do usuário). */
+  readonly autorId?: string;
+  /** Só causos que esta pessoa curtiu (id do usuário). */
+  readonly curtidosPor?: string;
 }
 
 export interface PortaDeComunidade {
@@ -90,6 +116,9 @@ export interface PortaDeComunidade {
 
   /** Lista o feed de causos (global ou filtrado por comunidade) */
   listarFeed(filtros?: FiltrosDoFeed): Promise<readonly CausoPostado[]>;
+
+  /** Um causo pelo id (ou `null` se não existe, está escondido ou foi apagado). */
+  obterCauso(id: string): Promise<CausoPostado | null>;
 
   /** Publica um novo causo no feed com consentimento de áudio verificado */
   postarCauso(pedido: PedidoDePostagemDeCauso): Promise<ResultadoDaPostagem>;
@@ -118,6 +147,13 @@ export interface PortaDeComunidade {
     respostaAId?: string,
   ): Promise<RespostaDeCauso | null>;
 
+  /**
+   * Apaga um causo MEU (e os comentários dele). Com `apagarAudio`, apaga também o
+   * arquivo do arroto — as duas coisas precisam dar certo para valer `true`.
+   * `false` quando o servidor não apagou: a tela não pode dizer que apagou.
+   */
+  apagarCauso(causoId: string, opcoes?: { readonly apagarAudio?: boolean }): Promise<boolean>;
+
   /** Entra em uma comunidade */
   entrarComunidade(slug: string): Promise<boolean>;
 
@@ -127,6 +163,9 @@ export interface PortaDeComunidade {
   /** Lista slugs de comunidades que o jogador participa */
   listarMinhasComunidades(): Promise<readonly string[]>;
 
-  /** Denuncia um post e oculta o áudio/conteúdo */
+  /**
+   * Denuncia um causo. `true` só quando a denúncia foi registrada (ou já existia);
+   * `false` quando não foi — a tela não pode dizer que denunciou.
+   */
   denunciarCauso(causoId: string, motivo: string): Promise<boolean>;
 }

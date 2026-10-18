@@ -9,6 +9,7 @@ interface BarraLateralNavegacaoProps {
   tema: 'dark' | 'light';
   aoAlternarTema: () => void;
   perfil?: PerfilUsuario;
+  aoAbrirPerfil?: () => void;
 }
 
 export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
@@ -18,6 +19,7 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
   compacto = false,
   tema,
   aoAlternarTema,
+  aoAbrirPerfil,
 }) => {
   const wide = !compacto;
   const largura = wide ? 275 : 76;
@@ -130,6 +132,20 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
             </button>
           );
         })}
+
+        {aoAbrirPerfil && (
+          <button
+            type="button"
+            onClick={aoAbrirPerfil}
+            aria-label="Perfil"
+            style={{ ...navBtnBase, color: 'var(--muted)' }}
+          >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21v-1a8 8 0 0116 0v1" />
+            </svg>
+            {wide && <span>Perfil</span>}
+          </button>
+        )}
 
         {/* Botão Postar */}
         <button

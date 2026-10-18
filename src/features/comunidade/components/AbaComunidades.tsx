@@ -14,7 +14,8 @@ interface AbaComunidadesProps {
   aoRepostarCauso?: (id: string) => void;
   aoDuvidarCauso?: (causo: CausoPostado) => void;
   aoCompartilharCauso?: (causo: CausoPostado) => void;
-  aoResponderCauso?: (id: string, texto: string) => void;
+  aoResponderCauso?: (id: string, texto: string, respostaAId?: string) => void;
+  aoAbrirConversaCauso?: (id: string) => void | Promise<void>;
   aoDenunciarCauso?: (id: string) => void;
   aoAbrirPerfil?: (handle: string, nome?: string) => void;
 }
@@ -25,7 +26,6 @@ const COMUNIDADE_RAIZ: ComunidadeInfo = {
   ini: 'EA',
   cat: 'Oficial',
   desc: 'A histórica comunidade mãe dos arrotadores. Orgulho do estrago e zero pudor social.',
-  members: '34,5 mil membros',
   ano: 2004,
 };
 
@@ -44,6 +44,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
   aoDuvidarCauso = () => {},
   aoCompartilharCauso = () => {},
   aoResponderCauso = () => {},
+  aoAbrirConversaCauso,
   aoDenunciarCauso = () => {},
   aoAbrirPerfil: _aoAbrirPerfil,
 }) => {
@@ -77,6 +78,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
         aoDuvidarCauso={aoDuvidarCauso}
         aoCompartilharCauso={aoCompartilharCauso}
         aoResponderCauso={aoResponderCauso}
+        aoAbrirConversaCauso={aoAbrirConversaCauso}
         aoDenunciarCauso={aoDenunciarCauso}
       />
     );
@@ -133,7 +135,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
               </span>
             </div>
             <div style={{ color: 'var(--muted)', fontSize: '13px', marginTop: '2px' }}>
-              {c.members} · Desde 2004 no Orkut, agora no Telegram
+              Desde 2004 no Orkut, agora no Telegram
             </div>
           </div>
         </div>

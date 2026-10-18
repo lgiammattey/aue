@@ -187,44 +187,19 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     expect(screen.getByText(/A histórica comunidade mãe dos arrotadores/)).toBeDefined();
   });
 
-  it('permite criar desafio X1, persistir na lista e alternar com o Jogo Auê dentro de Desafios', async () => {
+  it('X1 não é montado nesta tela: chamar pro X1 leva à Arena e a lista não inventa duelo', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
-    render(<TelaComunidade porta={adapter} initialTab="desafios" />);
+    const onArrotar = vi.fn();
+    render(<TelaComunidade porta={adapter} initialTab="desafios" onArrotar={onArrotar} />);
 
-    // Alterna para a sub-aba Duelos X1
-    const btnSubDuelos = await screen.findByRole('button', { name: /Duelos X1/i });
-    fireEvent.click(btnSubDuelos);
+    fireEvent.click(await screen.findByRole('button', { name: /Duelos X1/i }));
 
-    // Clica em Chamar pro X1 na sub-aba desafios
-    const btnChamar = screen.getByRole('button', { name: 'Chamar pro X1' });
-    fireEvent.click(btnChamar);
+    // Sem semente: nenhum duelo de mentira com placar e handles inventados.
+    expect(screen.getByText(/Nenhum X1 por aqui ainda/i)).toBeDefined();
+    expect(screen.queryByText('Churrasco de domingo')).toBeNull();
 
-    // Modal de desafio aberto
-    const inputOponente = screen.getByPlaceholderText('@quem vai levar ferro');
-    const textarea = screen.getByPlaceholderText('Qual é o desafio?');
-    fireEvent.change(inputOponente, { target: { value: '@arrotador_rival' } });
-    fireEvent.change(textarea, { target: { value: 'Duelo do arroto monstro' } });
-
-    // Publica o desafio
-    const btnEnviar = screen.getByRole('button', { name: 'Enviar' });
-    fireEvent.click(btnEnviar);
-
-    // Modal de compartilhamento abre
-    expect(screen.getByText('COMPARTILHAR')).toBeDefined();
-
-    // Fecha o modal de compartilhamento
-    const btnFechar = screen.getByRole('button', { name: 'Fechar' });
-    fireEvent.click(btnFechar);
-
-    // O novo desafio aparece na lista com status Esperando
-    expect(await screen.findByText('Duelo do arroto monstro')).toBeDefined();
-
-    // Clica em Revanche em um desafio para carregar o jogo Auê
-    const botoesRevanche = screen.getAllByRole('button', { name: 'Revanche' });
-    fireEvent.click(botoesRevanche[0]);
-
-    // O jogo Auê está ativo na sub-aba de jogo
-    expect(await screen.findByRole('button', { name: /O Jogo Auê/i })).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Chamar pro X1' }));
+    expect(onArrotar).toHaveBeenCalledTimes(1);
   });
 
   it('filtra causos no feed pela busca da coluna lateral e exibe o card da comunidade no Telegram', async () => {

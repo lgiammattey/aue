@@ -1,0 +1,47 @@
+/**
+ * A porta da conta (cadastro, entrada e saída).
+ *
+ * A identidade do Auê nasce anônima. Cadastrar com e-mail e senha **promove**
+ * essa mesma identidade — o histórico fica — em vez de abrir uma segunda conta.
+ */
+
+export interface EstadoDaConta {
+  /** Há alguém logado, anônimo ou não. */
+  readonly temSessao: boolean;
+  /** A sessão ainda é a anônima do aparelho. */
+  readonly anonima: boolean;
+  readonly email?: string;
+}
+
+export type ResultadoDaConta =
+  | { readonly ok: true; readonly aviso?: 'confirmeNoEmail' }
+  | { readonly ok: false; readonly motivo: 'emailInvalido' }
+  | { readonly ok: false; readonly motivo: 'senhaFraca' }
+  | { readonly ok: false; readonly motivo: 'emailEmUso' }
+  | { readonly ok: false; readonly motivo: 'credenciaisInvalidas' }
+  | { readonly ok: false; readonly motivo: 'semServidor' }
+  | { readonly ok: false; readonly motivo: 'falhou'; readonly detalhe: string };
+
+export interface PedidoDeCadastro {
+  readonly email: string;
+  readonly senha: string;
+  readonly apelido: string;
+}
+
+export interface PortaDeConta {
+  estado(): Promise<EstadoDaConta>;
+  cadastrar(pedido: PedidoDeCadastro): Promise<ResultadoDaConta>;
+  entrar(email: string, senha: string): Promise<ResultadoDaConta>;
+  /** Manda o link de redefinição. Responde igual exista o e-mail ou não. */
+  enviarLinkDeRedefinicao(email: string): Promise<ResultadoDaConta>;
+  /** Vale só depois de abrir o link do e-mail. */
+  redefinirSenha(novaSenha: string): Promise<ResultadoDaConta>;
+  sair(): Promise<boolean>;
+}
+
+/** Regras que valem antes de ir ao servidor. A senha mínima espelha a do Supabase Auth. */
+export const SENHA_MINIMA = 8;
+
+export function emailParece(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+}

@@ -45,7 +45,7 @@ repositório — o histórico do git continua sendo o backup.
 | `docs/produto/VOZ_E_PERSONALIDADE.md` | **manter** | a voz é a mesma; o protótipo da Arena a confirma | `docs/jogo/VOZ.md` |
 | `docs/technical/arquitetura.md` | **reescrever** | descrevia rotas por tela e superfície social por flag | `docs/technical/arquitetura.md` |
 | `docs/technical/ambientes.md` | **manter** | onde roda e como migração sobe; independe da visão | — |
-| `docs/technical/deploy-vercel-e-og-dinamico.md` | **manter** | deploy e OG continuam válidos | — |
+| `docs/_arquivo/deploy-vercel-e-og-dinamico.md` | **manter** | deploy e OG continuam válidos | — |
 | `docs/technical/deteccao-de-arroto-yamnet.md` | **manter** | detecção real de arroto é peça central do jogo | — |
 | `docs/technical/moderacao-de-audio.md` | **manter** | privacidade mínima continua no escopo | — |
 | `docs/schema/nomenclatura.md` | **manter** | regra de nome de banco | — |

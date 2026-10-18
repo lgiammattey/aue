@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArvoreDeComentarios } from './components/ArvoreDeComentarios';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { CausoPostado, RespostaDeCauso, PortaDeComunidade } from '../../portas/comunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
@@ -33,31 +34,45 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     let ativo = true;
     setCarregando(true);
 
-    porta.listarFeed().then((lista: readonly CausoPostado[]) => {
+    (async () => {
+      const encontrado = id ? await porta.obterCauso(id) : null;
+      const respostas = encontrado ? await porta.listarRespostas(encontrado.id) : [];
       if (!ativo) return;
-      const encontrado = lista.find((c: CausoPostado) => c.id === id);
       if (encontrado) {
         setCauso(encontrado);
         setCurtido(Boolean(encontrado.curtidoPorMim));
         setCurtidas(encontrado.curtidas || 0);
-        setComentarios(encontrado.comentarios || []);
+        setComentarios(respostas);
       }
       setCarregando(false);
-    });
+    })();
 
     return () => {
       ativo = false;
     };
   }, [id, porta]);
 
-  const togglePlay = () => {
-    if (!causo?.audioUrl) return;
-    const audio = new Audio(causo.audioUrl);
-    if (!tocando) {
-      audio.play().catch(() => {});
+  const playerRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => () => playerRef.current?.pause(), []);
+
+  const togglePlay = async () => {
+    if (!causo?.enderecoDoAudio) return;
+    if (tocando) {
+      playerRef.current?.pause();
+      setTocando(false);
+      return;
+    }
+    // Endereço assinado vence em minutos: pedido na hora de tocar.
+    const endereco = await causo.enderecoDoAudio();
+    if (!endereco) return;
+    const player = new Audio(endereco);
+    player.onended = () => setTocando(false);
+    playerRef.current = player;
+    try {
+      await player.play();
       setTocando(true);
-      audio.onended = () => setTocando(false);
-    } else {
+    } catch {
       setTocando(false);
     }
   };
@@ -89,8 +104,15 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
   const handleDenunciar = async () => {
     if (!causo) return;
-    await porta.denunciarCauso(causo.id, 'Conteúdo impróprio');
-    setDenunciado(true);
+    const registrou = await porta.denunciarCauso(causo.id, 'Conteúdo impróprio');
+    if (registrou) setDenunciado(true);
+  };
+
+  const responderComentario = async (texto: string, respostaAId?: string) => {
+    if (!causo) return;
+    const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
+    const nova = await porta.adicionarResposta(causo.id, texto, nome, nome.toLowerCase().replace(/\s+/g, '_'), respostaAId);
+    if (nova) setComentarios((prev) => [...prev, nova]);
   };
 
   const enviarComentario = async (e: React.FormEvent) => {
@@ -261,7 +283,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
               </div>
 
               {/* Player de Áudio */}
-              {(causo.audioUrl || causo.nota !== undefined) && (
+              {(causo.temAudio || causo.nota !== undefined) && (
                 <div
                   style={{
                     display: 'flex',
@@ -460,54 +482,10 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                   </div>
                 </form>
 
-                {/* Lista Simples de Comentários */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {comentarios.length === 0 ? (
-                    <div style={{ color: 'var(--muted)', fontSize: '14px', textAlign: 'center', padding: '16px' }}>
-                      Nenhum comentário ainda. Seja o primeiro a zoar!
-                    </div>
-                  ) : (
-                    comentarios.map((c) => (
-                      <div
-                        key={c.id}
-                        style={{
-                          display: 'flex',
-                          gap: '10px',
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            background: 'var(--surface-2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontWeight: 700,
-                            fontSize: '12px',
-                            flex: 'none',
-                          }}
-                        >
-                          {c.autorNome.slice(0, 2).toUpperCase()}
-                        </div>
-
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                            <b style={{ fontSize: '14px' }}>{c.autorNome}</b>
-                            <span style={{ color: 'var(--muted)', fontSize: '12px' }}>
-                              @{c.autorHandle} · {new Date(c.criadoEm).toLocaleDateString('pt-BR')}
-                            </span>
-                          </div>
-
-                          <p style={{ margin: '4px 0', fontSize: '14px', lineHeight: 1.4 }}>
-                            {c.conteudo}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                <ArvoreDeComentarios
+                  comentarios={comentarios}
+                  aoResponder={responderComentario}
+                />
               </section>
             </article>
           )}

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { criarComunidadeWeb } from './comunidade';
-import type { CausoPostado } from '../../portas/comunidade';
+import type { CausoPostado, PedidoDePostagemDeCauso } from '../../portas/comunidade';
+
+// Sem servidor o arroto nem é lido: só a trava de consentimento importa aqui.
+const ARROTO_DE_TESTE = {} as NonNullable<PedidoDePostagemDeCauso['arroto']>;
 
 describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
   it('retorna a lista de comunidades padrão com as comunidades canônicas', async () => {
@@ -63,7 +66,7 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
       comunidadeSlug: 'eu-arroto-e-dai',
       conteudo: 'Mandei esse arroto violento!',
       autorNome: 'Pedrão',
-      resultadoId: 'res-1234',
+      arroto: ARROTO_DE_TESTE,
       consentimentoAudioPublico: false, // Negou consentimento
     });
 
@@ -94,7 +97,7 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
       comunidadeSlug: 'eu-arroto-e-dai',
       conteudo: 'Arrotei no meio da chamada do Teams e o chefe aplaudiu.',
       autorNome: 'Pedrão',
-      resultadoId: 'res-1234',
+      arroto: ARROTO_DE_TESTE,
       consentimentoAudioPublico: true,
     });
 

@@ -1,16 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { configuracaoAusente, signInWithGoogle, supabase, updateProfile } from '../../db/supabase';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { signInWithGoogle } from '../../db/supabase';
+import { FLAGS } from '../../shared/flags';
+import { criarContaWeb } from '../../plataforma/web/conta';
+import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import { obterPerfilLocal, salvarPerfilLocal } from '../../plataforma/web/perfil';
+import { emailParece, SENHA_MINIMA, type PortaDeConta, type ResultadoDaConta } from '../../portas/conta';
 
-export const TelaLogin: React.FC = () => {
+const MENSAGENS: Record<string, string> = {
+  emailInvalido: 'E-mail inválido.',
+  senhaFraca: `Senha com no mínimo ${SENHA_MINIMA} caracteres.`,
+  emailEmUso: 'Este e-mail já está cadastrado. Entra com ele.',
+  credenciaisInvalidas: 'E-mail ou senha incorretos.',
+  semServidor: 'Sem conexão com o servidor do Auê. Tenta de novo daqui a pouco.',
+};
+
+function mensagemDe(r: Extract<ResultadoDaConta, { ok: false }>): string {
+  return r.motivo === 'falhou' ? 'Não deu certo agora. Tenta de novo.' : MENSAGENS[r.motivo];
+}
+
+interface TelaLoginProps {
+  portaConta?: PortaDeConta;
+}
+
+export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const [conta] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [mode, setMode] = useState<'in' | 'up'>('in');
+  const [mode, setMode] = useState<'in' | 'up'>(params.get('modo') === 'cadastro' ? 'up' : 'in');
+  const [esqueci, setEsqueci] = useState(false);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [nick, setNick] = useState('');
   const [err, setErr] = useState('');
+  const [info, setInfo] = useState('');
   const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
@@ -26,99 +50,61 @@ export const TelaLogin: React.FC = () => {
     navigate('/');
   };
 
+  // Alinha o perfil guardado no aparelho com o do servidor, para o nome certo
+  // aparecer no composer logo depois de entrar.
+  const sincronizarPerfilLocal = async () => {
+    try {
+      const meu = await criarPerfilRemoto().obterMeuPerfil();
+      if (!meu) return;
+      const local = obterPerfilLocal();
+      salvarPerfilLocal({ ...local, id: meu.id, nome: meu.apelido, handle: meu.handle });
+    } catch {
+      // o servidor é a fonte de verdade; o espelho local pode esperar
+    }
+  };
+
   const submit = async () => {
     setErr('');
-    if (!email.includes('@')) {
-      setErr('E-mail inválido.');
-      return;
-    }
-    if (pass.length < 6) {
-      setErr('Senha com no mínimo 6 caracteres.');
-      return;
-    }
-    if (mode === 'up' && !nick.trim()) {
-      setErr('Escolhe um apelido.');
-      return;
+    setInfo('');
+
+    if (esqueci) {
+      if (!emailParece(email)) return setErr(MENSAGENS.emailInvalido);
+      setCarregando(true);
+      const r = await conta.enviarLinkDeRedefinicao(email);
+      setCarregando(false);
+      if (!r.ok) return setErr(mensagemDe(r));
+      return setInfo('Se esse e-mail tiver conta, o link de nova senha já está a caminho. Olha também o spam.');
     }
 
-    if (configuracaoAusente) {
-      // Ambiente local sem supabase configurado: salva perfil local e prossegue
-      const perfil = obterPerfilLocal();
-      if (mode === 'up' && nick.trim()) {
-        perfil.nome = nick.trim();
-        perfil.handle = nick.trim().replace(/^@/, '').toLowerCase().replace(/\s+/g, '_');
-        salvarPerfilLocal(perfil);
-      }
-      enter();
-      return;
-    }
+    if (!emailParece(email)) return setErr(MENSAGENS.emailInvalido);
+    if (pass.length < SENHA_MINIMA) return setErr(MENSAGENS.senhaFraca);
+    if (mode === 'up' && nick.trim().replace(/^@/, '').length < 2) return setErr('Escolhe um apelido.');
 
     setCarregando(true);
     try {
       if (mode === 'in') {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: pass,
-        });
-        if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            setErr('E-mail ou senha incorretos.');
-          } else {
-            setErr(error.message);
-          }
-          return;
-        }
-        if (data.user) {
-          const p = obterPerfilLocal();
-          p.id = data.user.id;
-          salvarPerfilLocal(p);
-          enter();
-        }
-      } else {
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password: pass,
-          options: {
-            data: {
-              apelido: nick.trim(),
-            },
-          },
-        });
-        if (error) {
-          if (error.message.includes('already registered')) {
-            setErr('Este e-mail já está cadastrado.');
-          } else {
-            setErr(error.message);
-          }
-          return;
-        }
-        if (data.user) {
-          const perfil = obterPerfilLocal();
-          perfil.id = data.user.id;
-          perfil.nome = nick.trim();
-          perfil.handle = nick.trim().replace(/^@/, '').toLowerCase().replace(/\s+/g, '_');
-          salvarPerfilLocal(perfil);
-
-          try {
-            await updateProfile(data.user.id, { apelido: nick.trim() });
-          } catch {
-            // segue mesmo com erro no banco
-          }
-          enter();
-        }
+        const r = await conta.entrar(email, pass);
+        if (!r.ok) return setErr(mensagemDe(r));
+        await sincronizarPerfilLocal();
+        enter();
+        return;
       }
-    } catch (e: any) {
-      setErr('Falha de conexão com o servidor. Tente de novo.');
+
+      const r = await conta.cadastrar({ email, senha: pass, apelido: nick.trim().replace(/^@/, '') });
+      if (!r.ok) return setErr(mensagemDe(r));
+      if (r.aviso === 'confirmeNoEmail') {
+        return setInfo(
+          `Mandamos um link para ${email.trim()}. Abre e confirma: é isso que prende a conta ao seu e-mail. Seus arrotos e causos continuam seus.`,
+        );
+      }
+      await sincronizarPerfilLocal();
+      enter();
     } finally {
       setCarregando(false);
     }
   };
 
   const handleGoogle = async () => {
-    if (configuracaoAusente) {
-      enter();
-      return;
-    }
     try {
       await signInWithGoogle();
     } catch {
@@ -158,8 +144,8 @@ export const TelaLogin: React.FC = () => {
       }) as any as React.CSSProperties;
 
   const isSignup = mode === 'up';
-  const titulo = isSignup ? 'Entra pro bonde.' : 'Bora de novo?';
-  const cta = isSignup ? 'Criar conta' : 'Entrar';
+  const titulo = esqueci ? 'Esqueceu a senha?' : isSignup ? 'Entra pro bonde.' : 'Bora de novo?';
+  const cta = esqueci ? 'Mandar o link' : isSignup ? 'Criar conta' : 'Entrar';
 
   return (
     <div
@@ -214,7 +200,9 @@ export const TelaLogin: React.FC = () => {
             <button
               onClick={() => {
                 setMode('in');
+                setEsqueci(false);
                 setErr('');
+                setInfo('');
               }}
               aria-label="Aba Entrar"
               style={{
@@ -235,7 +223,9 @@ export const TelaLogin: React.FC = () => {
             <button
               onClick={() => {
                 setMode('up');
+                setEsqueci(false);
                 setErr('');
+                setInfo('');
               }}
               aria-label="Aba Criar conta"
               style={{
@@ -268,6 +258,7 @@ export const TelaLogin: React.FC = () => {
             {titulo}
           </h1>
 
+          {FLAGS.loginSocial && (
           <button
             onClick={handleGoogle}
             type="button"
@@ -284,7 +275,9 @@ export const TelaLogin: React.FC = () => {
           >
             Continuar com Google
           </button>
+          )}
 
+          {FLAGS.loginSocial && (
           <div
             style={{
               display: 'flex',
@@ -298,12 +291,14 @@ export const TelaLogin: React.FC = () => {
             ou
             <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
+          )}
 
-          {isSignup && (
+          {isSignup && !esqueci && (
             <input
               value={nick}
               onChange={(e) => setNick(e.target.value)}
               placeholder="Apelido (ex: @voce_arrota)"
+              aria-label="Apelido"
               style={{
                 height: 48,
                 borderRadius: 12,
@@ -322,6 +317,7 @@ export const TelaLogin: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
+            autoComplete="email"
             placeholder="E-mail"
             style={{
               height: 48,
@@ -336,10 +332,12 @@ export const TelaLogin: React.FC = () => {
             }}
           />
 
+          {!esqueci && (
           <input
             value={pass}
             onChange={(e) => setPass(e.target.value)}
             type="password"
+            autoComplete={isSignup ? 'new-password' : 'current-password'}
             placeholder="Senha"
             style={{
               height: 48,
@@ -353,8 +351,44 @@ export const TelaLogin: React.FC = () => {
               outline: 'none',
             }}
           />
+          )}
 
-          {err && <span style={{ color: 'var(--danger)', fontSize: 14 }}>{err}</span>}
+          {err && (
+            <span role="alert" style={{ color: 'var(--danger)', fontSize: 14 }}>
+              {err}
+            </span>
+          )}
+          {info && (
+            <span role="status" style={{ color: 'var(--fg)', fontSize: 14, lineHeight: 1.4 }}>
+              {info}
+            </span>
+          )}
+          {!esqueci && mode === 'in' && (
+            <button
+              type="button"
+              onClick={() => {
+                setEsqueci(true);
+                setErr('');
+                setInfo('');
+              }}
+              style={{ background: 'none', border: 0, color: 'var(--muted)', textDecoration: 'underline', cursor: 'pointer', minHeight: 44, fontSize: 14, fontFamily: 'inherit' }}
+            >
+              Esqueci minha senha
+            </button>
+          )}
+          {esqueci && (
+            <button
+              type="button"
+              onClick={() => {
+                setEsqueci(false);
+                setErr('');
+                setInfo('');
+              }}
+              style={{ background: 'none', border: 0, color: 'var(--muted)', textDecoration: 'underline', cursor: 'pointer', minHeight: 44, fontSize: 14, fontFamily: 'inherit' }}
+            >
+              Voltar pro login
+            </button>
+          )}
 
           <button
             onClick={submit}
@@ -371,7 +405,7 @@ export const TelaLogin: React.FC = () => {
               cursor: carregando ? 'not-allowed' : 'pointer',
             }}
           >
-            {carregando ? 'Entrando...' : cta}
+            {carregando ? 'Um instante…' : cta}
           </button>
         </div>
 
@@ -388,7 +422,7 @@ export const TelaLogin: React.FC = () => {
             >
               Arrota como convidado
             </Link>
-            . Pra postar e salvar o placar, precisa de conta.
+            . Sem conta, seus causos ficam só neste navegador.
           </span>
         </div>
       </div>

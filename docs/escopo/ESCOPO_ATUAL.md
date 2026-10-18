@@ -147,6 +147,15 @@ Aprovado por decisão de produto pelo Luiz em 17/10/2026:
 - **Consentimento e Opt-in:** gravação privada continua padrão; publicação na comunidade exige ação consciente e aceite explícito;
 - **Moderação ativa:** sistema de denúncia e ocultação server-side para áudios públicos.
 
+Contrato de funcionamento (auditoria de 18/10/2026):
+
+- a nota e o áudio de um causo vêm do resultado guardado no servidor; o cliente nunca afirma nota;
+- o arroto só sobe **depois** do aceite marcado no modal, nunca na hora de jogar;
+- reação, comentário e denúncia vão ao banco (`alternar_reacao_do_causo`, `criar_comentario`, `denuncias`); erro do servidor aparece como erro, não como sucesso;
+- três denúncias de pessoas distintas escondem o causo;
+- sem Supabase configurado, o causo fica no aparelho e vem marcado "só neste aparelho";
+- **sem número inventado:** nada de contagem de membros, seguidores ou duelo de exemplo. Seguir e perfil de terceiros não existem ainda e aparecem desabilitados.
+
 ---
 
 ## 3. Fora do escopo

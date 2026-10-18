@@ -8,7 +8,6 @@ export interface ComunidadeInfo {
   ini: string;
   cat: string;
   desc: string;
-  members: string;
   ano: number;
 }
 
@@ -23,7 +22,8 @@ interface DetalheComunidadeProps {
   aoRepostarCauso: (id: string) => void;
   aoDuvidarCauso: (causo: CausoPostado) => void;
   aoCompartilharCauso: (causo: CausoPostado) => void;
-  aoResponderCauso: (id: string, texto: string) => void;
+  aoResponderCauso: (id: string, texto: string, respostaAId?: string) => void;
+  aoAbrirConversaCauso?: (id: string) => void | Promise<void>;
   aoDenunciarCauso: (id: string) => void;
   aoAbrirPerfil?: (handle: string, nome?: string) => void;
 }
@@ -68,6 +68,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
   aoDuvidarCauso,
   aoCompartilharCauso,
   aoResponderCauso,
+  aoAbrirConversaCauso,
   aoDenunciarCauso,
   aoAbrirPerfil: _aoAbrirPerfil,
 }) => {
@@ -132,7 +133,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
         </button>
         <div style={{ lineHeight: 1.2 }}>
           <div style={{ fontWeight: 700, fontSize: '18px', color: 'var(--fg)' }}>{comunidade.nome}</div>
-          <div style={{ color: 'var(--muted)', fontSize: '13px' }}>{comunidade.members}</div>
+          <div style={{ color: 'var(--muted)', fontSize: '13px' }}>{comunidade.cat}</div>
         </div>
       </div>
 
@@ -165,7 +166,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
           <div>
             <b style={{ fontSize: '22px', color: 'var(--fg)' }}>{comunidade.nome}</b>
             <div style={{ color: 'var(--muted)', fontSize: '14px', marginTop: '2px' }}>
-              {comunidade.cat} · {comunidade.members} · criada em {comunidade.ano}
+              {comunidade.cat} · criada em {comunidade.ano}
             </div>
           </div>
           <button
@@ -334,6 +335,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
                 aoDuvidar={aoDuvidarCauso}
                 aoCompartilhar={aoCompartilharCauso}
                 aoResponder={aoResponderCauso}
+                aoAbrirConversa={aoAbrirConversaCauso}
                 aoDenunciar={aoDenunciarCauso}
               />
             ))

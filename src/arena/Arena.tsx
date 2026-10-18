@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CHAVES } from '../portas/armazenamento';
 import type { AudioCapturado } from '../portas/captura';
 import type { Nota } from '../portas/pontuacao';
-import type { AlvoDeOrigem } from '../nucleo/origem/origens';
+import type { AlvoDeOrigem, TipoDeOrigem } from '../nucleo/origem/origens';
 import {
   JULGANDO,
   JULGANDO_COMENTARIO,
@@ -189,7 +189,12 @@ interface PropsDaArena {
   /** Injetável para o teste controlar o cronômetro. */
   agora?: () => number;
   /** Callback opcional quando o arrotador toca em POSTAR_NO_BONDE */
-  onPostarNoBonde?: (resultado: { nota: number; resultadoId?: string; duracao?: number; origem?: string; audioUrl?: string }) => void;
+  onPostarNoBonde?: (resultado: {
+    nota: number;
+    duracao?: number;
+    /** O arroto inteiro, para o Bonde pedir o aceite e só então guardar e publicar. */
+    arroto?: { nota: Nota; origem: TipoDeOrigem; audio: AudioCapturado };
+  }) => void;
 }
 
 export function Arena({
@@ -353,7 +358,7 @@ export function Arena({
     remontam. O que muda é o CTA sumir e a Bolha segurar o que acabou de sair.
   */
   const [conferindo, setConferindo] = useState(false);
-  const [gritoDaConferida, setGritoDaConferida] = useState<string>(CONFERINDO[0]);
+  const [, setGritoDaConferida] = useState<string>(CONFERINDO[0]);
 
   /* A assinatura é sobreposição: a Arena continua atrás, com a nota no lugar. */
   const [cobrandoNome, setCobrandoNome] = useState(false);
@@ -2089,9 +2094,15 @@ export function Arena({
                   className="botao botao-secundario"
                   onClick={() => {
                     atualizarMaiorScoreLocal(situacao.nota.nota);
+                    const gravado = audio.current;
+                    const alvo = origemEscolhida.current;
                     onPostarNoBonde({
                       nota: situacao.nota.nota,
                       duracao: situacao.nota.medidas.folego,
+                      arroto:
+                        gravado && alvo
+                          ? { nota: situacao.nota, origem: alvo.tipo, audio: gravado }
+                          : undefined,
                     });
                   }}
                 >
@@ -2492,7 +2503,6 @@ export function Arena({
     fala,
     gritoDaGravacao,
     conferindo,
-    gritoDaConferida,
     comecouEm,
     agora,
     pergunta,
@@ -2517,6 +2527,7 @@ export function Arena({
     escolherOrigem,
     mandarOutro,
     mandarODesafio,
+    onPostarNoBonde,
     compartilharANota,
     avisoDoCompartilhar,
     sabeMandarImagem,

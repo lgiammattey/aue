@@ -1,0 +1,3 @@
+# Mínimo para o Supabase CLI (link + db push) funcionar no CI e na sua máquina.
+# O banco do Auê é o projeto remoto; não se roda stack local daqui.
+project_id = "aue"

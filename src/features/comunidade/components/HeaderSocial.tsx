@@ -1,8 +1,10 @@
 import React from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
+export type TabHeaderSocial = 'feed' | 'arena' | 'comm' | 'desafios';
+
 interface HeaderSocialProps {
-  abaAtiva: 'feed' | 'comm' | 'desafios';
+  abaAtiva: TabHeaderSocial;
   filtroFeed: 'todos' | 'minhas';
   aoMudarFiltroFeed: (filtro: 'todos' | 'minhas') => void;
   isMobile: boolean;
@@ -31,8 +33,9 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
   aoSair,
   aoEntrar,
 }) => {
-  const titulos = {
+  const titulos: Record<TabHeaderSocial, string> = {
     feed: 'Feed',
+    arena: 'Auê',
     comm: 'Comunidade',
     desafios: 'Desafios',
   };
@@ -63,28 +66,46 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
           <span style={{ fontWeight: 700, fontSize: '20px' }}>{titulos[abaAtiva]}</span>
+          {abaAtiva === 'arena' && (
+            <span
+              style={{
+                fontFamily: 'ui-monospace, monospace',
+                fontSize: '11px',
+                color: 'var(--muted)',
+                letterSpacing: '.06em',
+                textTransform: 'uppercase',
+                padding: '2px 8px',
+                border: '1px solid var(--border)',
+                borderRadius: '999px',
+              }}
+            >
+              Arena
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
-          <button
-            type="button"
-            onClick={aoAbrirArena}
-            style={{
-              background: 'var(--accent, #c6ff00)',
-              color: 'var(--accent-on, #000)',
-              border: 0,
-              borderRadius: '999px',
-              fontWeight: 800,
-              fontSize: '13px',
-              cursor: 'pointer',
-              padding: '6px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <span>Jogar o Auê</span>
-          </button>
+          {abaAtiva !== 'arena' && (
+            <button
+              type="button"
+              onClick={aoAbrirArena}
+              style={{
+                background: 'var(--accent, #c6ff00)',
+                color: 'var(--accent-on, #000)',
+                border: 0,
+                borderRadius: '999px',
+                fontWeight: 800,
+                fontSize: '13px',
+                cursor: 'pointer',
+                padding: '6px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <span>Jogar o Auê</span>
+            </button>
+          )}
           {contaLogada && aoSair && (
             <button
               type="button"

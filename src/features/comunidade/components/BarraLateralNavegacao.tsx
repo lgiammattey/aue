@@ -1,9 +1,11 @@
 import React from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
+export type TabNavegacao = 'feed' | 'arena' | 'comm' | 'desafios';
+
 interface BarraLateralNavegacaoProps {
-  abaAtiva: 'feed' | 'comm' | 'desafios';
-  aoMudarAba: (aba: 'feed' | 'comm' | 'desafios') => void;
+  abaAtiva: TabNavegacao;
+  aoMudarAba: (aba: TabNavegacao) => void;
   aoAbrirComposer: () => void;
   compacto?: boolean;
   tema: 'dark' | 'light';
@@ -34,6 +36,11 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
       id: 'feed' as const,
       label: 'Feed',
       d: 'M3 11l9-8 9 8v10h-6v-6H9v6H3z',
+    },
+    {
+      id: 'arena' as const,
+      label: 'Auê',
+      d: 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3',
     },
     {
       id: 'comm' as const,

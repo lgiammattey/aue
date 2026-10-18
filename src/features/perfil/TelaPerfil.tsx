@@ -446,7 +446,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
             abaAtiva="feed"
             aoMudarAba={(nova) => {
               if (nova === 'feed') aoVoltar();
-              else window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
+              else if (nova === 'arena') {
+                if (aoArrotar) aoArrotar();
+                else window.location.href = '/arena';
+              } else {
+                window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
+              }
             }}
             aoAbrirComposer={aoArrotar}
             compacto={!isWide}
@@ -851,7 +856,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
           abaAtiva="feed"
           aoMudarAba={(nova) => {
             if (nova === 'feed') aoVoltar();
-            else window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
+            else if (nova === 'arena') {
+              if (aoArrotar) aoArrotar();
+              else window.location.href = '/arena';
+            } else {
+              window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
+            }
           }}
           aoAbrirPerfil={() => {}}
           aoAbrirComposer={aoArrotar}

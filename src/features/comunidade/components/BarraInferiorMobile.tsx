@@ -1,8 +1,10 @@
 import React from 'react';
 
+export type TabNavegacaoMobile = 'feed' | 'arena' | 'comm' | 'desafios';
+
 interface BarraInferiorMobileProps {
-  abaAtiva: 'feed' | 'comm' | 'desafios';
-  aoMudarAba: (aba: 'feed' | 'comm' | 'desafios') => void;
+  abaAtiva: TabNavegacaoMobile;
+  aoMudarAba: (aba: TabNavegacaoMobile) => void;
   aoAbrirComposer?: () => void;
   aoAbrirPerfil?: () => void;
 }
@@ -18,6 +20,11 @@ export const BarraInferiorMobile: React.FC<BarraInferiorMobileProps> = ({
       id: 'feed' as const,
       label: 'Feed',
       d: 'M3 11l9-8 9 8v10h-6v-6H9v6H3z',
+    },
+    {
+      id: 'arena' as const,
+      label: 'Auê',
+      d: 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3',
     },
     {
       id: 'comm' as const,
@@ -41,7 +48,7 @@ export const BarraInferiorMobile: React.FC<BarraInferiorMobileProps> = ({
           bottom: 0,
           height: '56px',
           display: 'grid',
-          gridTemplateColumns: `repeat(${aoAbrirPerfil ? 4 : 3}, 1fr)`,
+          gridTemplateColumns: `repeat(${tabs.length + (aoAbrirPerfil ? 1 : 0)}, 1fr)`,
           borderTop: '1px solid var(--border)',
           background: 'var(--bg)',
           zIndex: 6,

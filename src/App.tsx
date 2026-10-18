@@ -63,26 +63,14 @@ function EntradaInicial() {
 function EntradaArena() {
   const navigate = useNavigate();
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'var(--bg, #000000)' }}>
-      {/* Botão de retorno rápido para o Feed */}
-      <button
-        type="button"
-        className="voltar-pro-feed"
-        onClick={() => navigate('/feed')}
-        aria-label="Voltar para o Feed"
-      >
-        <span aria-hidden="true">←</span>
-        <span>Voltar pro Feed</span>
-      </button>
-
-      <Arena
-        onPostarNoBonde={(resultado) => {
-          // Sem o arroto inteiro não há o que publicar com nota e áudio: o Bonde
-          // avisa em vez de postar um causo "com nota" que o servidor não conhece.
-          navigate('/feed', { state: { resultadoRecente: resultado } });
-        }}
-      />
-    </div>
+    <TelaComunidade
+      initialTab="arena"
+      onArrotar={() => navigate('/arena')}
+      aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
+      aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
+      aoSair={() => navigate('/login')}
+      aoEntrar={() => navigate('/login')}
+    />
   );
 }
 

@@ -66,8 +66,9 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     // Brand AUÊ! / A!
     expect(screen.getByText(/AUÊ!|A!/)).toBeDefined();
 
-    // Abas de navegação: Início virou Feed, Comunidade no singular, Desafios com Auê dentro, Perfil removido
+    // Abas de navegação: Início virou Feed, Auê (Arena), Comunidade no singular, Desafios com Auê dentro, Perfil removido
     expect(screen.getByRole('button', { name: 'Feed' })).toBeDefined();
+    expect(screen.getAllByRole('button', { name: 'Auê' }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('button', { name: 'Comunidade' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Desafios' })).toBeDefined();
     expect(screen.queryByRole('button', { name: 'Perfil' })).toBeNull();
@@ -236,12 +237,12 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     expect(screen.getByText('Comunidade oficial no Telegram')).toBeDefined();
   });
 
-  it('abre Desafios com o jogo Auê ao receber initialTab="arena"', async () => {
+  it('abre a Arena integrada ao receber initialTab="arena"', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} initialTab="arena" />);
 
-    // O jogo Auê dentro de Desafios é exibido
-    expect(await screen.findByRole('button', { name: /O Jogo Auê/i })).toBeDefined();
+    // A Arena de arrotos é exibida dentro da coluna central
+    expect(await screen.findByRole('button', { name: /arrotar|toque para começar/i })).toBeDefined();
   });
 
   it('garante que o botão postar publica o causo com sucesso e limpa o composer mesmo com adaptador simulando falha de rede', async () => {

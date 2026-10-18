@@ -141,7 +141,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
         {/* Barra lateral desktop */}
         <BarraLateralNavegacao
           abaAtiva="feed"
-          aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'comm' ? '/comunidade' : '/desafios')}
+          aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
           aoAbrirComposer={() => navigate('/arena')}
           tema="dark"
           aoAlternarTema={() => {}}
@@ -500,7 +500,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
       {/* Barra Inferior Mobile */}
       <BarraInferiorMobile
         abaAtiva="feed"
-        aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'comm' ? '/comunidade' : '/desafios')}
+        aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
         aoAbrirPerfil={() => navigate('/perfil')}
       />
     </div>

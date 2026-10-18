@@ -20,14 +20,15 @@ import { AbaDesafios, type DesafioSocialItem } from './components/AbaDesafios';
 import { ModalNovoCauso, type DadosDoCausoComArroto } from './ModalNovoCauso';
 import { ColunaTendencias } from './components/ColunaTendencias';
 import { ModalCardCompartilhamento } from './ModalCardCompartilhamento';
-import {
-} from '../../plataforma/web/desafios';
+import { Arena } from '../../arena/Arena';
 import './Comunidade.css';
 
 type ArrotoParaPublicar = NonNullable<PedidoDePostagemDeCauso['arroto']>;
 
+export type TabComunidade = 'feed' | 'arena' | 'comm' | 'desafios';
+
 interface TelaComunidadeProps {
-  initialTab?: 'feed' | 'comm' | 'desafios' | 'arena' | 'perfil';
+  initialTab?: TabComunidade | 'perfil';
   perfilHandleInicial?: string;
   comunidadeSlugInicial?: string;
   porta?: PortaDeComunidade;
@@ -94,9 +95,34 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     typeof window !== 'undefined' ? window.innerWidth : 1200,
   );
 
-  const tabNormalizada: 'feed' | 'comm' | 'desafios' =
-    initialTab === 'arena' ? 'desafios' : initialTab === 'perfil' ? 'feed' : initialTab;
-  const [tab, setTab] = useState<'feed' | 'comm' | 'desafios'>(tabNormalizada);
+  const tabNormalizada: TabComunidade =
+    initialTab === 'perfil' ? 'feed' : initialTab ?? 'feed';
+  const [tab, setTab] = useState<TabComunidade>(tabNormalizada);
+
+  useEffect(() => {
+    if (initialTab && initialTab !== 'perfil') {
+      setTab(initialTab);
+    }
+  }, [initialTab]);
+
+  const handleMudarAba = (nova: TabComunidade) => {
+    setTab(nova);
+    try {
+      if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+        const rota =
+          nova === 'arena'
+            ? '/arena'
+            : nova === 'comm'
+            ? '/comunidade'
+            : nova === 'desafios'
+            ? '/desafios'
+            : '/feed';
+        window.history.replaceState(null, '', rota);
+      }
+    } catch {
+      // ignora
+    }
+  };
   const [comunidadeAtivaSlug] = useState<string | null>(comunidadeSlugInicial ?? null);
   const [filtroFeed, setFiltroFeed] = useState<'todos' | 'minhas'>('todos');
   const [comunidades, setComunidades] = useState<readonly Comunidade[]>([]);
@@ -388,11 +414,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   const handleIrParaArena = () => {
-    if (onArrotar) {
-      onArrotar();
-    } else {
-      setTab('desafios');
-    }
+    handleMudarAba('arena');
+    onArrotar?.();
   };
 
   // X1 só existe dentro da Arena (link de verdade, nota do servidor). Esta tela
@@ -478,7 +501,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         {showLeft && (
           <BarraLateralNavegacao
             abaAtiva={tab}
-            aoMudarAba={(nova) => setTab(nova)}
+            aoMudarAba={handleMudarAba}
             aoAbrirComposer={() => {
               setNovoTipoModal('texto');
               setModalNovoAberto(true);
@@ -599,7 +622,27 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
             </div>
           )}
 
-          {/* 2. ABA COMUNIDADE */}
+          {/* 2. ABA ARENA / AUÊ (O Jogo Auê dentro da coluna central de 600px) */}
+          {tab === 'arena' && (
+            <div style={{ width: '100%', minHeight: 'calc(100vh - 53px)', display: 'flex', flexDirection: 'column' }}>
+              <Arena
+                codigoDoDesafio={desafioAtivoCodigo}
+                onPostarNoBonde={(res) => {
+                  if (!res?.arroto) {
+                    avisar('Esse arroto não pode ser publicado agora. Arrote de novo.');
+                    return;
+                  }
+                  handleMudarAba('feed');
+                  setArrotoParaPublicar({ nota: res.nota, arroto: res.arroto });
+                  setNovoTipoModal('audio');
+                  setModalNovoAberto(true);
+                  avisar(`Nota ${res.nota}! Escolha onde postar no Bonde.`);
+                }}
+              />
+            </div>
+          )}
+
+          {/* 3. ABA COMUNIDADE */}
           {tab === 'comm' && (
             <AbaComunidades
               comunidades={comunidades}
@@ -677,7 +720,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       {isMobile && (
         <BarraInferiorMobile
           abaAtiva={tab}
-          aoMudarAba={(nova) => setTab(nova)}
+          aoMudarAba={handleMudarAba}
           aoAbrirPerfil={aoAbrirPerfil ? () => aoAbrirPerfil() : undefined}
           aoAbrirComposer={() => {
             setNovoTipoModal('texto');

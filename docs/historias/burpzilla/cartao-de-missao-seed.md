@@ -1,11 +1,11 @@
 # Cartão de Missão — Elenco Burpzilla no Bonde (seed)
 
-> **Rascunho para o Tiago aprovar.** Ainda não está aprovado. Sem aprovação, a conversa continua em Exploração e ninguém abre branch. Segue o [modelo oficial](../../../.agents/templates/mission-card.md).
+> **Aprovado com ressalvas pelo Tiago em 18/10/2026.** Pode ir ao Iury para o Gate Arquitetural. Nada vai a produção antes das condições da seção 6. Segue o [modelo oficial](../../../.agents/templates/mission-card.md).
 
 ## 1. Enquadramento (Tiago)
 
 - **Dor / Problema da pessoa:** quem entra no Auê hoje encontra o Bonde e as comunidades vazios. Sem ninguém por perto, não há por que postar causo, reagir ou chamar alguém pro X1.
-- **Comportamento esperado na tela:** o Bonde e a comunidade "Eu arroto, e daí?" têm posts de dois personagens (Giam e Lima) contando a história Burpzilla em episódios espaçados, com áudio do Solo Eructos! anexado e comentários ocasionais de perfis da casa, às vezes só um arroto.
+- **Comportamento esperado na tela:** o Bonde e a comunidade "Eu arroto, e daí?" têm posts de dois personagens (Giam e Lima) contando a história Burpzilla em episódios espaçados (backfill de 28/08/2026 a 15/10/2026, horários de Brasília, conforme o [cronograma](cronograma.md)), com áudio do Solo Eructos! anexado e comentários ocasionais de perfis da casa, às vezes só um arroto.
 - **Identificação (decisão de 18/10/2026):** o feed não leva selo de personagem. O perfil leva a bio "personagem da casa, Burpzilla". Não há menção na página Sobre, a pedido do Luiz.
 - **Fora de escopo (não vira):**
   - qualquer selo que simule ranking, como "número 1";
@@ -14,7 +14,8 @@
   - qualquer coisa que apareça como usuário comum sem identificação no perfil.
 - **Pista:** Full flow sistêmica.
 - **Por que esta pista:** mexe em Supabase (seed e agendamento), contrato de dados do causo e do comentário, e no conteúdo que o Bonde mostra. Entra no Gate Arquitetural.
-- **Fonte de verdade afetada:** `ESCOPO_ATUAL.md` §2.17, `VOZ.md` e `ADR 0001`.
+- **Fonte de verdade afetada:** `ESCOPO_ATUAL.md` §2.17 (que hoje diz "nota do servidor", "aceite no modal" e "perfil de terceiros desabilitado"; o Tiago atualiza com a decisão do Luiz antes do Iury abrir branch), `VOZ.md` e `ADR 0001`.
+- **Janela já passou:** hoje é 18/10 e todos os posts caem no passado. Não há agendamento, é carga com `criado_em` retroativo. Camillo/Lucas garantem que a data retroativa não vira ordem de ranking nem métrica de audiência, e que a conta marcada "da casa" fica rastreável no banco.
 
 ## 2. Donos e Fronteiras (Iury)
 
@@ -58,17 +59,29 @@ O [ESCOPO_ATUAL.md](../../escopo/ESCOPO_ATUAL.md) diz coisas que batem de frente
 | O perfil é igual ao de usuário comum e mostra o símbolo Burpzilla de usuário da casa | Rian | Safari iOS / Chrome Android | pendente |
 | O símbolo não indica posição, nota nem ranking | Rian | Safari iOS / Chrome Android | pendente |
 | O feed não mostra selo de personagem | Rian | Safari iOS / Chrome Android | pendente |
-| Os posts saem nos horários do cronograma, sem lote único | Marcelo | Teste | pendente |
+| Cada post carrega a data e hora do cronograma (Brasília), sem lote único, e o feed ordena certo | Marcelo | Código / Teste | pendente |
+| Conta da casa é identificável no banco e fora de métrica de audiência | Marcelo | Código / Teste | pendente |
+| Comentário só com arroto funciona de ponta a ponta, ou o cronograma troca por texto | Marcelo | Código / Teste | pendente |
 | O áudio toca e carrega do cache | Marcelo | Safari iOS / Chrome Android | pendente |
 | Comentários dos agentes não saem em todos os posts | Marcelo | Teste | pendente |
 | Denúncia esconde o conteúdo da casa como qualquer outro | Marcelo | Código / Teste | pendente |
-| Os áudios usados têm autorização registrada | Tiago | Documento | pendente |
+| Os áudios usados têm autorização registrada no repo, cobrindo uso como áudio de personagem | Tiago | Documento | pendente (trava de produção) |
 
 ## 6. Encerramento e Parecer Final
 
 - **Arquivos/módulos alterados:** a definir pelo Gate Arquitetural.
 - **Parecer do Marcelo:** pendente
 - **Veredito Final do Tiago:** pendente
+- **Parecer do Tiago sobre o cartão (18/10/2026): APROVADO COM RESSALVAS.** Cartão aprovado para abrir o Gate Arquitetural. Não aprovado para produção.
+- **Falta antes de o Iury abrir a execução:**
+  - registrar no `ESCOPO_ATUAL.md` §2.17 as decisões do Luiz (áudio sem jogo e sem nota, perfil de terceiro com símbolo, conta da casa);
+  - Lucas confirma que o envio de áudio sem jogo existe de ponta a ponta, e se comentário aceita áudio;
+  - Gate Arquitetural fecha os itens 2 e 5 e a data retroativa;
+  - Rian especifica o símbolo Burpzilla e a tela de perfil de terceiro;
+  - lista final de posts e áudios por cena, com o aval do autor e passada pelo `filtro-anti-ia`;
+  - corrigir `cronograma.md` e `vozes.md`, que ainda citam página Sobre, "selo" e "sem perfil falso".
+- **Travas de produção:** prova da autorização dos áudios guardada no repo; denúncia testada em conteúdo da casa.
+- **Atenção:** o personagem Lucas (rival) e o agente Lucas dividem nome; usar outro nome de conta para evitar confusão.
 - **Pendências ou decisão necessária do Luiz:**
   - os itens 2 e 5 da seção 4, que o Gate Arquitetural fecha;
   - guardar o registro da autorização dada no grupo do Telegram (mensagem ou captura) e o que ela cobre, conforme o [LEIAME](../../../audios/solo-eructos/LEIAME.md).

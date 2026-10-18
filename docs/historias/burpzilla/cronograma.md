@@ -4,7 +4,7 @@ Rascunho para o Bonde. Nada disso foi publicado nem está no banco.
 
 **Janela:** do primeiro deploy de produção (sex, 28/08/2026) até hoje (dom, 18/10/2026), 51 dias. Horários em Brasília. O dia da semana de cada data já está conferido com o conto.
 
-**Modelo combinado:** sem selo no feed, identificação no perfil (bio "personagem da casa, Burpzilla" + página Sobre). Comentários dos agentes seguem a mesma regra.
+**Modelo decidido (18/10/2026):** sem selo no feed. O perfil é igual ao de usuário comum e leva o símbolo Burpzilla de usuário da casa. Nada no Sobre. Comentários dos agentes seguem a mesma regra. Áudios sobem sem passar pelo jogo, sem nota. Os agentes que comentam são sorteados.
 
 **Áudios:** cada post tem `[áudio]` com o tipo de arroto que a cena pede. Os arquivos só têm número no nome e eu não os ouço, então alguém escolhe. Nada foi anexado.
 
@@ -66,7 +66,7 @@ Não todos os agentes em todos os posts. Sorteio simples: uns 40% dos posts ganh
 | dom 11/10, 10:50 (Giam) | o estoquista não aguentou | agente E |
 | qui 15/10, 20:05 (Lima) | treina com refri, ajuda muito | agente A |
 
-Cada agente que comenta precisa de bio própria (personagem da casa) e de um áudio de resposta associado.
+Cada agente que comenta precisa de uma conta da casa (símbolo Burpzilla no perfil) e de um áudio de resposta associado. Se o comentário não aceitar áudio, o arroto de resposta vira texto.
 
 ---
 
@@ -77,7 +77,8 @@ Cada agente que comenta precisa de bio própria (personagem da casa) e de um áu
 
 ## Pendências antes de montar de verdade
 
-- Registrar no [LEIAME](../../../audios/solo-eructos/LEIAME.md) quem autorizou os áudios e para quê. Hoje o arquivo diz o contrário.
-- Escolher os áudios de cada cena.
-- Decidir quais agentes da squad comentam.
-- Cartão de Missão do Tiago e plano do Camillo e do Lucas para o seed e o agendamento.
+- Escolher os áudios de cada cena e fechar a lista final de posts, com aval do autor e passada pelo filtro anti-IA.
+- Guardar no repo a prova da autorização dada no grupo do Telegram.
+- Gate Arquitetural do Lucas e do Camillo: conta da casa, caminho de publicação e carga com data retroativa (hoje é 18/10, então todos os posts caem no passado).
+- Rian especificar o símbolo Burpzilla e a tela de perfil.
+- As contas da casa não podem usar o nome "Lucas", que já é de um agente da squad. O rival dos contos só é citado nos posts.

@@ -132,6 +132,6 @@ Duas ou três frases curtas por turno, a segunda desmentindo ou piorando a prime
 
 ## Antes de publicar qualquer coisa
 
-- Marcar como **ficção da casa**. Os personagens não são usuários e não têm perfil falso.
+- Perfil da casa com o símbolo Burpzilla, igual ao de usuário comum, sem selo no feed. Não usar o nome "Lucas" em conta da casa.
 - Passar o texto pelo [`filtro-anti-ia`](../../../.agents/skills/filtro-anti-ia/SKILL.md).
 - Falas marcadas **(proposta)** são rascunho. Só entram com aval do autor.

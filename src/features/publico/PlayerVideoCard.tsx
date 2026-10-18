@@ -5,10 +5,15 @@ interface PlayerVideoCardProps {
   readonly video: VideoCurado;
 }
 
+const ROTULOS_CATEGORIAS: Record<VideoCurado['categoria'], string> = {
+  trovao: 'Trovão',
+  trator: 'Trator',
+  rajada: 'Rajada',
+  resenha: 'Resenha',
+};
+
 export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
   const [reproduzindo, setReproduzindo] = useState(false);
-
-  const ehYoutube = video.plataforma === 'youtube';
 
   return (
     <article
@@ -22,13 +27,12 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
         transition: 'transform 0.2s ease, border-color 0.2s ease',
       }}
     >
-      {/* Moldura de Vídeo com Proporção 16:9 ou 9:16 adaptável */}
+      {/* Moldura de Vídeo 16:9 */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: ehYoutube ? '16 / 9' : '9 / 16',
-          maxHeight: ehYoutube ? 'none' : '480px',
+          aspectRatio: '16 / 9',
           background: '#050504',
           display: 'flex',
           alignItems: 'center',
@@ -38,7 +42,7 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
       >
         {reproduzindo ? (
           <iframe
-            src={ehYoutube ? `${video.embedUrl}&autoplay=1` : video.embedUrl}
+            src={`${video.embedUrl}&autoplay=1`}
             title={video.titulo}
             style={{
               position: 'absolute',
@@ -63,9 +67,7 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
               height: '100%',
               border: 0,
               padding: 0,
-              background: video.thumbnailUrl
-                ? `url(${video.thumbnailUrl}) center/cover no-repeat`
-                : 'linear-gradient(135deg, #1c1c16 0%, #0d0d0a 100%)',
+              background: `url(${video.thumbnailUrl}) center/cover no-repeat`,
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
@@ -79,7 +81,7 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'rgba(0,0,0,0.35)',
+                background: 'rgba(0,0,0,0.3)',
                 transition: 'background 0.2s ease',
               }}
             />
@@ -139,20 +141,34 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <span
-            style={{
-              fontSize: '11px',
-              fontFamily: 'var(--font-mono, monospace)',
-              textTransform: 'uppercase',
-              color: 'var(--muted, #a3a39a)',
-              background: 'var(--bg, #0a0a08)',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              border: '1px solid var(--border, #26261f)',
-            }}
-          >
-            {video.plataforma === 'youtube' ? 'YouTube' : 'TikTok'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span
+              style={{
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono, monospace)',
+                textTransform: 'uppercase',
+                color: 'var(--muted, #a3a39a)',
+                background: 'var(--bg, #0a0a08)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border, #26261f)',
+              }}
+            >
+              YouTube
+            </span>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--accent, #c6ff00)',
+                background: 'rgba(198, 255, 0, 0.08)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontWeight: 600,
+              }}
+            >
+              {ROTULOS_CATEGORIAS[video.categoria]}
+            </span>
+          </div>
           <span
             style={{
               fontSize: '12px',
@@ -204,7 +220,7 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
               gap: '4px',
             }}
           >
-            Ver original no {video.plataforma === 'youtube' ? 'YouTube' : 'TikTok'} ↗
+            Ver original no YouTube ↗
           </a>
         </div>
       </div>

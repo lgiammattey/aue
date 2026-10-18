@@ -150,14 +150,16 @@ describe('/videos-de-arroto com a moldura da landing', () => {
     expect(html).toMatch(/<h1>[\s\S]*Vídeos de Arroto/);
   });
 
-  it('lista os vídeos curados do YouTube e TikTok com links originais', () => {
+  it('lista os vídeos curados do YouTube com capas nativas e links originais', () => {
     const html = montar(VideosDeArroto);
     expect(html).not.toContain('Fartin Around');
+    expect(html).not.toContain('TikTok');
     expect(html).toContain('Garoto Arroto');
     expect(html).toContain('Gamer Burps 38');
-    expect(html).toContain('Rei do Arroto');
+    expect(html).toContain('Aula de Arroto com Professor Moises');
     expect(html).toContain('Assistir arroto');
     expect(html).toContain('Entrar na Arena e Arrotar');
+    expect(html).toContain('Ver original no YouTube ↗');
   });
 
   it('usa a casca compartilhada e links de navegação', () => {

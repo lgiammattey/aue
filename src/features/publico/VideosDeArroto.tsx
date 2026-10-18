@@ -4,28 +4,47 @@ import { Link } from 'react-router-dom';
 import { LayoutPublico, SecaoPublica } from './LayoutPublico';
 import { PlayerVideoCard } from './PlayerVideoCard';
 import { PLAYLIST_VIDEOS_ARROTO } from '../../nucleo/midia/playlistDeVideos';
+import type { VideoCurado } from '../../nucleo/midia/playlistDeVideos';
+
+type CategoriaFiltro = 'todos' | VideoCurado['categoria'];
+
+const ROTULOS_CATEGORIAS: Record<CategoriaFiltro, string> = {
+  todos: 'Todos',
+  trovao: 'Trovão',
+  trator: 'Trator',
+  rajada: 'Rajada',
+  resenha: 'Resenha',
+};
 
 /**
- * `/videos-de-arroto` — Galeria pública de vídeos de arroto do TikTok e YouTube.
+ * `/videos-de-arroto` — Galeria pública de vídeos de arroto do YouTube.
  *
  * Página de alta atração para SEO e tráfego orgânico, conectando
  * a zoeira audiovisual da internet à Arena do Auê!.
  */
 export const VideosDeArroto: React.FC = () => {
-  const [filtro, setFiltro] = useState<'todos' | 'youtube' | 'tiktok'>('todos');
+  const [categoria, setCategoria] = useState<CategoriaFiltro>('todos');
 
   const videosFiltrados = useMemo(() => {
-    if (filtro === 'todos') return PLAYLIST_VIDEOS_ARROTO;
-    return PLAYLIST_VIDEOS_ARROTO.filter((v) => v.plataforma === filtro);
-  }, [filtro]);
+    if (categoria === 'todos') return PLAYLIST_VIDEOS_ARROTO;
+    return PLAYLIST_VIDEOS_ARROTO.filter((v) => v.categoria === categoria);
+  }, [categoria]);
+
+  const categoriasDisponiveis: readonly CategoriaFiltro[] = [
+    'todos',
+    'trovao',
+    'trator',
+    'rajada',
+    'resenha',
+  ];
 
   return (
     <LayoutPublico
       eyebrow="Playlist & Zoeira"
-      titulo="Vídeos de Arroto: Os Maiores Estrondos do YouTube e TikTok"
-      resumo="Uma seleção curada dos arrotos mais barulhentos, bizarros e engraçados da internet. Do clássico estrondo do vizinho que atravessa a parede às maiores rajadas do TikTok."
+      titulo="Vídeos de Arroto: Os Maiores Estrondos do YouTube"
+      resumo="Uma seleção curada dos arrotos mais barulhentos, bizarros e engraçados do YouTube. Do clássico estrondo no microfone às maiores aulas e compilações da internet."
     >
-      {/* Barra de Filtros */}
+      {/* Barra de Filtros por Categoria/Estilo */}
       <div
         style={{
           display: 'flex',
@@ -35,57 +54,35 @@ export const VideosDeArroto: React.FC = () => {
           marginBottom: '32px',
         }}
       >
-        <button
-          type="button"
-          onClick={() => setFiltro('todos')}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '999px',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            border: '1px solid var(--border)',
-            background: filtro === 'todos' ? 'var(--fg)' : 'var(--surface)',
-            color: filtro === 'todos' ? 'var(--bg)' : 'var(--muted)',
-            fontFamily: 'inherit',
-          }}
-        >
-          Todos ({PLAYLIST_VIDEOS_ARROTO.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setFiltro('tiktok')}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '999px',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            border: '1px solid var(--border)',
-            background: filtro === 'tiktok' ? 'var(--fg)' : 'var(--surface)',
-            color: filtro === 'tiktok' ? 'var(--bg)' : 'var(--muted)',
-            fontFamily: 'inherit',
-          }}
-        >
-          TikTok ({PLAYLIST_VIDEOS_ARROTO.filter((v) => v.plataforma === 'tiktok').length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setFiltro('youtube')}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '999px',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            border: '1px solid var(--border)',
-            background: filtro === 'youtube' ? 'var(--fg)' : 'var(--surface)',
-            color: filtro === 'youtube' ? 'var(--bg)' : 'var(--muted)',
-            fontFamily: 'inherit',
-          }}
-        >
-          YouTube ({PLAYLIST_VIDEOS_ARROTO.filter((v) => v.plataforma === 'youtube').length})
-        </button>
+        {categoriasDisponiveis.map((cat) => {
+          const total =
+            cat === 'todos'
+              ? PLAYLIST_VIDEOS_ARROTO.length
+              : PLAYLIST_VIDEOS_ARROTO.filter((v) => v.categoria === cat).length;
+          const ativo = categoria === cat;
+
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategoria(cat)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '999px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                border: '1px solid var(--border)',
+                background: ativo ? 'var(--fg)' : 'var(--surface)',
+                color: ativo ? 'var(--bg)' : 'var(--muted)',
+                fontFamily: 'inherit',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {ROTULOS_CATEGORIAS[cat]} ({total})
+            </button>
+          );
+        })}
       </div>
 
       {/* Grade de Vídeos */}
@@ -106,7 +103,7 @@ export const VideosDeArroto: React.FC = () => {
       <SecaoPublica eyebrow="Sua vez" titulo="Acha que seu arroto bate de frente?">
         <p>
           Assistir aos outros é divertido, mas o Auê existe para testar a sua própria potência.
-          Abra a Arena pelo celular, solte o som no microfone e deixe a inteligência artificial dar
+          Abra a Arena pelo celular ou computador, solte o som no microfone e deixe o juiz dar
           sua nota oficial de 0 a 100.
         </p>
         <p>
@@ -137,7 +134,7 @@ export const VideosDeArroto: React.FC = () => {
           </Link>{' '}
           ·{' '}
           <Link to="/grupos" style={{ color: 'var(--fg)', fontWeight: 600 }}>
-            Grupos no WhatsApp e TikTok
+            Grupos no WhatsApp e comunidades
           </Link>
         </p>
       </div>

@@ -1,5 +1,5 @@
 /**
- * Playlist curada de vídeos de arroto do TikTok e YouTube para o Auê.
+ * Playlist curada de vídeos de arroto do YouTube para o Auê.
  * Alimenta a página pública `/videos-de-arroto` para SEO e entretenimento.
  */
 
@@ -7,11 +7,11 @@ export interface VideoCurado {
   readonly id: string;
   readonly titulo: string;
   readonly autor: string;
-  readonly plataforma: 'youtube' | 'tiktok';
+  readonly plataforma: 'youtube';
   readonly videoId: string;
   readonly urlOriginal: string;
   readonly embedUrl: string;
-  readonly thumbnailUrl?: string;
+  readonly thumbnailUrl: string;
   readonly descricao: string;
   readonly categoria: 'trovao' | 'trator' | 'rajada' | 'resenha';
 }
@@ -39,160 +39,6 @@ export const PLAYLIST_VIDEOS_ARROTO: readonly VideoCurado[] = [
     embedUrl: 'https://www.youtube-nocookie.com/embed/czYHjMNtJzU?rel=0&playsinline=1',
     thumbnailUrl: 'https://i.ytimg.com/vi/czYHjMNtJzU/hqdefault.jpg',
     descricao: 'Distorção acústica no ganho da gravação. Se passasse na Arena, pontuava fácil na faixa 85+.',
-    categoria: 'trovao',
-  },
-  {
-    id: 'tt-rei-do-arroto',
-    titulo: 'Rei do Arroto: A lenda brasileira',
-    autor: '@reidoarroto',
-    plataforma: 'tiktok',
-    videoId: '7692853346348141830',
-    urlOriginal: 'https://vt.tiktok.com/ZSbQDwQfW/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7692853346348141830',
-    descricao: 'Representante nacional com técnica refinada de arrotar sem respirar no meio.',
-    categoria: 'resenha',
-  },
-  {
-    id: 'tt-mansroar-1',
-    titulo: "Man's Roar: O rugido grave",
-    autor: '@mansroar',
-    plataforma: 'tiktok',
-    videoId: '7697164065797328161',
-    urlOriginal: 'https://vt.tiktok.com/ZSgNonRgH/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7697164065797328161',
-    descricao: 'Vibração esofágica pura que parece um felino gigante acordando na selva.',
-    categoria: 'trovao',
-  },
-  {
-    id: 'tt-the-great-belcher',
-    titulo: 'The Great Belcher: Volume e afinação',
-    autor: '@the.great.belcher',
-    plataforma: 'tiktok',
-    videoId: '7692837276153285909',
-    urlOriginal: 'https://vt.tiktok.com/ZSb78mFxP/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7692837276153285909',
-    descricao: 'Um veterano da arte de arrotar alto e desafiar os amigos em público.',
-    categoria: 'trator',
-  },
-  {
-    id: 'tt-burns-burps',
-    titulo: 'Burns: O trator sem freio',
-    autor: '@burnsoburps',
-    plataforma: 'tiktok',
-    videoId: '7692768040366116103',
-    urlOriginal: 'https://vt.tiktok.com/ZSbpTeeD4/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7692768040366116103',
-    descricao: 'Duração contínua impressionante. Parece motor diesel dando partida a frio.',
-    categoria: 'trator',
-  },
-  {
-    id: 'tt-mansroar-2',
-    titulo: "Man's Roar: O estouro da bolha",
-    autor: '@mansroar',
-    plataforma: 'tiktok',
-    videoId: '7696395517944728864',
-    urlOriginal: 'https://vt.tiktok.com/ZSgeutTGK/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7696395517944728864',
-    descricao: 'Acumulou ar no diafragma e liberou em um impacto de milissegundos.',
-    categoria: 'trovao',
-  },
-  {
-    id: 'tt-mansroar-3',
-    titulo: "Man's Roar: Eco contínuo",
-    autor: '@mansroar',
-    plataforma: 'tiktok',
-    videoId: '7695827791652080929',
-    urlOriginal: 'https://vt.tiktok.com/ZSboRrHtV/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7695827791652080929',
-    descricao: 'Ressonância no peito que faz qualquer copo de vidro vibrar na mesa.',
-    categoria: 'trator',
-  },
-  {
-    id: 'tt-kyletrash',
-    titulo: 'Kyle: Rajada seca e rápida',
-    autor: '@kyletrash',
-    plataforma: 'tiktok',
-    videoId: '7663570813005696287',
-    urlOriginal: 'https://vt.tiktok.com/ZSb7jDVQn/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7663570813005696287',
-    descricao: 'Pulsos rápidos de arrotos sequenciais. Ritmo e precisão de metralhadora.',
-    categoria: 'rajada',
-  },
-  {
-    id: 'tt-swainer',
-    titulo: 'Swainer: Pressão no diafragma',
-    autor: '@swainer__',
-    plataforma: 'tiktok',
-    videoId: '7690682843860667670',
-    urlOriginal: 'https://vt.tiktok.com/ZSgL5enEr/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7690682843860667670',
-    descricao: 'A técnica de engolir pequenos goles de ar e soltar com a boca bem aberta.',
-    categoria: 'resenha',
-  },
-  {
-    id: 'tt-863fam-1',
-    titulo: '863 Fam: Arroto e zoeira',
-    autor: '@863fam__',
-    plataforma: 'tiktok',
-    videoId: '7682499759877262614',
-    urlOriginal: 'https://vt.tiktok.com/ZSbbSpmFK/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7682499759877262614',
-    descricao: 'Quando a resenha entre amigos vira competição espontânea de quem arrota mais alto.',
-    categoria: 'resenha',
-  },
-  {
-    id: 'tt-863fam-2',
-    titulo: '863 Fam: Revanche no sofá',
-    autor: '@863fam__',
-    plataforma: 'tiktok',
-    videoId: '7683972329432452374',
-    urlOriginal: 'https://vt.tiktok.com/ZSbbSC7kd/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7683972329432452374',
-    descricao: 'A resposta imediata ao desafio. O espírito do duelo X1 na prática.',
-    categoria: 'resenha',
-  },
-  {
-    id: 'tt-littlemamakels',
-    titulo: 'Mama Kels: Desafio sem vergonha',
-    autor: '@littlemamakels',
-    plataforma: 'tiktok',
-    videoId: '7686496428851531039',
-    urlOriginal: 'https://vt.tiktok.com/ZSqwKx2GU/',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7686496428851531039',
-    descricao: 'Mostrando que talento de arroto não escolhe gênero: potência e risada solta.',
-    categoria: 'trovao',
-  },
-  {
-    id: 'tt-pg780010',
-    titulo: 'PG Arrotos: Tremor de graves',
-    autor: '@pg780010',
-    plataforma: 'tiktok',
-    videoId: '7687976294566481166',
-    urlOriginal: 'https://www.tiktok.com/@pg780010/video/7687976294566481166',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7687976294566481166',
-    descricao: 'Curto, direto e com muito ar saindo de uma vez só.',
-    categoria: 'trovao',
-  },
-  {
-    id: 'tt-burpingguy',
-    titulo: 'Burping Guy: Frequência pura',
-    autor: '@burpingguy0',
-    plataforma: 'tiktok',
-    videoId: '7683761696984354070',
-    urlOriginal: 'https://www.tiktok.com/@burpingguy0/video/7683761696984354070',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7683761696984354070',
-    descricao: 'Estudo prático de como a garganta serve como caixa de ressonância.',
-    categoria: 'trator',
-  },
-  {
-    id: 'tt-dftsp',
-    titulo: 'DFTSP: O trovão final',
-    autor: '@dftsp_',
-    plataforma: 'tiktok',
-    videoId: '7683647682476330270',
-    urlOriginal: 'https://www.tiktok.com/@dftsp_/video/7683647682476330270',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7683647682476330270',
-    descricao: 'Aquele estrondo que encerra a playlist com chave de ouro.',
     categoria: 'trovao',
   },
   {

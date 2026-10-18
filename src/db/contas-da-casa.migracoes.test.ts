@@ -244,3 +244,47 @@ describe('rollback', () => {
     expect(down).toContain('ORDER BY p.created_at DESC\n');
   });
 });
+
+describe('nomenclatura: o que as migrações do elenco criam está em português', () => {
+  const novos = (sql: string, padrao: RegExp) => [...semComentarios(sql).matchAll(padrao)].map((m) => m[1]);
+
+  it('tabelas, colunas e funções novas são as combinadas, em snake_case PT-BR', () => {
+    const todas = contas + feed;
+    expect(novos(todas, /CREATE TABLE (?:IF NOT EXISTS )?public\.([a-z_]+)/g)).toEqual(['contas_da_casa']);
+    expect(novos(todas, /ADD COLUMN IF NOT EXISTS ([a-z_]+)/g)).toEqual(['caminho_do_audio_da_casa']);
+    expect(novos(todas, /CREATE FUNCTION public\.([a-z_]+)\(/g).sort()).toEqual(
+      [
+        'aue_dentro_da_janela_da_casa',
+        'comentar_da_casa',
+        'listar_feed_de_causos',
+        'obter_perfil_publico',
+        'publicar_da_casa',
+        'registrar_conta_da_casa',
+      ].sort(),
+    );
+    expect(novos(todas, /INSERT INTO storage\.buckets[^V]*VALUES\s*\('([a-z_]+)'/g)).toEqual(['audio_da_casa']);
+  });
+
+  it('nenhum identificador aposentado pela tradução aparece no texto', () => {
+    // A trava geral está em nomenclatura-ptbr.migracoes.test.ts; aqui só garante que ela vê estes arquivos.
+    const posteriores = readdirSync(`${RAIZ}/supabase/migrations`).filter((n) => n > '20260807000036');
+    expect(posteriores).toContain(ARQUIVO_CONTAS);
+    expect(posteriores).toContain(ARQUIVO_FEED);
+  });
+});
+
+describe('ADR 0007', () => {
+  const adr = readFileSync(`${RAIZ}/docs/technical/adr/0007-audio-publico-da-casa.md`, 'utf8');
+
+  it('existe como proposto, cita o §8 item 9 e a alternativa privada', () => {
+    expect(adr).toMatch(/\*\*Status:\*\* proposto/);
+    expect(adr).toContain('§8');
+    expect(adr).toContain('item 9');
+    expect(adr).toContain('URL assinada');
+  });
+
+  it('a migração avisa que depende dele e o índice dos ADRs o lista', () => {
+    expect(contas).toContain('ADR 0007');
+    expect(readFileSync(`${RAIZ}/docs/technical/adr/README.md`, 'utf8')).toMatch(/0007-audio-publico-da-casa\.md\).*proposto/);
+  });
+});

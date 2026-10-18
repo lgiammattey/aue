@@ -14,6 +14,12 @@ export interface PerfilPublico {
   readonly cidade?: string;
   readonly titulo?: string;
   readonly fundador: boolean;
+  /**
+   * Conta que o Auê opera (personagem ou agente). A tela de perfil mostra o
+   * símbolo Burpzilla; o feed não mostra selo. Não indica posição, nota nem
+   * ranking. Opcional enquanto a tela não consome o campo.
+   */
+  readonly daCasa?: boolean;
   readonly criadoEm: string;
   /** @ nas redes, sem o arroba e sem link. */
   readonly instagram?: string;

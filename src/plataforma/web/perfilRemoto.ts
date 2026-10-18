@@ -10,8 +10,8 @@ import type {
   ResultadoDaFoto,
 } from '../../portas/perfil';
 
-/** Linha de `obter_perfil_publico` (20261018000004). */
-interface LinhaDePerfil {
+/** Linha de `obter_perfil_publico` (20261018000008). */
+export interface LinhaDePerfil {
   id: string;
   handle: string;
   apelido: string | null;
@@ -31,6 +31,7 @@ interface LinhaDePerfil {
   total_seguindo: number;
   eu_sigo: boolean;
   sou_eu: boolean;
+  conta_da_casa: boolean;
 }
 
 export function traduzirPerfil(l: LinhaDePerfil): PerfilPublico {
@@ -54,6 +55,7 @@ export function traduzirPerfil(l: LinhaDePerfil): PerfilPublico {
     totalSeguindo: Number(l.total_seguindo),
     euSigo: Boolean(l.eu_sigo),
     souEu: Boolean(l.sou_eu),
+    daCasa: Boolean(l.conta_da_casa),
   };
 }
 

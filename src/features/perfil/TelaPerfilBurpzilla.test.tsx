@@ -52,13 +52,6 @@ function portaDePerfil(sobrepor: Partial<PortaDePerfil> = {}): PortaDePerfil {
   };
 }
 
-const compartilhamentoFalso = (resultado: 'ok' | 'indisponivel' = 'ok') =>
-  ({
-    compartilhar: vi.fn(async () => (resultado === 'ok' ? { ok: true as const, via: 'texto' as const } : { ok: false as const, motivo: 'indisponivel' as const })),
-    sabeMandarImagem: () => false,
-    copiar: vi.fn(async () => true),
-  });
-
 const props = {
   aoVoltar: vi.fn(),
   aoArrotar: vi.fn(),

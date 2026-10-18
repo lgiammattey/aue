@@ -168,40 +168,52 @@ export function App() {
       <Router>
         <Suspense fallback={null}>
         <Routes>
-          {/*
-            Auê 3.0 / Bonde do Arroto - Feed, Comunidade e Desafios (com o Jogo Auê)
-            Desktop em 3 colunas, Tablet com ícones, Mobile com barra inferior.
-          */}
+          {/* Feed e Entrada Inteligente */}
           <Route path="/" element={<EntradaInicial />} />
           <Route path="/feed" element={<EntradaPrincipal />} />
+
+          {/* Arena de Arrotos */}
           <Route path="/arena" element={<EntradaArena />} />
+
+          {/* Comunidades (Singular, Plural e Aliases) */}
+          <Route path="/comunidade" element={<EntradaBondes />} />
+          <Route path="/comunidades" element={<EntradaBondes />} />
           <Route path="/bondes" element={<EntradaBondes />} />
+          <Route path="/comm" element={<Navigate to="/comunidade" replace />} />
           <Route path="/c/:slug" element={<EntradaComunidadeSlug />} />
           <Route path="/comunidade/:slug" element={<EntradaComunidadeSlug />} />
-          <Route path="/desafios" element={<EntradaDesafios />} />
-          <Route path="/perfil" element={<EntradaPerfil />} />
-          <Route path="/perfil/:handle" element={<EntradaPerfilHandle />} />
-          <Route path="/u/:handle" element={<EntradaPerfilHandle />} />
-          <Route path="/comunidade" element={<EntradaBondes />} />
-          <Route path="/landing" element={<TelaLanding />} />
-          <Route path="/login" element={<TelaLogin />} />
-          <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />
-          <Route path="/versoes" element={<TelaVersoesWebapp />} />
-          <Route path="/historia/:id" element={<EntradaHistoria />} />
-          <Route path="/conto/:id" element={<EntradaHistoria />} />
+          <Route path="/comunidades/:slug" element={<EntradaComunidadeSlug />} />
 
-          {/* Duelos e batalhas */}
+          {/* Desafios e Duelos X1 */}
+          <Route path="/desafios" element={<EntradaDesafios />} />
+          <Route path="/x1/:code" element={<EntradaPorLink />} />
           <Route path="/b/:code" element={<EntradaPorLink />} />
           <Route path="/d/:id" element={<ChallengeView />} />
 
-          {/* Páginas públicas e legais */}
-          <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
-          <Route path="/termos" element={<TermosDeUso />} />
+          {/* Perfil e Conta */}
+          <Route path="/perfil" element={<EntradaPerfil />} />
+          <Route path="/u/:handle" element={<EntradaPerfilHandle />} />
+          <Route path="/perfil/:handle" element={<EntradaPerfilHandle />} />
+          <Route path="/login" element={<TelaLogin />} />
+          <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />
+
+          {/* Resenhas e Histórias */}
+          <Route path="/resenha/:id" element={<EntradaHistoria />} />
+          <Route path="/historia/:id" element={<EntradaHistoria />} />
+          <Route path="/conto/:id" element={<EntradaHistoria />} />
+
+          {/* Páginas Públicas e Legais */}
           <Route path="/como-jogar" element={<ComoJogar />} />
           <Route path="/como-arrotar" element={<ComoArrotar />} />
+          <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
+          <Route path="/termos" element={<TermosDeUso />} />
           <Route path="/grupos" element={<TelaGrupos />} />
           {/* A página de /g/<slug>/ é estática (ADR 0004). Quem cai aqui é grupo que saiu do ar. */}
           <Route path="/g/:slug" element={<Navigate to="/grupos" replace />} />
+
+          {/* Ambientes de Apoio e Design */}
+          <Route path="/landing" element={<TelaLanding />} />
+          <Route path="/versoes" element={<TelaVersoesWebapp />} />
 
           {/* Fallback */}
           <Route path="*" element={<EntradaPrincipal />} />

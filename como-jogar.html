@@ -103,6 +103,39 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Auê" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "O que é o Auê?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "O Auê é um jogo de arroto online e rede social. Você grava seu arroto no celular, a inteligência artificial analisa a acústica e dá uma nota de 0 a 100 para você disputar duelos no X1."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Precisa instalar algum aplicativo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Não. O Auê funciona 100% online direto pelo navegador web do celular ou computador, sem downloads em lojas de aplicativos."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Como funciona o duelo X1?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Após receber sua nota, você gera um link privado para enviar no WhatsApp. Seu amigo clica, ouve seu arroto, manda o arroto de resposta e o jogo declara o vencedor com placar oficial."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
@@ -144,7 +177,13 @@
         <em>burp game</em>; aqui é só o Auê.
       </p>
 
-      <p><a href="/">Jogar agora</a> · <a href="/privacidade">Política de privacidade</a></p>
+      <p>
+        <a href="/">Jogar agora</a> ·
+        <a href="/como-arrotar">Como arrotar</a> ·
+        <a href="/tipos-de-arroto">Tipos de arroto</a> ·
+        <a href="/ranking-de-arrotos">Ranking de arrotos</a> ·
+        <a href="/privacidade">Política de privacidade</a>
+      </p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

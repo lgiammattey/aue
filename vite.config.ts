@@ -52,6 +52,8 @@ export default defineConfig(({ mode }) => ({
         termos: entrada('termos.html'),
         comoJogar: entrada('como-jogar.html'),
         comoArrotar: entrada('como-arrotar.html'),
+        tiposDeArroto: entrada('tipos-de-arroto.html'),
+        rankingDeArrotos: entrada('ranking-de-arrotos.html'),
         comunidade: entrada('comunidade.html'),
         grupos: entrada('grupos.html'),
       },

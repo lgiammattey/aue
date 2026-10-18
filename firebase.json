@@ -8,6 +8,8 @@
       { "source": "/termos", "destination": "/termos.html" },
       { "source": "/como-jogar", "destination": "/como-jogar.html" },
       { "source": "/como-arrotar", "destination": "/como-arrotar.html" },
+      { "source": "/tipos-de-arroto", "destination": "/tipos-de-arroto.html" },
+      { "source": "/ranking-de-arrotos", "destination": "/ranking-de-arrotos.html" },
       { "source": "/comunidade", "destination": "/comunidade.html" },
       { "source": "/grupos", "destination": "/grupos.html" },
       { "source": "**", "destination": "/index.html" }

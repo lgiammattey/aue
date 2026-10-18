@@ -13,6 +13,8 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { ComoJogar } from './ComoJogar';
 import { ComoArrotar } from './ComoArrotar';
+import { TiposDeArroto } from './TiposDeArroto';
+import { RankingDeArrotos } from './RankingDeArrotos';
 
 function montar(componente: FC): string {
   return renderToStaticMarkup(createElement(MemoryRouter, null, createElement(componente)));
@@ -86,5 +88,56 @@ describe('/como-arrotar com a moldura da landing', () => {
     const html = montar(ComoArrotar);
     expect(html).toContain('href="/"');
     expect(html).toContain('href="/como-jogar"');
+  });
+});
+
+describe('/tipos-de-arroto com a moldura da landing', () => {
+  it('tem um H1 só, e é o da página', () => {
+    const html = montar(TiposDeArroto);
+    expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
+    expect(html).toMatch(/<h1>[\s\S]*Tipos de arroto/);
+  });
+
+  it('traz os cinco estilos e os critérios acústicos', () => {
+    const html = montar(TiposDeArroto);
+    expect(html).toContain('O Trovão');
+    expect(html).toContain('O Trator');
+    expect(html).toContain('A Rajada');
+    expect(html).toContain('O Fraseado');
+    expect(html).toContain('O Sopro Oco');
+    expect(html).toContain('duração');
+    expect(html).toContain('potência');
+  });
+
+  it('usa a casca compartilhada e links de retorno', () => {
+    const html = montar(TiposDeArroto);
+    expect(html).toContain('desktop-site');
+    expect(html).toContain('href="/como-arrotar"');
+    expect(html).toContain('href="/ranking-de-arrotos"');
+  });
+});
+
+describe('/ranking-de-arrotos com a moldura da landing', () => {
+  it('tem um H1 só, e é o da página', () => {
+    const html = montar(RankingDeArrotos);
+    expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
+    expect(html).toMatch(/<h1>[\s\S]*Ranking e Recordes de Arroto/);
+  });
+
+  it('traz os recordes mundiais e as faixas de nota oficiais', () => {
+    const html = montar(RankingDeArrotos);
+    expect(html).toContain('112,4 dB');
+    expect(html).toContain('Neville Sharp');
+    expect(html).toContain('Foi isso?');
+    expect(html).toContain('Tá maluco.');
+    expect(html).toContain('Tá roubado. Não é possível.');
+    expect(html).toContain('YAMNet');
+  });
+
+  it('usa a casca compartilhada e links de retorno', () => {
+    const html = montar(RankingDeArrotos);
+    expect(html).toContain('desktop-site');
+    expect(html).toContain('href="/como-jogar"');
+    expect(html).toContain('href="/tipos-de-arroto"');
   });
 });

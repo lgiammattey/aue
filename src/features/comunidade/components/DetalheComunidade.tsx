@@ -70,7 +70,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
   aoResponderCauso,
   aoAbrirConversaCauso,
   aoDenunciarCauso,
-  aoAbrirPerfil: _aoAbrirPerfil,
+  aoAbrirPerfil,
 }) => {
   const [dtab, setDtab] = useState<'posts' | 'sobre'>('posts');
   const [draft, setDraft] = useState('');
@@ -337,6 +337,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
                 aoResponder={aoResponderCauso}
                 aoAbrirConversa={aoAbrirConversaCauso}
                 aoDenunciar={aoDenunciarCauso}
+                aoAbrirPerfil={aoAbrirPerfil}
               />
             ))
           ) : (

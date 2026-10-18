@@ -38,6 +38,11 @@ export interface CausoPostado {
   readonly comunidadeSlug: string;
   readonly autorNome: string;
   readonly autorHandle?: string;
+  /**
+   * `autorHandle` é o @ real, vindo do servidor. Falso quando o adaptador
+   * fabricou o @ a partir do nome: esse @ não abre perfil.
+   */
+  readonly autorHandleDoServidor?: boolean;
   readonly autorAvatarUrl?: string;
   readonly conteudo: string;
   /** Vínculo opcional com a nota do juiz de IA */

@@ -93,7 +93,32 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   ).toUpperCase();
 
   const handle = causo.autorHandle || causo.autorNome.toLowerCase().replace(/\s+/g, '_');
+  // Só o @ que o servidor mandou abre perfil; o fabricado do nome e o causo
+  // "só neste aparelho" ficam sem link.
+  const handleDoPerfil =
+    aoAbrirPerfil && causo.autorHandleDoServidor && !causo.somenteNesteAparelho && causo.autorHandle
+      ? causo.autorHandle
+      : null;
+  const abrirPerfilDoAutor = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (handleDoPerfil) aoAbrirPerfil?.(handleDoPerfil, causo.autorNome);
+  };
+  const botaoDoAutor: React.CSSProperties = {
+    background: 'none',
+    border: 0,
+    padding: 0,
+    margin: 0,
+    font: 'inherit',
+    color: 'inherit',
+    textAlign: 'left',
+    cursor: 'pointer',
+  };
   const tempo = causo.criadoEm ? new Date(causo.criadoEm).toLocaleDateString('pt-BR') : 'agora';
+
+  const AvatarTag = handleDoPerfil ? 'button' : 'div';
+  const propsDoAvatar = handleDoPerfil
+    ? { type: 'button' as const, onClick: abrirPerfilDoAutor, 'aria-label': `Ver perfil de @${handleDoPerfil}` }
+    : {};
 
   const formatarDuracao = (s?: number) => {
     if (!s) return '0:07';
@@ -131,7 +156,8 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
       }}
     >
       {/* Avatar 44px */}
-      <div
+      <AvatarTag
+        {...propsDoAvatar}
         style={{
           width: '44px',
           height: '44px',
@@ -145,6 +171,9 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           fontSize: '14px',
           color: 'var(--fg)',
           userSelect: 'none',
+          padding: 0,
+          border: 0,
+          cursor: handleDoPerfil ? 'pointer' : 'default',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -159,25 +188,40 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
         ) : (
           autorIni
         )}
-      </div>
+      </AvatarTag>
 
       {/* Conteúdo */}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-          <div
-            style={{
+          {(() => {
+            const nomeEHandle = (
+              <>
+                <b style={{ fontSize: '15px', color: 'var(--fg)' }}>{causo.autorNome}</b>
+                <span style={{ color: 'var(--muted)', fontSize: '15px' }}>
+                  @{handle} · {tempo}
+                </span>
+              </>
+            );
+            const estiloLinha: React.CSSProperties = {
               display: 'flex',
               gap: '4px',
               alignItems: 'baseline',
               flexWrap: 'wrap',
               minWidth: 0,
-            }}
-          >
-            <b style={{ fontSize: '15px', color: 'var(--fg)' }}>{causo.autorNome}</b>
-            <span style={{ color: 'var(--muted)', fontSize: '15px' }}>
-              @{handle} · {tempo}
-            </span>
-          </div>
+            };
+            return handleDoPerfil ? (
+              <button
+                type="button"
+                onClick={abrirPerfilDoAutor}
+                aria-label={`Ver perfil de ${causo.autorNome}, @${handleDoPerfil}`}
+                style={{ ...botaoDoAutor, ...estiloLinha, alignItems: 'center', minHeight: '44px', margin: '-12px 0' }}
+              >
+                {nomeEHandle}
+              </button>
+            ) : (
+              <div style={estiloLinha}>{nomeEHandle}</div>
+            );
+          })()}
 
           <div style={{ position: 'relative' }}>
             <button

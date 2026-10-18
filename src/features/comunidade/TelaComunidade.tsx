@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
+import { criarContaWeb } from '../../plataforma/web/conta';
+import type { PortaDeConta } from '../../portas/conta';
 import type {
   CausoPostado,
   Comunidade,
@@ -29,6 +31,10 @@ interface TelaComunidadeProps {
   perfilHandleInicial?: string;
   comunidadeSlugInicial?: string;
   porta?: PortaDeComunidade;
+  portaConta?: PortaDeConta;
+  /** Chamado depois que a pessoa saiu da conta (a tela do app leva ao login). */
+  aoSair?: () => void;
+  aoEntrar?: () => void;
   onArrotar?: () => void;
   onDuvidar?: (causo: CausoPostado) => void;
   aoAbrirHistoria?: (id: string) => void;
@@ -43,6 +49,9 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   perfilHandleInicial: _perfilHandleInicial,
   comunidadeSlugInicial,
   porta,
+  portaConta,
+  aoSair,
+  aoEntrar,
   onArrotar,
   onDuvidar,
   aoAbrirHistoria,
@@ -50,6 +59,28 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   resultadoRecente,
 }) => {
   const [adaptador] = useState<PortaDeComunidade>(() => porta ?? criarComunidadeWeb());
+  const [conta] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
+  const [contaLogada, setContaLogada] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    conta.estado().then((e) => {
+      if (ativo) setContaLogada(e.temSessao && !e.anonima);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [conta]);
+
+  const handleSair = async () => {
+    const ok = await conta.sair();
+    if (!ok) {
+      avisar('Não deu para sair agora. Tenta de novo.');
+      return;
+    }
+    setContaLogada(false);
+    aoSair?.();
+  };
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
       const salvo = localStorage.getItem('bda-theme');
@@ -454,6 +485,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
             }}
             compacto={!isWide}
             aoAbrirPerfil={aoAbrirPerfil ? () => aoAbrirPerfil() : undefined}
+            contaLogada={contaLogada}
+            aoSair={handleSair}
             tema={theme}
             aoAlternarTema={toggleTheme}
             perfil={perfil}
@@ -482,6 +515,9 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
             isMobile={isMobile}
             perfil={perfil}
             aoAbrirArena={handleIrParaArena}
+            contaLogada={contaLogada}
+            aoSair={handleSair}
+            aoEntrar={aoEntrar}
             tema={theme}
             aoAlternarTema={toggleTheme}
           />

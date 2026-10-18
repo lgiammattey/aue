@@ -11,6 +11,10 @@ interface HeaderSocialProps {
   aoAbrirArena: () => void;
   tema: 'dark' | 'light';
   aoAlternarTema: () => void;
+  /** Há conta com e-mail logada: mostra Sair. Sem ela, mostra Entrar. */
+  contaLogada?: boolean;
+  aoSair?: () => void;
+  aoEntrar?: () => void;
 }
 
 export const HeaderSocial: React.FC<HeaderSocialProps> = ({
@@ -23,6 +27,9 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
   aoAbrirArena,
   tema,
   aoAlternarTema,
+  contaLogada,
+  aoSair,
+  aoEntrar,
 }) => {
   const titulos = {
     feed: 'Feed',
@@ -78,6 +85,46 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
           >
             <span>Jogar o Auê</span>
           </button>
+          {contaLogada && aoSair && (
+            <button
+              type="button"
+              onClick={aoSair}
+              aria-label="Sair da conta"
+              style={{
+                minHeight: '36px',
+                padding: '0 12px',
+                borderRadius: '999px',
+                border: '1px solid var(--border-strong)',
+                background: 'none',
+                color: 'var(--fg)',
+                fontWeight: 600,
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
+              Sair
+            </button>
+          )}
+          {!contaLogada && aoEntrar && (
+            <button
+              type="button"
+              onClick={aoEntrar}
+              aria-label="Entrar na conta"
+              style={{
+                minHeight: '36px',
+                padding: '0 12px',
+                borderRadius: '999px',
+                border: '1px solid var(--border-strong)',
+                background: 'none',
+                color: 'var(--fg)',
+                fontWeight: 600,
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
+              Entrar
+            </button>
+          )}
           <button
             type="button"
             onClick={aoAlternarTema}

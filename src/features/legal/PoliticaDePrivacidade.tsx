@@ -65,8 +65,9 @@ export const PoliticaDePrivacidade: React.FC = () => {
             e-mail nunca aparece no seu perfil nem para outros jogadores.
           </li>
           <li>
-            <strong>Dados do perfil.</strong> Apelido, @, bio e cidade, quando você
-            preenche. São públicos (veja abaixo).
+            <strong>Dados do perfil.</strong> Apelido, @, bio, cidade, foto e os
+            @ das suas redes sociais, quando você preenche. São públicos (veja
+            abaixo). A foto é reduzida no seu aparelho antes de subir.
           </li>
           <li>
             <strong>O que você faz no jogo.</strong> Seus resultados, causos,
@@ -86,7 +87,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
           conta:
         </p>
         <ul style={{ margin: 0, paddingLeft: '1.2em', display: 'grid', gap: 6 }}>
-          <li>seu perfil: apelido, @, bio, cidade, título, quando entrou, quantidade de causos, seguidores e a sua melhor nota <em>entre os causos publicados</em>;</li>
+          <li>seu perfil: apelido, @, foto, bio, cidade, links das redes que você informar, título, quando entrou, quantidade de causos, quem você segue e quem segue você, e a sua melhor nota <em>entre os causos publicados</em>;</li>
           <li>seus causos, comentários e respostas;</li>
           <li>a nota e o áudio de um causo, <strong>só se você marcou a autorização de publicar o arroto</strong> na hora de postar.</li>
         </ul>
@@ -101,7 +102,9 @@ export const PoliticaDePrivacidade: React.FC = () => {
           reagiu a quê pode ser consultada tecnicamente por qualquer pessoa com
           conhecimento para isso, mesmo que nenhuma tela do app a mostre; e
           conteúdo público pode ser copiado, printado ou ouvido por quem tiver o
-          endereço do áudio antes de você apagar.
+          endereço do áudio antes de você apagar. A foto de perfil fica numa
+          pasta pública: quem tiver o endereço dela consegue abri-la, mesmo fora
+          do app. Dá para remover a foto na tela de editar o perfil.
         </p>
         <p>
           <strong>Apagar o que você publicou:</strong> no menu de cada causo seu

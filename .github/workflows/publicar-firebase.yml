@@ -53,6 +53,16 @@ on:
   # Permite republicar sem precisar de commit novo — útil quando o que mudou
   # foi um segredo, não o código.
   workflow_dispatch:
+  # Páginas dos grupos (ADR 0004). De hora em hora o primeiro job confere se a
+  # lista de grupos mudou; só se mudou é que o build e o deploy rodam.
+  #
+  # O GitHub não promete a hora exata do `schedule` e pode atrasar. E em
+  # repositório público ele desliga o agendamento depois de 60 dias sem
+  # atividade no repositório (o aviso chega por e-mail). Se isso acontecer, só
+  # as páginas dos grupos deixam de atualizar; push na `main` e execução manual
+  # continuam publicando normalmente.
+  schedule:
+    - cron: '17 * * * *'
 
 # Só leitura do repositório. A escrita acontece no Firebase, não aqui.
 permissions:
@@ -66,8 +76,37 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Barato de propósito: duas leituras e um hash, sem `npm ci` e sem build.
+  # Só roda no agendamento. Push e execução manual sempre publicam.
+  verificar:
+    name: a lista de grupos mudou?
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    outputs:
+      mudou: ${{ steps.conferir.outputs.mudou }}
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Preparar o Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Comparar o banco com o que está no ar
+        id: conferir
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: node scripts/verificar-lista-de-grupos.ts
+
   publicar:
     name: build · deploy
+    needs: verificar
+    # `verificar` fica "skipped" fora do agendamento, e job que depende de job
+    # pulado também seria pulado. `!cancelled()` evita isso.
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.verificar.outputs.mudou == 'true') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -109,6 +148,9 @@ jobs:
           VITE_CONTATO_PRIVACIDADE: ${{ secrets.VITE_CONTATO_PRIVACIDADE }}
           VITE_FEATURE_DISPUTA_LOCAL: '1'
           VITE_FEATURE_DISPUTA_NA_ARENA: '1'
+          # No agendamento, publicar sem as páginas dos grupos apagaria do Google
+          # o que já estava lá: se a leitura falhar, o build falha.
+          EXIGIR_GRUPOS: ${{ github.event_name == 'schedule' && '1' || '0' }}
         run: npm run build
 
       - name: Publicar

@@ -9,6 +9,7 @@
       { "source": "/como-jogar", "destination": "/como-jogar.html" },
       { "source": "/como-arrotar", "destination": "/como-arrotar.html" },
       { "source": "/comunidade", "destination": "/comunidade.html" },
+      { "source": "/grupos", "destination": "/grupos.html" },
       { "source": "**", "destination": "/index.html" }
     ],
     "headers": [

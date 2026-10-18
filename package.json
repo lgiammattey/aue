@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/gerar-paginas-de-grupos.ts",
     "build:casca": "tsc -b && vite build --mode casca",
     "casca:ios": "npm run build:casca && npx cap sync ios",
     "casca:android": "npm run build:casca && npx cap sync android",

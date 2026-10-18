@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { CausoPostado, Comunidade } from '../../../portas/comunidade';
 import { DetalheComunidade, type ComunidadeInfo } from './DetalheComunidade';
+import { SecaoDeGrupos } from '../../grupos/SecaoDeGrupos';
 
 interface AbaComunidadesProps {
   comunidades: readonly Comunidade[];
@@ -208,6 +209,8 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
           </button>
         </div>
       </div>
+
+      <SecaoDeGrupos />
     </div>
   );
 };

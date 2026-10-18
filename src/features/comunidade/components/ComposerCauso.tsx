@@ -1,36 +1,53 @@
 import React, { useState } from 'react';
-import type { Comunidade } from '../../../portas/comunidade';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
 interface ComposerCausoProps {
-  aoPostar: (texto: string, comunidadeSlug: string) => Promise<boolean>;
-  aoAbrirArena: () => void;
+  aoPostar: (texto: string) => Promise<boolean> | boolean;
+  aoAbrirArrotar: () => void;
   aoAbrirDesafio: () => void;
-  comunidades: readonly Comunidade[];
   perfil: PerfilUsuario;
 }
 
 export const ComposerCauso: React.FC<ComposerCausoProps> = ({
   aoPostar,
-  aoAbrirArena,
+  aoAbrirArrotar,
   aoAbrirDesafio,
-  comunidades,
   perfil,
 }) => {
   const [texto, setTexto] = useState('');
-  const [comuSlug, setComuSlug] = useState('bonde-geral');
   const [enviando, setEnviando] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!texto.trim() || enviando) return;
+  const iniciais = (perfil.nome?.trim().split(/\s+/).length > 1
+    ? (perfil.nome.trim().split(/\s+/)[0][0] + perfil.nome.trim().split(/\s+/)[1][0])
+    : (perfil.nome?.slice(0, 2) || 'VC')
+  ).toUpperCase();
 
+  const handlePostar = async () => {
+    if (!texto.trim() || enviando) return;
     setEnviando(true);
-    const ok = await aoPostar(texto.trim(), comuSlug);
-    setEnviando(false);
-    if (ok) {
-      setTexto('');
+    try {
+      const res = await aoPostar(texto.trim());
+      if (res) {
+        setTexto('');
+      }
+    } finally {
+      setEnviando(false);
     }
+  };
+
+  const chipBtnStyle: React.CSSProperties = {
+    height: '36px',
+    padding: '0 12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    border: 0,
+    borderRadius: '999px',
+    background: 'none',
+    color: 'var(--fg)',
+    fontWeight: 600,
+    fontSize: '14px',
+    cursor: 'pointer',
   };
 
   return (
@@ -43,7 +60,7 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
         background: 'var(--bg)',
       }}
     >
-      {/* Avatar */}
+      {/* Avatar 44px */}
       <div
         style={{
           width: '44px',
@@ -51,25 +68,28 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
           flex: 'none',
           borderRadius: '50%',
           background: 'var(--surface-2)',
-          border: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontWeight: 700,
-          fontSize: '15px',
-          color: 'var(--fg)',
+          fontSize: '14px',
+          position: 'relative',
           overflow: 'hidden',
+          color: 'var(--fg)',
         }}
       >
         {perfil.avatarUrl ? (
-          <img src={perfil.avatarUrl} alt={perfil.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img
+            src={perfil.avatarUrl}
+            alt={perfil.nome}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         ) : (
-          perfil.nome.slice(0, 2).toUpperCase()
+          iniciais
         )}
       </div>
 
-      {/* Form de Composição */}
-      <form onSubmit={handleSubmit} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <textarea
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
@@ -77,19 +97,17 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
           rows={2}
           style={{
             background: 'none',
-            border: 'none',
+            border: 0,
             outline: 'none',
             resize: 'none',
             color: 'var(--fg)',
             fontFamily: 'inherit',
-            fontSize: '18px',
-            lineHeight: 1.4,
-            padding: '4px 0',
+            fontSize: '19px',
+            padding: '8px 0',
             width: '100%',
           }}
         />
 
-        {/* Barra de Ações do Composer */}
         <div
           style={{
             display: 'flex',
@@ -97,104 +115,75 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
             justifyContent: 'space-between',
             borderTop: '1px solid var(--border)',
             paddingTop: '10px',
-            flexWrap: 'wrap',
-            gap: '8px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* Atalho Arrotar na Arena */}
+          <div style={{ display: 'flex', gap: '4px' }}>
             <button
               type="button"
-              onClick={aoAbrirArena}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '999px',
-                background: 'var(--surface)',
-                color: 'var(--fg)',
-                border: '1px solid var(--border)',
-                fontWeight: 600,
-                fontSize: '13px',
-                cursor: 'pointer',
-              }}
+              onClick={aoAbrirArrotar}
+              style={chipBtnStyle}
+              aria-label="Arrotar"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3" />
               </svg>
               <span>Arrotar</span>
             </button>
 
-            {/* Atalho Desafiar no X1 */}
             <button
               type="button"
               onClick={aoAbrirDesafio}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '999px',
-                background: 'var(--surface)',
-                color: 'var(--fg)',
-                border: '1px solid var(--border)',
-                fontWeight: 600,
-                fontSize: '13px',
-                cursor: 'pointer',
-              }}
+              style={chipBtnStyle}
+              aria-label="Desafiar"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3" />
               </svg>
               <span>Desafiar</span>
             </button>
-
-            {/* Seletor de Comunidade */}
-            <select
-              value={comuSlug}
-              onChange={(e) => setComuSlug(e.target.value)}
-              aria-label="Selecionar comunidade"
-              style={{
-                padding: '6px 10px',
-                borderRadius: '999px',
-                background: 'var(--surface)',
-                color: 'var(--fg)',
-                border: '1px solid var(--border)',
-                fontSize: '13px',
-                fontWeight: 500,
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              {comunidades.map((c) => (
-                <option key={c.slug} value={c.slug} style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
-                  {c.icone} {c.nome}
-                </option>
-              ))}
-            </select>
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={handlePostar}
             disabled={!texto.trim() || enviando}
             style={{
               height: '36px',
               padding: '0 20px',
-              border: 'none',
+              border: 0,
               borderRadius: '999px',
-              background: texto.trim() && !enviando ? 'var(--accent)' : 'var(--surface-2)',
-              color: texto.trim() && !enviando ? 'var(--accent-on)' : 'var(--muted)',
+              background: 'var(--accent)',
+              color: 'var(--accent-on)',
               fontWeight: 700,
-              fontSize: '14px',
-              cursor: texto.trim() && !enviando ? 'pointer' : 'not-allowed',
-              transition: 'background-color .15s ease',
+              fontSize: '15px',
+              cursor: (!texto.trim() || enviando) ? 'default' : 'pointer',
+              opacity: (!texto.trim() || enviando) ? 0.6 : 1,
             }}
           >
-            {enviando ? 'Postando...' : 'Postar'}
+            Postar
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

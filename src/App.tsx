@@ -45,6 +45,30 @@ function EntradaPerfil() {
   return <TelaComunidade initialTab="perfil" onArrotar={() => navigate('/arena')} />;
 }
 
+function EntradaPerfilHandle() {
+  const { handle } = useParams<{ handle: string }>();
+  const navigate = useNavigate();
+  return (
+    <TelaComunidade
+      initialTab="perfil"
+      perfilHandleInicial={handle}
+      onArrotar={() => navigate('/arena')}
+    />
+  );
+}
+
+function EntradaComunidadeSlug() {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  return (
+    <TelaComunidade
+      initialTab="comm"
+      comunidadeSlugInicial={slug}
+      onArrotar={() => navigate('/arena')}
+    />
+  );
+}
+
 export function App() {
   return (
     <>
@@ -59,8 +83,12 @@ export function App() {
           <Route path="/feed" element={<EntradaPrincipal />} />
           <Route path="/arena" element={<EntradaArena />} />
           <Route path="/bondes" element={<EntradaBondes />} />
+          <Route path="/c/:slug" element={<EntradaComunidadeSlug />} />
+          <Route path="/comunidade/:slug" element={<EntradaComunidadeSlug />} />
           <Route path="/desafios" element={<EntradaDesafios />} />
           <Route path="/perfil" element={<EntradaPerfil />} />
+          <Route path="/perfil/:handle" element={<EntradaPerfilHandle />} />
+          <Route path="/u/:handle" element={<EntradaPerfilHandle />} />
           <Route path="/comunidade" element={<EntradaPrincipal />} />
           <Route path="/landing" element={<TelaLanding />} />
           <Route path="/login" element={<TelaLogin />} />

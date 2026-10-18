@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { configuracaoAusente, signInWithGoogle, supabase, updateProfile } from '../../db/supabase';
+import { obterPerfilLocal, salvarPerfilLocal } from '../../plataforma/web/perfil';
 
 export const TelaLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -9,6 +11,7 @@ export const TelaLogin: React.FC = () => {
   const [pass, setPass] = useState('');
   const [nick, setNick] = useState('');
   const [err, setErr] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
     try {
@@ -23,7 +26,8 @@ export const TelaLogin: React.FC = () => {
     navigate('/');
   };
 
-  const submit = () => {
+  const submit = async () => {
+    setErr('');
     if (!email.includes('@')) {
       setErr('E-mail inválido.');
       return;
@@ -36,7 +40,90 @@ export const TelaLogin: React.FC = () => {
       setErr('Escolhe um apelido.');
       return;
     }
-    enter();
+
+    if (configuracaoAusente) {
+      // Ambiente local sem supabase configurado: salva perfil local e prossegue
+      const perfil = obterPerfilLocal();
+      if (mode === 'up' && nick.trim()) {
+        perfil.nome = nick.trim();
+        perfil.handle = nick.trim().replace(/^@/, '').toLowerCase().replace(/\s+/g, '_');
+        salvarPerfilLocal(perfil);
+      }
+      enter();
+      return;
+    }
+
+    setCarregando(true);
+    try {
+      if (mode === 'in') {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: pass,
+        });
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            setErr('E-mail ou senha incorretos.');
+          } else {
+            setErr(error.message);
+          }
+          return;
+        }
+        if (data.user) {
+          const p = obterPerfilLocal();
+          p.id = data.user.id;
+          salvarPerfilLocal(p);
+          enter();
+        }
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password: pass,
+          options: {
+            data: {
+              apelido: nick.trim(),
+            },
+          },
+        });
+        if (error) {
+          if (error.message.includes('already registered')) {
+            setErr('Este e-mail já está cadastrado.');
+          } else {
+            setErr(error.message);
+          }
+          return;
+        }
+        if (data.user) {
+          const perfil = obterPerfilLocal();
+          perfil.id = data.user.id;
+          perfil.nome = nick.trim();
+          perfil.handle = nick.trim().replace(/^@/, '').toLowerCase().replace(/\s+/g, '_');
+          salvarPerfilLocal(perfil);
+
+          try {
+            await updateProfile(data.user.id, { apelido: nick.trim() });
+          } catch {
+            // segue mesmo com erro no banco
+          }
+          enter();
+        }
+      }
+    } catch (e: any) {
+      setErr('Falha de conexão com o servidor. Tente de novo.');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    if (configuracaoAusente) {
+      enter();
+      return;
+    }
+    try {
+      await signInWithGoogle();
+    } catch {
+      setErr('Não foi possível conectar com o Google.');
+    }
   };
 
   const light = theme === 'light';
@@ -122,6 +209,7 @@ export const TelaLogin: React.FC = () => {
                 setMode('in');
                 setErr('');
               }}
+              aria-label="Aba Entrar"
               style={{
                 flex: 1,
                 height: 44,
@@ -142,6 +230,7 @@ export const TelaLogin: React.FC = () => {
                 setMode('up');
                 setErr('');
               }}
+              aria-label="Aba Criar conta"
               style={{
                 flex: 1,
                 height: 44,
@@ -173,7 +262,8 @@ export const TelaLogin: React.FC = () => {
           </h1>
 
           <button
-            onClick={enter}
+            onClick={handleGoogle}
+            type="button"
             style={{
               height: 48,
               borderRadius: 999,
@@ -261,18 +351,20 @@ export const TelaLogin: React.FC = () => {
 
           <button
             onClick={submit}
+            type="button"
+            disabled={carregando}
             style={{
               height: 56,
               border: 0,
               borderRadius: 18,
-              background: 'var(--accent)',
+              background: carregando ? 'var(--muted)' : 'var(--accent)',
               color: 'var(--accent-on)',
               fontWeight: 700,
               fontSize: 17,
-              cursor: 'pointer',
+              cursor: carregando ? 'not-allowed' : 'pointer',
             }}
           >
-            {cta}
+            {carregando ? 'Entrando...' : cta}
           </button>
         </div>
 

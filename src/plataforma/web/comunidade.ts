@@ -13,8 +13,8 @@ import type {
   TipoDeReacao,
 } from '../../portas/comunidade';
 
-const CHAVE_CAUSOS = 'aue.causos.v1';
-const CHAVE_MINHAS_COMUNIDADES = 'aue.minhas_comunidades.v1';
+const CHAVE_CAUSOS = 'aue.causos.v2';
+const CHAVE_MINHAS_COMUNIDADES = 'aue.minhas_comunidades.v2';
 
 function lerCausosLocais(): CausoPostado[] {
   try {
@@ -317,6 +317,26 @@ export function criarComunidadeWeb(
       };
       salvarCausosLocais(causosMemoria);
 
+      if (!opcoes.forcarOffline && !configuracaoAusente) {
+        garantirSessao().then((sessao) => {
+          if (sessao?.user?.id) {
+            if (novoCurtido) {
+              supabase.from('reacoes').insert({
+                post_id: causoId,
+                user_id: sessao.user.id,
+                reaction_type: 'like',
+              }).then();
+            } else {
+              supabase.from('reacoes').delete().match({
+                post_id: causoId,
+                user_id: sessao.user.id,
+                reaction_type: 'like',
+              }).then();
+            }
+          }
+        }).catch(() => {});
+      }
+
       return { ok: true, curtidas: novasCurtidas, curtido: novoCurtido };
     },
 
@@ -336,6 +356,26 @@ export function criarComunidadeWeb(
         repostadoPorMim: novoRepost,
       };
       salvarCausosLocais(causosMemoria);
+
+      if (!opcoes.forcarOffline && !configuracaoAusente) {
+        garantirSessao().then((sessao) => {
+          if (sessao?.user?.id) {
+            if (novoRepost) {
+              supabase.from('reacoes').insert({
+                post_id: causoId,
+                user_id: sessao.user.id,
+                reaction_type: 'repost',
+              }).then();
+            } else {
+              supabase.from('reacoes').delete().match({
+                post_id: causoId,
+                user_id: sessao.user.id,
+                reaction_type: 'repost',
+              }).then();
+            }
+          }
+        }).catch(() => {});
+      }
 
       return { ok: true, reposts: novosReposts, repostado: novoRepost };
     },
@@ -373,6 +413,18 @@ export function criarComunidadeWeb(
       };
       salvarCausosLocais(causosMemoria);
 
+      if (!opcoes.forcarOffline && !configuracaoAusente) {
+        garantirSessao().then((sessao) => {
+          if (sessao?.user?.id) {
+            supabase.from('comentarios').insert({
+              post_id: causoId,
+              user_id: sessao.user.id,
+              content: conteudo.trim(),
+            }).then();
+          }
+        }).catch(() => {});
+      }
+
       return novaResposta;
     },
 
@@ -397,8 +449,10 @@ export function criarComunidadeWeb(
 
       if (!opcoes.forcarOffline && !configuracaoAusente) {
         try {
+          const sessao = await garantirSessao();
           await supabase.from('denuncias').insert({
             post_id: causoId,
+            user_id: sessao?.user?.id ?? null,
             motivo: motivo.trim() || 'Conteúdo impróprio',
             denunciado_em: new Date().toISOString(),
           });

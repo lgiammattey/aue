@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 import type { CausoPostado } from '../../../portas/comunidade';
+import { alternarSeguirLocal, obterSeguindoLocais } from '../../../plataforma/web/perfil';
 import { CardDeCauso } from './CardDeCauso';
 
 interface AbaPerfilProps {
   perfil: PerfilUsuario;
+  ehMeuPerfil?: boolean;
   aoSalvarPerfil: (novo: PerfilUsuario) => void;
   meusCausos: readonly CausoPostado[];
   minhasComunidades: readonly string[];
@@ -14,10 +16,14 @@ interface AbaPerfilProps {
   aoCompartilharCauso: (causo: CausoPostado) => void;
   aoResponderCauso: (id: string, texto: string) => void;
   aoDenunciarCauso: (id: string) => void;
+  aoVoltar?: () => void;
+  aoChamarX1?: (perfil: PerfilUsuario) => void;
+  aoAbrirPerfil?: (handle: string, nome?: string) => void;
 }
 
 export const AbaPerfil: React.FC<AbaPerfilProps> = ({
   perfil,
+  ehMeuPerfil = true,
   aoSalvarPerfil,
   meusCausos,
   minhasComunidades,
@@ -27,280 +33,494 @@ export const AbaPerfil: React.FC<AbaPerfilProps> = ({
   aoCompartilharCauso,
   aoResponderCauso,
   aoDenunciarCauso,
+  aoVoltar,
+  aoChamarX1,
+  aoAbrirPerfil,
 }) => {
   const [editando, setEditando] = useState(false);
-  const [nome, setNome] = useState(perfil.nome);
-  const [handle, setHandle] = useState(perfil.handle);
-  const [bio, setBio] = useState(perfil.bio);
-  const [abaInterna, setAbaInterna] = useState<'causos' | 'comunidades'>('causos');
+  const [edNome, setEdNome] = useState(perfil.nome);
+  const [edHandle, setEdHandle] = useState(perfil.handle);
+  const [edBio, setEdBio] = useState(perfil.bio || 'Arroto de respeito, sem moral.');
+  const [edCidade, setEdCidade] = useState(perfil.cidade || 'Rio de Janeiro');
+  const [ptab, setPtab] = useState<'posts' | 'audios' | 'curtidas'>('posts');
+  const [seguindoLista, setSeguindoLista] = useState<string[]>(() => obterSeguindoLocais());
 
-  const salvarEdicao = (e: React.FormEvent) => {
+  const handleNormalizado = perfil.handle.replace(/^@/, '').toLowerCase();
+  const euSigo = seguindoLista.includes(handleNormalizado);
+
+  const toggleSeguir = () => {
+    alternarSeguirLocal(handleNormalizado);
+    setSeguindoLista(obterSeguindoLocais());
+  };
+
+  const iniciais = (perfil.nome?.trim().split(/\s+/).length > 1
+    ? (perfil.nome.trim().split(/\s+/)[0][0] + perfil.nome.trim().split(/\s+/)[1][0])
+    : (perfil.nome?.slice(0, 2) || 'VC')
+  ).toUpperCase();
+
+  const handleSalvar = (e: React.FormEvent) => {
     e.preventDefault();
     aoSalvarPerfil({
       ...perfil,
-      nome: nome.trim() || 'Você',
-      handle: handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, '') || 'voce_arrota',
-      bio: bio.trim(),
+      nome: edNome.trim() || 'Você',
+      handle: edHandle.trim().toLowerCase().replace(/[^\w]/g, '') || 'voce_arrota',
+      bio: edBio.trim(),
+      cidade: edCidade.trim(),
     });
     setEditando(false);
   };
 
+  const handleUploadFoto = (e: React.ChangeEvent<HTMLInputElement>, tipo: 'avatar' | 'banner') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        aoSalvarPerfil({
+          ...perfil,
+          [tipo === 'avatar' ? 'avatarUrl' : 'bannerUrl']: reader.result,
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Melhor nota
+  const notasComAudio = meusCausos.filter((p) => p.nota !== undefined).map((p) => p.nota as number);
+  const melhorNota = notasComAudio.length > 0 ? Math.max(...notasComAudio) : (perfil.maiorScore || '—');
+
+  // Filtragem por sub-aba
+  const postsFiltrados = meusCausos.filter((p) => {
+    if (ptab === 'curtidas') return p.curtidoPorMim;
+    if (ptab === 'audios') return p.nota !== undefined || p.audioUrl;
+    return true;
+  });
+
+  const ptabs = [
+    { id: 'posts' as const, label: 'Posts' },
+    { id: 'audios' as const, label: 'Áudios' },
+    { id: 'curtidas' as const, label: 'Curtidas' },
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Banner / Header do Perfil */}
-      <div
-        style={{
-          padding: '24px 16px',
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--surface)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Avatar Grande */}
-          <div
-            style={{
-              width: '72px',
-              height: '72px',
-              borderRadius: '50%',
-              background: 'var(--surface-2)',
-              border: '3px solid var(--accent)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '24px',
-              color: 'var(--fg)',
-              overflow: 'hidden',
-            }}
-          >
-            {perfil.avatarUrl ? (
-              <img src={perfil.avatarUrl} alt={perfil.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              perfil.nome.slice(0, 2).toUpperCase()
-            )}
-          </div>
-
+      {/* Botão Voltar se for perfil de terceiro ou tiver ação de voltar */}
+      {aoVoltar && (
+        <div
+          style={{
+            height: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 16px',
+            borderBottom: '1px solid var(--border)',
+            gap: '12px',
+          }}
+        >
           <button
             type="button"
-            onClick={() => setEditando(!editando)}
+            onClick={aoVoltar}
+            aria-label="Voltar"
             style={{
-              padding: '8px 18px',
-              borderRadius: '999px',
-              border: '1px solid var(--border)',
-              background: 'transparent',
+              background: 'none',
+              border: 0,
               color: 'var(--fg)',
-              fontWeight: 700,
-              fontSize: '13px',
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '15px',
+              fontWeight: 600,
+              padding: '6px 0',
             }}
           >
-            {editando ? 'Cancelar' : 'Editar perfil'}
+            ← Voltar
           </button>
+          <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--fg)' }}>
+            @{perfil.handle}
+          </span>
+        </div>
+      )}
+
+      {/* Capa de 160px */}
+      {ehMeuPerfil ? (
+        <label
+          style={{
+            position: 'relative',
+            display: 'block',
+            height: '160px',
+            background: 'var(--surface-2)',
+            overflow: 'hidden',
+            cursor: 'pointer',
+          }}
+          title="Trocar capa"
+        >
+          {perfil.bannerUrl && (
+            <img
+              src={perfil.bannerUrl}
+              alt="Capa"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleUploadFoto(e, 'banner')}
+            style={{ display: 'none' }}
+          />
+        </label>
+      ) : (
+        <div
+          style={{
+            position: 'relative',
+            display: 'block',
+            height: '160px',
+            background: 'var(--surface-2)',
+            overflow: 'hidden',
+          }}
+        >
+          {perfil.bannerUrl && (
+            <img
+              src={perfil.bannerUrl}
+              alt="Capa"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Bloco de Perfil */}
+      <div style={{ padding: '0 16px 16px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '-40px' }}>
+          {/* Avatar 80x80 com margem negativa -40px e borda 4px */}
+          {ehMeuPerfil ? (
+            <label
+              style={{
+                width: '80px',
+                height: '80px',
+                flex: 'none',
+                borderRadius: '50%',
+                background: 'var(--surface)',
+                border: '4px solid var(--bg)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-display)',
+                fontSize: '30px',
+                position: 'relative',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                color: 'var(--fg)',
+              }}
+              title="Trocar foto"
+            >
+              {perfil.avatarUrl ? (
+                <img
+                  src={perfil.avatarUrl}
+                  alt={perfil.nome}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                iniciais
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleUploadFoto(e, 'avatar')}
+                style={{ display: 'none' }}
+              />
+            </label>
+          ) : (
+            <div
+              style={{
+                width: '80px',
+                height: '80px',
+                flex: 'none',
+                borderRadius: '50%',
+                background: 'var(--surface)',
+                border: '4px solid var(--bg)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-display)',
+                fontSize: '30px',
+                position: 'relative',
+                overflow: 'hidden',
+                color: 'var(--fg)',
+              }}
+            >
+              {perfil.avatarUrl ? (
+                <img
+                  src={perfil.avatarUrl}
+                  alt={perfil.nome}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                iniciais
+              )}
+            </div>
+          )}
+
+          {/* Botões de Ação do Cabeçalho */}
+          {ehMeuPerfil ? (
+            <button
+              type="button"
+              onClick={() => setEditando(!editando)}
+              style={{
+                height: '40px',
+                borderRadius: '12px',
+                border: '1px solid var(--border-strong)',
+                background: 'transparent',
+                color: 'var(--fg)',
+                fontWeight: 600,
+                fontSize: '14px',
+                cursor: 'pointer',
+                flex: 'none',
+                padding: '0 20px',
+              }}
+            >
+              {editando ? 'Cancelar' : 'Editar perfil'}
+            </button>
+          ) : (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={toggleSeguir}
+                style={{
+                  height: '40px',
+                  borderRadius: '12px',
+                  border: euSigo ? '1px solid var(--border-strong)' : 0,
+                  background: euSigo ? 'transparent' : 'var(--fg)',
+                  color: euSigo ? 'var(--fg)' : 'var(--bg)',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  flex: 'none',
+                  padding: '0 18px',
+                }}
+              >
+                {euSigo ? 'Seguindo' : 'Seguir'}
+              </button>
+              {aoChamarX1 && (
+                <button
+                  type="button"
+                  onClick={() => aoChamarX1(perfil)}
+                  style={{
+                    height: '40px',
+                    borderRadius: '12px',
+                    border: 0,
+                    background: 'var(--accent)',
+                    color: 'var(--accent-on)',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    flex: 'none',
+                    padding: '0 16px',
+                  }}
+                >
+                  Chamar pro X1
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Formulário de Edição */}
+        {/* Modal/Form inline de edição de perfil se ativo */}
         {editando ? (
-          <form onSubmit={salvarEdicao} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div>
-              <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'block', marginBottom: '4px' }}>Nome</label>
+          <form onSubmit={handleSalvar} style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', color: 'var(--muted)' }}>
+              Nome
               <input
-                type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
+                value={edNome}
+                onChange={(e) => setEdNome(e.target.value)}
+                maxLength={30}
                 style={{
-                  width: '100%',
-                  height: '38px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
+                  height: '44px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-strong)',
                   background: 'var(--bg)',
                   color: 'var(--fg)',
-                  padding: '0 12px',
-                  boxSizing: 'border-box',
+                  padding: '0 14px',
+                  fontSize: '15px',
+                  fontFamily: 'inherit',
+                  outline: 'none',
                 }}
               />
-            </div>
-            <div>
-              <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'block', marginBottom: '4px' }}>@handle</label>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', color: 'var(--muted)' }}>
+              @usuário
               <input
-                type="text"
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
+                value={edHandle}
+                onChange={(e) => setEdHandle(e.target.value)}
+                maxLength={20}
                 style={{
-                  width: '100%',
-                  height: '38px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
+                  height: '44px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-strong)',
                   background: 'var(--bg)',
                   color: 'var(--fg)',
-                  padding: '0 12px',
-                  boxSizing: 'border-box',
+                  padding: '0 14px',
+                  fontSize: '15px',
+                  fontFamily: 'inherit',
+                  outline: 'none',
                 }}
               />
-            </div>
-            <div>
-              <label style={{ fontSize: '12px', color: 'var(--muted)', display: 'block', marginBottom: '4px' }}>Bio</label>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', color: 'var(--muted)' }}>
+              Cidade
+              <input
+                value={edCidade}
+                onChange={(e) => setEdCidade(e.target.value)}
+                maxLength={30}
+                style={{
+                  height: '44px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--bg)',
+                  color: 'var(--fg)',
+                  padding: '0 14px',
+                  fontSize: '15px',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', color: 'var(--muted)' }}>
+              Bio
               <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                rows={2}
+                value={edBio}
+                onChange={(e) => setEdBio(e.target.value)}
+                maxLength={120}
+                rows={3}
                 style={{
-                  width: '100%',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-strong)',
                   background: 'var(--bg)',
                   color: 'var(--fg)',
-                  padding: '8px 12px',
-                  boxSizing: 'border-box',
+                  padding: '12px 14px',
+                  fontSize: '15px',
+                  fontFamily: 'inherit',
+                  outline: 'none',
                   resize: 'none',
                 }}
               />
-            </div>
+            </label>
             <button
               type="submit"
               style={{
-                height: '40px',
-                borderRadius: '999px',
+                height: '48px',
+                border: 0,
+                borderRadius: '18px',
                 background: 'var(--accent)',
                 color: 'var(--accent-on)',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '14px',
+                fontWeight: 700,
+                fontSize: '16px',
                 cursor: 'pointer',
-                marginTop: '6px',
               }}
             >
-              Salvar Alterações
+              Salvar
             </button>
           </form>
         ) : (
-          <div>
-            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: 'var(--fg)' }}>{perfil.nome}</h2>
-            <div style={{ color: 'var(--muted)', fontSize: '14px', marginTop: '2px' }}>@{perfil.handle}</div>
-            <p style={{ margin: '8px 0 0', fontSize: '14px', lineHeight: 1.4, color: 'var(--fg)' }}>{perfil.bio}</p>
+          <div style={{ marginTop: '8px' }}>
+            <b style={{ fontSize: '20px', color: 'var(--fg)' }}>{perfil.nome}</b>
+            <div style={{ color: 'var(--muted)', fontSize: '15px' }}>@{perfil.handle}</div>
+            <div style={{ fontSize: '15px', marginTop: '8px', textWrap: 'pretty', color: 'var(--fg)' }}>
+              {perfil.bio || 'Arroto de respeito, sem moral.'}
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: '14px', marginTop: '4px' }}>
+              {perfil.cidade || 'Rio de Janeiro'} · no bonde desde 2026
+            </div>
           </div>
         )}
 
-        {/* Estatísticas de Arrotador */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-            marginTop: '4px',
-          }}
-        >
-          <div
-            style={{
-              padding: '12px',
-              borderRadius: '12px',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-            }}
-          >
-            <div style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 600 }}>MAIOR AUÊ SCORE</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', color: 'var(--accent)', marginTop: '2px' }}>
-              {perfil.maiorScore || '—'}
-            </div>
-          </div>
-          <div
-            style={{
-              padding: '12px',
-              borderRadius: '12px',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-            }}
-          >
-            <div style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 600 }}>CARTEL NO X1</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', color: 'var(--fg)', marginTop: '2px' }}>
-              {`${perfil.vitoriasX1}V · ${perfil.derrotasX1}D`}
-            </div>
-          </div>
+        {/* Seguindo / Seguidores */}
+        <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '14px' }}>
+          <span>
+            <b>{ehMeuPerfil ? seguindoLista.length : 124}</b> <span style={{ color: 'var(--muted)' }}>Seguindo</span>
+          </span>
+          <span>
+            <b>{ehMeuPerfil ? '2,4 mil' : euSigo ? 12 : 11}</b> <span style={{ color: 'var(--muted)' }}>Seguidores</span>
+          </span>
+        </div>
+
+        {/* Linha Canônica: Melhor Nota, Cartel X1, Comunidades */}
+        <div style={{ display: 'flex', gap: '20px', marginTop: '8px', fontSize: '14px' }}>
+          <span>
+            <b>{melhorNota}</b> <span style={{ color: 'var(--muted)' }}>melhor nota</span>
+          </span>
+          <span>
+            <b>{perfil.vitoriasX1}V · {perfil.derrotasX1}D</b> <span style={{ color: 'var(--muted)' }}>no X1</span>
+          </span>
+          <span>
+            <b>{minhasComunidades.length || 2}</b> <span style={{ color: 'var(--muted)' }}>comunidades</span>
+          </span>
         </div>
       </div>
 
-      {/* Sub-abas do Perfil */}
+      {/* Abas Internas do Perfil */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
-        <button
-          type="button"
-          onClick={() => setAbaInterna('causos')}
-          style={{
-            flex: 1,
-            height: '44px',
-            border: 'none',
-            background: 'transparent',
-            color: abaInterna === 'causos' ? 'var(--fg)' : 'var(--muted)',
-            fontWeight: abaInterna === 'causos' ? 700 : 500,
-            fontSize: '14px',
-            cursor: 'pointer',
-            borderBottom: abaInterna === 'causos' ? '2px solid var(--accent)' : 'none',
-          }}
-        >
-          Seus Causos ({meusCausos.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setAbaInterna('comunidades')}
-          style={{
-            flex: 1,
-            height: '44px',
-            border: 'none',
-            background: 'transparent',
-            color: abaInterna === 'comunidades' ? 'var(--fg)' : 'var(--muted)',
-            fontWeight: abaInterna === 'comunidades' ? 700 : 500,
-            fontSize: '14px',
-            cursor: 'pointer',
-            borderBottom: abaInterna === 'comunidades' ? '2px solid var(--accent)' : 'none',
-          }}
-        >
-          Comunidades ({minhasComunidades.length})
-        </button>
-      </div>
-
-      {/* Conteúdo da Sub-aba */}
-      <div>
-        {abaInterna === 'causos' ? (
-          meusCausos.length > 0 ? (
-            meusCausos.map((c) => (
-              <CardDeCauso
-                key={c.id}
-                causo={c}
-                aoCurtir={aoCurtirCauso}
-                aoRepostar={aoRepostarCauso}
-                aoDuvidar={aoDuvidarCauso}
-                aoCompartilhar={aoCompartilharCauso}
-                aoResponder={aoResponderCauso}
-                aoDenunciar={aoDenunciarCauso}
-              />
-            ))
-          ) : (
-            <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--muted)' }}>
-              Você ainda não postou nenhum causo. Arrote na Arena e mande pro bonde!
-            </div>
-          )
-        ) : (
-          <div style={{ padding: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {minhasComunidades.map((slug) => (
+        {ptabs.map((pt) => {
+          const ativo = ptab === pt.id;
+          return (
+            <button
+              key={pt.id}
+              type="button"
+              onClick={() => setPtab(pt.id)}
+              style={{
+                flex: 1,
+                height: '52px',
+                border: 0,
+                background: 'none',
+                color: ativo ? 'var(--fg)' : 'var(--muted)',
+                fontWeight: ativo ? 700 : 500,
+                fontSize: '15px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <span
-                key={slug}
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '999px',
-                  background: 'var(--surface-2)',
-                  color: 'var(--fg)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  border: '1px solid var(--border)',
+                  height: '52px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderBottom: ativo ? '4px solid var(--ind)' : '4px solid transparent',
+                  boxSizing: 'border-box',
                 }}
               >
-                #{slug}
+                {pt.label}
               </span>
-            ))}
-          </div>
-        )}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Conteúdo da aba selecionada usando CardDeCauso completo */}
+      {postsFiltrados.length > 0 ? (
+        postsFiltrados.map((p) => (
+          <CardDeCauso
+            key={p.id}
+            causo={p}
+            aoCurtir={aoCurtirCauso}
+            aoRepostar={aoRepostarCauso}
+            aoDuvidar={aoDuvidarCauso}
+            aoCompartilhar={aoCompartilharCauso}
+            aoResponder={aoResponderCauso}
+            aoDenunciar={aoDenunciarCauso}
+            aoAbrirPerfil={aoAbrirPerfil}
+          />
+        ))
+      ) : (
+        <div style={{ padding: '40px 32px', textAlign: 'center' }}>
+          <div style={{ fontWeight: 800, fontSize: '28px', lineHeight: 1.1, color: 'var(--fg)' }}>
+            Nada por aqui ainda
+          </div>
+          <div style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '8px' }}>
+            Quando rolar, aparece aqui.
+          </div>
+        </div>
+      )}
     </div>
   );
 };

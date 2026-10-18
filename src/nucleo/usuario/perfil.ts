@@ -9,6 +9,8 @@ export interface PerfilUsuario {
   handle: string;
   bio: string;
   avatarUrl?: string;
+  bannerUrl?: string;
+  cidade?: string;
   maiorScore: number;
   vitoriasX1: number;
   derrotasX1: number;
@@ -26,5 +28,34 @@ export function criarPerfilPadrao(): PerfilUsuario {
     maiorScore: 0,
     vitoriasX1: 7,
     derrotasX1: 3,
+  };
+}
+
+/**
+ * Resolve o perfil correspondente a um handle específico.
+ */
+export function resolverPerfilPorHandle(
+  handleDesejado: string,
+  meuPerfil: PerfilUsuario,
+  perfisConhecidos: readonly PerfilUsuario[] = [],
+): PerfilUsuario {
+  const normalizado = handleDesejado.replace(/^@/, '').trim().toLowerCase();
+  if (!normalizado || normalizado === meuPerfil.handle.replace(/^@/, '').trim().toLowerCase()) {
+    return meuPerfil;
+  }
+  const encontrado = perfisConhecidos.find(
+    (p) => p.handle.replace(/^@/, '').trim().toLowerCase() === normalizado,
+  );
+  if (encontrado) {
+    return encontrado;
+  }
+  return {
+    id: `arrotador_${normalizado}`,
+    nome: normalizado.charAt(0).toUpperCase() + normalizado.slice(1).replace(/_/g, ' '),
+    handle: normalizado,
+    bio: 'Arrotador ativo no Bonde do Arroto.',
+    maiorScore: 0,
+    vitoriasX1: 0,
+    derrotasX1: 0,
   };
 }

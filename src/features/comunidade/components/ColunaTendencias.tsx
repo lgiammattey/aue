@@ -1,32 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { CausoPostado, Comunidade } from '../../../portas/comunidade';
+import { alternarSeguirLocal, obterSeguindoLocais } from '../../../plataforma/web/perfil';
 
 interface ColunaTendenciasProps {
-  causos: readonly CausoPostado[];
-  comunidades: readonly Comunidade[];
-  minhasComunidades: readonly string[];
-  aoEntrarComunidade: (slug: string) => void;
-  aoAbrirDesafio: () => void;
+  causos?: readonly CausoPostado[];
+  comunidades?: readonly Comunidade[];
+  minhasComunidades?: readonly string[];
+  aoEntrarComunidade?: (slug: string) => void;
+  aoAbrirDesafio?: () => void;
+  aoAbrirPerfil?: (handle: string, nome?: string) => void;
+  termoBusca?: string;
+  aoMudarBusca?: (termo: string) => void;
+  aoSelecionarTrend?: (tagOuCategoria: string) => void;
 }
 
 export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
-  causos,
-  comunidades,
-  minhasComunidades,
-  aoEntrarComunidade,
-  aoAbrirDesafio,
+  aoAbrirPerfil,
+  termoBusca = '',
+  aoMudarBusca,
+  aoSelecionarTrend,
 }) => {
-  // Ranking de hoje extraído dos causos reais que possuem nota
-  const ranking = causos
-    .filter((c) => c.nota !== undefined)
-    .sort((a, b) => (b.nota || 0) - (a.nota || 0))
-    .slice(0, 5)
-    .map((c, i) => ({
-      pos: `${i + 1}º`,
-      nome: c.autorNome,
-      nota: c.nota,
-      destaque: i === 0,
-    }));
+  const [buscaInterna, setBuscaInterna] = useState('');
+  const valorBusca = aoMudarBusca ? termoBusca : buscaInterna;
+  const setBusca = (val: string) => {
+    if (aoMudarBusca) {
+      aoMudarBusca(val);
+    } else {
+      setBuscaInterna(val);
+    }
+  };
+  const [seguindo, setSeguindo] = useState<string[]>(() => obterSeguindoLocais());
+
+  const trends = [
+    { cat: 'Cerveja Gelada', tag: '#LongNeckChallenge', n: '12,4 mil' },
+    { cat: 'Arroto trovão', tag: '#TremeuAJanela', n: '8,9 mil' },
+    { cat: 'Na reunião da firma', tag: '#MutadoNoTeams', n: '6,2 mil' },
+    { cat: 'Primeiro encontro', tag: '#VexameNoJapa', n: '4,5 mil' },
+    { cat: 'Refri & Cia', tag: '#GraveDeElevador', n: '3,1 mil' },
+  ];
+
+  const sugestoes = [
+    { name: 'Tiago do Bonde', handle: 'tiagobonde', ini: 'TB' },
+    { name: 'Iury da Oficina', handle: 'iury_oficina', ini: 'IO' },
+    { name: 'Rian da Bolha', handle: 'rian_design', ini: 'RD' },
+    { name: 'Dani Gás', handle: 'danigas', ini: 'DG' },
+    { name: 'Lucas do Áudio', handle: 'lucas_audio', ini: 'LA' },
+  ];
+
+  const alternarSeguir = (handle: string) => {
+    alternarSeguirLocal(handle);
+    setSeguindo(obterSeguindoLocais());
+  };
 
   return (
     <aside
@@ -35,169 +59,168 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
         flex: 'none',
         position: 'sticky',
         top: 0,
-        height: '100vh',
-        padding: '12px 0 12px 20px',
+        padding: '12px 0 12px 24px',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
+        maxHeight: '100vh',
         overflowY: 'auto',
       }}
     >
-      {/* Bloco 1: Ranking de Hoje */}
-      <section
+      {/* Busca Pill */}
+      <input
+        value={valorBusca}
+        onChange={(e) => setBusca(e.target.value)}
+        placeholder="Buscar no bonde"
         style={{
+          height: '44px',
+          borderRadius: '999px',
+          border: '1px solid var(--border-strong)',
           background: 'var(--surface)',
-          borderRadius: '16px',
-          border: '1px solid var(--border)',
-          overflow: 'hidden',
+          color: 'var(--fg)',
+          padding: '0 18px',
+          fontSize: '15px',
+          fontFamily: 'inherit',
+          outline: 'none',
+          boxSizing: 'border-box',
+          width: '100%',
         }}
-      >
-        <div style={{ padding: '14px 16px', fontWeight: 800, fontSize: '18px', borderBottom: '1px solid var(--border)' }}>
-          Ranking do Bonde
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {ranking.length > 0 ? (
-            ranking.map((r, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: '10px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  borderBottom: i < ranking.length - 1 ? '1px solid var(--border)' : 'none',
-                }}
-              >
-                <span
-                  style={{
-                    width: '24px',
-                    fontFamily: 'ui-monospace, monospace',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: r.destaque ? 'var(--accent)' : 'var(--muted)',
-                  }}
-                >
-                  {r.pos}
-                </span>
-                <span style={{ flex: 1, fontSize: '14px', fontWeight: r.destaque ? 700 : 500, color: 'var(--fg)' }}>
-                  {r.nome}
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '20px',
-                    color: r.destaque ? 'var(--accent)' : 'var(--fg)',
-                  }}
-                >
-                  {r.nota}
-                </span>
-              </div>
-            ))
-          ) : (
-            <div style={{ padding: '16px', color: 'var(--muted)', fontSize: '13px' }}>
-              Nenhum arroto com nota hoje. Arrote na Arena e lidere o bonde!
-            </div>
-          )}
-        </div>
-      </section>
+      />
 
-      {/* Bloco 2: Desafio X1 Chamada Rápida */}
+      {/* Em alta no Bonde */}
       <section
         style={{
           background: 'var(--surface)',
           borderRadius: '16px',
+          overflow: 'hidden',
           border: '1px solid var(--border)',
-          padding: '16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
         }}
       >
-        <div style={{ fontWeight: 800, fontSize: '18px' }}>Duelos X1</div>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px', lineHeight: 1.4 }}>
-          Mande seu link pra humilhar aquele amigo que jura que arrota mais alto.
-        </p>
-        <button
-          type="button"
-          onClick={aoAbrirDesafio}
+        <div style={{ padding: '12px 16px', fontWeight: 700, fontSize: '20px', color: 'var(--fg)' }}>
+          Em alta no Bonde
+        </div>
+        {trends.map((t, i) => (
+          <div
+            key={i}
+            onClick={() => {
+              if (aoSelecionarTrend) {
+                aoSelecionarTrend(t.tag);
+              } else {
+                setBusca(t.tag);
+              }
+            }}
+            style={{
+              padding: '10px 16px',
+              cursor: 'pointer',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'ui-monospace, monospace',
+                fontSize: '11px',
+                color: 'var(--muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '.06em',
+              }}
+            >
+              {t.cat}
+            </div>
+            <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--fg)' }}>{t.tag}</div>
+            <div style={{ color: 'var(--muted)', fontSize: '13px' }}>{t.n} posts</div>
+          </div>
+        ))}
+        <div
           style={{
-            height: '42px',
-            borderRadius: '999px',
-            background: 'var(--accent)',
-            color: 'var(--accent-on)',
-            border: 'none',
-            fontWeight: 800,
-            fontSize: '14px',
+            padding: '14px 16px',
+            fontSize: '15px',
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
+            fontWeight: 600,
+            color: 'var(--fg)',
           }}
         >
-          <span>Criar Desafio X1</span>
-        </button>
+          Mostrar mais
+        </div>
       </section>
 
-      {/* Bloco 3: Comunidades para Explorar */}
+      {/* Quem seguir */}
       <section
         style={{
           background: 'var(--surface)',
           borderRadius: '16px',
-          border: '1px solid var(--border)',
           overflow: 'hidden',
+          border: '1px solid var(--border)',
         }}
       >
-        <div style={{ padding: '14px 16px', fontWeight: 800, fontSize: '18px', borderBottom: '1px solid var(--border)' }}>
-          Comunidades em Alta
+        <div style={{ padding: '12px 16px', fontWeight: 700, fontSize: '20px', color: 'var(--fg)' }}>
+          Quem seguir
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {comunidades.slice(0, 4).map((c, i) => {
-            const participa = minhasComunidades.includes(c.slug);
-            return (
+        {sugestoes.map((u) => {
+          const isSeguindo = seguindo.includes(u.handle);
+          return (
+            <div
+              key={u.handle}
+              style={{
+                padding: '10px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              }}
+            >
               <div
-                key={c.slug}
+                onClick={() => aoAbrirPerfil?.(u.handle, u.name)}
                 style={{
-                  padding: '12px 16px',
+                  width: '40px',
+                  height: '40px',
+                  flex: 'none',
+                  borderRadius: '50%',
+                  background: 'var(--surface-2)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '10px',
-                  borderBottom: i < 3 ? '1px solid var(--border)' : 'none',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  color: 'var(--fg)',
+                  cursor: aoAbrirPerfil ? 'pointer' : 'default',
+                }}
+                title={`Ver perfil de @${u.handle}`}
+              >
+                {u.ini}
+              </div>
+              <div
+                onClick={() => aoAbrirPerfil?.(u.handle, u.name)}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  lineHeight: 1.3,
+                  cursor: aoAbrirPerfil ? 'pointer' : 'default',
+                }}
+                title={`Ver perfil de @${u.handle}`}
+              >
+                <b style={{ fontSize: '15px', color: 'var(--fg)' }}>{u.name}</b>
+                <div style={{ color: 'var(--muted)', fontSize: '14px' }}>@{u.handle}</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => alternarSeguir(u.handle)}
+                style={{
+                  height: '32px',
+                  padding: '0 16px',
+                  borderRadius: '999px',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  border: isSeguindo ? '1px solid var(--border)' : '0',
+                  background: isSeguindo ? 'transparent' : 'var(--fg)',
+                  color: isSeguindo ? 'var(--fg)' : 'var(--bg)',
+                  flex: 'none',
                 }}
               >
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>{c.icone}</span>
-                    <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{c.nome}</span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
-                    {c.totalMembros ? `${(Math.round(c.totalMembros / 100) / 10).toString().replace('.', ',')}k arrotadores` : 'Ativa'}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => aoEntrarComunidade(c.slug)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '999px',
-                    background: participa ? 'var(--surface-2)' : 'var(--fg)',
-                    color: participa ? 'var(--muted)' : 'var(--bg)',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    flex: 'none',
-                  }}
-                >
-                  {participa ? 'Seguindo' : 'Entrar'}
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                {isSeguindo ? 'Seguindo' : 'Seguir'}
+              </button>
+            </div>
+          );
+        })}
       </section>
     </aside>
   );

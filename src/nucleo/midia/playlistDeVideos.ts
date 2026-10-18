@@ -18,18 +18,6 @@ export interface VideoCurado {
 
 export const PLAYLIST_VIDEOS_ARROTO: readonly VideoCurado[] = [
   {
-    id: 'yt-vizinho',
-    titulo: 'Fartin Around (O clássico do vizinho)',
-    autor: '@malestench',
-    plataforma: 'youtube',
-    videoId: 'gMIakMhDt4A',
-    urlOriginal: 'https://youtu.be/gMIakMhDt4A',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/gMIakMhDt4A?rel=0&playsinline=1',
-    thumbnailUrl: 'https://i.ytimg.com/vi/gMIakMhDt4A/hqdefault.jpg',
-    descricao: 'Aquele som inconfundível que atravessa o corredor e a parede. Potência bruta e zero cerimônia.',
-    categoria: 'trovao',
-  },
-  {
     id: 'yt-gamer-burps',
     titulo: 'Gamer Burps 38',
     autor: '@ethantompson23',

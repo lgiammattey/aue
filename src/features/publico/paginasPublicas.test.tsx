@@ -152,7 +152,8 @@ describe('/videos-de-arroto com a moldura da landing', () => {
 
   it('lista os vídeos curados do YouTube e TikTok com links originais', () => {
     const html = montar(VideosDeArroto);
-    expect(html).toContain('Fartin Around');
+    expect(html).not.toContain('Fartin Around');
+    expect(html).toContain('Garoto Arroto');
     expect(html).toContain('Gamer Burps 38');
     expect(html).toContain('Rei do Arroto');
     expect(html).toContain('Assistir arroto');

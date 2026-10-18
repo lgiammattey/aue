@@ -21,8 +21,10 @@
 --      comentar_da_casa.
 --
 -- O QUE NÃO MUDA
---   A RLS de posts_comunidade, comentarios, perfis e reacoes fica como está. O
---   usuário comum continua sem poder escrever nada com data retroativa.
+--   A RLS de posts_comunidade, comentarios, perfis e reacoes fica como está.
+--   Atenção: o INSERT de posts e comentários já não restringe `created_at` para
+--   o usuário comum (achado do Marcelo, 18/10/2026, anterior a esta migração).
+--   Isso pede issue própria; esta migração não o cria nem o corrige.
 --
 -- AUDIÊNCIA E RANKING (revisão de 18/10/2026)
 --   Nenhuma função de ranking, telemetria ou audiência lê posts_comunidade ou

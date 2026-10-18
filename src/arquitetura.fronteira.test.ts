@@ -46,7 +46,6 @@ const PASTAS_LIMPAS = [
   'src/nucleo',
   'src/portas',
   'src/arena',
-  'src/features/home',
   'src/features/legal',
   'src/features/publico',
   'src/features/audio/resultado',

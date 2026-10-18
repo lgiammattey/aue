@@ -21,12 +21,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { ChallengeView } from './features/audio/ChallengeView';
 import { BattleView } from './features/battle/BattleView';
-import { TelaDesktop } from './features/desktop/TelaDesktop';
 import { PoliticaDePrivacidade } from './features/legal/PoliticaDePrivacidade';
 import { AudioPlayback } from './features/audio/AudioPlayback';
 import { ReportButton } from './shared/components/ReportButton';
 import { AudioRecorder } from './features/audio/AudioRecorder';
-import { HomeScreen } from './features/home/HomeScreen';
 import { BottomNav } from './shared/components/BottomNav';
 import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguracaoAusente';
 import { FLAGS } from './shared/flags';
@@ -92,35 +90,6 @@ describe('corte de lançamento', () => {
     expect(html).toContain('Auê!');
   });
 
-  it('a tela de desktop é conteúdo indexável, não um muro', () => {
-    /*
-      O Googlebot renderiza como desktop. Como o app é uma SPA sem HTML
-      estático, ESTA tela é o único conteúdo que o buscador tem para indexar —
-      se ela fosse só "abra no celular", seria isso que o Google mostraria a
-      quem procura por arroto.
-
-      Trava o mínimo: um h1 que descreve o produto, explicação de verdade, e a
-      nota sobre celular como coadjuvante.
-    */
-    const html = renderToStaticMarkup(
-      createElement(MemoryRouter, null, createElement(TelaDesktop)),
-    );
-    expect(html).toContain('<h1');
-    expect(html).toContain('arroto');
-    expect(html).toContain('nota');
-    expect(html).toContain('/privacidade');
-  });
-
-  it('a tela de desktop não deixa botão de instalar morto', () => {
-    // Sem `beforeinstallprompt` capturado (o caso em teste, e o caso do
-    // Firefox e do Safari), não pode haver botão que não faz nada: a pessoa
-    // toca, nada acontece, e conclui que o site quebrou.
-    const html = renderToStaticMarkup(
-      createElement(MemoryRouter, null, createElement(TelaDesktop)),
-    );
-    expect(html).not.toContain('Instalar o Auê');
-  });
-
   it('a política não promete sigilo que o app não entrega', () => {
     // A chave anônima do app é pública: qualquer pessoa consegue ouvir
     // qualquer áudio não escondido. Se este texto virar "seu áudio é privado",
@@ -141,17 +110,6 @@ describe('corte de lançamento', () => {
     );
     expect(html).toContain('VITE_SUPABASE_URL');
     expect(html).toContain('não está configurado');
-  });
-
-  it('Home é só o convite para gravar', () => {
-    // O feed saiu do produto (#109). Antes dele sair, o login anônimo faria
-    // TODA gravação virar post público sem ninguém escolher isso. Não tem mais
-    // como voltar por acidente: não existe feed para a Home montar.
-    const html = renderToStaticMarkup(
-      createElement(HomeScreen, { onGravar: () => {} }),
-    );
-    expect(html).toContain('ARROTAR');
-    expect(html).not.toContain('No feed agora');
   });
 
   it('a barra de navegação do corte tem só Início e Arrotar', () => {

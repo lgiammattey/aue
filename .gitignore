@@ -27,6 +27,9 @@ dev-dist
 # (`npm run build:casca`). Segredo continua no `.env.local`, que segue ignorado.
 !.env.casca
 
+# Áudios convertidos do elenco da casa (npm run elenco:preparar). Regeneráveis.
+.cache/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -77,8 +77,7 @@ docs/
 ├── technical/   adr/ · arquitetura · ambientes · deploy · yamnet · moderação
 ├── schema/      nomenclatura · banco_de_dados
 ├── pesquisa/    análise competitiva de mercado
-├── production-pack/  pacote consolidado v1.0
-└── _arquivo/    histórico e versões anteriores, explicitamente sem autoridade
+└── _arquivo/    histórico, versões anteriores, protótipos e pacotes legados
 ```
 
 ---

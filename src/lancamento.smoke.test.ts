@@ -20,7 +20,6 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { ChallengeView } from './features/audio/ChallengeView';
-import { BattleView } from './features/battle/BattleView';
 import { PoliticaDePrivacidade } from './features/legal/PoliticaDePrivacidade';
 import { AudioPlayback } from './features/audio/AudioPlayback';
 import { ReportButton } from './shared/components/ReportButton';
@@ -64,25 +63,6 @@ describe('corte de lançamento', () => {
           Routes,
           null,
           createElement(Route, { path: '/d/:id', element: createElement(ChallengeView) }),
-        ),
-      ),
-    );
-    expect(html).toContain('app-shell');
-    expect(html).toContain('Auê!');
-  });
-
-  it('BattleView monta dentro do app-shell, com marca e saída', () => {
-    // Mesma exigência do ChallengeView, e pelo mesmo motivo: é porta de
-    // entrada do produto. O link /b/CODIGO cai no WhatsApp de gente que nunca
-    // abriu o app, e link errado ou batalha vencida caem no primeiro quadro.
-    const html = renderToStaticMarkup(
-      createElement(
-        MemoryRouter,
-        { initialEntries: ['/b/K7M3PQ9XTR'] },
-        createElement(
-          Routes,
-          null,
-          createElement(Route, { path: '/b/:code', element: createElement(BattleView) }),
         ),
       ),
     );

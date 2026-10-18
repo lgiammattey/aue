@@ -37,7 +37,7 @@ import { mensagemDeFalhaAoCompartilhar } from './resultado/mensagemDeFalhaAoComp
 import { useEnvioDoResultado } from './hooks/useEnvioDoResultado';
 import { SEGUNDOS_DE_GRAVACAO, useGravacao } from './hooks/useGravacao';
 import { mensagemDeFalhaNaAnalise } from './mensagemDeFalhaNaAnalise';
-import { guardarUltimaBatalha, lerUltimaBatalha } from '../battle/ultimaBatalha';
+import { guardarUltimaBatalha, lerUltimaBatalha } from './ultimaBatalha';
 
 interface AudioRecorderProps {
   /**

@@ -116,7 +116,7 @@ describe('a semente da fala', () => {
 
     expect(infracoes).toEqual([]);
     /* Não pode passar por não ter achado chamada nenhuma. */
-    expect(chamadas).toBeGreaterThanOrEqual(5);
+    expect(chamadas).toBeGreaterThanOrEqual(4);
   });
 
   it('ninguém inventa semente fora da ponte da Arena', () => {

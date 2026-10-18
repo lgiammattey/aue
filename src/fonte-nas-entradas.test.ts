@@ -160,12 +160,11 @@ describe('os tokens de tipografia batem com o protótipo canônico', () => {
 
   it('nenhum token de fonte diverge do protótipo canônico', () => {
     /*
-      O protótipo é quem decide aparência (AGENTS.md §2). Estes três tokens
+      O design system é quem decide os tokens canônicos (AGENTS.md §2). Estes três tokens
       foram COPIADOS de lá; este teste é o que impede o app de sair andando
-      sozinho de novo — foi exatamente assim que a Inter sobreviveu meses
-      depois de a decisão já estar escrita.
+      sozinho de novo.
     */
-    const prototipo = ler('../docs/design/prototipo-arena/arena.html');
+    const prototipo = ler('../docs/design/design-system/tokens/typography.css');
     const normalizar = (valor: string) => valor.replace(/['\s]/g, '').toLowerCase();
 
     for (const nome of ['font-display', 'font-body', 'font-mono']) {

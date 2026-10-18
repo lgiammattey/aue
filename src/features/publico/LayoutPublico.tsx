@@ -47,6 +47,7 @@ export const LayoutPublico: React.FC<{
           <Link to="/tipos-de-arroto">Tipos de arroto</Link>
           <Link to="/ranking-de-arrotos">Ranking</Link>
           <Link to="/grupos">Grupos</Link>
+          <Link to="/videos-de-arroto">Vídeos</Link>
           <Link to="/comunidade">Bonde</Link>
         </nav>
         <Link className="desktop-pill desktop-pill-primary" to="/">
@@ -86,6 +87,7 @@ export const LayoutPublico: React.FC<{
           <Link to="/ranking-de-arrotos">Ranking</Link>
           <Link to="/comunidade">Bonde & Comunidades</Link>
           <Link to="/grupos">Grupos</Link>
+          <Link to="/videos-de-arroto">Vídeos</Link>
           <Link to="/privacidade">Política de privacidade</Link>
           <Link to="/termos">Termos de uso</Link>
         </nav>

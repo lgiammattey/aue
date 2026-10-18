@@ -10,6 +10,7 @@ const TiposDeArroto = lazy(() => import('./features/publico/TiposDeArroto').then
 const RankingDeArrotos = lazy(() => import('./features/publico/RankingDeArrotos').then((m) => ({ default: m.RankingDeArrotos })));
 const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade').then((m) => ({ default: m.TelaComunidade })));
 const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then((m) => ({ default: m.TelaLanding })));
+const VideosDeArroto = lazy(() => import('./features/publico/VideosDeArroto').then((m) => ({ default: m.VideosDeArroto })));
 const TelaLogin = lazy(() => import('./features/comunidade/TelaLogin').then((m) => ({ default: m.TelaLogin })));
 const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
 const TelaPerfil = lazy(() => import('./features/perfil/TelaPerfil').then((m) => ({ default: m.TelaPerfil })));
@@ -198,6 +199,8 @@ export function App() {
           <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
           <Route path="/ranking-de-arrotos" element={<RankingDeArrotos />} />
           <Route path="/ranking" element={<Navigate to="/ranking-de-arrotos" replace />} />
+          <Route path="/videos-de-arroto" element={<VideosDeArroto />} />
+          <Route path="/videos" element={<Navigate to="/videos-de-arroto" replace />} />
           <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
           <Route path="/termos" element={<TermosDeUso />} />
           <Route path="/grupos" element={<TelaGrupos />} />

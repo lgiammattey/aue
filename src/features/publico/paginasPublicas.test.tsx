@@ -15,6 +15,7 @@ import { ComoJogar } from './ComoJogar';
 import { ComoArrotar } from './ComoArrotar';
 import { TiposDeArroto } from './TiposDeArroto';
 import { RankingDeArrotos } from './RankingDeArrotos';
+import { VideosDeArroto } from './VideosDeArroto';
 
 function montar(componente: FC): string {
   return renderToStaticMarkup(createElement(MemoryRouter, null, createElement(componente)));
@@ -139,5 +140,29 @@ describe('/ranking-de-arrotos com a moldura da landing', () => {
     expect(html).toContain('desktop-site');
     expect(html).toContain('href="/como-jogar"');
     expect(html).toContain('href="/tipos-de-arroto"');
+  });
+});
+
+describe('/videos-de-arroto com a moldura da landing', () => {
+  it('tem um H1 só, e é o da página', () => {
+    const html = montar(VideosDeArroto);
+    expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
+    expect(html).toMatch(/<h1>[\s\S]*Vídeos de Arroto/);
+  });
+
+  it('lista os vídeos curados do YouTube e TikTok com links originais', () => {
+    const html = montar(VideosDeArroto);
+    expect(html).toContain('Fartin Around');
+    expect(html).toContain('Gamer Burps 38');
+    expect(html).toContain('Rei do Arroto');
+    expect(html).toContain('Assistir arroto');
+    expect(html).toContain('Entrar na Arena e Arrotar');
+  });
+
+  it('usa a casca compartilhada e links de navegação', () => {
+    const html = montar(VideosDeArroto);
+    expect(html).toContain('desktop-site');
+    expect(html).toContain('href="/ranking-de-arrotos"');
+    expect(html).toContain('href="/grupos"');
   });
 });

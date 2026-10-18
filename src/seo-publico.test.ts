@@ -49,6 +49,7 @@ const ENTRADAS: ReadonlyArray<{ caminho: string; arquivo: string; temOpenGraph: 
   { caminho: '/ranking-de-arrotos', arquivo: '../ranking-de-arrotos.html', temOpenGraph: true },
   { caminho: '/comunidade', arquivo: '../comunidade.html', temOpenGraph: true },
   { caminho: '/grupos', arquivo: '../grupos.html', temOpenGraph: true },
+  { caminho: '/videos-de-arroto', arquivo: '../videos-de-arroto.html', temOpenGraph: true },
   /*
     As duas legais ficam SEM Open Graph, e é decisão, não esquecimento: ninguém
     compartilha termo de uso no grupo do WhatsApp. Cada bloco `og:` a mais é
@@ -180,6 +181,8 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       '../como-arrotar.html',
       '../tipos-de-arroto.html',
       '../ranking-de-arrotos.html',
+      '../grupos.html',
+      '../videos-de-arroto.html',
       '../privacidade.html',
       '../termos.html',
       '../public/sitemap.xml',
@@ -214,6 +217,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       '../tipos-de-arroto.html',
       '../ranking-de-arrotos.html',
       '../grupos.html',
+      '../videos-de-arroto.html',
       '../privacidade.html',
       '../termos.html',
     ]) {
@@ -494,5 +498,11 @@ describe('SEO público — o Auê se declara um jogo de arroto', () => {
     const html = ler('../grupos.html');
     expect(html).toContain('"@type": "CollectionPage"');
     expect(html).toContain('"url": "https://aue.web.app/grupos"');
+  });
+
+  it('a galeria de vídeos declara CollectionPage em JSON-LD', () => {
+    const html = ler('../videos-de-arroto.html');
+    expect(html).toContain('"@type": "CollectionPage"');
+    expect(html).toContain('"url": "https://aue.web.app/videos-de-arroto"');
   });
 });

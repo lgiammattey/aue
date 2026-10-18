@@ -34,7 +34,6 @@ function ler(caminhoRelativo: string): string {
 }
 
 const ENV_EXAMPLE = ler('../.env.example');
-const ENV_CASCA = ler('../.env.casca');
 const FLAGS_TS = ler('./shared/flags.ts');
 const WORKFLOW = ler('../.github/workflows/publicar-firebase.yml');
 
@@ -129,23 +128,6 @@ describe('o corte de produção — os três lugares falam a mesma coisa', () =>
       expect(
         publicado,
         `a flag ${flag} está na lista do .env.example e o workflow não liga`,
-      ).toContain(flag);
-    }
-  });
-
-  it('a casca não liga nada que a web não ligue', () => {
-    /*
-      Os dois cortes PODEM ser diferentes — a casca não tem fluxo velho para
-      servir e hoje liga só a Arena. O que não pode é a casca ligar algo que a
-      web não liga sem ninguém ter escrito por quê.
-    */
-    const daCasca = ligadas(ENV_CASCA);
-    const daWeb = corteDoWorkflow();
-
-    for (const flag of daCasca) {
-      expect(
-        daWeb,
-        `a casca liga ${flag} e a web não. Os dois cortes podem ser diferentes de propósito, mas isso precisa estar escrito no .env.casca antes de passar por aqui`,
       ).toContain(flag);
     }
   });

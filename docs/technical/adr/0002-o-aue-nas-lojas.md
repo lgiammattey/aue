@@ -1,6 +1,6 @@
 # ADR 0002 — O Auê nas lojas
 
-**Status:** aceito
+**Status:** substituído pelo AGENTS.md e decisão de 18/10/2026 (produto exclusivamente webapp mobile e desktop; cascas nativas removidas)
 **Data:** 2026-08-09
 **Decidiu:** Giam
 **Substitui:** nada

@@ -1,88 +1,81 @@
 # Auê 🎙️💨
 
-**Um jogo mobile casual, web-first.**
+**A rede social para arrotadores, exclusivamente online via desktop e webapp mobile.**
 
-> ## Arrote. Receba a nota. Humilhe seus amigos.
-
-```text
-ARROTAR → RECEBER NOTA → DESAFIAR → RESPONDER → REVANCHE
-```
-
-Abre no navegador do celular, arrota, ganha um número na cara e manda pro grupo.
-Sem cadastro, sem tutorial, sem tela de boas-vindas. A primeira coisa que a
-pessoa vê já é o botão de arrotar.
-
-Feito por três primos que já faziam essa besteira antes de existir qualquer
-código.
-
-## A Arena
-
-A experiência acontece em **uma Arena que muda de estado**, não numa sequência de
-páginas. Dez estados: `IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`,
-`CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`.
-
-**A referência visual é o protótipo:**
+> ## Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.
 
 ```text
-docs/design/prototipo-arena/arena.html
+DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
+    ▲                                                                   │
+    └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
 ```
 
-Abra direto no navegador — roda sozinho, sem build. Ver
-[`docs/design/README.md`](docs/design/README.md) e
-[`docs/jogo/ARENA.md`](docs/jogo/ARENA.md).
+O Auê conecta a adrenalina imediata da **Arena** (a máquina que captura, julga e pontua cada arroto) à dinâmica de timeline estilo Twitter/X (**Bonde do Arroto**) e **comunidades temáticas** (estilo Orkut / Reddit) para reunir os arrotadores do mundo.
 
-## O que o Auê não é
+Feito por quem já fazia essa zoeira antes de existir qualquer linha de código.
 
-Não tem, e **não é roadmap futuro**: feed · seguidores · comunidades ·
-campeonatos · temporadas · assinatura · XP · conquistas · ranking global ·
-perfil social · notificações.
+---
 
-Existe código de várias dessas coisas no repositório, herdado da fase anterior
-do produto. Está desligado por `src/shared/flags.ts` — **padrão desligado** — e
-está na fila para sair ([#109](https://github.com/gmmattey/aue/issues/109)).
-Código legado desligado não é roadmap.
+## A Experiência
 
-## Web-first, nativo depois
+A plataforma roda 100% na web moderna, adaptada tanto para telas grandes no **desktop** (layout de 3 colunas: navegação, feed/arena e lateral de tendências/ranking) quanto na palma da mão como **webapp mobile** (com barra inferior, safe area e alvos tocáveis >= 44px).
 
-O alvo é a web no celular: é onde um link cai no grupo e alguém joga em três
-segundos sem instalar nada. Android e iOS nativos são um destino possível
-**depois**. A consequência prática hoje é só não fechar a porta — motor de áudio
-e de score separados da tela, Arena empacotável, nada dependente de desktop.
+1. **Bonde do Arroto (Feed):** Linha do tempo de causos em texto e áudio com ondas sonoras interativas, notas anexadas e reações.
+2. **Arena:** Máquina de estados contínua (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`) onde o áudio é gravado, validado pelo YAMNet e pontuado de 0 a 100 (Auê Score).
+3. **Comunidades Temáticas:** Hubs organizados por assunto (Bonde Geral, Clássicos de Boteco, Madrugada, etc.) com rankings dedicados e moderação.
+4. **Desafios X1:** Duelos diretos entre amigos via link no zap com comparativo visual e revanche imediata.
+5. **Diretório de Grupos:** Diretório aberto de grupos externos no WhatsApp, Telegram e TikTok.
+6. **Perfis de Jogador:** Identidade de arrotador com apelido, handle `@`, histórico de causos e troféus.
 
-**Nada de implementar nativo agora.**
+---
 
-## Como a identidade funciona sem cadastro
+## Os Protótipos Canônicos
 
-Sessão anônima do Supabase (`signInAnonymously`) criada no boot. A pessoa não vê
-tela de conta, mas o backend ainda aplica regras de acesso e associa as
-gravações da sessão. O nome só é pedido no ato de desafiar ou compartilhar.
+**A referência visual viva do produto reside em [`docs/design/prototipo/`](docs/design/prototipo/):**
 
-Para funcionar no ambiente publicado:
+- [`Bonde do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html) — O feed social estilo Twitter/X
+- [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html) — A máquina da Arena e estados de captura
+- [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html) — Hub de comunidades e rankings
+- [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html) — Página de chegada e acesso rápido
+- [`Login.dc.html`](docs/design/prototipo/Login.dc.html) — Autenticação e entrada como convidado
+- [`Jornada.dc.html`](docs/design/prototipo/Jornada.dc.html) — As 6 fases da jornada do jogador
+- [`Versões Webapp.dc.html`](docs/design/prototipo/Vers%C3%B5es%20Webapp.dc.html) — Matriz de visualização desktop, tablet e celular
+- [`Design System.dc.html`](docs/design/prototipo/Design%20System.dc.html) — Mostruário de componentes, cores e tokens
 
-- `Anonymous sign-ins` habilitado no Supabase;
-- `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` presentes **antes do build**;
-- mudar variável `VITE_*` depois do build exige novo deploy.
+Abra direto no navegador — roda de forma autônoma sem build. Ver [`docs/design/README.md`](docs/design/README.md).
 
-## Stack
+---
 
-React 19 + TypeScript · Vite · PWA (`vite-plugin-pwa`) · Web Audio API +
-MediaRecorder · YAMNet local para detectar arroto · Supabase (Auth, PostgreSQL
-com RLS/RPC, Storage, Edge Functions) · Vitest.
+## Exclusivamente Web (Desktop & Webapp)
 
-## Motor de julgamento
+O Auê vive **100% na web** (`https://aue.web.app`), hospedado no Firebase Hosting.
 
-O juiz primeiro decide **se aquilo foi arroto mesmo** — conversa, sopro e
-silêncio não viram nota. Depois mede duração, potência, profundidade e textura e
-gera o **Auê Score** de 0 a 100.
+- **Sem download de loja:** Abre no navegador, joga em três segundos e compartilha no WhatsApp.
+- **PWA instalável:** Pode ser adicionado à tela inicial no Android e no iOS com suporte offline e cache do modelo YAMNet.
+- **Zero cascas nativas:** Lojas nativas (Google Play / App Store) estão fora de escopo.
 
-O produto não chama isso de medição científica em dB nem finge precisão física
-que não tem. A fórmula é versionada e espelhada entre TypeScript e SQL, com
-testes de paridade — o que **não** prova que o banco remoto está com a mesma
-migração aplicada.
+---
 
-Regras completas: [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md).
+## Como a Identidade Funciona
 
-## Desenvolvimento local
+- **Entrada instantânea:** Quem chega sem conta recebe uma sessão anônima do Supabase (`signInAnonymously`). Pode jogar na Arena, ouvir áudios e interagir imediatamente.
+- **Conta permanente e perfil:** A qualquer momento a pessoa pode vincular e-mail/senha ou Google, escolhendo seu apelido e handle `@` público.
+- Gravação para duelo ou teste não vira causo público sem autorização explícita na hora da postagem.
+
+---
+
+## Stack Técnica
+
+- **Frontend:** React 19 + TypeScript + Vite + React Router
+- **PWA:** `vite-plugin-pwa` (Workbox) com cache de runtime para o modelo de IA
+- **Áudio & IA:** Web Audio API + MediaRecorder + modelo YAMNet local (TensorFlow.js) para detecção de arrotos reais
+- **Backend & Dados:** Supabase (PostgreSQL, Row Level Security, RPCs, Auth, Storage privado e Edge Functions)
+- **Hospedagem:** Firebase Hosting com geração estática de páginas para grupos e SEO
+- **Qualidade & Testes:** Vitest + Testing Library + Oxlint + validações de arquitetura
+
+---
+
+## Desenvolvimento Local
 
 ```bash
 npm install
@@ -90,7 +83,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Validação mínima antes de PR:
+Validação obrigatória antes de qualquer entrega:
 
 ```bash
 npm run typecheck
@@ -99,49 +92,26 @@ npm run test
 npm run build
 ```
 
-As regras de trabalho estão em [`AGENTS.md`](AGENTS.md) — a **autoridade única**
-do repositório. `CLAUDE.md` só aponta para ele. Tudo que o projeto precisa está
-dentro deste repositório: nenhum agente, skill ou configuração externa é
-necessária.
+As regras de trabalho e papéis da squad estão em [`AGENTS.md`](AGENTS.md) — a **autoridade única** do repositório.
 
-## Banco e migrações
-
-A fonte do schema versionado é `supabase/migrations/`. Não use um desenho antigo
-de banco como prova de que uma tabela existe.
-
-Os scripts em `supabase/rollback/` são de emergência, não substituem backup, e
-vários foram revisados por leitura sem execução contra Postgres. Leia
-[`supabase/rollback/README.md`](supabase/rollback/README.md) antes de usar.
-
-## O que acontece com o áudio depois dos 7 dias
-
-**O que expira é o acesso pelo link, não a gravação.** Passado o prazo, o link
-para de abrir a sessão; o arquivo é mantido. **Não existe expurgo automático.**
-
-Isso está publicado na política de privacidade com essas palavras, porque
-retenção que a pessoa não consegue ler é retenção escondida. Quem gravou pode
-apagar o próprio áudio pela tela de resultado, e denúncia esconde a gravação.
+---
 
 ## Documentação
 
 Comece por [`docs/README.md`](docs/README.md).
 
-- visão: [`docs/jogo/VISAO.md`](docs/jogo/VISAO.md)
-- loop: [`docs/jogo/LOOP.md`](docs/jogo/LOOP.md)
-- estados da Arena: [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md)
-- regras de gameplay: [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md)
-- design: [`docs/design/README.md`](docs/design/README.md)
-- escopo: [`docs/escopo/ESCOPO_ATUAL.md`](docs/escopo/ESCOPO_ATUAL.md)
-- backlog: [`docs/escopo/BACKLOG.md`](docs/escopo/BACKLOG.md)
-- arquitetura: [`docs/technical/arquitetura.md`](docs/technical/arquitetura.md)
-- voz: [`docs/jogo/VOZ.md`](docs/jogo/VOZ.md)
-- história: [`docs/jogo/HISTORIA.md`](docs/jogo/HISTORIA.md)
+- Visão do produto: [`docs/jogo/VISAO.md`](docs/jogo/VISAO.md)
+- Loop do jogador: [`docs/jogo/LOOP.md`](docs/jogo/LOOP.md)
+- Jornada em 6 fases: [`docs/jogo/JORNADA.md`](docs/jogo/JORNADA.md)
+- Estados da Arena: [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md)
+- Regras e pontuação: [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md)
+- Design e protótipos: [`docs/design/README.md`](docs/design/README.md)
+- Escopo atual: [`docs/escopo/ESCOPO_ATUAL.md`](docs/escopo/ESCOPO_ATUAL.md)
+- Arquitetura e ADRs: [`docs/technical/adr/README.md`](docs/technical/adr/README.md)
+- Tom de voz: [`docs/jogo/VOZ.md`](docs/jogo/VOZ.md)
 
-A visão anterior está em [`docs/_arquivo/`](docs/_arquivo/), **sem autoridade
-nenhuma**.
+---
 
-## Regra que vale mais que empolgação
+## Regra de Ouro da Squad
 
-> Uma coisa de cada vez. Termina. Valida. Mergeia.
-
-E nada pode fingir que funciona.
+> **Uma entrega fechada por vez. Proteja a mesa limpa. Nada pode fingir que funciona.**

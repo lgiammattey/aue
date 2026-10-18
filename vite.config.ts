@@ -6,25 +6,12 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const entrada = (arquivo: string) => fileURLToPath(new URL(arquivo, import.meta.url));
 
-/**
- * O build da casca é o MESMO build da web, com uma diferença só: sem service
- * worker (`npm run build:casca`, modo `casca`).
- *
- * POR QUE TIRAR O SERVICE WORKER DE DENTRO DO APP: ele existe para guardar a
- * casca do site e o modelo do juiz quando a pessoa está num navegador. Dentro
- * do app, os arquivos já chegaram pela loja e vivem no aparelho — um segundo
- * cache por cima disso só cria um jeito de o app continuar servindo a versão
- * velha depois de atualizado, e é um bug que só aparece no celular de outra
- * pessoa. A web continua com ele, intacta.
- */
-const ehCasca = (mode: string) => mode === 'casca';
-
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   /*
     UMA ENTRADA HTML POR ROTA INDEXÁVEL — o conserto do canonical.
 
-    O app é uma SPA e `vercel.json` reescreve qualquer caminho para o
+    O app é uma SPA e `firebase.json` reescreve qualquer caminho para o
     `index.html`. Consequência: `/privacidade` era servida com o título, a
     descrição e o `<link rel="canonical">` da HOME, enquanto
     `public/sitemap.xml` declarava `/privacidade` como URL indexável. Sitemap e
@@ -62,8 +49,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
-      /* Ver o comentário do topo: dentro da casca não há service worker. */
-      disable: ehCasca(mode),
       registerType: 'autoUpdate',
       devOptions: {
         enabled: true,
@@ -201,7 +186,7 @@ export default defineConfig(({ mode }) => ({
           `share_target` REMOVIDO no corte de lançamento. Ele anunciava o app
           ao sistema operacional como destino de compartilhamento de áudio e
           fazia POST para /import-audio, rota que não existe no roteador
-          (só há /d/:id e o catch-all). Com o rewrite de SPA da Vercel esse
+          (só há /d/:id e o catch-all). Com o rewrite de SPA do Firebase Hosting esse
           POST passa a cair no index.html em vez de dar 404, ou seja, o
           usuário compartilharia um áudio e o app abriria sem nada acontecer.
           Para reativar: criar a rota e o handler que lê o FormData do POST.
@@ -209,4 +194,4 @@ export default defineConfig(({ mode }) => ({
       }
     })
   ],
-}));
+});

@@ -1,26 +1,25 @@
 # Mapa da documentação do Auê
 
-O Auê é um **jogo mobile casual, web-first**:
+O Auê é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**:
 
-> **Arrote. Receba a nota. Humilhe seus amigos.**
+> **Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.**
 
-A autoridade do repositório é [`../AGENTS.md`](../AGENTS.md). Este arquivo só
-diz onde cada coisa mora.
+A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arquivo serve como mapa para localizar cada decisão, protótipo e especificação.
 
 ---
 
 ## Comece por aqui
 
-1. [`../AGENTS.md`](../AGENTS.md) — **a autoridade**: papéis, escopo, fluxo e regras.
-2. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o jogo é**, e o que ele não é.
-3. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop principal.
-4. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da Arena.
-5. [`design/prototipo-arena/arena.html`](design/prototipo-arena/arena.html) — **a referência visual**. Abra no navegador.
-6. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo.
-7. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
-8. [`jogo/AUÊ!-2.md`](jogo/AUÊ!-2.md) — Game Design Document completo.
-9. [`design/AUÊ!.md`](design/AUÊ!.md) — Art Bible e direção artística.
-10. [`production-pack/Aue_Game_Production_Pack_v1.0/README.md`](production-pack/Aue_Game_Production_Pack_v1.0/README.md) — pacote consolidado de produção, QA, crescimento e release.
+1. [`../AGENTS.md`](../AGENTS.md) — **a autoridade única**: squad, governança, precedência, escopo e regras.
+2. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: o Bonde do Arroto, comunidades, Arena e X1.
+3. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop em 6 fases da experiência.
+4. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
+5. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da máquina da Arena.
+6. [`design/README.md`](design/README.md) e [`design/prototipo/`](design/prototipo/) — **os protótipos interativos canônicos**.
+7. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
+8. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
+9. [`technical/adr/README.md`](technical/adr/README.md) — índice dos ADRs aceitos.
+10. [`jogo/VOZ.md`](jogo/VOZ.md) — o tom de voz autêntico, zoeiro e direto.
 
 ---
 
@@ -28,78 +27,64 @@ diz onde cada coisa mora.
 
 | Pergunta | Fonte |
 |---|---|
-| O que o jogo é? | [`jogo/VISAO.md`](jogo/VISAO.md) |
-| Qual é o desenho de produto completo? | [`jogo/AUÊ!-2.md`](jogo/AUÊ!-2.md) |
-| Qual é o loop? | [`jogo/LOOP.md`](jogo/LOOP.md) |
+| O que o jogo e a rede social são? | [`jogo/VISAO.md`](jogo/VISAO.md) |
+| Qual é o loop da experiência? | [`jogo/LOOP.md`](jogo/LOOP.md) |
+| Qual é a jornada do jogador? | [`jogo/JORNADA.md`](jogo/JORNADA.md) e [`design/prototipo/Jornada.dc.html`](design/prototipo/Jornada.dc.html) |
 | Que estados a Arena tem? | [`jogo/ARENA.md`](jogo/ARENA.md) |
 | Como o jogo pontua e o que não vale? | [`jogo/REGRAS.md`](jogo/REGRAS.md) |
-| Com o que a Arena se parece? | [`design/prototipo-arena/arena.html`](design/prototipo-arena/arena.html) |
-| De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) |
-| Qual é a direção artística que une esses elementos? | [`design/AUÊ!.md`](design/AUÊ!.md) |
-| Onde está a marca, o logo e o kit? | [`design/design-system/`](design/design-system/) |
-| Isso pertence ao jogo agora? | [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) |
+| Com o que a interface se parece? | Protótipos canônicos em [`design/prototipo/`](design/prototipo/) |
+| De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e [`design/prototipo/Design System.dc.html`](design/prototipo/Design%20System.dc.html) |
+| Qual é a direção artística que une tudo? | [`design/AUÊ!.md`](design/AUÊ!.md) |
+| Isso pertence ao produto agora? | [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) |
 | O que pegar para fazer? | [`escopo/BACKLOG.md`](escopo/BACKLOG.md) |
-| Quem implementa e revisa? | [`../AGENTS.md`](../AGENTS.md) |
+| Quem implementa, valida e aceita? | [`../AGENTS.md`](../AGENTS.md) e [`.agents/README.md`](../.agents/README.md) |
 | Como o Auê fala? | [`jogo/VOZ.md`](jogo/VOZ.md) |
 | De onde veio o produto? | [`jogo/HISTORIA.md`](jogo/HISTORIA.md) |
 | Que stack é essa e por quê? | [`technical/adr/0001-arquitetura-oficial-do-aue.md`](technical/adr/0001-arquitetura-oficial-do-aue.md) |
-| Como o jogo vira app de loja? | [`technical/adr/0002-o-aue-nas-lojas.md`](technical/adr/0002-o-aue-nas-lojas.md) |
-| Como funciona a comunidade e o feed no 3.0? | [`technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md`](technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md) |
-| Posso trocar isso ou preciso de decisão formal? | [`technical/adr/`](technical/adr/) |
+| Como o link chega no zap com prévia? | [`technical/adr/0003-a-previa-do-link.md`](technical/adr/0003-a-previa-do-link.md) |
+| Como funciona a arquitetura de feed e comunidades? | [`technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md`](technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md) |
+| Como funcionam as contas e perfis públicos? | [`technical/adr/0005-conta-opcional-e-perfil-publico.md`](technical/adr/0005-conta-opcional-e-perfil-publico.md) |
+| Onde a aplicação é hospedada? | [`technical/adr/0006-hospedagem-somente-firebase.md`](technical/adr/0006-hospedagem-somente-firebase.md) |
+| Como as páginas públicas de grupos são geradas? | [`technical/adr/0008-paginas-publicas-dos-grupos.md`](technical/adr/0008-paginas-publicas-dos-grupos.md) |
+| Posso trocar isso ou preciso de decisão formal? | [`technical/adr/`](technical/adr/) (§8 do ADR 0001) |
 | Como o código está organizado hoje? | [`technical/arquitetura.md`](technical/arquitetura.md) + o código |
 | Por que essa gravação não virou nota? | [`technical/deteccao-de-arroto-yamnet.md`](technical/deteccao-de-arroto-yamnet.md) |
-| Onde o jogo roda e como uma migração sobe? | [`technical/ambientes.md`](technical/ambientes.md) |
-| Como o deploy funciona? | [`technical/hospedagem-firebase.md`](technical/hospedagem-firebase.md) |
-| Como a moderação de áudio funciona? | [`technical/moderacao-de-audio.md`](technical/moderacao-de-audio.md) |
-| Onde está o pacote consolidado de produção? | [`production-pack/Aue_Game_Production_Pack_v1.0/README.md`](production-pack/Aue_Game_Production_Pack_v1.0/README.md) |
-| O que sobrou no banco sem ninguém chamar? | [`technical/banco-sem-consumidor.md`](technical/banco-sem-consumidor.md) |
 | Qual é o schema realmente aplicado? | `../supabase/migrations/` + ambiente aplicado |
 | Como nomear um objeto novo do banco? | [`schema/nomenclatura.md`](schema/nomenclatura.md) |
-| Qual é o domínio de dados? | [`schema/banco_de_dados.md`](schema/banco_de_dados.md) |
-| Como desfazer uma migração? | [`../supabase/rollback/README.md`](../supabase/rollback/README.md) + backup + estado real |
-| Como está o mercado de concorrentes? | [`pesquisa/analise-competitiva-arroto-2026-08.md`](pesquisa/analise-competitiva-arroto-2026-08.md) |
+
+---
 
 ## Precedência
 
-1. **Comportamento real** — código, migrações e o que roda no celular vencem
-   documento de intenção.
-2. **`escopo/ESCOPO_ATUAL.md`** — decide o que pertence ao jogo.
-3. **`jogo/ARENA.md`** — decide **quais estados a Arena tem**. Protótipo, design
-   system e handoff não criam, não renomeiam e não removem estado.
-4. **`design/prototipo-arena/arena.html`** e
-   **`design/design-system/system/DESIGN.md`** — decidem como cada estado se
-   parece, se move e mede.
-5. **`technical/adr/`** — decide como o jogo é construído por dentro. ADR aceito
-   só cai com ADR novo.
+1. **Comportamento real** — código, migrações e o que roda no navegador vencem documento de intenção.
+2. **`escopo/ESCOPO_ATUAL.md`** — decide o que pertence ao produto agora.
+3. **`jogo/JORNADA.md` e `jogo/ARENA.md`** — decidem as 6 fases da experiência e quais estados a Arena tem. Nenhum protótipo, design system ou handoff cria, renomeia ou remove estado.
+4. **Protótipos em `design/prototipo/` e `design/design-system/system/DESIGN.md`** — decidem como cada estado e tela se parecem, se movem e medem.
+5. **`technical/adr/`** — decide como o produto é construído por dentro. Um ADR aceito só cai com outro ADR.
 6. **`../AGENTS.md`** — decide como o trabalho acontece.
-7. **`jogo/AUÊ!-2.md`** — desenho de produto consolidado, subordinado às fontes
-   de comportamento e escopo acima.
-8. **`design/AUÊ!.md`** — direção artística consolidada, subordinada ao
-   protótipo e ao design system.
-9. **Demais documentos** — contexto.
+7. **Demais documentos** — contexto e histórico.
 
-## Estrutura
+---
+
+## Estrutura de Documentos
 
 ```text
 docs/
 ├── README.md                          ← você está aqui
-├── inventario-do-reposicionamento.md  ← registro da virada para jogo
-├── jogo/        VISAO · LOOP · ARENA · REGRAS · VOZ · HISTORIA · AUÊ!-2 (GDD)
-├── design/      README · AUÊ! (Art Bible) · prototipo-arena/ · design-system/ · fontes/
+├── jogo/        VISAO · LOOP · JORNADA · ARENA · REGRAS · VOZ · HISTORIA · AUÊ!-2
+├── design/      README · AUÊ! (Art Bible) · prototipo/ · design-system/ · fontes/
 ├── escopo/      ESCOPO_ATUAL · BACKLOG
-├── technical/   adr/ · arquitetura · ambientes · deploy · yamnet · moderação · banco sem consumidor
+├── technical/   adr/ · arquitetura · ambientes · deploy · yamnet · moderação
 ├── schema/      nomenclatura · banco_de_dados
-├── pesquisa/    análise competitiva de mercado de áudio e arroto
-├── production-pack/  pacote de produção v1.0 · QA · crescimento · release · referência visual
-└── _arquivo/    a visão anterior (incluindo design-artifacts), sem autoridade nenhuma
+├── pesquisa/    análise competitiva de mercado
+├── production-pack/  pacote consolidado v1.0
+└── _arquivo/    histórico e versões anteriores, explicitamente sem autoridade
 ```
 
-## Uma última regra
+---
 
-A documentação pode falar palavrão, zoar e parecer escrita pelos três primos.
+## Regra de Ouro
 
-Ela não pode ser engraçada a ponto de esconder risco, erro, segurança,
-privacidade ou comportamento real.
+A documentação pode falar palavrão, zoar e parecer conversa de boteco entre parceiros.
 
-O produto é um jogo de arroto. A documentação não precisa parecer ata de banco.
-Mas também não pode meter caô só porque a frase ficou boa.
+Ela só não pode mentir: risco, erro, privacidade e comportamento real vêm sempre em primeiro lugar.

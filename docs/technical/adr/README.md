@@ -15,13 +15,14 @@ nome de pasta dentro de uma camada, refactor. Isso é PR.
 
 | # | Decisão | Status |
 |---|---|---|
-| [0001](0001-arquitetura-oficial-do-aue.md) | A arquitetura oficial do Auê — stack, quatro camadas, web-first com loja depois | aceito |
-| [0002](0002-o-aue-nas-lojas.md) | O Auê nas lojas — Capacitor entra, até onde cada loja vai e o que a casca não pode | aceito |
+| [0001](0001-arquitetura-oficial-do-aue.md) | A arquitetura oficial do Auê — stack, quatro camadas, web-first | aceito |
+| [0002](0002-o-aue-nas-lojas.md) | O Auê nas lojas — Capacitor (substituído pela decisão de produto 100% web/webapp) | substituído por AGENTS.md |
 | [0003](0003-a-previa-do-link.md) | A prévia do link — o link vira `/x/<código>` e a prévia é montada na borda | aceito |
 | [0004](0004-arquitetura-aue-3-comunidades-e-feed.md) | Auê 3.0: Arquitetura de Comunidades, Feed de Causos e Jogo | aceito |
 | [0005](0005-conta-opcional-e-perfil-publico.md) | Conta opcional (promove a sessão anônima), perfil público e comentário em níveis | aceito |
 | [0006](0006-hospedagem-somente-firebase.md) | Hospedagem somente Firebase | aceito |
 | [0007](0007-audio-publico-da-casa.md) | Áudio público da casa — bucket público separado só com conteúdo da casa | aceito |
+| [0008](0008-paginas-publicas-dos-grupos.md) | Páginas públicas dos grupos externos no build | aceito |
 
 ---
 

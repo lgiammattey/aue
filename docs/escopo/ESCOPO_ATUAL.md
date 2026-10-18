@@ -173,7 +173,7 @@ Aprovado por decisão de produto pelo Luiz em 18/10/2026:
 - **Cadastro aberto:** dentro do app, para quem está logado, e numa tela pública fora do login, para o visitante sem conta. O grupo cadastrado aparece na hora no app;
 - **Oficiais de partida:** os três grupos de WhatsApp que o Luiz passou entram como oficiais, com o texto aprovado por ele;
 - **Segurança:** o cadastro passa só pelo servidor, com limite de envios por origem. Sem verificação anti-robô, por decisão do Luiz em 18/10/2026. O link só vale se for do domínio da plataforma (`chat.whatsapp.com`, `t.me`, `tiktok.com`), e isso é conferido no banco. Só quem está logado denuncia; três pessoas distintas escondem o grupo, exceto os oficiais;
-- **Google:** cada grupo visível ganha uma página própria em `/g/<slug>`, gerada no build e republicada só quando a lista muda, conforme o [ADR 0004](../technical/adr/0004-paginas-publicas-dos-grupos.md). O link do convite sai com `nofollow`;
+- **Google:** cada grupo visível ganha uma página própria em `/g/<slug>`, gerada no build e republicada só quando a lista muda, conforme o [ADR 0008](../technical/adr/0008-paginas-publicas-dos-grupos.md). O link do convite sai com `nofollow`;
 - **Sem número inventado:** nada de contagem de membros, "ativos agora" ou ranking de grupo. O Auê não sabe se o grupo está cheio nem se o convite expirou;
 - **Não é a lista de comunidades temáticas** do app (Bonde Geral etc.), que continua separada.
 

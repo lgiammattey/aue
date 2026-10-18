@@ -6,7 +6,7 @@ Tudo que a SQUAD usa mora aqui dentro. **Nada externo ao repositório é necess�
 
 ## Quem é quem
 
-Os 7 membros da squad se conheceram nos anos 2000 na inesquecível comunidade **"Eu Arroto, E Daí?"** do falecido Orkut. Apaixonados pela arte do arroto e **viciados incuráveis em Twitter/X, TikTok e WhatsApp**, eles entendem como ninguém a dinâmica de engajamento, viralidade de áudio, ganchos visuais e o caos dos grupos de amigos.
+Os 8 membros da squad se conheceram nos anos 2000 na inesquecível comunidade **"Eu Arroto, E Daí?"** do falecido Orkut. Apaixonados pela arte do arroto e **viciados incuráveis em Twitter/X, TikTok e WhatsApp**, eles entendem como ninguém a dinâmica de engajamento, viralidade de áudio, ganchos visuais e o caos dos grupos de amigos.
 
 Definidos em [`AGENTS.md`](../AGENTS.md):
 

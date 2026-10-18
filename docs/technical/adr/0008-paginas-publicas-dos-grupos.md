@@ -1,4 +1,4 @@
-# ADR 0004 — Páginas públicas dos grupos
+# ADR 0008 — Páginas públicas dos grupos
 
 **Status:** aceito
 **Data:** 2026-10-18

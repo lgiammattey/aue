@@ -6,6 +6,8 @@ const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePriv
 const TermosDeUso = lazy(() => import('./features/legal/TermosDeUso').then((m) => ({ default: m.TermosDeUso })));
 const ComoJogar = lazy(() => import('./features/publico/ComoJogar').then((m) => ({ default: m.ComoJogar })));
 const ComoArrotar = lazy(() => import('./features/publico/ComoArrotar').then((m) => ({ default: m.ComoArrotar })));
+const TiposDeArroto = lazy(() => import('./features/publico/TiposDeArroto').then((m) => ({ default: m.TiposDeArroto })));
+const RankingDeArrotos = lazy(() => import('./features/publico/RankingDeArrotos').then((m) => ({ default: m.RankingDeArrotos })));
 const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade').then((m) => ({ default: m.TelaComunidade })));
 const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then((m) => ({ default: m.TelaLanding })));
 const TelaLogin = lazy(() => import('./features/comunidade/TelaLogin').then((m) => ({ default: m.TelaLogin })));
@@ -205,6 +207,9 @@ export function App() {
           {/* Páginas Públicas e Legais */}
           <Route path="/como-jogar" element={<ComoJogar />} />
           <Route path="/como-arrotar" element={<ComoArrotar />} />
+          <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
+          <Route path="/ranking-de-arrotos" element={<RankingDeArrotos />} />
+          <Route path="/ranking" element={<Navigate to="/ranking-de-arrotos" replace />} />
           <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
           <Route path="/termos" element={<TermosDeUso />} />
           <Route path="/grupos" element={<TelaGrupos />} />

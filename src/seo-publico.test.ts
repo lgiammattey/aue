@@ -45,6 +45,8 @@ const ENTRADAS: ReadonlyArray<{ caminho: string; arquivo: string; temOpenGraph: 
   { caminho: '/', arquivo: '../index.html', temOpenGraph: true },
   { caminho: '/como-jogar', arquivo: '../como-jogar.html', temOpenGraph: true },
   { caminho: '/como-arrotar', arquivo: '../como-arrotar.html', temOpenGraph: true },
+  { caminho: '/tipos-de-arroto', arquivo: '../tipos-de-arroto.html', temOpenGraph: true },
+  { caminho: '/ranking-de-arrotos', arquivo: '../ranking-de-arrotos.html', temOpenGraph: true },
   { caminho: '/comunidade', arquivo: '../comunidade.html', temOpenGraph: true },
   { caminho: '/grupos', arquivo: '../grupos.html', temOpenGraph: true },
   /*
@@ -176,6 +178,8 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       '../index.html',
       '../como-jogar.html',
       '../como-arrotar.html',
+      '../tipos-de-arroto.html',
+      '../ranking-de-arrotos.html',
       '../privacidade.html',
       '../termos.html',
       '../public/sitemap.xml',
@@ -207,6 +211,8 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     for (const arquivo of [
       '../como-jogar.html',
       '../como-arrotar.html',
+      '../tipos-de-arroto.html',
+      '../ranking-de-arrotos.html',
       '../grupos.html',
       '../privacidade.html',
       '../termos.html',
@@ -434,6 +440,8 @@ describe('SEO público — o Auê se declara um jogo de arroto', () => {
     expect(locs).toContain(`${ORIGEM_CANONICA}/termos`);
     expect(locs).toContain(`${ORIGEM_CANONICA}/como-jogar`);
     expect(locs).toContain(`${ORIGEM_CANONICA}/como-arrotar`);
+    expect(locs).toContain(`${ORIGEM_CANONICA}/tipos-de-arroto`);
+    expect(locs).toContain(`${ORIGEM_CANONICA}/ranking-de-arrotos`);
   });
 
   it('a página de como arrotar ensina a técnica e manda pro jogo, sem JavaScript', () => {
@@ -454,5 +462,31 @@ describe('SEO público — o Auê se declara um jogo de arroto', () => {
     for (const termo of ['engole o ar', 'arrotar alto', 'gás', 'médico', 'jogo de arroto']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
+  });
+
+  it('a página de tipos de arroto cataloga os estilos e explica as notas, sem JavaScript', () => {
+    const html = ler('../tipos-de-arroto.html');
+    const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
+
+    expect(noscript, 'tipos-de-arroto.html sem <noscript>').toBeTruthy();
+    for (const termo of ['trovão', 'trator', 'rajada', 'fraseado', 'sopro oco', 'jogo de arroto']) {
+      expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
+    }
+
+    // Valida JSON-LD FAQPage
+    expect(html).toContain('"@type": "FAQPage"');
+  });
+
+  it('a página de ranking de arrotos traz os recordes mundiais e as faixas oficiais, sem JavaScript', () => {
+    const html = ler('../ranking-de-arrotos.html');
+    const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
+
+    expect(noscript, 'ranking-de-arrotos.html sem <noscript>').toBeTruthy();
+    for (const termo of ['112,4 db', 'guinness', 'foi isso?', 'tá maluco', 'tá roubado', 'jogo de arroto']) {
+      expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
+    }
+
+    // Valida JSON-LD FAQPage
+    expect(html).toContain('"@type": "FAQPage"');
   });
 });

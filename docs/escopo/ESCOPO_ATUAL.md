@@ -154,7 +154,16 @@ Contrato de funcionamento (auditoria de 18/10/2026):
 - reação, comentário e denúncia vão ao banco (`alternar_reacao_do_causo`, `criar_comentario`, `denuncias`); erro do servidor aparece como erro, não como sucesso;
 - três denúncias de pessoas distintas escondem o causo;
 - sem Supabase configurado, o causo fica no aparelho e vem marcado "só neste aparelho";
-- **sem número inventado:** nada de contagem de membros, seguidores ou duelo de exemplo. Seguir e perfil de terceiros não existem ainda e aparecem desabilitados.
+- **sem número inventado:** nada de contagem de membros, seguidores ou duelo de exemplo. O perfil de terceiros existe em `/u/:handle` e o Seguir grava no servidor.
+
+Elenco da casa (decisões do Luiz em 18/10/2026, Cartão `docs/historias/burpzilla/cartao-de-missao-seed.md`):
+
+- **Conteúdo da casa:** o Bonde e a comunidade "Eu arroto, e daí?" recebem posts dos personagens Giam e Lima (história Burpzilla), com comentários de contas da casa. É carga retroativa (backfill), de 28/08 a 15/10/2026, horário de Brasília, com a data de cada post como no cronograma. Não é agendamento;
+- **Perfil:** igual ao de usuário comum. A conta da casa leva um símbolo Burpzilla (usuário da casa) só na tela de perfil. Não há selo no feed, nada na página Sobre, e o símbolo não indica posição, nota nem ranking. Não é conquista;
+- **Áudio sem nota:** os áudios do Solo Eructos! sobem sem passar pelo jogo, logo sem nota. Nota nunca é inventada e o card não desenha pontuação quando ela não existe. Por ora esse caminho é só da casa (servidor). Postar áudio sem jogo como usuário comum não existe e pede outro Cartão;
+- **Comentários da casa:** só texto. Os agentes da squad que comentam são sorteados (semente registrada e revisada antes de aplicar), nunca com o nome "Lucas";
+- **Rastreável e fora de métrica:** a conta da casa fica marcada no banco, fora do alcance do usuário, e não entra em ranking nem em métrica de audiência;
+- **Autorização dos áudios:** foi dada pelo grupo do Telegram. A prova precisa estar guardada no repositório antes de qualquer carga em produção.
 
 ### 2.18 Diretório de grupos externos
 

@@ -5,13 +5,22 @@ import { FLAGS } from '../../shared/flags';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import { obterPerfilLocal, salvarPerfilLocal } from '../../plataforma/web/perfil';
-import { emailParece, SENHA_MINIMA, type PortaDeConta, type ResultadoDaConta } from '../../portas/conta';
+import {
+  emailParece,
+  handleValido,
+  SENHA_MINIMA,
+  sugerirHandle,
+  type PortaDeConta,
+  type ResultadoDaConta,
+} from '../../portas/conta';
 
 const MENSAGENS: Record<string, string> = {
   emailInvalido: 'E-mail inválido.',
   senhaFraca: `Senha com no mínimo ${SENHA_MINIMA} caracteres.`,
   emailEmUso: 'Este e-mail já está cadastrado. Entra com ele.',
   credenciaisInvalidas: 'E-mail ou senha incorretos.',
+  handleEmUso: 'Esse @ já é de outra pessoa. Escolhe outro.',
+  handleInvalido: '@: de 3 a 20 letras minúsculas, números ou _.',
   semServidor: 'Sem conexão com o servidor do Auê. Tenta de novo daqui a pouco.',
 };
 
@@ -33,6 +42,8 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [nick, setNick] = useState('');
+  const [handle, setHandle] = useState('');
+  const [handleMexido, setHandleMexido] = useState(false);
   const [err, setErr] = useState('');
   const [info, setInfo] = useState('');
   const [carregando, setCarregando] = useState(false);
@@ -79,6 +90,9 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
     if (!emailParece(email)) return setErr(MENSAGENS.emailInvalido);
     if (pass.length < SENHA_MINIMA) return setErr(MENSAGENS.senhaFraca);
     if (mode === 'up' && nick.trim().replace(/^@/, '').length < 2) return setErr('Escolhe um apelido.');
+    if (mode === 'up' && !handleValido(handle.trim().replace(/^@/, '').toLowerCase())) {
+      return setErr(MENSAGENS.handleInvalido);
+    }
 
     setCarregando(true);
     try {
@@ -90,7 +104,12 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
         return;
       }
 
-      const r = await conta.cadastrar({ email, senha: pass, apelido: nick.trim().replace(/^@/, '') });
+      const r = await conta.cadastrar({
+        email,
+        senha: pass,
+        apelido: nick.trim().replace(/^@/, ''),
+        handle: handle.trim().replace(/^@/, '').toLowerCase(),
+      });
       if (!r.ok) return setErr(mensagemDe(r));
       if (r.aviso === 'confirmeNoEmail') {
         return setInfo(
@@ -296,9 +315,38 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
           {isSignup && !esqueci && (
             <input
               value={nick}
-              onChange={(e) => setNick(e.target.value)}
-              placeholder="Apelido (ex: @voce_arrota)"
+              onChange={(e) => {
+                setNick(e.target.value);
+                // O @ acompanha o apelido até a pessoa mexer nele.
+                if (!handleMexido) setHandle(sugerirHandle(e.target.value));
+              }}
+              placeholder="Apelido (ex: Betão da TI)"
               aria-label="Apelido"
+              style={{
+                height: 48,
+                borderRadius: 12,
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+                color: 'var(--fg)',
+                padding: '0 14px',
+                fontSize: 15,
+                fontFamily: 'inherit',
+                outline: 'none',
+              }}
+            />
+          )}
+          {isSignup && !esqueci && (
+            <input
+              value={handle}
+              onChange={(e) => {
+                setHandleMexido(true);
+                setHandle(e.target.value.toLowerCase());
+              }}
+              placeholder="Seu @ (ex: betao_da_ti)"
+              aria-label="Seu @"
+              autoCapitalize="none"
+              autoCorrect="off"
+              maxLength={21}
               style={{
                 height: 48,
                 borderRadius: 12,

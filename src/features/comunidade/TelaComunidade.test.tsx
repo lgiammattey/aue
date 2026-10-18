@@ -4,6 +4,18 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { TelaComunidade } from './TelaComunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import type { CausoPostado } from '../../portas/comunidade';
+import type { PortaDeConta } from '../../portas/conta';
+
+function contaFalsa(anonima: boolean, sairOk = true): PortaDeConta {
+  return {
+    estado: vi.fn(async () => ({ temSessao: true, anonima, email: anonima ? undefined : 'a@aue.com' })),
+    cadastrar: vi.fn(),
+    entrar: vi.fn(),
+    enviarLinkDeRedefinicao: vi.fn(),
+    redefinirSenha: vi.fn(),
+    sair: vi.fn(async () => sairOk),
+  };
+}
 
 const CAUSOS_MOCK_TESTE: readonly CausoPostado[] = [
   {
@@ -273,5 +285,43 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
 
     // Não deve existir rótulo 'Postado em feed'
     expect(screen.queryByText(/Postado em feed/i)).toBeNull();
+  });
+
+  it('conta com e-mail tem Sair; sair chama a porta e leva ao login', async () => {
+    const conta = contaFalsa(false);
+    const aoSair = vi.fn();
+    render(
+      <TelaComunidade porta={criarComunidadeWeb({ forcarOffline: true })} portaConta={conta} aoSair={aoSair} />,
+    );
+    const botoes = await screen.findAllByRole('button', { name: 'Sair da conta' });
+    fireEvent.click(botoes[0]);
+    await vi.waitFor(() => expect(aoSair).toHaveBeenCalledTimes(1));
+    expect(conta.sair).toHaveBeenCalledTimes(1);
+  });
+
+  it('sessão anônima não mostra Sair (sairia da única identidade do aparelho): mostra Entrar', async () => {
+    render(
+      <TelaComunidade
+        porta={criarComunidadeWeb({ forcarOffline: true })}
+        portaConta={contaFalsa(true)}
+        aoEntrar={vi.fn()}
+      />,
+    );
+    expect((await screen.findAllByRole('button', { name: 'Entrar na conta' })).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('button', { name: 'Sair da conta' })).toBeNull();
+  });
+
+  it('se o servidor não deixa sair, a tela avisa e não navega', async () => {
+    const aoSair = vi.fn();
+    render(
+      <TelaComunidade
+        porta={criarComunidadeWeb({ forcarOffline: true })}
+        portaConta={contaFalsa(false, false)}
+        aoSair={aoSair}
+      />,
+    );
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Sair da conta' }))[0]);
+    expect(await screen.findByText(/Não deu para sair agora/)).toBeDefined();
+    expect(aoSair).not.toHaveBeenCalled();
   });
 });

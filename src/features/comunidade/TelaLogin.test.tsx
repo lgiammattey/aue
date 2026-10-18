@@ -95,13 +95,52 @@ describe('TelaLogin (Autenticação do Auê)', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
-    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
+    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão da TI' } });
+    // O @ nasce do apelido, sem acento e com _.
+    expect((screen.getByLabelText('Seu @') as HTMLInputElement).value).toBe('betao_da_ti');
     fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
     fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
 
     expect(await screen.findByText(/Mandamos um link para betao@aue.com/)).toBeDefined();
-    expect(conta.cadastrar).toHaveBeenCalledWith({ email: 'betao@aue.com', senha: 'senhaboa123', apelido: 'Betão' });
+    expect(conta.cadastrar).toHaveBeenCalledWith({
+      email: 'betao@aue.com',
+      senha: 'senhaboa123',
+      apelido: 'Betão da TI',
+      handle: 'betao_da_ti',
+    });
+  });
+
+  it('@ que já é de outra pessoa vira mensagem clara e não prende o cadastro', async () => {
+    const conta = contaFalsa({ cadastrar: vi.fn(async () => ({ ok: false as const, motivo: 'handleEmUso' as const })) });
+    render(
+      <MemoryRouter>
+        <TelaLogin portaConta={conta} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
+    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
+    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
+    expect(await screen.findByText(/Esse @ já é de outra pessoa/)).toBeDefined();
+  });
+
+  it('@ inválido nem chega ao servidor', async () => {
+    const conta = contaFalsa();
+    render(
+      <MemoryRouter>
+        <TelaLogin portaConta={conta} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
+    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
+    fireEvent.change(screen.getByLabelText('Seu @'), { target: { value: 'oi' } });
+    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
+    expect(await screen.findByText(/3 a 20 letras minúsculas/)).toBeDefined();
+    expect(conta.cadastrar).not.toHaveBeenCalled();
   });
 
   it('e-mail já cadastrado vira mensagem clara', async () => {

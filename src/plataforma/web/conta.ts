@@ -1,6 +1,8 @@
 import { configuracaoAusente, supabase, updateProfile } from '../../db/supabase';
+import { limparDadosLocaisDaConta } from './perfil';
 import {
   emailParece,
+  handleValido,
   SENHA_MINIMA,
   type EstadoDaConta,
   type PedidoDeCadastro,
@@ -40,6 +42,8 @@ export function criarContaWeb(): PortaDeConta {
       const email = pedido.email.trim();
       if (!emailParece(email)) return { ok: false, motivo: 'emailInvalido' };
       if (pedido.senha.length < SENHA_MINIMA) return { ok: false, motivo: 'senhaFraca' };
+      const handle = pedido.handle?.trim().replace(/^@/, '').toLowerCase();
+      if (handle && !handleValido(handle)) return { ok: false, motivo: 'handleInvalido' };
 
       try {
         const { data: sessao } = await supabase.auth.getSession();
@@ -48,17 +52,22 @@ export function criarContaWeb(): PortaDeConta {
         // Sessão anônima: PROMOVE a mesma conta. O uid não muda, então os
         // arrotes, causos e comentários já feitos continuam seus.
         if (atual?.is_anonymous) {
+          // O @ e o apelido primeiro: se o @ já é de outra pessoa, nada mudou
+          // na conta e a tela pede outro.
+          const { error: erroDoPerfil } = await supabase.rpc('atualizar_meu_perfil', {
+            p_apelido: pedido.apelido.trim(),
+            p_handle: handle ?? null,
+          });
+          if (erroDoPerfil) {
+            if ((erroDoPerfil as { code?: string }).code === '23505') return { ok: false, motivo: 'handleEmUso' };
+            return { ok: false, motivo: 'handleInvalido' };
+          }
           const { error } = await supabase.auth.updateUser({
             email,
             password: pedido.senha,
             data: { apelido: pedido.apelido.trim() },
           });
           if (error) return traduzirErro(error.message);
-          try {
-            await supabase.rpc('atualizar_meu_perfil', { p_apelido: pedido.apelido.trim() });
-          } catch {
-            // o apelido pode ser acertado depois, no perfil
-          }
           return { ok: true, aviso: 'confirmeNoEmail' };
         }
 
@@ -121,7 +130,9 @@ export function criarContaWeb(): PortaDeConta {
     async sair(): Promise<boolean> {
       if (configuracaoAusente) return true;
       const { error } = await supabase.auth.signOut();
-      return !error;
+      if (error) return false;
+      limparDadosLocaisDaConta();
+      return true;
     },
   };
 }

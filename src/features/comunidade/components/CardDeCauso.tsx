@@ -145,9 +145,20 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           fontSize: '14px',
           color: 'var(--fg)',
           userSelect: 'none',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        {autorIni}
+        {causo.autorAvatarUrl ? (
+          <img
+            src={causo.autorAvatarUrl}
+            alt=""
+            loading="lazy"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          autorIni
+        )}
       </div>
 
       {/* Conteúdo */}

@@ -54,6 +54,7 @@ describe('política de privacidade', () => {
     expect(html).toContain('O e-mail nunca aparece no seu perfil');
     expect(html).toContain('Gravar para jogar não é autorizar a publicação');
     expect(html).toContain('Apagar meu causo');
+    expect(html).toContain('A foto de perfil fica numa');
     // Exclusão de conta ainda é por pedido: a página não pode fingir botão.
     expect(html).toContain('Ainda não existe');
     expect(html).not.toContain('não pede cadastro');

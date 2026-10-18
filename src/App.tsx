@@ -93,6 +93,8 @@ function EntradaPrincipal() {
       onArrotar={() => navigate('/arena')}
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
+      aoSair={() => navigate('/login')}
+      aoEntrar={() => navigate('/login')}
     />
   );
 }
@@ -105,14 +107,18 @@ function EntradaHistoria() {
 function EntradaBondes() {
   const navigate = useNavigate();
   return (
-    <TelaComunidade initialTab="comm" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')} />
+    <TelaComunidade initialTab="comm" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
+      aoSair={() => navigate('/login')}
+      aoEntrar={() => navigate('/login')} />
   );
 }
 
 function EntradaDesafios() {
   const navigate = useNavigate();
   return (
-    <TelaComunidade initialTab="desafios" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')} />
+    <TelaComunidade initialTab="desafios" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
+      aoSair={() => navigate('/login')}
+      aoEntrar={() => navigate('/login')} />
   );
 }
 
@@ -148,6 +154,8 @@ function EntradaComunidadeSlug() {
       comunidadeSlugInicial={slug}
       onArrotar={() => navigate('/arena')}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
+      aoSair={() => navigate('/login')}
+      aoEntrar={() => navigate('/login')}
     />
   );
 }

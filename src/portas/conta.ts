@@ -18,6 +18,8 @@ export type ResultadoDaConta =
   | { readonly ok: false; readonly motivo: 'emailInvalido' }
   | { readonly ok: false; readonly motivo: 'senhaFraca' }
   | { readonly ok: false; readonly motivo: 'emailEmUso' }
+  | { readonly ok: false; readonly motivo: 'handleEmUso' }
+  | { readonly ok: false; readonly motivo: 'handleInvalido' }
   | { readonly ok: false; readonly motivo: 'credenciaisInvalidas' }
   | { readonly ok: false; readonly motivo: 'semServidor' }
   | { readonly ok: false; readonly motivo: 'falhou'; readonly detalhe: string };
@@ -26,6 +28,8 @@ export interface PedidoDeCadastro {
   readonly email: string;
   readonly senha: string;
   readonly apelido: string;
+  /** O @ escolhido (3 a 20: minúsculas, números e _). Sem ele, o banco gera um. */
+  readonly handle?: string;
 }
 
 export interface PortaDeConta {
@@ -37,6 +41,24 @@ export interface PortaDeConta {
   /** Vale só depois de abrir o link do e-mail. */
   redefinirSenha(novaSenha: string): Promise<ResultadoDaConta>;
   sair(): Promise<boolean>;
+}
+
+/** Mesma regra do banco para o @. */
+export function handleValido(handle: string): boolean {
+  return /^[a-z0-9_]{3,20}$/.test(handle);
+}
+
+/** Sugestão de @ a partir do apelido: sem acento, minúsculo, só [a-z0-9_]. */
+export function sugerirHandle(apelido: string): string {
+  const base = apelido
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/^@/, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 20);
+  return base;
 }
 
 /** Regras que valem antes de ir ao servidor. A senha mínima espelha a do Supabase Auth. */

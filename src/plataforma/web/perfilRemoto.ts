@@ -1,10 +1,13 @@
 import { configuracaoAusente, supabase } from '../../db/supabase';
 import { garantirSessao } from '../../shared/auth/sessaoAnonima';
+import { reduzirParaAvatar } from './imagem';
 import type {
+  Conexao,
   DadosDoPerfil,
   PerfilPublico,
   PortaDePerfil,
   ResultadoDaEdicao,
+  ResultadoDaFoto,
 } from '../../portas/perfil';
 
 /** Linha de `obter_perfil_publico` (20261018000004). */
@@ -18,6 +21,10 @@ interface LinhaDePerfil {
   titulo: string | null;
   e_fundador: boolean;
   criado_em: string;
+  instagram: string | null;
+  tiktok: string | null;
+  youtube: string | null;
+  twitter: string | null;
   total_causos: number;
   melhor_nota: number | null;
   total_seguidores: number;
@@ -37,6 +44,10 @@ export function traduzirPerfil(l: LinhaDePerfil): PerfilPublico {
     titulo: l.titulo ?? undefined,
     fundador: Boolean(l.e_fundador),
     criadoEm: l.criado_em,
+    instagram: l.instagram ?? undefined,
+    tiktok: l.tiktok ?? undefined,
+    youtube: l.youtube ?? undefined,
+    twitter: l.twitter ?? undefined,
     totalCausos: Number(l.total_causos),
     melhorNota: l.melhor_nota === null ? undefined : Number(l.melhor_nota),
     totalSeguidores: Number(l.total_seguidores),
@@ -109,6 +120,10 @@ export function criarPerfilRemoto(): PortaDePerfil {
           p_handle: dados.handle ?? null,
           p_bio: dados.bio ?? null,
           p_cidade: dados.cidade ?? null,
+          p_instagram: dados.instagram ?? null,
+          p_tiktok: dados.tiktok ?? null,
+          p_youtube: dados.youtube ?? null,
+          p_twitter: dados.twitter ?? null,
         });
         if (error) {
           if ((error as { code?: string }).code === '23505') return { ok: false, motivo: 'handleEmUso' };
@@ -119,6 +134,88 @@ export function criarPerfilRemoto(): PortaDePerfil {
       } catch (erro) {
         console.error('Falha ao salvar o perfil', erro);
         return { ok: false, motivo: 'semRede' };
+      }
+    },
+
+    async enviarFoto(imagem: Blob): Promise<ResultadoDaFoto> {
+      if (configuracaoAusente) return { ok: false, motivo: 'falhou' };
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(imagem.type)) {
+        return { ok: false, motivo: 'formatoInvalido' };
+      }
+      if (imagem.size > 15 * 1024 * 1024) return { ok: false, motivo: 'grandeDemais' };
+      try {
+        const sessao = await garantirSessao();
+        const uid = sessao?.user?.id;
+        if (!uid) return { ok: false, motivo: 'semConta' };
+
+        const reduzida = await reduzirParaAvatar(imagem);
+        if (!reduzida) return { ok: false, motivo: 'falhou' };
+
+        const caminho = `${uid}/avatar.jpg`;
+        const { error: erroDoUpload } = await supabase.storage
+          .from('avatars')
+          .upload(caminho, reduzida, { upsert: true, contentType: 'image/jpeg' });
+        if (erroDoUpload) throw erroDoUpload;
+
+        // O nome é fixo; o `?v=` quebra o cache do navegador e da CDN.
+        const { data } = supabase.storage.from('avatars').getPublicUrl(caminho);
+        const url = `${data.publicUrl}?v=${Date.now()}`;
+
+        const { error } = await supabase.rpc('atualizar_meu_perfil', { p_url_do_avatar: url });
+        if (error) throw error;
+
+        const meu = await this.obterMeuPerfil();
+        return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'falhou' };
+      } catch (erro) {
+        console.error('Falha ao trocar a foto', erro);
+        return { ok: false, motivo: 'falhou' };
+      }
+    },
+
+    async removerFoto(): Promise<ResultadoDaFoto> {
+      if (configuracaoAusente) return { ok: false, motivo: 'falhou' };
+      try {
+        const sessao = await garantirSessao();
+        const uid = sessao?.user?.id;
+        if (!uid) return { ok: false, motivo: 'semConta' };
+        const { error } = await supabase.rpc('atualizar_meu_perfil', { p_remover_avatar: true });
+        if (error) throw error;
+        // O arquivo some do bucket também; se não sair, a foto já não aparece.
+        await supabase.storage.from('avatars').remove([`${uid}/avatar.jpg`]);
+        const meu = await this.obterMeuPerfil();
+        return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'falhou' };
+      } catch (erro) {
+        console.error('Falha ao remover a foto', erro);
+        return { ok: false, motivo: 'falhou' };
+      }
+    },
+
+    async listarConexoes(handle: string, tipo: 'seguidores' | 'seguindo'): Promise<readonly Conexao[]> {
+      if (configuracaoAusente) return [];
+      try {
+        await garantirSessao();
+        const { data, error } = await supabase.rpc('listar_conexoes_do_perfil', {
+          p_handle: handle,
+          p_tipo: tipo,
+          p_limite: 100,
+        });
+        if (error) throw error;
+        return ((data ?? []) as Array<{
+          id: string;
+          handle: string;
+          apelido: string | null;
+          url_do_avatar: string | null;
+          eu_sigo: boolean;
+        }>).map((c) => ({
+          id: c.id,
+          handle: c.handle,
+          apelido: c.apelido?.trim() || 'Arrotador',
+          avatarUrl: c.url_do_avatar ?? undefined,
+          euSigo: Boolean(c.eu_sigo),
+        }));
+      } catch (erro) {
+        console.error('Falha ao listar conexões', erro);
+        return [];
       }
     },
   };

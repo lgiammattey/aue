@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
+import { criarCompartilhamentoWeb } from '../../plataforma/web/compartilhamento';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { EstadoDaConta, PortaDeConta } from '../../portas/conta';
-import type { DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
+import type { Compartilhamento } from '../../portas/compartilhamento';
+import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { CardDeCauso } from '../comunidade/components/CardDeCauso';
 
 interface TelaPerfilProps {
@@ -13,6 +15,7 @@ interface TelaPerfilProps {
   portaPerfil?: PortaDePerfil;
   portaComunidade?: PortaDeComunidade;
   portaConta?: PortaDeConta;
+  compartilhamento?: Compartilhamento;
   aoVoltar: () => void;
   aoArrotar: () => void;
   aoAbrirHistoria: (id: string) => void;
@@ -28,11 +31,29 @@ const MENSAGENS_DE_EDICAO = {
   semRede: 'Não deu para salvar agora. Nada mudou.',
 } as const;
 
+const NOMES_DAS_REDES = { instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube', twitter: 'X' } as const;
+
+/** O servidor só guarda `[A-Za-z0-9._-]`, então o usuário entra no link sem escape extra. */
+function urlDaRede(rede: keyof typeof NOMES_DAS_REDES, usuario: string): string {
+  const u = encodeURIComponent(usuario);
+  switch (rede) {
+    case 'instagram':
+      return `https://instagram.com/${u}`;
+    case 'tiktok':
+      return `https://www.tiktok.com/@${u}`;
+    case 'youtube':
+      return `https://www.youtube.com/@${u}`;
+    default:
+      return `https://x.com/${u}`;
+  }
+}
+
 export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   handle,
   portaPerfil,
   portaComunidade,
   portaConta,
+  compartilhamento,
   aoVoltar,
   aoArrotar,
   aoAbrirHistoria,
@@ -42,6 +63,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [perfilPort] = useState<PortaDePerfil>(() => portaPerfil ?? criarPerfilRemoto());
   const [comunidade] = useState<PortaDeComunidade>(() => portaComunidade ?? criarComunidadeWeb());
   const [contaPort] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
+  const [compartilhar] = useState<Compartilhamento>(() => compartilhamento ?? criarCompartilhamentoWeb());
 
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
   const [conta, setConta] = useState<EstadoDaConta | null>(null);
@@ -51,7 +73,18 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [carregandoCausos, setCarregandoCausos] = useState(false);
   const [aviso, setAviso] = useState('');
   const [editando, setEditando] = useState(false);
-  const [form, setForm] = useState<Required<DadosDoPerfil>>({ apelido: '', handle: '', bio: '', cidade: '' });
+  const [form, setForm] = useState<Required<DadosDoPerfil>>({
+    apelido: '',
+    handle: '',
+    bio: '',
+    cidade: '',
+    instagram: '',
+    tiktok: '',
+    youtube: '',
+    twitter: '',
+  });
+  const [conexoes, setConexoes] = useState<{ tipo: 'seguidores' | 'seguindo'; lista: readonly Conexao[] } | null>(null);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
   const [erroDoForm, setErroDoForm] = useState('');
   const [salvando, setSalvando] = useState(false);
 
@@ -128,6 +161,10 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       handle: perfil.handle,
       bio: perfil.bio ?? '',
       cidade: perfil.cidade ?? '',
+      instagram: perfil.instagram ?? '',
+      tiktok: perfil.tiktok ?? '',
+      youtube: perfil.youtube ?? '',
+      twitter: perfil.twitter ?? '',
     });
     setErroDoForm('');
     setEditando(true);
@@ -147,6 +184,57 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       return;
     }
     setErroDoForm(res.motivo === 'invalido' ? res.detalhe : MENSAGENS_DE_EDICAO[res.motivo]);
+  };
+
+  const trocarFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const arquivo = e.target.files?.[0];
+    e.target.value = '';
+    if (!arquivo) return;
+    setEnviandoFoto(true);
+    const res = await perfilPort.enviarFoto(arquivo);
+    setEnviandoFoto(false);
+    if (res.ok) {
+      setPerfil(res.perfil);
+      avisar('Foto atualizada.');
+      return;
+    }
+    avisar(
+      res.motivo === 'formatoInvalido'
+        ? 'Use uma foto JPG, PNG ou WebP.'
+        : res.motivo === 'grandeDemais'
+          ? 'Essa foto é grande demais. Escolhe uma de até 15 MB.'
+          : 'Não deu para trocar a foto agora. Nada mudou.',
+    );
+  };
+
+  const tirarFoto = async () => {
+    const res = await perfilPort.removerFoto();
+    if (res.ok) {
+      setPerfil(res.perfil);
+      avisar('Foto removida.');
+    } else {
+      avisar('Não deu para remover a foto agora.');
+    }
+  };
+
+  const abrirConexoes = async (tipo: 'seguidores' | 'seguindo') => {
+    if (!perfil) return;
+    setConexoes({ tipo, lista: [] });
+    const lista = await perfilPort.listarConexoes(perfil.handle, tipo);
+    setConexoes({ tipo, lista });
+  };
+
+  const compartilharPerfil = async () => {
+    if (!perfil) return;
+    const url = `${window.location.origin}/u/${perfil.handle}`;
+    const res = await compartilhar.compartilhar({
+      url,
+      titulo: `${perfil.apelido} no Auê`,
+      texto: `Olha o perfil de ${perfil.apelido} no Auê.`,
+    });
+    if (res.ok || (!res.ok && res.motivo === 'cancelado')) return;
+    // Sem folha de compartilhar: copia o link, e diz se não conseguiu.
+    avisar((await compartilhar.copiar(url)) ? 'Link do perfil copiado.' : 'Não deu para copiar o link.');
   };
 
   const sair = async () => {
@@ -234,6 +322,38 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     cursor: 'pointer',
   };
 
+  const estiloAvatar: React.CSSProperties = {
+    width: 80,
+    height: 80,
+    flex: 'none',
+    borderRadius: '50%',
+    background: 'var(--surface)',
+    border: '4px solid var(--bg)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'var(--font-display)',
+    fontSize: 30,
+    position: 'relative',
+    overflow: 'hidden',
+    color: 'var(--fg)',
+  };
+  const estiloFoto: React.CSSProperties = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' };
+  const botaoTexto: React.CSSProperties = {
+    background: 'none',
+    border: 0,
+    padding: 0,
+    color: 'var(--fg)',
+    fontSize: 14,
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+  };
+  const redes = perfil
+    ? (['instagram', 'tiktok', 'youtube', 'twitter'] as const)
+        .filter((r) => Boolean(perfil[r]))
+        .map((r) => ({ nome: NOMES_DAS_REDES[r], usuario: perfil[r] as string, url: urlDaRede(r, perfil[r] as string) }))
+    : [];
+
   return (
     <div style={{ minHeight: '100svh', background: 'var(--bg)', color: 'var(--fg)', display: 'flex', justifyContent: 'center' }}>
       <main
@@ -289,41 +409,53 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
 
         {perfil && (
           <>
-            <section style={{ padding: '16px', display: 'grid', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                <div
-                  aria-hidden="true"
-                  style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: '50%',
-                    background: 'var(--surface-2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 28,
-                  }}
-                >
-                  {inicial}
-                </div>
+            {/* Faixa chapada (sem gradiente) e avatar 80px com -40px e borda 4px, como no protótipo */}
+            <div aria-hidden="true" style={{ height: 120, background: 'var(--surface-2)' }} />
+            <section style={{ padding: '0 16px 16px', display: 'grid', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, marginTop: -40 }}>
                 {perfil.souEu ? (
-                  <button type="button" onClick={editando ? () => setEditando(false) : abrirEdicao} style={botaoSecundario}>
-                    {editando ? 'Cancelar' : 'Editar perfil'}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={seguir}
-                    style={{
-                      ...botaoSecundario,
-                      background: perfil.euSigo ? 'transparent' : 'var(--fg)',
-                      color: perfil.euSigo ? 'var(--fg)' : 'var(--bg)',
-                    }}
+                  <label
+                    title="Trocar foto"
+                    style={{ ...estiloAvatar, cursor: enviandoFoto ? 'progress' : 'pointer' }}
                   >
-                    {perfil.euSigo ? 'Seguindo' : 'Seguir'}
-                  </button>
+                    {perfil.avatarUrl ? <img src={perfil.avatarUrl} alt={perfil.apelido} style={estiloFoto} /> : inicial}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-label="Trocar foto do perfil"
+                      onChange={trocarFoto}
+                      disabled={enviandoFoto}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                ) : (
+                  <div style={estiloAvatar}>
+                    {perfil.avatarUrl ? <img src={perfil.avatarUrl} alt={perfil.apelido} style={estiloFoto} /> : inicial}
+                  </div>
                 )}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <button type="button" onClick={compartilharPerfil} style={botaoSecundario}>
+                    Compartilhar
+                  </button>
+                  {perfil.souEu ? (
+                    <button type="button" onClick={editando ? () => setEditando(false) : abrirEdicao} style={botaoSecundario}>
+                      {editando ? 'Cancelar' : 'Editar perfil'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={seguir}
+                      style={{
+                        ...botaoSecundario,
+                        border: perfil.euSigo ? '1px solid var(--border-strong)' : 0,
+                        background: perfil.euSigo ? 'transparent' : 'var(--fg)',
+                        color: perfil.euSigo ? 'var(--fg)' : 'var(--bg)',
+                      }}
+                    >
+                      {perfil.euSigo ? 'Seguindo' : 'Seguir'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -337,12 +469,66 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 {[perfil.cidade, desde ? `no bonde desde ${desde}` : null].filter(Boolean).join(' · ')}
               </div>
 
+              {redes.length > 0 && (
+                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 14 }}>
+                  {redes.map((r) => (
+                    <a
+                      key={r.nome}
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      style={{ color: 'var(--fg)', textDecoration: 'underline' }}
+                    >
+                      {r.nome} @{r.usuario}
+                    </a>
+                  ))}
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 14 }}>
                 <span><b>{perfil.totalCausos}</b> <span style={{ color: 'var(--muted)' }}>causos</span></span>
                 <span><b>{perfil.melhorNota ?? '—'}</b> <span style={{ color: 'var(--muted)' }}>melhor nota publicada</span></span>
-                <span><b>{perfil.totalSeguidores}</b> <span style={{ color: 'var(--muted)' }}>seguidores</span></span>
-                <span><b>{perfil.totalSeguindo}</b> <span style={{ color: 'var(--muted)' }}>seguindo</span></span>
+                <button type="button" onClick={() => abrirConexoes('seguidores')} style={botaoTexto}>
+                  <b>{perfil.totalSeguidores}</b> <span style={{ color: 'var(--muted)' }}>seguidores</span>
+                </button>
+                <button type="button" onClick={() => abrirConexoes('seguindo')} style={botaoTexto}>
+                  <b>{perfil.totalSeguindo}</b> <span style={{ color: 'var(--muted)' }}>seguindo</span>
+                </button>
               </div>
+
+              {conexoes && (
+                <div role="dialog" aria-label={conexoes.tipo === 'seguidores' ? 'Seguidores' : 'Seguindo'} style={{ border: '1px solid var(--border)', borderRadius: 16, padding: 12, display: 'grid', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <b>{conexoes.tipo === 'seguidores' ? 'Seguidores' : 'Seguindo'}</b>
+                    <button type="button" onClick={() => setConexoes(null)} style={botaoTexto} aria-label="Fechar lista">
+                      Fechar
+                    </button>
+                  </div>
+                  {conexoes.lista.length === 0 && (
+                    <span style={{ color: 'var(--muted)', fontSize: 14 }}>
+                      {conexoes.tipo === 'seguidores' ? 'Ninguém segue ainda.' : 'Não segue ninguém ainda.'}
+                    </span>
+                  )}
+                  {conexoes.lista.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => aoAbrirPerfil(c.handle)}
+                      style={{ ...botaoTexto, display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left', minHeight: 44 }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface-2)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flex: 'none' }}
+                      >
+                        {c.avatarUrl ? <img src={c.avatarUrl} alt="" style={estiloFoto} /> : c.apelido.slice(0, 2).toUpperCase()}
+                      </span>
+                      <span>
+                        <b>{c.apelido}</b> <span style={{ color: 'var(--muted)' }}>@{c.handle}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {perfil.souEu && editando && (
                 <form onSubmit={salvar} style={{ display: 'grid', gap: 10, padding: 12, border: '1px solid var(--border)', borderRadius: 16 }}>
@@ -362,6 +548,23 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                     Cidade
                     <input style={campo} value={form.cidade} maxLength={60} onChange={(e) => setForm({ ...form, cidade: e.target.value })} />
                   </label>
+                  {(['instagram', 'tiktok', 'youtube', 'twitter'] as const).map((rede) => (
+                    <label key={rede} style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                      {NOMES_DAS_REDES[rede]} (só o @, sem link)
+                      <input
+                        style={campo}
+                        value={form[rede]}
+                        maxLength={31}
+                        autoCapitalize="none"
+                        onChange={(e) => setForm({ ...form, [rede]: e.target.value })}
+                      />
+                    </label>
+                  ))}
+                  {perfil.avatarUrl && (
+                    <button type="button" onClick={tirarFoto} style={botaoSecundario}>
+                      Remover foto
+                    </button>
+                  )}
                   {erroDoForm && <span role="alert" style={{ color: 'var(--danger, #ff4d4f)', fontSize: 14 }}>{erroDoForm}</span>}
                   <button
                     type="submit"

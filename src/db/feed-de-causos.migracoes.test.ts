@@ -53,3 +53,29 @@ describe('contrato do feed de causos', () => {
     expect(limpeza).toContain("email LIKE '%@aue.app'");
   });
 });
+
+describe('contrato do perfil', () => {
+  const perfilSql = lerSql('20261018000005_perfil_foto_redes_conexoes.sql');
+  const adaptadorDePerfil = readFileSync(resolve(raiz, 'src/plataforma/web/perfilRemoto.ts'), 'utf8');
+  const adaptadorDeConta = readFileSync(resolve(raiz, 'src/plataforma/web/conta.ts'), 'utf8');
+
+  it('toda RPC chamada pelos adaptadores de perfil e conta existe no SQL', () => {
+    const chamadas = [...(adaptadorDePerfil + adaptadorDeConta).matchAll(/\.rpc\(\s*'([a-z_]+)'/g)].map((m) => m[1]);
+    expect(chamadas.length).toBeGreaterThan(0);
+    const sql = perfilSql + lerSql('20261018000004_perfil_e_comentarios_aninhados.sql') + lerSql('20260807000036_nomenclatura_ptbr_mvp1.sql');
+    for (const nome of new Set(chamadas)) {
+      expect(sql, `RPC ${nome}`).toMatch(new RegExp(`FUNCTION public\\.${nome}\\(`));
+    }
+  });
+
+  it('os parâmetros que o adaptador manda existem na assinatura de atualizar_meu_perfil', () => {
+    const assinatura = perfilSql.match(/CREATE FUNCTION public\.atualizar_meu_perfil\(([\s\S]*?)\)\s*RETURNS/)?.[1] ?? '';
+    for (const p of ['p_apelido', 'p_handle', 'p_bio', 'p_cidade', 'p_url_do_avatar', 'p_remover_avatar', 'p_instagram', 'p_tiktok', 'p_youtube', 'p_twitter']) {
+      expect(assinatura, p).toContain(p);
+    }
+  });
+
+  it('a foto só aceita arquivo da própria pasta do bucket avatars', () => {
+    expect(perfilSql).toContain("'/storage/v1/object/public/avatars/' || v_id::text || '/'");
+  });
+});

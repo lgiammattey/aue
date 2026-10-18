@@ -107,8 +107,8 @@ function comunidadePorNome(nome: string): Comunidade {
   return COMUNIDADES_PADRAO.find((c) => c.nome === nome) ?? COMUNIDADE_FEED;
 }
 
-/** Linha devolvida por `listar_feed_de_causos` (20261018000004). */
-interface LinhaDoFeed {
+/** Linha devolvida por `listar_feed_de_causos` (20261018000009). */
+export interface LinhaDoFeed {
   id: string;
   user_id: string | null;
   apelido: string | null;
@@ -129,6 +129,8 @@ interface LinhaDoFeed {
   nojo: number;
   trofeu: number;
   minhas: string[] | null;
+  /** Áudio de post da casa (sem jogo, sem nota), dentro do bucket público. */
+  caminho_do_audio_da_casa: string | null;
 }
 
 /** Resposta de `alternar_reacao_do_causo`. */
@@ -146,7 +148,22 @@ function enderecoPorCaminho(caminho: string | null | undefined): (() => Promise<
   return () => assinarUrlDoAudio(caminho);
 }
 
-function traduzirLinha(l: LinhaDoFeed, meuId: string | null): CausoPostado {
+/** Bucket público só com conteúdo da casa (ADR 0007). */
+const BUCKET_AUDIO_DA_CASA = 'audio_da_casa';
+
+/**
+ * Áudio da casa: URL pública direta, sem assinar. O bucket é público de
+ * propósito e só guarda conteúdo da casa, então o endereço é estável e o
+ * navegador e a borda guardam em cache.
+ */
+function enderecoDoAudioDaCasa(caminho: string): () => Promise<string | null> {
+  const { data } = supabase.storage.from(BUCKET_AUDIO_DA_CASA).getPublicUrl(caminho);
+  const url = data.publicUrl || null;
+  return () => Promise.resolve(url);
+}
+
+export function traduzirLinha(l: LinhaDoFeed, meuId: string | null): CausoPostado {
+  const audioDaCasa = l.caminho_do_audio_da_casa;
   const comu = comunidadePorNome(l.topico ?? '');
   const apelido = l.apelido?.trim() || 'Arrotador Anônimo';
   const minhas = l.minhas ?? [];
@@ -157,12 +174,14 @@ function traduzirLinha(l: LinhaDoFeed, meuId: string | null): CausoPostado {
     comunidadeSlug: comu.slug,
     autorNome: apelido,
     autorHandle: l.handle ?? handleDoApelido(apelido),
+    autorHandleDoServidor: Boolean(l.handle),
     autorAvatarUrl: l.url_do_avatar ?? undefined,
     conteudo: l.conteudo ?? '',
     resultadoId: l.resultado_id ?? undefined,
+    // Post da casa não tem resultado: o servidor manda nota nula e ela fica sem nota.
     nota: l.nota ?? undefined,
-    enderecoDoAudio: enderecoPorCaminho(l.caminho_do_audio),
-    temAudio: Boolean(l.caminho_do_audio),
+    enderecoDoAudio: audioDaCasa ? enderecoDoAudioDaCasa(audioDaCasa) : enderecoPorCaminho(l.caminho_do_audio),
+    temAudio: Boolean(audioDaCasa || l.caminho_do_audio),
     duracaoSegundos: l.duracao ?? undefined,
     origem: l.subtipo_de_origem ?? undefined,
     reacoes: { fogo: Number(l.fogo), nojo: Number(l.nojo), trofeu: Number(l.trofeu) },
@@ -374,6 +393,7 @@ export function criarComunidadeWeb(
             comunidadeSlug: comu.slug,
             autorNome,
             autorHandle,
+            autorHandleDoServidor: Boolean(pedido.autorHandle),
             conteudo: data.content,
             resultadoId: resultadoId ?? undefined,
             nota: notaOficial,

@@ -7,6 +7,7 @@ import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { EstadoDaConta, PortaDeConta } from '../../portas/conta';
 import type { Compartilhamento } from '../../portas/compartilhamento';
 import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
+import { SimboloBurpzilla } from './SimboloBurpzilla';
 import { CardDeCauso } from '../comunidade/components/CardDeCauso';
 
 interface TelaPerfilProps {
@@ -68,6 +69,8 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
   const [conta, setConta] = useState<EstadoDaConta | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [falhou, setFalhou] = useState(false);
+  const [tentativa, setTentativa] = useState(0);
   const [aba, setAba] = useState<Aba>('causos');
   const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
   const [carregandoCausos, setCarregandoCausos] = useState(false);
@@ -96,20 +99,27 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   useEffect(() => {
     let ativo = true;
     setCarregando(true);
+    setFalhou(false);
     (async () => {
-      const [p, c] = await Promise.all([
-        handle ? perfilPort.obterPerfil(handle) : perfilPort.obterMeuPerfil(),
-        contaPort.estado(),
-      ]);
+      // Perfil de outra pessoa: `null` é "não existe", exceção é "não deu para abrir".
+      const buscar = async (): Promise<{ p: PerfilPublico | null; deuErro: boolean }> => {
+        try {
+          return { p: await (handle ? perfilPort.obterPerfil(handle) : perfilPort.obterMeuPerfil()), deuErro: false };
+        } catch {
+          return { p: null, deuErro: true };
+        }
+      };
+      const [{ p, deuErro }, c] = await Promise.all([buscar(), contaPort.estado()]);
       if (!ativo) return;
       setPerfil(p);
       setConta(c);
+      setFalhou(deuErro);
       setCarregando(false);
     })();
     return () => {
       ativo = false;
     };
-  }, [handle, perfilPort, contaPort]);
+  }, [handle, perfilPort, contaPort, tentativa]);
 
   useEffect(() => {
     if (!perfil) return;
@@ -391,9 +401,27 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
           </div>
         )}
 
-        {carregando && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando perfil…</p>}
+        {carregando && (
+          <p role="status" aria-live="polite" style={{ padding: 24, color: 'var(--muted)' }}>
+            Carregando perfil…
+          </p>
+        )}
 
-        {!carregando && !perfil && (
+        {!carregando && !perfil && falhou && (
+          <div role="alert" style={{ padding: 24, display: 'grid', gap: 12 }}>
+            <b style={{ fontSize: 18 }}>Não deu para abrir o perfil. Tenta de novo.</b>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => setTentativa((n) => n + 1)} style={botaoSecundario}>
+                Tentar de novo
+              </button>
+              <button type="button" onClick={aoVoltar} style={botaoSecundario}>
+                Voltar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!carregando && !perfil && !falhou && (
           <div style={{ padding: 24, display: 'grid', gap: 12 }}>
             <b style={{ fontSize: 18 }}>{handle ? 'Esse arrotador não existe.' : 'Seu perfil não abriu.'}</b>
             <span style={{ color: 'var(--muted)' }}>
@@ -401,9 +429,16 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 ? 'O @ pode ter mudado. Procura pelo causo no Bonde.'
                 : 'Precisa de conexão com o servidor. Tenta de novo daqui a pouco.'}
             </span>
-            <button type="button" onClick={aoArrotar} style={botaoSecundario}>
-              Ir arrotar
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {handle && (
+                <button type="button" onClick={aoVoltar} style={botaoSecundario}>
+                  Voltar ao Bonde
+                </button>
+              )}
+              <button type="button" onClick={aoArrotar} style={botaoSecundario}>
+                Ir arrotar
+              </button>
+            </div>
           </div>
         )}
 
@@ -459,7 +494,10 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               </div>
 
               <div>
-                <div style={{ fontSize: 22, fontWeight: 800 }}>{perfil.apelido}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center' }}>
+                  <span>{perfil.apelido}</span>
+                  {perfil.daCasa === true && <SimboloBurpzilla />}
+                </div>
                 <div style={{ color: 'var(--muted)' }}>@{perfil.handle}</div>
                 {perfil.titulo && <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>{perfil.titulo}</div>}
               </div>

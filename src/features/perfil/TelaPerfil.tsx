@@ -9,6 +9,9 @@ import type { Compartilhamento } from '../../portas/compartilhamento';
 import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { SimboloBurpzilla } from './SimboloBurpzilla';
 import { CardDeCauso } from '../comunidade/components/CardDeCauso';
+import { BarraLateralNavegacao } from '../comunidade/components/BarraLateralNavegacao';
+import { BarraInferiorMobile } from '../comunidade/components/BarraInferiorMobile';
+import { ColunaTendencias } from '../comunidade/components/ColunaTendencias';
 
 interface TelaPerfilProps {
   /** Sem handle, mostra o perfil de quem está jogando. */
@@ -61,6 +64,36 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   aoAbrirPerfil,
   aoEntrar,
 }) => {
+  const [larguraJanela, setLarguraJanela] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1200));
+
+  useEffect(() => {
+    const onResize = () => setLarguraJanela(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const isMobile = larguraJanela < 700;
+  const isWide = larguraJanela >= 1060;
+  const showLeft = larguraJanela >= 700;
+  const showRight = larguraJanela >= 1000;
+
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof localStorage !== 'undefined') {
+      const salvo = localStorage.getItem('bda-theme');
+      if (salvo === 'light' || salvo === 'dark') return salvo;
+    }
+    return 'dark';
+  });
+
+  const toggleTheme = () => {
+    const novo = theme === 'dark' ? 'light' : 'dark';
+    setTheme(novo);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('bda-theme', novo);
+    }
+    document.documentElement.setAttribute('data-theme', novo);
+  };
+
   const [perfilPort] = useState<PortaDePerfil>(() => portaPerfil ?? criarPerfilRemoto());
   const [comunidade] = useState<PortaDeComunidade>(() => portaComunidade ?? criarComunidadeWeb());
   const [contaPort] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
@@ -76,6 +109,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [carregandoCausos, setCarregandoCausos] = useState(false);
   const [aviso, setAviso] = useState('');
   const [editando, setEditando] = useState(false);
+  const [hoverFoto, setHoverFoto] = useState(false);
   const [form, setForm] = useState<Required<DadosDoPerfil>>({
     apelido: '',
     handle: '',
@@ -143,7 +177,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const abas = useMemo(
     () =>
       [
-        { id: 'causos' as const, rotulo: 'Causos' },
+        { id: 'causos' as const, rotulo: 'Resenhas' },
         { id: 'audios' as const, rotulo: 'Com áudio' },
         ...(perfil?.souEu ? [{ id: 'curtidos' as const, rotulo: 'Curtidos' }] : []),
       ],
@@ -285,15 +319,22 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   };
   const apagar = async (causo: CausoPostado) => {
     const comAudio = Boolean(causo.temAudio);
-    if (!window.confirm(comAudio ? 'Apagar este causo e o áudio do arroto? Não tem como desfazer.' : 'Apagar este causo? Não tem como desfazer.')) return;
+    if (
+      !window.confirm(
+        comAudio
+          ? 'Apagar esta resenha e o áudio do arroto? Não tem como desfazer.'
+          : 'Apagar esta resenha? Não tem como desfazer.',
+      )
+    )
+      return;
     const ok = await comunidade.apagarCauso(causo.id, { apagarAudio: comAudio });
     if (!ok) {
-      avisar('Não deu para apagar agora. Nada foi apagado.');
+      avisar('Não deu para apagar a resenha agora. Nada foi apagado.');
       return;
     }
     setCausos((prev) => prev.filter((c) => c.id !== causo.id));
     setPerfil((p) => (p ? { ...p, totalCausos: Math.max(0, p.totalCausos - 1) } : p));
-    avisar('Causo apagado.');
+    avisar('Resenha apagada.');
   };
   const denunciar = async (id: string) => {
     const ok = await comunidade.denunciarCauso(id, 'Denúncia de usuário');
@@ -330,6 +371,9 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     fontWeight: 700,
     fontSize: '14px',
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   };
 
   const estiloAvatar: React.CSSProperties = {
@@ -364,338 +408,682 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
         .map((r) => ({ nome: NOMES_DAS_REDES[r], usuario: perfil[r] as string, url: urlDaRede(r, perfil[r] as string) }))
     : [];
 
+  const perfilParaBarra = perfil
+    ? {
+        id: perfil.id,
+        nome: perfil.apelido,
+        handle: perfil.handle,
+        bio: perfil.bio ?? '',
+        avatarUrl: perfil.avatarUrl,
+        maiorScore: perfil.melhorNota ?? 0,
+        vitoriasX1: 0,
+        derrotasX1: 0,
+      }
+    : undefined;
+
   return (
-    <div style={{ minHeight: '100svh', background: 'var(--bg)', color: 'var(--fg)', display: 'flex', justifyContent: 'center' }}>
-      <main
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'var(--bg)',
+        color: 'var(--fg)',
+        fontFamily: 'var(--font-body)',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div
         style={{
-          width: '100%',
-          maxWidth: '600px',
-          borderLeft: '1px solid var(--border)',
-          borderRight: '1px solid var(--border)',
-          paddingBottom: 'max(40px, env(safe-area-inset-bottom))',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
         }}
       >
-        <header
+        {/* Coluna Esquerda: Navegação Canônica (275px / 76px) */}
+        {showLeft && (
+          <BarraLateralNavegacao
+            abaAtiva="feed"
+            aoMudarAba={(nova) => {
+              if (nova === 'feed') aoVoltar();
+              else window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
+            }}
+            aoAbrirComposer={aoArrotar}
+            compacto={!isWide}
+            tema={theme}
+            aoAlternarTema={toggleTheme}
+            perfil={perfilParaBarra}
+            aoAbrirPerfil={() => {}}
+            contaLogada={Boolean(conta && !conta.anonima && conta.temSessao)}
+            aoSair={sair}
+          />
+        )}
+
+        {/* Coluna Central: Perfil (Max 600px) */}
+        <main
           style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 5,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '8px 16px',
-            paddingTop: 'max(8px, env(safe-area-inset-top))',
-            background: 'var(--bg)',
-            borderBottom: '1px solid var(--border)',
+            width: '100%',
+            maxWidth: '600px',
+            flex: '1 1 0',
+            minWidth: 0,
+            borderLeft: '1px solid var(--border)',
+            borderRight: '1px solid var(--border)',
+            minHeight: '100vh',
+            boxSizing: 'border-box',
+            paddingBottom: isMobile ? '120px' : '40px',
           }}
         >
-          <button type="button" onClick={aoVoltar} aria-label="Voltar" style={{ ...botaoSecundario, border: 0, padding: 0, width: '44px' }}>
-            ←
-          </button>
-          <b style={{ fontSize: '18px' }}>{perfil ? `@${perfil.handle}` : 'Perfil'}</b>
-        </header>
+          <header
+            style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 16px',
+              paddingTop: 'max(8px, env(safe-area-inset-top))',
+              background: 'var(--bg)',
+              borderBottom: '1px solid var(--border)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={aoVoltar}
+              aria-label="Voltar"
+              style={{ ...botaoSecundario, border: 0, padding: 0, width: '44px' }}
+            >
+              ←
+            </button>
+            <b style={{ fontSize: '18px' }}>{perfil ? `@${perfil.handle}` : 'Perfil'}</b>
+          </header>
 
-        {aviso && (
-          <div role="status" style={{ padding: '10px 16px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', fontSize: '14px' }}>
-            {aviso}
-          </div>
-        )}
-
-        {carregando && (
-          <p role="status" aria-live="polite" style={{ padding: 24, color: 'var(--muted)' }}>
-            Carregando perfil…
-          </p>
-        )}
-
-        {!carregando && !perfil && falhou && (
-          <div role="alert" style={{ padding: 24, display: 'grid', gap: 12 }}>
-            <b style={{ fontSize: 18 }}>Não deu para abrir o perfil. Tenta de novo.</b>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button type="button" onClick={() => setTentativa((n) => n + 1)} style={botaoSecundario}>
-                Tentar de novo
-              </button>
-              <button type="button" onClick={aoVoltar} style={botaoSecundario}>
-                Voltar
-              </button>
+          {aviso && (
+            <div
+              role="status"
+              style={{
+                padding: '10px 16px',
+                background: 'var(--surface)',
+                borderBottom: '1px solid var(--border)',
+                fontSize: '14px',
+              }}
+            >
+              {aviso}
             </div>
-          </div>
-        )}
+          )}
 
-        {!carregando && !perfil && !falhou && (
-          <div style={{ padding: 24, display: 'grid', gap: 12 }}>
-            <b style={{ fontSize: 18 }}>{handle ? 'Esse arrotador não existe.' : 'Seu perfil não abriu.'}</b>
-            <span style={{ color: 'var(--muted)' }}>
-              {handle
-                ? 'O @ pode ter mudado. Procura pelo causo no Bonde.'
-                : 'Precisa de conexão com o servidor. Tenta de novo daqui a pouco.'}
-            </span>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {handle && (
+          {carregando && (
+            <p role="status" aria-live="polite" style={{ padding: 24, color: 'var(--muted)' }}>
+              Carregando perfil…
+            </p>
+          )}
+
+          {!carregando && !perfil && falhou && (
+            <div role="alert" style={{ padding: 24, display: 'grid', gap: 12 }}>
+              <b style={{ fontSize: 18 }}>Não deu para abrir o perfil. Tenta de novo.</b>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => setTentativa((n) => n + 1)} style={botaoSecundario}>
+                  Tentar de novo
+                </button>
                 <button type="button" onClick={aoVoltar} style={botaoSecundario}>
-                  Voltar ao Bonde
+                  Voltar
                 </button>
-              )}
-              <button type="button" onClick={aoArrotar} style={botaoSecundario}>
-                Ir arrotar
-              </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {perfil && (
-          <>
-            {/* Faixa chapada (sem gradiente) e avatar 80px com -40px e borda 4px, como no protótipo */}
-            <div aria-hidden="true" style={{ height: 120, background: 'var(--surface-2)' }} />
-            <section style={{ padding: '0 16px 16px', display: 'grid', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, marginTop: -40 }}>
-                {perfil.souEu ? (
-                  <label
-                    title="Trocar foto"
-                    style={{ ...estiloAvatar, cursor: enviandoFoto ? 'progress' : 'pointer' }}
-                  >
-                    {perfil.avatarUrl ? <img src={perfil.avatarUrl} alt={perfil.apelido} style={estiloFoto} /> : inicial}
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      aria-label="Trocar foto do perfil"
-                      onChange={trocarFoto}
-                      disabled={enviandoFoto}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-                ) : (
-                  <div style={estiloAvatar}>
-                    {perfil.avatarUrl ? <img src={perfil.avatarUrl} alt={perfil.apelido} style={estiloFoto} /> : inicial}
-                  </div>
-                )}
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                  <button type="button" onClick={compartilharPerfil} style={botaoSecundario}>
-                    Compartilhar
+          {!carregando && !perfil && !falhou && (
+            <div style={{ padding: 24, display: 'grid', gap: 12 }}>
+              <b style={{ fontSize: 18 }}>{handle ? 'Esse arrotador não existe.' : 'Seu perfil não abriu.'}</b>
+              <span style={{ color: 'var(--muted)' }}>
+                {handle
+                  ? 'O @ pode ter mudado. Procura pelo causo no Bonde.'
+                  : 'Precisa de conexão com o servidor. Tenta de novo daqui a pouco.'}
+              </span>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {handle && (
+                  <button type="button" onClick={aoVoltar} style={botaoSecundario}>
+                    Voltar ao Bonde
                   </button>
+                )}
+                <button type="button" onClick={aoArrotar} style={botaoSecundario}>
+                  Ir arrotar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {perfil && (
+            <>
+              {/* Capa Canônica: 160px */}
+              <div
+                aria-hidden="true"
+                style={{
+                  height: 160,
+                  background: 'var(--surface-2)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              />
+
+              <section style={{ padding: '0 16px 16px', display: 'grid', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, marginTop: -40 }}>
                   {perfil.souEu ? (
-                    <button type="button" onClick={editando ? () => setEditando(false) : abrirEdicao} style={botaoSecundario}>
-                      {editando ? 'Cancelar' : 'Editar perfil'}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={seguir}
-                      style={{
-                        ...botaoSecundario,
-                        border: perfil.euSigo ? '1px solid var(--border-strong)' : 0,
-                        background: perfil.euSigo ? 'transparent' : 'var(--fg)',
-                        color: perfil.euSigo ? 'var(--fg)' : 'var(--bg)',
-                      }}
+                    <label
+                      title="Trocar foto"
+                      onMouseEnter={() => setHoverFoto(true)}
+                      onMouseLeave={() => setHoverFoto(false)}
+                      style={{ ...estiloAvatar, cursor: enviandoFoto ? 'progress' : 'pointer' }}
                     >
-                      {perfil.euSigo ? 'Seguindo' : 'Seguir'}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center' }}>
-                  <span>{perfil.apelido}</span>
-                  {perfil.daCasa === true && <SimboloBurpzilla />}
-                </div>
-                <div style={{ color: 'var(--muted)' }}>@{perfil.handle}</div>
-                {perfil.titulo && <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>{perfil.titulo}</div>}
-              </div>
-
-              {perfil.bio && <p style={{ margin: 0, lineHeight: 1.4 }}>{perfil.bio}</p>}
-              <div style={{ color: 'var(--muted)', fontSize: 14 }}>
-                {[perfil.cidade, desde ? `no bonde desde ${desde}` : null].filter(Boolean).join(' · ')}
-              </div>
-
-              {redes.length > 0 && (
-                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 14 }}>
-                  {redes.map((r) => (
-                    <a
-                      key={r.nome}
-                      href={r.url}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      style={{ color: 'var(--fg)', textDecoration: 'underline' }}
-                    >
-                      {r.nome} @{r.usuario}
-                    </a>
-                  ))}
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 14 }}>
-                <span><b>{perfil.totalCausos}</b> <span style={{ color: 'var(--muted)' }}>causos</span></span>
-                <span><b>{perfil.melhorNota ?? '—'}</b> <span style={{ color: 'var(--muted)' }}>melhor nota publicada</span></span>
-                <button type="button" onClick={() => abrirConexoes('seguidores')} style={botaoTexto}>
-                  <b>{perfil.totalSeguidores}</b> <span style={{ color: 'var(--muted)' }}>seguidores</span>
-                </button>
-                <button type="button" onClick={() => abrirConexoes('seguindo')} style={botaoTexto}>
-                  <b>{perfil.totalSeguindo}</b> <span style={{ color: 'var(--muted)' }}>seguindo</span>
-                </button>
-              </div>
-
-              {conexoes && (
-                <div role="dialog" aria-label={conexoes.tipo === 'seguidores' ? 'Seguidores' : 'Seguindo'} style={{ border: '1px solid var(--border)', borderRadius: 16, padding: 12, display: 'grid', gap: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <b>{conexoes.tipo === 'seguidores' ? 'Seguidores' : 'Seguindo'}</b>
-                    <button type="button" onClick={() => setConexoes(null)} style={botaoTexto} aria-label="Fechar lista">
-                      Fechar
-                    </button>
-                  </div>
-                  {conexoes.lista.length === 0 && (
-                    <span style={{ color: 'var(--muted)', fontSize: 14 }}>
-                      {conexoes.tipo === 'seguidores' ? 'Ninguém segue ainda.' : 'Não segue ninguém ainda.'}
-                    </span>
-                  )}
-                  {conexoes.lista.map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => aoAbrirPerfil(c.handle)}
-                      style={{ ...botaoTexto, display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left', minHeight: 44 }}
-                    >
+                      {perfil.avatarUrl ? <img src={perfil.avatarUrl} alt={perfil.apelido} style={estiloFoto} /> : inicial}
                       <span
-                        aria-hidden="true"
-                        style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface-2)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flex: 'none' }}
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'rgba(0,0,0,0.55)',
+                          color: '#fff',
+                          opacity: hoverFoto ? 1 : 0,
+                          transition: 'opacity 0.15s ease',
+                        }}
                       >
-                        {c.avatarUrl ? <img src={c.avatarUrl} alt="" style={estiloFoto} /> : c.apelido.slice(0, 2).toUpperCase()}
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                          <circle cx="12" cy="13" r="4" />
+                        </svg>
                       </span>
-                      <span>
-                        <b>{c.apelido}</b> <span style={{ color: 'var(--muted)' }}>@{c.handle}</span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {perfil.souEu && editando && (
-                <form onSubmit={salvar} style={{ display: 'grid', gap: 10, padding: 12, border: '1px solid var(--border)', borderRadius: 16 }}>
-                  <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                    Apelido
-                    <input style={campo} value={form.apelido} maxLength={30} onChange={(e) => setForm({ ...form, apelido: e.target.value })} />
-                  </label>
-                  <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                    @ (3 a 20: letras minúsculas, números e _)
-                    <input style={campo} value={form.handle} maxLength={20} autoCapitalize="none" onChange={(e) => setForm({ ...form, handle: e.target.value })} />
-                  </label>
-                  <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                    Bio ({160 - form.bio.length})
-                    <textarea style={{ ...campo, minHeight: 80, padding: 12 }} value={form.bio} maxLength={160} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-                  </label>
-                  <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                    Cidade
-                    <input style={campo} value={form.cidade} maxLength={60} onChange={(e) => setForm({ ...form, cidade: e.target.value })} />
-                  </label>
-                  {(['instagram', 'tiktok', 'youtube', 'twitter'] as const).map((rede) => (
-                    <label key={rede} style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                      {NOMES_DAS_REDES[rede]} (só o @, sem link)
                       <input
-                        style={campo}
-                        value={form[rede]}
-                        maxLength={31}
-                        autoCapitalize="none"
-                        onChange={(e) => setForm({ ...form, [rede]: e.target.value })}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        aria-label="Trocar foto do perfil"
+                        onChange={trocarFoto}
+                        disabled={enviandoFoto}
+                        style={{ display: 'none' }}
                       />
                     </label>
-                  ))}
-                  {perfil.avatarUrl && (
-                    <button type="button" onClick={tirarFoto} style={botaoSecundario}>
-                      Remover foto
-                    </button>
-                  )}
-                  {erroDoForm && <span role="alert" style={{ color: 'var(--danger, #ff4d4f)', fontSize: 14 }}>{erroDoForm}</span>}
-                  <button
-                    type="submit"
-                    disabled={salvando}
-                    style={{ minHeight: 44, border: 0, borderRadius: 12, background: 'var(--accent)', color: 'var(--accent-on)', fontWeight: 700, cursor: 'pointer' }}
-                  >
-                    {salvando ? 'Salvando…' : 'Salvar'}
-                  </button>
-                </form>
-              )}
-
-              {perfil.souEu && conta && (
-                <div style={{ display: 'grid', gap: 8, padding: 12, border: '1px solid var(--border)', borderRadius: 16 }}>
-                  {conta.anonima || !conta.temSessao ? (
-                    <>
-                      <b>Sua conta é anônima</b>
-                      <span style={{ color: 'var(--muted)', fontSize: 14 }}>
-                        Ela existe só neste navegador. Se você limpar os dados, perde seus causos. Cadastre e-mail e
-                        senha para guardar tudo.
-                      </span>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button type="button" style={botaoSecundario} onClick={() => aoEntrar('cadastro')}>
-                          Criar conta
-                        </button>
-                        <button type="button" style={botaoSecundario} onClick={() => aoEntrar('entrar')}>
-                          Já tenho conta
-                        </button>
-                      </div>
-                    </>
                   ) : (
-                    <>
-                      <b>Conta</b>
-                      <span style={{ color: 'var(--muted)', fontSize: 14 }}>{conta.email}</span>
-                      <div>
-                        <button type="button" style={botaoSecundario} onClick={sair}>
-                          Sair
-                        </button>
-                      </div>
-                    </>
+                    <div style={estiloAvatar}>
+                      {perfil.avatarUrl ? <img src={perfil.avatarUrl} alt={perfil.apelido} style={estiloFoto} /> : inicial}
+                    </div>
                   )}
-                </div>
-              )}
-            </section>
 
-            <nav role="tablist" style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
-              {abas.map((a) => (
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <button type="button" onClick={compartilharPerfil} style={botaoSecundario}>
+                      Compartilhar
+                    </button>
+                    {perfil.souEu ? (
+                      <button
+                        type="button"
+                        onClick={() => (editando ? setEditando(false) : abrirEdicao())}
+                        style={botaoSecundario}
+                      >
+                        Editar perfil
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={seguir}
+                        style={{
+                          ...botaoSecundario,
+                          border: perfil.euSigo ? '1px solid var(--border-strong)' : 0,
+                          background: perfil.euSigo ? 'transparent' : 'var(--fg)',
+                          color: perfil.euSigo ? 'var(--fg)' : 'var(--bg)',
+                        }}
+                      >
+                        {perfil.euSigo ? 'Seguindo' : 'Seguir'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center' }}>
+                    <span>{perfil.apelido}</span>
+                    {perfil.daCasa === true && <SimboloBurpzilla />}
+                  </div>
+                  <div style={{ color: 'var(--muted)', fontSize: 15 }}>@{perfil.handle}</div>
+                  {perfil.titulo && <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>{perfil.titulo}</div>}
+                </div>
+
+                {perfil.bio && <p style={{ margin: 0, lineHeight: 1.45, fontSize: 15, textWrap: 'pretty' }}>{perfil.bio}</p>}
+
+                <div style={{ color: 'var(--muted)', fontSize: 14 }}>
+                  {[perfil.cidade, desde ? `no bonde desde ${desde}` : null].filter(Boolean).join(' · ')}
+                </div>
+
+                {redes.length > 0 && (
+                  <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 14 }}>
+                    {redes.map((r) => (
+                      <a
+                        key={r.nome}
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        style={{ color: 'var(--fg)', textDecoration: 'underline' }}
+                      >
+                        {r.nome} @{r.usuario}
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* Estatísticas Hierarquizadas: Social e Jogo */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+                  <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', fontSize: 14 }}>
+                    <button type="button" onClick={() => abrirConexoes('seguindo')} style={botaoTexto}>
+                      <b>{perfil.totalSeguindo}</b> <span style={{ color: 'var(--muted)' }}>seguindo</span>
+                    </button>
+                    <button type="button" onClick={() => abrirConexoes('seguidores')} style={botaoTexto}>
+                      <b>{perfil.totalSeguidores}</b> <span style={{ color: 'var(--muted)' }}>seguidores</span>
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', fontSize: 14 }}>
+                    <span>
+                      <b>{perfil.totalCausos}</b> <span style={{ color: 'var(--muted)' }}>resenhas</span>
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: 'var(--muted)' }}>melhor nota:</span>
+                      <b
+                        style={{
+                          fontFamily: 'var(--font-display)',
+                          fontSize: 18,
+                          letterSpacing: '0.02em',
+                          background: perfil.melhorNota !== undefined ? 'var(--accent)' : 'var(--surface-2)',
+                          color: perfil.melhorNota !== undefined ? 'var(--accent-on)' : 'var(--muted)',
+                          padding: '1px 8px',
+                          borderRadius: '6px',
+                        }}
+                      >
+                        {perfil.melhorNota ?? '—'}
+                      </b>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card de Conta Anônima / Promoção */}
+                {perfil.souEu && conta && (
+                  <div
+                    style={{
+                      display: 'grid',
+                      gap: 8,
+                      padding: 14,
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 16,
+                      marginTop: 4,
+                    }}
+                  >
+                    {conta.anonima || !conta.temSessao ? (
+                      <>
+                        <b style={{ fontSize: 15 }}>Sua conta é anônima</b>
+                        <span style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.4 }}>
+                          Ela existe só neste navegador. Se você limpar os dados, perde suas resenhas. Cadastre e-mail
+                          e senha para guardar tudo.
+                        </span>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                          <button
+                            type="button"
+                            style={{ ...botaoSecundario, background: 'var(--fg)', color: 'var(--bg)', border: 0 }}
+                            onClick={() => aoEntrar('cadastro')}
+                          >
+                            Criar conta
+                          </button>
+                          <button type="button" style={botaoSecundario} onClick={() => aoEntrar('entrar')}>
+                            Já tenho conta
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <b style={{ fontSize: 15 }}>Conta</b>
+                        <span style={{ color: 'var(--muted)', fontSize: 14 }}>{conta.email}</span>
+                        <div style={{ marginTop: 2 }}>
+                          <button type="button" style={botaoSecundario} onClick={sair}>
+                            Sair
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </section>
+
+              {/* Abas com Indicador Ativo --ind */}
+              <nav role="tablist" style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
+                {abas.map((a) => {
+                  const ativo = aba === a.id;
+                  return (
+                    <button
+                      key={a.id}
+                      role="tab"
+                      aria-selected={ativo}
+                      type="button"
+                      onClick={() => setAba(a.id)}
+                      style={{
+                        flex: 1,
+                        minHeight: 48,
+                        border: 0,
+                        background: 'none',
+                        color: ativo ? 'var(--fg)' : 'var(--muted)',
+                        fontWeight: ativo ? 700 : 500,
+                        fontSize: 15,
+                        cursor: 'pointer',
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <span>{a.rotulo}</span>
+                      {ativo && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            width: '48px',
+                            height: '3px',
+                            borderRadius: '999px',
+                            background: 'var(--ind)',
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
+              {!carregandoCausos && causos.length === 0 && (
+                <p style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
+                  {aba === 'curtidos'
+                    ? 'Nada curtido ainda.'
+                    : perfil.souEu
+                      ? 'Você ainda não postou nenhuma resenha.'
+                      : 'Sem resenhas por aqui ainda.'}
+                </p>
+              )}
+              {causos.map((c) => (
+                <CardDeCauso
+                  key={c.id}
+                  causo={c}
+                  aoCurtir={curtir}
+                  aoRepostar={repostar}
+                  aoDuvidar={aoArrotar}
+                  aoCompartilhar={(item) => aoAbrirHistoria(item.id)}
+                  aoResponder={responder}
+                  aoAbrirConversa={abrirConversa}
+                  aoDenunciar={denunciar}
+                  aoApagar={apagar}
+                  aoAbrirPerfil={(h) => aoAbrirPerfil(h)}
+                  aoAbrirHistoria={aoAbrirHistoria}
+                />
+              ))}
+            </>
+          )}
+        </main>
+
+        {/* Coluna Direita: Tendências e Busca (320px) */}
+        {showRight && (
+          <ColunaTendencias
+            termoBusca=""
+            aoMudarBusca={() => aoVoltar()}
+            aoSelecionarTrend={() => aoVoltar()}
+          />
+        )}
+      </div>
+
+      {/* Navegação Mobile Inferior */}
+      {isMobile && (
+        <BarraInferiorMobile
+          abaAtiva="feed"
+          aoMudarAba={(nova) => {
+            if (nova === 'feed') aoVoltar();
+            else window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
+          }}
+          aoAbrirPerfil={() => {}}
+          aoAbrirComposer={aoArrotar}
+        />
+      )}
+
+      {/* Modal / Bottom Sheet: Editar Perfil */}
+      {perfil?.souEu && editando && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Editar perfil"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: isMobile ? 'flex-end' : 'center',
+            justifyContent: 'center',
+            padding: isMobile ? 0 : '16px',
+            boxSizing: 'border-box',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditando(false);
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '560px',
+              background: 'var(--surface)',
+              border: '1px solid var(--border-strong)',
+              borderRadius: isMobile ? '24px 24px 0 0' : '24px',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+              boxShadow: '0 8px 32px rgba(0,0,0,.5)',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px' }}>EDITAR PERFIL</span>
+              <button
+                type="button"
+                onClick={() => setEditando(false)}
+                style={{ background: 'none', border: 0, color: 'var(--muted)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Fechar
+              </button>
+            </div>
+
+            <form onSubmit={salvar} style={{ display: 'grid', gap: 12 }}>
+              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                Apelido
+                <input
+                  style={campo}
+                  value={form.apelido}
+                  maxLength={30}
+                  onChange={(e) => setForm({ ...form, apelido: e.target.value })}
+                />
+              </label>
+              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                @ (3 a 20: letras minúsculas, números e _)
+                <input
+                  style={campo}
+                  value={form.handle}
+                  maxLength={20}
+                  autoCapitalize="none"
+                  onChange={(e) => setForm({ ...form, handle: e.target.value })}
+                />
+              </label>
+              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                Bio ({160 - form.bio.length})
+                <textarea
+                  style={{ ...campo, minHeight: 80, padding: 12, resize: 'none' }}
+                  value={form.bio}
+                  maxLength={160}
+                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                />
+              </label>
+              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                Cidade
+                <input
+                  style={campo}
+                  value={form.cidade}
+                  maxLength={60}
+                  onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                />
+              </label>
+              {(['instagram', 'tiktok', 'youtube', 'twitter'] as const).map((rede) => (
+                <label key={rede} style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                  {NOMES_DAS_REDES[rede]} (só o @, sem link)
+                  <input
+                    style={campo}
+                    value={form[rede]}
+                    maxLength={31}
+                    autoCapitalize="none"
+                    onChange={(e) => setForm({ ...form, [rede]: e.target.value })}
+                  />
+                </label>
+              ))}
+              {perfil.avatarUrl && (
+                <button type="button" onClick={tirarFoto} style={botaoSecundario}>
+                  Remover foto
+                </button>
+              )}
+              {erroDoForm && (
+                <span role="alert" style={{ color: 'var(--danger, #ff4d4f)', fontSize: 14 }}>
+                  {erroDoForm}
+                </span>
+              )}
+              <button
+                type="submit"
+                disabled={salvando}
+                style={{
+                  minHeight: 48,
+                  border: 0,
+                  borderRadius: 14,
+                  background: 'var(--accent)',
+                  color: 'var(--accent-on)',
+                  fontWeight: 700,
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  marginTop: 4,
+                }}
+              >
+                {salvando ? 'Salvando…' : 'Salvar'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal / Bottom Sheet: Seguidores e Seguindo */}
+      {conexoes && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={conexoes.tipo === 'seguidores' ? 'Seguidores' : 'Seguindo'}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: isMobile ? 'flex-end' : 'center',
+            justifyContent: 'center',
+            padding: isMobile ? 0 : '16px',
+            boxSizing: 'border-box',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setConexoes(null);
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '480px',
+              background: 'var(--surface)',
+              border: '1px solid var(--border-strong)',
+              borderRadius: isMobile ? '24px 24px 0 0' : '24px',
+              padding: '18px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <b style={{ fontSize: '18px' }}>{conexoes.tipo === 'seguidores' ? 'Seguidores' : 'Seguindo'}</b>
+              <button type="button" onClick={() => setConexoes(null)} style={botaoTexto} aria-label="Fechar lista">
+                Fechar
+              </button>
+            </div>
+            {conexoes.lista.length === 0 && (
+              <span style={{ color: 'var(--muted)', fontSize: 14, padding: '12px 0' }}>
+                {conexoes.tipo === 'seguidores' ? 'Ninguém segue ainda.' : 'Não segue ninguém ainda.'}
+              </span>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {conexoes.lista.map((c) => (
                 <button
-                  key={a.id}
-                  role="tab"
-                  aria-selected={aba === a.id}
+                  key={c.id}
                   type="button"
-                  onClick={() => setAba(a.id)}
+                  onClick={() => {
+                    setConexoes(null);
+                    aoAbrirPerfil(c.handle);
+                  }}
                   style={{
-                    flex: 1,
+                    ...botaoTexto,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    textAlign: 'left',
                     minHeight: 48,
-                    border: 0,
-                    background: 'none',
-                    color: aba === a.id ? 'var(--fg)' : 'var(--muted)',
-                    fontWeight: aba === a.id ? 700 : 500,
-                    fontSize: 15,
-                    cursor: 'pointer',
+                    padding: '6px 0',
                   }}
                 >
-                  {a.rotulo}
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: 'var(--surface-2)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      flex: 'none',
+                      position: 'relative',
+                    }}
+                  >
+                    {c.avatarUrl ? <img src={c.avatarUrl} alt="" style={estiloFoto} /> : c.apelido.slice(0, 2).toUpperCase()}
+                  </span>
+                  <span>
+                    <b>{c.apelido}</b> <span style={{ color: 'var(--muted)' }}>@{c.handle}</span>
+                  </span>
                 </button>
               ))}
-            </nav>
-
-            {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
-            {!carregandoCausos && causos.length === 0 && (
-              <p style={{ padding: 24, color: 'var(--muted)' }}>
-                {aba === 'curtidos' ? 'Nada curtido ainda.' : perfil.souEu ? 'Você ainda não postou nenhum causo.' : 'Sem causos por aqui ainda.'}
-              </p>
-            )}
-            {causos.map((c) => (
-              <CardDeCauso
-                key={c.id}
-                causo={c}
-                aoCurtir={curtir}
-                aoRepostar={repostar}
-                aoDuvidar={aoArrotar}
-                aoCompartilhar={(item) => aoAbrirHistoria(item.id)}
-                aoResponder={responder}
-                aoAbrirConversa={abrirConversa}
-                aoDenunciar={denunciar}
-                aoApagar={apagar}
-                aoAbrirPerfil={(h) => aoAbrirPerfil(h)}
-                aoAbrirHistoria={aoAbrirHistoria}
-              />
-            ))}
-          </>
-        )}
-      </main>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

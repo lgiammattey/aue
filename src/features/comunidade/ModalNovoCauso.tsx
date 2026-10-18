@@ -67,7 +67,7 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
       <div className="modal-card">
         <header className="modal-header">
-          <h3 id="modal-titulo">Soltar Causo no Mural</h3>
+          <h3 id="modal-titulo">Soltar Resenha no Mural</h3>
           <button
             type="button"
             className="modal-close"
@@ -107,7 +107,7 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="textarea-causo">O Causo / Contexto</label>
+            <label htmlFor="textarea-causo">A Resenha / Contexto</label>
             <textarea
               id="textarea-causo"
               placeholder="Conta o estrago: onde foi, quem ouviu e qual foi a reação..."

@@ -32,7 +32,7 @@ const REGRAS_PADRAO: Record<string, string[]> = {
   'bonde-do-arroto': [
     'Todo arroto vale nota.',
     'Zoeira com o arroto, nunca com a pessoa.',
-    'Post sem áudio só se for causo de respeito.',
+    'Post sem áudio só se for resenha de respeito.',
   ],
   'cerveja-gelada': [
     'Long neck, lata ou chope — declara a origem.',
@@ -45,7 +45,7 @@ const REGRAS_PADRAO: Record<string, string[]> = {
     'Não vale cuspir refrigerante.',
   ],
   'historias-de-arroto': [
-    'Causos reais de vergonha em público.',
+    'Resenhas reais de vergonha em público.',
     'Não vale inventar história de primo.',
     'Se tiver testemunha, marca o @.',
   ],
@@ -343,10 +343,10 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
           ) : (
             <div style={{ padding: '48px 32px', textAlign: 'center' }}>
               <div style={{ fontWeight: 800, fontSize: '24px', color: 'var(--fg)' }}>
-                Nenhum causo nesta comunidade ainda
+                Nenhuma resenha nesta comunidade ainda
               </div>
               <div style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '8px' }}>
-                Seja o primeiro a arrotar ou contar história aqui!
+                Seja o primeiro a arrotar ou soltar a resenha aqui!
               </div>
             </div>
           )}

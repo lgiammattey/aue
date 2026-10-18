@@ -281,7 +281,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                     borderRadius: '8px',
                   }}
                 >
-                  Denunciar causo
+                  Denunciar resenha
                 </button>
                 {causo.meu && aoApagar && (
                   <button
@@ -303,7 +303,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                       borderRadius: '8px',
                     }}
                   >
-                    Apagar meu causo
+                    Apagar minha resenha
                   </button>
                 )}
               </div>
@@ -345,7 +345,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           <div style={{ marginTop: '6px', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border)' }}>
             <img
               src={causo.imagemUrl}
-              alt="Imagem do causo"
+              alt="Imagem da resenha"
               style={{ width: '100%', maxHeight: '360px', objectFit: 'cover', display: 'block' }}
             />
           </div>

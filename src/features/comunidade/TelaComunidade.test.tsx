@@ -178,8 +178,8 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} initialTab="comm" />);
 
-    // Clica no botão de ver causos no mural
-    const btnVerCausos = await screen.findByRole('button', { name: 'Ver causos no mural' });
+    // Clica no botão de ver resenhas no mural
+    const btnVerCausos = await screen.findByRole('button', { name: 'Ver resenhas no mural' });
     fireEvent.click(btnVerCausos);
 
     // Visão de Detalhe da Comunidade aberta

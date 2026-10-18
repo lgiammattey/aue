@@ -270,16 +270,16 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       return;
     }
     setCausos((prev) => prev.filter((c) => c.id !== causoId));
-    avisar('Denúncia registrada. O causo some da sua tela.');
+    avisar('Denúncia registrada. A resenha some da sua tela.');
   };
 
-  // Apagar causo meu (com o áudio, quando houver)
+  // Apagar resenha minha (com o áudio, quando houver)
   const handleApagar = async (causo: CausoPostado) => {
     const comAudio = Boolean(causo.temAudio);
     const confirmou = window.confirm(
       comAudio
-        ? 'Apagar este causo e o áudio do arroto? Não tem como desfazer.'
-        : 'Apagar este causo? Não tem como desfazer.',
+        ? 'Apagar esta resenha e o áudio do arroto? Não tem como desfazer.'
+        : 'Apagar esta resenha? Não tem como desfazer.',
     );
     if (!confirmou) return;
     const ok = await adaptador.apagarCauso(causo.id, { apagarAudio: comAudio });
@@ -288,7 +288,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       return;
     }
     setCausos((prev) => prev.filter((c) => c.id !== causo.id));
-    avisar('Causo apagado.');
+    avisar('Resenha apagada.');
   };
 
   // Alternar Comunidade

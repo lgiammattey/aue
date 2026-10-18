@@ -99,8 +99,8 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
           style={{
             height: '40px',
             borderRadius: '999px',
-            background: 'var(--accent, #c6ff00)',
-            color: 'var(--accent-on, #000)',
+            background: 'var(--accent)',
+            color: 'var(--accent-on)',
             fontWeight: 700,
             fontSize: '14px',
             display: 'flex',

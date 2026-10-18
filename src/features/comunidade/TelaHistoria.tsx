@@ -90,7 +90,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     const url = window.location.href;
     if (navigator.share) {
       navigator.share({
-        title: `Causo de Arroto — ${causo?.autorNome}`,
+        title: `Resenha de Arroto — ${causo?.autorNome}`,
         text: causo?.conteudo.slice(0, 100),
         url,
       }).catch(() => {});

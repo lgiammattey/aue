@@ -107,8 +107,8 @@ export const PoliticaDePrivacidade: React.FC = () => {
           do app. Dá para remover a foto na tela de editar o perfil.
         </p>
         <p>
-          <strong>Apagar o que você publicou:</strong> no menu de cada causo seu
-          há <strong>"Apagar meu causo"</strong>. Ele apaga o texto, os comentários
+          <strong>Apagar o que você publicou:</strong> no menu de cada resenha sua
+          há <strong>"Apagar minha resenha"</strong>. Ele apaga o texto, os comentários
           e, se houver, o arquivo de áudio. Se o servidor não apagar, o app diz que
           não apagou.
         </p>

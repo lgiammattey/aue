@@ -137,6 +137,41 @@ export function criarComunidadeWeb(
           const { data, error } = (await Promise.race([promessaQuery, timeout])) as any;
 
           if (!error && data && data.length > 0) {
+            const userIds = [...new Set(data.map((p: any) => p.user_id).filter(Boolean))];
+            const postIds = data.map((p: any) => p.id);
+
+            let mapaPerfis: Record<string, string> = {};
+            if (userIds.length > 0) {
+              try {
+                const { data: dadosPerfis } = await supabase
+                  .from('perfis')
+                  .select('id, apelido')
+                  .in('id', userIds);
+                if (dadosPerfis) {
+                  mapaPerfis = Object.fromEntries(dadosPerfis.map((prf: any) => [prf.id, prf.apelido]));
+                }
+              } catch {
+                // segue com fallback de apelido se falhar
+              }
+            }
+
+            let mapaComentariosCount: Record<string, number> = {};
+            if (postIds.length > 0) {
+              try {
+                const { data: dadosComentarios } = await supabase
+                  .from('comentarios')
+                  .select('id, post_id')
+                  .in('post_id', postIds);
+                if (dadosComentarios) {
+                  for (const cm of dadosComentarios) {
+                    mapaComentariosCount[cm.post_id] = (mapaComentariosCount[cm.post_id] || 0) + 1;
+                  }
+                }
+              } catch {
+                // segue com 0 se falhar
+              }
+            }
+
             const mapeados: CausoPostado[] = data
               .filter((p: any) => !denunciasLocais.has(p.id))
               .map((p: any) => {
@@ -148,12 +183,16 @@ export function criarComunidadeWeb(
                   ? p.resultados[0]
                   : p.resultados;
 
+                const apelido = (p.user_id && mapaPerfis[p.user_id]) || 'Arrotador Anônimo';
+                const autorHandle = apelido.toLowerCase().replace(/\s+/g, '_');
+                const totalComentarios = mapaComentariosCount[p.id] || 0;
+
                 return {
                   id: p.id,
                   comunidadeId: comuEncontrada.id,
                   comunidadeSlug: comuEncontrada.slug,
-                  autorNome: 'Arrotador Anônimo',
-                  autorHandle: 'arrotador_anonimo',
+                  autorNome: apelido,
+                  autorHandle,
                   conteudo: p.content || '',
                   resultadoId: p.result_id ?? undefined,
                   nota: resultado?.score ?? undefined,
@@ -164,7 +203,7 @@ export function criarComunidadeWeb(
                   minhaReacao: null,
                   curtidas: 0,
                   reposts: 0,
-                  totalComentarios: 0,
+                  totalComentarios,
                   criadoEm: p.created_at,
                 };
               });
@@ -407,6 +446,63 @@ export function criarComunidadeWeb(
 
     async listarRespostas(causoId: string): Promise<readonly RespostaDeCauso[]> {
       const causo = causosMemoria.find((c) => c.id === causoId);
+      if (causo?.comentarios && causo.comentarios.length > 0) {
+        return causo.comentarios;
+      }
+
+      if (!opcoes.forcarOffline && supabaseRealConfigurado()) {
+        try {
+          const { data: dadosComentarios, error } = await supabase
+            .from('comentarios')
+            .select('id, post_id, user_id, content, created_at')
+            .eq('post_id', causoId)
+            .order('created_at', { ascending: true });
+
+          if (!error && dadosComentarios && dadosComentarios.length > 0) {
+            const userIds = [...new Set(dadosComentarios.map((c: any) => c.user_id).filter(Boolean))];
+            let mapaPerfis: Record<string, string> = {};
+            if (userIds.length > 0) {
+              try {
+                const { data: dadosPerfis } = await supabase
+                  .from('perfis')
+                  .select('id, apelido')
+                  .in('id', userIds);
+                if (dadosPerfis) {
+                  mapaPerfis = Object.fromEntries(dadosPerfis.map((prf: any) => [prf.id, prf.apelido]));
+                }
+              } catch {
+                // fallback
+              }
+            }
+
+            const respostasMapeadas: RespostaDeCauso[] = dadosComentarios.map((c: any) => {
+              const nome = (c.user_id && mapaPerfis[c.user_id]) || 'Arrotador';
+              return {
+                id: c.id,
+                causoId,
+                autorNome: nome,
+                autorHandle: nome.toLowerCase().replace(/\s+/g, '_'),
+                conteudo: c.content,
+                criadoEm: c.created_at,
+              };
+            });
+
+            if (causo) {
+              const idx = causosMemoria.indexOf(causo);
+              causosMemoria[idx] = {
+                ...causo,
+                totalComentarios: respostasMapeadas.length,
+                comentarios: respostasMapeadas,
+              };
+            }
+
+            return respostasMapeadas;
+          }
+        } catch {
+          // Fallback para memória em caso de erro de rede
+        }
+      }
+
       return causo?.comentarios ?? [];
     },
 

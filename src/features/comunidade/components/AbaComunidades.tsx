@@ -142,7 +142,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
         </div>
 
         <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.5, color: 'var(--fg)' }}>
-          {c.desc} Este é o ponto de encontro único dos maiores arrotadores da internet. Entre no grupo oficial do Telegram para trocar causos, mandar áudios e participar dos campeonatos.
+          {c.desc} Este é o ponto de encontro único dos maiores arrotadores da internet. Entre no grupo oficial do Telegram para trocar resenhas, mandar áudios e participar dos campeonatos.
         </p>
 
         {/* Botão Oficial do Grupo Telegram */}
@@ -188,7 +188,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
               cursor: 'pointer',
             }}
           >
-            Ver causos no mural
+            Ver resenhas no mural
           </button>
           <button
             type="button"

@@ -38,4 +38,22 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     // Deve conter o botão de retorno ao feed
     expect(await screen.findByRole('button', { name: 'Voltar para o Feed' })).toBeTruthy();
   });
+
+  it('abre o desafio X1 diretamente pela rota "/x1/:code" na Arena', async () => {
+    window.history.pushState({}, 'Desafio X1', '/x1/k4x9');
+    render(<App />);
+
+    // Deve carregar a Arena com o desafio
+    const elementos = await screen.findAllByText(/Auê/i);
+    expect(elementos.length).toBeGreaterThan(0);
+  });
+
+  it('abre a visão de comunidades pela rota plural "/comunidades"', async () => {
+    window.history.pushState({}, 'Comunidades', '/comunidades');
+    render(<App />);
+
+    // Deve renderizar a aba de Comunidade ativa
+    expect(await screen.findByRole('button', { name: 'Comunidade' })).toBeTruthy();
+  });
 });
+

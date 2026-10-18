@@ -189,14 +189,14 @@ const POSTS: readonly PostDeRoteiro[] = [
 ];
 
 /*
-  Os comentários da casa são só texto. Onde o cronograma pede `[arroto curto]`
-  ou `[arroto grave]`, vai uma onomatopeia e a marca `pendenteAvalAutor`.
+  Os comentários da casa são só texto. Onde o cronograma pedia `[arroto curto]`
+  ou `[arroto grave]`, vai a onomatopeia com aval do autor.
 */
 const COMENTARIOS: readonly ComentarioDeRoteiro[] = [
   { chave: 'c01', postChave: 'p01', agente: 'A', texto: 'pior que parece o vizinho antigo mesmo' },
-  { chave: 'c02', postChave: 'p09', agente: 'B', texto: 'buurp', pendenteAvalAutor: true },
+  { chave: 'c02', postChave: 'p09', agente: 'B', texto: 'buurp' },
   { chave: 'c03', postChave: 'p17', agente: 'C', texto: 'calma, o que foi isso' },
-  { chave: 'c04', postChave: 'p17', agente: 'D', texto: 'buuuurrrp', pendenteAvalAutor: true },
+  { chave: 'c04', postChave: 'p17', agente: 'D', texto: 'buuuurrrp' },
   { chave: 'c05', postChave: 'p20', agente: 'E', texto: 'o estoquista não aguentou' },
   { chave: 'c06', postChave: 'p22', agente: 'A', texto: 'treina com refri, ajuda muito' },
 ];

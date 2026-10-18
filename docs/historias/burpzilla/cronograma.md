@@ -60,9 +60,9 @@ Não todos os agentes em todos os posts. Sorteio simples: uns 40% dos posts ganh
 | Post | Comentário | Quem |
 |---|---|---|
 | ter 01/09, 23:12 (Lima) | pior que parece o vizinho antigo mesmo | agente A |
-| sáb 26/09, 18:22 (Giam) | `[arroto curto]` | agente B |
+| sáb 26/09, 18:22 (Giam) | buurp | agente B |
 | sáb 10/10, 21:41 (Giam) | calma, o que foi isso | agente C |
-| sáb 10/10, 21:41 (Giam) | `[arroto grave]` | agente D |
+| sáb 10/10, 21:41 (Giam) | buuuurrrp | agente D |
 | dom 11/10, 10:50 (Giam) | o estoquista não aguentou | agente E |
 | qui 15/10, 20:05 (Lima) | treina com refri, ajuda muito | agente A |
 

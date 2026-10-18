@@ -74,6 +74,14 @@ export function montarPaginaDoGrupo(grupo: GrupoParaPagina, origem: string): str
   const imagem = grupo.imagemUrl ?? `${origem}/og-image.png`;
   const t = escaparHtml(titulo);
   const r = escaparHtml(resumo);
+  const jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: titulo,
+    description: resumo,
+    url,
+    inLanguage: 'pt-BR',
+  }).replace(/</g, '\\u003c');
 
   return `<!doctype html>
 <html lang="pt-BR">
@@ -98,6 +106,10 @@ export function montarPaginaDoGrupo(grupo: GrupoParaPagina, origem: string): str
     <meta name="twitter:title" content="${t}" />
     <meta name="twitter:description" content="${r}" />
     <meta name="twitter:image" content="${escaparHtml(imagem)}" />
+
+    <script type="application/ld+json">
+      ${jsonLd}
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

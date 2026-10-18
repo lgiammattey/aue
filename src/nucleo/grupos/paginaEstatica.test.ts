@@ -32,6 +32,12 @@ describe('montarPaginaDoGrupo', () => {
     expect(html).not.toMatch(/noindex/i);
   });
 
+  it('declara dados estruturados WebPage em JSON-LD', () => {
+    expect(html).toContain('"@type":"WebPage"');
+    expect(html).toContain('"url":"https://aue.web.app/g/gym-arrotos/"');
+    expect(html).toContain('"inLanguage":"pt-BR"');
+  });
+
   it('o link do convite sai com nofollow e sem passar o referrer', () => {
     expect(html).toMatch(/<a class="botao" href="https:\/\/chat\.whatsapp\.com\/KrRzws9Xhlo4RmOq8TmVue" target="_blank" rel="nofollow ugc noopener noreferrer">Entrar no grupo<\/a>/);
   });

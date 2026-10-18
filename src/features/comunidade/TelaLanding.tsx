@@ -361,6 +361,9 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({
         <Link to="/bondes" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
           Comunidades
         </Link>
+        <Link to="/grupos" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Grupos
+        </Link>
         <Link to="/termos" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
           Termos
         </Link>

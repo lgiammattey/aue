@@ -489,4 +489,10 @@ describe('SEO público — o Auê se declara um jogo de arroto', () => {
     // Valida JSON-LD FAQPage
     expect(html).toContain('"@type": "FAQPage"');
   });
+
+  it('o diretório de grupos declara CollectionPage em JSON-LD', () => {
+    const html = ler('../grupos.html');
+    expect(html).toContain('"@type": "CollectionPage"');
+    expect(html).toContain('"url": "https://aue.web.app/grupos"');
+  });
 });

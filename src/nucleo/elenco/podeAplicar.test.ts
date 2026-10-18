@@ -65,7 +65,7 @@ describe('podeAplicar', () => {
     expect(v.pode).toBe(false);
     const texto = v.bloqueios.join('\n');
     expect(texto).toContain('PENDENTE_REVISAO');
-    expect(texto).toContain('áudio sem escolha em 6 post(s)');
+    expect(texto).not.toContain('áudio sem escolha');
     expect(texto).toContain('aval do autor: c02, c04');
     expect(texto).toContain('autorizacao-dos-audios.md não existe');
   });

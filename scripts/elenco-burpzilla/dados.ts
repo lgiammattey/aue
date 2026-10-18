@@ -12,7 +12,6 @@
  * - `pendenteAvalAutor` marca comentário em que o cronograma pedia um arroto e
  *   o comentário da casa é só texto. A onomatopeia é provisória.
  */
-import { AUDIO_PENDENTE } from '../../src/nucleo/elenco/tipos.ts';
 import type { ComentarioDeRoteiro, PostDeRoteiro, Roteiro } from '../../src/nucleo/elenco/tipos.ts';
 
 export const POOL_DE_AGENTES = ['tiago', 'iury', 'rian', 'kayky', 'camillo', 'rodrigo', 'marcelo'] as const;
@@ -27,7 +26,7 @@ const POSTS: readonly PostDeRoteiro[] = [
     autor: 'lima',
     quando: '2026-09-01T23:12',
     texto: 'quase meia noite e alguém aqui do lado acabou de soltar um arroto que dava pra ouvir da rua',
-    audio: AUDIO_PENDENTE,
+    audio: { arquivo: '1118_file_1118_0.ogg' },
     descricaoDoAudio: 'grave, longo, abafado, de longe',
   },
   {
@@ -85,7 +84,7 @@ const POSTS: readonly PostDeRoteiro[] = [
     autor: 'giam',
     quando: '2026-09-26T18:22',
     texto: 'passamos num boteco e eu soltei um. saiu fraco, sem refri não rola',
-    audio: AUDIO_PENDENTE,
+    audio: { arquivo: '510_file_510_0.ogg' },
     descricaoDoAudio: 'médio, sem graça',
   },
   {
@@ -100,7 +99,7 @@ const POSTS: readonly PostDeRoteiro[] = [
     autor: 'giam',
     quando: '2026-09-26T18:40',
     texto: 'esse aqui foi natural',
-    audio: AUDIO_PENDENTE,
+    audio: { arquivo: '1319_file_1319_0.ogg' },
     descricaoDoAudio: 'natural, solto',
   },
   {
@@ -140,7 +139,7 @@ const POSTS: readonly PostDeRoteiro[] = [
     autor: 'lima',
     quando: '2026-10-10T21:30',
     texto: 'o Lucas soltou um e já ficou se achando. o Giam só bebendo a dele',
-    audio: AUDIO_PENDENTE,
+    audio: { arquivo: '3020_file_3020_0.ogg' },
     descricaoDoAudio: 'o do Lucas: médio/alto, convencido',
   },
   {
@@ -148,7 +147,7 @@ const POSTS: readonly PostDeRoteiro[] = [
     autor: 'giam',
     quando: '2026-10-10T21:41',
     texto: 'calma gente, eu só queria beber',
-    audio: AUDIO_PENDENTE,
+    audio: { arquivo: '4246_file_4246_0.ogg' },
     descricaoDoAudio: 'o maior: longo e grave. Ponto alto do arco',
   },
   {
@@ -170,7 +169,7 @@ const POSTS: readonly PostDeRoteiro[] = [
     autor: 'giam',
     quando: '2026-10-11T10:50',
     texto: 'soltei um no mercado. o cara do estoque fez uma cara e saiu do corredor',
-    audio: AUDIO_PENDENTE,
+    audio: { arquivo: '5026_file_5026_0.ogg' },
     descricaoDoAudio: '"arroto social", grave mas contido',
   },
   {

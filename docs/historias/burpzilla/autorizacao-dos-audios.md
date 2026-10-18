@@ -14,6 +14,10 @@ Referências: [`audios/solo-eructos/LEIAME.md`](../../../audios/solo-eructos/LEI
 e o item "Autorização dos áudios" do
 [cartão de missão](cartao-de-missao-seed.md).
 
+## Declaração do Luiz (18/10/2026)
+
+O Luiz declarou que a autorização foi dada no grupo do Telegram e que os arrotos são dele e podem ser postados. A declaração está registrada aqui, mas **não preenche os campos abaixo**: a prova (mensagem ou captura) continua sem estar no repositório, e a conferência é do Tiago. Os 6 áudios do primeiro lote foram sorteados em 18/10/2026 e estão em `scripts/elenco-burpzilla/dados.ts`.
+
 ## O registro
 
 | Campo | Valor |

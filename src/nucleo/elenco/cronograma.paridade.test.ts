@@ -8,7 +8,6 @@ import { SEMENTE_DO_SORTEIO, textoDoSorteio } from '../../../scripts/elenco-burp
 import { obterComunidadePorSlug } from '../comunidade/comunidadesPadrao';
 import { diaDaSemana } from './horario';
 import { sortear } from './sorteio';
-import { AUDIO_PENDENTE } from './tipos';
 
 /**
  * Paridade entre o cronograma (o que o autor aprovou) e o dado que o script
@@ -70,10 +69,10 @@ describe('o roteiro bate com o cronograma', () => {
     for (const l of linhasDePosts) expect(DIAS[diaDaSemana(l.quando)], l.quando).toBe(l.dia);
   });
 
-  it('[áudio] vira AUDIO_PENDENTE e traço vira null', () => {
+  it('[áudio] vira arquivo escolhido (ou pendente) e traço vira null', () => {
     linhasDePosts.forEach((l, i) => {
       const p = ROTEIRO.posts[i];
-      if (l.audio.includes('[áudio]')) expect(p.audio, p.chave).toBe(AUDIO_PENDENTE);
+      if (l.audio.includes('[áudio]')) expect(p.audio, p.chave).not.toBeNull();
       else expect(p.audio, p.chave).toBeNull();
     });
   });
@@ -81,7 +80,7 @@ describe('o roteiro bate com o cronograma', () => {
   it('a descrição do áudio é a do cronograma', () => {
     linhasDePosts.forEach((l, i) => {
       const p = ROTEIRO.posts[i];
-      if (p.audio === AUDIO_PENDENTE) {
+      if (p.audio !== null) {
         const esperado = l.audio.replace('`[áudio]`', '').trim();
         expect(esperado, p.chave).toContain(p.descricaoDoAudio ?? '(sem descrição)');
       }

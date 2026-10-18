@@ -3,6 +3,36 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { TelaComunidade } from './TelaComunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
+import type { CausoPostado } from '../../portas/comunidade';
+
+const CAUSOS_MOCK_TESTE: readonly CausoPostado[] = [
+  {
+    id: 'causo-teste-tiago',
+    comunidadeId: 'comu-cerveja-gelada',
+    comunidadeSlug: 'cerveja-gelada',
+    autorNome: 'Tiago do Bonde',
+    autorHandle: 'tiagobonde',
+    conteudo: 'Almoço de domingo na sogra com reunião e tubaína.',
+    nota: 94,
+    duracaoSegundos: 4.8,
+    origem: 'refrigerante',
+    reacoes: { fogo: 284, nojo: 12, trofeu: 198 },
+    curtidas: 284,
+    reposts: 76,
+    totalComentarios: 1,
+    comentarios: [
+      {
+        id: 'resp-t-1',
+        causoId: 'causo-teste-tiago',
+        autorNome: 'Iury da Oficina',
+        autorHandle: 'iury_oficina',
+        conteudo: 'Isso não é arroto de visita, Tiago.',
+        criadoEm: '2026-10-17T18:10:00.000Z',
+      },
+    ],
+    criadoEm: '2026-10-17T18:00:00.000Z',
+  },
+];
 
 describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafios)', () => {
   afterEach(() => {
@@ -10,8 +40,15 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     localStorage.clear();
   });
 
-  it('renderiza AUÊ!, navegação canônica (Feed, Comunidade, Desafios), composer rápido e causos no feed', async () => {
+  it('exibe estado de lista vazia quando não há posts na semente', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
+    render(<TelaComunidade porta={adapter} />);
+    expect(await screen.findByText('Nada por aqui ainda')).toBeDefined();
+    expect(screen.getByText(/Nenhum arroto encontrado nesta lista/)).toBeDefined();
+  });
+
+  it('renderiza AUÊ!, navegação canônica (Feed, Comunidade, Desafios), composer rápido e causos no feed', async () => {
+    const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
     // Brand AUÊ! / A!
@@ -34,7 +71,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
   });
 
   it('permite curtir um causo no feed com coração', async () => {
-    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
     const botoesCurtir = await screen.findAllByRole('button', { name: 'Curtir' });
@@ -89,7 +126,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
   });
 
   it('abre o modal canônico de compartilhamento (proporção 9:12, COMPARTILHAR) e exibe as 4 opções', async () => {
-    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
     const botoesShare = await screen.findAllByRole('button', { name: 'Compartilhar' });
@@ -106,7 +143,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
   });
 
   it('expande thread de respostas e permite responder', async () => {
-    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
     const botoesResponder = await screen.findAllByRole('button', { name: 'Responder' });
@@ -191,7 +228,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
   });
 
   it('filtra causos no feed pela busca da coluna lateral e exibe o card da comunidade no Telegram', async () => {
-    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
     // Localiza o campo de busca

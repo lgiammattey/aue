@@ -13,16 +13,19 @@ import type {
   TipoDeReacao,
 } from '../../portas/comunidade';
 
-const CHAVE_CAUSOS = 'aue.causos.v2';
+const CHAVE_CAUSOS = 'aue.causos.v3';
 const CHAVE_MINHAS_COMUNIDADES = 'aue.minhas_comunidades.v2';
 
 function lerCausosLocais(): CausoPostado[] {
   try {
     if (typeof localStorage === 'undefined') return [];
+    // Purga a chave legada v2 que continha os posts autorais cacheados
+    localStorage.removeItem('aue.causos.v2');
     const bruto = localStorage.getItem(CHAVE_CAUSOS);
     if (!bruto) return [];
     const parsed = JSON.parse(bruto);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((c: any) => !c.id?.startsWith('causo-seed-'));
   } catch {
     return [];
   }

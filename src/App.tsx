@@ -12,6 +12,7 @@ const TelaLogin = lazy(() => import('./features/comunidade/TelaLogin').then((m) 
 const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
 const TelaPerfil = lazy(() => import('./features/perfil/TelaPerfil').then((m) => ({ default: m.TelaPerfil })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
+const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
@@ -198,6 +199,7 @@ export function App() {
           <Route path="/termos" element={<TermosDeUso />} />
           <Route path="/como-jogar" element={<ComoJogar />} />
           <Route path="/como-arrotar" element={<ComoArrotar />} />
+          <Route path="/grupos" element={<TelaGrupos />} />
 
           {/* Fallback */}
           <Route path="*" element={<EntradaPrincipal />} />

@@ -42,7 +42,8 @@ async function rpc<T>(c: Conexao, nome: string, args: Record<string, unknown>): 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(args),
   });
-  return (await r.json()) as T;
+  const texto = await r.text();
+  return (texto ? JSON.parse(texto) : undefined) as T;
 }
 
 export function criarPortaDoServidor(c: Conexao): PortaDoServidor & PortaDoDesfazer {

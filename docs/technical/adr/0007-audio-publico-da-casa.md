@@ -1,6 +1,6 @@
 # ADR 0007 — Áudio público da casa
 
-**Status:** proposto
+**Status:** ACEITO LUIZ , 18/10/2026
 **Data:** 2026-10-18
 **Decide:** Giam e Luiz (aguarda decisão formal; é o item 9 do §8 do [ADR 0001](0001-arquitetura-oficial-do-aue.md))
 **Substitui:** nada

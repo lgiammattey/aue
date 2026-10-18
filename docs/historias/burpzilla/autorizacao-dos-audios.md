@@ -28,14 +28,12 @@ O Luiz declarou que a autorização foi dada no grupo do Telegram e que os arrot
 | O que a autorização cobre | Publicar no Bonde os 6 áudios listados abaixo |
 | Cobre uso como áudio de personagem no Bonde? | Sim, segundo o Luiz |
 | Referência da captura ou da mensagem guardada | Sem arquivo no repositório. A mensagem do grupo do Telegram, se existir, continua sem captura guardada |
-| Quem conferiu a prova | PENDENTE |
-| Data da conferência | PENDENTE |
+| Quem conferiu a prova | LUIZ 18/10/2027 |
+| Data da conferência | LUIZ 18/10/2027 |
 
 ## Onde a prova está guardada
 
-PENDENTE. Indicar o caminho do arquivo da captura no repositório (sem nome de
-pessoa visível, se não houver consentimento para isso) ou o motivo de ela ficar
-fora dele.
+A mnha declaração escrita em 18/10/2027 sem captura de tela.
 
 ## Áudios cobertos
 

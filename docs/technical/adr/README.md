@@ -21,7 +21,7 @@ nome de pasta dentro de uma camada, refactor. Isso é PR.
 | [0004](0004-arquitetura-aue-3-comunidades-e-feed.md) | Auê 3.0: Arquitetura de Comunidades, Feed de Causos e Jogo | aceito |
 | [0005](0005-conta-opcional-e-perfil-publico.md) | Conta opcional (promove a sessão anônima), perfil público e comentário em níveis | aceito |
 | [0006](0006-hospedagem-somente-firebase.md) | Hospedagem somente Firebase | aceito |
-| [0007](0007-audio-publico-da-casa.md) | Áudio público da casa — bucket público separado só com conteúdo da casa | proposto |
+| [0007](0007-audio-publico-da-casa.md) | Áudio público da casa — bucket público separado só com conteúdo da casa | aceito |
 
 ---
 

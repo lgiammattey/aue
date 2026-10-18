@@ -7,7 +7,7 @@ import type { Sorteio } from '../../src/nucleo/elenco/tipos.ts';
 
 export const SORTEIO: Sorteio = {
   "semente": 20261018,
-  "status": "PENDENTE_REVISAO",
+  "status": "APROVADO",
   "agentes": {
     "A": "rodrigo",
     "B": "kayky",

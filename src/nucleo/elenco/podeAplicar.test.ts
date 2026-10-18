@@ -64,7 +64,7 @@ describe('podeAplicar', () => {
     const v = podeAplicar({ roteiro: ROTEIRO, sorteio: SORTEIO, autorizacao: null });
     expect(v.pode).toBe(false);
     const texto = v.bloqueios.join('\n');
-    expect(texto).toContain('PENDENTE_REVISAO');
+    expect(texto).not.toContain('PENDENTE_REVISAO');
     expect(texto).not.toContain('áudio sem escolha');
     expect(texto).toContain('aval do autor: c02, c04');
     expect(texto).toContain('autorizacao-dos-audios.md não existe');
@@ -76,7 +76,7 @@ describe('podeAplicar', () => {
   });
 
   it.each([
-    ['sorteio sem revisão', { sorteio: SORTEIO }],
+    ['sorteio sem revisão', { sorteio: { ...SORTEIO, status: 'PENDENTE_REVISAO' } as const }],
     ['autorização com campo PENDENTE', { autorizacao: 'quem autorizou: PENDENTE' }],
     ['autorização ausente', { autorizacao: null }],
     ['áudio sem escolha', { roteiro: ROTEIRO }],
@@ -90,12 +90,12 @@ describe('podeAplicar', () => {
     expect(podeAplicar({ roteiro: r, sorteio: SORTEIO_APROVADO, autorizacao: AUTORIZACAO_COMPLETA }).pode).toBe(false);
   });
 
-  it('o modelo de autorização que está no repositório continua travando', async () => {
+  it('a autorização que está no repositório não tem mais campo PENDENTE', async () => {
     const { readFileSync } = await import('node:fs');
-    const modelo = readFileSync(
+    const registro = readFileSync(
       new URL('../../../docs/historias/burpzilla/autorizacao-dos-audios.md', import.meta.url),
       'utf8',
     );
-    expect(podeAplicar({ roteiro: ROTEIRO_RESOLVIDO, sorteio: SORTEIO_APROVADO, autorizacao: modelo }).pode).toBe(false);
+    expect(podeAplicar({ roteiro: ROTEIRO_RESOLVIDO, sorteio: SORTEIO_APROVADO, autorizacao: registro }).pode).toBe(true);
   });
 });

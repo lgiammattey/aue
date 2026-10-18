@@ -276,8 +276,8 @@ describe('nomenclatura: o que as migrações do elenco criam está em português
 describe('ADR 0007', () => {
   const adr = readFileSync(`${RAIZ}/docs/technical/adr/0007-audio-publico-da-casa.md`, 'utf8');
 
-  it('existe como proposto, cita o §8 item 9 e a alternativa privada', () => {
-    expect(adr).toMatch(/\*\*Status:\*\* proposto/);
+  it('foi aceito pelo Luiz, cita o §8 item 9 e a alternativa privada', () => {
+    expect(adr).toMatch(/\*\*Status:\*\* aceito/i);
     expect(adr).toContain('§8');
     expect(adr).toContain('item 9');
     expect(adr).toContain('URL assinada');
@@ -285,6 +285,6 @@ describe('ADR 0007', () => {
 
   it('a migração avisa que depende dele e o índice dos ADRs o lista', () => {
     expect(contas).toContain('ADR 0007');
-    expect(readFileSync(`${RAIZ}/docs/technical/adr/README.md`, 'utf8')).toMatch(/0007-audio-publico-da-casa\.md\).*proposto/);
+    expect(readFileSync(`${RAIZ}/docs/technical/adr/README.md`, 'utf8')).toMatch(/0007-audio-publico-da-casa\.md\).*aceito/);
   });
 });

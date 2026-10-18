@@ -37,7 +37,7 @@ muda a cada vez e nada fica em cache do navegador nem da borda.
 - O cliente monta a URL pública do objeto e toca direto. O endereço é sempre o
   mesmo, então o navegador e a borda guardam em cache.
 - O bucket é do item 9 do §8 do ADR 0001 ("tornar público o bucket de áudio").
-  Esta proposta só vale depois de aceita. A migração `20261018000007` cria o
+  Esta proposta só vale depois de aceita. A migração `20261018000008` cria o
   bucket, mas não deve ser aplicada antes disso.
 
 ## Alternativas descartadas

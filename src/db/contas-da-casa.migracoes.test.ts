@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { JANELA_DA_CASA } from '../nucleo/elenco/horario';
 
 /**
- * Trava de texto das migrações do elenco da casa (20261018000007 e 000008).
+ * Trava de texto das migrações do elenco da casa (20261018000008 e 000009).
  *
  * Não há Postgres no CI: isto lê o SQL e confere o que a revisão por leitura
  * precisa garantir. Não prova que o SQL roda. Prova que as regras combinadas
@@ -16,8 +16,8 @@ const RAIZ = fileURLToPath(new URL('../..', import.meta.url));
 const lerMigracao = (nome: string) => readFileSync(`${RAIZ}/supabase/migrations/${nome}`, 'utf8');
 const semComentarios = (sql: string) => sql.replace(/--[^\n]*/g, '');
 
-const ARQUIVO_CONTAS = '20261018000007_contas_da_casa.sql';
-const ARQUIVO_FEED = '20261018000008_feed_e_perfil_da_casa.sql';
+const ARQUIVO_CONTAS = '20261018000008_contas_da_casa.sql';
+const ARQUIVO_FEED = '20261018000009_feed_e_perfil_da_casa.sql';
 const contas = lerMigracao(ARQUIVO_CONTAS);
 const contasSemComentario = semComentarios(contas);
 const feed = lerMigracao(ARQUIVO_FEED);
@@ -186,7 +186,7 @@ describe('registrar_conta_da_casa e a trava do perfil', () => {
   });
 });
 
-describe('feed e perfil (20261018000008)', () => {
+describe('feed e perfil (20261018000009)', () => {
   const sql = semComentarios(feed);
 
   it('listar_feed_de_causos: mesma assinatura da 000004, áudio da casa ao fim, desempate por id', () => {
@@ -227,7 +227,7 @@ describe('feed e perfil (20261018000008)', () => {
 
 describe('rollback', () => {
   it('desfaz tudo o que a 000007 criou, nesta ordem de dependência', () => {
-    const down = semComentarios(readFileSync(`${RAIZ}/supabase/rollback/20261018000007_contas_da_casa.down.sql`, 'utf8'));
+    const down = semComentarios(readFileSync(`${RAIZ}/supabase/rollback/20261018000008_contas_da_casa.down.sql`, 'utf8'));
     for (const nome of ['comentar_da_casa', 'publicar_da_casa', 'registrar_conta_da_casa', 'aue_dentro_da_janela_da_casa']) {
       expect(down).toContain(`DROP FUNCTION IF EXISTS public.${nome}(`);
     }
@@ -238,7 +238,7 @@ describe('rollback', () => {
   });
 
   it('o rollback da 000008 devolve as assinaturas anteriores (sem a coluna nova)', () => {
-    const down = semComentarios(readFileSync(`${RAIZ}/supabase/rollback/20261018000008_feed_e_perfil_da_casa.down.sql`, 'utf8'));
+    const down = semComentarios(readFileSync(`${RAIZ}/supabase/rollback/20261018000009_feed_e_perfil_da_casa.down.sql`, 'utf8'));
     expect(down).not.toContain('caminho_do_audio_da_casa');
     expect(down).not.toContain('conta_da_casa');
     expect(down).toContain('ORDER BY p.created_at DESC\n');

@@ -1,5 +1,5 @@
 -- =============================================================================
--- 20261018000007 — Contas da casa: estrutura para o elenco Burpzilla
+-- 20261018000008 — Contas da casa: estrutura para o elenco Burpzilla
 --
 -- Decisão do Luiz em 18/10/2026 (ESCOPO_ATUAL §2.17; Cartão de Missão em
 -- docs/historias/burpzilla/cartao-de-missao-seed.md): o Bonde recebe posts dos
@@ -67,7 +67,7 @@ COMMENT ON TABLE public.contas_da_casa IS
 -- 2. posts_comunidade: áudio da casa
 --
 -- Caminho dentro do bucket `audio_da_casa`. Só o feed o devolve, e só quando o
--- autor está em contas_da_casa (ver 20261018000008). Um usuário comum que
+-- autor está em contas_da_casa (ver 20261018000009). Um usuário comum que
 -- gravasse esta coluna não teria o áudio exibido.
 -- -----------------------------------------------------------------------------
 

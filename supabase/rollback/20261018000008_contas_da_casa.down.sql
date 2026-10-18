@@ -1,7 +1,7 @@
 -- =============================================================================
--- Rollback da 20261018000007 (contas da casa)
+-- Rollback da 20261018000008 (contas da casa)
 --
--- ORDEM: desfazer a 20261018000008 antes (ela lê contas_da_casa e a coluna
+-- ORDEM: desfazer a 20261018000009 antes (ela lê contas_da_casa e a coluna
 -- caminho_do_audio_da_casa).
 --
 -- PERDE DADO: apaga a tabela contas_da_casa e a coluna do áudio da casa. Os

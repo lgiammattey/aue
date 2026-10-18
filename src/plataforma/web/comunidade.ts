@@ -107,7 +107,7 @@ function comunidadePorNome(nome: string): Comunidade {
   return COMUNIDADES_PADRAO.find((c) => c.nome === nome) ?? COMUNIDADE_FEED;
 }
 
-/** Linha devolvida por `listar_feed_de_causos` (20261018000008). */
+/** Linha devolvida por `listar_feed_de_causos` (20261018000009). */
 export interface LinhaDoFeed {
   id: string;
   user_id: string | null;

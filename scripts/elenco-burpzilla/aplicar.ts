@@ -20,7 +20,7 @@
  * áudios escolhidos e preparados, comentários com aval do autor e o registro
  * da autorização preenchido. Enquanto faltar qualquer um, ele se recusa a rodar.
  *
- * As migrações 20261018000007 e 000008 precisam estar aplicadas antes, e o ADR
+ * As migrações 20261018000008 e 000009 precisam estar aplicadas antes, e o ADR
  * 0007 aceito. Este script não aplica migração.
  */
 import { existsSync, readFileSync } from 'node:fs';

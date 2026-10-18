@@ -1,9 +1,9 @@
 -- =============================================================================
--- Rollback da 20261018000008 (feed e perfil enxergam a conta da casa)
+-- Rollback da 20261018000009 (feed e perfil enxergam a conta da casa)
 --
 -- Devolve listar_feed_de_causos ao corpo da 20261018000004 e
 -- obter_perfil_publico ao corpo da 20261018000005. Não perde dado.
--- Se a 20261018000007 também será desfeita, rode este arquivo ANTES.
+-- Se a 20261018000008 também será desfeita, rode este arquivo ANTES.
 -- =============================================================================
 
 DROP FUNCTION IF EXISTS public.listar_feed_de_causos(text, integer, uuid, uuid, uuid);

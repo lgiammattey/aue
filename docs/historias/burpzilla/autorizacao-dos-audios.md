@@ -22,12 +22,12 @@ O Luiz declarou que a autorização foi dada no grupo do Telegram e que os arrot
 
 | Campo | Valor |
 |---|---|
-| Quem autorizou | PENDENTE |
-| Data da autorização | PENDENTE |
-| Onde foi dada (grupo, mensagem) | PENDENTE |
-| O que a autorização cobre | PENDENTE |
-| Cobre uso como áudio de personagem no Bonde? | PENDENTE |
-| Referência da captura ou da mensagem guardada | PENDENTE |
+| Quem autorizou | Luiz (declaração própria: diz que os arrotos são dele e que podem ser postados) |
+| Data da autorização | 18/10/2026 |
+| Onde foi dada (grupo, mensagem) | Por escrito, em conversa com o Claude Code no repositório. Antes, o Luiz disse que a autorização também foi dada no grupo do Telegram |
+| O que a autorização cobre | Publicar no Bonde os 6 áudios listados abaixo |
+| Cobre uso como áudio de personagem no Bonde? | Sim, segundo o Luiz |
+| Referência da captura ou da mensagem guardada | Sem arquivo no repositório. A mensagem do grupo do Telegram, se existir, continua sem captura guardada |
 | Quem conferiu a prova | PENDENTE |
 | Data da conferência | PENDENTE |
 
@@ -39,5 +39,11 @@ fora dele.
 
 ## Áudios cobertos
 
-PENDENTE. Listar os nomes de arquivo de `audios/solo-eructos/` que entram no
-Bonde, um por post, depois que o autor escolher.
+Os 6 do primeiro lote, sorteados em 18/10/2026 (ver `scripts/elenco-burpzilla/dados.ts`):
+
+- `1118_file_1118_0.ogg` (p01)
+- `510_file_510_0.ogg` (p09)
+- `1319_file_1319_0.ogg` (p11)
+- `3020_file_3020_0.ogg` (p16)
+- `4246_file_4246_0.ogg` (p17)
+- `5026_file_5026_0.ogg` (p20)

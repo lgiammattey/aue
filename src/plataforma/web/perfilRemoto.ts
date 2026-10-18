@@ -10,7 +10,7 @@ import type {
   ResultadoDaFoto,
 } from '../../portas/perfil';
 
-/** Linha de `obter_perfil_publico` (20261018000008). */
+/** Linha de `obter_perfil_publico` (20261018000009). */
 export interface LinhaDePerfil {
   id: string;
   handle: string;

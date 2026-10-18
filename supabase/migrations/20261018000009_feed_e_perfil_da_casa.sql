@@ -1,5 +1,5 @@
 -- =============================================================================
--- 20261018000008 — Feed e perfil público enxergam a conta da casa
+-- 20261018000009 — Feed e perfil público enxergam a conta da casa
 --
 -- 1. listar_feed_de_causos devolve, ao fim, o caminho do áudio da casa (o
 --    cliente monta a URL pública do bucket `audio_da_casa`, que é cacheável) e
@@ -12,7 +12,7 @@
 -- dito acima.
 --
 -- NÃO VALIDADO: sem Postgres neste ambiente. Revisão por leitura apenas.
--- Depende da 20261018000007.
+-- Depende da 20261018000008.
 -- =============================================================================
 
 

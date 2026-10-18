@@ -39,7 +39,8 @@ import { SORTEIO } from './sorteio.gerado.ts';
 
 const RAIZ = fileURLToPath(new URL('../..', import.meta.url));
 export const PASTA_DOS_AUDIOS_PREPARADOS = `${RAIZ}/.cache/elenco-burpzilla`;
-const ARQUIVO_DA_AUTORIZACAO = `${RAIZ}/docs/historias/burpzilla/autorizacao-dos-audios.md`;
+const ARQUIVO_DA_AUTORIZACAO =
+  process.env.AUE_ARQUIVO_AUTORIZACAO ?? `${RAIZ}/docs/historias/burpzilla/autorizacao-dos-audios.md`;
 
 export function caminhoDoAudioPreparado(post: PostMontado): string {
   return `${PASTA_DOS_AUDIOS_PREPARADOS}/${post.id}.m4a`;

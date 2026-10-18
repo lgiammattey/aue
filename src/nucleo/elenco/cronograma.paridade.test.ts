@@ -98,16 +98,11 @@ describe('o roteiro bate com o cronograma', () => {
     });
   });
 
-  it('comentário em texto é igual ao cronograma; arroto vira onomatopeia marcada', () => {
+  it('comentário em texto é igual ao cronograma, com o aval do autor', () => {
     linhasDeComentarios.forEach((l, i) => {
       const c = ROTEIRO.comentarios[i];
-      if (l.texto.startsWith('`[arroto')) {
-        expect(c.pendenteAvalAutor, c.chave).toBe(true);
-        expect(c.texto, c.chave).toMatch(/^b[u]+r+p$/);
-      } else {
-        expect(c.pendenteAvalAutor ?? false, c.chave).toBe(false);
-        expect(c.texto, c.chave).toBe(l.texto);
-      }
+      expect(c.pendenteAvalAutor ?? false, c.chave).toBe(false);
+      expect(c.texto, c.chave).toBe(l.texto);
     });
   });
 

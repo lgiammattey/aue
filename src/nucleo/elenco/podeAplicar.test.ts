@@ -7,12 +7,6 @@ import type { Roteiro } from './tipos';
 
 const AUTORIZACAO_COMPLETA = '# Autorização\n\nquem: fulano\ndata: 18/10/2026\n';
 
-/** O roteiro como ficaria no dia em que tudo estivesse resolvido. */
-const ROTEIRO_RESOLVIDO: Roteiro = {
-  ...ROTEIRO,
-  posts: ROTEIRO.posts.map((p, i) => (p.audio === 'AUDIO_PENDENTE' ? { ...p, audio: { arquivo: `${i}_file.ogg` } } : p)),
-  comentarios: ROTEIRO.comentarios.map((c) => ({ ...c, pendenteAvalAutor: false })),
-};
 const SORTEIO_APROVADO = { ...SORTEIO, status: 'APROVADO' } as const;
 
 describe('validação do elenco', () => {
@@ -60,18 +54,18 @@ describe('validação do elenco', () => {
 });
 
 describe('podeAplicar', () => {
-  it('hoje está travado, e diz por quê', () => {
+  it('sem autorização trava, e acusa arquivo ausente', () => {
     const v = podeAplicar({ roteiro: ROTEIRO, sorteio: SORTEIO, autorizacao: null });
     expect(v.pode).toBe(false);
     const texto = v.bloqueios.join('\n');
     expect(texto).not.toContain('PENDENTE_REVISAO');
     expect(texto).not.toContain('áudio sem escolha');
-    expect(texto).toContain('aval do autor: c02, c04');
+    expect(texto).not.toContain('aval do autor');
     expect(texto).toContain('autorizacao-dos-audios.md não existe');
   });
 
   it('abre quando tudo está resolvido', () => {
-    const v = podeAplicar({ roteiro: ROTEIRO_RESOLVIDO, sorteio: SORTEIO_APROVADO, autorizacao: AUTORIZACAO_COMPLETA });
+    const v = podeAplicar({ roteiro: ROTEIRO, sorteio: SORTEIO_APROVADO, autorizacao: AUTORIZACAO_COMPLETA });
     expect(v).toEqual({ pode: true, bloqueios: [] });
   });
 
@@ -79,23 +73,26 @@ describe('podeAplicar', () => {
     ['sorteio sem revisão', { sorteio: { ...SORTEIO, status: 'PENDENTE_REVISAO' } as const }],
     ['autorização com campo PENDENTE', { autorizacao: 'quem autorizou: PENDENTE' }],
     ['autorização ausente', { autorizacao: null }],
-    ['áudio sem escolha', { roteiro: ROTEIRO }],
+    ['áudio sem escolha', { roteiro: { ...ROTEIRO, posts: [{ ...ROTEIRO.posts[0], audio: 'AUDIO_PENDENTE' as any }] } }],
   ])('uma coisa só basta para travar: %s', (_nome, troca) => {
-    const base = { roteiro: ROTEIRO_RESOLVIDO, sorteio: SORTEIO_APROVADO, autorizacao: AUTORIZACAO_COMPLETA };
+    const base = { roteiro: ROTEIRO, sorteio: SORTEIO_APROVADO, autorizacao: AUTORIZACAO_COMPLETA };
     expect(podeAplicar({ ...base, ...troca }).pode).toBe(false);
   });
 
   it('comentário esperando aval do autor trava', () => {
-    const r: Roteiro = { ...ROTEIRO_RESOLVIDO, comentarios: ROTEIRO.comentarios };
+    const r: Roteiro = { ...ROTEIRO, comentarios: [{ ...ROTEIRO.comentarios[0], pendenteAvalAutor: true }] };
     expect(podeAplicar({ roteiro: r, sorteio: SORTEIO_APROVADO, autorizacao: AUTORIZACAO_COMPLETA }).pode).toBe(false);
   });
 
-  it('a autorização que está no repositório não tem mais campo PENDENTE', async () => {
+  it('os dados e a autorização que estão no repositório agora liberam o portão', async () => {
     const { readFileSync } = await import('node:fs');
     const registro = readFileSync(
       new URL('../../../docs/historias/burpzilla/autorizacao-dos-audios.md', import.meta.url),
       'utf8',
     );
-    expect(podeAplicar({ roteiro: ROTEIRO_RESOLVIDO, sorteio: SORTEIO_APROVADO, autorizacao: registro }).pode).toBe(true);
+    expect(podeAplicar({ roteiro: ROTEIRO, sorteio: SORTEIO, autorizacao: registro })).toEqual({
+      pode: true,
+      bloqueios: [],
+    });
   });
 });

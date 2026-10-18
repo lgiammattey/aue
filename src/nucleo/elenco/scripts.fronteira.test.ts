@@ -127,11 +127,11 @@ describe('o comando de verdade (offline, sem credencial)', () => {
     });
   }
 
-  it('sem flag é dry-run: mostra o plano, o bloqueio e sai com 0 sem credencial nenhuma', () => {
+  it('sem flag é dry-run: mostra o plano, o status liberado e sai com 0 sem credencial nenhuma', () => {
     const r = rodar([]);
     expect(r.status).toBe(0);
     expect(r.stdout).toContain('DRY-RUN');
-    expect(r.stdout).toContain('podeAplicar: BLOQUEADO');
+    expect(r.stdout).toContain('podeAplicar: LIBERADO');
     expect(r.stdout).toContain('posts: 22');
   });
 
@@ -155,6 +155,7 @@ describe('o comando de verdade (offline, sem credencial)', () => {
       AUE_SUPABASE_URL: 'https://abcdefghijklmnop.supabase.co',
       AUE_SERVICE_ROLE_KEY: 'chave-que-nao-deve-aparecer',
       AUE_CONFIRMA_PROJETO: 'abcdefghijklmnop',
+      AUE_ARQUIVO_AUTORIZACAO: `${RAIZ}/arquivo-que-nao-existe.md`,
     });
     expect(r.status).toBe(1);
     expect(r.stderr).toContain('BLOQUEADO');

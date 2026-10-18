@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, useParams, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 
 const ChallengeView = lazy(() => import('./features/audio/ChallengeView').then((m) => ({ default: m.ChallengeView })));
 const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePrivacidade').then((m) => ({ default: m.PoliticaDePrivacidade })));
@@ -200,6 +200,8 @@ export function App() {
           <Route path="/como-jogar" element={<ComoJogar />} />
           <Route path="/como-arrotar" element={<ComoArrotar />} />
           <Route path="/grupos" element={<TelaGrupos />} />
+          {/* A página de /g/<slug>/ é estática (ADR 0004). Quem cai aqui é grupo que saiu do ar. */}
+          <Route path="/g/:slug" element={<Navigate to="/grupos" replace />} />
 
           {/* Fallback */}
           <Route path="*" element={<EntradaPrincipal />} />

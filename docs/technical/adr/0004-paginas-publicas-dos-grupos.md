@@ -33,13 +33,24 @@ a descrição daquele grupo.
 
 - lê os grupos visíveis (`oculto = false`) com a chave pública do Supabase, que
   é a mesma que o navegador já usa, passando pela RLS;
-- escreve `dist/g/<slug>.html` para cada um, com `<title>`, `description`,
+- escreve `dist/g/<slug>/index.html` para cada um, com `<title>`, `description`,
   `canonical` próprio, Open Graph e o link de entrada;
-- escreve `dist/g/index.html` com a lista, e `dist/g/lista.json` com a lista
-  que serviu de base (usada na comparação do §3);
+- escreve `dist/g/lista.json` com o hash da lista que serviu de base (usado na
+  comparação do §3) e troca o marcador do `<noscript>` de `grupos.html` pela
+  lista de links, para o rastreador sem JavaScript chegar em cada página;
 - acrescenta as URLs ao `sitemap.xml`;
-- se a leitura falhar, o build **segue sem as páginas de grupos** e avisa. O
-  site não pode deixar de publicar porque o Supabase estava fora.
+- a URL termina em barra (`/g/<slug>/`), porque o Firebase serve a pasta pelo
+  `index.html` sem `cleanUrls`, que o repositório proíbe. Canonical, `og:url` e
+  sitemap usam a barra;
+- se a leitura falhar num push ou numa execução manual, o build **segue sem as
+  páginas de grupos** e avisa. O app não pode deixar de publicar porque o
+  Supabase estava fora. Como cada deploy troca o site inteiro, as páginas somem
+  até a próxima rodada, que as recria em até uma hora;
+- se a leitura falhar no **agendamento**, o build falha (`EXIGIR_GRUPOS=1`).
+  Ali o único motivo de publicar é a lista, e publicar sem as páginas apagaria
+  do Google o que já estava lá;
+- sem credencial do Supabase no build (CI de validação, máquina sem `.env`), o
+  passo é pulado sem erro.
 
 ## 2. O que a página pode fazer, e o que não pode
 
@@ -72,9 +83,14 @@ têm cota. Mesmo assim o desenho não depende disso.
   O `schedule` do GitHub não é pontual e pode atrasar. Ninguém deve contar com a
   hora exata.
 - **Verificação barata antes do deploy.** O primeiro job só consulta os grupos
-  visíveis, calcula um hash e compara com o `lista.json` que já está no site.
-  Se for igual, termina em segundos e não publica nada. O build completo, de uns
-  50 segundos, só roda quando a lista mudou.
+  visíveis, calcula um hash e compara com o `lista.json` que já está no site
+  (`scripts/verificar-lista-de-grupos.ts`). Se for igual, termina em segundos e
+  não publica nada. Antes da primeira publicação o arquivo não existe, e o
+  Firebase responde com o `index.html` da SPA: isso conta como "nada
+  publicado". Se o banco não puder ser lido, não publica; se o site no ar não
+  puder ser lido, publica. O build completo, de uns
+  50 segundos, só roda quando a lista mudou. Push na `main` e execução manual
+  sempre publicam.
 - **60 dias sem atividade.** Em repositório público o GitHub desliga workflows
   agendados depois de 60 dias sem atividade no repositório. O aviso do GitHub
   chega por e-mail. Se isso acontecer, as páginas dos grupos param de atualizar

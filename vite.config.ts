@@ -53,6 +53,7 @@ export default defineConfig(({ mode }) => ({
         comoJogar: entrada('como-jogar.html'),
         comoArrotar: entrada('como-arrotar.html'),
         comunidade: entrada('comunidade.html'),
+        grupos: entrada('grupos.html'),
       },
     },
   },

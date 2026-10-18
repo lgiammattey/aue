@@ -204,16 +204,12 @@
       }
     </script>
 
-    <!--
-      Google AdSense: o script NÃO é carregado aqui.
-
-      Antes, esta tag disparava uma requisição ao Google em toda visita com
-      `client=ca-pub-XXXXXXXXXXXXXXXX` — um id que nunca foi válido. Custo de
-      privacidade em toda sessão, receita zero.
-
-      Agora o carregamento é feito sob demanda pelo componente `AdBanner`, e
-      só quando `VITE_ADSENSE_CLIENT` está configurado. Ver src/shared/components/AdBanner.tsx.
-    -->
+    <!-- Google AdSense -->
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5542349230926522"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
     <div id="root"></div>

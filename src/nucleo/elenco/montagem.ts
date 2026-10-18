@@ -1,4 +1,3 @@
-import { obterComunidadePorSlug } from '../comunidade/comunidadesPadrao.ts';
 import { caminhoDoAudioDaCasa } from './formatoAudio.ts';
 import { brasiliaParaUtc, JANELA_DA_CASA, somarMinutos } from './horario.ts';
 import type {
@@ -35,9 +34,6 @@ export function idDaConta(handle: string): string {
  * aqui lança erro em vez de seguir.
  */
 export function montarElenco(roteiro: Roteiro, sorteio: Sorteio): ElencoMontado {
-  const comunidade = obterComunidadePorSlug(roteiro.comunidadeSlug);
-  if (!comunidade) throw new Error(`Comunidade "${roteiro.comunidadeSlug}" não existe.`);
-
   const posts = roteiro.posts.map((p) => {
     const id = uuidV5(`post:${p.chave}`, ESPACO_DE_NOMES_DA_CASA);
     return {
@@ -45,7 +41,7 @@ export function montarElenco(roteiro: Roteiro, sorteio: Sorteio): ElencoMontado 
       id,
       autorHandle: p.autor,
       autorId: idDaConta(p.autor),
-      topico: comunidade.nome,
+      topico: roteiro.comunidadeNome,
       texto: p.texto,
       criadoEm: brasiliaParaUtc(p.quando),
       audio: p.audio,

@@ -1,4 +1,3 @@
-import { obterComunidadePorSlug } from '../comunidade/comunidadesPadrao.ts';
 import { brasiliaParaUtc, dentroDaJanela } from './horario.ts';
 import { montarElenco } from './montagem.ts';
 import { AUDIO_PENDENTE } from './tipos.ts';
@@ -21,8 +20,8 @@ const NOME_PROIBIDO = 'lucas';
 export function validarElenco(roteiro: Roteiro, sorteio: Sorteio): string[] {
   const erros: string[] = [];
 
-  if (!obterComunidadePorSlug(roteiro.comunidadeSlug)) {
-    erros.push(`A comunidade "${roteiro.comunidadeSlug}" não existe em COMUNIDADES_PADRAO.`);
+  if (!roteiro.comunidadeSlug.trim() || !roteiro.comunidadeNome.trim()) {
+    erros.push('A comunidade do roteiro precisa de slug e nome.');
   }
 
   const semRepeticao = (rotulo: string, chaves: readonly string[]) => {

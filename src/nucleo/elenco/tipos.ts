@@ -54,6 +54,8 @@ export interface ContaFixa {
 
 export interface Roteiro {
   readonly comunidadeSlug: string;
+  /** Nome da comunidade como o feed o agrupa (`posts_comunidade.topic`). */
+  readonly comunidadeNome: string;
   readonly contasFixas: readonly ContaFixa[];
   readonly poolDeAgentes: readonly string[];
   readonly bioDosAgentes: string;

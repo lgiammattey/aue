@@ -6,6 +6,7 @@ import type { Roteiro } from './tipos';
 
 const ROTEIRO_DE_TESTE: Roteiro = {
   comunidadeSlug: 'eu-arroto-e-dai',
+  comunidadeNome: 'Eu arroto, e daí?',
   contasFixas: [{ handle: 'giam', apelido: 'Giam', bio: 'x' }],
   poolDeAgentes: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7'],
   bioDosAgentes: 'y',

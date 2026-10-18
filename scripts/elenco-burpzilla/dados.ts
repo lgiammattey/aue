@@ -203,7 +203,9 @@ const COMENTARIOS: readonly ComentarioDeRoteiro[] = [
 ];
 
 export const ROTEIRO: Roteiro = {
+  // Conferido contra COMUNIDADES_PADRAO em elenco.paridade.test.ts.
   comunidadeSlug: 'eu-arroto-e-dai',
+  comunidadeNome: 'Eu arroto, e daí?',
   contasFixas: [
     { handle: 'giam', apelido: 'Giam', bio: BIO_DOS_PERSONAGENS },
     { handle: 'lima', apelido: 'Lima', bio: BIO_DOS_PERSONAGENS },

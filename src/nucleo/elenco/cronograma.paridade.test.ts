@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { POOL_DE_AGENTES, ROTEIRO } from '../../../scripts/elenco-burpzilla/dados';
 import { SORTEIO } from '../../../scripts/elenco-burpzilla/sorteio.gerado';
 import { SEMENTE_DO_SORTEIO, textoDoSorteio } from '../../../scripts/elenco-burpzilla/sortear';
+import { obterComunidadePorSlug } from '../comunidade/comunidadesPadrao';
 import { diaDaSemana } from './horario';
 import { sortear } from './sorteio';
 import { AUDIO_PENDENTE } from './tipos';
@@ -115,6 +116,14 @@ describe('o roteiro bate com o cronograma', () => {
     expect(cronograma.match(/^\| \S+ \d{2}\/\d{2}, \d{2}:\d{2} /gm)).toHaveLength(
       linhasDePosts.length + linhasDeComentarios.length,
     );
+  });
+});
+
+describe('a comunidade do roteiro', () => {
+  it('é a "Eu arroto, e daí?" de COMUNIDADES_PADRAO, com o mesmo nome do feed', () => {
+    const comunidade = obterComunidadePorSlug(ROTEIRO.comunidadeSlug);
+    expect(comunidade?.slug).toBe('eu-arroto-e-dai');
+    expect(ROTEIRO.comunidadeNome).toBe(comunidade?.nome);
   });
 });
 

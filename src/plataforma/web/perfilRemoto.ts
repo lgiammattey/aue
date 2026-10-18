@@ -70,13 +70,13 @@ export function criarPerfilRemoto(): PortaDePerfil {
 
   return {
     async obterPerfil(handle: string): Promise<PerfilPublico | null> {
-      if (configuracaoAusente) return null;
+      if (configuracaoAusente) throw new Error('Sem servidor configurado.');
       try {
         await garantirSessao();
         return await porHandle(handle);
       } catch (erro) {
         console.error('Falha ao ler o perfil', erro);
-        return null;
+        throw erro;
       }
     },
 

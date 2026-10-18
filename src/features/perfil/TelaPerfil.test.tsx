@@ -11,6 +11,7 @@ const base: PerfilPublico = {
   handle: 'betao',
   apelido: 'Betão',
   fundador: false,
+  daCasa: false,
   criadoEm: '2026-08-01T00:00:00Z',
   totalCausos: 2,
   melhorNota: 91,

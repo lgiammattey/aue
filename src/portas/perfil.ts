@@ -17,9 +17,9 @@ export interface PerfilPublico {
   /**
    * Conta que o Auê opera (personagem ou agente). A tela de perfil mostra o
    * símbolo Burpzilla; o feed não mostra selo. Não indica posição, nota nem
-   * ranking. Opcional enquanto a tela não consome o campo.
+   * ranking.
    */
-  readonly daCasa?: boolean;
+  readonly daCasa: boolean;
   readonly criadoEm: string;
   /** @ nas redes, sem o arroba e sem link. */
   readonly instagram?: string;
@@ -71,7 +71,12 @@ export type ResultadoDaEdicao =
   | { readonly ok: false; readonly motivo: 'semRede' };
 
 export interface PortaDePerfil {
-  /** Perfil pelo handle, ou `null` se não existe (ou se não há servidor). */
+  /**
+   * Perfil pelo handle. `null` quer dizer que o servidor respondeu e o perfil
+   * não existe. Falha de rede, de sessão ou do servidor LANÇA: quem chama
+   * mostra "não deu para abrir", nunca "não existe". Sem servidor configurado
+   * também lança.
+   */
   obterPerfil(handle: string): Promise<PerfilPublico | null>;
   /** O perfil de quem está jogando agora. */
   obterMeuPerfil(): Promise<PerfilPublico | null>;

@@ -2,13 +2,13 @@ import React from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
 interface BarraLateralNavegacaoProps {
-  abaAtiva: 'feed' | 'arena' | 'comm' | 'desafios' | 'perfil';
-  aoMudarAba: (aba: 'feed' | 'arena' | 'comm' | 'desafios' | 'perfil') => void;
+  abaAtiva: 'feed' | 'comm' | 'desafios';
+  aoMudarAba: (aba: 'feed' | 'comm' | 'desafios') => void;
   aoAbrirComposer: () => void;
   compacto?: boolean;
   tema: 'dark' | 'light';
   aoAlternarTema: () => void;
-  perfil: PerfilUsuario;
+  perfil?: PerfilUsuario;
 }
 
 export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
@@ -18,7 +18,6 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
   compacto = false,
   tema,
   aoAlternarTema,
-  perfil,
 }) => {
   const wide = !compacto;
   const largura = wide ? 275 : 76;
@@ -27,23 +26,18 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
   const abas = [
     {
       id: 'feed' as const,
-      label: 'Início',
+      label: 'Feed',
       d: 'M3 11l9-8 9 8v10h-6v-6H9v6H3z',
     },
     {
       id: 'comm' as const,
-      label: 'Comunidades',
+      label: 'Comunidade',
       d: 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2',
     },
     {
       id: 'desafios' as const,
       label: 'Desafios',
       d: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3',
-    },
-    {
-      id: 'perfil' as const,
-      label: 'Perfil',
-      d: 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0',
     },
   ];
 
@@ -62,11 +56,6 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
     cursor: 'pointer',
     fontSize: '20px',
   };
-
-  const iniciais = (perfil.nome?.trim().split(/\s+/).length > 1
-    ? (perfil.nome.trim().split(/\s+/)[0][0] + perfil.nome.trim().split(/\s+/)[1][0])
-    : (perfil.nome?.slice(0, 2) || 'VC')
-  ).toUpperCase();
 
   const themeIcon =
     tema === 'light'
@@ -142,33 +131,6 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
           );
         })}
 
-        {/* Link Auê (Arena) */}
-        <button
-          type="button"
-          onClick={() => aoMudarAba('arena')}
-          style={{
-            ...navBtnBase,
-            fontWeight: abaAtiva === 'arena' ? 700 : 400,
-            color: abaAtiva === 'arena' ? 'var(--fg)' : 'var(--muted)',
-          }}
-          aria-label="Auê Arena"
-        >
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={abaAtiva === 'arena' ? 2.4 : 1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3" />
-          </svg>
-          {wide && <span>Auê</span>}
-        </button>
-
         {/* Botão Postar */}
         <button
           type="button"
@@ -205,7 +167,7 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
         </button>
       </div>
 
-      {/* Rodapé: Tema e Perfil */}
+      {/* Rodapé: Alternar Tema */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: navAlign }}>
         <button
           type="button"
@@ -232,61 +194,6 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
             <path d={themeIcon} />
           </svg>
           {wide && <span>{tema === 'light' ? 'Tema escuro' : 'Tema claro'}</span>}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => aoMudarAba('perfil')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '8px',
-            border: 0,
-            borderRadius: '999px',
-            background: 'none',
-            color: 'var(--fg)',
-            cursor: 'pointer',
-            width: wide ? '100%' : 'auto',
-            justifyContent: wide ? 'flex-start' : 'center',
-          }}
-          aria-label="Meu Perfil"
-        >
-          <span
-            style={{
-              width: '40px',
-              height: '40px',
-              flex: 'none',
-              borderRadius: '50%',
-              background: 'var(--surface-2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 700,
-              fontSize: '14px',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            {iniciais}
-            {perfil.avatarUrl && (
-              <img
-                src={perfil.avatarUrl}
-                alt={perfil.nome}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            )}
-          </span>
-          {wide && (
-            <span style={{ textAlign: 'left', lineHeight: 1.25, minWidth: 0, overflow: 'hidden' }}>
-              <b style={{ fontSize: '15px', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                {perfil.nome}
-              </b>
-              <span style={{ color: 'var(--muted)', fontSize: '14px', display: 'block' }}>
-                @{perfil.handle}
-              </span>
-            </span>
-          )}
         </button>
       </div>
     </header>

@@ -19,58 +19,20 @@ interface AbaComunidadesProps {
   aoAbrirPerfil?: (handle: string, nome?: string) => void;
 }
 
-const COMUNIDADES_CANONICAS: ComunidadeInfo[] = [
-  {
-    slug: 'bonde-do-arroto',
-    nome: 'Bonde do Arroto',
-    ini: 'BA',
-    cat: 'Oficial',
-    desc: 'A comunidade oficial do Auê!. A praça central: todo mundo arrota aqui.',
-    members: '48,2 mil',
-    ano: 2026,
-  },
-  {
-    slug: 'cerveja-gelada',
-    nome: 'Cerveja Gelada',
-    ini: 'CG',
-    cat: 'Cerveja',
-    desc: 'Arroto de long neck, chope e lata.',
-    members: '12,9 mil',
-    ano: 2026,
-  },
-  {
-    slug: 'refri-e-cia',
-    nome: 'Refri & Cia',
-    ini: 'RC',
-    cat: 'Refri',
-    desc: 'Gás de refrigerante. Grave é lei.',
-    members: '9,4 mil',
-    ano: 2026,
-  },
-  {
-    slug: 'historias-de-arroto',
-    nome: 'Histórias de Arroto',
-    ini: 'HA',
-    cat: 'Histórias',
-    desc: 'Casos, vexames e lendas de família.',
-    members: '21,7 mil',
-    ano: 2026,
-  },
-  {
-    slug: 'churrasco-raiz',
-    nome: 'Churrasco Raiz',
-    ini: 'CR',
-    cat: 'Comida',
-    desc: 'Pós-picanha. Respeito.',
-    members: '7,1 mil',
-    ano: 2026,
-  },
-];
+const COMUNIDADE_RAIZ: ComunidadeInfo = {
+  slug: 'eu-arroto-e-dai',
+  nome: 'Eu Arroto, e Daí?',
+  ini: 'EA',
+  cat: 'Oficial',
+  desc: 'A histórica comunidade mãe dos arrotadores. Orgulho do estrago e zero pudor social.',
+  members: '34,5 mil membros',
+  ano: 2004,
+};
 
-const CATEGORIAS = ['Todas', 'Oficial', 'Cerveja', 'Refri', 'Histórias', 'Comida'];
+const TELEGRAM_GRUPO_URL = 'https://t.me/+KQjRJFCibjliYzRh';
 
 export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
-  comunidades,
+  comunidades: _comunidades,
   minhasComunidades,
   aoAlternarParticipacao,
   aoFiltrarPorComunidade: _aoFiltrar,
@@ -83,38 +45,11 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
   aoCompartilharCauso = () => {},
   aoResponderCauso = () => {},
   aoDenunciarCauso = () => {},
-  aoAbrirPerfil,
+  aoAbrirPerfil: _aoAbrirPerfil,
 }) => {
   const [slugSelecionado, setSlugSelecionado] = useState<string | null>(comunidadeAtivaSlug ?? null);
-  const [categoriaAtiva, setCategoriaAtiva] = useState<string>('Todas');
 
-  // Mescla comunidades fornecidas ou usa lista canônica
-  const listaCompleta: ComunidadeInfo[] = (comunidades.length > 0 ? comunidades : COMUNIDADES_CANONICAS).map((c) => {
-    const can = COMUNIDADES_CANONICAS.find(
-      (x) => x.slug === c.slug || x.nome.toLowerCase() === c.nome.toLowerCase(),
-    );
-    const desc = 'descricao' in c && typeof c.descricao === 'string' ? c.descricao : can?.desc || 'Comunidade de arrotadores do Auê.';
-    const members = can ? can.members : ('totalMembros' in c && typeof c.totalMembros === 'number' ? `${c.totalMembros} membros` : '1,2 mil membros');
-    return {
-      slug: c.slug,
-      nome: c.nome,
-      ini: can ? can.ini : c.nome.slice(0, 2).toUpperCase(),
-      cat: can ? can.cat : 'Geral',
-      desc,
-      members,
-      ano: can ? can.ano : 2026,
-    };
-  });
-
-  const comunidadesFiltradas = listaCompleta.filter((c) => {
-    if (categoriaAtiva === 'Todas') return true;
-    return c.cat.toLowerCase() === categoriaAtiva.toLowerCase();
-  });
-
-  // Se houver uma comunidade selecionada, renderiza o DetalheComunidade
-  const comuAtiva = slugSelecionado
-    ? listaCompleta.find((c) => c.slug === slugSelecionado || c.nome.toLowerCase() === slugSelecionado.toLowerCase())
-    : null;
+  const comuAtiva = slugSelecionado ? COMUNIDADE_RAIZ : null;
 
   if (comuAtiva) {
     const estaDentro =
@@ -122,7 +57,8 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
     const causosDestaComu = causos.filter(
       (p) =>
         p.comunidadeSlug?.toLowerCase() === comuAtiva.slug.toLowerCase() ||
-        p.comunidadeSlug?.toLowerCase() === comuAtiva.nome.toLowerCase(),
+        p.comunidadeSlug?.toLowerCase() === comuAtiva.nome.toLowerCase() ||
+        p.comunidadeSlug?.toLowerCase().includes('arroto'),
     );
 
     return (
@@ -142,128 +78,134 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
         aoCompartilharCauso={aoCompartilharCauso}
         aoResponderCauso={aoResponderCauso}
         aoDenunciarCauso={aoDenunciarCauso}
-        aoAbrirPerfil={aoAbrirPerfil}
       />
     );
   }
 
+  const c = COMUNIDADE_RAIZ;
+  const estaDentro = minhasComunidades.includes(c.slug) || minhasComunidades.includes(c.nome);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Pills de Categorias */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
+      {/* Banner de Destaque Oficial Telegram */}
       <div
         style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '20px',
+          padding: '24px 20px',
           display: 'flex',
-          gap: '8px',
-          padding: '16px 16px 12px',
-          overflowX: 'auto',
-          borderBottom: '1px solid var(--border)',
-          scrollbarWidth: 'none',
+          flexDirection: 'column',
+          gap: '16px',
         }}
       >
-        {CATEGORIAS.map((cat) => {
-          const ativo = categoriaAtiva === cat;
-          return (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategoriaAtiva(cat)}
-              style={{
-                height: '34px',
-                padding: '0 16px',
-                borderRadius: '999px',
-                border: ativo ? '1px solid var(--fg)' : '1px solid var(--border)',
-                background: ativo ? 'var(--fg)' : 'var(--surface)',
-                color: ativo ? 'var(--bg)' : 'var(--fg)',
-                fontWeight: ativo ? 700 : 500,
-                fontSize: '14px',
-                cursor: 'pointer',
-                flex: 'none',
-              }}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Lista de Comunidades */}
-      {comunidadesFiltradas.map((c) => {
-        const j = minhasComunidades.includes(c.slug) || minhasComunidades.includes(c.nome);
-        return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div
-            key={c.slug}
             style={{
-              padding: '16px',
-              borderBottom: '1px solid var(--border)',
+              width: '64px',
+              height: '64px',
+              borderRadius: '16px',
+              background: 'var(--surface-2)',
               display: 'flex',
-              gap: '12px',
               alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '32px',
+              flex: 'none',
+            }}
+          >
+            🦍
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <b style={{ fontSize: '20px', color: 'var(--fg)' }}>{c.nome}</b>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontFamily: 'ui-monospace, monospace',
+                  color: 'var(--muted)',
+                  background: 'var(--surface-2)',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {c.cat}
+              </span>
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: '13px', marginTop: '2px' }}>
+              {c.members} · Desde 2004 no Orkut, agora no Telegram
+            </div>
+          </div>
+        </div>
+
+        <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.5, color: 'var(--fg)' }}>
+          {c.desc} Este é o ponto de encontro único dos maiores arrotadores da internet. Entre no grupo oficial do Telegram para trocar causos, mandar áudios e participar dos campeonatos.
+        </p>
+
+        {/* Botão Oficial do Grupo Telegram */}
+        <a
+          href={TELEGRAM_GRUPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            height: '48px',
+            borderRadius: '999px',
+            background: 'var(--accent, #c6ff00)',
+            color: 'var(--accent-on, #000)',
+            fontWeight: 800,
+            fontSize: '15px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+            gap: '10px',
+            boxShadow: '0 4px 12px rgba(198, 255, 0, 0.25)',
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.15.27-.01.06.01.24 0 .37z" />
+          </svg>
+          Entrar no grupo do Telegram
+        </a>
+
+        {/* Botão de Ver Causos da Comunidade */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+          <button
+            type="button"
+            onClick={() => setSlugSelecionado(c.slug)}
+            style={{
+              flex: 1,
+              height: '40px',
+              borderRadius: '999px',
+              border: '1px solid var(--border-strong)',
+              background: 'transparent',
+              color: 'var(--fg)',
+              fontSize: '14px',
+              fontWeight: 600,
               cursor: 'pointer',
             }}
-            onClick={() => setSlugSelecionado(c.slug)}
           >
-            <div
-              style={{
-                width: '52px',
-                height: '52px',
-                flex: 'none',
-                borderRadius: '12px',
-                background: 'var(--surface-2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'var(--font-display)',
-                fontSize: '20px',
-                color: 'var(--fg)',
-              }}
-            >
-              {c.ini}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <b style={{ fontSize: '15px', color: 'var(--fg)' }}>{c.nome}</b>
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontFamily: 'ui-monospace, monospace',
-                    color: 'var(--muted)',
-                    background: 'var(--surface-2)',
-                    padding: '2px 6px',
-                    borderRadius: '6px',
-                  }}
-                >
-                  {c.cat}
-                </span>
-              </div>
-              <div style={{ color: 'var(--muted)', fontSize: '14px', marginTop: '2px' }}>{c.desc}</div>
-              <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>
-                {c.members}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                aoAlternarParticipacao(c.slug);
-              }}
-              style={{
-                height: '36px',
-                padding: '0 18px',
-                borderRadius: '999px',
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '14px',
-                border: j ? '1px solid var(--border-strong)' : '0',
-                background: j ? 'transparent' : 'var(--fg)',
-                color: j ? 'var(--fg)' : 'var(--bg)',
-                flex: 'none',
-              }}
-            >
-              {j ? 'Dentro' : 'Entrar'}
-            </button>
-          </div>
-        );
-      })}
+            Ver causos no mural
+          </button>
+          <button
+            type="button"
+            onClick={() => aoAlternarParticipacao(c.slug)}
+            style={{
+              height: '40px',
+              padding: '0 20px',
+              borderRadius: '999px',
+              border: estaDentro ? '1px solid var(--border-strong)' : '0',
+              background: estaDentro ? 'transparent' : 'var(--fg)',
+              color: estaDentro ? 'var(--fg)' : 'var(--bg)',
+              fontSize: '14px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            {estaDentro ? 'Dentro' : 'Participar'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface BarraInferiorMobileProps {
-  abaAtiva: 'feed' | 'arena' | 'comm' | 'desafios' | 'perfil';
-  aoMudarAba: (aba: 'feed' | 'arena' | 'comm' | 'desafios' | 'perfil') => void;
+  abaAtiva: 'feed' | 'comm' | 'desafios';
+  aoMudarAba: (aba: 'feed' | 'comm' | 'desafios') => void;
   aoAbrirComposer?: () => void;
 }
 
@@ -14,23 +14,18 @@ export const BarraInferiorMobile: React.FC<BarraInferiorMobileProps> = ({
   const tabs = [
     {
       id: 'feed' as const,
-      label: 'Início',
+      label: 'Feed',
       d: 'M3 11l9-8 9 8v10h-6v-6H9v6H3z',
     },
     {
       id: 'comm' as const,
-      label: 'Comunidades',
+      label: 'Comunidade',
       d: 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2',
     },
     {
       id: 'desafios' as const,
       label: 'Desafios',
       d: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3',
-    },
-    {
-      id: 'perfil' as const,
-      label: 'Perfil',
-      d: 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0',
     },
   ];
 
@@ -44,7 +39,7 @@ export const BarraInferiorMobile: React.FC<BarraInferiorMobileProps> = ({
           bottom: 0,
           height: '56px',
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(3, 1fr)',
           borderTop: '1px solid var(--border)',
           background: 'var(--bg)',
           zIndex: 6,

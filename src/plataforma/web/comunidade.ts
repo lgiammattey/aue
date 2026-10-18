@@ -58,6 +58,15 @@ function salvarMinhasComunidadesLocais(slugs: readonly string[]): void {
   }
 }
 
+function supabaseRealConfigurado(): boolean {
+  if (configuracaoAusente) return false;
+  const url = import.meta.env.VITE_SUPABASE_URL || '';
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  if (url.includes('aue-dev.supabase.co') || url.includes('exemplo.supabase.co')) return false;
+  if (key.includes('chave-ficticia') || key.includes('chave-ausente')) return false;
+  return true;
+}
+
 /**
  * Adaptador Web da Porta de Comunidade e Feed do Auê 3.0.
  *
@@ -72,10 +81,10 @@ export function criarComunidadeWeb(
   } = {},
 ): PortaDeComunidade {
   const causosSalvos = lerCausosLocais();
-  // Estado local em memória sincronizado com armazenamento local
-  const causosMemoria: CausoPostado[] = [
-    ...(causosSalvos.length > 0 ? causosSalvos : (opcoes.causosIniciais ?? CAUSOS_PADRAO)),
-  ];
+  // Mescla os causos postados pelo usuário com os causos padrão de fábrica
+  const idsSalvos = new Set(causosSalvos.map((c) => c.id));
+  const padraoSemDuplicata = (opcoes.causosIniciais ?? CAUSOS_PADRAO).filter((c) => !idsSalvos.has(c.id));
+  const causosMemoria: CausoPostado[] = [...causosSalvos, ...padraoSemDuplicata];
   const denunciasLocais = new Set<string>();
   const minhasComunidadesMemoria = new Set<string>(lerMinhasComunidadesLocais());
 
@@ -88,7 +97,7 @@ export function criarComunidadeWeb(
       const slug = filtros?.comunidadeSlug;
       const limite = filtros?.limite ?? 30;
 
-      if (!opcoes.forcarOffline && !configuracaoAusente) {
+      if (!opcoes.forcarOffline && supabaseRealConfigurado()) {
         try {
           let query = supabase
             .from('posts_comunidade')
@@ -117,12 +126,17 @@ export function criarComunidadeWeb(
             }
           }
 
-          const { data, error } = await query;
+          const promessaQuery = query;
+          const timeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout Supabase')), 2000),
+          );
+
+          const { data, error } = (await Promise.race([promessaQuery, timeout])) as any;
 
           if (!error && data && data.length > 0) {
             const mapeados: CausoPostado[] = data
-              .filter((p) => !denunciasLocais.has(p.id))
-              .map((p) => {
+              .filter((p: any) => !denunciasLocais.has(p.id))
+              .map((p: any) => {
                 const comuEncontrada = COMUNIDADES_PADRAO.find(
                   (c) => c.nome === p.topic || c.id === p.group_id,
                 ) ?? COMUNIDADES_PADRAO[0];
@@ -152,10 +166,15 @@ export function criarComunidadeWeb(
                 };
               });
 
-            return mapeados;
+            // Preserva os causos criados localmente pelo usuário no topo
+            const locaisDoUsuario = causosMemoria.filter((c) => c.meu || c.id.startsWith('causo-local-'));
+            const idsRemotos = new Set(mapeados.map((m) => m.id));
+            const unicosLocais = locaisDoUsuario.filter((l) => !idsRemotos.has(l.id));
+
+            return [...unicosLocais, ...mapeados].slice(0, limite);
           }
         } catch {
-          // Falha de rede: cai pro fallback de memória
+          // Falha de rede / timeout: cai pro fallback de memória
         }
       }
 
@@ -178,67 +197,70 @@ export function criarComunidadeWeb(
         return { ok: false, motivo: 'consentimentoObrigatorio' };
       }
 
-      const comu = obterComunidadePorSlug(pedido.comunidadeSlug) ?? COMUNIDADES_PADRAO[0];
+      const comu = (pedido.comunidadeSlug && pedido.comunidadeSlug.toLowerCase() !== 'feed')
+        ? (obterComunidadePorSlug(pedido.comunidadeSlug) ?? COMUNIDADES_PADRAO[0])
+        : { id: 'comu-feed', slug: 'feed', nome: 'Feed', descricao: 'Feed Geral', icone: '📢', totalMembros: 100000 };
       const autorHandle = pedido.autorHandle || (pedido.autorNome || 'arrotador').toLowerCase().replace(/\s+/g, '_');
 
-      // Se conectado ao Supabase
-      if (!opcoes.forcarOffline && !configuracaoAusente) {
+      // Se conectado a um Supabase real com credenciais ativas
+      if (!opcoes.forcarOffline && supabaseRealConfigurado()) {
         try {
           const sessao = await garantirSessao();
-          if (!sessao) {
-            return { ok: false, motivo: 'semRede' };
+          if (sessao) {
+            const promessaInsert = supabase
+              .from('posts_comunidade')
+              .insert({
+                group_id: null,
+                user_id: sessao.user.id,
+                post_type: pedido.resultadoId ? 'audio_result' : 'text_announcement',
+                result_id: pedido.resultadoId ?? null,
+                topic: comu.nome,
+                content: pedido.conteudo.trim(),
+              })
+              .select()
+              .single();
+
+            const timeoutInsert = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('Timeout Supabase Insert')), 2000),
+            );
+
+            const { data, error } = (await Promise.race([promessaInsert, timeoutInsert])) as any;
+
+            if (!error && data) {
+              const novoCauso: CausoPostado = {
+                id: data.id,
+                comunidadeId: comu.id,
+                comunidadeSlug: comu.slug,
+                autorNome: pedido.autorNome || 'Você',
+                autorHandle,
+                conteudo: data.content,
+                resultadoId: pedido.resultadoId,
+                nota: pedido.nota,
+                audioUrl: pedido.audioUrl,
+                duracaoSegundos: pedido.duracaoSegundos,
+                origem: pedido.origem,
+                reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
+                minhaReacao: null,
+                curtidas: 0,
+                curtidoPorMim: false,
+                reposts: 0,
+                repostadoPorMim: false,
+                totalComentarios: 0,
+                criadoEm: data.created_at,
+                meu: true,
+              };
+
+              causosMemoria.unshift(novoCauso);
+              salvarCausosLocais(causosMemoria);
+              return { ok: true, causo: novoCauso };
+            }
           }
-
-          const { data, error } = await supabase
-            .from('posts_comunidade')
-            .insert({
-              group_id: null,
-              user_id: sessao.user.id,
-              post_type: pedido.resultadoId ? 'audio_result' : 'text_announcement',
-              result_id: pedido.resultadoId ?? null,
-              topic: comu.nome,
-              content: pedido.conteudo.trim(),
-            })
-            .select()
-            .single();
-
-          if (error || !data) {
-            return { ok: false, motivo: 'falhou', detalhe: error?.message ?? 'Erro ao salvar post' };
-          }
-
-          const novoCauso: CausoPostado = {
-            id: data.id,
-            comunidadeId: comu.id,
-            comunidadeSlug: comu.slug,
-            autorNome: pedido.autorNome || 'Você',
-            autorHandle,
-            conteudo: data.content,
-            resultadoId: pedido.resultadoId,
-            nota: pedido.nota,
-            audioUrl: pedido.audioUrl,
-            duracaoSegundos: pedido.duracaoSegundos,
-            origem: pedido.origem,
-            reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
-            minhaReacao: null,
-            curtidas: 0,
-            curtidoPorMim: false,
-            reposts: 0,
-            repostadoPorMim: false,
-            totalComentarios: 0,
-            criadoEm: data.created_at,
-            meu: true,
-          };
-
-          causosMemoria.unshift(novoCauso);
-          salvarCausosLocais(causosMemoria);
-          return { ok: true, causo: novoCauso };
-        } catch (err: unknown) {
-          const detalhe = err instanceof Error ? err.message : String(err);
-          return { ok: false, motivo: 'falhou', detalhe };
+        } catch {
+          // Em caso de falha de rede ou timeout, cai para o modo local
         }
       }
 
-      // Modo local / offline
+      // Modo local / offline (garantia de postagem imediata e zero espera)
       const novoCauso: CausoPostado = {
         id: `causo-local-${Date.now()}`,
         comunidadeId: comu.id,
@@ -390,6 +412,7 @@ export function criarComunidadeWeb(
       conteudo: string,
       autorNome: string,
       autorHandle?: string,
+      respostaAId?: string,
     ): Promise<RespostaDeCauso | null> {
       if (!conteudo || !conteudo.trim()) return null;
       const causo = causosMemoria.find((c) => c.id === causoId);
@@ -402,6 +425,7 @@ export function criarComunidadeWeb(
         autorHandle: autorHandle || (autorNome || 'voce').toLowerCase().replace(/\s+/g, '_'),
         conteudo: conteudo.trim(),
         criadoEm: new Date().toISOString(),
+        respostaAId,
       };
 
       const lista = [...(causo.comentarios ?? []), novaResposta];

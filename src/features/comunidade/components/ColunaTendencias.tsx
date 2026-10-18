@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import type { CausoPostado, Comunidade } from '../../../portas/comunidade';
-import { alternarSeguirLocal, obterSeguindoLocais } from '../../../plataforma/web/perfil';
 
 interface ColunaTendenciasProps {
   causos?: readonly CausoPostado[];
@@ -15,10 +14,10 @@ interface ColunaTendenciasProps {
 }
 
 export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
-  aoAbrirPerfil,
+  aoAbrirPerfil: _aoAbrirPerfil,
   termoBusca = '',
   aoMudarBusca,
-  aoSelecionarTrend,
+  aoSelecionarTrend: _aoSelecionarTrend,
 }) => {
   const [buscaInterna, setBuscaInterna] = useState('');
   const valorBusca = aoMudarBusca ? termoBusca : buscaInterna;
@@ -28,28 +27,6 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
     } else {
       setBuscaInterna(val);
     }
-  };
-  const [seguindo, setSeguindo] = useState<string[]>(() => obterSeguindoLocais());
-
-  const trends = [
-    { cat: 'Cerveja Gelada', tag: '#LongNeckChallenge', n: '12,4 mil' },
-    { cat: 'Arroto trovão', tag: '#TremeuAJanela', n: '8,9 mil' },
-    { cat: 'Na reunião da firma', tag: '#MutadoNoTeams', n: '6,2 mil' },
-    { cat: 'Primeiro encontro', tag: '#VexameNoJapa', n: '4,5 mil' },
-    { cat: 'Refri & Cia', tag: '#GraveDeElevador', n: '3,1 mil' },
-  ];
-
-  const sugestoes = [
-    { name: 'Tiago do Bonde', handle: 'tiagobonde', ini: 'TB' },
-    { name: 'Iury da Oficina', handle: 'iury_oficina', ini: 'IO' },
-    { name: 'Rian da Bolha', handle: 'rian_design', ini: 'RD' },
-    { name: 'Dani Gás', handle: 'danigas', ini: 'DG' },
-    { name: 'Lucas do Áudio', handle: 'lucas_audio', ini: 'LA' },
-  ];
-
-  const alternarSeguir = (handle: string) => {
-    alternarSeguirLocal(handle);
-    setSeguindo(obterSeguindoLocais());
   };
 
   return (
@@ -88,139 +65,56 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
         }}
       />
 
-      {/* Em alta no Bonde */}
+      {/* Card da Comunidade Oficial no Telegram */}
       <section
         style={{
           background: 'var(--surface)',
           borderRadius: '16px',
           overflow: 'hidden',
           border: '1px solid var(--border)',
+          padding: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
         }}
       >
-        <div style={{ padding: '12px 16px', fontWeight: 700, fontSize: '20px', color: 'var(--fg)' }}>
-          Em alta no Bonde
-        </div>
-        {trends.map((t, i) => (
-          <div
-            key={i}
-            onClick={() => {
-              if (aoSelecionarTrend) {
-                aoSelecionarTrend(t.tag);
-              } else {
-                setBusca(t.tag);
-              }
-            }}
-            style={{
-              padding: '10px 16px',
-              cursor: 'pointer',
-            }}
-          >
-            <div
-              style={{
-                fontFamily: 'ui-monospace, monospace',
-                fontSize: '11px',
-                color: 'var(--muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '.06em',
-              }}
-            >
-              {t.cat}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '24px' }}>🦍</span>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '16px', color: 'var(--fg)', lineHeight: 1.2 }}>
+              Eu Arroto, e Daí?
             </div>
-            <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--fg)' }}>{t.tag}</div>
-            <div style={{ color: 'var(--muted)', fontSize: '13px' }}>{t.n} posts</div>
+            <div style={{ color: 'var(--muted)', fontSize: '13px' }}>Comunidade oficial no Telegram</div>
           </div>
-        ))}
-        <div
+        </div>
+
+        <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.4, color: 'var(--fg)' }}>
+          Entre no grupo oficial dos arrotadores raiz no Telegram. Zoeira, causos e duelos sem censura.
+        </p>
+
+        <a
+          href="https://t.me/+KQjRJFCibjliYzRh"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
-            padding: '14px 16px',
-            fontSize: '15px',
-            cursor: 'pointer',
-            fontWeight: 600,
-            color: 'var(--fg)',
+            height: '40px',
+            borderRadius: '999px',
+            background: 'var(--accent, #c6ff00)',
+            color: 'var(--accent-on, #000)',
+            fontWeight: 700,
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+            gap: '8px',
           }}
         >
-          Mostrar mais
-        </div>
-      </section>
-
-      {/* Quem seguir */}
-      <section
-        style={{
-          background: 'var(--surface)',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          border: '1px solid var(--border)',
-        }}
-      >
-        <div style={{ padding: '12px 16px', fontWeight: 700, fontSize: '20px', color: 'var(--fg)' }}>
-          Quem seguir
-        </div>
-        {sugestoes.map((u) => {
-          const isSeguindo = seguindo.includes(u.handle);
-          return (
-            <div
-              key={u.handle}
-              style={{
-                padding: '10px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}
-            >
-              <div
-                onClick={() => aoAbrirPerfil?.(u.handle, u.name)}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  flex: 'none',
-                  borderRadius: '50%',
-                  background: 'var(--surface-2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  color: 'var(--fg)',
-                  cursor: aoAbrirPerfil ? 'pointer' : 'default',
-                }}
-                title={`Ver perfil de @${u.handle}`}
-              >
-                {u.ini}
-              </div>
-              <div
-                onClick={() => aoAbrirPerfil?.(u.handle, u.name)}
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  lineHeight: 1.3,
-                  cursor: aoAbrirPerfil ? 'pointer' : 'default',
-                }}
-                title={`Ver perfil de @${u.handle}`}
-              >
-                <b style={{ fontSize: '15px', color: 'var(--fg)' }}>{u.name}</b>
-                <div style={{ color: 'var(--muted)', fontSize: '14px' }}>@{u.handle}</div>
-              </div>
-              <button
-                type="button"
-                onClick={() => alternarSeguir(u.handle)}
-                style={{
-                  height: '32px',
-                  padding: '0 16px',
-                  borderRadius: '999px',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '14px',
-                  border: isSeguindo ? '1px solid var(--border)' : '0',
-                  background: isSeguindo ? 'transparent' : 'var(--fg)',
-                  color: isSeguindo ? 'var(--fg)' : 'var(--bg)',
-                  flex: 'none',
-                }}
-              >
-                {isSeguindo ? 'Seguindo' : 'Seguir'}
-              </button>
-            </div>
-          );
-        })}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.15.27-.01.06.01.24 0 .37z" />
+          </svg>
+          Entrar no Telegram
+        </a>
       </section>
     </aside>
   );

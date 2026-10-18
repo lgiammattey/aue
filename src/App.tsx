@@ -9,6 +9,7 @@ import { TelaComunidade } from './features/comunidade/TelaComunidade';
 import { TelaLanding } from './features/comunidade/TelaLanding';
 import { TelaLogin } from './features/comunidade/TelaLogin';
 import { TelaVersoesWebapp } from './features/comunidade/TelaVersoesWebapp';
+import { TelaHistoria } from './features/comunidade/TelaHistoria';
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
 
@@ -20,14 +21,94 @@ function EntradaPorLink() {
   return <Arena codigoDoDesafio={code} />;
 }
 
-function EntradaPrincipal() {
+function EntradaInicial() {
   const navigate = useNavigate();
-  return <TelaComunidade initialTab="feed" onArrotar={() => navigate('/arena')} />;
+  const jaVisitou = (() => {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) return false;
+      return Boolean(
+        localStorage.getItem('aue.visitou') ||
+        localStorage.getItem('aue.usuario.perfil.v1') ||
+        localStorage.getItem('aue.causos.v2')
+      );
+    } catch {
+      return false;
+    }
+  })();
+
+  if (jaVisitou) {
+    return <EntradaPrincipal />;
+  }
+
+  return (
+    <TelaLanding
+      onEntrarSemConta={() => {
+        try { localStorage.setItem('aue.visitou', 'true'); } catch {}
+        navigate('/feed');
+      }}
+      onArrotar={() => {
+        try { localStorage.setItem('aue.visitou', 'true'); } catch {}
+        navigate('/arena');
+      }}
+    />
+  );
 }
 
 function EntradaArena() {
   const navigate = useNavigate();
-  return <TelaComunidade initialTab="arena" onArrotar={() => navigate('/arena')} />;
+  return (
+    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', background: 'var(--bg, #000000)' }}>
+      {/* Botão de retorno rápido para o Feed */}
+      <button
+        type="button"
+        onClick={() => navigate('/feed')}
+        style={{
+          position: 'fixed',
+          top: '16px',
+          left: '16px',
+          zIndex: 9999,
+          background: 'var(--surface-2, #1c1c1e)',
+          color: 'var(--fg, #ffffff)',
+          border: '1px solid var(--border-strong, #3a3a3c)',
+          borderRadius: '999px',
+          padding: '8px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          cursor: 'pointer',
+          fontWeight: 700,
+          fontSize: '13px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+        }}
+        aria-label="Voltar para o Feed"
+      >
+        <span aria-hidden="true">←</span>
+        <span>Voltar pro Feed</span>
+      </button>
+
+      <Arena
+        onPostarNoBonde={(resultado) => {
+          navigate('/feed', { state: { resultadoRecente: resultado } });
+        }}
+      />
+    </div>
+  );
+}
+
+function EntradaPrincipal() {
+  const navigate = useNavigate();
+  return (
+    <TelaComunidade
+      initialTab="feed"
+      onArrotar={() => navigate('/arena')}
+      aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
+    />
+  );
+}
+
+function EntradaHistoria() {
+  const navigate = useNavigate();
+  return <TelaHistoria onArrotar={() => navigate('/arena')} />;
 }
 
 function EntradaBondes() {
@@ -42,19 +123,12 @@ function EntradaDesafios() {
 
 function EntradaPerfil() {
   const navigate = useNavigate();
-  return <TelaComunidade initialTab="perfil" onArrotar={() => navigate('/arena')} />;
+  return <TelaComunidade initialTab="feed" onArrotar={() => navigate('/arena')} />;
 }
 
 function EntradaPerfilHandle() {
-  const { handle } = useParams<{ handle: string }>();
   const navigate = useNavigate();
-  return (
-    <TelaComunidade
-      initialTab="perfil"
-      perfilHandleInicial={handle}
-      onArrotar={() => navigate('/arena')}
-    />
-  );
+  return <TelaComunidade initialTab="feed" onArrotar={() => navigate('/arena')} />;
 }
 
 function EntradaComunidadeSlug() {
@@ -76,10 +150,10 @@ export function App() {
       <Router>
         <Routes>
           {/*
-            Auê 3.0 / Bonde do Arroto - Implementação 1:1 do Protótipo
+            Auê 3.0 / Bonde do Arroto - Feed, Comunidade e Desafios (com o Jogo Auê)
             Desktop em 3 colunas, Tablet com ícones, Mobile com barra inferior.
           */}
-          <Route path="/" element={<EntradaPrincipal />} />
+          <Route path="/" element={<EntradaInicial />} />
           <Route path="/feed" element={<EntradaPrincipal />} />
           <Route path="/arena" element={<EntradaArena />} />
           <Route path="/bondes" element={<EntradaBondes />} />
@@ -89,10 +163,12 @@ export function App() {
           <Route path="/perfil" element={<EntradaPerfil />} />
           <Route path="/perfil/:handle" element={<EntradaPerfilHandle />} />
           <Route path="/u/:handle" element={<EntradaPerfilHandle />} />
-          <Route path="/comunidade" element={<EntradaPrincipal />} />
+          <Route path="/comunidade" element={<EntradaBondes />} />
           <Route path="/landing" element={<TelaLanding />} />
           <Route path="/login" element={<TelaLogin />} />
           <Route path="/versoes" element={<TelaVersoesWebapp />} />
+          <Route path="/historia/:id" element={<EntradaHistoria />} />
+          <Route path="/conto/:id" element={<EntradaHistoria />} />
 
           {/* Duelos e batalhas */}
           <Route path="/b/:code" element={<EntradaPorLink />} />

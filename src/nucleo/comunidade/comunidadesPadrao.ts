@@ -82,5 +82,7 @@ export const COMUNIDADES_PADRAO: readonly Comunidade[] = [
 ] as const;
 
 export function obterComunidadePorSlug(slug: string): Comunidade | undefined {
-  return COMUNIDADES_PADRAO.find((c) => c.slug === slug);
+  if (!slug) return undefined;
+  const limpo = slug.toLowerCase().trim();
+  return COMUNIDADES_PADRAO.find((c) => c.slug.toLowerCase() === limpo || c.nome.toLowerCase() === limpo);
 }

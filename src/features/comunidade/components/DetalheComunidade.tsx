@@ -56,14 +56,6 @@ const REGRAS_PADRAO: Record<string, string[]> = {
   ],
 };
 
-const RANKING_SEMENTE = [
-  { pos: 1, name: 'Iury da Oficina', handle: 'iury_oficina', ini: 'IO', nota: 98 },
-  { pos: 2, name: 'Tiago do Bonde', handle: 'tiagobonde', ini: 'TB', nota: 96 },
-  { pos: 3, name: 'Dani Gás', handle: 'danigas', ini: 'DG', nota: 94 },
-  { pos: 4, name: 'Tio Beto', handle: 'tiobeto', ini: 'TB', nota: 91 },
-  { pos: 5, name: 'Rian da Bolha', handle: 'rian_design', ini: 'RD', nota: 89 },
-];
-
 export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
   comunidade,
   estaDentro,
@@ -77,9 +69,9 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
   aoCompartilharCauso,
   aoResponderCauso,
   aoDenunciarCauso,
-  aoAbrirPerfil,
+  aoAbrirPerfil: _aoAbrirPerfil,
 }) => {
-  const [dtab, setDtab] = useState<'posts' | 'ranking' | 'sobre'>('posts');
+  const [dtab, setDtab] = useState<'posts' | 'sobre'>('posts');
   const [draft, setDraft] = useState('');
   const [enviando, setEnviando] = useState(false);
 
@@ -88,21 +80,6 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
     'Zoeira sem ofensa pessoal.',
     'Arroto de verdade é sagrado.',
   ];
-
-  // Mescla ranking de causos reais com semente
-  const causosComNota = causosDaComunidade
-    .filter((c) => typeof c.nota === 'number')
-    .sort((a, b) => ((b.nota as number) || 0) - ((a.nota as number) || 0));
-
-  const rankingLista = causosComNota.length > 0
-    ? causosComNota.map((c, idx) => ({
-        pos: idx + 1,
-        name: c.autorNome,
-        handle: c.autorHandle || c.autorNome.toLowerCase().replace(/\s+/g, '_'),
-        ini: c.autorNome.slice(0, 2).toUpperCase(),
-        nota: c.nota as number,
-      }))
-    : RANKING_SEMENTE;
 
   const handleEnviarPost = async () => {
     if (!draft.trim() || enviando) return;
@@ -213,13 +190,38 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
         <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.4, textWrap: 'pretty', color: 'var(--fg)' }}>
           {comunidade.desc}
         </p>
+
+        {/* Botão Oficial Telegram */}
+        <a
+          href="https://t.me/+KQjRJFCibjliYzRh"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            marginTop: '8px',
+            height: '44px',
+            borderRadius: '999px',
+            background: 'var(--accent, #c6ff00)',
+            color: 'var(--accent-on, #000)',
+            fontWeight: 800,
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+            gap: '8px',
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.15.27-.01.06.01.24 0 .37z" />
+          </svg>
+          Entrar no grupo do Telegram
+        </a>
       </div>
 
-      {/* Abas Internas: Posts | Ranking | Sobre */}
+      {/* Abas Internas: Posts | Sobre */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
         {[
           { id: 'posts' as const, label: 'Posts' },
-          { id: 'ranking' as const, label: 'Ranking' },
           { id: 'sobre' as const, label: 'Sobre' },
         ].map((tab) => {
           const ativo = dtab === tab.id;
@@ -333,7 +335,6 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
                 aoCompartilhar={aoCompartilharCauso}
                 aoResponder={aoResponderCauso}
                 aoDenunciar={aoDenunciarCauso}
-                aoAbrirPerfil={aoAbrirPerfil}
               />
             ))
           ) : (
@@ -349,72 +350,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
         </div>
       )}
 
-      {/* ABA 2: RANKING */}
-      {dtab === 'ranking' && (
-        <div>
-          {rankingLista.map((r) => (
-            <div
-              key={r.handle + r.pos}
-              style={{
-                padding: '14px 16px',
-                borderBottom: '1px solid var(--border)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-              }}
-            >
-              <span
-                style={{
-                  width: '24px',
-                  fontFamily: 'ui-monospace, monospace',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: r.pos <= 3 ? 'var(--accent)' : 'var(--muted)',
-                }}
-              >
-                {r.pos}º
-              </span>
-              <div
-                onClick={() => aoAbrirPerfil?.(r.handle, r.name)}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: 'var(--surface-2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  color: 'var(--fg)',
-                  cursor: aoAbrirPerfil ? 'pointer' : 'default',
-                }}
-                title={`Ver perfil de @${r.handle}`}
-              >
-                {r.ini}
-              </div>
-              <div
-                onClick={() => aoAbrirPerfil?.(r.handle, r.name)}
-                style={{ flex: 1, lineHeight: 1.3, cursor: aoAbrirPerfil ? 'pointer' : 'default' }}
-              >
-                <b style={{ fontSize: '15px', color: 'var(--fg)' }}>{r.name}</b>
-                <div style={{ color: 'var(--muted)', fontSize: '14px' }}>@{r.handle}</div>
-              </div>
-              <span
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '28px',
-                  color: 'var(--fg)',
-                }}
-              >
-                {r.nota}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ABA 3: SOBRE */}
+      {/* ABA 2: SOBRE */}
       {dtab === 'sobre' && (
         <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>

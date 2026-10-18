@@ -23,6 +23,8 @@ export interface RespostaDeCauso {
   readonly autorHandle: string;
   readonly conteudo: string;
   readonly criadoEm: string;
+  /** Identificador da resposta-pai quando for resposta aninhada (estilo Twitter) */
+  readonly respostaAId?: string;
 }
 
 export interface CausoPostado {
@@ -37,6 +39,8 @@ export interface CausoPostado {
   readonly nota?: number;
   readonly audioUrl?: string;
   readonly duracaoSegundos?: number;
+  readonly videoUrl?: string;
+  readonly imagemUrl?: string;
   readonly origem?: string;
   readonly reacoes: Readonly<Record<TipoDeReacao, number>>;
   readonly minhaReacao?: TipoDeReacao | null;
@@ -105,8 +109,14 @@ export interface PortaDeComunidade {
   /** Lista respostas de um causo (threads) */
   listarRespostas(causoId: string): Promise<readonly RespostaDeCauso[]>;
 
-  /** Adiciona uma resposta a um causo */
-  adicionarResposta(causoId: string, conteudo: string, autorNome: string, autorHandle?: string): Promise<RespostaDeCauso | null>;
+  /** Adiciona uma resposta a um causo (com suporte a resposta aninhada) */
+  adicionarResposta(
+    causoId: string,
+    conteudo: string,
+    autorNome: string,
+    autorHandle?: string,
+    respostaAId?: string,
+  ): Promise<RespostaDeCauso | null>;
 
   /** Entra em uma comunidade */
   entrarComunidade(slug: string): Promise<boolean>;

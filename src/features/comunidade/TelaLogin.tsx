@@ -129,28 +129,30 @@ export const TelaLogin: React.FC = () => {
   const light = theme === 'light';
   const vars: React.CSSProperties = (light
     ? {
-        '--bg': '#f5f3ea',
-        '--surface': '#ebe9de',
-        '--surface-2': '#dedcd0',
-        '--fg': '#0a0a08',
-        '--muted': '#6b6957',
-        '--border': '#d6d4c6',
-        '--accent': 'var(--cor-acento, #e63946)',
+        '--bg': '#ffffff',
+        '--surface': '#f7f7f8',
+        '--surface-2': '#ededf0',
+        '--fg': '#000000',
+        '--muted': '#666666',
+        '--border': '#e5e5e8',
+        '--border-strong': '#888888',
+        '--accent': '#000000',
         '--accent-on': '#ffffff',
-        '--accent-strong': '#d62839',
-        '--danger': '#ef4444',
+        '--accent-strong': '#24231f',
+        '--danger': '#c4161a',
         colorScheme: 'light',
       }
     : {
-        '--bg': '#0a0a08',
-        '--surface': '#141410',
-        '--surface-2': '#1e1e18',
-        '--fg': '#f5f3ea',
-        '--muted': '#9e9c8d',
-        '--border': '#2a2a22',
-        '--accent': 'var(--cor-acento, #e63946)',
-        '--accent-on': '#ffffff',
-        '--accent-strong': '#ff4d5e',
+        '--bg': '#000000',
+        '--surface': '#121212',
+        '--surface-2': '#1c1c1e',
+        '--fg': '#ffffff',
+        '--muted': '#8e8e93',
+        '--border': '#222222',
+        '--border-strong': '#3a3a3c',
+        '--accent': '#c6ff00',
+        '--accent-on': '#000000',
+        '--accent-strong': '#b8f000',
         '--danger': '#ef4444',
         colorScheme: 'dark',
       }) as any as React.CSSProperties;
@@ -179,15 +181,20 @@ export const TelaLogin: React.FC = () => {
         <Link
           to="/landing"
           style={{
-            color: 'var(--fg)',
-            fontFamily: 'var(--font-display, "Anton", sans-serif)',
-            fontSize: 24,
             textDecoration: 'none',
-            textAlign: 'center',
+            fontFamily: 'var(--font-display, "Anton", sans-serif)',
+            fontSize: 34,
+            lineHeight: 1,
+            background: 'var(--accent)',
+            color: 'var(--accent-on)',
+            padding: '6px 14px',
+            borderRadius: 10,
+            alignSelf: 'center',
+            display: 'inline-block',
             letterSpacing: '.02em',
           }}
         >
-          BONDE DO ARROTO
+          Auê!
         </Link>
 
         <div
@@ -369,19 +376,19 @@ export const TelaLogin: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', textAlign: 'center' }}>
-          <Link
-            to="/arena"
-            style={{
-              color: 'var(--fg)',
-              fontWeight: 600,
-              fontSize: 16,
-              textDecoration: 'none',
-            }}
-          >
-            Pular por enquanto
-          </Link>
-          <span style={{ color: 'var(--muted)', fontSize: 14, maxWidth: '34ch' }}>
-            Sem conta você arrota na Arena e vê o feed. Pra postar, entrar em bonde e salvar o placar, precisa de conta.
+          <span style={{ color: 'var(--muted)', fontSize: 14, maxWidth: '34ch', lineHeight: 1.45 }}>
+            Não quer conta agora?{' '}
+            <Link
+              to="/arena"
+              style={{
+                color: 'var(--fg)',
+                fontWeight: 600,
+                textDecoration: 'underline',
+              }}
+            >
+              Arrota como convidado
+            </Link>
+            . Pra postar e salvar o placar, precisa de conta.
           </span>
         </div>
       </div>

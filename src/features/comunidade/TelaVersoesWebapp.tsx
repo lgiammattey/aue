@@ -36,8 +36,8 @@ export const TelaVersoesWebapp: React.FC = () => {
       style={{
         width: '100%',
         minHeight: '100vh',
-        background: 'var(--bg, #0a0a08)',
-        color: 'var(--fg, #f5f3ea)',
+        background: 'var(--bg, #000000)',
+        color: 'var(--fg, #ffffff)',
         fontFamily: 'var(--font-body, "Archivo", sans-serif)',
         padding: '40px 32px',
         boxSizing: 'border-box',
@@ -58,10 +58,10 @@ export const TelaVersoesWebapp: React.FC = () => {
             Mesmo app, três larguras. Desktop em 3 colunas, tablet com menu em ícones, celular com barra inferior.
           </p>
           <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 15 }}>
-            <Link to="/landing" style={{ color: 'var(--fg, #f5f3ea)' }}>
+            <Link to="/landing" style={{ color: 'var(--fg, #ffffff)' }}>
               Landing
             </Link>
-            <Link to="/login" style={{ color: 'var(--fg, #f5f3ea)' }}>
+            <Link to="/login" style={{ color: 'var(--fg, #ffffff)' }}>
               Login
             </Link>
           </div>
@@ -74,7 +74,7 @@ export const TelaVersoesWebapp: React.FC = () => {
               <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: 'var(--muted, #9e9c8d)' }}>
                 {f.size}
               </span>
-              <a href={f.src} style={{ color: 'var(--fg, #f5f3ea)', fontSize: 14 }}>
+              <a href={f.src} style={{ color: 'var(--fg, #ffffff)', fontSize: 14 }}>
                 Abrir
               </a>
             </div>

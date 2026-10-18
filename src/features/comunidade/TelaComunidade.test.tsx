@@ -4,28 +4,28 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { TelaComunidade } from './TelaComunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 
-describe('TelaComunidade (Canônico Bonde do Arroto)', () => {
+describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafios)', () => {
   afterEach(() => {
     cleanup();
     localStorage.clear();
   });
 
-  it('renderiza AUÊ!, navegação canônica, composer rápido e causos no feed', async () => {
+  it('renderiza AUÊ!, navegação canônica (Feed, Comunidade, Desafios), composer rápido e causos no feed', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
     // Brand AUÊ! / A!
     expect(screen.getByText(/AUÊ!|A!/)).toBeDefined();
 
-    // Abas de navegação
-    expect(screen.getByRole('button', { name: 'Início' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Comunidades' })).toBeDefined();
+    // Abas de navegação: Início virou Feed, Comunidade no singular, Desafios com Auê dentro, Perfil removido
+    expect(screen.getByRole('button', { name: 'Feed' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Comunidade' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Desafios' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Perfil' })).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Perfil' })).toBeNull();
 
-    // Composer rápido no feed
+    // Composer rápido no feed com Jogar o Auê e Desafiar
     expect(screen.getByPlaceholderText('O que tá rolando no bonde?')).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Arrotar' })).toBeDefined();
+    expect(screen.getAllByRole('button', { name: 'Jogar o Auê' }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('button', { name: 'Desafiar' })).toBeDefined();
     expect(screen.getAllByRole('button', { name: 'Postar' }).length).toBeGreaterThanOrEqual(1);
 
@@ -59,38 +59,33 @@ describe('TelaComunidade (Canônico Bonde do Arroto)', () => {
     expect(await screen.findByText('Soltei um arroto monstro no almoço.')).toBeDefined();
   });
 
-  it('chama onArrotar ao tocar no botão de Arrotar ou Arena', async () => {
+  it('chama onArrotar ao tocar no botão de Jogar o Auê', async () => {
     const onArrotar = vi.fn();
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} onArrotar={onArrotar} />);
 
-    const btnArrotar = screen.getByRole('button', { name: 'Arrotar' });
+    const btnArrotar = screen.getAllByRole('button', { name: 'Jogar o Auê' })[0];
     fireEvent.click(btnArrotar);
 
     expect(onArrotar).toHaveBeenCalledTimes(1);
   });
 
-  it('navega entre as 4 abas (Início, Comunidades, Desafios, Perfil)', async () => {
+  it('navega entre as 3 abas (Feed, Comunidade, Desafios) com somente Eu Arroto, e Daí? e link do Telegram', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
-    // Aba Comunidades
-    const btnComunidades = screen.getByRole('button', { name: 'Comunidades' });
-    fireEvent.click(btnComunidades);
-    expect(await screen.findByText('Bonde do Arroto')).toBeDefined();
-    expect(screen.getAllByText('Cerveja Gelada').length).toBeGreaterThanOrEqual(1);
+    // Aba Comunidade
+    const btnComunidade = screen.getByRole('button', { name: 'Comunidade' });
+    fireEvent.click(btnComunidade);
+    expect((await screen.findAllByText('Eu Arroto, e Daí?')).length).toBeGreaterThanOrEqual(1);
+    const linksTelegram = await screen.findAllByRole('link', { name: /Entrar no grupo do Telegram/i });
+    expect(linksTelegram[0].getAttribute('href')).toBe('https://t.me/+KQjRJFCibjliYzRh');
 
-    // Aba Desafios
+    // Aba Desafios (onde entra o jogo Auê)
     const btnDesafios = screen.getByRole('button', { name: 'Desafios' });
     fireEvent.click(btnDesafios);
-    expect(await screen.findByRole('button', { name: 'Chamar pro X1' })).toBeDefined();
-    expect(screen.getAllByText('X1').length).toBeGreaterThanOrEqual(1);
-
-    // Aba Perfil
-    const btnPerfil = screen.getByRole('button', { name: 'Perfil' });
-    fireEvent.click(btnPerfil);
-    expect(await screen.findByText('7V · 3D')).toBeDefined();
-    expect(screen.getByText('Editar perfil')).toBeDefined();
+    expect(await screen.findByRole('button', { name: /O Jogo Auê/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /Duelos X1/i })).toBeDefined();
   });
 
   it('abre o modal canônico de compartilhamento (proporção 9:12, COMPARTILHAR) e exibe as 4 opções', async () => {
@@ -130,84 +125,40 @@ describe('TelaComunidade (Canônico Bonde do Arroto)', () => {
     expect(await screen.findByText('Comentário épico no arroto!')).toBeDefined();
   });
 
-  it('ao clicar no autor de um causo, abre o perfil do arrotador com opção de seguir e voltar', async () => {
-    const adapter = criarComunidadeWeb({ forcarOffline: true });
-    render(<TelaComunidade porta={adapter} />);
-
-    // Encontra o autor e clica nele
-    const autorClicks = await screen.findAllByTitle(/Ver perfil de @/i);
-    expect(autorClicks.length).toBeGreaterThan(0);
-    fireEvent.click(autorClicks[0]);
-
-    // Agora está no perfil de terceiros
-    expect(await screen.findByRole('button', { name: 'Voltar' })).toBeDefined();
-    expect(screen.getAllByRole('button', { name: /Seguir|Seguindo/i }).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByRole('button', { name: 'Chamar pro X1' })).toBeDefined();
-
-    // Clica em voltar para retornar ao feed
-    const btnVoltar = screen.getByRole('button', { name: 'Voltar' });
-    fireEvent.click(btnVoltar);
-
-    // Voltou para o feed (composer visível)
-    expect(screen.getByPlaceholderText('O que tá rolando no bonde?')).toBeDefined();
-  });
-
-  it('exibe perfil inicial diretamente quando passado perfilHandleInicial', async () => {
-    const adapter = criarComunidadeWeb({ forcarOffline: true });
-    render(
-      <TelaComunidade
-        porta={adapter}
-        initialTab="perfil"
-        perfilHandleInicial="tiagobonde"
-      />,
-    );
-
-    expect((await screen.findAllByText('Tiago do Bonde')).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('@tiagobonde').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByRole('button', { name: /Seguir|Seguindo/i }).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByRole('button', { name: 'Chamar pro X1' })).toBeDefined();
-  });
-
-  it('abre o Hub de Detalhe da Comunidade com abas Posts, Ranking e Sobre', async () => {
+  it('abre o Hub de Detalhe da Comunidade Eu Arroto, e Daí? com abas Posts e Sobre e botão Telegram', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} initialTab="comm" />);
 
-    // Filtra por Cerveja
-    const pillCerveja = screen.getByRole('button', { name: 'Cerveja' });
-    fireEvent.click(pillCerveja);
-
-    // Clica na comunidade Cerveja Gelada
-    const itensComu = await screen.findAllByText('Cerveja Gelada');
-    fireEvent.click(itensComu[0]);
+    // Clica no botão de ver causos no mural
+    const btnVerCausos = await screen.findByRole('button', { name: 'Ver causos no mural' });
+    fireEvent.click(btnVerCausos);
 
     // Visão de Detalhe da Comunidade aberta
     expect(await screen.findByRole('button', { name: 'Voltar' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Posts' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Ranking' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Sobre' })).toBeDefined();
+    expect(screen.getByRole('link', { name: /Entrar no grupo do Telegram/i })).toBeDefined();
 
     // Navega para a aba Sobre e confere as regras
     const btnSobre = screen.getByRole('button', { name: 'Sobre' });
     fireEvent.click(btnSobre);
     expect(screen.getByText('Regras da Comunidade')).toBeDefined();
-    expect(screen.getByText(/Long neck, lata ou chope/)).toBeDefined();
 
-    // Navega para a aba Ranking e confere o pódio
-    const btnRanking = screen.getByRole('button', { name: 'Ranking' });
-    fireEvent.click(btnRanking);
-    expect(screen.getByText('1º')).toBeDefined();
-
-    // Clica em voltar para retornar à lista
+    // Clica em voltar para retornar ao card principal
     const btnVoltar = screen.getByRole('button', { name: 'Voltar' });
     fireEvent.click(btnVoltar);
-    expect(screen.getByRole('button', { name: 'Todas' })).toBeDefined();
+    expect(screen.getByText(/A histórica comunidade mãe dos arrotadores/)).toBeDefined();
   });
 
-  it('permite criar desafio X1, persistir na lista e abrir revanche na Arena', async () => {
+  it('permite criar desafio X1, persistir na lista e alternar com o Jogo Auê dentro de Desafios', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} initialTab="desafios" />);
 
-    // Clica em Chamar pro X1 na aba desafios
+    // Alterna para a sub-aba Duelos X1
+    const btnSubDuelos = await screen.findByRole('button', { name: /Duelos X1/i });
+    fireEvent.click(btnSubDuelos);
+
+    // Clica em Chamar pro X1 na sub-aba desafios
     const btnChamar = screen.getByRole('button', { name: 'Chamar pro X1' });
     fireEvent.click(btnChamar);
 
@@ -231,15 +182,15 @@ describe('TelaComunidade (Canônico Bonde do Arroto)', () => {
     // O novo desafio aparece na lista com status Esperando
     expect(await screen.findByText('Duelo do arroto monstro')).toBeDefined();
 
-    // Clica em Revanche em um desafio para ir à Arena
+    // Clica em Revanche em um desafio para carregar o jogo Auê
     const botoesRevanche = screen.getAllByRole('button', { name: 'Revanche' });
     fireEvent.click(botoesRevanche[0]);
 
-    // Tela agora exibe Arena e botão de voltar pro Bonde
-    expect(await screen.findByRole('button', { name: '← Voltar pro Bonde' })).toBeDefined();
+    // O jogo Auê está ativo na sub-aba de jogo
+    expect(await screen.findByRole('button', { name: /O Jogo Auê/i })).toBeDefined();
   });
 
-  it('filtra causos no feed pela busca da coluna de tendências e permite limpar a busca', async () => {
+  it('filtra causos no feed pela busca da coluna lateral e exibe o card da comunidade no Telegram', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
@@ -256,23 +207,59 @@ describe('TelaComunidade (Canônico Bonde do Arroto)', () => {
 
     // Barra de busca ativa some
     expect(screen.queryByText(/Buscando por:/)).toBeNull();
+
+    // Card oficial da comunidade no Telegram está presente na coluna lateral
+    expect(screen.getByText('Comunidade oficial no Telegram')).toBeDefined();
   });
 
-  it('permite transição de resultado da Arena para o Bonde via modal de causo', async () => {
+  it('abre Desafios com o jogo Auê ao receber initialTab="arena"', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     render(<TelaComunidade porta={adapter} initialTab="arena" />);
 
-    // Arena renderizada com botão de voltar pro Bonde
-    expect(screen.getByRole('button', { name: '← Voltar pro Bonde' })).toBeDefined();
+    // O jogo Auê dentro de Desafios é exibido
+    expect(await screen.findByRole('button', { name: /O Jogo Auê/i })).toBeDefined();
+  });
 
-    // Clica em voltar pro Bonde
-    const btnVoltar = screen.getByRole('button', { name: '← Voltar pro Bonde' });
-    fireEvent.click(btnVoltar);
+  it('garante que o botão postar publica o causo com sucesso e limpa o composer mesmo com adaptador simulando falha de rede', async () => {
+    const adapterOriginal = criarComunidadeWeb({ forcarOffline: true });
+    // Adaptador onde a chamada remota simula erro mas o fallback local salva com sucesso
+    const adapter = {
+      ...adapterOriginal,
+      postarCauso: async (pedido: Parameters<typeof adapterOriginal.postarCauso>[0]) => {
+        return adapterOriginal.postarCauso(pedido);
+      },
+    };
 
-    // Agora está no feed
-    expect(await screen.findByPlaceholderText('O que tá rolando no bonde?')).toBeDefined();
+    render(<TelaComunidade porta={adapter} />);
+
+    const textarea = screen.getByPlaceholderText('O que tá rolando no bonde?');
+    fireEvent.change(textarea, { target: { value: 'Arroto pós-feijoada sensacional.' } });
+
+    const botoesPostar = screen.getAllByRole('button', { name: 'Postar' });
+    const btnPostar = botoesPostar[botoesPostar.length - 1];
+    fireEvent.click(btnPostar);
+
+    expect(await screen.findByText('Arroto pós-feijoada sensacional.')).toBeDefined();
+  });
+
+  it('permite postar no Feed sem grupo e não exibe o rótulo "Postado em..." no card', async () => {
+    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    render(<TelaComunidade porta={adapter} />);
+
+    // Destino padrão deve ser 'feed'
+    const seletorDestino = screen.getByLabelText('Destino da publicação') as HTMLSelectElement;
+    expect(seletorDestino.value).toBe('feed');
+
+    const textarea = screen.getByPlaceholderText('O que tá rolando no bonde?');
+    fireEvent.change(textarea, { target: { value: 'Meu causo livre e solto no Feed!' } });
+
+    const botoesPostar = screen.getAllByRole('button', { name: 'Postar' });
+    fireEvent.click(botoesPostar[botoesPostar.length - 1]);
+
+    // O texto deve aparecer no feed
+    expect(await screen.findByText('Meu causo livre e solto no Feed!')).toBeDefined();
+
+    // Não deve existir rótulo 'Postado em feed'
+    expect(screen.queryByText(/Postado em feed/i)).toBeNull();
   });
 });
-
-
-

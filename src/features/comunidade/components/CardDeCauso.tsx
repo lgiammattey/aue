@@ -7,9 +7,10 @@ interface CardDeCausoProps {
   aoRepostar: (id: string) => void;
   aoDuvidar: (causo: CausoPostado) => void;
   aoCompartilhar: (causo: CausoPostado) => void;
-  aoResponder: (causoId: string, texto: string) => void;
+  aoResponder: (causoId: string, texto: string, respostaAId?: string) => void;
   aoDenunciar: (id: string) => void;
   aoAbrirPerfil?: (handle: string, nome?: string) => void;
+  aoAbrirHistoria?: (id: string) => void;
 }
 
 export const CardDeCauso: React.FC<CardDeCausoProps> = ({
@@ -21,6 +22,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   aoResponder,
   aoDenunciar,
   aoAbrirPerfil,
+  aoAbrirHistoria,
 }) => {
   const [tocando, setTocando] = useState(false);
   const [threadAberta, setThreadAberta] = useState(false);
@@ -104,7 +106,6 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
     >
       {/* Avatar 44px */}
       <div
-        onClick={() => aoAbrirPerfil?.(handle, causo.autorNome)}
         style={{
           width: '44px',
           height: '44px',
@@ -118,9 +119,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           fontSize: '14px',
           color: 'var(--fg)',
           userSelect: 'none',
-          cursor: aoAbrirPerfil ? 'pointer' : 'default',
         }}
-        title={`Ver perfil de @${handle}`}
       >
         {autorIni}
       </div>
@@ -129,16 +128,13 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
           <div
-            onClick={() => aoAbrirPerfil?.(handle, causo.autorNome)}
             style={{
               display: 'flex',
               gap: '4px',
               alignItems: 'baseline',
               flexWrap: 'wrap',
               minWidth: 0,
-              cursor: aoAbrirPerfil ? 'pointer' : 'default',
             }}
-            title={`Ver perfil de @${handle}`}
           >
             <b style={{ fontSize: '15px', color: 'var(--fg)' }}>{causo.autorNome}</b>
             <span style={{ color: 'var(--muted)', fontSize: '15px' }}>
@@ -211,15 +207,52 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           </div>
         </div>
 
-        {/* Texto */}
-        <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.4, textWrap: 'pretty', color: 'var(--fg)' }}>
-          {causo.conteudo}
-        </p>
+        {/* Texto do Causo (120 caracteres no feed com '...' e expansão de história) */}
+        {(() => {
+          const textoLongo = (causo.conteudo?.length || 0) > 120;
+          const textoExibido = textoLongo ? `${causo.conteudo.slice(0, 120)}...` : causo.conteudo;
+          return (
+            <p style={{ margin: 0, fontSize: '15px', lineHeight: 1.4, textWrap: 'pretty', color: 'var(--fg)' }}>
+              {textoExibido}{' '}
+              {textoLongo && (
+                <button
+                  type="button"
+                  onClick={() => aoAbrirHistoria?.(causo.id)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    color: 'var(--accent, #c6ff00)',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  abrir história completa
+                </button>
+              )}
+            </p>
+          );
+        })()}
 
-        {/* Postado em... */}
-        <span style={{ color: 'var(--muted)', fontSize: '13px' }}>
-          Postado em <b style={{ fontWeight: 600, color: 'var(--fg)' }}>{causo.comunidadeSlug}</b>
-        </span>
+        {/* Imagem se houver */}
+        {causo.imagemUrl && (
+          <div style={{ marginTop: '6px', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <img
+              src={causo.imagemUrl}
+              alt="Imagem do causo"
+              style={{ width: '100%', maxHeight: '360px', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
+        )}
+
+        {/* Postado em... (não exibe quando for postado no Feed) */}
+        {causo.comunidadeSlug && causo.comunidadeSlug.toLowerCase() !== 'feed' && (
+          <span style={{ color: 'var(--muted)', fontSize: '13px' }}>
+            Postado em <b style={{ fontWeight: 600, color: 'var(--fg)' }}>{causo.comunidadeSlug}</b>
+          </span>
+        )}
 
         {/* Player com waveform de 28 barras, duração mono e badge Anton 24px */}
         {(causo.nota !== undefined || causo.audioUrl) && (
@@ -290,22 +323,6 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
             <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: '12px', color: 'var(--muted)' }}>
               {formatarDuracao(causo.duracaoSegundos)}
             </span>
-
-            {causo.nota !== undefined && (
-              <span
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '24px',
-                  lineHeight: 1,
-                  background: 'var(--accent)',
-                  color: 'var(--accent-on)',
-                  borderRadius: '12px',
-                  padding: '6px 10px',
-                }}
-              >
-                {causo.nota}
-              </span>
-            )}
           </div>
         )}
 
@@ -425,7 +442,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
           </button>
         </div>
 
-        {/* Thread de respostas inline */}
+        {/* Comentários simples (lista reta) */}
         {threadAberta && (
           <div
             style={{
@@ -444,7 +461,13 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                 ).toUpperCase();
 
                 return (
-                  <div key={r.id} style={{ display: 'flex', gap: '10px' }}>
+                  <div
+                    key={r.id}
+                    style={{
+                      display: 'flex',
+                      gap: '10px',
+                    }}
+                  >
                     <div
                       onClick={() => aoAbrirPerfil?.(r.autorHandle, r.autorNome)}
                       style={{
@@ -465,7 +488,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                     >
                       {rIni}
                     </div>
-                    <div style={{ minWidth: 0, lineHeight: 1.4 }}>
+                    <div style={{ minWidth: 0, lineHeight: 1.4, flex: 1 }}>
                       <span
                         onClick={() => aoAbrirPerfil?.(r.autorHandle, r.autorNome)}
                         style={{ cursor: aoAbrirPerfil ? 'pointer' : 'default' }}

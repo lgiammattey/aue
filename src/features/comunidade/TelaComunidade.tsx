@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import type {
   CausoPostado,
   Comunidade,
   PortaDeComunidade,
 } from '../../portas/comunidade';
-import { Arena } from '../../arena/Arena';
-import { obterPerfilLocal, salvarPerfilLocal } from '../../plataforma/web/perfil';
+import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import type { PerfilUsuario } from '../../nucleo/usuario/perfil';
 import { BarraLateralNavegacao } from './components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from './components/BarraInferiorMobile';
@@ -15,11 +14,8 @@ import { ComposerCauso } from './components/ComposerCauso';
 import { CardDeCauso } from './components/CardDeCauso';
 import { AbaComunidades } from './components/AbaComunidades';
 import { AbaDesafios, type DesafioSocialItem } from './components/AbaDesafios';
-import { AbaPerfil } from './components/AbaPerfil';
 import { ColunaTendencias } from './components/ColunaTendencias';
 import { ModalCardCompartilhamento } from './ModalCardCompartilhamento';
-import { resolverPerfilPorHandle } from '../../nucleo/usuario/perfil';
-import { PERFIS_CATALOGO } from '../../plataforma/web/perfil';
 import {
   obterDesafiosSociaisLocais,
   salvarDesafioSocialLocal,
@@ -27,22 +23,24 @@ import {
 import './Comunidade.css';
 
 interface TelaComunidadeProps {
-  initialTab?: 'feed' | 'arena' | 'comm' | 'desafios' | 'perfil';
+  initialTab?: 'feed' | 'comm' | 'desafios' | 'arena' | 'perfil';
   perfilHandleInicial?: string;
   comunidadeSlugInicial?: string;
   porta?: PortaDeComunidade;
   onArrotar?: () => void;
   onDuvidar?: (causo: CausoPostado) => void;
+  aoAbrirHistoria?: (id: string) => void;
   resultadoRecente?: { id: string; nota: number };
 }
 
 export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   initialTab = 'feed',
-  perfilHandleInicial,
+  perfilHandleInicial: _perfilHandleInicial,
   comunidadeSlugInicial,
   porta,
   onArrotar,
   onDuvidar,
+  aoAbrirHistoria,
   resultadoRecente,
 }) => {
   const [adaptador] = useState<PortaDeComunidade>(() => porta ?? criarComunidadeWeb());
@@ -59,14 +57,13 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     typeof window !== 'undefined' ? window.innerWidth : 1200,
   );
 
-  const [tab, setTab] = useState<'feed' | 'arena' | 'comm' | 'desafios' | 'perfil'>(initialTab);
+  const tabNormalizada: 'feed' | 'comm' | 'desafios' =
+    initialTab === 'arena' ? 'desafios' : initialTab === 'perfil' ? 'feed' : initialTab;
+  const [tab, setTab] = useState<'feed' | 'comm' | 'desafios'>(tabNormalizada);
   const [comunidadeAtivaSlug] = useState<string | null>(comunidadeSlugInicial ?? null);
-  const [perfilVisualizadoHandle, setPerfilVisualizadoHandle] = useState<string | null>(
-    perfilHandleInicial ? perfilHandleInicial.replace(/^@/, '').toLowerCase() : null,
-  );
   const [filtroFeed, setFiltroFeed] = useState<'todos' | 'minhas'>('todos');
   const [comunidades, setComunidades] = useState<readonly Comunidade[]>([]);
-  const [minhasComunidades, setMinhasComunidades] = useState<readonly string[]>(['Bonde do Arroto', 'Cerveja Gelada']);
+  const [minhasComunidades, setMinhasComunidades] = useState<readonly string[]>(['eu-arroto-e-dai', 'Eu Arroto, e Daí?']);
   const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
   const [desafiosLista, setDesafiosLista] = useState<readonly DesafioSocialItem[]>(() =>
     obterDesafiosSociaisLocais(),
@@ -78,7 +75,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Modais e Feedback
   const [modalNovoAberto, setModalNovoAberto] = useState<boolean>(false);
   const [novoTextoModal, setNovoTextoModal] = useState<string>('');
-  const [novoComuModal, setNovoComuModal] = useState<string>('Bonde do Arroto');
+  const [novoComuModal, setNovoComuModal] = useState<string>('feed');
   const [novoTipoModal, setNovoTipoModal] = useState<'texto' | 'audio' | 'desafio'>('texto');
   const [novoOponenteModal, setNovoOponenteModal] = useState<string>('');
   const [modalShareAberto, setModalShareAberto] = useState<boolean>(false);
@@ -92,7 +89,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   const [toastMsg, setToastMsg] = useState<string>('');
 
-  const [perfil, setPerfil] = useState<PerfilUsuario>(() => {
+  const [perfil] = useState<PerfilUsuario>(() => {
     const p = obterPerfilLocal();
     if (p.vitoriasX1 === 0 && p.derrotasX1 === 0) {
       p.vitoriasX1 = 7;
@@ -107,53 +104,6 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       setToastMsg((cur) => (cur === msg ? '' : cur));
     }, 2200);
   };
-
-  const handleAtualizarPerfil = (novo: PerfilUsuario) => {
-    salvarPerfilLocal(novo);
-    setPerfil(novo);
-    avisar('Perfil salvo.');
-  };
-
-  const handleAbrirPerfil = (handle: string, _nome?: string) => {
-    const norm = handle.replace(/^@/, '').toLowerCase();
-    setPerfilVisualizadoHandle(norm);
-    setTab('perfil');
-  };
-
-  const handleIrMeuPerfil = () => {
-    setPerfilVisualizadoHandle(null);
-    setTab('perfil');
-  };
-
-  const perfilAtivo = useMemo(() => {
-    if (!perfilVisualizadoHandle || perfilVisualizadoHandle === perfil.handle.replace(/^@/, '').toLowerCase()) {
-      return perfil;
-    }
-    const causoDoAutor = causos.find(
-      (c) =>
-        (c.autorHandle && c.autorHandle.replace(/^@/, '').toLowerCase() === perfilVisualizadoHandle) ||
-        c.autorNome.toLowerCase().replace(/\s+/g, '_') === perfilVisualizadoHandle,
-    );
-    const conhecidos = causoDoAutor
-      ? [
-          ...PERFIS_CATALOGO,
-          {
-            id: `usr_${perfilVisualizadoHandle}`,
-            nome: causoDoAutor.autorNome,
-            handle: perfilVisualizadoHandle,
-            bio: 'Arrotador ativo no Bonde do Arroto.',
-            maiorScore: causoDoAutor.nota ?? 0,
-            vitoriasX1: 5,
-            derrotasX1: 2,
-          },
-        ]
-      : PERFIS_CATALOGO;
-
-    return resolverPerfilPorHandle(perfilVisualizadoHandle, perfil, conhecidos);
-  }, [perfilVisualizadoHandle, perfil, causos]);
-
-  const ehMeuPerfil =
-    perfilAtivo.handle.replace(/^@/, '').toLowerCase() === perfil.handle.replace(/^@/, '').toLowerCase();
 
   // Sincroniza tema
   useEffect(() => {
@@ -204,7 +154,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Se receber resultado recente da Arena
   useEffect(() => {
     if (resultadoRecente) {
-      setTab('arena');
+      setTab('desafios');
     }
   }, [resultadoRecente]);
 
@@ -237,8 +187,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   // Responder
-  const handleResponder = async (causoId: string, texto: string) => {
-    const nova = await adaptador.adicionarResposta(causoId, texto, perfil.nome, perfil.handle);
+  const handleResponder = async (causoId: string, texto: string, respostaAId?: string) => {
+    const nova = await adaptador.adicionarResposta(causoId, texto, perfil.nome, perfil.handle, respostaAId);
     if (nova) {
       setCausos((prev) =>
         prev.map((c) => {
@@ -277,19 +227,42 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   // Postar via composer rápido
-  const handlePostarRapido = async (texto: string) => {
-    const res = await adaptador.postarCauso({
-      comunidadeSlug: minhasComunidades[0] || 'Bonde do Arroto',
-      autorNome: perfil.nome,
-      conteudo: texto,
-      consentimentoAudioPublico: true,
-    });
-    if (res.ok) {
-      setCausos((prev) => [res.causo, ...prev]);
-      avisar('Postado no bonde.');
-      return true;
+  const handlePostarRapido = async (
+    dados: string | { texto: string; autorNome?: string; audioUrl?: string; duracaoSegundos?: number; videoUrl?: string; imagemUrl?: string; comunidadeSlug?: string },
+  ) => {
+    const texto = typeof dados === 'string' ? dados : dados.texto;
+    const autorNome = typeof dados === 'string' ? perfil.nome : (dados.autorNome || perfil.nome);
+    const audioUrl = typeof dados === 'string' ? undefined : dados.audioUrl;
+    const duracaoSegundos = typeof dados === 'string' ? undefined : dados.duracaoSegundos;
+    const videoUrl = typeof dados === 'string' ? undefined : dados.videoUrl;
+    const imagemUrl = typeof dados === 'string' ? undefined : dados.imagemUrl;
+    const comunidadeSlug = typeof dados === 'string' ? 'feed' : (dados.comunidadeSlug || 'feed');
+
+    try {
+      const res = await adaptador.postarCauso({
+        comunidadeSlug,
+        autorNome,
+        conteudo: texto,
+        audioUrl,
+        duracaoSegundos,
+        consentimentoAudioPublico: true,
+      });
+      if (res.ok) {
+        const causoComMidia: CausoPostado = {
+          ...res.causo,
+          videoUrl,
+          imagemUrl,
+        };
+        setCausos((prev) => [causoComMidia, ...prev]);
+        avisar(comunidadeSlug === 'feed' ? 'Postado no feed.' : `Postado em ${comunidadeSlug}.`);
+        return true;
+      }
+      avisar('Não foi possível postar.');
+      return false;
+    } catch {
+      avisar('Não foi possível postar.');
+      return false;
     }
-    return false;
   };
 
   // Postar via Modal
@@ -327,19 +300,25 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       return;
     }
 
-    const res = await adaptador.postarCauso({
-      comunidadeSlug: novoComuModal,
-      autorNome: perfil.nome,
-      conteudo: novoTextoModal.trim(),
-      consentimentoAudioPublico: true,
-    });
+    try {
+      const res = await adaptador.postarCauso({
+        comunidadeSlug: novoComuModal,
+        autorNome: perfil.nome,
+        conteudo: novoTextoModal.trim(),
+        consentimentoAudioPublico: true,
+      });
 
-    if (res.ok) {
-      setCausos((prev) => [res.causo, ...prev]);
-      setModalNovoAberto(false);
-      setNovoTextoModal('');
-      setTab('feed');
-      avisar(`Postado em ${novoComuModal}.`);
+      if (res.ok) {
+        setCausos((prev) => [res.causo, ...prev]);
+        setModalNovoAberto(false);
+        setNovoTextoModal('');
+        setTab('feed');
+        avisar(novoComuModal === 'feed' ? 'Postado no feed.' : `Postado em ${novoComuModal}.`);
+      } else {
+        avisar('Não foi possível postar.');
+      }
+    } catch {
+      avisar('Não foi possível postar.');
     }
   };
 
@@ -347,7 +326,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     if (onArrotar) {
       onArrotar();
     } else {
-      setTab('arena');
+      setTab('desafios');
     }
   };
 
@@ -392,6 +371,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Filtragem da lista de causos
   const causosFiltrados = causos.filter((c) => {
+    // Causos postados pelo próprio usuário na sessão SEMPRE aparecem no feed
+    if (c.meu) return true;
     if (filtroFeed === 'minhas') {
       const nasMinhas =
         minhasComunidades.includes(c.comunidadeSlug) ||
@@ -433,13 +414,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         {showLeft && (
           <BarraLateralNavegacao
             abaAtiva={tab}
-            aoMudarAba={(nova) => {
-              if (nova === 'perfil') {
-                handleIrMeuPerfil();
-              } else {
-                setTab(nova);
-              }
-            }}
+            aoMudarAba={(nova) => setTab(nova)}
             aoAbrirComposer={() => {
               setNovoTipoModal('texto');
               setModalNovoAberto(true);
@@ -466,19 +441,16 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
           }}
         >
           {/* Header Sticky (53px) e Abas Feed */}
-          {tab !== 'arena' && (
-            <HeaderSocial
-              abaAtiva={tab}
-              filtroFeed={filtroFeed}
-              aoMudarFiltroFeed={(f) => setFiltroFeed(f)}
-              isMobile={isMobile}
-              perfil={perfil}
-              aoAbrirPerfil={handleIrMeuPerfil}
-              aoAbrirArena={handleIrParaArena}
-              tema={theme}
-              aoAlternarTema={toggleTheme}
-            />
-          )}
+          <HeaderSocial
+            abaAtiva={tab}
+            filtroFeed={filtroFeed}
+            aoMudarFiltroFeed={(f) => setFiltroFeed(f)}
+            isMobile={isMobile}
+            perfil={perfil}
+            aoAbrirArena={handleIrParaArena}
+            tema={theme}
+            aoAlternarTema={toggleTheme}
+          />
 
           {/* 1. ABA FEED */}
           {tab === 'feed' && (
@@ -521,6 +493,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                 aoAbrirArrotar={handleIrParaArena}
                 aoAbrirDesafio={() => handleChamarDesafio()}
                 perfil={perfil}
+                comunidades={minhasComunidades}
               />
 
               {/* Feed de Causos com CardDeCauso completo */}
@@ -539,7 +512,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                     aoCompartilhar={handleCompartilharCauso}
                     aoResponder={handleResponder}
                     aoDenunciar={handleDenunciar}
-                    aoAbrirPerfil={handleAbrirPerfil}
+                    aoAbrirHistoria={aoAbrirHistoria || ((id) => { window.location.href = `/historia/${id}`; })}
                   />
                 ))
               ) : (
@@ -553,43 +526,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
             </div>
           )}
 
-          {/* 2. ABA ARENA */}
-          {tab === 'arena' && (
-            <div style={{ padding: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDesafioAtivoCodigo(undefined);
-                    setTab('feed');
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 0,
-                    color: 'var(--muted)',
-                    cursor: 'pointer',
-                    fontSize: '15px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  ← Voltar pro Bonde
-                </button>
-              </div>
-              <Arena
-                codigoDoDesafio={desafioAtivoCodigo}
-                onPostarNoBonde={(res) => {
-                  setTab('feed');
-                  setNovoTipoModal('audio');
-                  setNovoTextoModal(`Soltei um arroto de nota ${res.nota}!`);
-                  setModalNovoAberto(true);
-                }}
-              />
-            </div>
-          )}
-
-          {/* 3. ABA COMUNIDADES */}
+          {/* 2. ABA COMUNIDADE */}
           {tab === 'comm' && (
             <AbaComunidades
               comunidades={comunidades}
@@ -621,49 +558,27 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
               aoCompartilharCauso={handleCompartilharCauso}
               aoResponderCauso={handleResponder}
               aoDenunciarCauso={handleDenunciar}
-              aoAbrirPerfil={handleAbrirPerfil}
             />
           )}
 
-          {/* 4. ABA DESAFIOS (X1) */}
+          {/* 3. ABA DESAFIOS (O Jogo Auê entra aqui dentro) */}
           {tab === 'desafios' && (
             <AbaDesafios
               desafios={desafiosLista}
               aoCriarDesafio={() => handleChamarDesafio()}
               aoRevanche={(d) => {
                 setDesafioAtivoCodigo(d.codigo);
-                setTab('arena');
               }}
               aoCompartilhar={handleCompartilharDesafio}
               perfil={perfil}
-            />
-          )}
-
-          {/* 5. ABA PERFIL */}
-          {tab === 'perfil' && (
-            <AbaPerfil
-              perfil={perfilAtivo}
-              ehMeuPerfil={ehMeuPerfil}
-              aoSalvarPerfil={handleAtualizarPerfil}
-              meusCausos={causos.filter((c) => {
-                const h = (c.autorHandle || c.autorNome.toLowerCase().replace(/\s+/g, '_')).replace(/^@/, '').toLowerCase();
-                return h === perfilAtivo.handle.replace(/^@/, '').toLowerCase() || c.autorNome === perfilAtivo.nome;
-              })}
-              minhasComunidades={minhasComunidades}
-              aoCurtirCauso={handleCurtir}
-              aoRepostarCauso={handleRepostar}
-              aoDuvidarCauso={(item) => handleChamarDesafio(item)}
-              aoCompartilharCauso={handleCompartilharCauso}
-              aoResponderCauso={handleResponder}
-              aoDenunciarCauso={handleDenunciar}
-              aoVoltar={!ehMeuPerfil ? () => setTab('feed') : undefined}
-              aoChamarX1={(p) => {
-                setNovoTipoModal('desafio');
-                setNovoOponenteModal(`@${p.handle}`);
-                setNovoTextoModal(`Bora pro X1, @${p.handle}!`);
+              desafioAtivoCodigo={desafioAtivoCodigo}
+              onPostarNoBonde={(res) => {
+                setTab('feed');
+                setNovoTipoModal('audio');
+                const notaTexto = res?.nota ? ` Tirei ${res.nota} no Auê Score!` : '';
+                setNovoTextoModal(`Soltei um arroto no Auê!${notaTexto}`);
                 setModalNovoAberto(true);
               }}
-              aoAbrirPerfil={handleAbrirPerfil}
             />
           )}
         </main>
@@ -671,7 +586,6 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         {/* Coluna Direita: Tendências (320px) */}
         {showRight && (
           <ColunaTendencias
-            aoAbrirPerfil={handleAbrirPerfil}
             termoBusca={termoBusca}
             aoMudarBusca={(t) => {
               setTermoBusca(t);
@@ -689,13 +603,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       {isMobile && (
         <BarraInferiorMobile
           abaAtiva={tab}
-          aoMudarAba={(nova) => {
-            if (nova === 'perfil') {
-              handleIrMeuPerfil();
-            } else {
-              setTab(nova);
-            }
-          }}
+          aoMudarAba={(nova) => setTab(nova)}
           aoAbrirComposer={() => {
             setNovoTipoModal('texto');
             setModalNovoAberto(true);
@@ -815,7 +723,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                 <select
                   value={novoComuModal}
                   onChange={(e) => setNovoComuModal(e.target.value)}
-                  aria-label="Bonde"
+                  aria-label="Destino da publicação"
                   style={{
                     alignSelf: 'flex-start',
                     height: '28px',
@@ -830,11 +738,14 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                     cursor: 'pointer',
                   }}
                 >
-                  {minhasComunidades.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
+                  <option value="feed">Feed</option>
+                  {minhasComunidades
+                    .filter((c) => c.toLowerCase() !== 'feed')
+                    .map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
                 </select>
 
                 {novoTipoModal === 'desafio' && (

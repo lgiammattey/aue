@@ -34,8 +34,9 @@ export interface Flags {
     ------------------------------------------------------------------------
     ERAM ONZE. A #109 apagou oito, junto com o código que elas escondiam.
 
-    O que saiu: feed, ranking global, XP, conquistas, perfil social, grupos e
-    comunidades, ligas, push e assinatura. Nenhuma delas estava ligada em
+    O que saiu: ranking global, XP, conquistas, perfil social, grupos, ligas,
+    push e assinatura. (Feed e comunidades voltaram como decisão de produto do
+    Auê 3.0, sem flag: ADR 0004 e ESCOPO_ATUAL §2.17.) Nenhuma delas estava ligada em
     produção; o que elas guardavam era código da visão anterior, decidido fora
     do jogo. Flag desligada convida a ligar, e ligar aquilo publicava o arroto
     de todo visitante, enchia o ranking de "Arrotador a1b2c3" e oferecia

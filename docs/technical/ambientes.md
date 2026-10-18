@@ -96,6 +96,10 @@ Antes de aplicar, pergunte: o app que está no ar agora continua funcionando com
 este banco? Se a resposta for não, migração e deploy viram um passo só, e a
 janela entre eles é tempo de produto quebrado.
 
+> **Atualização de 18/10/2026: hospedagem somente Firebase.** Quem publica é
+> `.github/workflows/publicar-firebase.yml`, em `https://aue.web.app`. As partes
+> abaixo que falam da Vercel descrevem o desenho anterior.
+
 ## Variáveis da Vercel são lidas em tempo de build
 
 Projeto `aue`, time `buildea-projects`, domínio `aue.vercel.app`.

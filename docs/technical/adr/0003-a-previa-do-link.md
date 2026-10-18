@@ -156,7 +156,7 @@ cobra, e ninguém reclama deles. Aceito.
   direto. Compartilhar não pode depender da prévia estar de pé;
 - o retorno da função tem que ser **URL absoluta** do endereço público. O
   relativo de hoje manda o jogador para o lugar errado, e é o defeito descrito
-  em [`deploy-vercel-e-og-dinamico.md`](../deploy-vercel-e-og-dinamico.md) §2;
+  em [`deploy-vercel-e-og-dinamico.md`](../../_arquivo/deploy-vercel-e-og-dinamico.md) §2;
 - **nenhum código de batalha vira previsível** por causa disso. O código é o
   mesmo de hoje, com a mesma imprevisibilidade e o mesmo prazo.
 

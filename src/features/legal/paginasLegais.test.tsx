@@ -48,6 +48,18 @@ describe('política de privacidade', () => {
     expect(montar(PoliticaDePrivacidade)).toContain('não é um segredo');
   });
 
+  it('diz o que a conta guarda e o que é público, sem prometer o que o app não faz', () => {
+    const html = montar(PoliticaDePrivacidade);
+    expect(html).toContain('Conta é opcional');
+    expect(html).toContain('O e-mail nunca aparece no seu perfil');
+    expect(html).toContain('Gravar para jogar não é autorizar a publicação');
+    expect(html).toContain('Apagar meu causo');
+    // Exclusão de conta ainda é por pedido: a página não pode fingir botão.
+    expect(html).toContain('Ainda não existe');
+    expect(html).not.toContain('não pede cadastro');
+    expect(html).not.toContain('Não existe login');
+  });
+
   it('aponta para os termos de uso', () => {
     expect(montar(PoliticaDePrivacidade)).toContain('href="/termos"');
   });
@@ -62,7 +74,7 @@ describe('termos de uso', () => {
     expect(html).toContain('Moderação');
   });
 
-  it('não inventa cobrança, conta nem verificação de idade', () => {
+  it('não inventa cobrança nem verificação de idade, e diz que a conta é opcional', () => {
     /*
       As três armadilhas deste documento, todas presentes no protótipo:
 
@@ -74,7 +86,7 @@ describe('termos de uso', () => {
     */
     const html = montar(TermosDeUso);
     expect(html).toContain('não existe cobrança');
-    expect(html).toContain('não existe conta');
+    expect(html).toContain('conta, com e-mail e senha, é opcional');
     expect(html).toContain('Não existe verificação de idade');
   });
 

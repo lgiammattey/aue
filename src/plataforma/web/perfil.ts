@@ -26,8 +26,8 @@ export function obterPerfilLocal(): PerfilUsuario {
       bio: parsed.bio || 'Arrotador oficial no Bonde do Arroto.',
       avatarUrl: parsed.avatarUrl,
       maiorScore: typeof parsed.maiorScore === 'number' ? parsed.maiorScore : 0,
-      vitoriasX1: typeof parsed.vitoriasX1 === 'number' ? parsed.vitoriasX1 : 7,
-      derrotasX1: typeof parsed.derrotasX1 === 'number' ? parsed.derrotasX1 : 3,
+      vitoriasX1: typeof parsed.vitoriasX1 === 'number' ? parsed.vitoriasX1 : 0,
+      derrotasX1: typeof parsed.derrotasX1 === 'number' ? parsed.derrotasX1 : 0,
     };
   } catch {
     return criarPerfilPadrao();

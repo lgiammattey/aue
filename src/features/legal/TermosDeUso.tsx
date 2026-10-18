@@ -44,7 +44,8 @@ export const TermosDeUso: React.FC = () => (
       </p>
       <p>
         Usar o Auê é de graça. Nesta versão não existe cobrança, assinatura, nem
-        compra dentro do app: não há nada para pagar e nada para cancelar.
+        compra dentro do app: não há nada para pagar e nada para cancelar. A
+        conta, com e-mail e senha, é opcional.
       </p>
     </Secao>
 
@@ -53,6 +54,8 @@ export const TermosDeUso: React.FC = () => (
         <li>Enviar só gravações feitas por você, ou por quem sabe que está sendo gravado e topou.</li>
         <li>Não mandar conteúdo sexual, discurso de ódio, ameaça, assédio ou crime.</li>
         <li>Não usar o Auê para expor, humilhar ou perseguir alguém.</li>
+        <li>Não se passar por outra pessoa no apelido, no @ ou no perfil.</li>
+        <li>Só publicar no Bonde o que você tem direito de publicar. O que você posta ali é público.</li>
         <li>Não tentar quebrar, sobrecarregar ou automatizar o serviço.</li>
       </ul>
       <p>
@@ -65,7 +68,9 @@ export const TermosDeUso: React.FC = () => (
       <p>
         O áudio é seu. O que você dá ao Auê é permissão para guardá-lo e tocá-lo
         dentro do app para quem abrir a batalha em que você gravou — que é o
-        mínimo para o produto funcionar, e é o que ele já faz.
+        mínimo para o produto funcionar. Para o arroto aparecer no Bonde, você
+        precisa publicar e marcar a autorização na hora; ao fazer isso, você
+        permite que qualquer pessoa o ouça e comente.
       </p>
       <p>
         Onde isso fica guardado, por quanto tempo e quem consegue ouvir está na{' '}
@@ -83,8 +88,9 @@ export const TermosDeUso: React.FC = () => (
         mundo. Gravação escondida à mão não volta por falta de denúncia nova.
       </p>
       <p>
-        Como não existe conta, não existe "banimento de usuário": o que é
-        removido é o conteúdo, e o acesso pode ser bloqueado.
+        Causos, comentários e perfis também podem ser denunciados e escondidos. A
+        moderação age primeiro sobre o conteúdo. Quem abusar repetidamente pode
+        ter a conta ou o acesso bloqueados.
       </p>
     </Secao>
 
@@ -112,8 +118,8 @@ export const TermosDeUso: React.FC = () => (
 
     <Secao titulo="Estas regras podem mudar">
       <p>
-        Quando mudarem, mudam nesta página. Não existe e-mail de aviso porque não
-        existe e-mail seu guardado em lugar nenhum.
+        Quando mudarem, mudam nesta página, antes de valer. Mudança que mexa no que
+        você já publicou ou no uso do seu e-mail é avisada também no app.
       </p>
     </Secao>
 

@@ -26,8 +26,8 @@ export function criarPerfilPadrao(): PerfilUsuario {
     handle: 'voce_arrota',
     bio: 'Arrotador oficial no Bonde do Arroto.',
     maiorScore: 0,
-    vitoriasX1: 7,
-    derrotasX1: 3,
+    vitoriasX1: 0,
+    derrotasX1: 0,
   };
 }
 

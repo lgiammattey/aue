@@ -566,40 +566,21 @@ export interface DesafioSocialRegistro {
   codigo: string;
 }
 
+/**
+ * Os duelos desta lista eram semente fixa e registro local sem servidor atrás —
+ * placar e link de mentira. X1 de verdade só existe dentro da Arena. A lista fica
+ * vazia e a chave antiga é apagada do aparelho.
+ */
 const CHAVE_DESAFIOS_SOCIAIS = 'aue-desafios-sociais';
 
-export const DESAFIOS_SOCIAIS_PADRAO: DesafioSocialRegistro[] = [
-  { id: 1, titulo: 'Churrasco de domingo', jogadorA: 'voce_arrota', jogadorB: 'tiobeto', notaA: 94, notaB: 88, status: 'Ganhou', codigo: 'k4x9' },
-  { id: 2, titulo: 'Agachamento da SmartFit', jogadorA: 'voce_arrota', jogadorB: 'iury_oficina', notaA: 92, notaB: 98, status: 'Perdeu', codigo: 's8m2' },
-  { id: 3, titulo: 'Dolby Atmos no Cinema', jogadorA: 'voce_arrota', jogadorB: 'rian_design', notaA: 89, notaB: '—', status: 'Esperando', codigo: 'c4d1' },
-];
-
 export function obterDesafiosSociaisLocais(): DesafioSocialRegistro[] {
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return DESAFIOS_SOCIAIS_PADRAO;
-  }
-  try {
-    const salvo = localStorage.getItem(CHAVE_DESAFIOS_SOCIAIS);
-    if (!salvo) return DESAFIOS_SOCIAIS_PADRAO;
-    const parseado = JSON.parse(salvo);
-    return Array.isArray(parseado) && parseado.length > 0 ? parseado : DESAFIOS_SOCIAIS_PADRAO;
-  } catch {
-    return DESAFIOS_SOCIAIS_PADRAO;
-  }
-}
-
-export function salvarDesafioSocialLocal(novo: DesafioSocialRegistro): DesafioSocialRegistro[] {
-  const atuais = obterDesafiosSociaisLocais();
-  // Evita duplicata se já existir o mesmo código
-  const semDuplicata = atuais.filter((d) => d.codigo !== novo.codigo);
-  const atualizados = [novo, ...semDuplicata];
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem(CHAVE_DESAFIOS_SOCIAIS, JSON.stringify(atualizados));
+      localStorage.removeItem(CHAVE_DESAFIOS_SOCIAIS);
     }
   } catch {
-    // ignora erro de armazenamento
+    // ignora
   }
-  return atualizados;
+  return [];
 }
 

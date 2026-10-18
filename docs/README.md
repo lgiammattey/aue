@@ -49,7 +49,7 @@ diz onde cada coisa mora.
 | Como o código está organizado hoje? | [`technical/arquitetura.md`](technical/arquitetura.md) + o código |
 | Por que essa gravação não virou nota? | [`technical/deteccao-de-arroto-yamnet.md`](technical/deteccao-de-arroto-yamnet.md) |
 | Onde o jogo roda e como uma migração sobe? | [`technical/ambientes.md`](technical/ambientes.md) |
-| Como o deploy e o OG dinâmico funcionam? | [`technical/deploy-vercel-e-og-dinamico.md`](technical/deploy-vercel-e-og-dinamico.md) |
+| Como o deploy funciona? | [`technical/hospedagem-firebase.md`](technical/hospedagem-firebase.md) |
 | Como a moderação de áudio funciona? | [`technical/moderacao-de-audio.md`](technical/moderacao-de-audio.md) |
 | Onde está o pacote consolidado de produção? | [`production-pack/Aue_Game_Production_Pack_v1.0/README.md`](production-pack/Aue_Game_Production_Pack_v1.0/README.md) |
 | O que sobrou no banco sem ninguém chamar? | [`technical/banco-sem-consumidor.md`](technical/banco-sem-consumidor.md) |

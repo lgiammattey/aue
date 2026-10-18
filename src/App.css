@@ -182,3 +182,23 @@
     border-right-color: var(--border);
   }
 }
+
+/* Atalho da /arena de volta para o Bonde. */
+.voltar-pro-feed {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  left: 16px;
+  z-index: 50;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong, #3a3a3c);
+  background: var(--surface-2, #1c1c1e);
+  color: var(--fg, #ffffff);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}

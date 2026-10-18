@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, type ComponentProps } from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
-import { obterDesafiosSociaisLocais, type DesafioSocialRegistro } from '../../../plataforma/web/desafios';
+import type { DesafioSocialRegistro } from '../../../plataforma/web/desafios';
 import { Arena } from '../../../arena/Arena';
 
 export type DesafioSocialItem = DesafioSocialRegistro;
@@ -11,7 +11,7 @@ interface AbaDesafiosProps {
   aoRevanche?: (desafio: DesafioSocialItem) => void;
   aoCompartilhar: (desafio: DesafioSocialItem) => void;
   perfil?: PerfilUsuario;
-  onPostarNoBonde?: (res: { nota: number }) => void;
+  onPostarNoBonde?: ComponentProps<typeof Arena>['onPostarNoBonde'];
   desafioAtivoCodigo?: string;
   iniciarNoJogo?: boolean;
 }
@@ -27,7 +27,7 @@ export const AbaDesafios: React.FC<AbaDesafiosProps> = ({
 }) => {
   const [subAba, setSubAba] = useState<'jogo' | 'duelos'>(iniciarNoJogo ? 'jogo' : 'duelos');
   const [codigoDesafioAtual, setCodigoDesafioAtual] = useState<string | undefined>(desafioAtivoCodigo);
-  const lista = desafios && desafios.length > 0 ? desafios : obterDesafiosSociaisLocais();
+  const lista = desafios ?? [];
 
   const handleRevanche = (d: DesafioSocialItem) => {
     setCodigoDesafioAtual(d.codigo);
@@ -133,6 +133,12 @@ export const AbaDesafios: React.FC<AbaDesafiosProps> = ({
               Chamar pro X1
             </button>
           </div>
+
+          {lista.length === 0 && (
+            <p style={{ padding: '24px 16px', color: 'var(--muted)', fontSize: '15px' }}>
+              Nenhum X1 por aqui ainda. Arrote, receba a nota e chame alguém: o link do duelo sai da Arena.
+            </p>
+          )}
 
           {/* Lista de Desafios */}
           {lista.map((d) => (

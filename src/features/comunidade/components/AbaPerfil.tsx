@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 import type { CausoPostado } from '../../../portas/comunidade';
-import { alternarSeguirLocal, obterSeguindoLocais } from '../../../plataforma/web/perfil';
 import { CardDeCauso } from './CardDeCauso';
 
 interface AbaPerfilProps {
@@ -43,15 +42,8 @@ export const AbaPerfil: React.FC<AbaPerfilProps> = ({
   const [edBio, setEdBio] = useState(perfil.bio || 'Arroto de respeito, sem moral.');
   const [edCidade, setEdCidade] = useState(perfil.cidade || 'Rio de Janeiro');
   const [ptab, setPtab] = useState<'posts' | 'audios' | 'curtidas'>('posts');
-  const [seguindoLista, setSeguindoLista] = useState<string[]>(() => obterSeguindoLocais());
-
-  const handleNormalizado = perfil.handle.replace(/^@/, '').toLowerCase();
-  const euSigo = seguindoLista.includes(handleNormalizado);
-
-  const toggleSeguir = () => {
-    alternarSeguirLocal(handleNormalizado);
-    setSeguindoLista(obterSeguindoLocais());
-  };
+  // Seguir não existe no servidor (escopo atual): o botão fica desabilitado.
+  const euSigo = false;
 
   const iniciais = (perfil.nome?.trim().split(/\s+/).length > 1
     ? (perfil.nome.trim().split(/\s+/)[0][0] + perfil.nome.trim().split(/\s+/)[1][0])
@@ -92,7 +84,7 @@ export const AbaPerfil: React.FC<AbaPerfilProps> = ({
   // Filtragem por sub-aba
   const postsFiltrados = meusCausos.filter((p) => {
     if (ptab === 'curtidas') return p.curtidoPorMim;
-    if (ptab === 'audios') return p.nota !== undefined || p.audioUrl;
+    if (ptab === 'audios') return p.nota !== undefined || p.temAudio;
     return true;
   });
 
@@ -284,7 +276,8 @@ export const AbaPerfil: React.FC<AbaPerfilProps> = ({
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 type="button"
-                onClick={toggleSeguir}
+                disabled
+                title="Seguir chega junto com as contas. Ainda não existe no servidor."
                 style={{
                   height: '40px',
                   borderRadius: '12px',
@@ -293,7 +286,8 @@ export const AbaPerfil: React.FC<AbaPerfilProps> = ({
                   color: euSigo ? 'var(--fg)' : 'var(--bg)',
                   fontWeight: 700,
                   fontSize: '14px',
-                  cursor: 'pointer',
+                  cursor: 'not-allowed',
+                  opacity: 0.5,
                   flex: 'none',
                   padding: '0 18px',
                 }}
@@ -433,16 +427,6 @@ export const AbaPerfil: React.FC<AbaPerfilProps> = ({
           </div>
         )}
 
-        {/* Seguindo / Seguidores */}
-        <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '14px' }}>
-          <span>
-            <b>{ehMeuPerfil ? seguindoLista.length : 124}</b> <span style={{ color: 'var(--muted)' }}>Seguindo</span>
-          </span>
-          <span>
-            <b>{ehMeuPerfil ? '2,4 mil' : euSigo ? 12 : 11}</b> <span style={{ color: 'var(--muted)' }}>Seguidores</span>
-          </span>
-        </div>
-
         {/* Linha Canônica: Melhor Nota, Cartel X1, Comunidades */}
         <div style={{ display: 'flex', gap: '20px', marginTop: '8px', fontSize: '14px' }}>
           <span>
@@ -452,7 +436,7 @@ export const AbaPerfil: React.FC<AbaPerfilProps> = ({
             <b>{perfil.vitoriasX1}V · {perfil.derrotasX1}D</b> <span style={{ color: 'var(--muted)' }}>no X1</span>
           </span>
           <span>
-            <b>{minhasComunidades.length || 2}</b> <span style={{ color: 'var(--muted)' }}>comunidades</span>
+            <b>{minhasComunidades.length}</b> <span style={{ color: 'var(--muted)' }}>comunidades</span>
           </span>
         </div>
       </div>

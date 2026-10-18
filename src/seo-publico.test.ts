@@ -215,7 +215,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     }
   });
 
-  it('AS DUAS hospedagens servem cada rota de conteúdo antes do catch-all', () => {
+  it('o Firebase serve cada rota de conteúdo antes do catch-all', () => {
     /*
       POR QUE O FIREBASE ENTROU AQUI, e este é o buraco que a #138 fecha.
 
@@ -229,15 +229,6 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       lista de rotas. Rota nova que esquecer uma das duas derruba a suíte.
     */
     const hospedagens = [
-      {
-        nome: 'vercel.json',
-        catchAll: '/(.*)',
-        rewrites: (
-          JSON.parse(ler('../vercel.json')) as {
-            rewrites: Array<{ source: string; destination: string }>;
-          }
-        ).rewrites,
-      },
       {
         nome: 'firebase.json',
         catchAll: '**',
@@ -294,35 +285,13 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     }
   });
 
-  it('cleanUrls continua fora do vercel.json', () => {
-    const vercel = JSON.parse(ler('../vercel.json')) as {
-      cleanUrls?: boolean;
-      rewrites: Array<{ source: string; destination: string }>;
-    };
-
-    /*
-      `cleanUrls` NÃO pode voltar, e isto custou uma produção quebrada.
-
-      Ele foi ligado aqui para evitar que `/privacidade.html` respondesse como
-      uma segunda URL com o mesmo conteúdo. O efeito colateral não apareceu em
-      teste nenhum: com `cleanUrls`, a Vercel deixa de endereçar destinos com
-      `.html`, e o catch-all `/(.*)` -> `/index.html` para de resolver. Toda
-      rota de SPA passou a devolver **404** em produção — `/b/CODIGO`, que é a
-      mecânica viral inteira, incluída.
-
-      As duas rotas legais sobreviveram por acidente: com `cleanUrls` elas eram
-      servidas direto pelo arquivo, sem passar pelo rewrite. Ou seja, a
-      configuração que "funcionava" nas rotas testadas era a mesma que matava
-      todas as outras.
-
-      A duplicata `/privacidade.html` continua existindo e é aceita: cada HTML
-      declara o próprio `canonical` apontando para a URL sem extensão, que é o
-      mecanismo pensado exatamente para isso.
-    */
-    expect(
-      vercel.cleanUrls,
-      'cleanUrls quebra o catch-all e faz /b/CODIGO devolver 404',
-    ).toBeUndefined();
+  it('a hospedagem é só o Firebase: não sobrou vercel.json nem cleanUrls', () => {
+    // Decisão de 18/10/2026: um endereço, uma hospedagem. Um `vercel.json`
+    // voltando ao repositório é sinal de segundo publicador (e de dois jogos).
+    expect(() => ler('../vercel.json')).toThrow();
+    const firebase = JSON.parse(ler('../firebase.json')) as { hosting: { cleanUrls?: boolean } };
+    // cleanUrls reescreve destinos `.html` e já derrubou o catch-all uma vez.
+    expect(firebase.hosting.cleanUrls).toBeUndefined();
   });
 });
 

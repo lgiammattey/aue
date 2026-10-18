@@ -4,12 +4,14 @@ interface BarraInferiorMobileProps {
   abaAtiva: 'feed' | 'comm' | 'desafios';
   aoMudarAba: (aba: 'feed' | 'comm' | 'desafios') => void;
   aoAbrirComposer?: () => void;
+  aoAbrirPerfil?: () => void;
 }
 
 export const BarraInferiorMobile: React.FC<BarraInferiorMobileProps> = ({
   abaAtiva,
   aoMudarAba,
   aoAbrirComposer,
+  aoAbrirPerfil,
 }) => {
   const tabs = [
     {
@@ -39,7 +41,7 @@ export const BarraInferiorMobile: React.FC<BarraInferiorMobileProps> = ({
           bottom: 0,
           height: '56px',
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: `repeat(${aoAbrirPerfil ? 4 : 3}, 1fr)`,
           borderTop: '1px solid var(--border)',
           background: 'var(--bg)',
           zIndex: 6,
@@ -80,6 +82,18 @@ export const BarraInferiorMobile: React.FC<BarraInferiorMobileProps> = ({
             </button>
           );
         })}
+        {aoAbrirPerfil && (
+          <button
+            type="button"
+            onClick={aoAbrirPerfil}
+            aria-label="Perfil"
+            style={{ border: 0, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}
+          >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21v-1a8 8 0 0116 0v1" />
+            </svg>
+          </button>
+        )}
       </nav>
 
       {/* Botão flutuante '+' mobile 56x56 */}

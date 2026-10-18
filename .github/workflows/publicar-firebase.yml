@@ -1,8 +1,9 @@
 # Publicação do Auê no Firebase Hosting
 #
-# Todo merge na `main` publica em https://aue.web.app. A Vercel continua
-# publicando por conta dela, pela integração com o GitHub — os dois endereços
-# ficam no ar até o Firebase estabilizar (#137).
+# Todo merge na `main` publica em https://aue.web.app. Esta é a ÚNICA
+# hospedagem (decisão de 18/10/2026): o `vercel.json` saiu do repositório e a
+# integração da Vercel com o GitHub deve ficar desligada, senão cada push
+# publica duas vezes e os endereços podem servir builds diferentes.
 #
 # POR QUE ISTO PRECISA DE SEGREDO, AO CONTRÁRIO DA VALIDAÇÃO
 # ----------------------------------------------------------
@@ -40,7 +41,7 @@
 # fluxo de telas antigo enquanto o aue.vercel.app servia a Arena. Dois jogos
 # diferentes no mesmo produto, sem nenhum erro em lugar nenhum.
 #
-# Se alguém ligar ou desligar uma flag na Vercel, TEM que mexer aqui também.
+# Flag se liga e desliga AQUI, no arquivo. Não existe outro painel que mande.
 # A prova de que os dois endereços estão em paridade é o nome do arquivo
 # `assets/main-*.js` ser idêntico nos dois — se divergiu, alguma flag divergiu.
 

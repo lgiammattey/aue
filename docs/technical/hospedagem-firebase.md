@@ -1,5 +1,13 @@
 # Hospedagem no Firebase, e os dois endereços convivendo
 
+> **Atualização de 18/10/2026 — decisão do Luiz: hospedagem somente Firebase.**
+> O `vercel.json` saiu do repositório e `https://aue.web.app` é o único endereço
+> publicado por este projeto. As seções abaixo contam a convivência dos dois
+> endereços e ficam como histórico. **Falta fora do repositório** (painel da
+> Vercel): desligar a integração com o GitHub e, quando o redirecionamento de
+> `aue.vercel.app` para `aue.web.app` estiver de pé (§5), pausar o projeto. Até
+> lá o endereço antigo continua respondendo aos links que já circularam.
+
 Escopo: `firebase.json`, `.firebaserc` e o procedimento de publicar. Não cobre
 banco, autenticação nem variáveis de aplicação (essas estão no `.env.example`).
 

@@ -27,9 +27,13 @@ export function MenuDeAcoes({ rotulo, itens, botaoRef }: Props) {
   const botao = botaoRef ?? interno;
   const itensRef = useRef<(HTMLButtonElement | null)[]>([]);
   const idDaLista = useId();
+  const lista = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    if (aberto) itensRef.current[0]?.focus();
+    if (!aberto) return;
+    itensRef.current[0]?.focus({ preventScroll: true });
+    // A lista toda dentro da tela, mesmo para um botão colado na borda de baixo.
+    lista.current?.scrollIntoView?.({ block: 'nearest' });
   }, [aberto]);
 
   if (itens.length === 0) return null;
@@ -90,7 +94,7 @@ export function MenuDeAcoes({ rotulo, itens, botaoRef }: Props) {
       {aberto && (
         <>
           <div className="forum-menu__fundo" onClick={() => fechar(false)} aria-hidden="true" />
-          <ul id={idDaLista} className="forum-menu__lista" role="menu" aria-label={rotulo} onKeyDown={aoTeclarNaLista}>
+          <ul ref={lista} id={idDaLista} className="forum-menu__lista" role="menu" aria-label={rotulo} onKeyDown={aoTeclarNaLista}>
             {itens.map((item, i) => (
               <li key={item.id} role="none">
                 <button

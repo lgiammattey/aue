@@ -299,12 +299,17 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
   const tituloRef = useRef<HTMLHeadingElement>(null);
   const caminho = local.pathname + local.search;
 
-  const chavePrincipal = chaveDoRascunhoDeResposta(papel.tipo === 'conta' ? papel.contaId : 'sem-conta', id, null);
-  const [textoPrincipal, setTextoPrincipal] = useState(() => lerRascunhoDeResposta(armazenamento, chavePrincipal));
+  // O rascunho é da conta: só se sabe a chave depois que o papel chega (e muda se a conta mudar).
+  const contaId = papel.tipo === 'conta' ? papel.contaId : null;
+  const chavePrincipal = contaId ? chaveDoRascunhoDeResposta(contaId, id, null) : null;
+  const [textoPrincipal, setTextoPrincipal] = useState('');
+  useEffect(() => {
+    setTextoPrincipal(chavePrincipal ? lerRascunhoDeResposta(armazenamento, chavePrincipal) : '');
+  }, [armazenamento, chavePrincipal]);
   const mudarTextoPrincipal = useCallback(
     (t: string) => {
       setTextoPrincipal(t);
-      guardarRascunhoDeResposta(armazenamento, chavePrincipal, t);
+      if (chavePrincipal) guardarRascunhoDeResposta(armazenamento, chavePrincipal, t);
     },
     [armazenamento, chavePrincipal],
   );

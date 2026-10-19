@@ -1124,6 +1124,14 @@ describe('detalhes do composer (R3, R4, R5)', () => {
 });
 
 describe('rascunho de resposta é de uma conta só (B1)', () => {
+  it('o rascunho do disco aparece mesmo com o papel chegando depois da conversa (recarregar a página)', async () => {
+    const armazenamento = armazenamentoFalso();
+    armazenamento.gravar(chaveDoRascunhoDeResposta('conta-a', ID, null), JSON.stringify({ corpo: 'do disco' }));
+    abrir({ armazenamento });
+    await esperarConversa();
+    await waitFor(() => expect(campo().value).toBe('do disco'));
+  });
+
   it('a conta B não vê o rascunho da A no mesmo navegador', async () => {
     const armazenamento = armazenamentoFalso();
     armazenamento.gravar(chaveDoRascunhoDeResposta('conta-a', ID, null), JSON.stringify({ corpo: 'segredo da A' }));

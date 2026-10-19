@@ -1442,7 +1442,7 @@ html:has(.forum-dialogo[open]) {
 }
 
 /* Com o dialog aberto, o verde da tela é o do formulário: o "Novo tópico" de trás (só escurecido pelo fundo) perde o verde. */
-.forum-shell:has(.forum-dialogo[open]) .forum-cabecalho .forum-botao--acento {
+.forum-shell:has(.forum-dialogo[open]) .forum-botao--acento:not(.forum-dialogo .forum-botao--acento) {
   background: transparent;
   color: var(--fg);
   box-shadow: inset 0 0 0 1px var(--border-strong);
@@ -1638,4 +1638,18 @@ html:has(.forum-dialogo[open]) {
   color: var(--muted);
   font-size: 0.8125rem;
   line-height: 1.4;
+}
+
+/* Celular: o menu é uma folha acima da barra inferior (dentro da tela em qualquer nível, sem ficar sob a barra). */
+@media (max-width: 699px) {
+  .forum-menu__lista,
+  .forum-resposta__acoes .forum-menu__lista {
+    position: fixed;
+    top: auto;
+    right: 16px;
+    left: 16px;
+    bottom: calc(56px + env(safe-area-inset-bottom) + 8px);
+    min-width: 0;
+    padding: 8px;
+  }
 }

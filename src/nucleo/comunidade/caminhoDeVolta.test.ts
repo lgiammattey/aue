@@ -17,6 +17,8 @@ describe('caminhoDeVoltaSeguro', () => {
     ['historia/abc'],
     [''],
     ['/login?volta=/historia/1'],
+    ['/LOGIN'],
+    ['/Login?x=1'],
     ['/' + 'a'.repeat(600)],
   ])('recusa %j', (entrada) => {
     expect(caminhoDeVoltaSeguro(entrada)).toBeNull();

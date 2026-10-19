@@ -22,9 +22,6 @@ import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
 
-/**
- * Abertura de desafio por link direto.
- */
 /** Leva ao login guardando a página atual, para a pessoa voltar a ela depois de entrar. */
 function useIrParaLogin() {
   const navigate = useNavigate();
@@ -33,6 +30,9 @@ function useIrParaLogin() {
     navigate(enderecoDoLoginComVolta(location.pathname + location.search, modo));
 }
 
+/**
+ * Abertura de desafio por link direto.
+ */
 function EntradaPorLink() {
   const { code } = useParams<{ code: string }>();
   return <Arena codigoDoDesafio={code} />;

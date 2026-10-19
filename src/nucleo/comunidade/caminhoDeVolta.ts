@@ -19,7 +19,7 @@ export function caminhoDeVoltaSeguro(bruto: string | null | undefined): string |
     if (letra === '\\' || codigo < 0x20 || codigo === 0x7f) return null;
   }
   // Não volta para as telas de entrada: viraria um laço.
-  if (/^\/login(?:[/?#]|$)/.test(bruto)) return null;
+  if (/^\/login(?:[/?#]|$)/i.test(bruto)) return null;
   return bruto;
 }
 

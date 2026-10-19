@@ -16,9 +16,11 @@ import type {
  * devolve ao adaptador: visitante lê, a paginação não repete nem pula, e o cursor
  * (texto do servidor, com microssegundo) volta como veio.
  *
- * COMO SE ATIVA: quando `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` existem e não
- * são os marcadores de exemplo (mesma regra de `scripts/grupos-do-supabase.ts`). Sem
- * credencial, o arquivo inteiro aparece como PULADO no relatório, nunca como verde.
+ * COMO SE ATIVA (opt-in, para `npm test` nunca bater no Supabase real sem querer):
+ *   AUE_TESTE_SERVIDOR=1 npx vitest run src/plataforma/web/forum.servidor.test.ts
+ * além de `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` existirem e não serem os
+ * marcadores de exemplo (mesma regra de `scripts/grupos-do-supabase.ts`). Sem a
+ * variável ou sem credencial, o arquivo inteiro aparece como PULADO, nunca como verde.
  *
  * SÓ LEITURA, SEMPRE. Chave pública (a do navegador), sem sessão: é um visitante.
  * Nenhuma escrita é chamada aqui, nem por engano: o teste não tem `criar`, `responder`,
@@ -29,6 +31,7 @@ import type {
  */
 
 function credenciais(): { url: string; chave: string } | null {
+  if (process.env.AUE_TESTE_SERVIDOR !== '1') return null;
   const url = process.env.VITE_SUPABASE_URL ?? '';
   const chave = process.env.VITE_SUPABASE_ANON_KEY ?? '';
   if (!url || !chave) return null;

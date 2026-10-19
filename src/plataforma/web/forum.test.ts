@@ -446,6 +446,34 @@ describe('escritas: visitante', () => {
     });
   });
 
+  it('getSession com erro de auth (refresh token inválido) é precisaEntrar, sem chamar a RPC', async () => {
+    getSession.mockResolvedValue({
+      data: { session: null },
+      error: { name: 'AuthApiError', message: 'Invalid Refresh Token', status: 400 },
+    });
+    expect(await criarForumWeb().apagarTopico(ID_A)).toEqual({ ok: false, motivo: 'precisaEntrar' });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it.each(['AuthRetryableFetchError', 'AuthUnknownError'])('getSession com erro %s segue falhou', async (name) => {
+    getSession.mockResolvedValue({ data: { session: null }, error: { name, message: 'x', status: 0 } });
+    expect(await criarForumWeb().apagarTopico(ID_A)).toEqual({ ok: false, motivo: 'falhou' });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['PGRST301', { data: null, error: { code: 'PGRST301', hint: null, message: 'JWT expired', details: null } }],
+    ['status 401', { data: null, error: { code: '', hint: null, message: 'x', details: null, status: 401 } }],
+  ])('JWT expirado (%s) é precisaEntrar, não semConfirmacao', async (_n, resposta) => {
+    rpc.mockResolvedValue(resposta);
+    expect(await criarForumWeb().apagarTopico(ID_A)).toEqual({ ok: false, motivo: 'precisaEntrar' });
+  });
+
+  it('slug desconhecido em listarTopicos é ok com zero itens (só slug em branco dá HINT)', async () => {
+    rpc.mockResolvedValue({ data: [], error: null });
+    expect(await criarForumWeb().listarTopicos('nao-existe')).toEqual({ ok: true, valor: { itens: [], proximo: null } });
+  });
+
   it('não conseguir ler a sessão não vira sucesso nem convite: falhou, sem chamar a RPC', async () => {
     getSession.mockRejectedValue(new Error('storage'));
     expect(await criarForumWeb().apagarTopico(ID_A)).toEqual({ ok: false, motivo: 'falhou' });

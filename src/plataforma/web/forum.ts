@@ -72,6 +72,8 @@ function comTempo<T>(promessa: PromiseLike<T>, ms: number, rotulo: string): Prom
 interface ErroDoServidor {
   readonly code?: string | null;
   readonly hint?: string | null;
+  /** Status HTTP, quando o cliente o repassa junto do erro. */
+  readonly status?: number | null;
 }
 
 const HINTS_DE_LEITURA: Readonly<Record<string, MotivoDeLeitura>> = {
@@ -115,6 +117,8 @@ function motivoDeEscrita(erro: ErroDoServidor): MotivoDeEscrita {
   const semHint = !(erro.hint ?? '').trim();
   // "Ação social exige conta promovida" e "permission denied" de visitante: 42501 sem HINT.
   if (code === '42501' && semHint) return 'precisaEntrar';
+  // JWT expirado: o PostgREST recusa antes de executar a função, então nada foi gravado.
+  if (code === 'PGRST301' || erro.status === 401) return 'precisaEntrar';
   // HINT desconhecido com recusa do Postgres: falha genérica, e sabemos que não gravou.
   if (RECUSA_DEFINITIVA.test(code)) return 'falhou';
   // Rede, 5xx, PGRST, cancelamento: pode ter gravado.
@@ -376,7 +380,14 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
   async function temConta(): Promise<boolean | 'erro'> {
     try {
       const { data, error } = await comTempo(supabase.auth.getSession(), TEMPO_DA_LEITURA_MS, 'sessão');
-      if (error) return 'erro';
+      if (error) {
+        // Rede ou erro ilegível: não sabemos nada. Qualquer outro erro de auth (refresh token
+        // inválido, sessão revogada) é sessão que caiu: a tela mostra o convite.
+        const nome = (error as { name?: string }).name ?? '';
+        return nome === 'AuthRetryableFetchError' || nome === 'AuthUnknownError' || !nome.startsWith('Auth')
+          ? 'erro'
+          : false;
+      }
       const usuario = data.session?.user;
       return Boolean(usuario) && usuario?.is_anonymous !== true;
     } catch {

@@ -294,7 +294,12 @@ export interface PortaDeForum {
   /** `valor: null` = slug inexistente (a tela mostra "não achei", nunca outra comunidade). */
   obterComunidadeDoForum(slug: string): Promise<ResultadoDaLeitura<ComunidadeDoForum | null>>;
 
-  /** Tópicos de UMA comunidade. Slug que não existe é `comunidadeInexistente`. */
+  /**
+   * Tópicos de UMA comunidade. O servidor só recusa slug em BRANCO
+   * (`comunidadeInexistente`). Slug desconhecido devolve `ok: true` com zero itens,
+   * igual a comunidade vazia: para distinguir "não achei" de "vazia", a tela chama
+   * `obterComunidadeDoForum` (que devolve `valor: null` quando o slug não existe).
+   */
   listarTopicos(
     slug: string,
     opcoes?: OpcoesDeListagemDeTopicos,

@@ -748,6 +748,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
           {tab === 'comm' && (
             <AbaComunidades
               comunidades={comunidades}
+              carregando={carregando}
               minhasComunidades={minhasComunidades}
               aoAlternarParticipacao={handleAlternarComunidade}
               aoFiltrarPorComunidade={(_slug) => {

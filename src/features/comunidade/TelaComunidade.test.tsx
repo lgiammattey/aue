@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { TelaComunidade } from './TelaComunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import type { CausoPostado } from '../../portas/comunidade';
@@ -156,7 +156,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     expect(screen.getByRole('button', { name: /Duelos X1/i })).toBeDefined();
   });
 
-  it('abre o modal canônico de compartilhamento (proporção 9:12, COMPARTILHAR) e exibe as 4 opções', async () => {
+  it('abre o modal de compartilhamento só com ações que existem e com link real', async () => {
     const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
     render(<TelaComunidade porta={adapter} />);
 
@@ -165,12 +165,42 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
 
     fireEvent.click(botoesShare[0]);
 
-    // Modal canônico aberto
     expect(screen.getByText('COMPARTILHAR')).toBeDefined();
-    expect(screen.getByText('Vídeo pro TikTok')).toBeDefined();
-    expect(screen.getByText('Baixar card (PNG)')).toBeDefined();
-    expect(screen.getByText('Copiar link do X1')).toBeDefined();
-    expect(screen.getByText('Stories / WhatsApp')).toBeDefined();
+    expect(screen.getByText('Copiar link da resenha')).toBeDefined();
+    expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'WhatsApp' })).toBeDefined();
+    // Nada de exportação fictícia nem código de X1 forjado
+    expect(screen.queryByText('Vídeo pro TikTok')).toBeNull();
+    expect(screen.queryByText('Baixar card (PNG)')).toBeNull();
+    expect(screen.queryByText(/\/x1\//)).toBeNull();
+    expect(screen.getByText(/aue\.web\.app\/historia\//)).toBeDefined();
+  });
+
+  it('causo que só existe neste aparelho não abre o compartilhar com link que daria 404', async () => {
+    const causoLocal = { ...CAUSOS_MOCK_TESTE[0], somenteNesteAparelho: true };
+    const adapter = criarComunidadeWeb({ causosIniciais: [causoLocal], forcarOffline: true });
+    render(<TelaComunidade porta={adapter} />);
+
+    const botoesShare = await screen.findAllByRole('button', { name: 'Compartilhar' });
+    fireEvent.click(botoesShare[0]);
+
+    expect(screen.queryByText('COMPARTILHAR')).toBeNull();
+    expect(await screen.findByText(/ainda não subiu pro Auê/)).toBeDefined();
+  });
+
+  it('copiar link falha com aviso de erro, sem dizer que copiou', async () => {
+    const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
+    render(<TelaComunidade porta={adapter} />);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: vi.fn().mockRejectedValue(new Error('negado')) },
+    });
+
+    const botoesShare = await screen.findAllByRole('button', { name: 'Compartilhar' });
+    fireEvent.click(botoesShare[0]);
+    fireEvent.click(screen.getByText('Copiar link da resenha'));
+
+    expect(await screen.findByText(/Não deu pra copiar/)).toBeDefined();
+    expect(screen.queryByText('Link copiado.')).toBeNull();
   });
 
   it('visitante lê thread, mas responder pede promoção', async () => {

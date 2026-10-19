@@ -40,6 +40,9 @@
 -- 1. Funções internas (sem grant)
 -- -----------------------------------------------------------------------------
 
+-- Se não conseguir a trava em 5 s, aborta: melhor falhar o deploy que enfileirar o app inteiro.
+SET LOCAL lock_timeout = '5s';
+
 CREATE OR REPLACE FUNCTION public.aue_obter_comunidade_acervo()
 RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp
 AS $$
@@ -74,7 +77,7 @@ BEGIN
   IF v = '' THEN
     v := CASE p_tipo
       WHEN 'audio_result' THEN 'Arroto sem legenda'
-      WHEN 'social_link' THEN 'Link no ' || coalesce(nullif(btrim(p_rede), ''), 'rede social')
+      WHEN 'social_link' THEN 'Link ' || coalesce('no ' || nullif(btrim(p_rede), ''), 'compartilhado')
       ELSE 'Causo sem título'
     END;
   END IF;
@@ -288,7 +291,10 @@ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_t
 AS $$
 BEGIN
   BEGIN
-    UPDATE public.topicos SET status = 'removido' WHERE legado_post_id = OLD.id AND status <> 'removido';
+    UPDATE public.topicos
+       SET status = 'removido', titulo = 'Tópico removido', corpo = '',
+           caminho_do_audio_da_casa = NULL, resultado_id = NULL, consentimento_audio_publico = false
+     WHERE legado_post_id = OLD.id AND status <> 'removido';
   EXCEPTION WHEN OTHERS THEN
     RAISE WARNING 'aue: espelho da remoção do post % falhou (%): %', OLD.id, SQLSTATE, SQLERRM;
   END;
@@ -301,7 +307,7 @@ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_t
 AS $$
 BEGIN
   BEGIN
-    UPDATE public.respostas SET status = 'removido' WHERE legado_comentario_id = OLD.id AND status <> 'removido';
+    UPDATE public.respostas SET status = 'removido', corpo = '[removido]' WHERE legado_comentario_id = OLD.id AND status <> 'removido';
   EXCEPTION WHEN OTHERS THEN
     RAISE WARNING 'aue: espelho da remoção do comentário % falhou (%): %', OLD.id, SQLSTATE, SQLERRM;
   END;

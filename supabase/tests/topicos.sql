@@ -324,14 +324,14 @@ UPDATE public.topicos SET status = 'fechado' WHERE id = (SELECT t_topicos.pegar(
 DO $t$
 DECLARE v_n integer;
 BEGIN
-  PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, 'em fechado')$$, t_topicos.pegar('t2')), '55000', 'topico_fechado');
-  PERFORM t_topicos.erro(format($$SELECT public.editar_resposta(%L, 'em fechado')$$, t_topicos.pegar('r1')), '55000', 'topico_fechado');
+  PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, 'em fechado')$$, t_topicos.pegar('t2')), 'P0001', 'topico_fechado');
+  PERFORM t_topicos.erro(format($$SELECT public.editar_resposta(%L, 'em fechado')$$, t_topicos.pegar('r1')), 'P0001', 'topico_fechado');
   SELECT count(*) INTO v_n FROM public.obter_topico(t_topicos.pegar('t2'));
   PERFORM t_topicos.ok(v_n = 1, 'fechado continua legível');
 END $t$;
 :como_b
 DO $t$ BEGIN
-  PERFORM t_topicos.erro(format($$SELECT public.editar_topico(%L, 'novo título')$$, t_topicos.pegar('t2')), '55000', 'topico_fechado');
+  PERFORM t_topicos.erro(format($$SELECT public.editar_topico(%L, 'novo título')$$, t_topicos.pegar('t2')), 'P0001', 'topico_fechado');
 END $t$;
 :como_admin
 UPDATE public.topicos SET status = 'oculto' WHERE id = (SELECT t_topicos.pegar('t2'));
@@ -1029,6 +1029,76 @@ VALUES ('b0000000-0000-0000-0000-0000000000f1', NULL, 'a0000000-0000-0000-0000-0
 DO $t$ BEGIN
   PERFORM t_topicos.ok((SELECT comunidade_id FROM public.topicos WHERE legado_post_id = 'b0000000-0000-0000-0000-0000000000f1') = (SELECT id FROM public.grupos WHERE slug = 'acervo'), 'órfão tardio vai para o acervo');
   PERFORM t_topicos.ok((SELECT count(*) FROM public.grupos WHERE slug = 'acervo') = 1, 'acervo continua único');
+END $t$;
+
+-- =============================================================================
+-- Revisão da squad: Camillo C2 (LGPD no espelho), Marcelo F1, M19 e M20
+-- =============================================================================
+
+-- C2: causo apagado pelo caminho antigo não deixa o texto no tópico espelho.
+:como_a
+DO $t$
+DECLARE v_post public.posts_comunidade;
+BEGIN
+  v_post := public.publicar_causo('bonde-geral', 'Texto que não pode sobreviver ao apagar');
+  PERFORM t_topicos.guardar('p_lgpd', v_post.id);
+END $t$;
+:como_b
+DO $t$
+DECLARE v_com public.comentarios;
+BEGIN
+  v_com := public.criar_comentario('Comentário que também não pode sobreviver', t_topicos.pegar('p_lgpd'));
+  PERFORM t_topicos.guardar('c_lgpd', v_com.id);
+END $t$;
+:como_admin
+DELETE FROM public.comentarios WHERE id = t_topicos.pegar('c_lgpd');
+DO $t$ BEGIN
+  PERFORM t_topicos.ok((SELECT status FROM public.respostas WHERE legado_comentario_id = t_topicos.pegar('c_lgpd')) = 'removido', 'comentário apagado: resposta removida');
+  PERFORM t_topicos.ok((SELECT corpo FROM public.respostas WHERE legado_comentario_id = t_topicos.pegar('c_lgpd')) = '[removido]', 'comentário apagado: o texto não fica na resposta');
+END $t$;
+:como_a
+DO $t$ BEGIN PERFORM t_topicos.ok(public.apagar_meu_causo(t_topicos.pegar('p_lgpd')), 'apagou o causo'); END $t$;
+:como_admin
+DO $t$
+DECLARE v public.topicos;
+BEGIN
+  SELECT * INTO v FROM public.topicos WHERE legado_post_id = t_topicos.pegar('p_lgpd');
+  PERFORM t_topicos.ok(v.status = 'removido', 'causo apagado: tópico removido');
+  PERFORM t_topicos.ok(v.corpo = '' AND v.titulo = 'Tópico removido', 'causo apagado: título e corpo não ficam no tópico');
+  PERFORM t_topicos.ok(v.caminho_do_audio_da_casa IS NULL AND v.resultado_id IS NULL AND v.consentimento_audio_publico = false, 'causo apagado: áudio e consentimento limpos');
+END $t$;
+
+-- F1: motivo curto ou vazio de denúncia vira o motivo padrão, sem erro cru de constraint.
+:como_a
+DO $t$
+DECLARE v_t public.topicos; v_r public.respostas;
+BEGIN
+  v_t := public.criar_topico('bonde-geral', 'Tópico das denúncias curtas', 'Texto');
+  PERFORM t_topicos.guardar('t_den', v_t.id);
+  v_r := public.responder_topico(v_t.id, 'Resposta que vai ser apagada');
+  PERFORM t_topicos.guardar('r_den', v_r.id);
+  PERFORM public.apagar_resposta(v_r.id);
+END $t$;
+:como_b
+DO $t$ BEGIN
+  PERFORM public.denunciar_topico(t_topicos.pegar('t_den'), 'ab');
+  -- M20: resposta apagada não se denuncia (some para quem lê).
+  PERFORM t_topicos.erro(format($$SELECT public.denunciar_resposta(%L, 'tarde demais')$$, t_topicos.pegar('r_den')), '22023', 'resposta_nao_encontrada');
+END $t$;
+:como_admin
+DO $t$ BEGIN
+  PERFORM t_topicos.ok((SELECT motivo FROM public.denuncias_conversa WHERE topico_id = t_topicos.pegar('t_den') AND usuario_id = 'a0000000-0000-0000-0000-000000000002') = 'Conteúdo impróprio', 'motivo de 2 caracteres vira o padrão');
+END $t$;
+
+-- M19: a conferência do acervo acusa autor trocado no tópico.
+:como_admin
+DO $t$
+DECLARE v_autor uuid;
+BEGIN
+  SELECT autor_id INTO v_autor FROM public.topicos WHERE id = t_topicos.pegar('p_novo');
+  UPDATE public.topicos SET autor_id = 'a0000000-0000-0000-0000-000000000004' WHERE id = t_topicos.pegar('p_novo');
+  PERFORM t_topicos.erro('SELECT public.aue_conferir_acervo()', 'P0001');
+  UPDATE public.topicos SET autor_id = v_autor WHERE id = t_topicos.pegar('p_novo');
 END $t$;
 
 -- =============================================================================

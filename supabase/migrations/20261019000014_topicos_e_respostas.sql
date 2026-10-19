@@ -25,13 +25,16 @@
 --
 -- Mensagens de erro: ERRCODE + mensagem curta estável + HINT com código de
 -- máquina (a UI traduz pelo HINT). 22023 = entrada inválida/inexistente,
--- 42501 = sem permissão, 55000 = tópico fechado.
+-- 42501 = sem permissão, P0001 = tópico fechado (PostgREST responde 400; 55000 viraria 500).
 -- =============================================================================
 
 
 -- -----------------------------------------------------------------------------
 -- 1. Tabelas
 -- -----------------------------------------------------------------------------
+
+-- Se não conseguir a trava em 5 s, aborta: melhor falhar o deploy que enfileirar o app inteiro.
+SET LOCAL lock_timeout = '5s';
 
 CREATE TABLE IF NOT EXISTS public.topicos (
   id                          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -127,7 +130,7 @@ REVOKE ALL ON public.topicos, public.respostas, public.denuncias_conversa FROM P
 -- -----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.aue_falhar_conversa(p_sqlstate text, p_mensagem text, p_codigo text)
-RETURNS void LANGUAGE plpgsql IMMUTABLE SET search_path = public, pg_temp
+RETURNS void LANGUAGE plpgsql VOLATILE SET search_path = public, pg_temp
 AS $$
 BEGIN
   RAISE EXCEPTION '%', p_mensagem USING ERRCODE = p_sqlstate, HINT = p_codigo;
@@ -233,12 +236,12 @@ $$;
 
 -- Ordem 'atividade': fixados, depois última atividade. Cursor = (fixado,
 -- ultima_atividade_em, id) da ÚLTIMA linha da página anterior.
--- Ordem 'recentes': por criado_em; o cursor usa p_cursor_atividade com o criado_em
+-- Ordem 'recentes': por criado_em; o cursor usa p_cursor_valor com o criado_em
 -- da última linha. Sem p_cursor_fixado, o cursor assume linha não fixada.
 CREATE OR REPLACE FUNCTION public.listar_topicos(
   p_slug text,
   p_limite integer DEFAULT 30,
-  p_cursor_atividade timestamptz DEFAULT NULL,
+  p_cursor_valor timestamptz DEFAULT NULL,
   p_cursor_id uuid DEFAULT NULL,
   p_ordem text DEFAULT 'atividade',
   p_cursor_fixado boolean DEFAULT false
@@ -258,7 +261,7 @@ BEGIN
   IF nullif(btrim(coalesce(p_slug, '')), '') IS NULL THEN
     PERFORM public.aue_falhar_conversa('22023', 'Comunidade não existe', 'comunidade_inexistente');
   END IF;
-  RETURN QUERY SELECT * FROM public.aue_ler_topicos(p_slug, NULL, p_limite, p_ordem, p_cursor_atividade, p_cursor_id, p_cursor_fixado);
+  RETURN QUERY SELECT * FROM public.aue_ler_topicos(p_slug, NULL, p_limite, p_ordem, p_cursor_valor, p_cursor_id, p_cursor_fixado);
 END;
 $$;
 
@@ -404,7 +407,7 @@ BEGIN
     PERFORM public.aue_falhar_conversa('22023', 'Tópico não encontrado', 'topico_nao_encontrado');
   END IF;
   IF v_topico.status = 'fechado' THEN
-    PERFORM public.aue_falhar_conversa('55000', 'Tópico fechado para respostas', 'topico_fechado');
+    PERFORM public.aue_falhar_conversa('P0001', 'Tópico fechado para respostas', 'topico_fechado');
   END IF;
   PERFORM public.aue_exigir_participacao(v_topico.comunidade_id);
 
@@ -455,7 +458,7 @@ BEGIN
     PERFORM public.aue_falhar_conversa('42501', 'Só quem escreveu pode alterar', 'nao_e_autor');
   END IF;
   IF v_topico.status = 'fechado' THEN
-    PERFORM public.aue_falhar_conversa('55000', 'Tópico fechado', 'topico_fechado');
+    PERFORM public.aue_falhar_conversa('P0001', 'Tópico fechado', 'topico_fechado');
   END IF;
   UPDATE public.topicos
      SET titulo = coalesce(v_titulo, titulo), corpo = coalesce(v_corpo, corpo), editado_em = now()
@@ -491,7 +494,7 @@ BEGIN
   END IF;
   SELECT t.status INTO v_status FROM public.topicos t WHERE t.id = v_resposta.topico_id;
   IF v_status = 'fechado' THEN
-    PERFORM public.aue_falhar_conversa('55000', 'Tópico fechado', 'topico_fechado');
+    PERFORM public.aue_falhar_conversa('P0001', 'Tópico fechado', 'topico_fechado');
   END IF;
   UPDATE public.respostas SET corpo = v_corpo, editado_em = now() WHERE id = v_resposta.id RETURNING * INTO v_linha;
   RETURN v_linha;
@@ -552,7 +555,7 @@ BEGIN
     PERFORM public.aue_falhar_conversa('22023', 'Tópico não encontrado', 'topico_nao_encontrado');
   END IF;
   INSERT INTO public.denuncias_conversa (topico_id, usuario_id, motivo)
-  VALUES (p_topico_id, auth.uid(), left(coalesce(nullif(btrim(p_motivo), ''), 'Conteúdo impróprio'), 500))
+  VALUES (p_topico_id, auth.uid(), left(CASE WHEN char_length(public.aue_aparar_texto(p_motivo)) < 3 THEN 'Conteúdo impróprio' ELSE public.aue_aparar_texto(p_motivo) END, 500))
   ON CONFLICT (topico_id, usuario_id) WHERE topico_id IS NOT NULL DO NOTHING;
   IF (SELECT count(DISTINCT d.usuario_id) FROM public.denuncias_conversa d WHERE d.topico_id = p_topico_id) >= 3 THEN
     UPDATE public.topicos SET status = 'oculto' WHERE id = p_topico_id AND status IN ('aberto', 'fechado');
@@ -574,7 +577,7 @@ BEGIN
     PERFORM public.aue_falhar_conversa('22023', 'Resposta não encontrada', 'resposta_nao_encontrada');
   END IF;
   INSERT INTO public.denuncias_conversa (resposta_id, usuario_id, motivo)
-  VALUES (p_resposta_id, auth.uid(), left(coalesce(nullif(btrim(p_motivo), ''), 'Conteúdo impróprio'), 500))
+  VALUES (p_resposta_id, auth.uid(), left(CASE WHEN char_length(public.aue_aparar_texto(p_motivo)) < 3 THEN 'Conteúdo impróprio' ELSE public.aue_aparar_texto(p_motivo) END, 500))
   ON CONFLICT (resposta_id, usuario_id) WHERE resposta_id IS NOT NULL DO NOTHING;
   IF (SELECT count(DISTINCT d.usuario_id) FROM public.denuncias_conversa d WHERE d.resposta_id = p_resposta_id) >= 3 THEN
     UPDATE public.respostas SET status = 'oculto' WHERE id = p_resposta_id AND status = 'visivel';

@@ -1,6 +1,6 @@
 # ADR 0010 — Comunidades, tópicos e respostas (sem feed solto)
 
-**Status:** proposto — espera o aceite formal de Camillo e Lucas (Gate Arquitetural) e do Luiz
+**Status:** proposto — Gate Arquitetural do Camillo: **aprovado com condições** (cumpridas na PR da migração, 19/10/2026). Falta o aceite formal do Lucas e do Luiz.
 **Data:** 2026-10-19
 **Decisão de produto:** Luiz, em 19/10/2026 ([#251](https://github.com/lgiammattey/aue/issues/251))
 **Pretende substituir:** ADR 0004 §1 (camada de Feed), §3 (modelo de dados) e §5 (UI do feed)
@@ -101,6 +101,37 @@ Por isso:
 - Backfill com validação própria, porque o `validacao.yml` não testa SQL.
 - Reescrever rotas, telas e testes que hoje assumem causo avulso.
 - Documentação e protótipos precisam acompanhar ([#252](https://github.com/lgiammattey/aue/issues/252), [#253](https://github.com/lgiammattey/aue/issues/253)).
+
+## O que a implementação da migração decidiu (19/10/2026)
+
+Estas decisões saíram do desenho da migração (`20261019000014` e `20261019000015`) e do Gate
+Arquitetural. Onde divergem do texto acima, **vale esta seção**.
+
+- **Resposta em tabela própria.** O texto acima dizia que a resposta reaproveita `comentarios`.
+  Adicionar `topico_id` obrigatório em `comentarios` mudaria tabela e RPC que o frontend atual usa
+  em produção. `respostas` é nova e usa o mesmo id do comentário.
+- **Id preservado.** O id do tópico é o id do post; o da resposta é o do comentário. `legado_post_id`
+  e `legado_comentario_id` (UNIQUE) são as chaves do backfill. `/historia/:id` resolve direto.
+- **Acesso só por RPC.** `topicos`, `respostas` e `denuncias_conversa` têm RLS ligada, nenhuma
+  policy e nenhum grant. Leitura pública (anon e authenticated) e escrita só authenticated, com
+  conta promovida e participação na comunidade. Nenhuma RPC recebe o autor como parâmetro.
+- **Limites.** Título de 1 a 120, texto de tópico de 1 a 1000 (a tabela aceita até 2000, por causa
+  de posts antigos), resposta de 1 a 500. Contados por caractere, como o `char_length` do Postgres.
+- **Erros.** Mensagem curta estável e `HINT` com código de máquina (`titulo_invalido`,
+  `nao_e_membro`, `topico_fechado`...). `22023` entrada inválida ou inexistente, `42501` sem
+  permissão, `P0001` tópico fechado (PostgREST responde 400; `55000` viraria 500). O adaptador
+  decide pelo `HINT`.
+- **Cursor.** Em `listar_topicos` o cursor é `(p_cursor_valor, p_cursor_id, p_cursor_fixado)`. Tem
+  precisão de microssegundo: o adaptador devolve a string do servidor, sem passar por `Date`.
+- **Apagar é soft** no lado novo. Pelo caminho antigo (`apagar_meu_causo`), o espelho limpa
+  título, texto e áudio do tópico (não deixa o conteúdo apagado guardado).
+- **Espelho em um sentido** (antigo → novo), enquanto o feed antigo existir. Denúncia do lado novo
+  não esconde o post antigo.
+- **Comunidade de acervo** só nasce se existir post sem comunidade. Em produção o esperado é zero.
+- **A PR do frontend pode ter migração própria**, aplicada e conferida antes dela: faltam leituras
+  que a UI exige (membros reais e contagem de tópicos por comunidade, tópicos e respostas por
+  autor, leitura global para o Explorar) e uma função que **repare** (não só acuse) o espelho de
+  esconder e apagar. Isso é a "PR 1b".
 
 ## O que ainda não está decidido
 

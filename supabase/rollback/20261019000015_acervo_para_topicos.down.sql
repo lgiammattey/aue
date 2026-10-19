@@ -25,12 +25,16 @@ DROP FUNCTION IF EXISTS public.aue_titulo_do_acervo(text, text, text);
 -- A comunidade 'acervo' só sai se ninguém conversa nela (sem tópico dentro).
 DO $$
 BEGIN
+  -- Nunca apaga o grupo se tem post dentro: ON DELETE CASCADE levaria os posts junto.
   IF to_regclass('public.topicos') IS NULL THEN
-    DELETE FROM public.grupos g WHERE lower(g.slug) = 'acervo';
+    DELETE FROM public.grupos g
+     WHERE lower(g.slug) = 'acervo'
+       AND NOT EXISTS (SELECT 1 FROM public.posts_comunidade p WHERE p.group_id = g.id);
   ELSE
     DELETE FROM public.grupos g
      WHERE lower(g.slug) = 'acervo'
-       AND NOT EXISTS (SELECT 1 FROM public.topicos t WHERE t.comunidade_id = g.id);
+       AND NOT EXISTS (SELECT 1 FROM public.topicos t WHERE t.comunidade_id = g.id)
+       AND NOT EXISTS (SELECT 1 FROM public.posts_comunidade p WHERE p.group_id = g.id);
   END IF;
 END;
 $$;

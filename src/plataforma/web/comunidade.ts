@@ -19,6 +19,7 @@ import type {
   ResultadoDaPostagem,
   TipoDeReacao,
 } from '../../portas/comunidade';
+import { FalhaDeLeitura } from '../../nucleo/comunidade/falhaDeLeitura';
 
 const CHAVE_CAUSOS = 'aue.causos.v3';
 
@@ -242,7 +243,7 @@ export function criarComunidadeWeb(
         }));
       } catch (erro) {
         console.error('Falha ao listar comunidades', erro);
-        return [];
+        throw new FalhaDeLeitura('comunidades', erro);
       }
     },
 
@@ -279,7 +280,9 @@ export function criarComunidadeWeb(
           );
           return [...pendentes, ...remotos].slice(0, limite);
         } catch (erro) {
-          console.error('Falha ao ler o feed; mostrando o que está neste aparelho', erro);
+          console.error('Falha ao ler o feed', erro);
+          // Servidor configurado e fora do ar: não finge lista vazia.
+          throw new FalhaDeLeitura('feed', erro);
         }
       }
 
@@ -506,7 +509,7 @@ export function criarComunidadeWeb(
           });
         } catch (erro) {
           console.error('Falha ao ler os comentários', erro);
-          return [];
+          throw new FalhaDeLeitura('comentários', erro);
         }
       }
       return causosMemoria.find((c) => c.id === causoId)?.comentarios ?? [];

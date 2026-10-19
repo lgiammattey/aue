@@ -140,6 +140,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   const [desafioAtivoCodigo, setDesafioAtivoCodigo] = useState<string | undefined>(undefined);
   const [termoBusca, setTermoBusca] = useState<string>('');
   const [carregando, setCarregando] = useState<boolean>(true);
+  const [falhaAoCarregar, setFalhaAoCarregar] = useState(false);
 
   // Modais e Feedback
   const [modalNovoAberto, setModalNovoAberto] = useState<boolean>(false);
@@ -203,6 +204,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Carregamento de dados da porta
   const carregarDados = useCallback(async () => {
     setCarregando(true);
+    setFalhaAoCarregar(false);
     try {
       const [comus, minhas, listaFeed] = await Promise.all([
         adaptador.listarComunidades(),
@@ -213,7 +215,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       setMinhasComunidades(minhas ?? []);
       setCausos(listaFeed);
     } catch {
-      // fallback gracioso
+      // Falha de leitura não é lista vazia: a tela mostra o erro e o botão de tentar de novo.
+      setFalhaAoCarregar(true);
     } finally {
       setCarregando(false);
     }
@@ -285,7 +288,13 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Abrir a conversa: traz os comentários do servidor
   const handleAbrirConversa = async (causoId: string) => {
-    const lista = await adaptador.listarRespostas(causoId);
+    let lista: Awaited<ReturnType<typeof adaptador.listarRespostas>>;
+    try {
+      lista = await adaptador.listarRespostas(causoId);
+    } catch {
+      avisar('Não deu para carregar as respostas. Tenta de novo.');
+      return;
+    }
     setCausos((prev) =>
       prev.map((c) =>
         c.id === causoId
@@ -691,6 +700,20 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
               {carregando || (filtroFeed === 'seguindo' && carregandoSeguindo) ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontSize: '15px' }}>
                   Carregando o bonde...
+                </div>
+              ) : falhaAoCarregar ? (
+                <div role="alert" style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--muted)' }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--fg)', marginBottom: '8px' }}>
+                    Não deu pra carregar
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>O servidor não respondeu. Não é que não tem nada: tenta de novo.</div>
+                  <button
+                    type="button"
+                    onClick={() => void carregarDados()}
+                    style={{ minHeight: '44px', padding: '0 20px', borderRadius: '999px', border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--fg)', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Tentar de novo
+                  </button>
                 </div>
               ) : causosFiltrados.length > 0 ? (
                 causosFiltrados.map((c) => (

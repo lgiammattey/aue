@@ -29,6 +29,7 @@ vi.mock('../../shared/auth/sessaoAnonima', () => ({
 }));
 
 import { criarComunidadeWeb } from './comunidade';
+import { FalhaDeLeitura } from '../../nucleo/comunidade/falhaDeLeitura';
 
 const ARROTO = {
   nota: { nota: 91, medidas: { folego: 70, estouro: 60, grave: 80, sujeira: 40 } },
@@ -110,6 +111,21 @@ describe('feed pelo servidor', () => {
     rpc.mockResolvedValue({ data: [], error: null });
     await criarComunidadeWeb().listarFeed();
     expect(from).not.toHaveBeenCalled();
+  });
+});
+
+describe('falha de leitura não é lista vazia', () => {
+  it('feed, comunidades e respostas lançam FalhaDeLeitura quando o servidor recusa', async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: 'boom' } });
+    const porta = criarComunidadeWeb();
+    await expect(porta.listarFeed()).rejects.toBeInstanceOf(FalhaDeLeitura);
+    await expect(porta.listarComunidades()).rejects.toBeInstanceOf(FalhaDeLeitura);
+    await expect(porta.listarRespostas('00000000-0000-4000-8000-000000000001')).rejects.toBeInstanceOf(FalhaDeLeitura);
+  });
+
+  it('servidor que responde lista vazia continua sendo lista vazia', async () => {
+    rpc.mockResolvedValue({ data: [], error: null });
+    expect(await criarComunidadeWeb().listarFeed()).toEqual([]);
   });
 });
 

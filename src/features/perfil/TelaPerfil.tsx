@@ -115,6 +115,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [aba, setAba] = useState<Aba>('causos');
   const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
   const [carregandoCausos, setCarregandoCausos] = useState(false);
+  const [falhaNosCausos, setFalhaNosCausos] = useState(false);
   const [aviso, setAviso] = useState('');
   const [editando, setEditando] = useState(false);
   const [hoverFoto, setHoverFoto] = useState(false);
@@ -229,6 +230,13 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       .then((lista) => {
         if (!ativo) return;
         setCausos(aba === 'audios' ? lista.filter((c) => c.temAudio) : lista);
+        setFalhaNosCausos(false);
+        setCarregandoCausos(false);
+      })
+      .catch(() => {
+        if (!ativo) return;
+        setCausos([]);
+        setFalhaNosCausos(true);
         setCarregandoCausos(false);
       });
     return () => {
@@ -405,8 +413,11 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     else avisar('Não deu para repostar agora.');
   };
   const abrirConversa = async (id: string) => {
-    const lista = await comunidade.listarRespostas(id);
-    atualizar(id, { comentarios: lista });
+    try {
+      atualizar(id, { comentarios: await comunidade.listarRespostas(id) });
+    } catch {
+      avisar('Não deu para carregar as respostas. Tenta de novo.');
+    }
   };
   const responder = async (id: string, texto: string, respostaAId?: string) => {
     if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
@@ -1028,7 +1039,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               </nav>
 
               {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
-              {!carregandoCausos && causos.length === 0 && (
+              {!carregandoCausos && falhaNosCausos && (
+                <p role="alert" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
+                  Não deu pra carregar as resenhas agora. Não é que não tem nada: atualize a página.
+                </p>
+              )}
+              {!carregandoCausos && !falhaNosCausos && causos.length === 0 && (
                 <p style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
                   {aba === 'curtidos'
                     ? 'Nada curtido ainda.'

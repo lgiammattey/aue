@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>button,a{transition:background-color .15s ease,color .15s ease,opacity .15s ease,transform .1s ease}button:active{transform:scale(.97)}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}body{margin:0}a{color:var(--fg);text-decoration:none}a:hover{color:var(--muted)}button{font-family:inherit}nav::-webkit-scrollbar{display:none}</style>
+</helmet>
+<div style="--bg:#f7f8f5;--surface:#eef4e7;--surface-2:#e2ebd8;--fg:#202824;--muted:#5c675d;--border:#e7ebe3;--border-strong:#c9d1c4;background:var(--bg);color:var(--fg);font-family:'Archivo',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;min-height:100vh">
+
+<header style="position:sticky;top:0;z-index:10;background:rgba(247,248,245,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(8px)">
+<div style="max-width:1080px;margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;gap:20px;box-sizing:border-box">
+<a href="Landing.dc.html" style="font-weight:900;font-size:30px;letter-spacing:-.06em;line-height:1;flex:none">auê<span style="color:#2f5d0a">!</span></a>
+<nav style="flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6"><button onClick="{{ t.go }}" style="{{ t.style }}" style-hover="background:var(--surface)">{{ t.label }}</button></sc-for></nav>
+<a href="Comunidades.dc.html" style="flex:none;height:38px;padding:0 18px;border-radius:999px;background:var(--fg);color:var(--bg);font-weight:700;font-size:14px;display:flex;align-items:center;white-space:nowrap" style-hover="opacity:.85;color:var(--bg)">Entrar</a>
+</div></header>
+
+<main style="max-width:1080px;margin:0 auto;padding:0 20px;box-sizing:border-box">
+<section style="padding:56px 0 40px;display:flex;flex-direction:column;gap:14px;max-width:760px">
+<span style="font-size:13px;font-weight:700;color:var(--muted)">{{ pg.eyebrow }}</span>
+<h1 style="margin:0;font-weight:900;font-size:clamp(36px,6vw,60px);line-height:1;letter-spacing:-.035em;text-wrap:balance">{{ pg.title }}</h1>
+<p style="margin:0;font-size:19px;line-height:1.55;color:var(--muted);text-wrap:pretty">{{ pg.lead }}</p>
+</section>
+
+<sc-for list="{{ pg.blocks }}" as="b" hint-placeholder-count="3">
+<section style="border-top:1px solid var(--border);padding:40px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 56px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--muted)">{{ b.eyebrow }}</span><h2 style="margin:0;font-weight:800;font-size:28px;line-height:1.1;letter-spacing:-.02em;text-wrap:balance">{{ b.title }}</h2></div>
+<div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+<sc-for list="{{ b.paras }}" as="p" hint-placeholder-count="1"><p style="margin:0;font-size:17px;line-height:1.6;text-wrap:pretty">{{ p }}</p></sc-for>
+<sc-if value="{{ b.hasCards }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px"><sc-for list="{{ b.cards }}" as="c" hint-placeholder-count="2"><div style="background:var(--surface);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:6px"><b style="font-size:17px;line-height:1.25">{{ c.t }}</b><span style="font-size:15px;line-height:1.5;color:var(--muted)">{{ c.d }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ b.hasLinks }}"><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ b.links }}" as="l" hint-placeholder-count="2"><button onClick="{{ l.go }}" style="height:38px;padding:0 16px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font-weight:600;font-size:14px;cursor:pointer" style-hover="background:var(--surface-2)">{{ l.label }} →</button></sc-for></div></sc-if>
+</div></section>
+</sc-for>
+
+<sc-if value="{{ pg.hasList }}"><section style="border-top:1px solid var(--border);padding:24px 0 40px">
+<sc-if value="{{ pg.listHead }}"><div style="padding:16px 0 8px"><h2 style="margin:0;font-weight:800;font-size:28px;letter-spacing:-.02em">{{ pg.listHead }}</h2></div></sc-if>
+<sc-for list="{{ pg.list }}" as="i" hint-placeholder-count="5"><article style="display:grid;grid-template-columns:minmax(72px,140px) minmax(0,1fr);gap:8px 32px;padding:24px 0;border-bottom:1px solid var(--border);align-items:start">
+<div style="font-weight:900;font-size:clamp(28px,4vw,40px);line-height:1;letter-spacing:-.03em;color:#2f5d0a">{{ i.n }}</div>
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:13px;font-weight:700;color:var(--muted)">{{ i.eyebrow }}</span><h3 style="margin:0;font-weight:800;font-size:22px;line-height:1.2">{{ i.t }}</h3>
+<sc-for list="{{ i.paras }}" as="p" hint-placeholder-count="1"><p style="margin:0;font-size:16px;line-height:1.6;color:var(--muted);text-wrap:pretty">{{ p }}</p></sc-for></div></article></sc-for>
+</section></sc-if>
+
+<sc-for list="{{ pg.tailBlocks }}" as="b" hint-placeholder-count="1">
+<section style="border-top:1px solid var(--border);padding:40px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 56px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--muted)">{{ b.eyebrow }}</span><h2 style="margin:0;font-weight:800;font-size:28px;line-height:1.1;letter-spacing:-.02em;text-wrap:balance">{{ b.title }}</h2></div>
+<div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+<sc-for list="{{ b.paras }}" as="p" hint-placeholder-count="1"><p style="margin:0;font-size:17px;line-height:1.6;text-wrap:pretty">{{ p }}</p></sc-for>
+<sc-if value="{{ b.hasLinks }}"><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ b.links }}" as="l" hint-placeholder-count="2"><button onClick="{{ l.go }}" style="height:38px;padding:0 16px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font-weight:600;font-size:14px;cursor:pointer" style-hover="background:var(--surface-2)">{{ l.label }} →</button></sc-for></div></sc-if>
+</div></section>
+</sc-for>
+
+<sc-if value="{{ pg.isGroups }}"><section style="padding:0 0 48px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px">
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3"><div style="background:var(--surface);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:14px;align-items:center"><div style="width:52px;height:52px;flex:none;border-radius:14px;background:var(--fg);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px">{{ g.ini }}</div><div style="line-height:1.25"><b style="font-size:19px">{{ g.name }}</b><div style="font-size:14px;color:var(--muted)">{{ g.members }} no grupo</div></div></div>
+<span style="font-size:15px;line-height:1.5;text-wrap:pretty">{{ g.desc }}</span>
+<a href="{{ g.href }}" style="margin-top:4px;height:44px;border-radius:999px;background:var(--fg);color:var(--bg);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center" style-hover="opacity:.85;color:var(--bg)">Entrar no grupo do WhatsApp</a></div></sc-for>
+</section>
+<section style="border-top:1px solid var(--border);padding:32px 0;max-width:640px"><h2 style="margin:0 0 8px;font-weight:800;font-size:24px">Regras dos grupos</h2><p style="margin:0;font-size:16px;line-height:1.6;color:var(--muted);text-wrap:pretty">A piada é com o arroto, nunca com a pessoa. Sem spam, sem links de terceiros e sem áudio de quem não autorizou. Quem ignorar sai.</p></section></sc-if>
+
+<sc-if value="{{ pg.isVideos }}"><section style="padding:0 0 48px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px"><sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }} ({{ c.n }})</button></sc-for></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:24px"><sc-for list="{{ vids }}" as="v" hint-placeholder-count="6"><div style="display:flex;flex-direction:column;gap:10px"><div style="aspect-ratio:16/9;border-radius:16px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;font-weight:600">Miniatura do vídeo</div><div style="display:flex;flex-direction:column;gap:2px"><b style="font-size:16px;line-height:1.3">{{ v.t }}</b><span style="font-size:13px;color:var(--muted)">{{ v.cat }} · YouTube</span></div></div></sc-for></div>
+</section></sc-if>
+
+<section style="background:#17221c;color:#f7f8f5;border-radius:24px;padding:48px 32px;margin:24px 0 56px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<span style="font-size:13px;font-weight:700;opacity:.75">Chega de ler</span>
+<h2 style="margin:0;font-weight:900;font-size:clamp(30px,5vw,48px);line-height:1;letter-spacing:-.03em">Agora entra na conversa.</h2>
+<p style="margin:0;font-size:17px;line-height:1.5;opacity:.85;max-width:46ch;text-wrap:pretty">Ache sua comunidade, conte seu causo e leve o arroto pra Arena. Quem tiver convite, entra.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px"><a href="Landing.dc.html" style="height:48px;padding:0 28px;border-radius:999px;background:var(--accent);color:var(--accent-on);font-weight:700;font-size:16px;display:flex;align-items:center" style-hover="opacity:.9;color:var(--accent-on)">Entrar no Auê</a><a href="Arena.dc.html" style="height:48px;padding:0 24px;border-radius:999px;border:1px solid rgba(247,248,245,.4);color:#f7f8f5;font-weight:600;font-size:16px;display:flex;align-items:center" style-hover="background:rgba(247,248,245,.1);color:#f7f8f5">Arrotar na Arena</a></div>
+</section>
+</main>
+
+<footer style="border-top:1px solid var(--border)"><div style="max-width:1080px;margin:0 auto;padding:24px 20px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:13px;color:var(--muted)"><span>© 2026 auê!</span><span style="display:flex;flex-wrap:wrap;gap:6px 20px"><a href="Comunidades.dc.html" style="color:var(--muted)">Comunidades</a><a href="Landing.dc.html" style="color:var(--muted)">Entrar</a><a href="#" style="color:var(--muted)">Privacidade</a><a href="#" style="color:var(--muted)">Termos</a></span></div></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: 'como-jogar', cat: 'todos' };
+  componentDidMount() { const h = (location.hash || '').slice(1); if (this.pages()[h]) this.setState({ page: h }); }
+  pages() {
+    const go = (k) => () => { this.setState({ page: k }); try { history.replaceState(null, '', '#' + k); } catch (x) {} window.scrollTo(0, 0); };
+    const L = (k, label) => ({ label, go: go(k) });
+    return {
+      'como-jogar': { nav: 'Como jogar', eyebrow: 'Guia rápido', title: 'Como jogar o Auê', lead: 'O Auê reúne quem gosta de arrotos, histórias e desafios. Você participa de comunidades, conversa em tópicos e leva o arroto pra Arena, que devolve uma nota de 0 a 100. Não é sorteio: o que não for arroto não vira nota.', blocks: [
+        { eyebrow: 'As comunidades', title: 'Cada conversa tem seu lugar', paras: ['Toda publicação pertence a uma comunidade e a um tópico. A comunidade é o grupo; o tópico é o assunto. Qualquer visitante lê e ouve. Pra criar tópicos e responder, precisa de conta.'], links: [L('x', 'Ver comunidades')].map(l => ({ ...l, go: () => { window.location.href = 'Comunidades.dc.html'; } })) },
+        { eyebrow: 'A Arena', title: 'Arrotar e receber a nota', paras: ['Toque em arrotar e solte. O microfone só é pedido nessa hora. O Auê grava, julga e mostra a nota com as quatro medidas. Não gostou do número? Manda outro.', 'Depois, você escolhe: publicar o resultado como resposta num tópico, abrir uma discussão nova ou guardar pra você.'] },
+        { eyebrow: 'O X1', title: 'Desafiar um amigo', paras: ['Chame alguém por um link privado. Quem abrir ouve o seu arroto, arrota a resposta no próprio aparelho e as duas notas se enfrentam. No fim tem placar e revanche.'] },
+        { eyebrow: 'Sem instalar', title: 'Direto no navegador, de graça', paras: ['Funciona no navegador do celular, Android ou iPhone. Sem assinatura e sem moeda dentro do jogo.'], hasCards: true, cards: [{ t: 'Seu áudio', d: 'Entenda o que o Auê faz com ele na página de privacidade.' }] }
+      ] },
+      'como-arrotar': { nav: 'Como arrotar', eyebrow: 'Antes de jogar', title: 'Como arrotar', lead: 'Arroto é ar que entrou e resolveu voltar. A parte que dá pra treinar é a entrada. O resto o corpo resolve sozinho.', blocks: [
+        { eyebrow: 'Antes das técnicas', title: 'Tem arroto de ar e tem arroto de estômago', paras: ['Nenhum dos dois é melhor. O jogo não julga a origem, julga o resultado.'], hasCards: true, cards: [{ t: 'Arroto de ar', d: 'É o ar que você engoliu. Sobe rápido, sai fácil e dá pra repetir.' }, { t: 'Arroto de estômago', d: 'Vem do gás que já estava lá, geralmente de bebida com gás. Demora mais, sai com mais força.' }] }
+      ], listHead: 'Cinco técnicas', list: [
+        { n: '01', eyebrow: 'Técnica', t: 'Engole ar, devolve ar', paras: ['Puxa uma sequência de golinhos de ar pela boca, rápido, um atrás do outro. Deixa acumular um instante e solta pela garganta relaxada, sem forçar o peito.'] },
+        { n: '02', eyebrow: 'Atalho', t: 'Com refrigerante é trapaça? É, e funciona', paras: ['Bebida com gás já entrega o ar pronto. Dá um gole, espera a bolha subir e relaxa. O Auê julga o som, não o método.'] },
+        { n: '03', eyebrow: 'Postura', t: 'O corpo ajuda, se você deixar', paras: ['Sentado ereto ou inclinado pra frente facilita. Deitado, o caminho emperra. Quanto mais você tenta segurar, mais trava.'] },
+        { n: '04', eyebrow: 'Sequência', t: 'Arroto renovado', paras: ['Repete os golinhos sem parar pra respirar fundo no meio. O efeito é uma cadeia, um arroto grudando no outro. Sai picotado nas primeiras vezes.'] },
+        { n: '05', eyebrow: 'Volume', t: 'Arrotar alto', paras: ['Garganta aberta, boca aberta na hora certa. Peito pra frente, queixo um pouco pra cima. Arroto abafado perde nota.'] }
+      ], tail: [{ eyebrow: 'Se travar', title: 'E se não sai nada?', paras: ['Tem gente que simplesmente não arrota. Se forçar dói, incomoda ou vira azia, para. Isso é assunto de médico, não de jogo.'] }] },
+      'tipos': { nav: 'Tipos de arroto', eyebrow: 'Estilos e acústica', title: 'Tipos de arroto', lead: 'Nem todo arroto é igual. Tem o que racha parede, o que parece trator e o sopro oco que não assusta ninguém. Conheça as cinco variantes e como cada uma pontua.', blocks: [
+        { eyebrow: 'Como o som se forma', title: 'O que separa um trovão de um sopro', paras: ['O Auê julga quatro medidas: duração, potência, profundidade e textura.'], hasCards: true, cards: [{ t: 'Ar engolido', d: 'Sobe rápido e seco. Bom pra rajadas curtas.' }, { t: 'Fermentação', d: 'Gás de refrigerante ou cerveja. Graves profundos e duração longa.' }] }
+      ], listHead: 'As cinco categorias', list: [
+        { n: '01', eyebrow: 'Impacto bruto', t: 'O Trovão', paras: ['Volume absurdo, impacto seco e ressonância grave no peito. Bate no teto de potência e profundidade.'] },
+        { n: '02', eyebrow: 'Resistência', t: 'O Trator', paras: ['Vibração contínua, como motor dando partida na subida. Pontua alto em duração.'] },
+        { n: '03', eyebrow: 'Cadência', t: 'A Rajada', paras: ['Mini-arrotos colados, sem respirar no meio. Pra valer, a sequência não pode ter pausa.'] },
+        { n: '04', eyebrow: 'Controle vocal', t: 'O Fraseado', paras: ['Modular a voz pra falar uma palavra, ou o alfabeto, enquanto o gás sobe. Ganha em textura.'] },
+        { n: '05', eyebrow: 'O desastre', t: 'O Sopro Oco', paras: ['Muito esforço pra quase nada. Cai na primeira faixa. Se o microfone captar só ar, nem vale como arroto.'] }
+      ], tail: [{ eyebrow: 'Dicas', title: 'Como tirar nota máxima', paras: ['Celular a 10 a 15 cm da boca. Não abafe com a mão. Solte sem frear no meio.'], hasLinks: true, links: [L('como-arrotar', 'Como arrotar'), L('ranking', 'Tabela de notas')] }] },
+      'ranking': { nav: 'Ranking', eyebrow: 'Competição e estatísticas', title: 'Ranking e recordes de arroto', lead: 'Como o juiz do Auê avalia sua nota de 0 a 100, e onde o seu arroto se posiciona.', blocks: [
+        { eyebrow: 'Sem sorteio', title: 'Como a nota é calculada', paras: ['Um modelo de IA, rodando no navegador do seu celular, verifica se o áudio é mesmo um arroto e rejeita palmas, assobios e fala. Depois mede potência, tempo de sustentação e graves.', 'Com a nota na mão, você escolhe: publicar num tópico, chamar alguém pro X1 ou arrotar de novo.'] }
+      ], listHead: 'A tabela de vereditos', list: [
+        { n: '0–19', eyebrow: 'Faixa oficial', t: 'Foi isso?', paras: ['Nem o cachorro ouviu. Faltou ar, sobrou vergonha.'] },
+        { n: '20–39', eyebrow: 'Faixa oficial', t: 'Tá fraco, hein.', paras: ['Som de porta rangendo. Dá pra melhorar sem esforço.'] },
+        { n: '40–59', eyebrow: 'Faixa oficial', t: 'Dá pro gasto.', paras: ['Arroto de almoço de família. Não passa vergonha, mas não ganha X1.'] },
+        { n: '60–74', eyebrow: 'Faixa oficial', t: 'Aí sim.', paras: ['Arroto de respeito. Vibrou a garganta e impôs respeito na sala.'] },
+        { n: '75–84', eyebrow: 'Faixa oficial', t: 'Veio forte.', paras: ['Potência acima da média. Entra fácil nos rankings das comunidades.'] },
+        { n: '85–94', eyebrow: 'Faixa oficial', t: 'Tá maluco.', paras: ['Estrondo de tremer janela. O oponente no X1 já começa a tremer.'] },
+        { n: '95–99', eyebrow: 'Faixa oficial', t: 'Apelão.', paras: ['Nível quase sobre-humano. Duração longa e potência de show de rock.'] },
+        { n: '100', eyebrow: 'Faixa oficial', t: 'Tá roubado.', paras: ['A lenda. O estômago alinhado com a acústica perfeita.'] }
+      ] },
+      'grupos': { nav: 'Grupos', eyebrow: 'Fora do app também', title: 'Grupos do WhatsApp', lead: 'A conversa continua no zap. Entre no grupo da sua comunidade, mande seus áudios e acompanhe os desafios da semana.', isGroups: true, blocks: [] },
+      'videos': { nav: 'Vídeos', eyebrow: 'Playlist e zoeira', title: 'Vídeos de arroto', lead: 'Uma seleção dos arrotos mais barulhentos, bizarros e engraçados do YouTube.', isVideos: true, blocks: [] }
+    };
+  }
+  renderVals() {
+    const s = this.state, P = this.pages(), cur = P[s.page] || P['como-jogar'];
+    const go = (k) => () => { this.setState({ page: k, cat: 'todos' }); try { history.replaceState(null, '', '#' + k); } catch (x) {} window.scrollTo(0, 0); };
+    const pg = { ...cur, blocks: cur.blocks.map(b => ({ hasCards: false, hasLinks: false, cards: [], links: [], ...b })), tailBlocks: (cur.tail || []).map(b => ({ hasCards: false, hasLinks: false, cards: [], links: [], ...b })), hasList: !!cur.list, list: cur.list || [], listHead: cur.listHead || '' };
+    // keep tail blocks after list: render tail separately by ordering
+    const tabs = Object.keys(P).map(k => { const on = k === s.page; return { label: P[k].nav, go: go(k), style: { height: 36, padding: '0 14px', border: 0, borderRadius: 999, background: on ? 'var(--surface)' : 'transparent', color: on ? 'var(--fg)' : 'var(--muted)', fontWeight: on ? 800 : 600, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' } }; });
+    const V = [['Trovão', 'trovao', 'Os maiores estrondos no microfone'], ['Trator', 'trator', 'Arroto contínuo de 5 segundos'], ['Rajada', 'rajada', 'Metralhadora ao vivo'], ['Resenha', 'resenha', 'Aula completa de técnica'], ['Trovão', 'trovao', 'Compilação de recordes'], ['Resenha', 'resenha', 'Como arrotar alto, passo a passo']].map(([cat, k, t]) => ({ cat, k, t }));
+    const cl = [['todos', 'Todos'], ['trovao', 'Trovão'], ['trator', 'Trator'], ['rajada', 'Rajada'], ['resenha', 'Resenha']];
+    const cats = cl.map(([k, label]) => { const on = s.cat === k; return { label, n: k === 'todos' ? V.length : V.filter(v => v.k === k).length, go: () => this.setState({ cat: k }), style: { height: 36, padding: '0 16px', borderRadius: 999, border: on ? 0 : '1px solid var(--border-strong)', background: on ? 'var(--fg)' : 'transparent', color: on ? 'var(--bg)' : 'var(--fg)', fontWeight: 700, fontSize: 13, cursor: 'pointer' } }; });
+    const groups = [['EA', 'Eu arroto, e daí?', '48 mil', 'Histórias, áudios e o desafio da semana.'], ['CG', 'Cerveja Gelada', '12 mil', 'Long neck, chope e lata. Gás na temperatura certa.'], ['RC', 'Refri & Cia', '9 mil', 'Refrigerante e guaraná. Grave de elevador é lei.']].map(([ini, name, members, desc]) => ({ ini, name, members, desc, href: '#' }));
+    return { tabs, pg, cats, groups, vids: s.cat === 'todos' ? V : V.filter(v => v.k === s.cat) };
+  }
+}
+</script>
+</body>
+</html>

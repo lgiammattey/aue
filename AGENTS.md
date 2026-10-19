@@ -43,7 +43,7 @@ Não duplique regra. Leia a fonte certa.
 | **Qual é a jornada completa do jogador?** | [`docs/jogo/JORNADA.md`](docs/jogo/JORNADA.md) e [`docs/design/prototipo/Jornada.dc.html`](docs/design/prototipo/Jornada.dc.html) |
 | Quais são os estados da Arena? | [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md) |
 | Como o jogo se comporta e pontua? | [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md) |
-| **Com o que a interface se parece?** | Protótipos canônicos em [`docs/design/prototipo/`](docs/design/prototipo/): [`Bonde do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html), [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html), [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html), [`Login.dc.html`](docs/design/prototipo/Login.dc.html), [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html), [`Versões Webapp.dc.html`](docs/design/prototipo/Vers%C3%B5es%20Webapp.dc.html) |
+| **Com o que a interface se parece?** | Protótipos canônicos em [`docs/design/prototipo/`](docs/design/prototipo/): [`Bonde do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html), [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html), [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html), [`Login.dc.html`](docs/design/prototipo/Login.dc.html), [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html), [`Páginas Públicas.dc.html`](docs/design/prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html), [`Versões Webapp.dc.html`](docs/design/prototipo/Vers%C3%B5es%20Webapp.dc.html) |
 | De onde vêm cor, tipo, espaço e movimento? | [`docs/design/design-system/system/DESIGN.md`](docs/design/design-system/system/DESIGN.md) e [`docs/design/prototipo/Design System.dc.html`](docs/design/prototipo/Design%20System.dc.html) |
 | **O que estamos construindo agora?** | [`docs/escopo/ESCOPO_ATUAL.md`](docs/escopo/ESCOPO_ATUAL.md) |
 | O que vem depois? | [`docs/escopo/BACKLOG.md`](docs/escopo/BACKLOG.md) |
@@ -148,7 +148,7 @@ A regra que mais aparece no dia a dia:
 - **Nada escrito pode cheirar a IA.** Copy, issue, PR, commit e conversa passam pela [`filtro-anti-ia`](.agents/skills/filtro-anti-ia/SKILL.md).
 - **Issue e PR são anotações de primos experientes**, diretos, claros e sem corporativismo.
 - **Nenhuma entrega sem aceite do Tiago.** Qualidade é do Marcelo; aceite contra os requisitos é do Tiago.
-- **Fidelidade ao Design System:** Anton para display/scores/wordmark, Archivo para interface, fundo chapado, sem gradientes falsos, verde elétrico `--accent: #c6ff00` limitado a no máximo 2 aparições por estado, suporte a temas escuro e claro, card de compartilhamento 9:12.
+- **Fidelidade ao Design System:** Anton para display/scores/wordmark, Archivo para interface (exceção: as telas públicas — landing `/`, `/login`, `/privacidade`, `/termos`, `/como-jogar`, `/como-arrotar`, `/tipos-de-arroto`, `/ranking-de-arrotos`, `/grupos`, `/videos-de-arroto` — seguem [`Páginas Públicas.dc.html`](docs/design/prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html): Archivo 800/900 nos títulos e no wordmark `auê!`, tema claro fixo e verde elétrico só sobre fundo escuro), fundo chapado, sem gradientes falsos, verde elétrico `--accent: #c6ff00` limitado a no máximo 2 aparições por estado, suporte a temas escuro e claro, card de compartilhamento 9:12.
 - **Nenhum merge com `typecheck`, `lint`, `test` ou `build` falhando.**
 - **Nenhum desenvolvimento direto na `main`.**
 - **Commits e PRs em PT-BR.**

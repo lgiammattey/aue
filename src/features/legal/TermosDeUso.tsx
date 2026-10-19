@@ -33,9 +33,10 @@ export const TermosDeUso: React.FC = () => (
 
     <Secao titulo="O que o Auê é">
       <p>
-        Um juiz de arroto. Você grava, ele analisa duração, potência,
-        profundidade e textura do som e devolve uma nota de 0 a 100. Dá para
-        mandar o link para os amigos e ver quem se sai melhor.
+        Uma comunidade de quem gosta de arrotar. Dá para ler, ouvir e
+        conversar. Na Arena, você grava um arroto e o Auê analisa duração,
+        potência, profundidade e textura do som e devolve uma nota de 0 a 100.
+        Dá para mandar o link para os amigos e ver quem se sai melhor.
       </p>
       <p>
         <strong>A nota é brincadeira</strong>, não medição científica de coisa

@@ -1,0 +1,65 @@
+/*
+  Os documentos legais na moldura clara das páginas públicas. Texto de leitura
+  em `--fg` (13:1 sobre o fundo) e não em `--muted`: é o que a pessoa precisa
+  ler de verdade. Os links dos documentos usam `var(--accent)` inline; aqui
+  `--accent` vira o verde escuro, que o elétrico não lê sobre o claro.
+*/
+.publico-legal {
+  --accent: var(--publico-verde);
+  --danger: #c4161a;
+  padding-bottom: 56px;
+}
+
+.publico-legal .publico-hero {
+  padding-bottom: 16px;
+}
+
+.publico-legal-corpo {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.publico-legal-secao {
+  padding-block: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.publico-legal-secao h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+}
+
+.publico-legal-texto {
+  display: grid;
+  gap: 10px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.publico-legal-texto p {
+  margin: 0;
+}
+
+.publico-legal-texto a,
+.publico-legal-rodape > a:first-child {
+  color: var(--publico-verde);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.publico-legal-rodape {
+  padding-block: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}

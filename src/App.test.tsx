@@ -18,9 +18,9 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     render(<App />);
 
     // Deve exibir os elementos da Landing
-    expect(await screen.findByRole('heading', { level: 1, name: 'Tá rolando agora' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Arrotar sem conta' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Explorar o feed sem conta' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Ir pra Arena' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Só quero ouvir' })).toBeTruthy();
   });
 
   it('mantém o visitante deslogado na Landing na raiz "/" sem forçar o feed', async () => {
@@ -28,8 +28,8 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     render(<App />);
 
     // Mesmo com dados no localStorage, deslogado permanece na Landing com opções públicas
-    expect(await screen.findByRole('heading', { level: 1, name: 'Tá rolando agora' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Explorar o feed sem conta' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Só quero ouvir' })).toBeTruthy();
   });
 
   it('exibe o Feed diretamente quando acessa a rota "/feed"', async () => {

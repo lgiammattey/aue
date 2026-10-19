@@ -1,32 +1,129 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 
-import '../../shared/publico/publico.css';
+import '../../shared/publico/tema-claro.css';
 import './LayoutPublico.css';
 
 /**
- * A moldura das páginas públicas de conteúdo: `/como-jogar` e `/como-arrotar`.
+ * A moldura das páginas públicas de conteúdo: `/como-jogar`, `/como-arrotar`,
+ * `/tipos-de-arroto`, `/ranking-de-arrotos`, `/grupos` e `/videos-de-arroto`.
  *
- * POR QUE ELA EXISTE, E POR QUE NÃO É `TelaDesktop`
- * --------------------------------------------------
- * A landing (`TelaDesktop`) só aparece pro gate `ehDesktop` — ela foi desenhada
- * pra tela larga, com hero de duas colunas e celular falso. `/como-jogar` e
- * `/como-arrotar` são páginas de SEO: quem chega por elas vem do buscador, do
- * celular ou do computador, e não têm gate nenhum. Por isso esta moldura é uma
- * versão da mesma família visual que também funciona empilhada numa tela de
- * 375px — mesma marca, mesma tipografia, mesmo rodapé, sem o hero de duas
- * colunas que só faz sentido em tela larga.
+ * No celular as abas viram um menu hambúrguer (abaixo de 960px). Teclado: Esc
+ * fecha. Esta pasta não toca em `window`/`document`, então o fechamento vem do
+ * `onKeyDown` do próprio `<header>`.
  *
- * A casca (fundo, shell, topbar, pílula, cabeçalho de seção, CTA final,
- * rodapé) é a mesma classe CSS da landing, vinda de
- * `src/shared/publico/publico.css` — não existe uma segunda cópia daquele
- * token em lugar nenhum.
+ * O DESENHO VEM DE `docs/design/prototipo/Páginas Públicas.dc.html`
+ * ----------------------------------------------------------------
+ * Base clara e esverdeada, Archivo pesada nos títulos (sem Anton em caixa
+ * alta), abas em pílula no topo, seções em duas colunas separadas por linha,
+ * listas numeradas em vez de grade de cards e uma faixa final verde-escura.
+ * É a direção "roda de amigos" do Auê: a intensidade preta com verde elétrico
+ * fica pra Arena.
  *
- * NENHUM ESTADO DA ARENA NASCE AQUI, igual à landing: esta moldura vive fora
- * da máquina de estados.
+ * O tema é sempre claro aqui, de propósito. Os tokens são redefinidos no
+ * escopo de `.publico-site` (ver `LayoutPublico.css`), então nada vaza pro app.
+ *
+ * Quem chega por busca abre do celular: nada aqui depende de tela larga.
+ *
+ * NENHUM ESTADO DA ARENA NASCE AQUI: esta moldura vive fora da máquina de
+ * estados.
  */
+
+const ABAS: ReadonlyArray<{ para: string; rotulo: string }> = [
+  { para: '/como-jogar', rotulo: 'Como funciona' },
+  { para: '/comunidade', rotulo: 'Comunidades' },
+  { para: '/como-arrotar', rotulo: 'Como arrotar' },
+  { para: '/tipos-de-arroto', rotulo: 'Tipos de arroto' },
+  { para: '/ranking-de-arrotos', rotulo: 'Ranking' },
+  { para: '/grupos', rotulo: 'Grupos' },
+  { para: '/videos-de-arroto', rotulo: 'Vídeos' },
+];
+
+const classeDaAba = ({ isActive }: { isActive: boolean }) =>
+  isActive ? 'publico-aba publico-aba-ativa' : 'publico-aba';
+
+/**
+ * Topo com abas e rodapé, sem hero nem faixa final. É o que as páginas de
+ * conteúdo e os documentos legais têm em comum.
+ */
+export const MolduraPublica: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [menuAberto, setMenuAberto] = useState(false);
+  const fechar = () => setMenuAberto(false);
+
+  return (
+    <div className="publico-site">
+      <header
+        className="publico-topo"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') fechar();
+        }}
+      >
+        <div className="publico-shell publico-topo-inner">
+          <Link className="publico-marca" to="/" aria-label="Auê! início" onClick={fechar}>
+            auê<span>!</span>
+          </Link>
+          <nav className="publico-abas" aria-label="Navegação">
+            {ABAS.map(({ para, rotulo }) => (
+              <NavLink key={para} to={para} className={classeDaAba}>
+                {rotulo}
+              </NavLink>
+            ))}
+          </nav>
+          <Link className="publico-pilula publico-pilula-escura publico-topo-entrar" to="/login">
+            Entrar
+          </Link>
+          <button
+            type="button"
+            className="publico-menu-botao"
+            aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+            aria-expanded={menuAberto}
+            aria-controls="menu-publico"
+            onClick={() => setMenuAberto((v) => !v)}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+              {menuAberto ? (
+                <path d="M5 5l14 14M19 5L5 19" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+        <nav id="menu-publico" className="publico-menu" aria-label="Menu" hidden={!menuAberto}>
+          <div className="publico-shell">
+            {ABAS.map(({ para, rotulo }) => (
+              <NavLink key={para} to={para} className={classeDaAba} onClick={fechar}>
+                {rotulo}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+      </header>
+
+    {children}
+
+    <footer className="publico-rodape">
+      <div className="publico-shell publico-rodape-inner">
+        <span>© 2026 Auê! · A comunidade de quem gosta de arrotar.</span>
+        <nav aria-label="Links institucionais">
+          <Link to="/como-jogar">Como funciona</Link>
+          <Link to="/como-arrotar">Como arrotar</Link>
+          <Link to="/tipos-de-arroto">Tipos de arroto</Link>
+          <Link to="/ranking-de-arrotos">Ranking</Link>
+          <Link to="/comunidade">Comunidades</Link>
+          <Link to="/grupos">Grupos externos</Link>
+          <Link to="/videos-de-arroto">Vídeos</Link>
+          <Link to="/privacidade">Política de privacidade</Link>
+          <Link to="/termos">Termos de uso</Link>
+        </nav>
+      </div>
+    </footer>
+    </div>
+  );
+};
+
 export const LayoutPublico: React.FC<{
-  /** Vai no eyebrow do hero, acima do H1. Curto, no tom do jogo. */
+  /** Vai acima do H1. Curto, no tom do jogo. */
   eyebrow: string;
   /** O H1 da página. */
   titulo: string;
@@ -34,88 +131,107 @@ export const LayoutPublico: React.FC<{
   resumo: string;
   children: React.ReactNode;
 }> = ({ eyebrow, titulo, resumo, children }) => (
-  <div className="desktop-site publico-site">
-    <header className="desktop-topbar">
-      <div className="desktop-shell desktop-topbar-inner">
-        <Link className="desktop-brand" to="/" aria-label="Auê! início">
-          AUÊ!
-        </Link>
-        <nav className="desktop-nav" aria-label="Navegação">
-          <Link to="/">Início</Link>
-          <Link to="/como-jogar">Como jogar</Link>
-          <Link to="/como-arrotar">Como arrotar</Link>
-          <Link to="/tipos-de-arroto">Tipos de arroto</Link>
-          <Link to="/ranking-de-arrotos">Ranking</Link>
-          <Link to="/grupos">Grupos</Link>
-          <Link to="/videos-de-arroto">Vídeos</Link>
-          <Link to="/comunidade">Bonde</Link>
-        </nav>
-        <Link className="desktop-pill desktop-pill-primary" to="/">
-          Jogar no celular
-        </Link>
-      </div>
-    </header>
-
-    <main>
-      <section className="desktop-shell publico-hero">
-        <span className="desktop-eyebrow">{eyebrow}</span>
+  <MolduraPublica>
+    <main className="publico-shell">
+      <section className="publico-hero">
+        <span className="publico-eyebrow">{eyebrow}</span>
         <h1>{titulo}</h1>
         <p>{resumo}</p>
       </section>
 
       {children}
 
-      <section className="desktop-shell desktop-final-cta">
-        <span className="desktop-eyebrow">Chega de ler</span>
-        <h2>
-          Agora <span>entra</span> na competição.
-        </h2>
-        <p>Pega o celular, solta o primeiro arroto e arruma alguém pra tentar bater tua nota.</p>
-        <Link className="desktop-pill desktop-pill-primary desktop-pill-large" to="/">
-          Arrotar agora
+      <section className="publico-cta">
+        <span className="publico-eyebrow">Quer participar?</span>
+        <h2>Chega mais.</h2>
+        <p>Arrota, aprende ou só vem ouvir. O importante é participar da resenha.</p>
+        <Link className="publico-pilula publico-pilula-grande publico-pilula-accent" to="/">
+          Ir pro Auê
         </Link>
       </section>
     </main>
-
-    <footer className="desktop-footer">
-      <div className="desktop-shell desktop-footer-inner">
-        <span>© 2026 Auê! · Competição de arroto levada a sério demais.</span>
-        <nav aria-label="Links institucionais">
-          <Link to="/como-jogar">Como jogar</Link>
-          <Link to="/como-arrotar">Como arrotar</Link>
-          <Link to="/tipos-de-arroto">Tipos de arroto</Link>
-          <Link to="/ranking-de-arrotos">Ranking</Link>
-          <Link to="/comunidade">Bonde & Comunidades</Link>
-          <Link to="/grupos">Grupos</Link>
-          <Link to="/videos-de-arroto">Vídeos</Link>
-          <Link to="/privacidade">Política de privacidade</Link>
-          <Link to="/termos">Termos de uso</Link>
-        </nav>
-      </div>
-    </footer>
-  </div>
+  </MolduraPublica>
 );
 
 /**
- * Uma seção de conteúdo dentro de `LayoutPublico`: eyebrow curto + h2 + corpo.
- *
- * É o equivalente, nas páginas de conteúdo, ao `Secao` de `LayoutLegal` — só
- * que na tipografia da landing em vez da tipografia sóbria dos documentos
- * legais. O eyebrow é novo: o conteúdo das duas páginas já existia como título
- * de `Secao` (ex.: "Arrotar e receber a nota"), e virou o h2 daqui; o eyebrow
- * curto ("O loop", "Com gás") é a única coisa que cada seção ganhou pra caber
- * no padrão eyebrow + h2 da landing.
+ * Uma seção de conteúdo: eyebrow + h2 numa coluna, o corpo na outra. Em tela
+ * estreita as duas colunas empilham sozinhas (grid `auto-fit`).
  */
 export const SecaoPublica: React.FC<{
   eyebrow: string;
   titulo: string;
   children: React.ReactNode;
 }> = ({ eyebrow, titulo, children }) => (
-  <section className="desktop-shell desktop-section publico-section">
-    <div className="publico-section-head">
-      <span className="desktop-eyebrow">{eyebrow}</span>
+  <section className="publico-secao">
+    <div className="publico-secao-cabeca">
+      <span className="publico-eyebrow">{eyebrow}</span>
       <h2>{titulo}</h2>
     </div>
-    <div className="publico-section-body">{children}</div>
+    <div className="publico-secao-corpo">{children}</div>
   </section>
+);
+
+/** Cartões curtos lado a lado, dentro do corpo de uma `SecaoPublica`. */
+export const CartoesPublicos: React.FC<{
+  cartoes: ReadonlyArray<{ titulo: string; texto: React.ReactNode }>;
+}> = ({ cartoes }) => (
+  <div className="publico-cartoes">
+    {cartoes.map(({ titulo, texto }) => (
+      <div className="publico-cartao" key={titulo}>
+        <h3>{titulo}</h3>
+        <p>{texto}</p>
+      </div>
+    ))}
+  </div>
+);
+
+export interface ItemDaListaPublica {
+  numero: string;
+  eyebrow: string;
+  titulo: string;
+  texto: readonly string[];
+}
+
+/**
+ * A lista numerada (técnicas, estilos, faixas de nota): número grande em verde
+ * escuro à esquerda, texto à direita, uma linha entre cada item.
+ */
+export const ListaPublica: React.FC<{
+  eyebrow?: string;
+  titulo?: string;
+  itens: readonly ItemDaListaPublica[];
+}> = ({ eyebrow, titulo, itens }) => (
+  <section className="publico-lista">
+    {titulo && (
+      <div className="publico-lista-cabeca">
+        {eyebrow && <span className="publico-eyebrow">{eyebrow}</span>}
+        <h2>{titulo}</h2>
+      </div>
+    )}
+    {itens.map(({ numero, eyebrow: eyebrowDoItem, titulo: tituloDoItem, texto }) => (
+      <article className="publico-item" key={numero}>
+        <div className="publico-item-numero">{numero}</div>
+        <div className="publico-item-corpo">
+          <span className="publico-eyebrow">{eyebrowDoItem}</span>
+          <h3>{tituloDoItem}</h3>
+          {texto.map((paragrafo) => (
+            <p key={paragrafo}>{paragrafo}</p>
+          ))}
+        </div>
+      </article>
+    ))}
+  </section>
+);
+
+/** Pílulas de "veja também" no fim de uma seção. */
+export const LinksPublicos: React.FC<{
+  links: ReadonlyArray<{ para: string; rotulo: string }>;
+}> = ({ links }) => (
+  <div className="publico-links">
+    {links.map(({ para, rotulo }) => (
+      <Link className="publico-pilula publico-pilula-clara" to={para} key={para}>
+        {rotulo} →
+      </Link>
+    ))}
+  </div>
 );

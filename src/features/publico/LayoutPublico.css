@@ -1,204 +1,403 @@
 /*
-  O que é exclusivo das páginas de conteúdo (`/como-jogar`, `/como-arrotar`) e
-  não existe na landing: o hero simples — eyebrow, H1 e um parágrafo, sem o
-  celular falso — e o corpo de cada seção de conteúdo, empilhado em vez do
-  grid assimétrico de `.desktop-section-head` da landing (que existe pra casar
-  título curto com um parágrafo largo ao lado; aqui cada seção já É um bloco
-  de leitura, então título e texto ficam na mesma coluna).
-
-  A casca (fundo, shell, topbar, pílula, CTA final, rodapé) vem de
-  `src/shared/publico/publico.css` — não duplicada aqui.
-
-  ESSAS DUAS PÁGINAS NÃO TÊM O GATE DE DESKTOP: quem chega por busca abre do
-  celular. Por isso os dois blocos abaixo usam `clamp()` para o tamanho de
-  fonte em vez de só um valor fixo trocado em media query — a régua já nasce
-  contínua entre 375px e 1280px, e a media query de 640px só ajusta o que
-  sobra (espaçamento de seção, principalmente).
+  O que é exclusivo das páginas de conteúdo: a moldura com abas no topo, o hero,
+  as seções em duas colunas, a lista numerada e a faixa final. Tokens, marca,
+  pílulas e campos vêm de `src/shared/publico/tema-claro.css`.
 */
+/* ---------- topo ---------- */
+
+.publico-topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--border);
+  background: rgba(247, 248, 245, .94);
+  backdrop-filter: blur(8px);
+}
+
+.publico-topo-inner {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.publico-abas {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.publico-abas::-webkit-scrollbar {
+  display: none;
+}
+
+.publico-aba {
+  flex: none;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.publico-site .publico-aba:hover {
+  background: var(--surface);
+}
+
+.publico-site .publico-aba-ativa {
+  background: var(--surface);
+  color: var(--fg);
+  font-weight: 800;
+}
+
+/* ---------- menu hambúrguer (celular) ---------- */
+
+.publico-menu-botao {
+  display: none;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin-right: -8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.publico-site .publico-menu-botao:hover {
+  background: var(--surface);
+}
+
+.publico-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: 0 12px 24px rgba(23, 34, 28, .08);
+}
+
+.publico-menu[hidden] {
+  display: none;
+}
+
+.publico-menu .publico-shell {
+  padding-block: 8px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.publico-menu .publico-aba {
+  height: 48px;
+  padding: 0 14px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+
+@media (max-width: 960px) {
+  .publico-abas {
+    display: none;
+  }
+
+  .publico-topo-inner {
+    justify-content: space-between;
+  }
+
+  .publico-topo-entrar {
+    margin-left: auto;
+  }
+
+  .publico-menu-botao {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 961px) {
+  .publico-menu {
+    display: none;
+  }
+}
+
+/* ---------- hero ---------- */
+
 .publico-hero {
-  padding-block: 64px 40px;
+  max-width: 760px;
+  padding-block: 56px 40px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
 .publico-hero h1 {
-  max-width: 16ch;
-  margin: 4px 0 2px;
-  font-family: var(--font-display);
-  font-size: clamp(40px, 6.4vw, 64px);
-  font-weight: 400;
-  line-height: .95;
-  letter-spacing: -.02em;
-  text-transform: uppercase;
+  margin: 0;
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.035em;
+  text-wrap: balance;
 }
 
 .publico-hero > p {
-  max-width: 640px;
-  color: color-mix(in oklch, var(--fg) 76%, var(--muted));
-  font-size: clamp(16px, 2.4vw, 18px);
-  line-height: 1.6;
+  margin: 0;
+  color: var(--muted);
+  font-size: 19px;
+  line-height: 1.55;
+  text-wrap: pretty;
 }
 
-.publico-section {
-  padding-block: 44px;
+/* ---------- seção em duas colunas ---------- */
+
+.publico-secao {
+  padding-block: 40px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 20px 56px;
+  align-items: start;
+}
+
+.publico-secao-cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.publico-secao-cabeca h2,
+.publico-lista-cabeca h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+
+.publico-secao-corpo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.publico-secao-corpo > p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+/* ---------- cartões ---------- */
+
+.publico-cartoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+}
+
+.publico-cartao {
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.publico-cartao h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.publico-cartao p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ---------- lista numerada ---------- */
+
+.publico-lista {
+  padding-block: 24px 40px;
   border-top: 1px solid var(--border);
 }
 
-.publico-section:first-of-type {
-  border-top: 0;
-}
-
-.publico-section-head {
+.publico-lista-cabeca {
+  padding-block: 16px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: 6px;
 }
 
-.publico-section-head h2 {
-  font-family: var(--font-display);
-  font-size: clamp(26px, 3.6vw, 38px);
-  font-weight: 400;
-  line-height: 1.05;
-  text-transform: uppercase;
-}
-
-.publico-section-body {
+.publico-item {
+  padding-block: 24px;
+  border-bottom: 1px solid var(--border);
   display: grid;
-  gap: 14px;
-  max-width: 700px;
+  grid-template-columns: minmax(72px, 140px) minmax(0, 1fr);
+  gap: 8px 32px;
+  align-items: start;
 }
 
-.publico-section-body p {
+.publico-item-numero {
+  color: var(--publico-verde);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
+.publico-item-corpo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.publico-item-corpo h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.publico-item-corpo p {
+  margin: 0;
   color: var(--muted);
   font-size: 16px;
-  line-height: 1.65;
-}
-
-.publico-section-body strong,
-.publico-section-body em {
-  color: var(--fg);
-  font-style: normal;
-}
-
-.publico-extra {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-bottom: 28px;
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.publico-extra a {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-/*
-  As cinco técnicas de `/como-arrotar`, em card — reaproveitando o padrão
-  visual de `.desktop-step` (número, título, texto) da landing
-  (`src/features/desktop/TelaDesktop.css`), que já está no bundle porque
-  `TelaDesktop` é importado no mesmo `App.tsx`. O que muda aqui é só o que a
-  landing não precisa: um grid que aceita qualquer quantidade de cards (a
-  landing tem sempre 4, numa borda dividida por `nth-child`; aqui a borda vem
-  do gap + fundo, então funciona igual com 2, 5 ou qualquer outro número) e o
-  espaço pro ícone acima do número. Nenhuma regra de `.desktop-step` é
-  redefinida — só estendida dentro do escopo `.publico-tecnicas`.
-*/
-.publico-tecnicas {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  border: 1px solid var(--border);
-  background: var(--border);
-}
-
-.publico-tecnicas .desktop-step {
-  background: var(--surface);
-  border-right: 0;
-}
-
-.desktop-step-icone svg {
-  width: 26px;
-  height: 26px;
-  margin-bottom: 16px;
-  color: var(--muted);
-}
-
-.desktop-step-icone h3 {
-  margin-top: 14px;
-}
-
-.publico-tecnica-eyebrow {
-  margin: 2px 0 0;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-/*
-  Os "dois tipos" de arroto: dois mini-cards lado a lado, não numerados — é
-  introdução, não passo, então não usa `.desktop-step`.
-*/
-.publico-dois-tipos {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  border: 1px solid var(--border);
-  background: var(--border);
-  margin-block: 4px;
-}
-
-.publico-tipo-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 22px 24px 26px;
-  background: var(--surface);
-}
-
-.publico-tipo-card svg {
-  width: 24px;
-  height: 24px;
-  color: var(--muted);
-}
-
-.publico-tipo-card h3 {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 1.05;
-  text-transform: uppercase;
-}
-
-.publico-tipo-card p {
-  color: var(--muted);
-  font-size: 15px;
   line-height: 1.6;
+  text-wrap: pretty;
 }
 
-@media (max-width: 900px) {
-  .publico-tecnicas {
-    grid-template-columns: repeat(2, 1fr);
-  }
+/* ---------- links de "veja também" ---------- */
+
+.publico-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
+/* ---------- faixa final ---------- */
+
+.publico-cta {
+  margin-block: 24px 56px;
+  padding: 48px 32px;
+  border-radius: 24px;
+  background: var(--publico-faixa);
+  color: var(--publico-faixa-fg);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.publico-cta .publico-eyebrow {
+  color: inherit;
+  opacity: .75;
+}
+
+.publico-cta h2 {
+  margin: 0;
+  font-size: clamp(30px, 5vw, 48px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
+.publico-cta > p {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  opacity: .85;
+  text-wrap: pretty;
+}
+
+.publico-cta .publico-pilula {
+  margin-top: 8px;
+}
+
+/* ---------- rodapé ---------- */
+
+.publico-rodape {
+  border-top: 1px solid var(--border);
+}
+
+.publico-rodape-inner {
+  padding-block: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.publico-rodape nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+}
+
+.publico-site .publico-rodape a:hover {
+  color: var(--fg);
+}
+
+/* ---------- filtro em pílula (vídeos) ---------- */
+
+.publico-filtros {
+  margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.publico-filtro {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.publico-filtro[aria-pressed='true'] {
+  border-color: transparent;
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.publico-grade-videos {
+  padding-bottom: 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+/*
+  Em tela de celular a coluna do número (até 140px) deixava o texto com menos
+  de 170px de largura. Ali o número sobe pra cima do texto.
+*/
 @media (max-width: 640px) {
-  .publico-hero {
-    padding-block: 40px 28px;
-  }
-
-  .publico-section {
-    padding-block: 32px;
-  }
-
-  .publico-tecnicas,
-  .publico-dois-tipos {
-    grid-template-columns: 1fr;
+  .publico-item {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

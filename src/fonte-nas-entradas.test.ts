@@ -94,11 +94,13 @@ describe('a fonte chega igual em toda entrada HTML', () => {
     }
   });
 
-  it('a URL pede Anton, Archivo em 400/600/700, e nada além disso', () => {
+  it('a URL pede Anton, Archivo em 400/600/700/800/900, e nada além disso', () => {
     const url = urlDaFonte(ler('../index.html')) as string;
 
     expect(url).toContain('family=Anton');
-    expect(url).toContain('family=Archivo:wght@400;600;700');
+    // 800 e 900 são os títulos e a marca das páginas públicas
+    // (`src/features/publico/LayoutPublico.css`, protótipo `Páginas Públicas.dc.html`).
+    expect(url).toContain('family=Archivo:wght@400;600;700;800;900');
 
     // 500 não é usado por nenhum CSS do Auê. Ele estava na URL antiga da Inter
     // e está na do protótipo; carregar peso que ninguém aplica é rede jogada

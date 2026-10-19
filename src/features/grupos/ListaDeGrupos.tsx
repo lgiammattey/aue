@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import type { GrupoExterno, PortaDeGrupos } from '../../portas/grupos';
 import { CartaoDeGrupo } from './CartaoDeGrupo';
+import type { VarianteDeGrupos } from './CartaoDeGrupo';
 
 interface ListaDeGruposProps {
   porta: PortaDeGrupos;
@@ -8,6 +9,7 @@ interface ListaDeGruposProps {
   versao?: number;
   /** Avisos curtos (ex.: "Denúncia enviada."). */
   aoAvisar?: (texto: string) => void;
+  variante?: VarianteDeGrupos;
 }
 
 type Estado =
@@ -25,7 +27,7 @@ const caixa: React.CSSProperties = {
   lineHeight: 1.5,
 };
 
-export const ListaDeGrupos: React.FC<ListaDeGruposProps> = ({ porta, versao = 0, aoAvisar }) => {
+export const ListaDeGrupos: React.FC<ListaDeGruposProps> = ({ porta, versao = 0, aoAvisar, variante = 'app' }) => {
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' });
   const [denunciados, setDenunciados] = useState<ReadonlySet<string>>(new Set());
 
@@ -87,9 +89,15 @@ export const ListaDeGrupos: React.FC<ListaDeGruposProps> = ({ porta, versao = 0,
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div
+      style={
+        variante === 'publica'
+          ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: 16 }
+          : { display: 'flex', flexDirection: 'column', gap: 12 }
+      }
+    >
       {visiveis.map((g) => (
-        <CartaoDeGrupo key={g.id} grupo={g} aoDenunciar={denunciar} />
+        <CartaoDeGrupo key={g.id} grupo={g} aoDenunciar={denunciar} variante={variante} />
       ))}
     </div>
   );

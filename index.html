@@ -25,17 +25,15 @@
     -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!--
-      O TÍTULO DIZ O QUE É ANTES DE DIZER O QUE FAZ.
+      O TÍTULO DIZ QUEM SOMOS: "a comunidade de quem gosta de arrotar".
 
-      Antes era "Auê — grave seu arroto, receba a nota e desafie os amigos":
-      descreve a mecânica e não nomeia a categoria. Quem lê entende; quem indexa
-      fica sem saber se isto é jogo, rede social ou app de gravador.
-
-      "Jogo de arroto online" é a categoria em português, e é exatamente o que o
-      produto é (`docs/jogo/VISAO.md`). Não é palavra-chave enfiada: é a frase
-      que a gente usaria para explicar o Auê para alguém na rua.
+      Até 19/10/2026 o título e a descrição chamavam o Auê de "jogo de arroto
+      online". Luiz mudou o posicionamento: o Auê é uma comunidade, e a Arena
+      (onde o arroto ganha nota) é uma das coisas que ela oferece, não a
+      identidade inteira. Voz e regras de copy: `docs/jogo/VOZ.md`, seção
+      "Direção editorial".
     -->
-    <title>Auê! — Jogo de arroto online: grave, receba a nota e desafie os amigos</title>
+    <title>Auê! — A comunidade de quem gosta de arrotar</title>
 
     <meta name="theme-color" content="#0a0a08" />
 
@@ -62,7 +60,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700;800;900&display=swap"
       rel="stylesheet"
     />
 
@@ -135,7 +133,7 @@
       (src/shared/flags.ts). Prometer no buscador o que a tela não entrega é a
       pior primeira impressão possível.
     -->
-    <meta name="description" content="Auê! é um jogo de arroto online e grátis: grave o seu arroto, receba uma nota de 0 a 100 e chame os amigos para a competição de arroto. Direto no navegador, sem instalar e sem cadastro." />
+    <meta name="description" content="Comunidade de arrotadores: histórias, áudios e a Arena, onde você solta um arroto e vê a nota. Arrota, aprende ou só vem ouvir." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://aue.web.app/" />
 
@@ -163,16 +161,16 @@
     <meta property="og:site_name" content="Auê" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:url" content="https://aue.web.app/" />
-    <meta property="og:title" content="Auê! — Jogo de arroto online" />
-    <meta property="og:description" content="Arrota, recebe a nota e chama pro X1. Jogo de arroto grátis, direto no navegador, sem cadastro." />
+    <meta property="og:title" content="Auê! — A comunidade de quem gosta de arrotar" />
+    <meta property="og:description" content="Arrotar é um dom. Aqui, ele tem turma. Arrota, aprende ou só vem ouvir." />
     <meta property="og:image" content="https://aue.web.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Símbolo do Auê: uma bolha verde-limão com um ponto de exclamação vazado." />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Auê! — Jogo de arroto online" />
-    <meta name="twitter:description" content="Arrota, recebe a nota e chama pro X1. Jogo de arroto grátis, direto no navegador, sem cadastro." />
+    <meta name="twitter:title" content="Auê! — A comunidade de quem gosta de arrotar" />
+    <meta name="twitter:description" content="Arrotar é um dom. Aqui, ele tem turma. Arrota, aprende ou só vem ouvir." />
     <meta name="twitter:image" content="https://aue.web.app/og-image.png" />
 
     <!--
@@ -186,11 +184,10 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Auê!",
-        "alternateName": "Auê — jogo de arroto online",
+        "alternateName": "Auê — comunidade de arrotadores",
         "url": "https://aue.web.app/",
-        "description": "Jogo de arroto online: grave o seu arroto, receba uma nota de 0 a 100 e desafie os amigos numa competição de arroto pelo link.",
-        "applicationCategory": "GameApplication",
-        "genre": "Party game",
+        "description": "Comunidade de quem gosta de arrotar: histórias, áudios e a Arena, onde você solta um arroto e recebe uma nota de 0 a 100.",
+        "applicationCategory": "SocialNetworkingApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Navegador com suporte a microfone",
         "inLanguage": "pt-BR",
@@ -198,7 +195,7 @@
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
         "potentialAction": {
           "@type": "ViewAction",
-          "name": "Como jogar",
+          "name": "Como funciona",
           "target": "https://aue.web.app/como-jogar"
         }
       }
@@ -222,20 +219,23 @@
       verdade, mas ela depende do React ter montado.
     -->
     <noscript>
-      <h1>Auê! — jogo de arroto online</h1>
+      <h1>Auê! — a comunidade de quem gosta de arrotar</h1>
       <p>
-        O Auê é um jogo de arroto que roda direto no navegador: você grava, ele
-        analisa duração, potência, profundidade e textura do som, e devolve uma
-        nota de 0 a 100. Depois é só mandar o link para um amigo, ouvir o arroto
-        dele e descobrir quem arrota mais alto do grupo. É de graça, não precisa
-        instalar nada e não tem cadastro.
+        Arrotar é um dom. No Auê, ele tem turma: comunidades de arrotadores,
+        histórias, áudios e a Arena, onde você solta um arroto e recebe uma
+        nota de 0 a 100.
       </p>
       <p>
-        Dá para desafiar amigos por link: cada um arrota no próprio celular, as
-        notas se enfrentam e a competição de arroto termina com placar e
-        revanche. Lá fora chamam esse tipo de coisa de <em>burp game</em>.
+        Arrota, aprende ou só vem ouvir. Qualquer pessoa pode ler e ouvir sem
+        conta. Funciona direto no navegador, de graça, sem instalar nada.
       </p>
-      <p><a href="/como-jogar">Como jogar o Auê</a></p>
+      <p>
+        <a href="/comunidade">Comunidades</a> ·
+        <a href="/como-jogar">Como funciona</a> ·
+        <a href="/como-arrotar">Como arrotar</a> ·
+        <a href="/tipos-de-arroto">Tipos de arroto</a> ·
+        <a href="/ranking-de-arrotos">Ranking de arrotos</a>
+      </p>
       <p>Para usar o Auê é preciso ativar o JavaScript no navegador.</p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

@@ -1,0 +1,201 @@
+/*
+  O `/login`, no formato do cartão do Google de `docs/design/prototipo/Login.dc.html`:
+  um cartão só, sem abas e sem linhas divisórias, e a entrada em dois passos.
+  Tema claro fixo; tokens, marca, pílulas e campos vêm de
+  `src/shared/publico/tema-claro.css`.
+*/
+.login {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-centro {
+  width: 100%;
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.login-cartao {
+  width: 100%;
+  max-width: 450px;
+  padding: 48px 40px 36px;
+  border: 1px solid var(--border-strong);
+  border-radius: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  animation: loginEntra .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.login-cartao .publico-marca {
+  font-size: 40px;
+}
+
+.login-cartao h1 {
+  margin: 16px 0 8px;
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.login-sub {
+  margin: 0;
+  font-size: 16px;
+  text-align: center;
+}
+
+.login-chip {
+  height: 32px;
+  margin-top: 4px;
+  padding: 0 12px 0 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.login-chip:hover {
+  background: var(--surface);
+}
+
+.login-chip span {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form {
+  width: 100%;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-form .publico-campo {
+  height: 56px;
+  border-radius: 6px;
+}
+
+.login-form .publico-campo:focus {
+  box-shadow: 0 0 0 1px var(--fg);
+}
+
+.login-mostrar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.login-mostrar input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--fg);
+}
+
+.login-link {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-convidado {
+  width: 100%;
+  margin: 32px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.login-convidado a {
+  color: var(--fg);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.login-acoes {
+  width: 100%;
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-acoes .publico-pilula {
+  height: 40px;
+}
+
+.login-acoes .login-secundaria {
+  margin-left: -12px;
+  padding: 0 12px;
+  background: none;
+  color: var(--fg);
+}
+
+.login-acoes .login-secundaria:not(:disabled):hover {
+  background: var(--surface);
+}
+
+.login-rodape {
+  width: 100%;
+  max-width: 450px;
+  padding: 0 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  box-sizing: border-box;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.login-rodape a:hover {
+  color: var(--fg);
+}
+
+@keyframes loginEntra {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-cartao {
+    padding: 36px 24px 28px;
+  }
+}

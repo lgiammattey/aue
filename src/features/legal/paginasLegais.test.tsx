@@ -145,3 +145,22 @@ describe('quem responde, nos dois documentos', () => {
     expect(html).toContain('canal de contato ainda não foi configurado');
   });
 });
+
+describe('moldura das páginas legais', () => {
+  it.each([
+    ['política de privacidade', PoliticaDePrivacidade, 'Política de privacidade'],
+    ['termos de uso', TermosDeUso, 'Termos de uso'],
+  ] as const)('%s usa a moldura pública clara, com o título como H1', (_nome, componente, titulo) => {
+    const html = montar(componente);
+
+    expect(html).toContain('publico-site');
+    expect(html).toContain('publico-topo');
+    expect(html).toContain('publico-rodape');
+    expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
+    expect(html).toMatch(new RegExp(`<h1>${titulo}</h1>`));
+  });
+
+  it('não carrega a casca escura do app', () => {
+    expect(montar(TermosDeUso)).not.toContain('app-shell');
+  });
+});

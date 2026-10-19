@@ -1,0 +1,211 @@
+/*
+  A base visual clara das telas públicas: páginas de conteúdo, landing, login
+  e documentos legais. Medida em `docs/design/prototipo/Páginas Públicas.dc.html`
+  e `Landing.dc.html`.
+
+  TEMA CLARO FIXO: os tokens abaixo valem só dentro de `.publico-site`. O resto
+  do app continua com os tokens de `src/index.css` e o tema que a pessoa
+  escolheu. Componentes de outras features que entram aqui (cartão de grupo,
+  card de vídeo) leem `--bg`, `--surface`, `--fg` etc. e herdam a paleta clara
+  sem saber disso.
+
+  O VERDE: o elétrico (`--accent`) sobre fundo claro some — 1,07:1 no creme. Aqui
+  ele só aparece dentro da faixa escura do fim. Número de lista e o "!" da
+  marca usam `--publico-verde`, que passa de 7:1 sobre `--bg`.
+
+  Tipografia: Archivo em tudo, pesos 800 e 900 nos títulos. Anton fica pra
+  Arena e pra nota.
+*/
+.publico-site {
+  --bg: #f7f8f5;
+  --surface: #eef4e7;
+  --surface-2: #e2ebd8;
+  --fg: #202824;
+  --muted: #5c675d;
+  --border: #e7ebe3;
+  --border-strong: #c9d1c4;
+  /* Fixos aqui: o tema claro do app redefine `--accent` pra preto, e a faixa escura ficaria sem texto. */
+  --accent: #c6ff00;
+  --accent-on: #000000;
+  --danger: #c4161a;
+  --publico-verde: #2f5d0a;
+  --publico-faixa: #17221c;
+  --publico-faixa-fg: #f7f8f5;
+
+  color-scheme: light;
+  width: 100%;
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+}
+
+.publico-site a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.publico-site a,
+.publico-site button {
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    opacity var(--duration-fast) ease,
+    transform var(--duration-instant) ease;
+}
+
+/* O contorno global é `--accent`, invisível no claro. */
+.publico-site *:focus-visible {
+  outline-color: var(--publico-verde);
+}
+
+.publico-cta *:focus-visible {
+  outline-color: var(--accent);
+}
+
+.publico-site button:active,
+.publico-pilula:active {
+  transform: scale(.97);
+}
+
+.publico-site strong,
+.publico-site em {
+  color: var(--fg);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.publico-shell {
+  max-width: 1080px;
+  margin-inline: auto;
+  padding-inline: 20px;
+  box-sizing: border-box;
+}
+
+.publico-eyebrow {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ---------- marca ---------- */
+
+.publico-marca {
+  flex: none;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.06em;
+}
+
+.publico-marca span {
+  color: var(--publico-verde);
+}
+
+/* ---------- pílulas ---------- */
+
+.publico-pilula {
+  flex: none;
+  height: 38px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.publico-site .publico-pilula-escura {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.publico-site .publico-pilula-escura:hover {
+  opacity: .85;
+}
+
+.publico-site .publico-pilula-clara {
+  padding: 0 16px;
+  background: var(--surface);
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.publico-site .publico-pilula-clara:hover {
+  background: var(--surface-2);
+}
+
+.publico-site .publico-pilula-accent {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+
+.publico-site .publico-pilula-accent:hover {
+  opacity: .9;
+}
+
+.publico-pilula-grande {
+  height: 48px;
+  padding: 0 28px;
+  font-size: 16px;
+}
+
+/* ---------- campo de formulário ---------- */
+
+.publico-campo {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.publico-campo::placeholder {
+  color: var(--muted);
+}
+
+.publico-campo:focus {
+  border-color: var(--fg);
+}
+
+.publico-campo:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.publico-erro {
+  margin: 0;
+  color: #c4161a;
+  font-size: 14px;
+}
+
+.publico-aviso {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.publico-site .publico-pilula:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .publico-site *,
+  .publico-site *::before,
+  .publico-site *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

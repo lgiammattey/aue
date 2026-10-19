@@ -30,7 +30,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
   const contato = import.meta.env.VITE_CONTATO_PRIVACIDADE as string | undefined;
 
   return (
-    <LayoutLegal rotulo="Privacidade">
+    <LayoutLegal rotulo="Política de privacidade">
       <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
         Em linguagem direta, sem letra miúda. Se algo aqui não bater com o que o
         app faz, o errado é o app.
@@ -87,9 +87,9 @@ export const PoliticaDePrivacidade: React.FC = () => {
           conta:
         </p>
         <ul style={{ margin: 0, paddingLeft: '1.2em', display: 'grid', gap: 6 }}>
-          <li>seu perfil: apelido, @, foto, bio, cidade, links das redes que você informar, título, quando entrou, quantidade de causos, quem você segue e quem segue você, e a sua melhor nota <em>entre os causos publicados</em>;</li>
-          <li>seus causos, comentários e respostas;</li>
-          <li>a nota e o áudio de um causo, <strong>só se você marcou a autorização de publicar o arroto</strong> na hora de postar.</li>
+          <li>seu perfil: apelido, @, foto, bio, cidade, links das redes que você informar, título, quando entrou, quantidade de resenhas, quem você segue e quem segue você, e a sua melhor nota <em>entre os causos publicados</em>;</li>
+          <li>suas resenhas, comentários e respostas;</li>
+          <li>a nota e o áudio de uma resenha, <strong>só se você marcou a autorização de publicar o arroto</strong> na hora de postar.</li>
         </ul>
         <p>
           <strong>Gravar para jogar não é autorizar a publicação.</strong> Um

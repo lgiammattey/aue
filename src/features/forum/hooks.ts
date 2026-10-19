@@ -98,9 +98,18 @@ interface Salvo<C, T> {
  */
 const listasVistas = new Map<string, Salvo<unknown, unknown>>();
 
+/**
+ * Esquecer uma lista não basta: a tela que está saindo ainda guarda a dela ao desmontar
+ * (e é ela que ficou velha). Por isso cada esquecimento ganha um número, e quem abriu a
+ * lista ANTES dele não a guarda de volta.
+ */
+let numeroDoEsquecimento = 0;
+const esquecidasEm = new Map<string, number>();
+
 /** Para os testes e para o "Tentar de novo" de uma lista inteira. */
 export function limparListasVistas(): void {
   listasVistas.clear();
+  esquecidasEm.clear();
 }
 
 /**
@@ -109,9 +118,18 @@ export function limparListasVistas(): void {
  * o que a pessoa acabou de escrever: a lista seguinte vem do servidor.
  */
 export function esquecerListasVistas(prefixo: string): void {
+  numeroDoEsquecimento += 1;
+  esquecidasEm.set(prefixo, numeroDoEsquecimento);
   for (const chave of [...listasVistas.keys()]) {
     if (chave.startsWith(prefixo)) listasVistas.delete(chave);
   }
+}
+
+function foiEsquecidaDepoisDe(chave: string, abertaNoNumero: number): boolean {
+  for (const [prefixo, numero] of esquecidasEm) {
+    if (numero > abertaNoNumero && chave.startsWith(prefixo)) return true;
+  }
+  return false;
 }
 
 export type FaseDaLista = 'carregando' | 'pronto' | 'erro';
@@ -176,6 +194,8 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
   itensRef.current = itens;
   proximoRef.current = proximo;
 
+  const abertaNoNumero = useRef(numeroDoEsquecimento);
+
   // A volta do navegador só vale para a lista com que a tela abriu.
   const voltaInicial = useRef<{ chave: string; salvo: Salvo<unknown, unknown> } | null | undefined>(undefined);
   if (voltaInicial.current === undefined) {
@@ -205,6 +225,7 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
     setItens([]);
     setProximo(null);
     setMotivo(null);
+    const numeroNaCarga = numeroDoEsquecimento;
     carregarRef
       .current(null)
       .catch((): ResultadoDaLeitura<PaginaDoForum<C, T>> => ({ ok: false, motivo: 'falhou' }))
@@ -215,6 +236,8 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
           setFase('erro');
           return;
         }
+        // Dado lido do servidor depois do último esquecimento vale de novo para a volta do navegador.
+        abertaNoNumero.current = numeroNaCarga;
         const { itens: primeira } = juntarPorId<T>([], r.valor.itens);
         setItens(primeira);
         setProximo(r.valor.proximo);
@@ -238,7 +261,7 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
   useLayoutEffect(() => {
     if (!chaveDeMemoria) return;
     return () => {
-      if (itensRef.current.length > 0) {
+      if (itensRef.current.length > 0 && !foiEsquecidaDepoisDe(chaveDeMemoria, abertaNoNumero.current)) {
         listasVistas.set(chaveDeMemoria, {
           itens: itensRef.current,
           proximo: proximoRef.current,

@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { esquecerRascunhosDaSessao } from '../../nucleo/forum/rascunho';
 import { chaveDoRascunhoDeTopico } from '../../portas/armazenamento';
 import type { MotivoDeEscrita, PortaDeForum, ResultadoDaEscrita, TopicoCriado } from '../../portas/forum';
-import { esquecerListasVistas, limparListasVistas } from './hooks';
+import { limparListasVistas } from './hooks';
 import {
   Rotas,
   ambienteFalso,
@@ -36,6 +36,7 @@ interface Cenario {
   readonly armazenamento?: ReturnType<typeof armazenamentoFalso>;
   readonly ambiente?: ReturnType<typeof ambienteFalso>;
   readonly comunidadePorta?: ReturnType<typeof comunidadeFalsa>;
+  readonly listarTopicos?: PortaDeForum['listarTopicos'];
 }
 
 const ok = (): ResultadoDaEscrita<TopicoCriado> => ({ ok: true, valor: { id: ID_NOVO, criadoEm: '2026-10-19T15:00:00.123456+00:00' } });
@@ -47,7 +48,7 @@ function abrir(c: Cenario = {}) {
   const ambiente = c.ambiente ?? ambienteFalso();
   const forum = forumFalso({
     obterComunidadeDoForum: vi.fn(async () => ({ ok: true as const, valor: comunidade({ slug: SLUG, souMembro: c.souMembro ?? true }) })),
-    listarTopicos: vi.fn(async () => ({ ok: true as const, valor: { itens: [], proximo: null } })),
+    listarTopicos: c.listarTopicos ?? vi.fn(async () => ({ ok: true as const, valor: { itens: [], proximo: null } })),
     obterTopico: vi.fn(async () => ({ ok: true as const, valor: topico({ id: ID_NOVO }) })),
     listarRespostasDoTopico: vi.fn(async () => ({ ok: true as const, valor: { itens: [], proximo: null } })),
     criarTopico,
@@ -294,7 +295,6 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
   });
 
   it('voltar depois de criar não reabre o formulário (a navegação foi replace) e a lista não é a velha', async () => {
-    const listar = vi.fn(async () => ({ ok: true as const, valor: { itens: [], proximo: null } }));
     abrir();
     await abrirFormulario();
     preencher();
@@ -304,25 +304,22 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
     expect(await screen.findByRole('heading', { level: 1, name: 'Na reunião da firma' })).toBeDefined();
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(sondas.caminho).toBe(`/c/${SLUG}`);
-    void listar;
   });
 
-  it('esquece a lista guardada da comunidade e do Explorar (a volta busca do servidor)', async () => {
-    const spy = vi.spyOn({ esquecerListasVistas }, 'esquecerListasVistas');
-    void spy;
-    // Prova de comportamento: a lista da comunidade volta a ser pedida ao servidor depois de criar.
-    const { forum } = abrir();
-    await screen.findByRole('link', { name: 'Novo tópico' });
-    const chamadasAntes = (forum.listarTopicos as ReturnType<typeof vi.fn>).mock.calls.length;
+  it('a volta do navegador não mostra a lista velha: a lista que estava na tela não se guarda de volta ao sair', async () => {
+    const T1 = topico({ id: '33333333-3333-4333-8333-333333333333', titulo: 'Tópico antigo' });
+    const listar = vi.fn(async () => ({ ok: true as const, valor: { itens: [T1], proximo: null } }));
+    abrir({ listarTopicos: listar });
+    await screen.findByRole('link', { name: 'Tópico antigo' });
+    const antes = listar.mock.calls.length;
     await abrirFormulario();
     preencher();
     enviarFormulario();
     await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
     act(() => void sondas.navegar!(-1));
     await screen.findByRole('heading', { level: 1, name: 'Na reunião da firma' });
-    await waitFor(() =>
-      expect((forum.listarTopicos as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(chamadasAntes),
-    );
+    // POP: sem a regra, a lista velha voltaria da memória sem ir ao servidor.
+    await waitFor(() => expect(listar.mock.calls.length).toBeGreaterThan(antes));
   });
 });
 

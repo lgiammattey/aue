@@ -1439,3 +1439,10 @@ html:has(.forum-dialogo[open]) {
     bottom: 12px;
   }
 }
+
+/* Com o dialog aberto, o verde da tela é o do formulário: o "Novo tópico" de trás (só escurecido pelo fundo) perde o verde. */
+.forum-shell:has(.forum-dialogo[open]) .forum-cabecalho .forum-botao--acento {
+  background: transparent;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}

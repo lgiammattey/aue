@@ -289,6 +289,7 @@ function LinkDaComunidade({ slug, nome }: { readonly slug: string; readonly nome
   return (
     <Link className="forum-perfil-meta__comunidade" to={enderecoDaComunidade(slug)}>
       {nome}
+      <span aria-hidden="true">{'\u00a0·'}</span>
     </Link>
   );
 }
@@ -314,8 +315,8 @@ function LinhaDoTopicoDoAutor({
       </h2>
       <p className="forum-linha__meta forum-perfil-meta">
         <LinkDaComunidade slug={topico.comunidade.slug} nome={topico.comunidade.nome} />
-        <span>
-          {'\u00a0· '}
+        <span className="forum-perfil-meta__resto">
+          {' '}
           {textoDeRespostas(topico.respostasTotal)}
           {' · '}
           <Tempo iso={topico.criadoEm} agora={agora} />
@@ -356,8 +357,8 @@ function LinhaDeResposta({
       <p className="forum-linha__corpo">{resposta.corpo}</p>
       <p className="forum-linha__meta forum-perfil-meta">
         <LinkDaComunidade slug={resposta.comunidade.slug} nome={resposta.comunidade.nome} />
-        <span>
-          {'\u00a0· '}
+        <span className="forum-perfil-meta__resto">
+          {' '}
           <Tempo iso={resposta.criadoEm} agora={agora} />
         </span>
       </p>

@@ -1770,6 +1770,9 @@ html:has(.forum-dialogo[open]) {
   position: absolute;
   inset: -13px 0;
 }
+.forum-perfil-meta__resto {
+  margin-inline-start: 0.3em;
+}
 .forum-perfil-meta__comunidade:hover {
   text-decoration: underline;
 }
@@ -1789,4 +1792,13 @@ html:has(.forum-dialogo[open]) {
   overflow: hidden;
   font-size: 0.9375rem;
   line-height: 1.45;
+}
+
+/* Respiro depois do "Ver mais" e do fim da lista: o botão flutuante do shell antigo não cobre o canto. */
+.forum-perfil .forum-ver-mais,
+.forum-perfil .forum-lista:last-child {
+  margin-bottom: 96px;
+}
+.forum-perfil .forum-estado {
+  padding-bottom: 112px;
 }

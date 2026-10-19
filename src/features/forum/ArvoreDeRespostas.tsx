@@ -329,6 +329,7 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
   const esquecerListas = useCallback(() => {
     esquecerListasVistas(`c:${comunidade.slug}|`);
     esquecerListasVistas('explorar|');
+    esquecerListasVistas('perfil-');
   }, [comunidade.slug]);
 
   const relerTudo = useCallback(

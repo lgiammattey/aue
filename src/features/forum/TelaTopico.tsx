@@ -247,6 +247,7 @@ function ConversaDoTopico({ topico, atualizar }: { readonly topico: TopicoDoForu
             setDialogo(null);
             esquecerListasVistas(`c:${slug}|`);
             esquecerListasVistas('explorar|');
+            esquecerListasVistas('perfil-');
             toast('Tópico atualizado.');
             void atualizar();
           }}
@@ -266,6 +267,7 @@ function ConversaDoTopico({ topico, atualizar }: { readonly topico: TopicoDoForu
           aoSucesso={() => {
             esquecerListasVistas(`c:${slug}|`);
             esquecerListasVistas('explorar|');
+            esquecerListasVistas('perfil-');
             toast('Tópico apagado.');
             navegar(enderecoDaComunidade(slug), { replace: true });
           }}

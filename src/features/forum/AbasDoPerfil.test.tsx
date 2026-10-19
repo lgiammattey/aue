@@ -447,3 +447,60 @@ describe('vazio de verdade (o servidor respondeu e não há nada)', () => {
     expect(screen.getByRole('link', { name: 'Ver comunidades' }).getAttribute('href')).toBe('/comunidades');
   });
 });
+
+describe('resposta atrasada nunca sobrescreve a tela atual', () => {
+  const segurar = <T,>() => {
+    let soltar: (v: T) => void = () => undefined;
+    const p = new Promise<T>((r) => {
+      soltar = r;
+    });
+    return { p, soltar };
+  };
+  const montar = (forum: PortaDeForum, handle: string, entrada = '/u/ana') => {
+    const deps = dependencias({ forum });
+    const ui = (h: string) => (
+      <MemoryRouter initialEntries={[entrada]}>
+        <Routes>
+          <Route path="/u/:handle" element={<AbasDoPerfil handle={h} souEu={false} dependencias={deps} />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    const r = render(ui(handle));
+    return { trocar: (h: string) => r.rerender(ui(h)) };
+  };
+
+  it('trocar de handle na mesma tela: a lista do handle antigo, chegando depois, não vira a do novo', async () => {
+    const velho = segurar<Pagina<TopicoDoAutor>>();
+    const topicos = vi.fn((handle: string) =>
+      handle === 'ana' ? velho.p : Promise.resolve(pagina([topicoDoAutor('da-bia')])),
+    );
+    const { trocar } = montar(forumFalso({ listarTopicosDoAutor: topicos as PortaDeForum['listarTopicosDoAutor'] }), 'ana');
+    trocar('bia');
+    await screen.findByRole('link', { name: 'Tópico da-bia' });
+    await act(async () => velho.soltar(pagina([topicoDoAutor('da-ana')])));
+    expect(screen.queryByRole('link', { name: 'Tópico da-ana' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Tópico da-bia' })).toBeDefined();
+    expect(topicos).toHaveBeenCalledWith('bia', { limite: 30, cursor: null });
+  });
+
+  it('a chave da lista leva o handle: outro handle lê de novo, não reaproveita a lista do anterior', async () => {
+    const topicos = vi.fn(async (handle: string) => pagina([topicoDoAutor(`de-${handle}`)]));
+    const { trocar } = montar(forumFalso({ listarTopicosDoAutor: topicos as PortaDeForum['listarTopicosDoAutor'] }), 'ana');
+    await screen.findByRole('link', { name: 'Tópico de-ana' });
+    trocar('bia');
+    await screen.findByRole('link', { name: 'Tópico de-bia' });
+    expect(screen.queryByRole('link', { name: 'Tópico de-ana' })).toBeNull();
+    expect(topicos).toHaveBeenCalledTimes(2);
+  });
+
+  it('troca rápida de aba: tópicos que chegam depois não aparecem na aba Respostas', async () => {
+    const lentos = segurar<Pagina<TopicoDoAutor>>();
+    const { forum } = abrir({ topicos: vi.fn(() => lentos.p) });
+    fireEvent.click(screen.getByRole('tab', { name: 'Respostas' }));
+    await screen.findByRole('link', { name: /Em: Arrotos/ });
+    await act(async () => lentos.soltar(pagina([topicoDoAutor('atrasado')])));
+    expect(screen.queryByRole('link', { name: 'Tópico atrasado' })).toBeNull();
+    expect(screen.getByRole('tab', { name: 'Respostas' }).getAttribute('aria-selected')).toBe('true');
+    expect(forum.listarRespostasDoAutor).toHaveBeenCalledTimes(1);
+  });
+});

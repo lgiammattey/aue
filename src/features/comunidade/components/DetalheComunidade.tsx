@@ -1,3 +1,4 @@
+import type { ResultadoDoEnvio } from './useEnvioDeResposta';
 import React, { useState } from 'react';
 import type { CausoPostado } from '../../../portas/comunidade';
 import { CardDeCauso } from './CardDeCauso';
@@ -22,7 +23,7 @@ interface DetalheComunidadeProps {
   aoRepostarCauso: (id: string) => void;
   aoDuvidarCauso: (causo: CausoPostado) => void;
   aoCompartilharCauso: (causo: CausoPostado) => void;
-  aoResponderCauso: (id: string, texto: string, respostaAId?: string) => void;
+  aoResponderCauso: (id: string, texto: string, respostaAId?: string) => ResultadoDoEnvio;
   aoAbrirConversaCauso?: (id: string) => void | Promise<void>;
   aoDenunciarCauso: (id: string) => void;
   aoAbrirPerfil?: (handle: string, nome?: string) => void;

@@ -132,8 +132,8 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     if (registrou) setDenunciado(true);
   };
 
-  const responderComentario = async (texto: string, respostaAId?: string): Promise<boolean> => {
-    if (!exigirContaSocial()) return false;
+  const responderComentario = async (texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
+    if (!exigirContaSocial()) return 'sem-conta';
     if (!causo) return false;
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
     const nova = await porta.adicionarResposta(causo.id, texto, nome, nome.toLowerCase().replace(/\s+/g, '_'), respostaAId);

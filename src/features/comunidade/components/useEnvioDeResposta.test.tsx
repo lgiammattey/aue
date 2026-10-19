@@ -55,4 +55,19 @@ describe('resposta que falha não some', () => {
     liberar(true);
     await waitFor(() => expect(screen.queryByLabelText('Responder a @iury')).toBeNull());
   });
+
+  it('visitante mandado criar conta mantém o texto e NÃO mostra erro falso', async () => {
+    const campo = abrirFormulario(vi.fn().mockResolvedValue('sem-conta'));
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
+    await waitFor(() => expect((screen.getByRole('button', { name: 'Enviar' }) as HTMLButtonElement).disabled).toBe(false));
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(campo.value).toBe('Concordo.');
+  });
+
+  it('quem não devolve resultado (undefined) não conta como enviado', async () => {
+    const campo = abrirFormulario(vi.fn().mockResolvedValue(undefined));
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
+    expect(await screen.findByRole('alert')).toBeDefined();
+    expect(campo.value).toBe('Concordo.');
+  });
 });

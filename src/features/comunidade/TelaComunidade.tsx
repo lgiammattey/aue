@@ -296,10 +296,10 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   // Responder
-  const handleResponder = async (causoId: string, texto: string, respostaAId?: string): Promise<boolean> => {
+  const handleResponder = async (causoId: string, texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
     if (!contaLogada) {
       pedirPromocao();
-      return false;
+      return 'sem-conta';
     }
     const nova = await adaptador.adicionarResposta(causoId, texto, perfil.nome, perfil.handle, respostaAId);
     if (nova) {

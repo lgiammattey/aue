@@ -73,7 +73,10 @@ export const ArvoreDeComentarios: React.FC<ArvoreDeComentariosProps> = ({
               <div style={{ fontSize: '14px', textWrap: 'pretty', color: 'var(--fg)' }}>{r.conteudo}</div>
               <button
                 type="button"
-                onClick={() => setRespondendoId(respondendoId === r.id ? null : r.id)}
+                onClick={() => {
+                  envio.limparErro();
+                  setRespondendoId(respondendoId === r.id ? null : r.id);
+                }}
                 style={{
                   background: 'none',
                   border: 0,

@@ -1,7 +1,13 @@
 import { useRef, useState } from 'react';
 
-/** `false` (ou uma exceção) quer dizer que a resposta NÃO foi enviada. */
-export type ResultadoDoEnvio = void | boolean | Promise<void | boolean>;
+/**
+ * O que quem envia devolve. Só `true` conta como enviado.
+ * - `false` ou exceção: tentou e falhou; a tela mostra erro e mantém o texto;
+ * - `'sem-conta'`: não tentou (visitante foi mandado criar conta); mantém o texto, sem erro.
+ * Não há `void` de propósito: quem esquecer de devolver o resultado não compila.
+ */
+export type RespostaDoEnvio = boolean | 'sem-conta';
+export type ResultadoDoEnvio = RespostaDoEnvio | Promise<RespostaDoEnvio>;
 
 /**
  * Envio de resposta sem perder o que a pessoa escreveu.
@@ -22,9 +28,12 @@ export function useEnvioDeResposta() {
     setErro(false);
     try {
       const resultado = await acao();
-      const ok = resultado !== false;
-      if (!ok) setErro(true);
-      return ok;
+      if (resultado === 'sem-conta') return false;
+      if (resultado !== true) {
+        setErro(true);
+        return false;
+      }
+      return true;
     } catch {
       setErro(true);
       return false;

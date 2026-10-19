@@ -118,10 +118,17 @@ export interface FiltrosDoFeed {
 }
 
 export interface PortaDeComunidade {
-  /** Lista as comunidades disponíveis (ex: "Eu arroto, e daí?", "Na reunião da firma") */
+  /**
+   * Lista as comunidades disponíveis (ex: "Eu arroto, e daí?", "Na reunião da firma").
+   * Com servidor configurado e fora do ar, REJEITA com `FalhaDeLeitura`: quem implementar
+   * esta porta não pode devolver `[]` para falha, senão a tela mostra "vazio" no lugar de erro.
+   */
   listarComunidades(): Promise<readonly Comunidade[]>;
 
-  /** Lista o feed de causos (global ou filtrado por comunidade) */
+  /**
+   * Lista o feed de causos (global ou filtrado por comunidade).
+   * Rejeita com `FalhaDeLeitura` se o servidor configurado falhar (ver `listarComunidades`).
+   */
   listarFeed(filtros?: FiltrosDoFeed): Promise<readonly CausoPostado[]>;
 
   /** Um causo pelo id (ou `null` se não existe, está escondido ou foi apagado). */
@@ -142,7 +149,7 @@ export interface PortaDeComunidade {
   /** Alterna repostagem de um causo no feed */
   alternarRepost(causoId: string): Promise<{ readonly ok: boolean; readonly reposts: number; readonly repostado: boolean }>;
 
-  /** Lista respostas de um causo (threads) */
+  /** Lista respostas de um causo (threads). Rejeita com `FalhaDeLeitura` se o servidor configurado falhar. */
   listarRespostas(causoId: string): Promise<readonly RespostaDeCauso[]>;
 
   /** Adiciona uma resposta a um causo (com suporte a resposta aninhada) */

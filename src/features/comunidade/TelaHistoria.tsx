@@ -40,6 +40,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   const [curtido, setCurtido] = useState(false);
   const [curtidas, setCurtidas] = useState(0);
   const [textoResposta, setTextoResposta] = useState('');
+  const [falhaNasRespostas, setFalhaNasRespostas] = useState(false);
   const [apelidoResposta, setApelidoResposta] = useState('');
   const [comentarios, setComentarios] = useState<readonly RespostaDeCauso[]>([]);
   const [copiado, setCopiado] = useState(false);
@@ -65,7 +66,15 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
     (async () => {
       const encontrado = id ? await porta.obterCauso(id) : null;
-      const respostas = encontrado ? await porta.listarRespostas(encontrado.id) : [];
+      let respostas: readonly RespostaDeCauso[] = [];
+      let respostasFalharam = false;
+      if (encontrado) {
+        try {
+          respostas = await porta.listarRespostas(encontrado.id);
+        } catch {
+          respostasFalharam = true;
+        }
+      }
       if (!ativo) return;
       if (encontrado) {
         setCauso(encontrado);
@@ -73,6 +82,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
         setCurtidas(encontrado.curtidas || 0);
         setComentarios(respostas);
       }
+      setFalhaNasRespostas(respostasFalharam);
       setCarregando(false);
     })();
 
@@ -557,6 +567,12 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                   >
                     Cria sua conta pra comentar e entrar na zoeira.
                   </button>
+                )}
+
+                {falhaNasRespostas && (
+                  <p role="alert" style={{ color: 'var(--muted)', fontSize: '14px' }}>
+                    Não deu pra carregar as respostas agora. Atualiza a página pra tentar de novo.
+                  </p>
                 )}
 
                 <ArvoreDeComentarios

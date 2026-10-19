@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { CausoPostado } from '../../../portas/comunidade';
 import { ArvoreDeComentarios } from './ArvoreDeComentarios';
+import { soltar, tocarExclusivo } from '../../../plataforma/web/audioUnico';
 
 interface CardDeCausoProps {
   causo: CausoPostado;
@@ -49,27 +50,56 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   const playerRef = useRef<HTMLAudioElement | null>(null);
   const [erroDeAudio, setErroDeAudio] = useState(false);
 
-  useEffect(() => () => playerRef.current?.pause(), []);
+  const montadoRef = useRef(true);
+
+  useEffect(() => {
+    montadoRef.current = true;
+    return () => {
+      montadoRef.current = false;
+      const player = playerRef.current;
+      if (!player) return;
+      player.pause();
+      soltar(player);
+    };
+  }, []);
 
   const togglePlay = async () => {
     if (!causo.enderecoDoAudio) return;
     if (tocando) {
-      playerRef.current?.pause();
+      const atual = playerRef.current;
+      atual?.pause();
+      if (atual) soltar(atual);
       setTocando(false);
       return;
     }
     setErroDeAudio(false);
     // O endereço é assinado e vence em minutos: pedido na hora de tocar.
     const endereco = await causo.enderecoDoAudio();
+    // A tela pode ter saído enquanto o endereço vinha: não toca áudio órfão.
+    if (!montadoRef.current) return;
     if (!endereco) {
       setErroDeAudio(true);
       return;
     }
     const player = new Audio(endereco);
-    player.onended = () => setTocando(false);
+    player.onended = () => {
+      soltar(player);
+      setTocando(false);
+    };
+    player.onpause = () => setTocando(false);
+    player.onerror = () => {
+      soltar(player);
+      setTocando(false);
+      setErroDeAudio(true);
+    };
     playerRef.current = player;
     try {
-      await player.play();
+      await tocarExclusivo(player, () => setTocando(false));
+      if (!montadoRef.current) {
+        player.pause();
+        soltar(player);
+        return;
+      }
       setTocando(true);
     } catch {
       setErroDeAudio(true);
@@ -121,8 +151,9 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
     ? { type: 'button' as const, onClick: abrirPerfilDoAutor, 'aria-label': `Ver perfil de @${handleDoPerfil}` }
     : {};
 
+  // Sem duração medida, não mostra duração: antes aparecia um "0:07" que ninguém mediu.
   const formatarDuracao = (s?: number) => {
-    if (!s) return '0:07';
+    if (!s) return null;
     const min = Math.floor(s / 60);
     const seg = Math.round(s % 60);
     return `${min}:${String(seg).padStart(2, '0')}`;
@@ -445,13 +476,15 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               ))}
             </div>
 
-            <span
-              style={{ fontFamily: 'ui-monospace, monospace', fontSize: '12px', color: 'var(--muted)' }}
-              aria-label={`Duração do arroto: ${formatarDuracao(causo.duracaoSegundos)}`}
-              title={`Duração: ${formatarDuracao(causo.duracaoSegundos)}`}
-            >
-              {formatarDuracao(causo.duracaoSegundos)}
-            </span>
+            {formatarDuracao(causo.duracaoSegundos) && (
+              <span
+                style={{ fontFamily: 'ui-monospace, monospace', fontSize: '12px', color: 'var(--muted)' }}
+                aria-label={`Duração do arroto: ${formatarDuracao(causo.duracaoSegundos)}`}
+                title={`Duração: ${formatarDuracao(causo.duracaoSegundos)}`}
+              >
+                {formatarDuracao(causo.duracaoSegundos)}
+              </span>
+            )}
           </div>
         )}
 

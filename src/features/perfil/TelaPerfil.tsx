@@ -1041,7 +1041,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
               {!carregandoCausos && falhaNosCausos && (
                 <p role="alert" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
-                  Não deu pra carregar as resenhas agora. Não é que não tem nada: atualize a página.
+                  Não deu pra carregar as resenhas agora. Atualiza a página pra tentar de novo.
                 </p>
               )}
               {!carregandoCausos && !falhaNosCausos && causos.length === 0 && (

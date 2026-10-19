@@ -23,4 +23,13 @@ describe('TelaComunidade — falha de leitura', () => {
     await waitFor(() => expect(screen.queryByText('Não deu pra carregar')).toBeNull());
     expect(listarFeed).toHaveBeenCalledTimes(2);
   });
+
+  it('falha só na lista de comunidades não derruba o feed', async () => {
+    const base = criarComunidadeWeb({ forcarOffline: true });
+    const listarComunidades = vi.fn().mockRejectedValue(new FalhaDeLeitura('comunidades'));
+    render(<TelaComunidade porta={{ ...base, listarComunidades }} />);
+
+    await waitFor(() => expect(listarComunidades).toHaveBeenCalled());
+    expect(screen.queryByText('Não deu pra carregar')).toBeNull();
+  });
 });

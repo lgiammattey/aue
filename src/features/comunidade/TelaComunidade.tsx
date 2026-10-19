@@ -206,14 +206,16 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     setCarregando(true);
     setFalhaAoCarregar(false);
     try {
-      const [comus, minhas, listaFeed] = await Promise.all([
+      // O feed não depende da lista de comunidades: uma falha não derruba a outra.
+      const [comus, minhas, listaFeed] = await Promise.allSettled([
         adaptador.listarComunidades(),
         adaptador.listarMinhasComunidades(),
         adaptador.listarFeed(),
       ]);
-      setComunidades(comus);
-      setMinhasComunidades(minhas ?? []);
-      setCausos(listaFeed);
+      if (comus.status === 'fulfilled') setComunidades(comus.value);
+      if (minhas.status === 'fulfilled') setMinhasComunidades(minhas.value ?? []);
+      if (listaFeed.status === 'rejected') throw listaFeed.reason;
+      setCausos(listaFeed.value);
     } catch {
       // Falha de leitura não é lista vazia: a tela mostra o erro e o botão de tentar de novo.
       setFalhaAoCarregar(true);
@@ -706,7 +708,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--fg)', marginBottom: '8px' }}>
                     Não deu pra carregar
                   </div>
-                  <div style={{ marginBottom: '16px' }}>O servidor não respondeu. Não é que não tem nada: tenta de novo.</div>
+                  <div style={{ marginBottom: '16px' }}>O servidor não respondeu. Tenta de novo.</div>
                   <button
                     type="button"
                     onClick={() => void carregarDados()}

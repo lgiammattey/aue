@@ -527,7 +527,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
                 {falhaNasRespostas && (
                   <p role="alert" style={{ color: 'var(--muted)', fontSize: '14px' }}>
-                    Não deu pra carregar as respostas agora. Atualize a página para tentar de novo.
+                    Não deu pra carregar as respostas agora. Atualiza a página pra tentar de novo.
                   </p>
                 )}
 

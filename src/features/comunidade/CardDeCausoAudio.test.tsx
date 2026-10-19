@@ -73,4 +73,29 @@ describe('CardDeCauso — áudio', () => {
     expect(instancias[0].pause).toHaveBeenCalled();
     expect(instancias[1].pause).not.toHaveBeenCalled();
   });
+
+  it('sair da tela enquanto o endereço vem não deixa áudio órfão tocando', async () => {
+    const instancias: { play: ReturnType<typeof vi.fn> }[] = [];
+    vi.stubGlobal(
+      'Audio',
+      class {
+        pause = vi.fn();
+        play = vi.fn(() => Promise.resolve());
+        onended: (() => void) | null = null;
+        constructor() {
+          instancias.push(this);
+        }
+      },
+    );
+    let liberar: (v: string) => void = () => {};
+    const demorado = { ...base, enderecoDoAudio: () => new Promise<string | null>((r) => { liberar = r; }) };
+    const { unmount } = montar(demorado);
+
+    fireEvent.click(screen.getAllByRole('button', { name: /ouvir|tocar|play/i })[0]);
+    unmount();
+    liberar('https://audio.exemplo/a.webm');
+    await new Promise((r) => setTimeout(r, 20));
+
+    expect(instancias).toHaveLength(0);
+  });
 });

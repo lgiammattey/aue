@@ -50,15 +50,18 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   const playerRef = useRef<HTMLAudioElement | null>(null);
   const [erroDeAudio, setErroDeAudio] = useState(false);
 
-  useEffect(
-    () => () => {
+  const montadoRef = useRef(true);
+
+  useEffect(() => {
+    montadoRef.current = true;
+    return () => {
+      montadoRef.current = false;
       const player = playerRef.current;
       if (!player) return;
       player.pause();
       soltar(player);
-    },
-    [],
-  );
+    };
+  }, []);
 
   const togglePlay = async () => {
     if (!causo.enderecoDoAudio) return;
@@ -72,6 +75,8 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
     setErroDeAudio(false);
     // O endereço é assinado e vence em minutos: pedido na hora de tocar.
     const endereco = await causo.enderecoDoAudio();
+    // A tela pode ter saído enquanto o endereço vinha: não toca áudio órfão.
+    if (!montadoRef.current) return;
     if (!endereco) {
       setErroDeAudio(true);
       return;
@@ -81,9 +86,20 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
       soltar(player);
       setTocando(false);
     };
+    player.onpause = () => setTocando(false);
+    player.onerror = () => {
+      soltar(player);
+      setTocando(false);
+      setErroDeAudio(true);
+    };
     playerRef.current = player;
     try {
       await tocarExclusivo(player, () => setTocando(false));
+      if (!montadoRef.current) {
+        player.pause();
+        soltar(player);
+        return;
+      }
       setTocando(true);
     } catch {
       setErroDeAudio(true);

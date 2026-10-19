@@ -76,15 +76,18 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
   const playerRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(
-    () => () => {
+  const montadoRef = useRef(true);
+
+  useEffect(() => {
+    montadoRef.current = true;
+    return () => {
+      montadoRef.current = false;
       const player = playerRef.current;
       if (!player) return;
       player.pause();
       soltar(player);
-    },
-    [],
-  );
+    };
+  }, []);
 
   const togglePlay = async () => {
     if (!causo?.enderecoDoAudio) return;
@@ -97,15 +100,26 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     }
     // Endereço assinado vence em minutos: pedido na hora de tocar.
     const endereco = await causo.enderecoDoAudio();
-    if (!endereco) return;
+    // A tela pode ter saído enquanto o endereço vinha: não toca áudio órfão.
+    if (!montadoRef.current || !endereco) return;
     const player = new Audio(endereco);
     player.onended = () => {
+      soltar(player);
+      setTocando(false);
+    };
+    player.onpause = () => setTocando(false);
+    player.onerror = () => {
       soltar(player);
       setTocando(false);
     };
     playerRef.current = player;
     try {
       await tocarExclusivo(player, () => setTocando(false));
+      if (!montadoRef.current) {
+        player.pause();
+        soltar(player);
+        return;
+      }
       setTocando(true);
     } catch {
       setTocando(false);

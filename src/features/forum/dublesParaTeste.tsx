@@ -116,7 +116,7 @@ export function contaFalsa(estado: Partial<EstadoDaConta> | 'quebrada'): PortaDe
   return {
     estado: vi.fn(async () => {
       if (estado === 'quebrada') throw new Error('rede');
-      return { temSessao: false, anonima: false, ...estado };
+      return { temSessao: false, anonima: false, ...(estado.temSessao ? { id: 'conta-a' } : {}), ...estado };
     }),
   } as unknown as PortaDeConta;
 }

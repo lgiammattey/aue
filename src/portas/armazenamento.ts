@@ -52,9 +52,14 @@ export const CHAVES = {
  * como as outras. O rascunho guarda o texto que a pessoa escreveu e ainda não
  * enviou, e só isso: nada de autor, nota ou id de resposta do servidor.
  *
- * - tópico novo: uma chave por comunidade;
- * - resposta: uma chave por tópico e por pai (sem pai = responde o tópico).
+ * - tópico novo: uma chave por conta e comunidade;
+ * - resposta: uma chave por conta, tópico e pai (sem pai = responde o tópico).
  */
-export const chaveDoRascunhoDeTopico = (slug: string) => `aue.forum.rascunho-topico.${slug}.v1`;
-export const chaveDoRascunhoDeResposta = (topicoId: string, paiId: string | null) =>
-  `aue.forum.rascunho-resposta.${topicoId}.${paiId ?? 'topo'}.v1`;
+/** Prefixo de tudo que o fórum guarda no aparelho: `sair()` apaga tudo que começa por ele. */
+export const PREFIXO_DO_FORUM = 'aue.forum.';
+
+/** O rascunho é DE UMA CONTA: o id dela entra na chave (o navegador pode ser de várias pessoas). */
+export const chaveDoRascunhoDeTopico = (contaId: string, slug: string) =>
+  `${PREFIXO_DO_FORUM}rascunho-topico.${contaId}.${slug}.v1`;
+export const chaveDoRascunhoDeResposta = (contaId: string, topicoId: string, paiId: string | null) =>
+  `${PREFIXO_DO_FORUM}rascunho-resposta.${contaId}.${topicoId}.${paiId ?? 'topo'}.v1`;

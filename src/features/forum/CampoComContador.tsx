@@ -68,8 +68,9 @@ export function CampoComContador({
   useLayoutEffect(() => {
     const el = area.current;
     if (!el || tipo !== 'area') return;
+    // Dentro de um <dialog> ainda fechado o scrollHeight é 0: não encolhe o campo (o piso em `min-height` segura).
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    if (el.scrollHeight > 0) el.style.height = `${el.scrollHeight}px`;
   }, [valor, tipo, linhasMaximas]);
 
   const idDoErro = `${id}-erro`;
@@ -125,7 +126,11 @@ export function CampoComContador({
         <textarea
           ref={guardarRef}
           rows={linhas}
-          style={{ maxHeight: `calc(${linhasMaximas} * 1.5em + 24px)` }}
+          style={{
+            // Piso de `linhas` linhas (24px de linha + 24px de padding + 2px de borda): o campo nunca colapsa.
+            minHeight: `calc(${linhas} * 1.5em + 26px)`,
+            maxHeight: `calc(${linhasMaximas} * 1.5em + 26px)`,
+          }}
           {...comuns}
         />
       )}

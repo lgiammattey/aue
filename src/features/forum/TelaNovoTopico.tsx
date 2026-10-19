@@ -53,10 +53,10 @@ export function TelaNovoTopico() {
   if (papel.tipo !== 'conta' || !contexto.souMembro) {
     return <Navigate to={enderecoDaComunidade(contexto.comunidade.slug)} replace />;
   }
-  return <FormularioDeNovoTopico key={contexto.comunidade.slug} contexto={contexto} />;
+  return <FormularioDeNovoTopico key={contexto.comunidade.slug} contexto={contexto} contaId={papel.contaId} />;
 }
 
-function FormularioDeNovoTopico({ contexto }: { readonly contexto: ContextoDaComunidade }) {
+function FormularioDeNovoTopico({ contexto, contaId }: { readonly contexto: ContextoDaComunidade; readonly contaId: string }) {
   const { comunidade, gatilho } = contexto;
   const { forum, ambiente, armazenamento } = useDependenciasDoForum();
   const navegar = useNavigate();
@@ -68,7 +68,7 @@ function FormularioDeNovoTopico({ contexto }: { readonly contexto: ContextoDaCom
   const participar = useParticiparDaComunidade(comunidade, contexto.atualizarComunidade);
 
   const slug = comunidade.slug;
-  const chave = chaveDoRascunhoDeTopico(slug);
+  const chave = chaveDoRascunhoDeTopico(contaId, slug);
   const idBase = useId();
   const idDoTitulo = `${idBase}-titulo`;
   const idDoCorpo = `${idBase}-corpo`;
@@ -166,12 +166,13 @@ function FormularioDeNovoTopico({ contexto }: { readonly contexto: ContextoDaCom
       idDoTitulo={idDoDialogo}
       classe="forum-dialogo--formulario"
       aoCancelar={fechar}
+      bloqueado={enviando}
       focoInicial={tituloRef}
       aoFechar={devolverFoco}
     >
       <form className="forum-form" onSubmit={aoEnviar} noValidate>
         <div className="forum-form__cabecalho">
-          <button type="button" className="forum-botao-texto forum-form__so-celular" onClick={fechar}>
+          <button type="button" className="forum-botao-texto forum-form__so-celular" onClick={fechar} disabled={enviando}>
             Cancelar
           </button>
           <h2 id={idDoDialogo} className="forum-form__titulo">
@@ -264,7 +265,7 @@ function FormularioDeNovoTopico({ contexto }: { readonly contexto: ContextoDaCom
         </div>
 
         <div className="forum-form__rodape forum-form__so-desktop">
-          <button type="button" className="forum-botao forum-botao--contorno" onClick={fechar}>
+          <button type="button" className="forum-botao forum-botao--contorno" onClick={fechar} disabled={enviando}>
             Cancelar
           </button>
           <button

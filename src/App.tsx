@@ -166,7 +166,7 @@ function EntradaDoPerfil({ handle }: { handle?: string }) {
     <TelaPerfil
       handle={handle}
       boasVindas={!handle && new URLSearchParams(location.search).get('boas-vindas') === '1'}
-      aoVoltar={() => navigate('/feed')}
+      aoVoltar={() => navigate('/comunidades')}
       aoArrotar={() => navigate('/arena')}
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(h) => navigate(`/u/${h}`)}

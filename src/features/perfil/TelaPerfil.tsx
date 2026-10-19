@@ -3,17 +3,12 @@ import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarCompartilhamentoWeb } from '../../plataforma/web/compartilhamento';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
-import { obterPerfilLocal } from '../../plataforma/web/perfil';
-import type { PerfilUsuario } from '../../nucleo/usuario/perfil';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { EstadoDaConta, PortaDeConta } from '../../portas/conta';
 import type { Compartilhamento } from '../../portas/compartilhamento';
 import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { SimboloBurpzilla } from './SimboloBurpzilla';
 import { CardDeCauso } from '../comunidade/components/CardDeCauso';
-import { BarraLateralNavegacao } from '../comunidade/components/BarraLateralNavegacao';
-import { BarraInferiorMobile } from '../comunidade/components/BarraInferiorMobile';
-import { ColunaTendencias } from '../comunidade/components/ColunaTendencias';
 
 interface TelaPerfilProps {
   /** Sem handle, mostra o perfil de quem está jogando. */
@@ -78,25 +73,6 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   }, []);
 
   const isMobile = larguraJanela < 700;
-  const isWide = larguraJanela >= 1060;
-
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    if (typeof localStorage !== 'undefined') {
-      const salvo = localStorage.getItem('bda-theme');
-      if (salvo === 'light' || salvo === 'dark') return salvo;
-    }
-    return 'dark';
-  });
-
-  const toggleTheme = () => {
-    const novo = theme === 'dark' ? 'light' : 'dark';
-    setTheme(novo);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('bda-theme', novo);
-    }
-    document.documentElement.setAttribute('data-theme', novo);
-  };
-
   const [perfilPort] = useState<PortaDePerfil>(() => portaPerfil ?? criarPerfilRemoto());
   const [comunidade] = useState<PortaDeComunidade>(() => portaComunidade ?? criarComunidadeWeb());
   const [contaPort] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
@@ -107,8 +83,6 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   // A ficha inaugural não é um perfil navegável: a pessoa termina o básico
   // antes de entrar no Bonde. O guard de rota reforça isso fora da tela.
   const bloqueiaSaidaDaFicha = !handle && (boasVindas || Boolean(conta?.perfilSocialPendente));
-  const showLeft = larguraJanela >= 700 && !bloqueiaSaidaDaFicha;
-  const showRight = larguraJanela >= 1000 && !bloqueiaSaidaDaFicha;
   const [carregando, setCarregando] = useState(true);
   const [falhou, setFalhou] = useState(false);
   const [tentativa, setTentativa] = useState(0);
@@ -244,18 +218,8 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     };
   }, [perfil, aba, comunidade]);
 
-  const [meuPerfilLocal] = useState<PerfilUsuario>(() => obterPerfilLocal());
-
-  const souEu = Boolean(
-    perfil?.souEu ||
-      (!handle && (conta ? conta.temSessao : true)) ||
-      (perfil &&
-        meuPerfilLocal &&
-        ((perfil.handle &&
-          meuPerfilLocal.handle &&
-          perfil.handle.toLowerCase().replace(/^@/, '') === meuPerfilLocal.handle.toLowerCase().replace(/^@/, '')) ||
-          (perfil.id && meuPerfilLocal.id && perfil.id === meuPerfilLocal.id))),
-  );
+  // A autoridade de "sou eu" é o servidor. Perfil local não decide autoria.
+  const souEu = Boolean(perfil?.souEu || (!handle && conta?.temSessao && !conta.anonima));
 
   const abas = useMemo(
     () => [
@@ -536,64 +500,72 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     !handle && conta && !(conta.podeParticiparSocialmente ?? (conta.temSessao && !conta.anonima)),
   );
 
-  const perfilParaBarra = meuPerfilLocal;
-
   return (
     <div
       style={{
+        '--bg': '#f7f8f5',
+        '--surface': '#eef4e7',
+        '--surface-2': '#e2ebd8',
+        '--fg': '#202824',
+        '--muted': '#5c675d',
+        '--border': '#e7ebe3',
+        '--border-strong': '#c9d1c4',
+        '--accent': '#c6ff00',
+        '--accent-on': '#000',
+        '--ind': '#2f5d0a',
         minHeight: '100vh',
         background: 'var(--bg)',
         color: 'var(--fg)',
         fontFamily: 'var(--font-body)',
         boxSizing: 'border-box',
-      }}
+      } as React.CSSProperties}
     >
-      <div
+      <header
         style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
+          position: 'sticky',
+          top: 0,
+          zIndex: 20,
+          minHeight: 60,
+          background: 'var(--bg)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
-        {/* Coluna Esquerda: Navegação Canônica (275px / 76px) */}
-        {showLeft && (
-          <BarraLateralNavegacao
-            abaAtiva="perfil"
-            aoMudarAba={(nova) => {
-              if (nova === 'feed') aoVoltar();
-              else if (nova === 'arena') {
-                if (aoArrotar) aoArrotar();
-                else window.location.href = '/arena';
-              } else {
-                window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
-              }
-            }}
-            aoAbrirComposer={aoArrotar}
-            compacto={!isWide}
-            tema={theme}
-            aoAlternarTema={toggleTheme}
-            perfil={perfilParaBarra}
-            aoAbrirPerfil={() => {
-              if (handle) {
-                aoAbrirPerfil(meuPerfilLocal.handle);
-              }
-            }}
-            contaLogada={Boolean(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))}
-            aoSair={sair}
-          />
-        )}
+        <div
+          style={{
+            width: 'min(1080px, 100%)',
+            minHeight: 60,
+            margin: '0 auto',
+            padding: '0 20px',
+            boxSizing: 'border-box',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 24,
+          }}
+        >
+          <a href="/" aria-label="Auê!, início" style={{ color: 'var(--fg)', fontSize: 30, fontWeight: 900, letterSpacing: '-.07em', lineHeight: 1, textDecoration: 'none' }}>
+            auê<span style={{ color: '#2f5d0a' }}>!</span>
+          </a>
+          <nav aria-label="Principal" style={{ display: 'flex', gap: 20, overflowX: 'auto' }}>
+            <a href="/" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: 15, fontWeight: 650, whiteSpace: 'nowrap' }}>O Auê</a>
+            <a href="/comunidades" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: 15, fontWeight: 650, whiteSpace: 'nowrap' }}>Comunidades</a>
+            <a href="/perfil" aria-current="page" style={{ color: 'var(--fg)', textDecoration: 'none', fontSize: 15, fontWeight: 700, whiteSpace: 'nowrap' }}>Perfil</a>
+          </nav>
+        </div>
+      </header>
 
-        {/* Coluna Central: Perfil (Max 600px) */}
+      <div
+        style={{
+          width: 'min(760px, 100%)',
+          margin: '0 auto',
+          padding: '0 20px 56px',
+          boxSizing: 'border-box',
+        }}
+      >
         <main
           style={{
             width: '100%',
-            maxWidth: '600px',
-            flex: '1 1 0',
+            maxWidth: '760px',
             minWidth: 0,
-            borderLeft: '1px solid var(--border)',
-            borderRight: '1px solid var(--border)',
             minHeight: '100vh',
             boxSizing: 'border-box',
             paddingBottom: isMobile ? '120px' : '40px',
@@ -601,15 +573,11 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
         >
           <header
             style={{
-              position: 'sticky',
-              top: 0,
-              zIndex: 5,
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              padding: '8px 16px',
-              paddingTop: 'max(8px, env(safe-area-inset-top))',
-              background: 'var(--bg)',
+              padding: '40px 0 20px',
+              background: 'transparent',
               borderBottom: '1px solid var(--border)',
             }}
           >
@@ -623,7 +591,9 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 ←
               </button>
             )}
-            <b style={{ fontSize: '18px' }}>{primeiraChegada ? 'Seu perfil' : perfil ? `@${perfil.handle}` : 'Perfil'}</b>
+              <b style={{ fontSize: 'clamp(2rem, 8vw, 4rem)', fontWeight: 900, letterSpacing: '-.065em', lineHeight: .95 }}>
+                {primeiraChegada ? 'Seu perfil' : perfil ? `@${perfil.handle}` : 'Perfil'}
+              </b>
           </header>
 
           {aviso && (
@@ -792,15 +762,15 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               <div
                 aria-hidden="true"
                 style={{
-                  height: 160,
-                  background: 'var(--surface-2)',
+                  height: 116,
+                  background: 'var(--surface)',
                   borderBottom: '1px solid var(--border)',
                   position: 'relative',
                   overflow: 'hidden',
                 }}
               />
 
-              <section style={{ padding: '0 16px 16px', display: 'grid', gap: 12 }}>
+              <section style={{ padding: '0 0 24px', display: 'grid', gap: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, marginTop: -40 }}>
                   {souEu ? (
                     <label
@@ -1074,33 +1044,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
           )}
         </main>
 
-        {/* Coluna Direita: Tendências e Busca (320px) */}
-        {showRight && (
-          <ColunaTendencias
-            termoBusca=""
-            aoMudarBusca={() => aoVoltar()}
-            aoSelecionarTrend={() => aoVoltar()}
-          />
-        )}
       </div>
-
-      {/* Navegação Mobile Inferior */}
-      {isMobile && !bloqueiaSaidaDaFicha && (
-        <BarraInferiorMobile
-          abaAtiva="feed"
-          aoMudarAba={(nova) => {
-            if (nova === 'feed') aoVoltar();
-            else if (nova === 'arena') {
-              if (aoArrotar) aoArrotar();
-              else window.location.href = '/arena';
-            } else {
-              window.location.href = nova === 'comm' ? '/comunidades' : '/desafios';
-            }
-          }}
-          aoAbrirPerfil={() => {}}
-          aoAbrirComposer={aoArrotar}
-        />
-      )}
 
       {/* Modal / Bottom Sheet: Editar Perfil */}
       {souEu && editando && (

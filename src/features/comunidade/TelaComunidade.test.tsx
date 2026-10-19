@@ -258,7 +258,10 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     fireEvent.click(await screen.findByRole('button', { name: /Duelos X1/i }));
 
     // Sem semente: nenhum duelo de mentira com placar e handles inventados.
-    expect(screen.getByText(/Nenhum X1 por aqui ainda/i)).toBeDefined();
+    // E sem dizer "zero" quando os duelos nem foram consultados.
+    expect(screen.getByText(/Os seus duelos ainda não aparecem aqui/i)).toBeDefined();
+    expect(screen.queryByText(/Nenhum X1 por aqui ainda/i)).toBeNull();
+    expect(screen.queryByRole('button', { name: /Duelos X1 \(0\)/ })).toBeNull();
     expect(screen.queryByText('Churrasco de domingo')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Chamar pro X1' }));

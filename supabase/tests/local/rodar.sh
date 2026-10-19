@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Recria um banco PostgreSQL local, aplica as migrações REAIS de supabase/migrations
-# (com os papéis e schemas do Supabase simulados em stubs.sql) e roda os testes SQL (topicos.sql e forum_leituras.sql).
+# (com os papéis e schemas do Supabase simulados em stubs.sql) e roda os testes SQL (topicos.sql, forum_leituras.sql e grupos_fechado.sql).
 #
 # Uso:   supabase/tests/local/rodar.sh [banco] [ate_versao]
 #   banco       nome do banco descartável (padrão: aue_teste). É APAGADO e recriado.
@@ -29,7 +29,7 @@ echo "migrações aplicadas em $DB"
 
 if [[ -z "$ATE" ]]; then
   # pipefail + grep: se o psql falhar, o runner falha (o grep só tira ruído).
-  for teste in topicos forum_leituras; do
+  for teste in topicos forum_leituras grupos_fechado; do
     $PSQL -q -d "$DB" -v ON_ERROR_STOP=1 < "$RAIZ/supabase/tests/$teste.sql" 2>&1 | grep -v "WARNING\|^CONTEXT\|PL/pgSQL"
   done
 fi

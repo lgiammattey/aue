@@ -13,8 +13,11 @@ export function caminhoDeVoltaSeguro(bruto: string | null | undefined): string |
   if (!bruto || bruto.length > TAMANHO_MAXIMO) return null;
   // Tem que começar com uma única barra: "//x.com" e "/\x.com" saem do site.
   if (!bruto.startsWith('/') || bruto.startsWith('//') || bruto.startsWith('/\\')) return null;
-  // Sem esquema, barra invertida ou caractere de controle em qualquer posição.
-  if (/[\\\u0000-\u001f\u007f]/.test(bruto) || /^\/+[a-z][a-z0-9+.-]*:/i.test(bruto)) return null;
+  // Sem barra invertida nem caractere de controle em qualquer posição.
+  for (const letra of bruto) {
+    const codigo = letra.charCodeAt(0);
+    if (letra === '\\' || codigo < 0x20 || codigo === 0x7f) return null;
+  }
   // Não volta para as telas de entrada: viraria um laço.
   if (/^\/login(?:[/?#]|$)/.test(bruto)) return null;
   return bruto;

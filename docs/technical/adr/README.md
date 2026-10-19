@@ -23,6 +23,8 @@ nome de pasta dentro de uma camada, refactor. Isso é PR.
 | [0006](0006-hospedagem-somente-firebase.md) | Hospedagem somente Firebase | aceito |
 | [0007](0007-audio-publico-da-casa.md) | Áudio público da casa — bucket público separado só com conteúdo da casa | aceito |
 | [0008](0008-paginas-publicas-dos-grupos.md) | Páginas públicas dos grupos externos no build | aceito |
+| [0009](0009-identidade-social-promovida.md) | Identidade social promovida | aceito |
+| [0010](0010-comunidades-topicos-e-respostas.md) | Comunidades, tópicos e respostas (sem feed solto) — pretende substituir partes do 0004 | proposto |
 
 ---
 

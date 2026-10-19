@@ -3,7 +3,6 @@ import type { Comunidade } from '../../portas/comunidade';
 
 export interface DadosDoCausoComArroto {
   comunidadeSlug: string;
-  autorNome: string;
   conteudo: string;
   consentimentoAudioPublico: boolean;
 }
@@ -12,7 +11,6 @@ interface ModalNovoCausoProps {
   aberto: boolean;
   comunidades: readonly Comunidade[];
   comunidadeAtualSlug?: string;
-  apelidoInicial?: string;
   /** Nota que a Arena mostrou. A publicada é a que o servidor calcula. */
   notaResultado?: number;
   /** Devolve `true` quando publicou; `false` mantém o modal aberto. */
@@ -24,7 +22,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
   aberto,
   comunidades,
   comunidadeAtualSlug,
-  apelidoInicial,
   notaResultado,
   onSubmit,
   onFechar,
@@ -32,7 +29,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
   const [comunidadeSlug, setComunidadeSlug] = useState(
     comunidadeAtualSlug || comunidades[0]?.slug || 'eu-arroto-e-dai',
   );
-  const [autorNome, setAutorNome] = useState(apelidoInicial ?? '');
   const [falhou, setFalhou] = useState(false);
   const [conteudo, setConteudo] = useState('');
   const [consentimentoAudio, setConsentimentoAudio] = useState(false);
@@ -52,7 +48,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
     try {
       const publicou = await onSubmit({
         comunidadeSlug,
-        autorNome: autorNome.trim() || 'Arrotador Anônimo',
         conteudo: conteudo.trim(),
         consentimentoAudioPublico: consentimentoAudio,
       });
@@ -92,18 +87,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="input-nome">Seu Apelido</label>
-            <input
-              id="input-nome"
-              type="text"
-              placeholder="Ex: Betão da TI, Zé do Bar"
-              value={autorNome}
-              onChange={(e) => setAutorNome(e.target.value)}
-              maxLength={40}
-            />
           </div>
 
           <div className="form-group">

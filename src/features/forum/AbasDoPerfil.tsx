@@ -7,7 +7,6 @@ import { ForumProvider, useDependenciasDoForum, useDependenciasOuPadrao, type De
 import { ContextoDosEncaixes, useAnunciar, type Encaixes } from './encaixes';
 import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
 import { useListaPaginada, useOnline, type ListaPaginada } from './hooks';
-import { abaDaUrl, type IdDaAbaDoPerfil } from './ordem';
 import './forum.css';
 
 /**
@@ -19,12 +18,22 @@ import './forum.css';
  * por isso este componente só é montado com um perfil carregado.
  */
 
-type IdDaAba = IdDaAbaDoPerfil;
+type IdDaAba = string;
 
-const ABAS: readonly { readonly id: IdDaAba; readonly rotulo: string }[] = [
+interface DadosDaAba {
+  readonly id: IdDaAba;
+  readonly rotulo: string;
+}
+
+const ABAS_DO_FORUM: readonly DadosDaAba[] = [
   { id: 'topicos', rotulo: 'Tópicos' },
   { id: 'respostas', rotulo: 'Respostas' },
 ];
+
+/** Uma aba que o perfil antigo já tinha (Resenhas, Com áudio, Curtidos): o painel é dele. */
+export interface AbaExtraDoPerfil extends DadosDaAba {
+  readonly painel: ReactNode;
+}
 
 const TAMANHO_DA_PAGINA = 30;
 
@@ -35,6 +44,11 @@ export interface PropsDasAbasDoPerfil {
   readonly souEu: boolean;
   /** Portas dubladas, só nos testes. Sem isso, as de verdade. */
   readonly dependencias?: DependenciasDoForum;
+  /**
+   * Abas do perfil antigo, antes de Tópicos e Respostas. A primeira é a aberta quando a URL não
+   * diz nada (`?aba=`); sem extras, a primeira é Tópicos.
+   */
+  readonly extras?: readonly AbaExtraDoPerfil[];
 }
 
 export function AbasDoPerfil({ dependencias, ...resto }: PropsDasAbasDoPerfil) {
@@ -57,11 +71,13 @@ function ComPortasDeVerdade(props: Omit<PropsDasAbasDoPerfil, 'dependencias'>) {
   );
 }
 
-function Abas({ handle, souEu }: Omit<PropsDasAbasDoPerfil, 'dependencias'>) {
+function Abas({ handle, souEu, extras = [] }: Omit<PropsDasAbasDoPerfil, 'dependencias'>) {
+  const ABAS = useMemo<readonly DadosDaAba[]>(() => [...extras.map(({ id, rotulo }) => ({ id, rotulo })), ...ABAS_DO_FORUM], [extras]);
   const { ambiente } = useDependenciasDoForum();
   const online = useOnline(ambiente);
   const [params, setParams] = useSearchParams();
-  const ativa = abaDaUrl(params.get('aba'));
+  const pedida = params.get('aba');
+  const ativa = ABAS.some((a) => a.id === pedida) ? (pedida as string) : ABAS[0].id;
   const botoes = useRef<Partial<Record<IdDaAba, HTMLButtonElement | null>>>({});
 
   const [anuncio, setAnuncio] = useState<{ texto: string; n: number }>({ texto: '', n: 0 });
@@ -70,6 +86,17 @@ function Abas({ handle, souEu }: Omit<PropsDasAbasDoPerfil, 'dependencias'>) {
     () => ({ topo: null, aside: null, anunciar, definirRaiz: () => {} }),
     [anunciar],
   );
+
+  // Com cinco abas a lista rola por dentro (320px não comporta todas): a ativa fica à vista, sem rolar a página.
+  useEffect(() => {
+    const el = botoes.current[ativa];
+    const lista = el?.parentElement;
+    if (!el || !lista) return;
+    if (el.offsetLeft < lista.scrollLeft) lista.scrollLeft = el.offsetLeft;
+    else if (el.offsetLeft + el.offsetWidth > lista.scrollLeft + lista.clientWidth) {
+      lista.scrollLeft = el.offsetLeft + el.offsetWidth - lista.clientWidth;
+    }
+  }, [ativa]);
 
   // Voltou a internet: avisa uma vez (a faixa some sozinha).
   const estavaOnline = useRef(online);
@@ -85,14 +112,14 @@ function Abas({ handle, souEu }: Omit<PropsDasAbasDoPerfil, 'dependencias'>) {
       setParams(
         (atuais) => {
           const novos = new URLSearchParams(atuais);
-          if (id === 'respostas') novos.set('aba', 'respostas');
-          else novos.delete('aba');
+          if (id === ABAS[0].id) novos.delete('aba');
+          else novos.set('aba', id);
           return novos;
         },
         { replace: true },
       );
     },
-    [setParams],
+    [setParams, ABAS],
   );
 
   // Padrão WAI-ARIA de abas: setas, Home e End movem o foco e abrem a aba (são só duas, a troca é leve).
@@ -144,7 +171,9 @@ function Abas({ handle, souEu }: Omit<PropsDasAbasDoPerfil, 'dependencias'>) {
         )}
 
         <div id="painel-do-perfil" role="tabpanel" aria-labelledby={`aba-${ativa}`} tabIndex={0} className="forum-painel">
-          {ativa === 'topicos' ? (
+          {extras.find((e) => e.id === ativa) ? (
+            extras.find((e) => e.id === ativa)!.painel
+          ) : ativa === 'topicos' ? (
             <TopicosDoAutor key="topicos" handle={handle} souEu={souEu} online={online} />
           ) : (
             <RespostasDoAutor key="respostas" handle={handle} souEu={souEu} online={online} />

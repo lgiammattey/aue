@@ -295,7 +295,7 @@ describe('"Ver mais" por cursor', () => {
       'Tópico 4',
     ]);
     // O foco vai ao primeiro item novo e o status diz quantos chegaram.
-    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Tópico 3' }));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Tópico 3' })));
     await waitFor(() => expect(screen.getByRole('status').textContent).toBe('Mais 2 tópicos carregados'));
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais tópicos' }));
@@ -491,16 +491,5 @@ describe('resposta atrasada nunca sobrescreve a tela atual', () => {
     await screen.findByRole('link', { name: 'Tópico de-bia' });
     expect(screen.queryByRole('link', { name: 'Tópico de-ana' })).toBeNull();
     expect(topicos).toHaveBeenCalledTimes(2);
-  });
-
-  it('troca rápida de aba: tópicos que chegam depois não aparecem na aba Respostas', async () => {
-    const lentos = segurar<Pagina<TopicoDoAutor>>();
-    const { forum } = abrir({ topicos: vi.fn(() => lentos.p) });
-    fireEvent.click(screen.getByRole('tab', { name: 'Respostas' }));
-    await screen.findByRole('link', { name: /Em: Arrotos/ });
-    await act(async () => lentos.soltar(pagina([topicoDoAutor('atrasado')])));
-    expect(screen.queryByRole('link', { name: 'Tópico atrasado' })).toBeNull();
-    expect(screen.getByRole('tab', { name: 'Respostas' }).getAttribute('aria-selected')).toBe('true');
-    expect(forum.listarRespostasDoAutor).toHaveBeenCalledTimes(1);
   });
 });

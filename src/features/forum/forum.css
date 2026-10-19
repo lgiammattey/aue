@@ -1711,13 +1711,21 @@ html:has(.forum-dialogo[open]) {
 .forum-abas {
   display: flex;
   border-bottom: 1px solid var(--border);
+  /* Muitas abas: a lista rola por dentro, a página não. Largura 0 + mínimo 100%: não alarga quem se dimensiona pelo conteúdo. */
+  overflow-x: auto;
+  width: 0;
+  min-width: 100%;
+  scrollbar-width: none;
+}
+.forum-abas::-webkit-scrollbar {
+  display: none;
 }
 .forum-aba {
   position: relative;
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 0 auto;
   min-height: 52px;
-  padding: 0 var(--recuo);
+  padding: 0 var(--gut);
+  white-space: nowrap;
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -1740,7 +1748,7 @@ html:has(.forum-dialogo[open]) {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -1px;
+  bottom: 0;
   height: 3px;
   background: var(--fg);
 }

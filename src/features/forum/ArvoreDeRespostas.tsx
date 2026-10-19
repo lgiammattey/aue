@@ -358,12 +358,13 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
   const depoisDeEditar = useCallback(
     async (respostaId: string) => {
       setModo(null);
+      esquecerListas();
       if (await relerTudo('Sua edição foi salva, mas não deu pra atualizar a conversa.')) {
         pedirFoco(respostaId);
         anunciar('Resposta atualizada.');
       }
     },
-    [relerTudo, pedirFoco, anunciar],
+    [esquecerListas, relerTudo, pedirFoco, anunciar],
   );
 
   const depoisDeApagar = async (apagada: RespostaDoForum) => {
@@ -384,9 +385,12 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
       const lidas = await relerTudo('Não deu pra atualizar a conversa. Tenta de novo.');
       if (!lidas) return 'falhou';
       anunciar('Conversa atualizada.');
-      return lidas.some(casa) ? 'jaEsta' : 'naoEsta';
+      // Se o que a pessoa tentou já está lá, a escrita aconteceu: as listas guardadas (perfil, comunidade) são velhas.
+      const jaEsta = lidas.some(casa);
+      if (jaEsta) esquecerListas();
+      return jaEsta ? 'jaEsta' : 'naoEsta';
     },
-    [relerTudo, anunciar],
+    [esquecerListas, relerTudo, anunciar],
   );
 
   // `topico_fechado` ao enviar: a tela relê o tópico e o composer vira a faixa. Diz uma vez por quê.

@@ -1,15 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarCompartilhamentoWeb } from '../../plataforma/web/compartilhamento';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import type { PerfilUsuario } from '../../nucleo/usuario/perfil';
+import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { EstadoDaConta, PortaDeConta } from '../../portas/conta';
 import type { Compartilhamento } from '../../portas/compartilhamento';
 import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { SimboloBurpzilla } from './SimboloBurpzilla';
-import { AbasDoPerfil } from '../forum/AbasDoPerfil';
+import { AbasDoPerfil, type AbaExtraDoPerfil } from '../forum/AbasDoPerfil';
 import type { DependenciasDoForum } from '../forum/contexto';
+import { useSearchParams } from 'react-router-dom';
+import { CardDeCauso } from '../comunidade/components/CardDeCauso';
 import { BarraLateralNavegacao } from '../comunidade/components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from '../comunidade/components/BarraInferiorMobile';
 import { ColunaTendencias } from '../comunidade/components/ColunaTendencias';
@@ -20,15 +24,19 @@ interface TelaPerfilProps {
   /** Primeira parada depois de criar conta: uma ficha curta, antes do feed. */
   boasVindas?: boolean;
   portaPerfil?: PortaDePerfil;
+  portaComunidade?: PortaDeComunidade;
   portaConta?: PortaDeConta;
   compartilhamento?: Compartilhamento;
   aoVoltar: () => void;
   aoArrotar: () => void;
+  aoAbrirHistoria: (id: string) => void;
   aoAbrirPerfil: (handle: string) => void;
   aoEntrar: (modo: 'cadastro' | 'entrar') => void;
   /** Portas do fórum para as abas Tópicos e Respostas. Só os testes passam; sem isso, as de verdade. */
   dependenciasDoForum?: DependenciasDoForum;
 }
+
+type Aba = 'causos' | 'audios' | 'curtidos';
 
 const MENSAGENS_DE_EDICAO = {
   handleEmUso: 'Esse @ já é de outra pessoa. Escolhe outro.',
@@ -57,10 +65,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   handle,
   boasVindas = false,
   portaPerfil,
+  portaComunidade,
   portaConta,
   compartilhamento,
   aoVoltar,
   aoArrotar,
+  aoAbrirHistoria,
   aoAbrirPerfil,
   aoEntrar,
   dependenciasDoForum,
@@ -94,6 +104,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   };
 
   const [perfilPort] = useState<PortaDePerfil>(() => portaPerfil ?? criarPerfilRemoto());
+  const [comunidade] = useState<PortaDeComunidade>(() => portaComunidade ?? criarComunidadeWeb());
   const [contaPort] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
   const [compartilhar] = useState<Compartilhamento>(() => compartilhamento ?? criarCompartilhamentoWeb());
 
@@ -107,6 +118,13 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [carregando, setCarregando] = useState(true);
   const [falhou, setFalhou] = useState(false);
   const [tentativa, setTentativa] = useState(0);
+  // A aba vem da URL (`?aba=`): o Voltar cai na mesma. Resenhas é a aberta sem parâmetro.
+  const [paramsDaUrl] = useSearchParams();
+  const pedida = paramsDaUrl.get('aba');
+  const aba: Aba | 'forum' = pedida === 'audios' || pedida === 'curtidos' ? pedida : pedida === 'topicos' || pedida === 'respostas' ? 'forum' : 'causos';
+  const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
+  const [carregandoCausos, setCarregandoCausos] = useState(false);
+  const [falhaNosCausos, setFalhaNosCausos] = useState(false);
   const [aviso, setAviso] = useState('');
   const [editando, setEditando] = useState(false);
   const [hoverFoto, setHoverFoto] = useState(false);
@@ -209,6 +227,32 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     };
   }, [handle, perfilPort, contaPort, tentativa, boasVindas]);
 
+  useEffect(() => {
+    if (!perfil || aba === 'forum') return;
+    let ativo = true;
+    setCarregandoCausos(true);
+    comunidade
+      .listarFeed({
+        limite: 50,
+        ...(aba === 'curtidos' ? { curtidosPor: perfil.id } : { autorId: perfil.id }),
+      })
+      .then((lista) => {
+        if (!ativo) return;
+        setCausos(aba === 'audios' ? lista.filter((c) => c.temAudio) : lista);
+        setFalhaNosCausos(false);
+        setCarregandoCausos(false);
+      })
+      .catch(() => {
+        if (!ativo) return;
+        setCausos([]);
+        setFalhaNosCausos(true);
+        setCarregandoCausos(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [perfil, aba, comunidade]);
+
   const [meuPerfilLocal] = useState<PerfilUsuario>(() => obterPerfilLocal());
 
   const souEu = Boolean(
@@ -220,6 +264,15 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
           meuPerfilLocal.handle &&
           perfil.handle.toLowerCase().replace(/^@/, '') === meuPerfilLocal.handle.toLowerCase().replace(/^@/, '')) ||
           (perfil.id && meuPerfilLocal.id && perfil.id === meuPerfilLocal.id))),
+  );
+
+  const abas = useMemo(
+    () => [
+      { id: 'causos' as const, rotulo: 'Resenhas' },
+      { id: 'audios' as const, rotulo: 'Com áudio' },
+      ...(souEu ? [{ id: 'curtidos' as const, rotulo: 'Curtidos' }] : []),
+    ],
+    [souEu],
   );
 
   const primeiraChegada = Boolean(
@@ -344,6 +397,89 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     else avisar('Não deu para sair agora.');
   };
 
+  // Ações do card: tudo passa pela porta, e falha vira aviso.
+  const atualizar = (id: string, mudanca: Partial<CausoPostado>) =>
+    setCausos((prev) => prev.map((c) => (c.id === id ? { ...c, ...mudanca } : c)));
+
+  const curtir = async (id: string) => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para curtir resenhas.');
+      aoEntrar('cadastro');
+      return;
+    }
+    const r = await comunidade.alternarCurtida(id);
+    if (r.ok) atualizar(id, { curtidas: r.curtidas, curtidoPorMim: r.curtido });
+    else avisar('Não deu para curtir agora.');
+  };
+  const repostar = async (id: string) => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para entrar no Bonde.');
+      aoEntrar('cadastro');
+      return;
+    }
+    const r = await comunidade.alternarRepost(id);
+    if (r.ok) atualizar(id, { reposts: r.reposts, repostadoPorMim: r.repostado });
+    else avisar('Não deu para repostar agora.');
+  };
+  const abrirConversa = async (id: string) => {
+    try {
+      atualizar(id, { comentarios: await comunidade.listarRespostas(id) });
+    } catch {
+      avisar('Não deu para carregar as respostas. Tenta de novo.');
+    }
+  };
+  const responder = async (id: string, texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para responder no Bonde.');
+      aoEntrar('cadastro');
+      return 'sem-conta';
+    }
+    const causo = causos.find((c) => c.id === id);
+    const nova = await comunidade.adicionarResposta(id, texto, perfil?.apelido ?? 'Você', perfil?.handle, respostaAId);
+    if (!nova) {
+      avisar('Não deu para enviar a resposta.');
+      return false;
+    }
+    atualizar(id, {
+      comentarios: [...(causo?.comentarios ?? []), nova],
+      totalComentarios: (causo?.totalComentarios ?? 0) + 1,
+    });
+    return true;
+  };
+  const apagar = async (causo: CausoPostado) => {
+    const comAudio = Boolean(causo.temAudio);
+    if (
+      !window.confirm(
+        comAudio
+          ? 'Apagar esta resenha e o áudio do arroto? Não tem como desfazer.'
+          : 'Apagar esta resenha? Não tem como desfazer.',
+      )
+    )
+      return;
+    const ok = await comunidade.apagarCauso(causo.id, { apagarAudio: comAudio });
+    if (!ok) {
+      avisar('Não deu para apagar a resenha agora. Nada foi apagado.');
+      return;
+    }
+    setCausos((prev) => prev.filter((c) => c.id !== causo.id));
+    setPerfil((p) => (p ? { ...p, totalCausos: Math.max(0, p.totalCausos - 1) } : p));
+    avisar('Resenha apagada.');
+  };
+  const denunciar = async (id: string) => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para denunciar uma resenha.');
+      aoEntrar('cadastro');
+      return;
+    }
+    const ok = await comunidade.denunciarCauso(id, 'Denúncia de usuário');
+    if (!ok) {
+      avisar('Não deu para registrar a denúncia.');
+      return;
+    }
+    setCausos((prev) => prev.filter((c) => c.id !== id));
+    avisar('Denúncia registrada.');
+  };
+
   const inicial = (perfil?.apelido || form.apelido || 'A').slice(0, 2).toUpperCase();
   const desde = perfil ? new Date(perfil.criadoEm).getFullYear() : undefined;
 
@@ -410,6 +546,44 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   );
 
   const perfilParaBarra = meuPerfilLocal;
+
+  // O conteúdo das abas antigas é um só, filtrado pela aba aberta (o painel só é montado na aba ativa).
+  const painelAntigo = (
+    <>
+                {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
+                {!carregandoCausos && falhaNosCausos && (
+                  <p role="alert" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
+                    Não deu pra carregar as resenhas agora. Atualiza a página pra tentar de novo.
+                  </p>
+                )}
+                {!carregandoCausos && !falhaNosCausos && causos.length === 0 && (
+                  <p style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
+                    {aba === 'curtidos'
+                      ? 'Nada curtido ainda.'
+                      : souEu
+                        ? 'Você ainda não postou nenhuma resenha.'
+                        : 'Sem resenhas por aqui ainda.'}
+                  </p>
+                )}
+                {causos.map((c) => (
+                  <CardDeCauso
+                    key={c.id}
+                    causo={c}
+                    aoCurtir={curtir}
+                    aoRepostar={repostar}
+                    aoDuvidar={aoArrotar}
+                    aoCompartilhar={(item) => aoAbrirHistoria(item.id)}
+                    aoResponder={responder}
+                    aoAbrirConversa={abrirConversa}
+                    aoDenunciar={denunciar}
+                    aoApagar={apagar}
+                    aoAbrirPerfil={(h) => aoAbrirPerfil(h)}
+                    aoAbrirHistoria={aoAbrirHistoria}
+                  />
+                ))}
+    </>
+  );
+  const abasAntigas: readonly AbaExtraDoPerfil[] = abas.map((a) => ({ ...a, painel: painelAntigo }));
 
   return (
     <div
@@ -867,7 +1041,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 )}
               </section>
 
-              <AbasDoPerfil handle={perfil.handle} souEu={souEu} dependencias={dependenciasDoForum} />
+              <AbasDoPerfil
+                handle={perfil.handle}
+                souEu={souEu}
+                dependencias={dependenciasDoForum}
+                extras={abasAntigas}
+              />
             </>
           )}
         </main>

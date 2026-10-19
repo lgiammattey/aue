@@ -1,84 +1,59 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { formatarNota } from '../../shared/formato/nota';
 
 interface ModalCardCompartilhamentoProps {
   aberto: boolean;
-  nota: number | string;
+  /** Endereço público e abrível do que está sendo compartilhado. */
+  url: string;
+  /** Só existe quando o servidor entregou uma nota. Sem nota, o card não mostra placar. */
+  nota?: number | string;
   autorNome: string;
   comunidadeNome?: string;
   textoCauso?: string;
-  codigoDesafio?: string;
+  /** Rótulo do botão de link: "Copiar link do causo" ou "Copiar link do X1". */
+  rotuloLink?: string;
   onFechar: () => void;
   onNotificar?: (msg: string) => void;
 }
 
 export const ModalCardCompartilhamento: React.FC<ModalCardCompartilhamentoProps> = ({
   aberto,
+  url,
   nota,
   autorNome,
-  comunidadeNome = 'Bonde do Arroto',
+  comunidadeNome,
   textoCauso,
-  codigoDesafio = 'k4x9',
+  rotuloLink = 'Copiar link',
   onFechar,
   onNotificar,
 }) => {
-  const [gerando, setGerando] = useState(false);
-  const [progresso, setProgresso] = useState(0);
-
-  useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (gerando) {
-      timer = setInterval(() => {
-        setProgresso((p) => {
-          const prox = p + 12 + Math.random() * 10;
-          if (prox >= 100) {
-            clearInterval(timer);
-            setGerando(false);
-            if (onNotificar) onNotificar('Vídeo pronto pro TikTok. Baixando.');
-            return 0;
-          }
-          return prox;
-        });
-      }, 300);
-    }
-    return () => clearInterval(timer);
-  }, [gerando, onNotificar]);
-
   if (!aberto) return null;
 
-  const urlX1 = `https://aue.app/x1/${codigoDesafio}`;
-
-  const cardKicker = `@${autorNome.toLowerCase().replace(/\s+/g, '_')} · ${comunidadeNome}`;
-  const cardScore = typeof nota === 'number' ? formatarNota(nota) : String(nota || 'BO');
-  const cardLine = textoCauso ? textoCauso.slice(0, 48) : 'Bate esse arroto.';
+  const cardKicker = comunidadeNome ? `${autorNome} · ${comunidadeNome}` : autorNome;
+  const temNota = nota !== undefined && nota !== '';
+  const cardScore = typeof nota === 'number' ? formatarNota(nota) : String(nota ?? '');
+  const cardLine = textoCauso ? textoCauso.slice(0, 48) : '';
+  const urlCurta = url.replace(/^https?:\/\//, '');
 
   const handleCopiarLink = async () => {
     try {
-      await navigator.clipboard.writeText(urlX1);
-      if (onNotificar) onNotificar('Link copiado.');
+      await navigator.clipboard.writeText(url);
+      onNotificar?.('Link copiado.');
     } catch {
-      // fallback
+      onNotificar?.('Não deu pra copiar. Selecione o link e copie na mão.');
     }
   };
 
-  const handleBaixarPNG = () => {
-    if (onNotificar) onNotificar('Card salvo.');
-  };
-
   const handleWhatsApp = () => {
-    const textoZap = `Soltei um arroto de nota ${cardScore} no Auê! Quero ver bater: ${urlX1}`;
+    const textoZap = temNota
+      ? `Olha esse arroto de nota ${cardScore} no Auê: ${url}`
+      : `Olha esse causo no Auê: ${url}`;
     const link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoZap)}`;
-    window.open(link, '_blank');
-    if (onNotificar) onNotificar('Abrindo compartilhamento.');
-  };
-
-  const handleGerarVideo = () => {
-    setProgresso(0);
-    setGerando(true);
+    window.open(link, '_blank', 'noopener,noreferrer');
   };
 
   const outBtnStyle: React.CSSProperties = {
-    height: '40px',
+    minHeight: '44px',
     borderRadius: '12px',
     border: '1px solid var(--border-strong)',
     background: 'transparent',
@@ -169,6 +144,7 @@ export const ModalCardCompartilhamento: React.FC<ModalCardCompartilhamentoProps>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{cardKicker}</span>
+            {temNota && (
             <span
               style={{
                 fontFamily: 'var(--font-display)',
@@ -183,78 +159,23 @@ export const ModalCardCompartilhamento: React.FC<ModalCardCompartilhamentoProps>
             >
               {cardScore}
             </span>
+            )}
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '20px', lineHeight: 1.15, color: 'var(--fg)' }}>
               {cardLine}
             </span>
           </div>
 
           <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: '10px', color: 'var(--muted)' }}>
-            aue.app/x1/{codigoDesafio}
+            {urlCurta}
           </span>
         </div>
 
-        {/* Barra de progresso ao gerar vídeo */}
-        {gerando && (
-          <div
-            style={{
-              height: '44px',
-              borderRadius: '12px',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              position: 'relative',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '14px',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                background: 'var(--surface-2)',
-                width: `${Math.min(100, progresso)}%`,
-                transition: 'width .2s ease',
-              }}
-            />
-            <span style={{ position: 'relative', color: 'var(--fg)', fontWeight: 600 }}>
-              Gerando vídeo 9:16... {Math.min(99, Math.round(progresso))}%
-            </span>
-          </div>
-        )}
-
-        {/* Grid com 4 opções do protótipo */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          <button
-            type="button"
-            onClick={handleGerarVideo}
-            style={outBtnStyle}
-          >
-            Vídeo pro TikTok
+          <button type="button" onClick={handleCopiarLink} style={outBtnStyle}>
+            {rotuloLink}
           </button>
-          <button
-            type="button"
-            onClick={handleBaixarPNG}
-            style={outBtnStyle}
-          >
-            Baixar card (PNG)
-          </button>
-          <button
-            type="button"
-            onClick={handleCopiarLink}
-            style={outBtnStyle}
-          >
-            Copiar link do X1
-          </button>
-          <button
-            type="button"
-            onClick={handleWhatsApp}
-            style={outBtnStyle}
-          >
-            Stories / WhatsApp
+          <button type="button" onClick={handleWhatsApp} style={outBtnStyle}>
+            WhatsApp
           </button>
         </div>
       </div>

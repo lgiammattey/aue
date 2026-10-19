@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
+import { caminhoDeVoltaSeguro } from '../../nucleo/comunidade/caminhoDeVolta';
 
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
@@ -34,6 +36,7 @@ function mensagemDe(r: Extract<ResultadoDaConta, { ok: false }>): string {
  */
 export function useEntrarNaConta(portaConta?: PortaDeConta) {
   const navigate = useNavigate();
+  const [parametros] = useSearchParams();
   const [conta] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
   const [erro, setErro] = useState('');
   const [info, setInfo] = useState('');
@@ -72,7 +75,8 @@ export function useEntrarNaConta(portaConta?: PortaDeConta) {
         return;
       }
       await sincronizarPerfilLocal();
-      navigate('/');
+      // Quem veio por um link de conversa volta para ela; sem destino válido, vai ao início.
+      navigate(caminhoDeVoltaSeguro(parametros.get('volta')) ?? '/');
     } finally {
       setCarregando(false);
     }

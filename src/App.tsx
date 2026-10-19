@@ -20,10 +20,19 @@ const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) =>
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
+import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
 
 /**
  * Abertura de desafio por link direto.
  */
+/** Leva ao login guardando a página atual, para a pessoa voltar a ela depois de entrar. */
+function useIrParaLogin() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  return (modo: 'cadastro' | 'entrar' = 'cadastro') =>
+    navigate(enderecoDoLoginComVolta(location.pathname + location.search, modo));
+}
+
 function EntradaPorLink() {
   const { code } = useParams<{ code: string }>();
   return <Arena codigoDoDesafio={code} />;
@@ -73,6 +82,7 @@ function EntradaInicial() {
 
 function EntradaArena() {
   const navigate = useNavigate();
+  const irParaLogin = useIrParaLogin();
   return (
     <TelaComunidade
       initialTab="arena"
@@ -80,13 +90,14 @@ function EntradaArena() {
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login?modo=cadastro')}
+      aoEntrar={() => irParaLogin()}
     />
   );
 }
 
 function EntradaPrincipal() {
   const navigate = useNavigate();
+  const irParaLogin = useIrParaLogin();
   const { state } = useLocation();
   const [perfilPendente, setPerfilPendente] = useState<boolean | null>(null);
 
@@ -116,31 +127,34 @@ function EntradaPrincipal() {
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login?modo=cadastro')}
+      aoEntrar={() => irParaLogin()}
     />
   );
 }
 
 function EntradaHistoria() {
   const navigate = useNavigate();
-  return <TelaHistoria onArrotar={() => navigate('/arena')} aoEntrar={() => navigate('/login?modo=cadastro')} />;
+  const irParaLogin = useIrParaLogin();
+  return <TelaHistoria onArrotar={() => navigate('/arena')} aoEntrar={() => irParaLogin()} />;
 }
 
 function EntradaBondes() {
   const navigate = useNavigate();
+  const irParaLogin = useIrParaLogin();
   return (
     <TelaComunidade initialTab="comm" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login?modo=cadastro')} />
+      aoEntrar={() => irParaLogin()} />
   );
 }
 
 function EntradaDesafios() {
   const navigate = useNavigate();
+  const irParaLogin = useIrParaLogin();
   return (
     <TelaComunidade initialTab="desafios" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login?modo=cadastro')} />
+      aoEntrar={() => irParaLogin()} />
   );
 }
 
@@ -155,6 +169,7 @@ function EntradaPerfilHandle() {
 
 function EntradaDoPerfil({ handle }: { handle?: string }) {
   const navigate = useNavigate();
+  const irParaLogin = useIrParaLogin();
   const location = useLocation();
   return (
     <TelaPerfil
@@ -164,7 +179,7 @@ function EntradaDoPerfil({ handle }: { handle?: string }) {
       aoArrotar={() => navigate('/arena')}
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
-      aoEntrar={(modo) => navigate(modo === 'cadastro' ? '/login?modo=cadastro' : '/login')}
+      aoEntrar={(modo) => irParaLogin(modo === 'cadastro' ? 'cadastro' : 'entrar')}
     />
   );
 }
@@ -172,6 +187,7 @@ function EntradaDoPerfil({ handle }: { handle?: string }) {
 function EntradaComunidadeSlug() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const irParaLogin = useIrParaLogin();
   return (
     <TelaComunidade
       initialTab="comm"
@@ -179,7 +195,7 @@ function EntradaComunidadeSlug() {
       onArrotar={() => navigate('/arena')}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login?modo=cadastro')}
+      aoEntrar={() => irParaLogin()}
     />
   );
 }

@@ -19,6 +19,25 @@
 
 ---
 
+## Decisão vigente — Comunidades usam a linguagem das páginas públicas
+
+**Decisão do Luiz, 19/10/2026:** diretório, comunidade, tópico, respostas e formulários seguem o padrão visual de [`Páginas Públicas.dc.html`](prototipo/Páginas%20Públicas.dc.html). Esta seção vence qualquer trecho abaixo que mande em tema, fonte, casca ou navegação do fórum.
+
+A comunidade continua sendo lugar de leitura e conversa. Lista, tópico, resposta, participação, rascunho e formulário não viram página estática. O que muda é a pele: clara, editorial e com respiro.
+
+- tema claro fixo: `#f7f8f5` no fundo, `#eef4e7` e `#e2ebd8` nas superfícies, `#202824` no texto, `#5c675d` no secundário e `#e7ebe3` nas linhas;
+- Archivo em tudo, inclusive o wordmark `auê!`, em peso 900. Anton fica na Arena e na nota;
+- verde público `#2f5d0a` na marca, no foco e em detalhe editorial. O verde elétrico fica guardado para CTA dentro de faixa escura; não aparece solto sobre o fundo claro;
+- cabeçalho público sticky de 60px, com wordmark, navegação horizontal e ação de entrar. No celular a navegação rola na horizontal; não nasce uma barra inferior própria do fórum;
+- diretório e listas usam até 1080px. A leitura de comunidade, tópico e resposta fica em até 760px, com gutter de 20px;
+- linhas de 1px separam comunidades, tópicos e respostas. Cards só entram quando têm função. Nada de sombra decorativa, gradiente, blur ou um monte de caixinha;
+- botão escuro é a ação principal normal; pílula clara atende filtro e ação secundária. Cada estado tem uma chamada principal;
+- campos usam fundo claro, borda forte, 16px e raio 12px. Voltar é link real, com alvo de 44px.
+
+Ainda falta atualizar o protótipo navegável antes de dar fidelidade 1:1 como aceita. Esta decisão basta para orientar o redesenho; não autoriza mudar regra de dados, participação, erro, privacidade, Arena ou o caminho da pessoa dentro da conversa.
+
+---
+
 ## 1. Direção (do Luiz) em oito linhas
 
 1. Visual **leve, limpo e adulto**. Fundo claro por padrão, tema escuro opcional.

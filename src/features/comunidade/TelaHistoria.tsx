@@ -10,6 +10,7 @@ import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import { BarraLateralNavegacao } from './components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from './components/BarraInferiorMobile';
 import { ColunaTendencias } from './components/ColunaTendencias';
+import { MENSAGEM_DE_ERRO_DE_RESPOSTA, useEnvioDeResposta } from './components/useEnvioDeResposta';
 import { LARGURA_CELULAR, LARGURA_COLUNA_DIREITA, useLarguraJanela, useTema } from './useLayoutDaConversa';
 
 interface TelaHistoriaProps {
@@ -165,13 +166,17 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     if (registrou) setDenunciado(true);
   };
 
-  const responderComentario = async (texto: string, respostaAId?: string) => {
-    if (!exigirContaSocial()) return;
-    if (!causo) return;
+  const responderComentario = async (texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
+    if (!exigirContaSocial()) return 'sem-conta';
+    if (!causo) return false;
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
     const nova = await porta.adicionarResposta(causo.id, texto, nome, nome.toLowerCase().replace(/\s+/g, '_'), respostaAId);
-    if (nova) setComentarios((prev) => [...prev, nova]);
+    if (!nova) return false;
+    setComentarios((prev) => [...prev, nova]);
+    return true;
   };
+
+  const envioDoComentario = useEnvioDeResposta();
 
   const enviarComentario = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,17 +186,13 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
     const handle = nome.toLowerCase().replace(/\s+/g, '_');
 
-    const nova = await porta.adicionarResposta(
-      causo.id,
-      textoResposta.trim(),
-      nome,
-      handle,
-    );
-
-    if (nova) {
+    const ok = await envioDoComentario.enviar(async () => {
+      const nova = await porta.adicionarResposta(causo.id, textoResposta.trim(), nome, handle);
+      if (!nova) return false;
       setComentarios((prev) => [...prev, nova]);
-      setTextoResposta('');
-    }
+      return true;
+    });
+    if (ok) setTextoResposta('');
   };
 
   return (
@@ -527,7 +528,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <button
                       type="submit"
-                      disabled={!textoResposta.trim()}
+                      disabled={!textoResposta.trim() || envioDoComentario.enviando}
                       style={{
                         background: 'var(--accent, #c6ff00)',
                         color: 'var(--accent-on, #000)',
@@ -540,9 +541,14 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                         opacity: textoResposta.trim() ? 1 : 0.6,
                       }}
                     >
-                      Comentar
+                      {envioDoComentario.enviando ? 'Enviando…' : 'Comentar'}
                     </button>
                   </div>
+                  {envioDoComentario.erro && (
+                    <p role="alert" style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>
+                      {MENSAGEM_DE_ERRO_DE_RESPOSTA}
+                    </p>
+                  )}
                 </form> : (
                   <button
                     type="button"

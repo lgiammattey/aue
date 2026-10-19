@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { CausoPostado } from '../../../portas/comunidade';
 import { ArvoreDeComentarios } from './ArvoreDeComentarios';
+import { MENSAGEM_DE_ERRO_DE_RESPOSTA, useEnvioDeResposta, type ResultadoDoEnvio } from './useEnvioDeResposta';
 import { soltar, tocarExclusivo } from '../../../plataforma/web/audioUnico';
 
 interface CardDeCausoProps {
@@ -10,7 +11,7 @@ interface CardDeCausoProps {
   aoRepostar?: (id: string) => void;
   aoDuvidar: (causo: CausoPostado) => void;
   aoCompartilhar: (causo: CausoPostado) => void;
-  aoResponder: (causoId: string, texto: string, respostaAId?: string) => void;
+  aoResponder: (causoId: string, texto: string, respostaAId?: string) => ResultadoDoEnvio;
   /** Pede os comentários ao servidor quando a conversa abre. */
   aoAbrirConversa?: (causoId: string) => void | Promise<void>;
   aoDenunciar: (id: string) => void;
@@ -106,11 +107,13 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
     }
   };
 
-  const enviarResposta = (e: React.FormEvent) => {
+  const envioDaResposta = useEnvioDeResposta();
+
+  const enviarResposta = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!textoResposta.trim()) return;
-    aoResponder(causo.id, textoResposta.trim());
-    setTextoResposta('');
+    const ok = await envioDaResposta.enviar(() => aoResponder(causo.id, textoResposta.trim()));
+    if (ok) setTextoResposta('');
   };
 
   const handleDenunciar = () => {
@@ -624,6 +627,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               />
               <button
                 type="submit"
+                disabled={envioDaResposta.enviando}
                 aria-label="Enviar resposta"
                 style={{
                   height: '40px',
@@ -638,9 +642,14 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                   flex: 'none',
                 }}
               >
-                Responder
+                {envioDaResposta.enviando ? 'Enviando…' : 'Responder'}
               </button>
             </form>
+            {envioDaResposta.erro && (
+              <p role="alert" style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>
+                {MENSAGEM_DE_ERRO_DE_RESPOSTA}
+              </p>
+            )}
           </div>
         )}
       </div>

@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { ordenarEmNiveis } from '../../../nucleo/comunidade/comentarios';
 import type { RespostaDeCauso } from '../../../portas/comunidade';
+import { MENSAGEM_DE_ERRO_DE_RESPOSTA, useEnvioDeResposta, type ResultadoDoEnvio } from './useEnvioDeResposta';
 
 interface ArvoreDeComentariosProps {
   comentarios: readonly RespostaDeCauso[];
   /** `respostaAId` vem preenchido quando a pessoa responde outro comentário. */
-  aoResponder: (texto: string, respostaAId?: string) => void | Promise<void>;
+  aoResponder: (texto: string, respostaAId?: string) => ResultadoDoEnvio;
   aoAbrirPerfil?: (handle: string, nome?: string) => void;
 }
 
@@ -18,10 +19,13 @@ export const ArvoreDeComentarios: React.FC<ArvoreDeComentariosProps> = ({
   const [respondendoId, setRespondendoId] = useState<string | null>(null);
   const [texto, setTexto] = useState('');
 
+  const envio = useEnvioDeResposta();
+
   const enviar = async (e: React.FormEvent, respostaAId: string) => {
     e.preventDefault();
     if (!texto.trim()) return;
-    await aoResponder(texto.trim(), respostaAId);
+    const ok = await envio.enviar(() => aoResponder(texto.trim(), respostaAId));
+    if (!ok) return;
     setTexto('');
     setRespondendoId(null);
   };
@@ -69,7 +73,10 @@ export const ArvoreDeComentarios: React.FC<ArvoreDeComentariosProps> = ({
               <div style={{ fontSize: '14px', textWrap: 'pretty', color: 'var(--fg)' }}>{r.conteudo}</div>
               <button
                 type="button"
-                onClick={() => setRespondendoId(respondendoId === r.id ? null : r.id)}
+                onClick={() => {
+                  envio.limparErro();
+                  setRespondendoId(respondendoId === r.id ? null : r.id);
+                }}
                 style={{
                   background: 'none',
                   border: 0,
@@ -107,6 +114,7 @@ export const ArvoreDeComentarios: React.FC<ArvoreDeComentariosProps> = ({
                   />
                   <button
                     type="submit"
+                    disabled={envio.enviando}
                     style={{
                       height: '40px',
                       padding: '0 16px',
@@ -119,9 +127,14 @@ export const ArvoreDeComentarios: React.FC<ArvoreDeComentariosProps> = ({
                       cursor: 'pointer',
                     }}
                   >
-                    Enviar
+                    {envio.enviando ? 'Enviando…' : 'Enviar'}
                   </button>
                 </form>
+              )}
+              {respondendoId === r.id && envio.erro && (
+                <p role="alert" style={{ margin: '4px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                  {MENSAGEM_DE_ERRO_DE_RESPOSTA}
+                </p>
               )}
             </div>
           </div>

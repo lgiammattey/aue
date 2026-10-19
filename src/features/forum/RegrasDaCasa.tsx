@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Monograma } from './componentes';
 import { enderecoDaComunidade } from './enderecos';
@@ -50,10 +51,13 @@ export function AsideDeRegras() {
 export function AsideSobreAComunidade({
   referencia,
   comunidade,
+  acao,
 }: {
   readonly referencia: { readonly slug: string; readonly nome: string };
   /** `null` enquanto carrega ou se a leitura falhou: o aside mostra só o que a conversa já sabe. */
   readonly comunidade: ComunidadeDoForum | null;
+  /** A ação da pessoa na comunidade (Participar, Você participa · Sair). */
+  readonly acao?: ReactNode;
 }) {
   return (
     <>
@@ -69,6 +73,7 @@ export function AsideSobreAComunidade({
         </div>
         {comunidade?.descricao && <p className="forum-aside__texto">{comunidade.descricao}</p>}
         {comunidade && <p className="forum-aside__meta">{metaDoCabecalho(comunidade)}</p>}
+        {acao}
       </section>
       <AsideDeRegras />
     </>

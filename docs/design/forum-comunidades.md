@@ -624,9 +624,9 @@ Fica **no fim da conversa**, nunca fixo na tela. Conteúdo por papel:
 | Papel / estado | O que aparece | Copy exata |
 |---|---|---|
 | Membro, tópico aberto | foto própria + textarea + contador + botão | label (oculto) "Sua resposta", placeholder "Escreve sua resposta", botão verde "Enviar", enviando "Enviando…" |
-| Conta, não-membro | faixa + botão | "Entre em {Comunidade} para responder." botão "Participar" (entrou, o composer aparece e o foco vai nele) |
+| Conta, não-membro | faixa + botão | "Entre na comunidade para responder." botão "Participar" (entrou, o composer aparece e o foco vai nele) |
 | Visitante | faixa + botões | "Quer responder? Crie sua conta ou entre. Ler e ouvir continua liberado." botões "Criar conta" (verde) e "Já tenho conta" |
-| Tópico fechado | faixa `--surface` | "Tópico fechado. Dá pra ler tudo, mas não aceita novas respostas." |
+| Tópico fechado | faixa `--surface` | a faixa do tópico (9.7) já avisa: "Este tópico está fechado. Dá pra ler tudo, mas não aceita novas respostas." Se fechar com a pessoa escrevendo: "Esse tópico foi fechado. Não aceita mais respostas." (6.6) |
 
 Textarea: 16px, mínimo 2 linhas, **cresce até 8 e depois rola por dentro**, borda `--border-strong`, raio 12, padding 12. Contador 6.9. Após sucesso: campo limpo, a conversa mostra a nova resposta **na posição certa**, o foco vai para ela (`tabindex="-1"`) e a região de status diz "Resposta enviada." Falha: 6.6 e 6.7, texto preservado.
 

@@ -295,7 +295,23 @@ describe('teclado do celular (spec 4.3 e 4.7)', () => {
     act(() => ambiente.focarCampo(true));
     expect(casca.getAttribute('data-teclado')).toBe('aberto');
     act(() => ambiente.focarCampo(false));
-    expect(casca.hasAttribute('data-teclado')).toBe(false);
+    // a saída espera um instante (R6): a barra não volta por cima do botão tocado antes do clique
+    expect(casca.getAttribute('data-teclado')).toBe('aberto');
+    await waitFor(() => expect(casca.hasAttribute('data-teclado')).toBe(false));
+  });
+});
+
+describe('R6: tocar no botão não perde o clique para a barra inferior', () => {
+  it('sair do campo e voltar a um campo em seguida não pisca a barra; só some depois do atraso', async () => {
+    const ambiente = ambienteFalso();
+    abrir({ ambiente });
+    await screen.findByRole('heading', { level: 1, name: 'Na reunião da firma' });
+    const casca = document.querySelector('.forum-shell')!;
+    act(() => ambiente.focarCampo(true));
+    act(() => ambiente.focarCampo(false));
+    act(() => ambiente.focarCampo(true));
+    await new Promise((r) => setTimeout(r, 300));
+    expect(casca.getAttribute('data-teclado')).toBe('aberto');
   });
 });
 

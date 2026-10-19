@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { avisoDeContador, excessoDoCampo, lerCampo, type LeituraDoCampo } from '../../nucleo/forum/escrita';
 
 interface Props {
@@ -24,6 +24,8 @@ interface Props {
   readonly aoFocar?: () => void;
   /** Enter num campo de uma linha (o título passa para a mensagem em vez de enviar). */
   readonly aoEnter?: () => void;
+  /** Aviso entre o campo e o contador (o alerta de envio não empurra o campo para baixo). */
+  readonly meio?: ReactNode;
 }
 
 /**
@@ -50,6 +52,7 @@ export function CampoComContador({
   enterKeyHint,
   aoFocar,
   aoEnter,
+  meio,
 }: Props) {
   const leitura = lerCampo(valor, limite);
   const anterior = useRef<LeituraDoCampo | null>(null);
@@ -134,6 +137,7 @@ export function CampoComContador({
           {...comuns}
         />
       )}
+      {meio}
       <div className="forum-campo__rodape">
         {erro ? (
           <p id={idDoErro} className="forum-campo__erro" role="alert">

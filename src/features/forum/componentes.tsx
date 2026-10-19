@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  nomeDoAutor,
   metaDeComunidade,
   metaDeTopico,
   monograma,
@@ -9,7 +10,7 @@ import {
   urlDeImagemSegura,
 } from '../../nucleo/forum/apresentacao';
 import type { ComunidadeDoForum } from '../../portas/forum';
-import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
+import { enderecoDaComunidade, enderecoDoPerfil, enderecoDoTopico } from './enderecos';
 import { IconeFechado, IconeFixado } from './Icones';
 import { useAnunciar } from './encaixes';
 
@@ -149,6 +150,20 @@ export function Avatar({ nome, url, pequeno }: { readonly nome: string; readonly
       {segura ? <img src={segura} alt="" loading="lazy" referrerPolicy="no-referrer" /> : letras}
     </span>
   );
+}
+
+/** Nome do autor, como link para o perfil quando existe @. */
+export function NomeDoAutor({
+  autor,
+  forte,
+}: {
+  readonly autor: { readonly apelido: string | null; readonly handle: string | null };
+  readonly forte?: boolean;
+}) {
+  const nome = nomeDoAutor(autor);
+  if (!nome) return null;
+  const conteudo = <span className={forte ? 'forum-autor__nome' : undefined}>{nome}</span>;
+  return autor.handle ? <Link to={enderecoDoPerfil(autor.handle)}>{conteudo}</Link> : conteudo;
 }
 
 export function Tempo({ iso, agora }: { readonly iso: string; readonly agora: number }) {

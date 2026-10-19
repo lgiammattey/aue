@@ -55,11 +55,13 @@ describe('/c/:slug/t/:id: a conversa', () => {
     expect(screen.getAllByRole('link', { name: 'Ana Souza' })[0].getAttribute('href')).toBe('/u/ana');
   });
 
-  it('sem nenhuma escrita: nada de composer, Responder, Editar, Apagar, Denunciar nem Arrotar para responder', async () => {
+  it('visitante: nada de composer, Editar, Apagar, Denunciar, Enviar nem Arrotar para responder; vê o convite', async () => {
     abrir(forumDo(topico({ souAutor: true }), vi.fn(async () => paginaR([resposta({ id: 'r1', souAutor: true })]))));
     await screen.findByText('texto r1');
     expect(screen.queryByRole('textbox')).toBeNull();
-    expect(screen.queryByRole('button', { name: /responder|enviar|editar|apagar|denunciar|arrotar|participar/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /enviar|editar|apagar|denunciar|arrotar|participar|responder a/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /ações/i })).toBeNull();
+    expect(screen.getByText('Quer responder? Crie sua conta ou entre. Ler e ouvir continua liberado.')).toBeDefined();
   });
 
   it('id que não é tópico: "não está disponível" com volta para a comunidade, e não chama as respostas', async () => {

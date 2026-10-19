@@ -85,8 +85,16 @@ export function criarAmbienteDoForumWeb(): AmbienteDoForum {
 
     centralizarCampo(idDoCampo) {
       try {
-        const centralizar = () =>
-          document.getElementById(idDoCampo)?.scrollIntoView({ block: 'center', behavior: 'instant' });
+        const centralizar = () => {
+          const campo = document.getElementById(idDoCampo);
+          if (!campo) return;
+          // Campo já à vista (acima do teclado): não rola. Rolar por cima de um toque em andamento faz a página
+          // sair de baixo do dedo e o toque cair em outro lugar.
+          const altura = window.visualViewport?.height ?? window.innerHeight;
+          const r = campo.getBoundingClientRect();
+          if (r.top >= 0 && r.bottom <= altura) return;
+          campo.scrollIntoView({ block: 'center', behavior: 'instant' });
+        };
         const vv = window.visualViewport;
         if (!vv) {
           centralizar();

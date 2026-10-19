@@ -940,6 +940,12 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   font-size: 0.9375rem;
   line-height: 1.45;
 }
+/* Na área do composer a faixa precisa do mesmo respiro lateral (o padding da área não a engole). */
+.forum-faixa-fechado.forum-compositor-area {
+  padding: 12px 16px;
+  margin: 16px var(--gut) 0;
+  border-top: 0;
+}
 
 .forum-avatar {
   flex: none;
@@ -1150,6 +1156,7 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   margin-top: 0;
 }
 .forum-acoes__participa {
+  column-gap: 4px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1441,8 +1448,214 @@ html:has(.forum-dialogo[open]) {
 }
 
 /* Com o dialog aberto, o verde da tela é o do formulário: o "Novo tópico" de trás (só escurecido pelo fundo) perde o verde. */
-.forum-shell:has(.forum-dialogo[open]) .forum-cabecalho .forum-botao--acento {
+.forum-shell:has(.forum-dialogo[open]) .forum-botao--acento:not(.forum-dialogo .forum-botao--acento) {
   background: transparent;
   color: var(--fg);
   box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* ============================================================================
+   Responder, editar, apagar e denunciar (cartão 0017, pedaço 2c-2).
+   ========================================================================= */
+
+.forum-botao--escuro {
+  background: var(--fg);
+  color: var(--bg);
+}
+.forum-botao--escuro:hover:not([aria-disabled='true']) {
+  background: color-mix(in srgb, var(--fg) 88%, var(--bg));
+}
+
+.forum-topo__miolo {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+}
+.forum-topo__acoes {
+  display: flex;
+  align-items: center;
+}
+
+/* Menu de ações (APG). Sem sombra: borda forte. */
+.forum-menu {
+  position: relative;
+}
+.forum-menu__botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.forum-menu__botao:hover,
+.forum-menu__botao[aria-expanded='true'] {
+  background: var(--fg-soft);
+}
+.forum-menu__fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  cursor: pointer;
+}
+.forum-menu__lista {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 30;
+  min-width: 200px;
+  padding: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--bg);
+  list-style: none;
+}
+.forum-menu__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.forum-menu__item:hover,
+.forum-menu__item:focus-visible {
+  background: var(--fg-soft-forte);
+}
+
+.forum-topico__responder {
+  margin-top: 16px;
+}
+
+.forum-resposta__acoes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+.forum-resposta__responder {
+  min-height: 44px;
+  font-size: 0.8125rem;
+  padding: 0 8px 0 0;
+}
+
+/* Composer (spec 9.5): no fim da conversa, nunca fixo na tela. */
+.forum-compositor-area,
+.forum-faixa-convite {
+  margin: 0 var(--gut);
+  padding: 16px 0 8px;
+  border-top: 1px solid var(--border);
+}
+.forum-faixa-convite {
+  outline: none;
+  padding-bottom: 16px;
+}
+.forum-faixa-convite p {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.forum-faixa-convite .forum-botao,
+.forum-faixa-convite .forum-convite {
+  margin-top: 12px;
+}
+.forum-faixa-convite .forum-convite .forum-botao {
+  margin-top: 0;
+}
+.forum-compositor {
+  margin-top: 8px;
+}
+.forum-compositor__referencia {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.forum-compositor__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.forum-form__alerta-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.forum-conversa__aviso {
+  margin: 12px var(--gut) 0;
+}
+.forum-resposta .forum-compositor {
+  margin: 8px 0 8px;
+}
+
+/* Dialogs pequenos: confirmar apagar e denunciar. */
+.forum-dialogo--pequeno {
+  max-width: 440px;
+}
+.forum-confirmacao {
+  padding: 24px;
+}
+.forum-confirmacao__titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.forum-confirmacao__corpo {
+  margin-top: 8px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.forum-confirmacao__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+@media (max-width: 699px) {
+  .forum-dialogo--pequeno {
+    width: calc(100% - 32px);
+  }
+}
+
+/* Menu da resposta: abre para a direita do botão (dentro da tela, em qualquer nível e em 320px) e alinha o ícone com o texto. */
+.forum-resposta__acoes .forum-menu__lista {
+  right: auto;
+  left: 0;
+  min-width: 136px;
+}
+.forum-resposta__acoes > .forum-menu:first-child .forum-menu__botao {
+  margin-left: -12px;
+}
+.forum-compositor__aviso {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* Celular: o menu é uma folha acima da barra inferior (dentro da tela em qualquer nível, sem ficar sob a barra). */
+@media (max-width: 699px) {
+  .forum-menu__lista,
+  .forum-resposta__acoes .forum-menu__lista {
+    position: fixed;
+    top: auto;
+    right: 16px;
+    left: 16px;
+    bottom: calc(56px + env(safe-area-inset-bottom) + 8px);
+    min-width: 0;
+    padding: 8px;
+  }
 }

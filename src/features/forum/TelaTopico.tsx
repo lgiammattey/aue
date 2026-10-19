@@ -1,41 +1,37 @@
-import { useEffect, useRef } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { formatarNota } from '../../shared/formato/nota';
-import { normalizarQuebras, nomeDoAutor, textoDeRespostas } from '../../nucleo/forum/apresentacao';
-import type { CursorDoForum, RespostaDoForum, TopicoDoForum } from '../../portas/forum';
+import { normalizarQuebras, nomeDoAutor } from '../../nucleo/forum/apresentacao';
+import type { ComunidadeDoForum, TopicoDoForum } from '../../portas/forum';
+import { BotaoParticipar } from './AcoesDaComunidade';
+import { Respostas, type ApiDasRespostas } from './ArvoreDeRespostas';
 import {
   Avatar,
   BotaoComoLink,
-  BotaoVerMais,
   EstadoDeErro,
   EstadoDeMolde,
   Esqueleto,
   Marcadores,
+  NomeDoAutor,
   Tempo,
 } from './componentes';
-import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
 import { useDependenciasDoForum } from './contexto';
-import { useLeitura, useListaPaginada, useOnline } from './hooks';
-import { montarArvoreDeRespostas, type NoDeResposta } from '../../nucleo/forum/apresentacao';
+import { DialogoDeConfirmacao } from './DialogoDeConfirmacao';
+import { DialogoDeDenuncia } from './DialogoDeDenuncia';
+import { useTituloDoDocumento } from './encaixes';
+import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
+import { FormularioDeTopico } from './FormularioDeTopico';
+import { esquecerListasVistas, useLeitura, useOnline } from './hooks';
+import { MenuDeAcoes, type ItemDoMenu } from './MenuDeAcoes';
+import { usePapel, useSouMembro, SLUG_DO_BONDE_GERAL } from './papel';
 import { AsideSobreAComunidade } from './RegrasDaCasa';
 import { NoAside, TopoDaTela } from './ShellDoForum';
-import { useAnunciar, useTituloDoDocumento } from './encaixes';
-
-const TAMANHO_DA_PAGINA_DE_RESPOSTAS = 100;
-
-const enderecoDoPerfil = (handle: string) => `/u/${encodeURIComponent(handle)}`;
+import { useToast } from './toast';
+import { useParticiparDaComunidade } from './useParticiparDaComunidade';
 
 function formatarDuracao(segundos: number): string {
   const total = Math.max(0, Math.round(segundos));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
-}
-
-/** Nome do autor, como link para o perfil quando existe @. */
-function NomeDoAutor({ autor, forte }: { readonly autor: { apelido: string | null; handle: string | null }; readonly forte?: boolean }) {
-  const nome = nomeDoAutor(autor);
-  if (!nome) return null;
-  const conteudo = <span className={forte ? 'forum-autor__nome' : undefined}>{nome}</span>;
-  return autor.handle ? <Link to={enderecoDoPerfil(autor.handle)}>{conteudo}</Link> : conteudo;
 }
 
 // ---------------------------------------------------------------------------
@@ -77,7 +73,16 @@ function BlocoDeAudio({ topico }: { readonly topico: TopicoDoForum }) {
 // Cabeçalho do tópico
 // ---------------------------------------------------------------------------
 
-function CabecalhoDoTopico({ topico, agora }: { readonly topico: TopicoDoForum; readonly agora: number }) {
+function CabecalhoDoTopico({
+  topico,
+  agora,
+  aoResponder,
+}: {
+  readonly topico: TopicoDoForum;
+  readonly agora: number;
+  /** "Responder": leva ao composer (ou ao convite). Sem ele, o botão não existe. */
+  readonly aoResponder?: () => void;
+}) {
   const h1 = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     h1.current?.focus({ preventScroll: true });
@@ -109,6 +114,11 @@ function CabecalhoDoTopico({ topico, agora }: { readonly topico: TopicoDoForum; 
       )}
       {corpo.trim() !== '' && <p className="forum-corpo">{corpo}</p>}
       <BlocoDeAudio topico={topico} />
+      {aoResponder && (
+        <button type="button" className="forum-botao forum-botao--contorno forum-topico__responder" onClick={aoResponder}>
+          Responder
+        </button>
+      )}
       {fechado && (
         <p className="forum-faixa-fechado">
           Este tópico está fechado. Dá pra ler tudo, mas não aceita novas respostas.
@@ -119,128 +129,165 @@ function CabecalhoDoTopico({ topico, agora }: { readonly topico: TopicoDoForum; 
 }
 
 // ---------------------------------------------------------------------------
-// Respostas
+// Aside do desktop: quem é a comunidade (e a ação da pessoa nela)
 // ---------------------------------------------------------------------------
 
-function ItemDeResposta({
-  no,
-  porId,
-  agora,
-  idParaFocar,
-}: {
-  readonly no: NoDeResposta<RespostaDoForum>;
-  readonly porId: ReadonlyMap<string, RespostaDoForum>;
-  readonly agora: number;
-  readonly idParaFocar: string | null;
-}) {
-  const r = no.resposta;
-  const li = useRef<HTMLLIElement>(null);
-  useEffect(() => {
-    if (idParaFocar === r.id) li.current?.focus();
-  }, [idParaFocar, r.id]);
-
-  const casca = r.status !== 'visivel' || r.corpo === null;
-  const pai = r.paiId ? porId.get(r.paiId) : undefined;
-  const handleDoPai = pai?.autor?.handle ?? null;
-  const respondeNivelDois = r.nivel === 2 && pai?.nivel === 2 && handleDoPai;
-
-  return (
-    <li className="forum-resposta" data-nivel={r.nivel} ref={li} tabIndex={-1}>
-      {casca ? (
-        <p className="forum-resposta__casca">
-          {r.status === 'oculto' ? 'Resposta oculta.' : r.status === 'removido' ? 'Resposta removida.' : 'Resposta indisponível.'}
-        </p>
-      ) : (
-        <>
-          <p className="forum-resposta__autoria">
-            {r.autor && <Avatar nome={nomeDoAutor(r.autor)} url={r.autor.avatarUrl} pequeno={r.nivel === 2} />}
-            {r.autor && <NomeDoAutor autor={r.autor} forte />}
-            {r.autor?.apelido && r.autor.handle && <span className="forum-muted">@{r.autor.handle}</span>}
-            <Tempo iso={r.criadoEm} agora={agora} />
-            {r.editadoEm && <span className="forum-muted">editado</span>}
-          </p>
-          {respondeNivelDois && <p className="forum-resposta__referencia">Respondendo a @{handleDoPai}</p>}
-          <p className="forum-resposta__corpo">{normalizarQuebras(r.corpo ?? '')}</p>
-        </>
-      )}
-      {no.filhas.length > 0 && (
-        <ul className="forum-respostas forum-respostas--filhas">
-          {no.filhas.map((filha) => (
-            <ItemDeResposta key={filha.resposta.id} no={filha} porId={porId} agora={agora} idParaFocar={idParaFocar} />
-          ))}
-        </ul>
-      )}
-    </li>
-  );
-}
-
-function Respostas({ topico, agora }: { readonly topico: TopicoDoForum; readonly agora: number }) {
-  const { forum, ambiente } = useDependenciasDoForum();
-  const online = useOnline(ambiente);
-  const anunciar = useAnunciar();
-  const id = topico.id;
-
-  const lista = useListaPaginada<RespostaDoForum, CursorDoForum>({
-    chave: id,
-    substantivo: 'respostas',
-    carregarPagina: (cursor) => forum.listarRespostasDoTopico(id, { limite: TAMANHO_DA_PAGINA_DE_RESPOSTAS, cursor }),
-  });
-  const anuncio = lista.anuncio;
-  useEffect(() => {
-    if (anuncio) anunciar(anuncio.texto);
-  }, [anuncio, anunciar]);
-
-  let corpo;
-  if (lista.fase === 'carregando') {
-    corpo = <Esqueleto forma="lista" anuncio="Carregando respostas" />;
-  } else if (lista.fase === 'erro') {
-    corpo = <EstadoDeErro titulo="Deu ruim pra carregar as respostas." offline={!online} aoTentar={lista.recarregar} />;
-  } else if (lista.itens.length === 0) {
-    corpo = <p className="forum-aviso">Ninguém respondeu ainda.</p>;
-  } else {
-    const porId = new Map(lista.itens.map((r) => [r.id, r]));
-    corpo = (
-      <>
-        <ul className="forum-respostas">
-          {montarArvoreDeRespostas(lista.itens).map((no) => (
-            <ItemDeResposta key={no.resposta.id} no={no} porId={porId} agora={agora} idParaFocar={lista.idParaFocar} />
-          ))}
-        </ul>
-        {lista.proximo !== null && (
-          <BotaoVerMais
-            rotulo="Ver mais respostas"
-            carregando={lista.carregandoMais}
-            falhou={lista.falhouAoCarregarMais}
-            aoClicar={lista.verMais}
-          />
-        )}
-      </>
+function AcaoDoAside({ comunidade, souMembro, aoMudar }: { readonly comunidade: { slug: string; nome: string }; readonly souMembro: boolean; readonly aoMudar: () => void }) {
+  const papel = usePapel();
+  const participar = useParticiparDaComunidade(comunidade, aoMudar);
+  if (papel.tipo !== 'conta') return null;
+  if (!souMembro) {
+    return (
+      <div className="forum-acoes">
+        <BotaoParticipar pendente={participar.pendente === 'entrar'} aoClicar={() => void participar.entrar()} acento={false} />
+        {participar.erro && <p className="forum-campo__erro" role="alert">{participar.erro}</p>}
+      </div>
     );
   }
-
   return (
-    <section className="forum-conversa" aria-labelledby="forum-respostas-titulo">
-      <div className="forum-conversa__cabeca">
-        <h2 id="forum-respostas-titulo" className="forum-secao">
-          {textoDeRespostas(topico.respostasTotal)}
-        </h2>
-        <span className="forum-muted">Mais antigas primeiro</span>
-      </div>
-      {corpo}
-    </section>
+    <p className="forum-meta forum-meta--forte forum-acoes__participa">
+      <span>Você participa</span>
+      {comunidade.slug !== SLUG_DO_BONDE_GERAL && (
+        <>
+          <span aria-hidden="true"> · </span>
+          <button type="button" className="forum-botao-texto" onClick={() => void participar.sair()}>
+            Sair da comunidade
+          </button>
+        </>
+      )}
+    </p>
   );
 }
 
-/** Aside do desktop: quem é a comunidade. A falha da leitura só tira a descrição. */
-function AsideDoTopico({ topico }: { readonly topico: TopicoDoForum }) {
-  const { forum } = useDependenciasDoForum();
+// ---------------------------------------------------------------------------
+// A conversa (tópico já lido)
+// ---------------------------------------------------------------------------
+
+type DialogoDoTopico = 'editar' | 'apagar' | 'denunciar' | null;
+
+function ConversaDoTopico({ topico, atualizar }: { readonly topico: TopicoDoForum; readonly atualizar: () => Promise<boolean> }) {
+  const { forum, ambiente } = useDependenciasDoForum();
+  const papel = usePapel();
+  const navegar = useNavigate();
+  const local = useLocation();
+  const toast = useToast();
   const slug = topico.comunidade.slug;
-  const { estado } = useLeitura(() => forum.obterComunidadeDoForum(slug), `aside:${slug}`);
-  const comunidade = estado.fase === 'pronto' ? estado.valor : null;
+  const { estado: leituraDaComunidade, atualizar: atualizarComunidade } = useLeitura(
+    () => forum.obterComunidadeDoForum(slug),
+    `aside:${slug}`,
+  );
+  const comunidadeLida: ComunidadeDoForum | null = leituraDaComunidade.fase === 'pronto' ? leituraDaComunidade.valor : null;
+  const souMembro = useSouMembro(slug, comunidadeLida?.souMembro ?? false);
+  const aberto = topico.status === 'aberto';
+  const ehConta = papel.tipo === 'conta';
+  const agora = ambiente.agora();
+  const respostas = useRef<ApiDasRespostas>(null);
+  const botaoDoMenu = useRef<HTMLButtonElement>(null);
+  const [dialogo, setDialogo] = useState<DialogoDoTopico>(null);
+  const caminho = local.pathname + local.search;
+
+  const aoMudarParticipacao = useCallback(() => {
+    void atualizarComunidade();
+  }, [atualizarComunidade]);
+  const aoMudarConversa = useCallback(() => {
+    void atualizar();
+  }, [atualizar]);
+
+  const itens: ItemDoMenu[] = [];
+  if (ehConta) {
+    if (topico.souAutor && aberto) itens.push({ id: 'editar', rotulo: 'Editar', aoEscolher: () => setDialogo('editar') });
+    if (topico.souAutor) itens.push({ id: 'apagar', rotulo: 'Apagar', aoEscolher: () => setDialogo('apagar') });
+    if (!topico.souAutor) itens.push({ id: 'denunciar', rotulo: 'Denunciar', aoEscolher: () => setDialogo('denunciar') });
+  }
+  const fecharDialogo = () => setDialogo(null);
+  const devolverFoco = () => botaoDoMenu.current?.focus();
+  const papelSabido = papel.tipo === 'conta' || papel.tipo === 'visitante';
+
   return (
-    <NoAside>
-      <AsideSobreAComunidade referencia={topico.comunidade} comunidade={comunidade} />
-    </NoAside>
+    <>
+      <TopoDaTela
+        titulo={topico.comunidade.nome}
+        voltar={{ para: enderecoDaComunidade(slug), rotulo: topico.comunidade.nome }}
+        acoes={<MenuDeAcoes rotulo="Ações do tópico" itens={itens} botaoRef={botaoDoMenu} />}
+      />
+      <NoAside>
+        <AsideSobreAComunidade
+          referencia={topico.comunidade}
+          comunidade={comunidadeLida}
+          acao={<AcaoDoAside comunidade={topico.comunidade} souMembro={souMembro} aoMudar={aoMudarParticipacao} />}
+        />
+      </NoAside>
+      <CabecalhoDoTopico
+        topico={topico}
+        agora={agora}
+        aoResponder={aberto && papelSabido ? () => void respostas.current?.irParaOCompositor() : undefined}
+      />
+      <Respostas
+        topico={topico}
+        agora={agora}
+        comunidade={topico.comunidade}
+        souMembro={souMembro}
+        aoMudarConversa={aoMudarConversa}
+        api={respostas}
+      />
+
+      {dialogo === 'editar' && (
+        <FormularioDeTopico
+          modo="editar"
+          comunidade={topico.comunidade}
+          inicial={{ titulo: topico.titulo, corpo: topico.corpo }}
+          enviar={(texto) =>
+            forum.editarTopico({
+              topicoId: topico.id,
+              ...(texto.titulo !== topico.titulo.trim() ? { titulo: texto.titulo } : {}),
+              ...(texto.corpo !== topico.corpo.trim() ? { corpo: texto.corpo } : {}),
+            })
+          }
+          aoSucesso={() => {
+            setDialogo(null);
+            esquecerListasVistas(`c:${slug}|`);
+            esquecerListasVistas('explorar|');
+            toast('Tópico atualizado.');
+            void atualizar();
+          }}
+          aoCancelar={fecharDialogo}
+          aoFechar={devolverFoco}
+          caminhoDeVolta={caminho}
+          aoEstadoDoTopicoMudar={aoMudarConversa}
+        />
+      )}
+      {dialogo === 'apagar' && (
+        <DialogoDeConfirmacao
+          titulo="Apagar este tópico?"
+          corpo="Ele sai da comunidade e as respostas deixam de aparecer. Não dá pra desfazer."
+          rotuloDeConfirmar="Apagar tópico"
+          rotuloEmAndamento="Apagando…"
+          confirmar={() => forum.apagarTopico(topico.id)}
+          aoSucesso={() => {
+            esquecerListasVistas(`c:${slug}|`);
+            esquecerListasVistas('explorar|');
+            toast('Tópico apagado.');
+            navegar(enderecoDaComunidade(slug), { replace: true });
+          }}
+          aoCancelar={fecharDialogo}
+          aoFechar={devolverFoco}
+          caminhoDeVolta={caminho}
+        />
+      )}
+      {dialogo === 'denunciar' && (
+        <DialogoDeDenuncia
+          alvo="tópico"
+          denunciar={(motivo) => forum.denunciarTopico(topico.id, motivo)}
+          aoSucesso={() => {
+            setDialogo(null);
+            toast('Denúncia enviada. Valeu.');
+          }}
+          aoCancelar={fecharDialogo}
+          aoFechar={devolverFoco}
+          caminhoDeVolta={caminho}
+        />
+      )}
+    </>
   );
 }
 
@@ -258,7 +305,7 @@ export function TelaTopico() {
   const { slug = '', id = '' } = useParams<{ slug: string; id: string }>();
   const { forum, ambiente } = useDependenciasDoForum();
   const online = useOnline(ambiente);
-  const { estado, recarregar } = useLeitura(() => forum.obterTopico(id), `topico:${id}`);
+  const { estado, recarregar, atualizar } = useLeitura(() => forum.obterTopico(id), `topico:${id}`);
 
   const topico = estado.fase === 'pronto' ? estado.valor : null;
   useTituloDoDocumento(topico ? `${topico.titulo} · ${topico.comunidade.nome}` : 'Conversa');
@@ -298,16 +345,5 @@ export function TelaTopico() {
     return <Navigate to={enderecoDoTopico(topico.comunidade.slug, topico.id)} replace />;
   }
 
-  const agora = ambiente.agora();
-  return (
-    <>
-      <TopoDaTela
-        titulo={topico.comunidade.nome}
-        voltar={{ para: enderecoDaComunidade(topico.comunidade.slug), rotulo: topico.comunidade.nome }}
-      />
-      <AsideDoTopico topico={topico} />
-      <CabecalhoDoTopico topico={topico} agora={agora} />
-      <Respostas topico={topico} agora={agora} />
-    </>
-  );
+  return <ConversaDoTopico key={topico.id} topico={topico} atualizar={atualizar} />;
 }

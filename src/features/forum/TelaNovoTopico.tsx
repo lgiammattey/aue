@@ -1,27 +1,19 @@
-import { useCallback, useId, useRef, useState, type FormEvent, type RefObject } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { enderecoDoLoginComVolta } from '../../nucleo/comunidade/caminhoDeVolta';
-import { LIMITE_TEXTO_TOPICO, LIMITE_TITULO_TOPICO } from '../../nucleo/comunidade/limites';
-import { erroDeEnvio, erroDoCampo, TEXTO_SEM_INTERNET, type ErroDeEnvio } from '../../nucleo/forum/escrita';
+import { useCallback, useState, type RefObject } from 'react';
+import { Navigate, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import {
   apagarRascunho,
   guardarRascunhoDeTopico,
   lerRascunhoDeTopico,
 } from '../../nucleo/forum/rascunho';
 import { chaveDoRascunhoDeTopico } from '../../portas/armazenamento';
-import type { ComunidadeDoForum } from '../../portas/forum';
-import { BotaoParticipar } from './AcoesDaComunidade';
-import { CampoComContador } from './CampoComContador';
-import { Monograma } from './componentes';
+import type { ComunidadeDoForum, TopicoCriado } from '../../portas/forum';
 import { useDependenciasDoForum } from './contexto';
-import { DialogoDoForum } from './DialogoDoForum';
 import { useAnunciar } from './encaixes';
 import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
-import { esquecerListasVistas, useOnline } from './hooks';
+import { FormularioDeTopico, type TextoDoTopico } from './FormularioDeTopico';
+import { esquecerListasVistas } from './hooks';
 import { usePapel } from './papel';
 import { useToast } from './toast';
-import { useEnvio } from './useEnvio';
-import { useParticiparDaComunidade } from './useParticiparDaComunidade';
 
 /** O que `TelaComunidadeDoForum` entrega às rotas filhas (`<Outlet context>`). */
 export interface ContextoDaComunidade {
@@ -53,35 +45,19 @@ export function TelaNovoTopico() {
   if (papel.tipo !== 'conta' || !contexto.souMembro) {
     return <Navigate to={enderecoDaComunidade(contexto.comunidade.slug)} replace />;
   }
-  return <FormularioDeNovoTopico key={contexto.comunidade.slug} contexto={contexto} contaId={papel.contaId} />;
+  return <NovoTopico key={contexto.comunidade.slug} contexto={contexto} contaId={papel.contaId} />;
 }
 
-function FormularioDeNovoTopico({ contexto, contaId }: { readonly contexto: ContextoDaComunidade; readonly contaId: string }) {
+function NovoTopico({ contexto, contaId }: { readonly contexto: ContextoDaComunidade; readonly contaId: string }) {
   const { comunidade, gatilho } = contexto;
-  const { forum, ambiente, armazenamento } = useDependenciasDoForum();
+  const { forum, armazenamento } = useDependenciasDoForum();
   const navegar = useNavigate();
   const local = useLocation();
   const anunciar = useAnunciar();
   const toast = useToast();
-  const online = useOnline(ambiente);
-  const { enviando, enviar } = useEnvio();
-  const participar = useParticiparDaComunidade(comunidade, contexto.atualizarComunidade);
-
   const slug = comunidade.slug;
   const chave = chaveDoRascunhoDeTopico(contaId, slug);
-  const idBase = useId();
-  const idDoTitulo = `${idBase}-titulo`;
-  const idDoCorpo = `${idBase}-corpo`;
-  const idDoDialogo = `${idBase}-h`;
-
-  const [rascunho, setRascunho] = useState(() => lerRascunhoDeTopico(armazenamento, chave) ?? { titulo: '', corpo: '' });
-  const [errosDoCampo, setErrosDoCampo] = useState<{ titulo: string | null; corpo: string | null }>({
-    titulo: null,
-    corpo: null,
-  });
-  const [erroDoServidor, setErroDoServidor] = useState<ErroDeEnvio | null>(null);
-  const tituloRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
-  const corpoRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const [inicial] = useState(() => lerRascunhoDeTopico(armazenamento, chave) ?? { titulo: '', corpo: '' });
 
   // Quem chegou pela lista volta pelo histórico; quem caiu aqui por URL direta vai para a comunidade.
   const veioDaLista = (local.state as { daLista?: boolean } | null)?.daLista === true;
@@ -96,187 +72,35 @@ function FormularioDeNovoTopico({ contexto, contaId }: { readonly contexto: Cont
     else contexto.focarTitulo();
   }, [gatilho, contexto]);
 
-  const mudar = (parcial: Partial<{ titulo: string; corpo: string }>) => {
-    const novo = { ...rascunho, ...parcial };
-    setRascunho(novo);
-    guardarRascunhoDeTopico(armazenamento, chave, novo);
-    if (parcial.titulo !== undefined && errosDoCampo.titulo) setErrosDoCampo((e) => ({ ...e, titulo: null }));
-    if (parcial.corpo !== undefined && errosDoCampo.corpo) setErrosDoCampo((e) => ({ ...e, corpo: null }));
-    if (erroDoServidor && erroDoServidor.acao !== 'participar') setErroDoServidor(null);
-  };
-
-  const descartar = () => {
-    apagarRascunho(armazenamento, chave);
-    setRascunho({ titulo: '', corpo: '' });
-    setErrosDoCampo({ titulo: null, corpo: null });
-    setErroDoServidor(null);
-    tituloRef.current?.focus();
-  };
-
-  async function aoEnviar(e: FormEvent) {
-    e.preventDefault();
-    if (enviando) return;
-    const titulo = erroDoCampo(rascunho.titulo, LIMITE_TITULO_TOPICO, 'Falta o título.');
-    const corpo = erroDoCampo(rascunho.corpo, LIMITE_TEXTO_TOPICO, 'Falta a mensagem.');
-    setErrosDoCampo({ titulo, corpo });
-    if (titulo) return void tituloRef.current?.focus();
-    if (corpo) return void corpoRef.current?.focus();
-    if (!online) {
-      setErroDoServidor({ texto: TEXTO_SEM_INTERNET, onde: 'geral', acao: null, ambiguo: false });
-      return;
-    }
-    setErroDoServidor(null);
-
-    const r = await enviar(
-      () => forum.criarTopico({ comunidadeSlug: slug, titulo: rascunho.titulo.trim(), corpo: rascunho.corpo.trim() }),
-      { travarSeOk: true },
-    );
-    if (r === null) return;
-    if (r.ok) {
-      apagarRascunho(armazenamento, chave);
-      // A volta do navegador não pode mostrar a lista velha, sem este tópico.
-      esquecerListasVistas(`c:${slug}|`);
-      esquecerListasVistas('explorar|');
-      toast('Tópico criado.');
-      navegar(enderecoDoTopico(slug, r.valor.id), { replace: true });
-      return;
-    }
-    const erro = erroDeEnvio(r.motivo, 'topico');
-    setErroDoServidor(erro);
-    if (erro.onde === 'titulo') tituloRef.current?.focus();
-    else if (erro.onde === 'corpo') corpoRef.current?.focus();
-  }
-
-  const conferir = () => {
+  const conferir = useCallback(() => {
     esquecerListasVistas(`c:${slug}|`);
     anunciar('Conferindo os tópicos da comunidade.');
     fechar();
     contexto.conferirLista();
-  };
-
-  const temTexto = rascunho.titulo !== '' || rascunho.corpo !== '';
-  const erroGeral = erroDoServidor && erroDoServidor.onde === 'geral' ? erroDoServidor : null;
-  const erroNoTitulo = errosDoCampo.titulo ?? (erroDoServidor?.onde === 'titulo' ? erroDoServidor.texto : null);
-  const erroNoCorpo = errosDoCampo.corpo ?? (erroDoServidor?.onde === 'corpo' ? erroDoServidor.texto : null);
-  const rotuloDoEnvio = enviando ? 'Enviando…' : 'Criar tópico';
-  const volta = local.pathname + local.search;
+  }, [slug, anunciar, fechar, contexto]);
 
   return (
-    <DialogoDoForum
-      idDoTitulo={idDoDialogo}
-      classe="forum-dialogo--formulario"
+    <FormularioDeTopico
+      modo="criar"
+      comunidade={comunidade}
+      inicial={inicial}
+      aoMudarTexto={(texto: TextoDoTopico) => guardarRascunhoDeTopico(armazenamento, chave, texto)}
+      aoDescartar={() => apagarRascunho(armazenamento, chave)}
+      enviar={(texto) => forum.criarTopico({ comunidadeSlug: slug, titulo: texto.titulo, corpo: texto.corpo })}
+      aoSucesso={(valor) => {
+        const criado = valor as TopicoCriado;
+        apagarRascunho(armazenamento, chave);
+        // A volta do navegador não pode mostrar a lista velha, sem este tópico.
+        esquecerListasVistas(`c:${slug}|`);
+        esquecerListasVistas('explorar|');
+        toast('Tópico criado.');
+        navegar(enderecoDoTopico(slug, criado.id), { replace: true });
+      }}
       aoCancelar={fechar}
-      bloqueado={enviando}
-      focoInicial={tituloRef}
       aoFechar={devolverFoco}
-    >
-      <form className="forum-form" onSubmit={aoEnviar} noValidate>
-        <div className="forum-form__cabecalho">
-          <button type="button" className="forum-botao-texto forum-form__so-celular" onClick={fechar} disabled={enviando}>
-            Cancelar
-          </button>
-          <h2 id={idDoDialogo} className="forum-form__titulo">
-            Novo tópico
-          </h2>
-          <button
-            type="submit"
-            className="forum-botao forum-botao--acento forum-botao--pequeno forum-form__so-celular"
-            aria-busy={enviando || undefined}
-          >
-            {rotuloDoEnvio}
-          </button>
-        </div>
-
-        <div className="forum-form__corpo">
-          <p className="forum-form__em">
-            <Monograma nome={comunidade.nome} tamanho="mini" />
-            <span>Em {comunidade.nome}</span>
-          </p>
-
-          {erroGeral && (
-            <div className="forum-form__alerta" role="alert">
-              <p>{erroGeral.texto}</p>
-              {erroGeral.acao === 'participar' && (
-                <BotaoParticipar
-                  pendente={participar.pendente === 'entrar'}
-                  aoClicar={() => {
-                    void participar.entrar().then((ok) => {
-                      if (!ok) return;
-                      setErroDoServidor(null);
-                      anunciar(`Você entrou em ${comunidade.nome}. Pode enviar de novo.`);
-                    });
-                  }}
-                  acento={false}
-                />
-              )}
-              {erroGeral.acao === 'entrar' && (
-                <Link className="forum-botao forum-botao--contorno" to={enderecoDoLoginComVolta(volta, 'entrar')}>
-                  Entrar
-                </Link>
-              )}
-              {erroGeral.acao === 'verComunidades' && (
-                <Link className="forum-botao forum-botao--contorno" to="/comunidades">
-                  Ver comunidades
-                </Link>
-              )}
-              {erroGeral.acao === 'conferir' && (
-                <button type="button" className="forum-botao forum-botao--contorno" onClick={conferir}>
-                  Conferir os tópicos
-                </button>
-              )}
-              {participar.erro && <p className="forum-campo__erro">{participar.erro}</p>}
-            </div>
-          )}
-
-          <CampoComContador
-            id={idDoTitulo}
-            rotulo="Título"
-            tipo="linha"
-            valor={rascunho.titulo}
-            aoMudar={(titulo) => mudar({ titulo })}
-            limite={LIMITE_TITULO_TOPICO}
-            placeholder="Sobre o que é a conversa?"
-            enterKeyHint="next"
-            aoEnter={() => corpoRef.current?.focus()}
-            erro={erroNoTitulo}
-            somenteLeitura={enviando}
-            campoRef={tituloRef}
-          />
-          <CampoComContador
-            id={idDoCorpo}
-            rotulo="Mensagem"
-            tipo="area"
-            linhas={6}
-            valor={rascunho.corpo}
-            aoMudar={(corpo) => mudar({ corpo })}
-            limite={LIMITE_TEXTO_TOPICO}
-            placeholder="Conta o que rolou ou o que você quer perguntar."
-            erro={erroNoCorpo}
-            somenteLeitura={enviando}
-            campoRef={corpoRef}
-            aoFocar={() => ambiente.centralizarCampo(idDoCorpo)}
-          />
-
-          {temTexto && (
-            <button type="button" className="forum-botao-texto" onClick={descartar} disabled={enviando}>
-              Descartar rascunho
-            </button>
-          )}
-        </div>
-
-        <div className="forum-form__rodape forum-form__so-desktop">
-          <button type="button" className="forum-botao forum-botao--contorno" onClick={fechar} disabled={enviando}>
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="forum-botao forum-botao--acento"
-            aria-busy={enviando || undefined}
-          >
-            {rotuloDoEnvio}
-          </button>
-        </div>
-      </form>
-    </DialogoDoForum>
+      caminhoDeVolta={local.pathname + local.search}
+      aoConferir={conferir}
+      aoMudarParticipacao={contexto.atualizarComunidade}
+    />
   );
 }

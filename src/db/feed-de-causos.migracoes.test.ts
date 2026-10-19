@@ -113,9 +113,13 @@ describe('contrato da última definição do feed e do perfil', () => {
 
   it('LinhaDoFeed tem exatamente as colunas que a última listar_feed_de_causos devolve', () => {
     const { arquivo, colunas } = colunasDaUltimaDefinicao('listar_feed_de_causos');
-    expect(arquivo).toBe('20261018000010_rede_social_promovida.sql');
+    expect(arquivo).toBe('20261019000013_corrige_tipo_do_feed.sql');
     expect(camposDaInterface(adaptador, 'LinhaDoFeed').sort()).toEqual([...colunas].sort());
     expect(colunas.slice(-5)).toEqual(['minhas', 'caminho_do_audio_da_casa', 'comunidade_id', 'comunidade_slug', 'comunidade_nome']);
+  });
+
+  it('a última RPC converte o nome varchar da comunidade para o text declarado', () => {
+    expect(lerSql('20261019000013_corrige_tipo_do_feed.sql')).toContain('g.nome::text');
   });
 
   it('LinhaDePerfil tem exatamente as colunas que a última obter_perfil_publico devolve', () => {

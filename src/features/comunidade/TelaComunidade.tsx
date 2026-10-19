@@ -296,8 +296,11 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   // Responder
-  const handleResponder = async (causoId: string, texto: string, respostaAId?: string) => {
-    if (!contaLogada) return pedirPromocao();
+  const handleResponder = async (causoId: string, texto: string, respostaAId?: string): Promise<boolean> => {
+    if (!contaLogada) {
+      pedirPromocao();
+      return false;
+    }
     const nova = await adaptador.adicionarResposta(causoId, texto, perfil.nome, perfil.handle, respostaAId);
     if (nova) {
       setCausos((prev) =>
@@ -312,9 +315,10 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         }),
       );
       avisar('Resposta enviada.');
-    } else {
-      avisar('Não deu para enviar a resposta. Tenta de novo.');
+      return true;
     }
+    avisar('Não deu para enviar a resposta. Tenta de novo.');
+    return false;
   };
 
   // Denunciar

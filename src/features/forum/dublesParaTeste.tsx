@@ -127,6 +127,8 @@ export function comunidadeFalsa(slugs: readonly string[] = []): PortaDeComunidad
 export interface AmbienteDeTeste extends AmbienteDoForum {
   mudarConectividade(online: boolean): void;
   readonly rolagens: number[];
+  /** A pessoa rolou até `y`: atualiza a posição e dispara o evento de rolagem. */
+  rolarAte(y: number): void;
   titulo: string;
   tema: TemaDoForum | null;
   y: number;
@@ -135,6 +137,7 @@ export interface AmbienteDeTeste extends AmbienteDoForum {
 export function ambienteFalso(opcoes: { online?: boolean } = {}): AmbienteDeTeste {
   let online = opcoes.online ?? true;
   const ouvintes = new Set<(o: boolean) => void>();
+  const ouvintesDeRolagem = new Set<(y: number) => void>();
   const a: AmbienteDeTeste = {
     estaOnline: () => online,
     aoMudarConectividade(ouvinte) {
@@ -152,9 +155,18 @@ export function ambienteFalso(opcoes: { online?: boolean } = {}): AmbienteDeTest
     aplicarTema(tema) {
       a.tema = tema;
     },
-    rolagemAtual: () => a.y,
+    aoRolar(ouvinte) {
+      ouvintesDeRolagem.add(ouvinte);
+      return () => ouvintesDeRolagem.delete(ouvinte);
+    },
+    rolarAte(y) {
+      a.y = y;
+      ouvintesDeRolagem.forEach((o) => o(y));
+    },
     rolarPara(y) {
       a.rolagens.push(y);
+      a.y = y;
+      ouvintesDeRolagem.forEach((o) => o(y));
     },
     agora: () => AGORA,
     rolagens: [],

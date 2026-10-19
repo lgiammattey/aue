@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { useAnunciar } from './ShellDoForum';
+import { useAnunciar } from './encaixes';
 import type { ListaPaginada } from './hooks';
 import {
   BotaoVerMais,

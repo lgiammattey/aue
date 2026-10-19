@@ -48,8 +48,10 @@ export function criarAmbienteDoForumWeb(): AmbienteDoForum {
       }
     },
 
-    rolagemAtual() {
-      return window.scrollY;
+    aoRolar(ouvinte) {
+      const aoRolar = () => ouvinte(window.scrollY);
+      window.addEventListener('scroll', aoRolar, { passive: true });
+      return () => window.removeEventListener('scroll', aoRolar);
     },
 
     rolarPara(y) {

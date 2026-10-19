@@ -140,27 +140,27 @@ describe('áudio e nota: só o que o servidor devolveu', () => {
     expect(document.querySelector('.forum-selo-nota')).toBeNull();
   });
 
-  it('com áudio e nota: duração, selo com vírgula e botão de tocar desabilitado e marcado (URL do áudio ainda não decidida)', async () => {
+  it('com áudio e nota: duração e selo com vírgula, sem botão nem player (URL do áudio ainda não decidida, #250)', async () => {
     abrir(forumDo(topico({ audio: audio(87.4) })));
     await screen.findByRole('article');
-    const tocar = screen.getByRole('button', { name: 'Tocar arroto de Ana Souza' }) as HTMLButtonElement;
-    expect(tocar.disabled).toBe(true);
     expect(screen.getByText('0:07')).toBeDefined();
     expect(screen.getByText('87,4')).toBeDefined();
-    expect(screen.getByText('O player ainda não está disponível nesta tela.')).toBeDefined();
+    expect(screen.queryByRole('button', { name: /tocar/i })).toBeNull();
+    expect(screen.queryByText(/player/i)).toBeNull();
   });
 
-  it('áudio sem nota mostra o player sem selo, e nunca inventa nota', async () => {
+  it('áudio sem nota mostra só a duração, sem selo, e nunca inventa nota', async () => {
     abrir(forumDo(topico({ audio: audio(null) })));
     await screen.findByRole('article');
-    expect(screen.getByRole('button', { name: /Tocar arroto/ })).toBeDefined();
+    expect(screen.getByText('0:07')).toBeDefined();
+    expect(screen.queryByRole('button', { name: /Tocar arroto/ })).toBeNull();
     expect(document.querySelector('.forum-selo-nota')).toBeNull();
   });
 
   it('áudio da casa sem nota também não ganha selo', async () => {
     abrir(forumDo(topico({ audio: audio(null, { caminhoDoAudio: null, caminhoDoAudioDaCasa: 'casa/x.mp3', resultadoId: null }) })));
     await screen.findByRole('article');
-    expect(screen.getByRole('button', { name: /Tocar arroto/ })).toBeDefined();
+    expect(screen.queryByRole('button', { name: /Tocar arroto/ })).toBeNull();
     expect(document.querySelector('.forum-selo-nota')).toBeNull();
   });
 

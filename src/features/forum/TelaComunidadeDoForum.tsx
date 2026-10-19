@@ -19,7 +19,8 @@ import { metaDoCabecalho } from './metaDoCabecalho';
 import { ordemDaUrl } from './ordem';
 import { usePapel } from './papel';
 import { AsideDeRegras, RegrasEmDetalhes } from './RegrasDaCasa';
-import { NoAside, TopoDaTela, useTituloDoDocumento } from './ShellDoForum';
+import { NoAside, TopoDaTela } from './ShellDoForum';
+import { useTituloDoDocumento } from './encaixes';
 
 const TAMANHO_DA_PAGINA = 30;
 

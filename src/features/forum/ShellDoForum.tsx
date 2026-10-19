@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -13,27 +12,11 @@ import { Link, Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import { enderecoDoLoginComVolta } from '../../nucleo/comunidade/caminhoDeVolta';
 import type { TemaDoForum } from '../../portas/ambienteDoForum';
 import { useDependenciasDoForum, useDependenciasOuPadrao, ForumProvider } from './contexto';
+import { ContextoDosEncaixes } from './encaixes';
 import { useOnline } from './hooks';
 import { IconeArena, IconeComunidades, IconeExplorar, IconePerfil, IconeTema, IconeVoltar } from './Icones';
 import { ContextoDoPapel, useDescobrirPapel } from './papel';
 import './forum.css';
-
-// ---------------------------------------------------------------------------
-// Encaixes: a barra do topo e o aside são da casca; o conteúdo de cada um é da tela
-// ---------------------------------------------------------------------------
-
-interface Encaixes {
-  readonly topo: HTMLElement | null;
-  readonly aside: HTMLElement | null;
-  readonly anunciar: (mensagem: string) => void;
-}
-
-const ContextoDosEncaixes = createContext<Encaixes>({ topo: null, aside: null, anunciar: () => {} });
-
-/** Região de status única da tela: "Carregando tópicos", "Mais 5 tópicos carregados", "A internet voltou." */
-export function useAnunciar(): (mensagem: string) => void {
-  return useContext(ContextoDosEncaixes).anunciar;
-}
 
 interface PropsDoTopo {
   readonly titulo: string;
@@ -43,9 +26,13 @@ interface PropsDoTopo {
 
 /** Preenche a barra do topo. */
 export function TopoDaTela({ titulo, voltar }: PropsDoTopo) {
-  const { topo } = useContext(ContextoDosEncaixes);
+  const { topo, definirRaiz } = useContext(ContextoDosEncaixes);
   const h1 = useRef<HTMLHeadingElement>(null);
   const raiz = !voltar;
+
+  useLayoutEffect(() => {
+    definirRaiz(raiz);
+  }, [definirRaiz, raiz]);
 
   useEffect(() => {
     if (raiz) h1.current?.focus({ preventScroll: true });
@@ -79,14 +66,6 @@ export function TopoDaTela({ titulo, voltar }: PropsDoTopo) {
 export function NoAside({ children }: { readonly children: ReactNode }) {
   const { aside } = useContext(ContextoDosEncaixes);
   return aside ? createPortal(children, aside) : null;
-}
-
-/** Título da aba: "{Título} · Auê!". Vazio enquanto não há o que dizer. */
-export function useTituloDoDocumento(titulo: string | null): void {
-  const { ambiente } = useDependenciasDoForum();
-  useEffect(() => {
-    if (titulo) ambiente.definirTituloDoDocumento(`${titulo} · Auê!`);
-  }, [ambiente, titulo]);
 }
 
 // ---------------------------------------------------------------------------
@@ -172,6 +151,7 @@ function Casca({ children }: { readonly children: ReactNode }) {
 
   const [topo, setTopo] = useState<HTMLElement | null>(null);
   const [aside, setAside] = useState<HTMLElement | null>(null);
+  const [telaRaiz, setTelaRaiz] = useState(true);
 
   const [anuncio, setAnuncio] = useState<{ texto: string; n: number }>({ texto: '', n: 0 });
   const anunciar = useCallback((texto: string) => setAnuncio((a) => ({ texto, n: a.n + 1 })), []);
@@ -194,7 +174,7 @@ function Casca({ children }: { readonly children: ReactNode }) {
 
   return (
     <ContextoDoPapel.Provider value={papel}>
-      <ContextoDosEncaixes.Provider value={{ topo, aside, anunciar }}>
+      <ContextoDosEncaixes.Provider value={{ topo, aside, anunciar, definirRaiz: setTelaRaiz }}>
         <div className="forum-shell" data-forum-tema={tema}>
           <a
             className="forum-pular"
@@ -226,7 +206,7 @@ function Casca({ children }: { readonly children: ReactNode }) {
           </div>
 
           <div className="forum-centro">
-            <header className="forum-topo">
+            <header className={`forum-topo${telaRaiz ? '' : ' forum-topo--aninhado'}`}>
               <div className="forum-topo__miolo" ref={setTopo} />
               <div className="forum-topo__direita">
                 <BotaoDeTema tema={tema} aoAlternar={alternarTema} classe="forum-tema forum-tema--topo" />

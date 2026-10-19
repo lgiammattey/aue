@@ -48,7 +48,7 @@ describe('/comunidades: o diretório', () => {
     abrir();
     const link = (await screen.findByRole('heading', { name: 'Cerveja Gelada' })).closest('a')!;
     expect(link.getAttribute('href')).toBe('/c/cerveja-gelada');
-    expect(link.textContent).toContain('1.234 tópicos · 48.200 membros · atividade há 5 h');
+    expect(link.textContent).toContain('1.234 tópicos · 48.200 membros · atividade há 5 h');
     const zeta = screen.getByRole('heading', { name: 'Zeta' }).closest('a')!;
     expect(zeta.textContent).toContain('Nenhum tópico ainda · 1 membro');
     expect(zeta.textContent).not.toContain('atividade');

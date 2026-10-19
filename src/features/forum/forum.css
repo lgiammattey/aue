@@ -73,9 +73,25 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.forum-shell a {
+/* :where zera a especificidade do seletor de elemento: as classes de botão e link (cor própria) sempre vencem. */
+.forum-shell :where(a) {
   color: inherit;
   text-decoration: none;
+}
+
+/* Hora relativa nunca quebra no meio ("há 3 h"). */
+.forum-shell time {
+  white-space: nowrap;
+}
+
+/* Atrás do shell (overscroll do iOS, bordas) vale o fundo do tema; ao sair do fórum a regra deixa de casar. */
+html:has(.forum-shell[data-forum-tema='escuro']),
+html:has(.forum-shell[data-forum-tema='escuro']) body {
+  background: #0a0a08;
+}
+html:has(.forum-shell[data-forum-tema='claro']),
+html:has(.forum-shell[data-forum-tema='claro']) body {
+  background: #f5f3ea;
 }
 
 .forum-shell :focus-visible {
@@ -257,9 +273,6 @@
   .forum-principal {
     padding-bottom: 48px;
   }
-  .forum-topo__direita {
-    display: none;
-  }
   .forum-faixa-offline {
     margin-inline: 0;
   }
@@ -371,6 +384,15 @@
   align-items: center;
   gap: 4px;
 }
+/* Celular: tema e Entrar só nas telas raiz (nas aninhadas o título precisa da largura). Do tablet em diante já estão na lateral. */
+.forum-topo--aninhado .forum-topo__direita {
+  display: none;
+}
+@media (min-width: 700px) {
+  .forum-topo__direita {
+    display: none;
+  }
+}
 
 .forum-tema {
   display: inline-flex;
@@ -431,6 +453,10 @@
 
 /* -------------------------------------------------------------------- Texto */
 
+/* H1 recebe foco só por código (tabindex -1, fora da ordem do Tab): sem anel, nem no foco programático. Todo o resto mantém o anel. */
+.forum-shell .forum-h1[tabindex='-1']:focus {
+  outline: 0;
+}
 .forum-h1 {
   font-size: var(--h1);
   font-weight: 800;
@@ -522,7 +548,7 @@
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 0 20px;
+  padding: 12px 20px;
   border: 0;
   border-radius: 999px;
   font: inherit;
@@ -617,6 +643,7 @@
 }
 .forum-linha__comunidade {
   order: -1;
+  line-height: 1.4;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--muted);
@@ -625,9 +652,13 @@
 .forum-linha__comunidade a {
   position: relative;
   z-index: 1;
-  display: inline-block;
-  padding: 13px 0 4px;
-  margin: -13px 0 -4px;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-width: 44px;
+  min-height: 44px;
+  /* 44px de área tocável; as margens negativas devolvem a altura da linha de texto (13px de fonte x 1,4). */
+  margin-block: -13px;
 }
 .forum-linha__comunidade a:hover {
   text-decoration: underline;
@@ -640,6 +671,9 @@
 }
 .forum-marcador svg {
   flex: none;
+  /* o glifo desenha de y=4 a y=21 num quadro de 24: sobe para o centro do desenho cair no da linha de texto */
+  position: relative;
+  top: -1px;
 }
 
 .forum-linha-comunidade {
@@ -926,37 +960,10 @@
 .forum-audio {
   margin-top: 16px;
 }
-.forum-audio__pilula {
+.forum-audio__resumo {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 52px;
-  padding: 4px 8px 4px 4px;
-  background: var(--surface);
-  border-radius: 999px;
-}
-.forum-audio__tocar {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--fg);
-  color: var(--bg);
-}
-.forum-audio__tocar:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-.forum-audio__barra {
-  flex: 1;
-  min-width: 0;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border-strong);
-  opacity: 0.5;
 }
 .forum-audio__duracao {
   flex: none;
@@ -976,11 +983,6 @@
 }
 .forum-shell[data-forum-tema='claro'] .forum-selo-nota {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 30%, transparent);
-}
-.forum-audio__aviso {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 0.8125rem;
 }
 
 /* --------------------------------------------------------------- Respostas */

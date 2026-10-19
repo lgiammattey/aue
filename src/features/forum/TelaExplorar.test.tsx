@@ -26,7 +26,7 @@ describe('/explorar', () => {
     expect(titulo.getAttribute('href')).toBe('/c/cerveja-gelada/t/1');
     const linha = titulo.closest('li')!;
     expect(within(linha).getByRole('link', { name: 'Cerveja Gelada' }).getAttribute('href')).toBe('/c/cerveja-gelada');
-    expect(linha.textContent).toContain('Ana Souza · 8 respostas · atividade há 3 h');
+    expect(linha.textContent).toContain('Ana Souza · 8 respostas · atividade há 3 h');
     const outra = screen.getByRole('link', { name: 'Tópico 2' }).closest('li')!;
     expect(within(outra).getByRole('link', { name: 'Refri & Cia' }).getAttribute('href')).toBe('/c/refri');
   });

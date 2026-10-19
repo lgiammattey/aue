@@ -6,7 +6,8 @@ import { EstadoDeErro, EstadoVazio, Esqueleto, LinhaDeComunidade } from './compo
 import { useDependenciasDoForum } from './contexto';
 import { useLeitura, useOnline } from './hooks';
 import { usePapel } from './papel';
-import { TopoDaTela, useTituloDoDocumento } from './ShellDoForum';
+import { TopoDaTela } from './ShellDoForum';
+import { useTituloDoDocumento } from './encaixes';
 
 function ListaDeComunidades({ comunidades, agora }: { readonly comunidades: readonly ComunidadeDoForum[]; readonly agora: number }) {
   return (

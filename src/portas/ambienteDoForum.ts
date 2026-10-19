@@ -30,8 +30,13 @@ export interface AmbienteDoForum {
    */
   aplicarTema(tema: TemaDoForum, guardar: boolean): void;
 
-  /** Rolagem vertical do documento (o fórum rola o documento, não um contêiner). */
-  rolagemAtual(): number;
+  /**
+   * Avisa a rolagem vertical do documento a cada mudança, com o `y` novo. Quem precisa da
+   * posição de saída guarda a última recebida: ler na hora de sair é tarde (a página já
+   * encolheu e o navegador já ajustou a rolagem).
+   */
+  aoRolar(ouvinte: (y: number) => void): () => void;
+  /** Rola o documento (o fórum rola o documento, não um contêiner). */
   rolarPara(y: number): void;
 
   /** Relógio, para o "há 3 h" não depender de `Date.now()` solto na tela. */

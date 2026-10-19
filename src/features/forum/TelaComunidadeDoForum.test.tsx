@@ -49,11 +49,11 @@ describe('/c/:slug: comunidade e lista de tópicos', () => {
 
     const linha1 = screen.getByRole('link', { name: 'Tópico 1' });
     expect(linha1.getAttribute('href')).toBe('/c/reuniao-da-firma/t/00000000-0000-4000-8000-000000000001');
-    expect(linha1.closest('li')!.textContent).toContain('Ana Souza · 8 respostas · atividade há 3 h');
+    expect(linha1.closest('li')!.textContent).toContain('Ana Souza · 8 respostas · atividade há 3 h');
     const linha2 = screen.getByRole('link', { name: 'Tópico 2' }).closest('li')!;
     expect(linha2.textContent).toContain('Fixado');
     expect(linha2.textContent).toContain('Fechado');
-    expect(linha2.textContent).toContain('Sem respostas · há 3 d');
+    expect(linha2.textContent).toContain('Sem respostas · há 3 d');
   });
 
   it('o título da aba é "{Comunidade} · Auê!" e o foco vai ao H1', async () => {
@@ -298,13 +298,16 @@ describe('voltar da conversa para a lista (#234)', () => {
     await screen.findByRole('link', { name: 'Tópico 1' });
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais tópicos' }));
     await screen.findByRole('link', { name: 'Tópico 2' });
-    ambiente.y = 640;
+    ambiente.rolarAte(640);
 
     // abre a conversa (a leitura do tópico falha de propósito: só interessa sair da lista)
     await act(async () => {
       sondas.navegar!('/c/reuniao-da-firma/t/00000000-0000-4000-8000-000000000002');
     });
     expect(screen.queryByRole('link', { name: 'Tópico 1' })).toBeNull();
+    // Na saída o documento já encolheu: a rolagem de agora não é a de quem saiu.
+    // Só vale o que o evento de rolagem guardou enquanto a lista estava na tela.
+    expect(ambiente.y).toBe(0);
 
     ambiente.rolagens.length = 0;
     await act(async () => {

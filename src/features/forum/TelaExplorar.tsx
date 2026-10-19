@@ -6,7 +6,8 @@ import { useDependenciasDoForum } from './contexto';
 import { useListaPaginada, useOnline } from './hooks';
 import { ListaDeTopicos } from './ListaDeTopicos';
 import { ordemDaUrl } from './ordem';
-import { TopoDaTela, useTituloDoDocumento } from './ShellDoForum';
+import { TopoDaTela } from './ShellDoForum';
+import { useTituloDoDocumento } from './encaixes';
 
 /**
  * Tela 5 (spec 11): tópicos de todas as comunidades, cada um com a sua à vista.

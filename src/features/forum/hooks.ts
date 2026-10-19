@@ -191,7 +191,17 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
       });
   }, [chave, tentativa]);
 
-  // Guarda a lista e a rolagem ao sair (antes de o DOM sumir), para a volta do navegador.
+  // A rolagem vem por evento, enquanto a lista está na tela: na saída o documento já encolheu
+  // e o navegador já puxou o scrollY para baixo, então ler ali perde dezenas de pixels.
+  const rolagemRef = useRef(0);
+  useEffect(() => {
+    if (!chaveDeMemoria) return;
+    return ambiente.aoRolar((y) => {
+      rolagemRef.current = y;
+    });
+  }, [chaveDeMemoria, ambiente]);
+
+  // Guarda a lista e a última rolagem vista ao sair, para a volta do navegador.
   useLayoutEffect(() => {
     if (!chaveDeMemoria) return;
     return () => {
@@ -199,11 +209,11 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
         listasVistas.set(chaveDeMemoria, {
           itens: itensRef.current,
           proximo: proximoRef.current,
-          rolagem: ambiente.rolagemAtual(),
+          rolagem: rolagemRef.current,
         });
       }
     };
-  }, [chaveDeMemoria, ambiente]);
+  }, [chaveDeMemoria]);
 
   // Restaura a rolagem da volta uma vez, antes da pintura.
   const rolagemRestaurada = useRef(false);
@@ -211,6 +221,7 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
     if (rolagemRestaurada.current || fase !== 'pronto') return;
     rolagemRestaurada.current = true;
     if (voltaInicial.current && voltaInicial.current.chave === chave) {
+      rolagemRef.current = voltaInicial.current.salvo.rolagem;
       ambiente.rolarPara(voltaInicial.current.salvo.rolagem);
     }
   }, [fase, chave, ambiente]);

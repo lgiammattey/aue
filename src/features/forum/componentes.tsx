@@ -11,7 +11,7 @@ import {
 import type { ComunidadeDoForum } from '../../portas/forum';
 import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
 import { IconeFechado, IconeFixado } from './Icones';
-import { useAnunciar } from './ShellDoForum';
+import { useAnunciar } from './encaixes';
 
 
 // ---------------------------------------------------------------------------

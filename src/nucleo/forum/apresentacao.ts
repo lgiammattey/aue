@@ -23,12 +23,13 @@ export function tempoRelativo(iso: string, agoraMs: number): string {
   if (Number.isNaN(instante)) return '';
   const diferenca = Math.max(0, agoraMs - instante);
   if (diferenca < MINUTO) return 'agora';
-  if (diferenca < HORA) return `há ${Math.floor(diferenca / MINUTO)} min`;
-  if (diferenca < DIA) return `há ${Math.floor(diferenca / HORA)} h`;
-  if (diferenca < 7 * DIA) return `há ${Math.floor(diferenca / DIA)} d`;
+  // Espaço sem quebra (U+00A0): "há 3 h" nunca deixa o "h" sozinho na linha de baixo.
+  if (diferenca < HORA) return `há\u00a0${Math.floor(diferenca / MINUTO)}\u00a0min`;
+  if (diferenca < DIA) return `há\u00a0${Math.floor(diferenca / HORA)}\u00a0h`;
+  if (diferenca < 7 * DIA) return `há\u00a0${Math.floor(diferenca / DIA)}\u00a0d`;
   const data = new Date(instante);
-  const base = `${data.getDate()} ${MESES[data.getMonth()]}`;
-  return data.getFullYear() === new Date(agoraMs).getFullYear() ? base : `${base} ${data.getFullYear()}`;
+  const base = `${data.getDate()}\u00a0${MESES[data.getMonth()]}`;
+  return data.getFullYear() === new Date(agoraMs).getFullYear() ? base : `${base}\u00a0${data.getFullYear()}`;
 }
 
 /** "19/10/2026 14:32", para o `title` do `<time>`. */

@@ -15,11 +15,11 @@ import {
 } from './componentes';
 import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
 import { useDependenciasDoForum } from './contexto';
-import { IconeTocar } from './Icones';
 import { useLeitura, useListaPaginada, useOnline } from './hooks';
 import { montarArvoreDeRespostas, type NoDeResposta } from '../../nucleo/forum/apresentacao';
 import { AsideSobreAComunidade } from './RegrasDaCasa';
-import { NoAside, TopoDaTela, useAnunciar, useTituloDoDocumento } from './ShellDoForum';
+import { NoAside, TopoDaTela } from './ShellDoForum';
+import { useAnunciar, useTituloDoDocumento } from './encaixes';
 
 const TAMANHO_DA_PAGINA_DE_RESPOSTAS = 100;
 
@@ -45,24 +45,30 @@ function NomeDoAutor({ autor, forte }: { readonly autor: { apelido: string | nul
 /**
  * Existe áudio quando há caminho; existe nota quando a nota não é nula. Áudio
  * sem nota não ganha selo; nada de forma de onda inventada. Tocar depende do
- * contrato de URL do áudio (#250), que ainda não fechou: o botão fica
- * desabilitado e a tela diz isso, em vez de fingir um player.
+ * contrato de URL do áudio (#250), que ainda não fechou: até lá não há botão
+ * nem player (nada que sugira que dá pra ouvir), só a duração e a nota que o
+ * servidor devolveu.
  */
 function BlocoDeAudio({ topico }: { readonly topico: TopicoDoForum }) {
   const audio = topico.audio;
   if (!audio || (!audio.caminhoDoAudio && !audio.caminhoDoAudioDaCasa)) return null;
-  const nome = nomeDoAutor(topico.autor) || 'quem abriu o tópico';
+  if (audio.duracao === null && audio.nota === null) return null;
   return (
     <div className="forum-audio">
-      <div className="forum-audio__pilula">
-        <button type="button" className="forum-audio__tocar" disabled aria-label={`Tocar arroto de ${nome}`}>
-          <IconeTocar />
-        </button>
-        <span className="forum-audio__barra" aria-hidden="true" />
-        {audio.duracao !== null && <span className="forum-audio__duracao">{formatarDuracao(audio.duracao)}</span>}
-        {audio.nota !== null && <span className="forum-selo-nota">{formatarNota(audio.nota)}</span>}
-      </div>
-      <p className="forum-audio__aviso">O player ainda não está disponível nesta tela.</p>
+      <p className="forum-audio__resumo">
+        {audio.duracao !== null && (
+          <span className="forum-audio__duracao">
+            <span className="forum-sr">Duração </span>
+            {formatarDuracao(audio.duracao)}
+          </span>
+        )}
+        {audio.nota !== null && (
+          <span className="forum-selo-nota">
+            <span className="forum-sr">Nota </span>
+            {formatarNota(audio.nota)}
+          </span>
+        )}
+      </p>
     </div>
   );
 }

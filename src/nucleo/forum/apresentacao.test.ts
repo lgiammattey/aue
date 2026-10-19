@@ -26,11 +26,11 @@ const D = 24 * H;
 describe('tempoRelativo', () => {
   it('segue a tabela da spec', () => {
     expect(tempoRelativo(atras(20_000), AGORA)).toBe('agora');
-    expect(tempoRelativo(atras(5 * MIN), AGORA)).toBe('há 5 min');
-    expect(tempoRelativo(atras(3 * H), AGORA)).toBe('há 3 h');
-    expect(tempoRelativo(atras(2 * D), AGORA)).toBe('há 2 d');
-    expect(tempoRelativo(new Date(2026, 9, 5, 12).toISOString(), AGORA)).toBe('5 out');
-    expect(tempoRelativo(new Date(2025, 9, 12, 12).toISOString(), AGORA)).toBe('12 out 2025');
+    expect(tempoRelativo(atras(5 * MIN), AGORA)).toBe('há 5 min');
+    expect(tempoRelativo(atras(3 * H), AGORA)).toBe('há 3 h');
+    expect(tempoRelativo(atras(2 * D), AGORA)).toBe('há 2 d');
+    expect(tempoRelativo(new Date(2026, 9, 5, 12).toISOString(), AGORA)).toBe('5 out');
+    expect(tempoRelativo(new Date(2025, 9, 12, 12).toISOString(), AGORA)).toBe('12 out 2025');
   });
 
   it('data ilegível não inventa tempo', () => {
@@ -72,8 +72,8 @@ describe('monograma', () => {
 describe('meta', () => {
   it('tópico com respostas usa a atividade; sem respostas usa a criação', () => {
     const base = { autorNome: 'Ana Souza', criadoEm: atras(3 * D), ultimaAtividadeEm: atras(3 * H) };
-    expect(metaDeTopico({ ...base, respostasTotal: 8 }, AGORA)).toBe('Ana Souza · 8 respostas · atividade há 3 h');
-    expect(metaDeTopico({ ...base, respostasTotal: 0 }, AGORA)).toBe('Ana Souza · Sem respostas · há 3 d');
+    expect(metaDeTopico({ ...base, respostasTotal: 8 }, AGORA)).toBe('Ana Souza · 8 respostas · atividade há 3 h');
+    expect(metaDeTopico({ ...base, respostasTotal: 0 }, AGORA)).toBe('Ana Souza · Sem respostas · há 3 d');
   });
 
   it('comunidade sem tópico não fala em atividade', () => {
@@ -81,7 +81,7 @@ describe('meta', () => {
       'Nenhum tópico ainda · 3 membros',
     );
     expect(metaDeComunidade({ topicosTotal: 12, membrosTotal: 34, ultimaAtividadeEm: atras(2 * H) }, AGORA)).toBe(
-      '12 tópicos · 34 membros · atividade há 2 h',
+      '12 tópicos · 34 membros · atividade há 2 h',
     );
   });
 });

@@ -10,7 +10,7 @@ interface ModalCardCompartilhamentoProps {
   autorNome: string;
   comunidadeNome?: string;
   textoCauso?: string;
-  /** Rótulo do botão de link: "Copiar link do causo" ou "Copiar link do X1". */
+  /** Rótulo do botão de link: "Copiar link da resenha" ou "Copiar link do X1". */
   rotuloLink?: string;
   onFechar: () => void;
   onNotificar?: (msg: string) => void;
@@ -47,7 +47,7 @@ export const ModalCardCompartilhamento: React.FC<ModalCardCompartilhamentoProps>
   const handleWhatsApp = () => {
     const textoZap = temNota
       ? `Olha esse arroto de nota ${cardScore} no Auê: ${url}`
-      : `Olha esse causo no Auê: ${url}`;
+      : `Olha essa resenha no Auê: ${url}`;
     const link = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoZap)}`;
     window.open(link, '_blank', 'noopener,noreferrer');
   };

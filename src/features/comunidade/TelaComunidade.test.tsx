@@ -166,13 +166,25 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     fireEvent.click(botoesShare[0]);
 
     expect(screen.getByText('COMPARTILHAR')).toBeDefined();
-    expect(screen.getByText('Copiar link do causo')).toBeDefined();
+    expect(screen.getByText('Copiar link da resenha')).toBeDefined();
     expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'WhatsApp' })).toBeDefined();
     // Nada de exportação fictícia nem código de X1 forjado
     expect(screen.queryByText('Vídeo pro TikTok')).toBeNull();
     expect(screen.queryByText('Baixar card (PNG)')).toBeNull();
     expect(screen.queryByText(/\/x1\//)).toBeNull();
     expect(screen.getByText(/aue\.web\.app\/historia\//)).toBeDefined();
+  });
+
+  it('causo que só existe neste aparelho não abre o compartilhar com link que daria 404', async () => {
+    const causoLocal = { ...CAUSOS_MOCK_TESTE[0], somenteNesteAparelho: true };
+    const adapter = criarComunidadeWeb({ causosIniciais: [causoLocal], forcarOffline: true });
+    render(<TelaComunidade porta={adapter} />);
+
+    const botoesShare = await screen.findAllByRole('button', { name: 'Compartilhar' });
+    fireEvent.click(botoesShare[0]);
+
+    expect(screen.queryByText('COMPARTILHAR')).toBeNull();
+    expect(await screen.findByText(/ainda não subiu pro Auê/)).toBeDefined();
   });
 
   it('copiar link falha com aviso de erro, sem dizer que copiou', async () => {
@@ -185,7 +197,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
 
     const botoesShare = await screen.findAllByRole('button', { name: 'Compartilhar' });
     fireEvent.click(botoesShare[0]);
-    fireEvent.click(screen.getByText('Copiar link do causo'));
+    fireEvent.click(screen.getByText('Copiar link da resenha'));
 
     expect(await screen.findByText(/Não deu pra copiar/)).toBeDefined();
     expect(screen.queryByText('Link copiado.')).toBeNull();

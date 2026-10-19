@@ -475,13 +475,18 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   const handleCompartilharCauso = (causo: CausoPostado) => {
+    // Causo que só existe neste aparelho não tem página: o link abriria 404 para quem recebe.
+    if (causo.somenteNesteAparelho) {
+      avisar('Essa resenha ainda não subiu pro Auê. Sem link pra compartilhar por enquanto.');
+      return;
+    }
     setItemParaCompartilhar({
       nota: causo.nota,
       autorNome: causo.autorNome,
       comunidadeNome: causo.comunidadeSlug,
       textoCauso: causo.conteudo,
       url: `${ORIGEM_CANONICA}/historia/${causo.id}`,
-      rotuloLink: 'Copiar link do causo',
+      rotuloLink: 'Copiar link da resenha',
     });
     setModalShareAberto(true);
   };

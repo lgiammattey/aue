@@ -239,7 +239,11 @@ export function CompositorDeResposta({
         campoRef={campo}
         aoFocar={() => ambiente.centralizarCampo(`${id}-campo`)}
       />
-      <div className="forum-compositor__acoes">
+      <div
+        className="forum-compositor__acoes"
+        // Tocar num botão não tira o foco do campo: sem blur, a barra inferior não volta por cima do botão antes do clique.
+        onMouseDown={(e) => e.preventDefault()}
+      >
         {aoCancelar && (
           <button type="button" className="forum-botao forum-botao--contorno" onClick={aoCancelar} disabled={enviando}>
             Cancelar

@@ -940,6 +940,12 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   font-size: 0.9375rem;
   line-height: 1.45;
 }
+/* Na área do composer a faixa precisa do mesmo respiro lateral (o padding da área não a engole). */
+.forum-faixa-fechado.forum-compositor-area {
+  padding: 12px 16px;
+  margin: 16px var(--gut) 0;
+  border-top: 0;
+}
 
 .forum-avatar {
   flex: none;

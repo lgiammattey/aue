@@ -1143,3 +1143,30 @@ describe('rascunho de resposta é de uma conta só (B1)', () => {
     expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeResposta('conta-a', ID, null))!).corpo).toBe('segredo da A');
   });
 });
+
+describe('R6: os botões do composer não tiram o foco do campo', () => {
+  it('mousedown em Enviar e Cancelar é cancelado (o campo não perde o foco, a barra não volta antes do clique)', async () => {
+    abrir({ respostas: [resposta({ id: 'r1' })] });
+    await screen.findByText('texto r1');
+    fireEvent.click(screen.getByRole('button', { name: 'Responder a Bia Lima' }));
+    await screen.findByLabelText('Sua resposta a Bia Lima');
+    for (const nome of ['Enviar', 'Cancelar']) {
+      const botoes = screen.getAllByRole('button', { name: nome });
+      const botao = botoes[0];
+      const ev = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+      botao.dispatchEvent(ev);
+      expect(ev.defaultPrevented).toBe(true);
+    }
+  });
+});
+
+describe('R7: faixa de tópico fechado dentro da área do composer', () => {
+  it('é uma só faixa de aviso por estado: a da área do composer ganha a classe com padding próprio', async () => {
+    const { estado } = abrir({ forum: { responderTopico: vi.fn(async () => falha('topicoFechado')) } });
+    await esperarConversa();
+    digitar('tarde');
+    estado.topico = { ...estado.topico, status: 'fechado' };
+    enviar();
+    await waitFor(() => expect(document.querySelector('.forum-faixa-fechado.forum-compositor-area')).not.toBeNull());
+  });
+});

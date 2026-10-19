@@ -20,6 +20,8 @@ import { ContextoDaParticipacao, ContextoDoPapel, useDescobrirPapel, type Partic
 import { ProvedorDeToast } from './ProvedorDeToast';
 import './forum.css';
 
+const ATRASO_DA_BARRA_MS = 200;
+
 interface PropsDoTopo {
   readonly titulo: string;
   /** Telas raiz (Comunidades, Explorar): o título é o H1. Telas aninhadas: o H1 está no conteúdo. */
@@ -166,7 +168,20 @@ function Casca({ children }: { readonly children: ReactNode }) {
 
   // Teclado aberto no celular: a barra inferior sai da frente (spec 4.3 e 4.7).
   const [emCampo, setEmCampo] = useState(false);
-  useEffect(() => ambiente.aoMudarFocoEmCampo(setEmCampo), [ambiente]);
+  // A saída do campo espera um instante: tocar num botão tira o foco do campo ANTES do clique, e a barra
+  // voltando nesse meio tempo cobriria o botão sob o dedo (o clique se perderia sem erro).
+  useEffect(() => {
+    let espera: ReturnType<typeof setTimeout> | undefined;
+    const parar = ambiente.aoMudarFocoEmCampo((noCampo) => {
+      clearTimeout(espera);
+      if (noCampo) setEmCampo(true);
+      else espera = setTimeout(() => setEmCampo(false), ATRASO_DA_BARRA_MS);
+    });
+    return () => {
+      parar();
+      clearTimeout(espera);
+    };
+  }, [ambiente]);
 
   const [topo, setTopo] = useState<HTMLElement | null>(null);
   const [aside, setAside] = useState<HTMLElement | null>(null);

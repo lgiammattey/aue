@@ -373,14 +373,14 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Postar via composer rápido
   const handlePostarRapido = async (
-    dados: string | { texto: string; autorNome?: string; videoUrl?: string; imagemUrl?: string; comunidadeSlug?: string },
+    dados: string | { texto: string; videoUrl?: string; imagemUrl?: string; comunidadeSlug?: string },
   ) => {
     if (!contaLogada) {
       pedirPromocao();
       return false;
     }
     const texto = typeof dados === 'string' ? dados : dados.texto;
-    const autorNome = typeof dados === 'string' ? perfil.nome : (dados.autorNome || perfil.nome);
+    const autorNome = perfil.nome;
     const videoUrl = typeof dados === 'string' ? undefined : dados.videoUrl;
     const imagemUrl = typeof dados === 'string' ? undefined : dados.imagemUrl;
     const comunidadeSlug = typeof dados === 'string' ? 'bonde-geral' : (dados.comunidadeSlug || 'bonde-geral');
@@ -449,7 +449,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     if (!arrotoParaPublicar) return false;
     const res = await adaptador.postarCauso({
       comunidadeSlug: dados.comunidadeSlug,
-      autorNome: dados.autorNome,
+      // Só rótulo provisório: a autoria real é a conta, resolvida no servidor.
+      autorNome: perfil.nome,
       conteudo: dados.conteudo,
       arroto: arrotoParaPublicar.arroto,
       consentimentoAudioPublico: dados.consentimentoAudioPublico,
@@ -1063,7 +1064,6 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         aberto={arrotoParaPublicar !== null}
         comunidades={comunidades}
         comunidadeAtualSlug={comunidadeAtivaSlug ?? undefined}
-        apelidoInicial={perfil.nome}
         notaResultado={arrotoParaPublicar?.nota}
         onSubmit={handlePublicarArroto}
         onFechar={() => setArrotoParaPublicar(null)}

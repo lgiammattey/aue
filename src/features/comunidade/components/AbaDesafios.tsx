@@ -27,6 +27,8 @@ export const AbaDesafios: React.FC<AbaDesafiosProps> = ({
 }) => {
   const [subAba, setSubAba] = useState<'jogo' | 'duelos'>(iniciarNoJogo ? 'jogo' : 'duelos');
   const [codigoDesafioAtual, setCodigoDesafioAtual] = useState<string | undefined>(desafioAtivoCodigo);
+  // `undefined` = ninguém consultou os duelos. Não é o mesmo que "zero duelos".
+  const consultou = desafios !== undefined;
   const lista = desafios ?? [];
 
   const handleRevanche = (d: DesafioSocialItem) => {
@@ -96,7 +98,7 @@ export const AbaDesafios: React.FC<AbaDesafiosProps> = ({
             borderBottom: subAba === 'duelos' ? '3px solid var(--accent)' : '3px solid transparent',
           }}
         >
-          ⚔️ Duelos X1 ({lista.length})
+          ⚔️ Duelos X1{consultou ? ` (${lista.length})` : ''}
         </button>
       </div>
 
@@ -134,7 +136,12 @@ export const AbaDesafios: React.FC<AbaDesafiosProps> = ({
             </button>
           </div>
 
-          {lista.length === 0 && (
+          {!consultou && (
+            <p style={{ padding: '24px 16px', color: 'var(--muted)', fontSize: '15px' }}>
+              Os seus duelos ainda não aparecem aqui. Arrote, receba a nota e chame alguém: o link do X1 sai da Arena.
+            </p>
+          )}
+          {consultou && lista.length === 0 && (
             <p style={{ padding: '24px 16px', color: 'var(--muted)', fontSize: '15px' }}>
               Nenhum X1 por aqui ainda. Arrote, receba a nota e chame alguém: o link do duelo sai da Arena.
             </p>

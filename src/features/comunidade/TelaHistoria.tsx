@@ -10,6 +10,7 @@ import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import { BarraLateralNavegacao } from './components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from './components/BarraInferiorMobile';
 import { ColunaTendencias } from './components/ColunaTendencias';
+import { cabeNoLimite, caracteresRestantes, LIMITE_COMENTARIO } from '../../nucleo/comunidade/limites';
 import { MENSAGEM_DE_ERRO_DE_RESPOSTA, useEnvioDeResposta } from './components/useEnvioDeResposta';
 import { LARGURA_CELULAR, LARGURA_COLUNA_DIREITA, useLarguraJanela, useTema } from './useLayoutDaConversa';
 
@@ -191,7 +192,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   const enviarComentario = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!exigirContaSocial()) return;
-    if (!causo || !textoResposta.trim()) return;
+    if (!causo || !textoResposta.trim() || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO)) return;
 
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
     const handle = nome.toLowerCase().replace(/\s+/g, '_');
@@ -520,6 +521,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                   <textarea
                     value={textoResposta}
                     onChange={(e) => setTextoResposta(e.target.value)}
+                    aria-describedby="contador-comentario"
                     placeholder="Deixe seu comentário ou zoação..."
                     rows={2}
                     style={{
@@ -535,10 +537,20 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                     }}
                   />
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
+                    <span
+                      id="contador-comentario"
+                      role="status"
+                      style={{
+                        fontSize: '13px',
+                        color: !cabeNoLimite(textoResposta, LIMITE_COMENTARIO) ? 'var(--danger)' : 'var(--muted)',
+                      }}
+                    >
+                      {caracteresRestantes(textoResposta, LIMITE_COMENTARIO)}
+                    </span>
                     <button
                       type="submit"
-                      disabled={!textoResposta.trim() || envioDoComentario.enviando}
+                      disabled={!textoResposta.trim() || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO) || envioDoComentario.enviando}
                       style={{
                         background: 'var(--accent, #c6ff00)',
                         color: 'var(--accent-on, #000)',

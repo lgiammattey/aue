@@ -19,6 +19,7 @@ import { AbaComunidades } from './components/AbaComunidades';
 import { AbaDesafios, type DesafioSocialItem } from './components/AbaDesafios';
 import { ModalNovoCauso, type DadosDoCausoComArroto } from './ModalNovoCauso';
 import { ColunaTendencias } from './components/ColunaTendencias';
+import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../nucleo/comunidade/limites';
 import { ModalCardCompartilhamento } from './ModalCardCompartilhamento';
 import { ORIGEM_CANONICA } from '../../shared/enderecoPublico';
 import { Arena } from '../../arena/Arena';
@@ -427,6 +428,10 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     if (!contaLogada) return pedirPromocao();
     if (!novoTextoModal.trim()) {
       avisar('Escreve alguma coisa.');
+      return;
+    }
+    if (!cabeNoLimite(novoTextoModal, LIMITE_CAUSO)) {
+      avisar(`Passou do limite de ${LIMITE_CAUSO} caracteres. Encurta o texto.`);
       return;
     }
     try {
@@ -1065,14 +1070,15 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                 <span
                   style={{
                     fontSize: '13px',
-                    color: novoTextoModal.length > 280 ? 'var(--danger)' : 'var(--muted)',
+                    color: !cabeNoLimite(novoTextoModal, LIMITE_CAUSO) ? 'var(--danger)' : 'var(--muted)',
                   }}
                 >
-                  {280 - novoTextoModal.length}
+                  {caracteresRestantes(novoTextoModal, LIMITE_CAUSO)}
                 </span>
                 <button
                   type="button"
                   onClick={handlePublicarModal}
+                  disabled={!novoTextoModal.trim() || !cabeNoLimite(novoTextoModal, LIMITE_CAUSO)}
                   style={{
                     height: '36px',
                     padding: '0 20px',

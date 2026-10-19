@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { CausoPostado } from '../../../portas/comunidade';
 import { ArvoreDeComentarios } from './ArvoreDeComentarios';
+import { cabeNoLimite, LIMITE_COMENTARIO } from '../../../nucleo/comunidade/limites';
 import { MENSAGEM_DE_ERRO_DE_RESPOSTA, useEnvioDeResposta, type ResultadoDoEnvio } from './useEnvioDeResposta';
 import { soltar, tocarExclusivo } from '../../../plataforma/web/audioUnico';
 
@@ -111,7 +112,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
 
   const enviarResposta = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!textoResposta.trim()) return;
+    if (!textoResposta.trim() || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO)) return;
     const ok = await envioDaResposta.enviar(() => aoResponder(causo.id, textoResposta.trim()));
     if (ok) setTextoResposta('');
   };
@@ -627,7 +628,8 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               />
               <button
                 type="submit"
-                disabled={envioDaResposta.enviando}
+                disabled={envioDaResposta.enviando || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO)}
+                title={cabeNoLimite(textoResposta, LIMITE_COMENTARIO) ? undefined : `Passou do limite de ${LIMITE_COMENTARIO} caracteres`}
                 aria-label="Enviar resposta"
                 style={{
                   height: '40px',

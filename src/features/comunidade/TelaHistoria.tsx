@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { CausoPostado, RespostaDeCauso, PortaDeComunidade } from '../../portas/comunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
+import { soltar, tocarExclusivo } from '../../plataforma/web/audioUnico';
 import type { PortaDeConta } from '../../portas/conta';
 import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import { BarraLateralNavegacao } from './components/BarraLateralNavegacao';
@@ -81,23 +82,50 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
   const playerRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => () => playerRef.current?.pause(), []);
+  const montadoRef = useRef(true);
+
+  useEffect(() => {
+    montadoRef.current = true;
+    return () => {
+      montadoRef.current = false;
+      const player = playerRef.current;
+      if (!player) return;
+      player.pause();
+      soltar(player);
+    };
+  }, []);
 
   const togglePlay = async () => {
     if (!causo?.enderecoDoAudio) return;
     if (tocando) {
-      playerRef.current?.pause();
+      const atual = playerRef.current;
+      atual?.pause();
+      if (atual) soltar(atual);
       setTocando(false);
       return;
     }
     // Endereço assinado vence em minutos: pedido na hora de tocar.
     const endereco = await causo.enderecoDoAudio();
-    if (!endereco) return;
+    // A tela pode ter saído enquanto o endereço vinha: não toca áudio órfão.
+    if (!montadoRef.current || !endereco) return;
     const player = new Audio(endereco);
-    player.onended = () => setTocando(false);
+    player.onended = () => {
+      soltar(player);
+      setTocando(false);
+    };
+    player.onpause = () => setTocando(false);
+    player.onerror = () => {
+      soltar(player);
+      setTocando(false);
+    };
     playerRef.current = player;
     try {
-      await player.play();
+      await tocarExclusivo(player, () => setTocando(false));
+      if (!montadoRef.current) {
+        player.pause();
+        soltar(player);
+        return;
+      }
       setTocando(true);
     } catch {
       setTocando(false);

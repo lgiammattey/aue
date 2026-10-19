@@ -147,6 +147,14 @@ Aprovado por decisão de produto pelo Luiz em 17/10/2026:
 - **Consentimento e Opt-in:** gravação privada continua padrão; publicação na comunidade exige ação consciente e aceite explícito;
 - **Moderação ativa:** sistema de denúncia e ocultação server-side para áudios públicos.
 
+**Direção decidida em 19/10/2026 — ainda não é o comportamento do produto.**
+O Luiz decidiu que o Auê deixa de ter feed livre: a conversa passa a morar em
+**tópicos dentro de comunidades**, com respostas ([#251](https://github.com/lgiammattey/aue/issues/251)).
+A decisão de arquitetura está em [ADR 0010](../technical/adr/0010-comunidades-topicos-e-respostas.md)
+(**proposto**, sem aceite formal). Até o aceite e até a jornada nova ser provada
+ponta a ponta, o feed e o causo avulso descritos abaixo seguem sendo o que o
+produto faz — e a documentação não deve prometer o contrário.
+
 Contrato de funcionamento (auditoria de 18/10/2026):
 
 - a nota e o áudio de um causo vêm do resultado guardado no servidor; o cliente nunca afirma nota;

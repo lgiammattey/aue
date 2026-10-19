@@ -612,7 +612,8 @@ describe('a Arena gravando', () => {
   it('marca que a pessoa já jogou', async () => {
     const dubles = montarDubles();
     await ateGravar(dubles);
-    expect(dubles.guardado[CHAVES.jaJogou]).toBe('1');
+    // A marcação roda num useEffect depois do commit: espera a escrita, não assume.
+    await waitFor(() => expect(dubles.guardado[CHAVES.jaJogou]).toBe('1'));
   });
 });
 

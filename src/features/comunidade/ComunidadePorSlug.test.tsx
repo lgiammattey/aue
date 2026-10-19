@@ -55,4 +55,23 @@ describe('/c/:slug mostra a comunidade pedida e só os causos dela', () => {
     expect(screen.queryByText(/Microfone aberto sem querer/)).toBeNull();
     expect(screen.queryByText(/A histórica comunidade mãe/)).toBeNull();
   });
+
+  it('slug com maiúscula abre a mesma comunidade', async () => {
+    abrir('Reuniao-Da-Firma');
+    expect(await screen.findByText('Arroto na reunião da diretoria.')).toBeDefined();
+  });
+
+  it('bonde-geral abre o detalhe da comunidade geral', async () => {
+    abrir('bonde-geral');
+    expect(await screen.findAllByText('Bonde Geral')).toBeDefined();
+    expect(screen.queryByText('Comunidade não encontrada')).toBeNull();
+  });
+
+  it('lista de comunidades que não veio diz que não carregou, não que o slug não existe', async () => {
+    const base = criarComunidadeWeb({ causosIniciais: CAUSOS, forcarOffline: true });
+    const porta = { ...base, listarComunidades: async () => [] };
+    render(<TelaComunidade porta={porta} initialTab="comm" comunidadeSlugInicial="reuniao-da-firma" />);
+    expect(await screen.findByText('Não deu pra carregar')).toBeDefined();
+    expect(screen.queryByText('Comunidade não encontrada')).toBeNull();
+  });
 });

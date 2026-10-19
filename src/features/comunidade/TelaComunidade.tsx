@@ -757,13 +757,15 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
               }}
               comunidadeAtivaSlug={comunidadeAtivaSlug}
               causos={causos}
-              aoPostarCauso={async (comuNome, texto) => {
+              aoPostarCauso={async (comuSlug, texto) => {
+                const comuNome =
+                  comunidades.find((c) => c.slug.toLowerCase() === comuSlug.toLowerCase())?.nome ?? comuSlug;
                 if (!contaLogada) {
                   pedirPromocao();
                   return false;
                 }
                 const res = await adaptador.postarCauso({
-                  comunidadeSlug: comuNome,
+                  comunidadeSlug: comuSlug,
                   autorNome: perfil.nome,
                   conteudo: texto,
                   consentimentoAudioPublico: false,
@@ -1063,7 +1065,9 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       <ModalNovoCauso
         aberto={arrotoParaPublicar !== null}
         comunidades={comunidades}
-        comunidadeAtualSlug={comunidadeAtivaSlug ?? undefined}
+        comunidadeAtualSlug={
+          comunidades.find((c) => c.slug.toLowerCase() === comunidadeAtivaSlug?.toLowerCase())?.slug ?? undefined
+        }
         apelidoInicial={perfil.nome}
         notaResultado={arrotoParaPublicar?.nota}
         onSubmit={handlePublicarArroto}

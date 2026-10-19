@@ -75,12 +75,18 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
   const comuAtiva: ComunidadeInfo | null = comuDaLista ? infoDaComunidade(comuDaLista) : null;
 
   if (slugSelecionado && !comuAtiva) {
+    // Lista vazia depois de carregar = a leitura falhou, não "esse slug não existe".
+    const listaNaoVeio = !carregando && comunidades.length === 0;
     return (
       <div role="status" style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--muted)' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--fg)', marginBottom: '8px' }}>
-          {carregando ? 'Carregando a comunidade…' : 'Comunidade não encontrada'}
+          {carregando ? 'Carregando a comunidade…' : listaNaoVeio ? 'Não deu pra carregar' : 'Comunidade não encontrada'}
         </div>
-        {!carregando && <div style={{ marginBottom: '16px' }}>Esse endereço não leva a nenhuma comunidade do Auê.</div>}
+        {!carregando && (
+          <div style={{ marginBottom: '16px' }}>
+            {listaNaoVeio ? 'As comunidades não vieram. Atualiza a página pra tentar de novo.' : 'Esse endereço não leva a nenhuma comunidade do Auê.'}
+          </div>
+        )}
         <button
           type="button"
           onClick={() => setSlugSelecionado(null)}

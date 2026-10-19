@@ -58,8 +58,19 @@ describe('aoMudarFocoEmCampo: o teclado do celular abre quando um campo de texto
 });
 
 describe('centralizarCampo', () => {
+  it('campo já à vista: não rola (rolar por cima de um toque faz a página sair de baixo do dedo)', () => {
+    const { b } = montar();
+    const rolar = vi.fn();
+    b.scrollIntoView = rolar;
+    b.getBoundingClientRect = () => ({ top: 100, bottom: 200 }) as DOMRect;
+    vi.stubGlobal('visualViewport', null);
+    criarAmbienteDoForumWeb().centralizarCampo('b');
+    expect(rolar).not.toHaveBeenCalled();
+  });
+
   it('sem visualViewport, centraliza na hora', () => {
     const { b } = montar();
+    b.getBoundingClientRect = () => ({ top: 5000, bottom: 5100 }) as DOMRect;
     const rolar = vi.fn();
     b.scrollIntoView = rolar;
     vi.stubGlobal('visualViewport', null);
@@ -71,6 +82,7 @@ describe('centralizarCampo', () => {
     const { b } = montar();
     const rolar = vi.fn();
     b.scrollIntoView = rolar;
+    b.getBoundingClientRect = () => ({ top: 5000, bottom: 5100 }) as DOMRect;
     const alvo = new EventTarget();
     vi.stubGlobal('visualViewport', alvo);
     vi.useFakeTimers();
@@ -86,6 +98,7 @@ describe('centralizarCampo', () => {
     const { b } = montar();
     const rolar = vi.fn();
     b.scrollIntoView = rolar;
+    b.getBoundingClientRect = () => ({ top: 5000, bottom: 5100 }) as DOMRect;
     vi.stubGlobal('visualViewport', new EventTarget());
     vi.useFakeTimers();
     criarAmbienteDoForumWeb().centralizarCampo('b');

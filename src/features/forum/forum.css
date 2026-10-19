@@ -1150,6 +1150,7 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   margin-top: 0;
 }
 .forum-acoes__participa {
+  column-gap: 4px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

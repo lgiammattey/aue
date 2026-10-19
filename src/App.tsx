@@ -21,6 +21,7 @@ const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').the
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
+import { rotasDoForum } from './features/forum/rotas';
 
 /** Leva ao login guardando a página atual, para a pessoa voltar a ela depois de entrar. */
 function useIrParaLogin() {
@@ -216,10 +217,13 @@ export function App() {
 
           {/* Comunidades (Singular, Plural e Aliases) */}
           <Route path="/comunidade" element={<EntradaBondes />} />
-          <Route path="/comunidades" element={<EntradaBondes />} />
           <Route path="/bondes" element={<EntradaBondes />} />
           <Route path="/comm" element={<Navigate to="/comunidade" replace />} />
-          <Route path="/c/:slug" element={<EntradaComunidadeSlug />} />
+          {/*
+            Telas de leitura do fórum (cartão 0017, pedaço 2b): /comunidades, /explorar,
+            /c/:slug e /c/:slug/t/:id. As rotas antigas ao lado seguem como estavam até o corte (2e).
+          */}
+          {rotasDoForum()}
           <Route path="/comunidade/:slug" element={<EntradaComunidadeSlug />} />
           <Route path="/comunidades/:slug" element={<EntradaComunidadeSlug />} />
 

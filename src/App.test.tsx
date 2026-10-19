@@ -58,12 +58,38 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(elementos.length).toBeGreaterThan(0);
   });
 
-  it('abre a visão de comunidades pela rota plural "/comunidades"', async () => {
+  it('"/comunidades" abre o diretório novo do fórum, não a aba antiga', async () => {
     window.history.pushState({}, 'Comunidades', '/comunidades');
     render(<App />);
 
-    // Deve renderizar a aba de Comunidade ativa
+    expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Comunidade' })).toBeNull();
+  });
+
+  it('"/c/:slug" abre a comunidade do fórum, e sem servidor diz que falhou em vez de mostrar outra', async () => {
+    window.history.pushState({}, 'Comunidade', '/c/reuniao-da-firma');
+    render(<App />);
+
+    expect(await screen.findByText('Deu ruim pra carregar a comunidade.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Comunidade' })).toBeNull();
+  });
+
+  it('"/explorar" e "/c/:slug/t/:id" existem como telas do fórum', async () => {
+    window.history.pushState({}, 'Explorar', '/explorar');
+    const { unmount } = render(<App />);
+    expect(await screen.findByRole('heading', { level: 1, name: 'Explorar' })).toBeTruthy();
+    unmount();
+
+    window.history.pushState({}, 'Conversa', '/c/reuniao-da-firma/t/lixo');
+    render(<App />);
+    // Sem servidor configurado a leitura falha: erro com "Tentar de novo", nunca "indisponível" inventado.
+    expect(await screen.findByText('Deu ruim pra carregar o tópico.')).toBeTruthy();
+  });
+
+  it('as rotas antigas "/comunidade/:slug" e "/comunidades/:slug" seguem na tela antiga', async () => {
+    window.history.pushState({}, 'Comunidade', '/comunidades/reuniao-da-firma');
+    render(<App />);
+
     expect(await screen.findByRole('button', { name: 'Comunidade' })).toBeTruthy();
   });
 });
-

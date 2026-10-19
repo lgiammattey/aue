@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { AmbienteDoForum } from '../../portas/ambienteDoForum';
+import type { ArmazenamentoLocal } from '../../portas/armazenamento';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeConta } from '../../portas/conta';
 import type { PortaDeForum } from '../../portas/forum';
+import { criarArmazenamentoWeb } from '../../plataforma/web/armazenamento';
 import { criarAmbienteDoForumWeb } from '../../plataforma/web/ambienteDoForum';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
@@ -15,9 +17,14 @@ import { criarForumWeb } from '../../plataforma/web/forum';
 export interface DependenciasDoForum {
   readonly forum: PortaDeForum;
   readonly conta: PortaDeConta;
-  /** Só para `listarMinhasComunidades` (conta promovida entra no bonde-geral). */
+  /**
+   * `listarMinhasComunidades` (conta promovida entra no bonde-geral) e, na escrita
+   * (pedaço 2c), `entrarComunidade` e `sairComunidade`.
+   */
   readonly comunidade: PortaDeComunidade;
   readonly ambiente: AmbienteDoForum;
+  /** Só o rascunho do que a pessoa está escrevendo (spec 6.8). */
+  readonly armazenamento: ArmazenamentoLocal;
 }
 
 const Contexto = createContext<DependenciasDoForum | null>(null);
@@ -28,6 +35,7 @@ export function criarDependenciasPadrao(): DependenciasDoForum {
     conta: criarContaWeb(),
     comunidade: criarComunidadeWeb(),
     ambiente: criarAmbienteDoForumWeb(),
+    armazenamento: criarArmazenamentoWeb(),
   };
 }
 

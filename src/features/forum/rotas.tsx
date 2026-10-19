@@ -3,10 +3,11 @@ import { LayoutDoForum } from './ShellDoForum';
 import { TelaComunidadeDoForum } from './TelaComunidadeDoForum';
 import { TelaDiretorio } from './TelaDiretorio';
 import { TelaExplorar } from './TelaExplorar';
+import { TelaNovoTopico } from './TelaNovoTopico';
 import { TelaTopico } from './TelaTopico';
 
 /**
- * As rotas de leitura do fórum (cartão 0017, pedaço 2b), para entrar dentro de
+ * As rotas do fórum (cartão 0017, pedaços 2b e 2c), para entrar dentro de
  * um `<Routes>`. Compartilham uma casca só: a navegação não remonta ao passar
  * de uma tela para outra.
  *
@@ -18,7 +19,10 @@ export function rotasDoForum() {
     <Route element={<LayoutDoForum />}>
       <Route path="/comunidades" element={<TelaDiretorio />} />
       <Route path="/explorar" element={<TelaExplorar />} />
-      <Route path="/c/:slug" element={<TelaComunidadeDoForum />} />
+      <Route path="/c/:slug" element={<TelaComunidadeDoForum />}>
+        {/* Formulário de novo tópico: por cima da lista da comunidade (cartão 0017, pedaço 2c). */}
+        <Route path="novo" element={<TelaNovoTopico />} />
+      </Route>
       <Route path="/c/:slug/t/:id" element={<TelaTopico />} />
     </Route>
   );

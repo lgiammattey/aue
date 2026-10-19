@@ -132,7 +132,7 @@ export function BotaoComoLink({ para, children }: { readonly para: string; reado
 // Identidade
 // ---------------------------------------------------------------------------
 
-export function Monograma({ nome, tamanho }: { readonly nome: string; readonly tamanho: 'lista' | 'cabecalho' }) {
+export function Monograma({ nome, tamanho }: { readonly nome: string; readonly tamanho: 'mini' | 'lista' | 'cabecalho' }) {
   return (
     <span className={`forum-monograma forum-monograma--${tamanho}`} aria-hidden="true">
       {monograma(nome)}

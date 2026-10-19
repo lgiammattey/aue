@@ -46,3 +46,15 @@ export const CHAVES = {
    */
   roda: 'aue.roda.v1',
 } as const;
+
+/**
+ * Chaves do rascunho do fórum (cartão 0017, pedaço 2c; spec 6.8). Versionadas
+ * como as outras. O rascunho guarda o texto que a pessoa escreveu e ainda não
+ * enviou, e só isso: nada de autor, nota ou id de resposta do servidor.
+ *
+ * - tópico novo: uma chave por comunidade;
+ * - resposta: uma chave por tópico e por pai (sem pai = responde o tópico).
+ */
+export const chaveDoRascunhoDeTopico = (slug: string) => `aue.forum.rascunho-topico.${slug}.v1`;
+export const chaveDoRascunhoDeResposta = (topicoId: string, paiId: string | null) =>
+  `aue.forum.rascunho-resposta.${topicoId}.${paiId ?? 'topo'}.v1`;

@@ -62,6 +62,51 @@ export function criarAmbienteDoForumWeb(): AmbienteDoForum {
       }
     },
 
+    aoMudarFocoEmCampo(ouvinte) {
+      const ehCampo = (alvo: EventTarget | null): boolean => {
+        if (!(alvo instanceof HTMLElement)) return false;
+        if (alvo.isContentEditable) return true;
+        if (alvo instanceof HTMLTextAreaElement || alvo instanceof HTMLSelectElement) return true;
+        if (alvo instanceof HTMLInputElement) {
+          return !['button', 'submit', 'reset', 'checkbox', 'radio', 'file', 'image', 'range', 'color'].includes(alvo.type);
+        }
+        return false;
+      };
+      const aoFocar = (e: FocusEvent) => ouvinte(ehCampo(e.target));
+      // Ao sair, `relatedTarget` é para onde o foco vai: campo para campo não pisca.
+      const aoSair = (e: FocusEvent) => ouvinte(ehCampo(e.relatedTarget));
+      document.addEventListener('focusin', aoFocar);
+      document.addEventListener('focusout', aoSair);
+      return () => {
+        document.removeEventListener('focusin', aoFocar);
+        document.removeEventListener('focusout', aoSair);
+      };
+    },
+
+    centralizarCampo(idDoCampo) {
+      try {
+        const centralizar = () =>
+          document.getElementById(idDoCampo)?.scrollIntoView({ block: 'center', behavior: 'instant' });
+        const vv = window.visualViewport;
+        if (!vv) {
+          centralizar();
+          return;
+        }
+        // O teclado do iPhone demora a abrir: espera o viewport encolher (ou 350ms) e então centraliza.
+        let feito = false;
+        const uma = () => {
+          if (feito) return;
+          feito = true;
+          vv.removeEventListener('resize', uma);
+          centralizar();
+        };
+        vv.addEventListener('resize', uma);
+        setTimeout(uma, 350);
+      } catch {
+        // sem visualViewport ou scrollIntoView: o navegador faz o que sabe
+      }
+    },
+
     agora() {
       return Date.now();
     },

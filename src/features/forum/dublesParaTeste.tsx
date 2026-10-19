@@ -6,6 +6,7 @@
 import { MemoryRouter, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { vi } from 'vitest';
 import type { AmbienteDoForum, TemaDoForum } from '../../portas/ambienteDoForum';
+import type { ArmazenamentoLocal } from '../../portas/armazenamento';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { EstadoDaConta, PortaDeConta } from '../../portas/conta';
 import type {
@@ -120,8 +121,35 @@ export function contaFalsa(estado: Partial<EstadoDaConta> | 'quebrada'): PortaDe
   } as unknown as PortaDeConta;
 }
 
-export function comunidadeFalsa(slugs: readonly string[] = []): PortaDeComunidade {
-  return { listarMinhasComunidades: vi.fn(async () => slugs) } as unknown as PortaDeComunidade;
+export function comunidadeFalsa(
+  slugs: readonly string[] = [],
+  partes: { entrarComunidade?: (slug: string) => Promise<boolean>; sairComunidade?: (slug: string) => Promise<boolean> } = {},
+): PortaDeComunidade {
+  return {
+    listarMinhasComunidades: vi.fn(async () => slugs),
+    entrarComunidade: vi.fn(partes.entrarComunidade ?? (async () => true)),
+    sairComunidade: vi.fn(partes.sairComunidade ?? (async () => true)),
+  } as unknown as PortaDeComunidade;
+}
+
+/** Armazenamento em memória, com opção de barrar (Safari em aba privada): nunca lança. */
+export interface ArmazenamentoDeTeste extends ArmazenamentoLocal {
+  readonly dados: Map<string, string>;
+}
+export function armazenamentoFalso(opcoes: { barrado?: boolean } = {}): ArmazenamentoDeTeste {
+  const dados = new Map<string, string>();
+  return {
+    dados,
+    ler: (chave) => (opcoes.barrado ? null : (dados.get(chave) ?? null)),
+    gravar: (chave, valor) => {
+      if (opcoes.barrado) return false;
+      dados.set(chave, valor);
+      return true;
+    },
+    apagar: (chave) => {
+      if (!opcoes.barrado) dados.delete(chave);
+    },
+  };
 }
 
 export interface AmbienteDeTeste extends AmbienteDoForum {
@@ -134,12 +162,16 @@ export interface AmbienteDeTeste extends AmbienteDoForum {
   titulo: string;
   tema: TemaDoForum | null;
   y: number;
+  /** Um campo de texto ganhou ou perdeu o foco (o teclado abre ou fecha). */
+  focarCampo(emCampo: boolean): void;
+  readonly camposCentralizados: string[];
 }
 
 export function ambienteFalso(opcoes: { online?: boolean } = {}): AmbienteDeTeste {
   let online = opcoes.online ?? true;
   const ouvintes = new Set<(o: boolean) => void>();
   const ouvintesDeRolagem = new Set<(y: number) => void>();
+  const ouvintesDeFoco = new Set<(emCampo: boolean) => void>();
   const a: AmbienteDeTeste = {
     estaOnline: () => online,
     aoMudarConectividade(ouvinte) {
@@ -173,6 +205,17 @@ export function ambienteFalso(opcoes: { online?: boolean } = {}): AmbienteDeTest
       a.y = y;
       ouvintesDeRolagem.forEach((o) => o(y));
     },
+    aoMudarFocoEmCampo(ouvinte) {
+      ouvintesDeFoco.add(ouvinte);
+      return () => ouvintesDeFoco.delete(ouvinte);
+    },
+    focarCampo(emCampo) {
+      ouvintesDeFoco.forEach((o) => o(emCampo));
+    },
+    centralizarCampo(id) {
+      a.camposCentralizados.push(id);
+    },
+    camposCentralizados: [],
     agora: () => AGORA,
     rolagens: [],
     titulo: '',
@@ -187,6 +230,7 @@ export interface Montagem {
   readonly conta?: PortaDeConta;
   readonly comunidade?: PortaDeComunidade;
   readonly ambiente?: AmbienteDeTeste;
+  readonly armazenamento?: ArmazenamentoLocal;
 }
 
 export function dependencias(m: Montagem): DependenciasDoForum & { ambiente: AmbienteDeTeste } {
@@ -195,6 +239,7 @@ export function dependencias(m: Montagem): DependenciasDoForum & { ambiente: Amb
     conta: m.conta ?? contaFalsa({ temSessao: false }),
     comunidade: m.comunidade ?? comunidadeFalsa(),
     ambiente: m.ambiente ?? ambienteFalso(),
+    armazenamento: m.armazenamento ?? armazenamentoFalso(),
   };
 }
 

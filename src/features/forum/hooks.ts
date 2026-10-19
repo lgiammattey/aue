@@ -33,7 +33,7 @@ export type EstadoDeLeitura<T> =
 export function useLeitura<T>(
   carregar: () => Promise<ResultadoDaLeitura<T>>,
   chave: string,
-): { estado: EstadoDeLeitura<T>; recarregar: () => void } {
+): { estado: EstadoDeLeitura<T>; recarregar: () => void; atualizar: () => Promise<boolean> } {
   const [estado, setEstado] = useState<EstadoDeLeitura<T>>({ fase: 'carregando' });
   const [tentativa, setTentativa] = useState(0);
   const carregarRef = useRef(carregar);
@@ -57,7 +57,29 @@ export function useLeitura<T>(
   }, [chave, tentativa]);
 
   const recarregar = useCallback(() => setTentativa((t) => t + 1), []);
-  return { estado, recarregar };
+
+  /**
+   * Lê de novo SEM voltar para "carregando": a tela fica como está até o servidor
+   * responder (depois de entrar numa comunidade ou de responder, o número certo vem
+   * do servidor). Se a nova leitura falhar, o que estava na tela fica, e quem chamou
+   * fica sabendo (`false`). Resposta velha (a chave mudou no meio) é jogada fora.
+   */
+  const chaveAtual = useRef(chave);
+  chaveAtual.current = chave;
+  const atualizar = useCallback(async (): Promise<boolean> => {
+    const minhaChave = chaveAtual.current;
+    let r: ResultadoDaLeitura<T>;
+    try {
+      r = await carregarRef.current();
+    } catch {
+      return false;
+    }
+    if (!r.ok || chaveAtual.current !== minhaChave) return false;
+    setEstado({ fase: 'pronto', valor: r.valor });
+    return true;
+  }, []);
+
+  return { estado, recarregar, atualizar };
 }
 
 // ---------------------------------------------------------------------------
@@ -79,6 +101,17 @@ const listasVistas = new Map<string, Salvo<unknown, unknown>>();
 /** Para os testes e para o "Tentar de novo" de uma lista inteira. */
 export function limparListasVistas(): void {
   listasVistas.clear();
+}
+
+/**
+ * Esquece as listas guardadas cujo nome começa com `prefixo`. Depois de criar um
+ * tópico ou uma resposta, a volta do navegador não pode mostrar a lista velha, sem
+ * o que a pessoa acabou de escrever: a lista seguinte vem do servidor.
+ */
+export function esquecerListasVistas(prefixo: string): void {
+  for (const chave of [...listasVistas.keys()]) {
+    if (chave.startsWith(prefixo)) listasVistas.delete(chave);
+  }
 }
 
 export type FaseDaLista = 'carregando' | 'pronto' | 'erro';

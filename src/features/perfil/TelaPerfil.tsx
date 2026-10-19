@@ -3,6 +3,8 @@ import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarCompartilhamentoWeb } from '../../plataforma/web/compartilhamento';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
+import { obterPerfilLocal } from '../../plataforma/web/perfil';
+import type { PerfilUsuario } from '../../nucleo/usuario/perfil';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { EstadoDaConta, PortaDeConta } from '../../portas/conta';
 import type { Compartilhamento } from '../../portas/compartilhamento';
@@ -135,6 +137,16 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     setCarregando(true);
     setFalhou(false);
     (async () => {
+      const c = await contaPort.estado();
+      if (!ativo) return;
+      // A identidade anônima é da Arena, não é um perfil público nem "meu perfil".
+      if (!handle && !(c.podeParticiparSocialmente ?? (c.temSessao && !c.anonima))) {
+        setPerfil(null);
+        setConta(c);
+        setFalhou(false);
+        setCarregando(false);
+        return;
+      }
       // Perfil de outra pessoa: `null` é "não existe", exceção é "não deu para abrir".
       const buscar = async (): Promise<{ p: PerfilPublico | null; deuErro: boolean }> => {
         try {
@@ -143,7 +155,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
           return { p: null, deuErro: true };
         }
       };
-      const [{ p, deuErro }, c] = await Promise.all([buscar(), contaPort.estado()]);
+      const { p, deuErro } = await buscar();
       if (!ativo) return;
       setPerfil(p);
       setConta(c);
@@ -174,18 +186,35 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     };
   }, [perfil, aba, comunidade]);
 
+  const [meuPerfilLocal] = useState<PerfilUsuario>(() => obterPerfilLocal());
+
+  const souEu = Boolean(
+    perfil?.souEu ||
+      (!handle && (conta ? conta.temSessao : true)) ||
+      (perfil &&
+        meuPerfilLocal &&
+        ((perfil.handle &&
+          meuPerfilLocal.handle &&
+          perfil.handle.toLowerCase().replace(/^@/, '') === meuPerfilLocal.handle.toLowerCase().replace(/^@/, '')) ||
+          (perfil.id && meuPerfilLocal.id && perfil.id === meuPerfilLocal.id))),
+  );
+
   const abas = useMemo(
-    () =>
-      [
-        { id: 'causos' as const, rotulo: 'Resenhas' },
-        { id: 'audios' as const, rotulo: 'Com áudio' },
-        ...(perfil?.souEu ? [{ id: 'curtidos' as const, rotulo: 'Curtidos' }] : []),
-      ],
-    [perfil?.souEu],
+    () => [
+      { id: 'causos' as const, rotulo: 'Resenhas' },
+      { id: 'audios' as const, rotulo: 'Com áudio' },
+      ...(souEu ? [{ id: 'curtidos' as const, rotulo: 'Curtidos' }] : []),
+    ],
+    [souEu],
   );
 
   const seguir = async () => {
     if (!perfil) return;
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para seguir arrotadores.');
+      aoEntrar('cadastro');
+      return;
+    }
     const res = await perfilPort.alternarSeguir(perfil.id);
     if (!res.ok) {
       avisar('Não deu para seguir agora.');
@@ -292,11 +321,21 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     setCausos((prev) => prev.map((c) => (c.id === id ? { ...c, ...mudanca } : c)));
 
   const curtir = async (id: string) => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para curtir resenhas.');
+      aoEntrar('cadastro');
+      return;
+    }
     const r = await comunidade.alternarCurtida(id);
     if (r.ok) atualizar(id, { curtidas: r.curtidas, curtidoPorMim: r.curtido });
     else avisar('Não deu para curtir agora.');
   };
   const repostar = async (id: string) => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para entrar no Bonde.');
+      aoEntrar('cadastro');
+      return;
+    }
     const r = await comunidade.alternarRepost(id);
     if (r.ok) atualizar(id, { reposts: r.reposts, repostadoPorMim: r.repostado });
     else avisar('Não deu para repostar agora.');
@@ -306,6 +345,11 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     atualizar(id, { comentarios: lista });
   };
   const responder = async (id: string, texto: string, respostaAId?: string) => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para responder no Bonde.');
+      aoEntrar('cadastro');
+      return;
+    }
     const causo = causos.find((c) => c.id === id);
     const nova = await comunidade.adicionarResposta(id, texto, perfil?.apelido ?? 'Você', perfil?.handle, respostaAId);
     if (!nova) {
@@ -337,6 +381,11 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     avisar('Resenha apagada.');
   };
   const denunciar = async (id: string) => {
+    if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
+      avisar('Crie sua conta para denunciar uma resenha.');
+      aoEntrar('cadastro');
+      return;
+    }
     const ok = await comunidade.denunciarCauso(id, 'Denúncia de usuário');
     if (!ok) {
       avisar('Não deu para registrar a denúncia.');
@@ -407,19 +456,11 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
         .filter((r) => Boolean(perfil[r]))
         .map((r) => ({ nome: NOMES_DAS_REDES[r], usuario: perfil[r] as string, url: urlDaRede(r, perfil[r] as string) }))
     : [];
+  const visitanteSemPerfil = Boolean(
+    !handle && conta && !(conta.podeParticiparSocialmente ?? (conta.temSessao && !conta.anonima)),
+  );
 
-  const perfilParaBarra = perfil
-    ? {
-        id: perfil.id,
-        nome: perfil.apelido,
-        handle: perfil.handle,
-        bio: perfil.bio ?? '',
-        avatarUrl: perfil.avatarUrl,
-        maiorScore: perfil.melhorNota ?? 0,
-        vitoriasX1: 0,
-        derrotasX1: 0,
-      }
-    : undefined;
+  const perfilParaBarra = meuPerfilLocal;
 
   return (
     <div
@@ -443,7 +484,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
         {/* Coluna Esquerda: Navegação Canônica (275px / 76px) */}
         {showLeft && (
           <BarraLateralNavegacao
-            abaAtiva="feed"
+            abaAtiva="perfil"
             aoMudarAba={(nova) => {
               if (nova === 'feed') aoVoltar();
               else if (nova === 'arena') {
@@ -458,8 +499,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
             tema={theme}
             aoAlternarTema={toggleTheme}
             perfil={perfilParaBarra}
-            aoAbrirPerfil={() => {}}
-            contaLogada={Boolean(conta && !conta.anonima && conta.temSessao)}
+            aoAbrirPerfil={() => {
+              if (handle) {
+                aoAbrirPerfil(meuPerfilLocal.handle);
+              }
+            }}
+            contaLogada={Boolean(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))}
             aoSair={sair}
           />
         )}
@@ -537,7 +582,30 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
             </div>
           )}
 
-          {!carregando && !perfil && !falhou && (
+          {!carregando && !perfil && !falhou && visitanteSemPerfil && (
+            <section style={{ padding: 24, display: 'grid', gap: 12 }} aria-labelledby="titulo-promocao-perfil">
+              <b id="titulo-promocao-perfil" style={{ fontSize: 22 }}>
+                Seu perfil público começa com uma conta
+              </b>
+              <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.45 }}>
+                Como visitante você pode jogar, desafiar e ler o Bonde. Crie uma conta para escolher seu @ e participar da rede.
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => aoEntrar('cadastro')}
+                  style={{ ...botaoSecundario, background: 'var(--accent)', color: 'var(--accent-on)', border: 0 }}
+                >
+                  Criar conta
+                </button>
+                <button type="button" onClick={aoVoltar} style={botaoSecundario}>
+                  Voltar ao Bonde
+                </button>
+              </div>
+            </section>
+          )}
+
+          {!carregando && !perfil && !falhou && !visitanteSemPerfil && (
             <div style={{ padding: 24, display: 'grid', gap: 12 }}>
               <b style={{ fontSize: 18 }}>{handle ? 'Esse arrotador não existe.' : 'Seu perfil não abriu.'}</b>
               <span style={{ color: 'var(--muted)' }}>
@@ -566,6 +634,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 style={{
                   height: 160,
                   background: 'var(--surface-2)',
+                  borderBottom: '1px solid var(--border)',
                   position: 'relative',
                   overflow: 'hidden',
                 }}
@@ -573,7 +642,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
 
               <section style={{ padding: '0 16px 16px', display: 'grid', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, marginTop: -40 }}>
-                  {perfil.souEu ? (
+                  {souEu ? (
                     <label
                       title="Trocar foto"
                       onMouseEnter={() => setHoverFoto(true)}
@@ -628,7 +697,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                     <button type="button" onClick={compartilharPerfil} style={botaoSecundario}>
                       Compartilhar
                     </button>
-                    {perfil.souEu ? (
+                    {souEu ? (
                       <button
                         type="button"
                         onClick={() => (editando ? setEditando(false) : abrirEdicao())}
@@ -718,7 +787,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 </div>
 
                 {/* Card de Conta Anônima / Promoção */}
-                {perfil.souEu && conta && (
+                {souEu && conta && (
                   <div
                     style={{
                       display: 'grid',
@@ -815,7 +884,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 <p style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
                   {aba === 'curtidos'
                     ? 'Nada curtido ainda.'
-                    : perfil.souEu
+                    : souEu
                       ? 'Você ainda não postou nenhuma resenha.'
                       : 'Sem resenhas por aqui ainda.'}
                 </p>
@@ -869,7 +938,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       )}
 
       {/* Modal / Bottom Sheet: Editar Perfil */}
-      {perfil?.souEu && editando && (
+      {souEu && editando && (
         <div
           role="dialog"
           aria-modal="true"
@@ -967,7 +1036,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                   />
                 </label>
               ))}
-              {perfil.avatarUrl && (
+              {perfil?.avatarUrl && (
                 <button type="button" onClick={tirarFoto} style={botaoSecundario}>
                   Remover foto
                 </button>

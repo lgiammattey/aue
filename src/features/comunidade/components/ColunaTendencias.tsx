@@ -99,8 +99,8 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
           style={{
             height: '40px',
             borderRadius: '999px',
-            background: 'var(--accent)',
-            color: 'var(--accent-on)',
+            background: 'var(--fg)',
+            color: 'var(--bg)',
             fontWeight: 700,
             fontSize: '14px',
             display: 'flex',
@@ -242,7 +242,7 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
           <a
             href="/landing"
             style={{
-              color: 'var(--accent)',
+              color: 'var(--fg)',
               textDecoration: 'none',
               fontSize: '14px',
               fontWeight: 700,
@@ -254,7 +254,7 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
             }}
           >
             <span>🏠 Ver Apresentação / Início</span>
-            <span>↗</span>
+            <span style={{ color: 'var(--muted)' }}>↗</span>
           </a>
         </div>
       </section>

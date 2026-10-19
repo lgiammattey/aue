@@ -111,7 +111,9 @@ export interface FiltrosDoFeed {
   readonly limite?: number;
   /** Só causos desta pessoa (id do usuário). */
   readonly autorId?: string;
-  /** Só causos que esta pessoa curtiu (id do usuário). */
+  /** Só os causos de quem a conta atual segue. */
+  readonly seguindo?: boolean;
+  /** Só causos curtidos pela própria conta promovida. */
   readonly curtidosPor?: string;
 }
 
@@ -154,8 +156,8 @@ export interface PortaDeComunidade {
 
   /**
    * Apaga um causo MEU (e os comentários dele). Com `apagarAudio`, apaga também o
-   * arquivo do arroto — as duas coisas precisam dar certo para valer `true`.
-   * `false` quando o servidor não apagou: a tela não pode dizer que apagou.
+   * arquivo privado do arroto. Depois que o causo saiu do servidor, a operação
+   * continua sendo sucesso mesmo se a limpeza do arquivo falhar.
    */
   apagarCauso(causoId: string, opcoes?: { readonly apagarAudio?: boolean }): Promise<boolean>;
 

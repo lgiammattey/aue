@@ -10,6 +10,8 @@ export interface EstadoDaConta {
   readonly temSessao: boolean;
   /** A sessão ainda é a anônima do aparelho. */
   readonly anonima: boolean;
+  /** Só uma conta promovida participa de perfil, Bonde e comunidades. */
+  readonly podeParticiparSocialmente?: boolean;
   readonly email?: string;
 }
 

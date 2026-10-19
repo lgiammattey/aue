@@ -3,6 +3,8 @@ import { ArvoreDeComentarios } from './components/ArvoreDeComentarios';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { CausoPostado, RespostaDeCauso, PortaDeComunidade } from '../../portas/comunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
+import { criarContaWeb } from '../../plataforma/web/conta';
+import type { PortaDeConta } from '../../portas/conta';
 import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import { BarraLateralNavegacao } from './components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from './components/BarraInferiorMobile';
@@ -11,12 +13,17 @@ import { ColunaTendencias } from './components/ColunaTendencias';
 interface TelaHistoriaProps {
   onArrotar?: () => void;
   porta?: PortaDeComunidade;
+  portaConta?: PortaDeConta;
+  /** Leva o visitante para promover a identidade antes de agir socialmente. */
+  aoEntrar?: () => void;
 }
 
-export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: portaProp }) => {
+export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: portaProp, portaConta, aoEntrar }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [porta] = useState<PortaDeComunidade>(() => portaProp ?? criarComunidadeWeb());
+  const [conta] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
+  const [podeParticiparSocialmente, setPodeParticiparSocialmente] = useState(false);
   const perfil = obterPerfilLocal();
 
   const [causo, setCauso] = useState<CausoPostado | null>(null);
@@ -29,6 +36,20 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   const [comentarios, setComentarios] = useState<readonly RespostaDeCauso[]>([]);
   const [copiado, setCopiado] = useState(false);
   const [denunciado, setDenunciado] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    conta.estado().then((estado) => {
+      if (ativo) setPodeParticiparSocialmente(estado.podeParticiparSocialmente ?? (estado.temSessao && !estado.anonima));
+    });
+    return () => { ativo = false; };
+  }, [conta]);
+
+  const exigirContaSocial = (): boolean => {
+    if (podeParticiparSocialmente) return true;
+    aoEntrar?.();
+    return false;
+  };
 
   useEffect(() => {
     let ativo = true;
@@ -78,6 +99,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   };
 
   const handleCurtir = async () => {
+    if (!exigirContaSocial()) return;
     if (!causo) return;
     const res = await porta.alternarCurtida(causo.id);
     if (res.ok) {
@@ -103,12 +125,14 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   };
 
   const handleDenunciar = async () => {
+    if (!exigirContaSocial()) return;
     if (!causo) return;
     const registrou = await porta.denunciarCauso(causo.id, 'Conteúdo impróprio');
     if (registrou) setDenunciado(true);
   };
 
   const responderComentario = async (texto: string, respostaAId?: string) => {
+    if (!exigirContaSocial()) return;
     if (!causo) return;
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
     const nova = await porta.adicionarResposta(causo.id, texto, nome, nome.toLowerCase().replace(/\s+/g, '_'), respostaAId);
@@ -117,6 +141,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
   const enviarComentario = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!exigirContaSocial()) return;
     if (!causo || !textoResposta.trim()) return;
 
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
@@ -413,7 +438,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                 </h2>
 
                 {/* Formulário de Comentário */}
-                <form
+                {podeParticiparSocialmente ? <form
                   onSubmit={enviarComentario}
                   style={{
                     display: 'flex',
@@ -480,7 +505,15 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                       Comentar
                     </button>
                   </div>
-                </form>
+                </form> : (
+                  <button
+                    type="button"
+                    onClick={aoEntrar}
+                    style={{ width: '100%', marginBottom: '24px', padding: '14px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--fg)', cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    Cria sua conta pra comentar e entrar na zoeira.
+                  </button>
+                )}
 
                 <ArvoreDeComentarios
                   comentarios={comentarios}

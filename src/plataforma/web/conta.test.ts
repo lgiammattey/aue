@@ -49,7 +49,7 @@ describe('conta: cadastro por e-mail e senha', () => {
       data: { apelido: 'Betão' },
     });
     expect(signUp).not.toHaveBeenCalled();
-    expect(rpc).toHaveBeenCalledWith('atualizar_meu_perfil', { p_apelido: 'Betão', p_handle: 'betao_ti' });
+    expect(rpc).toHaveBeenCalledWith('preparar_promocao_social', { p_apelido: 'Betão', p_handle: 'betao_ti' });
     expect(r).toEqual({ ok: true, aviso: 'confirmeNoEmail' });
   });
 
@@ -67,11 +67,20 @@ describe('conta: cadastro por e-mail e senha', () => {
     expect(getSession).not.toHaveBeenCalled();
   });
 
-  it('sem sessão anônima usa signUp', async () => {
+  it('cadastro novo com sessão usa signUp e entra no Bonde Geral', async () => {
+    getSession.mockResolvedValue({ data: { session: null } });
+    signUp.mockResolvedValue({ data: { user: { id: 'u' }, session: { user: { id: 'u' } } }, error: null });
+    const r = await criarContaWeb().cadastrar({ email: 'a@b.com', senha: 'senhaboa123', apelido: 'Zé', handle: 'ze_do_bonde' });
+    expect(signUp).toHaveBeenCalled();
+    expect(rpc).toHaveBeenCalledWith('preparar_promocao_social', { p_apelido: 'Zé', p_handle: 'ze_do_bonde' });
+    expect(r).toEqual({ ok: true });
+  });
+
+  it('cadastro novo que exige confirmação guarda o resultado sem fingir sessão', async () => {
     getSession.mockResolvedValue({ data: { session: null } });
     signUp.mockResolvedValue({ data: { user: { id: 'u' }, session: null }, error: null });
     const r = await criarContaWeb().cadastrar({ email: 'a@b.com', senha: 'senhaboa123', apelido: 'Zé' });
-    expect(signUp).toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
     expect(r).toEqual({ ok: true, aviso: 'confirmeNoEmail' });
   });
 

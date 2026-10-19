@@ -21,17 +21,15 @@ import type {
 } from '../../portas/comunidade';
 
 const CHAVE_CAUSOS = 'aue.causos.v3';
-const CHAVE_MINHAS_COMUNIDADES = 'aue.minhas_comunidades.v2';
-const PADRAO_MINHAS_COMUNIDADES = ['bonde-geral', 'eu-arroto-e-dai'];
 
 const TEMPO_DA_LEITURA_MS = 6000;
 const TEMPO_DA_ESCRITA_MS = 15000;
 
 const COMUNIDADE_FEED: Comunidade = {
-  id: 'comu-feed',
-  slug: 'feed',
-  nome: 'Feed',
-  descricao: 'Feed geral.',
+  id: 'comu-bonde-geral',
+  slug: 'bonde-geral',
+  nome: 'Bonde Geral',
+  descricao: 'A praça central da zoeira.',
   icone: '📢',
 };
 
@@ -56,27 +54,6 @@ function salvarCausosLocais(causos: readonly CausoPostado[]): void {
     // Só o que é meu: o resto vem do servidor a cada abertura. Função
     // (`enderecoDoAudio`) não serializa e some sozinha.
     localStorage.setItem(CHAVE_CAUSOS, JSON.stringify(causos.filter((c) => c.meu)));
-  } catch {
-    // ignora erro no safari privado
-  }
-}
-
-function lerMinhasComunidadesLocais(): string[] {
-  try {
-    if (typeof localStorage === 'undefined') return [...PADRAO_MINHAS_COMUNIDADES];
-    const bruto = localStorage.getItem(CHAVE_MINHAS_COMUNIDADES);
-    if (!bruto) return [...PADRAO_MINHAS_COMUNIDADES];
-    const parsed = JSON.parse(bruto);
-    return Array.isArray(parsed) ? parsed : [...PADRAO_MINHAS_COMUNIDADES];
-  } catch {
-    return [...PADRAO_MINHAS_COMUNIDADES];
-  }
-}
-
-function salvarMinhasComunidadesLocais(slugs: readonly string[]): void {
-  try {
-    if (typeof localStorage === 'undefined') return;
-    localStorage.setItem(CHAVE_MINHAS_COMUNIDADES, JSON.stringify(slugs));
   } catch {
     // ignora erro no safari privado
   }
@@ -131,6 +108,9 @@ export interface LinhaDoFeed {
   minhas: string[] | null;
   /** Áudio de post da casa (sem jogo, sem nota), dentro do bucket público. */
   caminho_do_audio_da_casa: string | null;
+  comunidade_id?: string | null;
+  comunidade_slug?: string | null;
+  comunidade_nome?: string | null;
 }
 
 /** Resposta de `alternar_reacao_do_causo`. */
@@ -164,14 +144,14 @@ function enderecoDoAudioDaCasa(caminho: string): () => Promise<string | null> {
 
 export function traduzirLinha(l: LinhaDoFeed, meuId: string | null): CausoPostado {
   const audioDaCasa = l.caminho_do_audio_da_casa;
-  const comu = comunidadePorNome(l.topico ?? '');
-  const apelido = l.apelido?.trim() || 'Arrotador Anônimo';
+  const comu = (l.comunidade_slug ? obterComunidadePorSlug(l.comunidade_slug) : undefined) ?? comunidadePorNome(l.topico ?? '');
+  const apelido = l.apelido?.trim() || 'Arrotador';
   const minhas = l.minhas ?? [];
   const minhaReacao = (['fogo', 'nojo', 'trofeu'] as const).find((t) => minhas.includes(t)) ?? null;
   return {
     id: l.id,
-    comunidadeId: comu.id,
-    comunidadeSlug: comu.slug,
+    comunidadeId: l.comunidade_id ?? comu.id,
+    comunidadeSlug: l.comunidade_slug ?? comu.slug,
     autorNome: apelido,
     autorHandle: l.handle ?? handleDoApelido(apelido),
     autorHandleDoServidor: Boolean(l.handle),
@@ -218,7 +198,6 @@ export function criarComunidadeWeb(
   const padraoSemDuplicata = (opcoes.causosIniciais ?? CAUSOS_PADRAO).filter((c) => !idsSalvos.has(c.id));
   const causosMemoria: CausoPostado[] = [...causosSalvos, ...padraoSemDuplicata];
   const denunciasLocais = new Set<string>();
-  const minhasComunidadesMemoria = new Set<string>(lerMinhasComunidadesLocais());
 
   const usaServidor = (): boolean => !opcoes.forcarOffline && supabaseRealConfigurado();
   const ehLocal = (causoId: string): boolean => causoId.startsWith('causo-local-');
@@ -254,7 +233,17 @@ export function criarComunidadeWeb(
 
   return {
     async listarComunidades(): Promise<readonly Comunidade[]> {
-      return COMUNIDADES_PADRAO;
+      if (!usaServidor()) return COMUNIDADES_PADRAO;
+      try {
+        const { data, error } = await comTempo(supabase.rpc('listar_comunidades_sociais'), TEMPO_DA_LEITURA_MS, 'comunidades');
+        if (error) throw error;
+        return ((data ?? []) as Array<{ id: string; slug: string; nome: string; descricao: string | null; icone: string | null }>).map((c) => ({
+          id: c.id, slug: c.slug, nome: c.nome, descricao: c.descricao ?? '', icone: c.icone ?? '📢',
+        }));
+      } catch (erro) {
+        console.error('Falha ao listar comunidades', erro);
+        return [];
+      }
     },
 
     async listarFeed(filtros?: FiltrosDoFeed): Promise<readonly CausoPostado[]> {
@@ -271,6 +260,7 @@ export function criarComunidadeWeb(
               p_limite: limite,
               p_autor_id: filtros?.autorId ?? null,
               p_curtidos_por: filtros?.curtidosPor ?? null,
+              p_seguindo: Boolean(filtros?.seguindo),
             }),
             TEMPO_DA_LEITURA_MS,
             'feed',
@@ -365,19 +355,12 @@ export function criarComunidadeWeb(
           }
 
           const { data, error } = await comTempo(
-            supabase
-              .from('posts_comunidade')
-              .insert({
-                group_id: null,
-                user_id: sessao.user.id,
-                post_type: resultadoId ? 'audio_result' : 'text_announcement',
-                result_id: resultadoId,
-                consentimento_audio_publico: Boolean(resultadoId && pedido.consentimentoAudioPublico),
-                topic: comu.nome,
-                content: conteudo,
-              })
-              .select()
-              .single(),
+            supabase.rpc('publicar_causo', {
+              p_slug_da_comunidade: comu.slug,
+              p_conteudo: conteudo,
+              p_resultado_id: resultadoId,
+              p_consentimento_audio_publico: Boolean(resultadoId && pedido.consentimentoAudioPublico),
+            }),
             TEMPO_DA_ESCRITA_MS,
             'postar causo',
           );
@@ -421,36 +404,15 @@ export function criarComunidadeWeb(
         }
       }
 
-      // Sem servidor configurado: fica neste aparelho, e a porta diz isso. Arroto
-      // não é guardado aqui — sem servidor não existe nota oficial nem áudio.
-      const novoCauso: CausoPostado = {
-        id: `causo-local-${Date.now()}`,
-        comunidadeId: comu.id,
-        comunidadeSlug: comu.slug,
-        autorNome,
-        autorHandle,
-        conteudo,
-        reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
-        minhaReacao: null,
-        curtidas: 0,
-        curtidoPorMim: false,
-        reposts: 0,
-        repostadoPorMim: false,
-        totalComentarios: 0,
-        criadoEm: new Date().toISOString(),
-        meu: true,
-        somenteNesteAparelho: true,
-      };
-
-      causosMemoria.unshift(novoCauso);
-      salvarCausosLocais(causosMemoria);
-      return { ok: true, causo: novoCauso };
+      // Publicação local fingiria uma rede social funcionando sem conta.
+      return { ok: false, motivo: 'semRede' };
     },
 
     async alternarReacao(
       causoId: string,
       reacao: TipoDeReacao,
     ): Promise<{ readonly ok: boolean; readonly reacoes: Readonly<Record<TipoDeReacao, number>> }> {
+      if (!usaServidor()) return { ok: false, reacoes: { fogo: 0, nojo: 0, trofeu: 0 } };
       if (usaServidor() && !ehLocal(causoId)) {
         const contagem = await alternarNoServidor(causoId, reacao);
         if (!contagem) return { ok: false, reacoes: { fogo: 0, nojo: 0, trofeu: 0 } };
@@ -481,6 +443,7 @@ export function criarComunidadeWeb(
     },
 
     async alternarCurtida(causoId: string): Promise<{ readonly ok: boolean; readonly curtidas: number; readonly curtido: boolean }> {
+      if (!usaServidor()) return { ok: false, curtidas: 0, curtido: false };
       if (usaServidor() && !ehLocal(causoId)) {
         const contagem = await alternarNoServidor(causoId, 'like');
         if (!contagem) return { ok: false, curtidas: 0, curtido: false };
@@ -496,6 +459,7 @@ export function criarComunidadeWeb(
     },
 
     async alternarRepost(causoId: string): Promise<{ readonly ok: boolean; readonly reposts: number; readonly repostado: boolean }> {
+      if (!usaServidor()) return { ok: false, reposts: 0, repostado: false };
       if (usaServidor() && !ehLocal(causoId)) {
         const contagem = await alternarNoServidor(causoId, 'repost');
         if (!contagem) return { ok: false, reposts: 0, repostado: false };
@@ -555,6 +519,7 @@ export function criarComunidadeWeb(
       autorHandle?: string,
       respostaAId?: string,
     ): Promise<RespostaDeCauso | null> {
+      if (!usaServidor()) return null;
       const texto = conteudo?.trim();
       if (!texto) return null;
       const nome = autorNome || 'Você';
@@ -610,36 +575,26 @@ export function criarComunidadeWeb(
       return nova;
     },
 
-    // Comunidades "minhas" é preferência deste aparelho: não há tabela de
-    // membros no escopo atual, e nenhuma tela mostra isso como contagem.
     async apagarCauso(causoId: string, opcoes?: { readonly apagarAudio?: boolean }): Promise<boolean> {
-      const causo = causosMemoria.find((c) => c.id === causoId);
-
       if (usaServidor() && !ehLocal(causoId)) {
         try {
           const sessao = await garantirSessao();
           if (!sessao?.user?.id) return false;
-
-          // O áudio primeiro: se o arquivo não sair, o causo fica de pé e dá
-          // para tentar de novo. Na ordem inversa o arquivo ficaria órfão.
-          if (opcoes?.apagarAudio) {
-            const resultadoId =
-              causo?.resultadoId ?? (await this.obterCauso(causoId))?.resultadoId;
-            if (resultadoId) {
-              const feito = await criarDesafiosWeb().apagarMeuArroto(resultadoId);
-              if (feito !== 'apagado') return false;
-            }
-          }
-
+          const causo = await this.obterCauso(causoId);
           const { data, error } = await comTempo(
-            supabase.from('posts_comunidade').delete().eq('id', causoId).eq('user_id', sessao.user.id).select('id'),
+            supabase.rpc('apagar_meu_causo', { p_post_id: causoId }),
             TEMPO_DA_ESCRITA_MS,
             'apagar causo',
           );
-          // RLS que recusa não dá erro: devolve lista vazia. Vazio = não apagou.
-          if (error || !data || data.length === 0) {
-            console.error('O servidor não apagou o causo', error);
-            return false;
+          if (error || !data) return false;
+
+          // O causo já deixou de existir publicamente. Uma falha posterior no
+          // Storage não pode fazer a tela afirmar que a exclusão falhou.
+          if (opcoes?.apagarAudio) {
+            const resultadoId = causo?.resultadoId;
+            if (resultadoId) {
+              await criarDesafiosWeb().apagarMeuArroto(resultadoId);
+            }
           }
         } catch (erro) {
           console.error('Falha ao apagar o causo', erro);
@@ -656,37 +611,44 @@ export function criarComunidadeWeb(
     },
 
     async entrarComunidade(slug: string): Promise<boolean> {
-      minhasComunidadesMemoria.add(slug);
-      salvarMinhasComunidadesLocais(Array.from(minhasComunidadesMemoria));
-      return true;
+      if (!usaServidor()) return false;
+      try {
+        const { data, error } = await supabase.rpc('entrar_na_comunidade', { p_slug: slug });
+        return !error && Boolean(data);
+      } catch { return false; }
     },
 
     async sairComunidade(slug: string): Promise<boolean> {
-      minhasComunidadesMemoria.delete(slug);
-      salvarMinhasComunidadesLocais(Array.from(minhasComunidadesMemoria));
-      return true;
+      if (!usaServidor()) return false;
+      try {
+        const { data, error } = await supabase.rpc('sair_da_comunidade', { p_slug: slug });
+        return !error && Boolean(data);
+      } catch { return false; }
     },
 
     async listarMinhasComunidades(): Promise<readonly string[]> {
-      return Array.from(minhasComunidadesMemoria);
+      if (!usaServidor()) return [];
+      try {
+        const { data, error } = await supabase.rpc('listar_minhas_comunidades');
+        return error ? [] : (data ?? []).map((linha: { slug: string }) => linha.slug);
+      } catch { return []; }
     },
 
     async denunciarCauso(causoId: string, motivo: string): Promise<boolean> {
+      if (!usaServidor()) return false;
       if (usaServidor() && !ehLocal(causoId)) {
         try {
           const sessao = await garantirSessao();
           if (!sessao?.user?.id) return false;
-          const { error } = await comTempo(
-            supabase.from('denuncias').insert({
-              post_id: causoId,
-              user_id: sessao.user.id,
-              reason: motivo.trim().length >= 3 ? motivo.trim() : 'Conteúdo impróprio',
+          const { data, error } = await comTempo(
+            supabase.rpc('denunciar_causo', {
+              p_post_id: causoId,
+              p_motivo: motivo.trim().length >= 3 ? motivo.trim() : 'Conteúdo impróprio',
             }),
             TEMPO_DA_ESCRITA_MS,
             'denunciar',
           );
-          // 23505: já denunciou. Está registrado, então conta como feito.
-          if (error && (error as { code?: string }).code !== '23505') {
+          if (error || !data) {
             console.error('O servidor recusou a denúncia', error);
             return false;
           }

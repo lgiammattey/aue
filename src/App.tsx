@@ -76,7 +76,7 @@ function EntradaArena() {
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login')}
+      aoEntrar={() => navigate('/login?modo=cadastro')}
     />
   );
 }
@@ -92,14 +92,14 @@ function EntradaPrincipal() {
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login')}
+      aoEntrar={() => navigate('/login?modo=cadastro')}
     />
   );
 }
 
 function EntradaHistoria() {
   const navigate = useNavigate();
-  return <TelaHistoria onArrotar={() => navigate('/arena')} />;
+  return <TelaHistoria onArrotar={() => navigate('/arena')} aoEntrar={() => navigate('/login?modo=cadastro')} />;
 }
 
 function EntradaBondes() {
@@ -107,7 +107,7 @@ function EntradaBondes() {
   return (
     <TelaComunidade initialTab="comm" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login')} />
+      aoEntrar={() => navigate('/login?modo=cadastro')} />
   );
 }
 
@@ -116,7 +116,7 @@ function EntradaDesafios() {
   return (
     <TelaComunidade initialTab="desafios" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login')} />
+      aoEntrar={() => navigate('/login?modo=cadastro')} />
   );
 }
 
@@ -153,7 +153,7 @@ function EntradaComunidadeSlug() {
       onArrotar={() => navigate('/arena')}
       aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
       aoSair={() => navigate('/login')}
-      aoEntrar={() => navigate('/login')}
+      aoEntrar={() => navigate('/login?modo=cadastro')}
     />
   );
 }

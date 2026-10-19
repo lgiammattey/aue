@@ -14,6 +14,7 @@ const raiz = resolve(__dirname, '../..');
 const lerSql = (arquivo: string) => readFileSync(resolve(raiz, 'supabase/migrations', arquivo), 'utf8');
 const adaptador = readFileSync(resolve(raiz, 'src/plataforma/web/comunidade.ts'), 'utf8');
 const feedSql = lerSql('20261018000002_feed_de_causos_contrato.sql');
+const socialSql = lerSql('20261018000010_rede_social_promovida.sql');
 
 describe('contrato do feed de causos', () => {
   it('toda RPC chamada pelo adaptador existe no SQL do feed ou na 036', () => {
@@ -23,6 +24,7 @@ describe('contrato do feed de causos', () => {
       feedSql +
       lerSql('20261018000004_perfil_e_comentarios_aninhados.sql') +
       lerSql('20261018000009_feed_e_perfil_da_casa.sql') +
+      socialSql +
       lerSql('20260807000036_nomenclatura_ptbr_mvp1.sql');
     for (const nome of new Set(chamadas)) {
       expect(sql, `RPC ${nome}`).toMatch(new RegExp(`FUNCTION public\\.${nome}\\(`));
@@ -67,6 +69,7 @@ describe('contrato do perfil', () => {
       perfilSql +
       lerSql('20261018000009_feed_e_perfil_da_casa.sql') +
       lerSql('20261018000004_perfil_e_comentarios_aninhados.sql') +
+      socialSql +
       lerSql('20260807000036_nomenclatura_ptbr_mvp1.sql');
     for (const nome of new Set(chamadas)) {
       expect(sql, `RPC ${nome}`).toMatch(new RegExp(`FUNCTION public\\.${nome}\\(`));
@@ -74,7 +77,7 @@ describe('contrato do perfil', () => {
   });
 
   it('os parâmetros que o adaptador manda existem na assinatura de atualizar_meu_perfil', () => {
-    const assinatura = perfilSql.match(/CREATE FUNCTION public\.atualizar_meu_perfil\(([\s\S]*?)\)\s*RETURNS/)?.[1] ?? '';
+    const assinatura = socialSql.match(/CREATE OR REPLACE FUNCTION public\.atualizar_meu_perfil\(([\s\S]*?)\)\s*RETURNS/)?.[1] ?? '';
     for (const p of ['p_apelido', 'p_handle', 'p_bio', 'p_cidade', 'p_url_do_avatar', 'p_remover_avatar', 'p_instagram', 'p_tiktok', 'p_youtube', 'p_twitter']) {
       expect(assinatura, p).toContain(p);
     }
@@ -108,15 +111,14 @@ describe('contrato da última definição do feed e do perfil', () => {
 
   it('LinhaDoFeed tem exatamente as colunas que a última listar_feed_de_causos devolve', () => {
     const { arquivo, colunas } = colunasDaUltimaDefinicao('listar_feed_de_causos');
-    expect(arquivo).toBe('20261018000009_feed_e_perfil_da_casa.sql');
+    expect(arquivo).toBe('20261018000010_rede_social_promovida.sql');
     expect(camposDaInterface(adaptador, 'LinhaDoFeed').sort()).toEqual([...colunas].sort());
-    // O áudio da casa vem por último, depois de "minhas".
-    expect(colunas.slice(-2)).toEqual(['minhas', 'caminho_do_audio_da_casa']);
+    expect(colunas.slice(-5)).toEqual(['minhas', 'caminho_do_audio_da_casa', 'comunidade_id', 'comunidade_slug', 'comunidade_nome']);
   });
 
   it('LinhaDePerfil tem exatamente as colunas que a última obter_perfil_publico devolve', () => {
     const { arquivo, colunas } = colunasDaUltimaDefinicao('obter_perfil_publico');
-    expect(arquivo).toBe('20261018000009_feed_e_perfil_da_casa.sql');
+    expect(arquivo).toBe('20261018000010_rede_social_promovida.sql');
     const perfil = readFileSync(resolve(raiz, 'src/plataforma/web/perfilRemoto.ts'), 'utf8');
     expect(camposDaInterface(perfil, 'LinhaDePerfil').sort()).toEqual([...colunas].sort());
   });

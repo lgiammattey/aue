@@ -87,6 +87,7 @@ describe('feed pelo servidor', () => {
       p_limite: 30,
       p_autor_id: null,
       p_curtidos_por: null,
+      p_seguindo: false,
     });
     expect(feed).toHaveLength(1);
     expect(feed[0]).toMatchObject({
@@ -130,9 +131,7 @@ describe('postar causo pelo servidor', () => {
   it('com aceite: sobe o arroto, grava o consentimento e usa a nota do servidor', async () => {
     enviarResultado.mockResolvedValue({ id: 'r9' });
     enviarAudioDoResultado.mockResolvedValue({ id: 'r9', nota: 90.5, duracao: 70, caminho_do_audio: 'usuario-1/r9.webm' });
-    const single = vi.fn().mockResolvedValue({ data: { id: 'p9', content: 'Meu arroto', created_at: '2026-10-18T11:00:00Z' }, error: null });
-    insert.mockReturnValue({ select: () => ({ single }) });
-    from.mockReturnValue({ insert });
+    rpc.mockResolvedValue({ data: { id: 'p9', content: 'Meu arroto', created_at: '2026-10-18T11:00:00Z' }, error: null });
 
     const res = await criarComunidadeWeb().postarCauso({
       comunidadeSlug: 'feed',
@@ -142,14 +141,9 @@ describe('postar causo pelo servidor', () => {
       consentimentoAudioPublico: true,
     });
 
-    expect(insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        result_id: 'r9',
-        consentimento_audio_publico: true,
-        post_type: 'audio_result',
-        user_id: 'usuario-1',
-      }),
-    );
+    expect(rpc).toHaveBeenCalledWith('publicar_causo', expect.objectContaining({
+      p_resultado_id: 'r9', p_consentimento_audio_publico: true,
+    }));
     expect(res.ok).toBe(true);
     if (res.ok) {
       expect(res.causo.nota).toBe(90.5); // a do servidor, não a que o cliente trouxe (91)
@@ -233,14 +227,12 @@ describe('reação, comentário e denúncia pelo servidor', () => {
     expect(await criarComunidadeWeb().adicionarResposta('p1', 'kkk', 'Zé')).toBeNull();
   });
 
-  it('denúncia grava nas colunas que existem (post_id, user_id, reason)', async () => {
-    const inserir = vi.fn().mockResolvedValue({ error: null });
-    from.mockReturnValue({ insert: inserir });
+  it('denúncia passa pela RPC fechada', async () => {
+    rpc.mockResolvedValue({ data: true, error: null });
 
     const feito = await criarComunidadeWeb().denunciarCauso('p1', 'Spam pesado');
 
-    expect(from).toHaveBeenCalledWith('denuncias');
-    expect(inserir).toHaveBeenCalledWith({ post_id: 'p1', user_id: 'usuario-1', reason: 'Spam pesado' });
+    expect(rpc).toHaveBeenCalledWith('denunciar_causo', { p_post_id: 'p1', p_motivo: 'Spam pesado' });
     expect(feito).toBe(true);
   });
 
@@ -249,8 +241,8 @@ describe('reação, comentário e denúncia pelo servidor', () => {
     expect(await criarComunidadeWeb().denunciarCauso('p1', 'Spam')).toBe(false);
   });
 
-  it('denunciar de novo (23505) conta como registrado', async () => {
-    from.mockReturnValue({ insert: vi.fn().mockResolvedValue({ error: { code: '23505', message: 'dup' } }) });
-    expect(await criarComunidadeWeb().denunciarCauso('p1', 'Spam')).toBe(true);
+  it('denúncia recusada não vira sucesso', async () => {
+    rpc.mockResolvedValue({ data: null, error: { code: '42501', message: 'conta promovida' } });
+    expect(await criarComunidadeWeb().denunciarCauso('p1', 'Spam')).toBe(false);
   });
 });

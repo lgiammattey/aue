@@ -66,7 +66,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   useEffect(() => {
     let ativo = true;
     conta.estado().then((e) => {
-      if (ativo) setContaLogada(e.temSessao && !e.anonima);
+      if (ativo) setContaLogada(e.podeParticiparSocialmente ?? (e.temSessao && !e.anonima));
     });
     return () => {
       ativo = false;
@@ -105,7 +105,11 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     }
   }, [initialTab]);
 
-  const handleMudarAba = (nova: TabComunidade) => {
+  const handleMudarAba = (nova: TabComunidade | 'perfil') => {
+    if (nova === 'perfil') {
+      aoAbrirPerfil?.();
+      return;
+    }
     setTab(nova);
     try {
       if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
@@ -124,10 +128,12 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     }
   };
   const [comunidadeAtivaSlug] = useState<string | null>(comunidadeSlugInicial ?? null);
-  const [filtroFeed, setFiltroFeed] = useState<'todos' | 'minhas'>('todos');
+  const [filtroFeed, setFiltroFeed] = useState<'todos' | 'seguindo'>('todos');
   const [comunidades, setComunidades] = useState<readonly Comunidade[]>([]);
-  const [minhasComunidades, setMinhasComunidades] = useState<readonly string[]>(['eu-arroto-e-dai', 'Eu Arroto, e Daí?']);
+  const [minhasComunidades, setMinhasComunidades] = useState<readonly string[]>([]);
   const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
+  const [causosSeguindo, setCausosSeguindo] = useState<readonly CausoPostado[]>([]);
+  const [carregandoSeguindo, setCarregandoSeguindo] = useState(false);
   const [arrotoParaPublicar, setArrotoParaPublicar] = useState<{ nota: number; arroto: ArrotoParaPublicar } | null>(
     () => (resultadoRecente?.arroto ? { nota: resultadoRecente.nota, arroto: resultadoRecente.arroto } : null),
   );
@@ -138,7 +144,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Modais e Feedback
   const [modalNovoAberto, setModalNovoAberto] = useState<boolean>(false);
   const [novoTextoModal, setNovoTextoModal] = useState<string>('');
-  const [novoComuModal, setNovoComuModal] = useState<string>('feed');
+  const [novoComuModal, setNovoComuModal] = useState<string>('bonde-geral');
   const [novoTipoModal, setNovoTipoModal] = useState<'texto' | 'audio' | 'desafio'>('texto');
   const [modalShareAberto, setModalShareAberto] = useState<boolean>(false);
   const [itemParaCompartilhar, setItemParaCompartilhar] = useState<{
@@ -165,6 +171,12 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     setTimeout(() => {
       setToastMsg((cur) => (cur === msg ? '' : cur));
     }, 2200);
+  };
+
+  /** A sessão anônima pode jogar e ler; participação no Bonde exige promoção. */
+  const pedirPromocao = () => {
+    avisar('Crie sua conta para entrar no Bonde.');
+    aoEntrar?.();
   };
 
   // Sincroniza tema
@@ -198,9 +210,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         adaptador.listarFeed(),
       ]);
       setComunidades(comus);
-      if (minhas && minhas.length > 0) {
-        setMinhasComunidades(minhas);
-      }
+      setMinhasComunidades(minhas ?? []);
       setCausos(listaFeed);
     } catch {
       // fallback gracioso
@@ -212,6 +222,22 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
+
+  const carregarSeguindo = async () => {
+    if (!contaLogada) {
+      pedirPromocao();
+      return;
+    }
+    setCarregandoSeguindo(true);
+    try {
+      // O contrato social devolve somente autores seguidos; não há filtro local.
+      setCausosSeguindo(await adaptador.listarFeed({ seguindo: true }));
+    } catch {
+      avisar('Não deu para carregar quem você segue agora.');
+    } finally {
+      setCarregandoSeguindo(false);
+    }
+  };
 
   // Se receber resultado recente da Arena
   useEffect(() => {
@@ -227,6 +253,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Curtir
   const handleCurtir = async (causoId: string) => {
+    if (!contaLogada) return pedirPromocao();
     const res = await adaptador.alternarCurtida(causoId);
     if (!res.ok) avisar('Não deu para curtir agora.');
     if (res.ok) {
@@ -242,6 +269,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Repostar
   const handleRepostar = async (causoId: string) => {
+    if (!contaLogada) return pedirPromocao();
     const res = await adaptador.alternarRepost(causoId);
     if (!res.ok) avisar('Não deu para repostar agora.');
     if (res.ok) {
@@ -269,6 +297,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Responder
   const handleResponder = async (causoId: string, texto: string, respostaAId?: string) => {
+    if (!contaLogada) return pedirPromocao();
     const nova = await adaptador.adicionarResposta(causoId, texto, perfil.nome, perfil.handle, respostaAId);
     if (nova) {
       setCausos((prev) =>
@@ -290,6 +319,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Denunciar
   const handleDenunciar = async (causoId: string) => {
+    if (!contaLogada) return pedirPromocao();
     const registrou = await adaptador.denunciarCauso(causoId, 'Denúncia de usuário');
     if (!registrou) {
       avisar('Não deu para registrar a denúncia. Tenta de novo.');
@@ -301,6 +331,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Apagar resenha minha (com o áudio, quando houver)
   const handleApagar = async (causo: CausoPostado) => {
+    if (!contaLogada) return pedirPromocao();
     const comAudio = Boolean(causo.temAudio);
     const confirmou = window.confirm(
       comAudio
@@ -319,13 +350,22 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Alternar Comunidade
   const handleAlternarComunidade = async (slug: string) => {
+    if (!contaLogada) return pedirPromocao();
     const jaEntrou = minhasComunidades.includes(slug);
     if (jaEntrou) {
-      await adaptador.sairComunidade(slug);
+      const saiu = await adaptador.sairComunidade(slug);
+      if (!saiu) {
+        avisar('Não deu para sair da comunidade agora.');
+        return;
+      }
       setMinhasComunidades((prev) => prev.filter((s) => s !== slug));
       avisar('Saiu da comunidade.');
     } else {
-      await adaptador.entrarComunidade(slug);
+      const entrou = await adaptador.entrarComunidade(slug);
+      if (!entrou) {
+        avisar('Não deu para entrar na comunidade agora.');
+        return;
+      }
       setMinhasComunidades((prev) => [...prev, slug]);
       avisar('Você entrou na comunidade.');
     }
@@ -335,11 +375,15 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   const handlePostarRapido = async (
     dados: string | { texto: string; autorNome?: string; videoUrl?: string; imagemUrl?: string; comunidadeSlug?: string },
   ) => {
+    if (!contaLogada) {
+      pedirPromocao();
+      return false;
+    }
     const texto = typeof dados === 'string' ? dados : dados.texto;
     const autorNome = typeof dados === 'string' ? perfil.nome : (dados.autorNome || perfil.nome);
     const videoUrl = typeof dados === 'string' ? undefined : dados.videoUrl;
     const imagemUrl = typeof dados === 'string' ? undefined : dados.imagemUrl;
-    const comunidadeSlug = typeof dados === 'string' ? 'feed' : (dados.comunidadeSlug || 'feed');
+    const comunidadeSlug = typeof dados === 'string' ? 'bonde-geral' : (dados.comunidadeSlug || 'bonde-geral');
 
     try {
       const res = await adaptador.postarCauso({
@@ -355,7 +399,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
           imagemUrl,
         };
         setCausos((prev) => [causoComMidia, ...prev]);
-        avisar(res.causo.somenteNesteAparelho ? 'Salvo só neste aparelho. O servidor não está configurado.' : comunidadeSlug === 'feed' ? 'Postado no feed.' : `Postado em ${comunidadeSlug}.`);
+        avisar(res.causo.somenteNesteAparelho ? 'Salvo só neste aparelho. O servidor não está configurado.' : comunidadeSlug === 'bonde-geral' ? 'Postado no feed.' : `Postado em ${comunidadeSlug}.`);
         return true;
       }
       avisar('Não foi possível postar.');
@@ -368,6 +412,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Postar via Modal
   const handlePublicarModal = async () => {
+    if (!contaLogada) return pedirPromocao();
     if (!novoTextoModal.trim()) {
       avisar('Escreve alguma coisa.');
       return;
@@ -385,7 +430,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         setModalNovoAberto(false);
         setNovoTextoModal('');
         setTab('feed');
-        avisar(res.causo.somenteNesteAparelho ? 'Salvo só neste aparelho. O servidor não está configurado.' : novoComuModal === 'feed' ? 'Postado no feed.' : `Postado em ${novoComuModal}.`);
+        avisar(res.causo.somenteNesteAparelho ? 'Salvo só neste aparelho. O servidor não está configurado.' : novoComuModal === 'bonde-geral' ? 'Postado no feed.' : `Postado em ${novoComuModal}.`);
       } else {
         avisar('Não foi possível postar.');
       }
@@ -397,6 +442,10 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Publicar o arroto da Arena: o aceite vem do modal; guardar e subir o áudio
   // só acontece aqui, depois dele.
   const handlePublicarArroto = async (dados: DadosDoCausoComArroto): Promise<boolean> => {
+    if (!contaLogada) {
+      pedirPromocao();
+      return false;
+    }
     if (!arrotoParaPublicar) return false;
     const res = await adaptador.postarCauso({
       comunidadeSlug: dados.comunidadeSlug,
@@ -457,15 +506,9 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   const showLeft = !isMobile;
 
   // Filtragem da lista de causos
-  const causosFiltrados = causos.filter((c) => {
+  const causosFiltrados = (filtroFeed === 'seguindo' ? causosSeguindo : causos).filter((c) => {
     // Causos postados pelo próprio usuário na sessão SEMPRE aparecem no feed
     if (c.meu) return true;
-    if (filtroFeed === 'minhas') {
-      const nasMinhas =
-        minhasComunidades.includes(c.comunidadeSlug) ||
-        minhasComunidades.some((m) => m.toLowerCase() === c.comunidadeSlug.toLowerCase());
-      if (!nasMinhas) return false;
-    }
     if (termoBusca.trim()) {
       const q = termoBusca.toLowerCase().trim();
       const bateTexto = c.conteudo.toLowerCase().includes(q);
@@ -507,7 +550,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
               setModalNovoAberto(true);
             }}
             compacto={!isWide}
-            aoAbrirPerfil={aoAbrirPerfil ? () => aoAbrirPerfil() : undefined}
+            aoAbrirPerfil={aoAbrirPerfil ? () => (contaLogada ? aoAbrirPerfil() : pedirPromocao()) : undefined}
             contaLogada={contaLogada}
             aoSair={handleSair}
             aoEntrar={aoEntrar}
@@ -535,7 +578,18 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
           <HeaderSocial
             abaAtiva={tab}
             filtroFeed={filtroFeed}
-            aoMudarFiltroFeed={(f) => setFiltroFeed(f)}
+            aoMudarFiltroFeed={(f) => {
+              if (f === 'seguindo') {
+                if (!contaLogada) {
+                  pedirPromocao();
+                  return;
+                }
+                setFiltroFeed(f);
+                void carregarSeguindo();
+                return;
+              }
+              setFiltroFeed(f);
+            }}
             isMobile={isMobile}
             perfil={perfil}
             aoAbrirArena={handleIrParaArena}
@@ -634,7 +688,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
               />
 
               {/* Feed de Causos com CardDeCauso completo */}
-              {carregando ? (
+              {carregando || (filtroFeed === 'seguindo' && carregandoSeguindo) ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontSize: '15px' }}>
                   Carregando o bonde...
                 </div>
@@ -660,7 +714,11 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--fg)', marginBottom: '8px' }}>
                     Nada por aqui ainda
                   </div>
-                  <div>Nenhum arroto encontrado nesta lista. Solte o primeiro no bonde!</div>
+                  <div>
+                    {filtroFeed === 'seguindo'
+                      ? 'Você ainda não segue ninguém. Quando seguir alguém, as resenhas dela aparecem aqui.'
+                      : 'Nenhum arroto encontrado nesta lista. Solte o primeiro no bonde!'}
+                  </div>
                 </div>
               )}
             </div>
@@ -693,12 +751,16 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
               minhasComunidades={minhasComunidades}
               aoAlternarParticipacao={handleAlternarComunidade}
               aoFiltrarPorComunidade={(_slug) => {
-                setFiltroFeed('minhas');
+                setFiltroFeed('todos');
                 setTab('feed');
               }}
               comunidadeAtivaSlug={comunidadeAtivaSlug}
               causos={causos}
               aoPostarCauso={async (comuNome, texto) => {
+                if (!contaLogada) {
+                  pedirPromocao();
+                  return false;
+                }
                 const res = await adaptador.postarCauso({
                   comunidadeSlug: comuNome,
                   autorNome: perfil.nome,
@@ -765,7 +827,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         <BarraInferiorMobile
           abaAtiva={tab}
           aoMudarAba={handleMudarAba}
-          aoAbrirPerfil={aoAbrirPerfil ? () => aoAbrirPerfil() : undefined}
+          aoAbrirPerfil={aoAbrirPerfil ? () => (contaLogada ? aoAbrirPerfil() : pedirPromocao()) : undefined}
           aoAbrirComposer={() => {
             setNovoTipoModal('texto');
             setModalNovoAberto(true);
@@ -900,9 +962,9 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                     cursor: 'pointer',
                   }}
                 >
-                  <option value="feed">Feed</option>
+                  <option value="bonde-geral">Feed</option>
                   {minhasComunidades
-                    .filter((c) => c.toLowerCase() !== 'feed')
+                    .filter((c) => c.toLowerCase() !== 'bonde-geral')
                     .map((c) => (
                       <option key={c} value={c}>
                         {c}

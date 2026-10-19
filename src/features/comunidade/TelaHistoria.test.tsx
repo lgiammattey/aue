@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { TelaHistoria } from './TelaHistoria';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
@@ -70,7 +70,7 @@ describe('TelaHistoria — Página de Contos e Leitura Completa', () => {
     expect(screen.getByText(/Isso não é arroto de visita/)).toBeDefined();
   });
 
-  it('permite enviar um novo comentário com apelido customizado', async () => {
+  it('leva visitante à promoção antes de permitir comentário', async () => {
     const adapter = criarComunidadeWeb({
       causosIniciais: [CAUSO_TESTE],
       forcarOffline: true,
@@ -86,17 +86,7 @@ describe('TelaHistoria — Página de Contos e Leitura Completa', () => {
     // Aguarda carregar
     expect((await screen.findAllByText('Tiago do Bonde')).length).toBeGreaterThan(0);
 
-    const inputApelido = screen.getByPlaceholderText('Seu apelido (nickname)');
-    const inputTexto = screen.getByPlaceholderText('Deixe seu comentário ou zoação...');
-
-    fireEvent.change(inputApelido, { target: { value: 'Zeca do Bar' } });
-    fireEvent.change(inputTexto, { target: { value: 'Esse aí quebrou as taças da estante!' } });
-
-    const btnComentar = screen.getByRole('button', { name: 'Comentar' });
-    fireEvent.click(btnComentar);
-
-    // Comentário aparece na lista simples
-    expect(await screen.findByText('Zeca do Bar')).toBeDefined();
-    expect(screen.getByText('Esse aí quebrou as taças da estante!')).toBeDefined();
+    expect(screen.queryByPlaceholderText('Deixe seu comentário ou zoação...')).toBeNull();
+    expect(screen.getByRole('button', { name: /Cria sua conta/ })).toBeDefined();
   });
 });

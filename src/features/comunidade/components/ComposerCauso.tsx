@@ -22,7 +22,7 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
   aoAbrirDesafio,
   perfil,
   comunidades,
-  comunidadeInicial = 'feed',
+  comunidadeInicial = 'bonde-geral',
 }) => {
   const [texto, setTexto] = useState('');
   const [nickname, setNickname] = useState(perfil.nome || '');
@@ -147,10 +147,10 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
                 outline: 'none',
               }}
             >
-              <option value="feed">Feed</option>
+              <option value="bonde-geral">Feed</option>
               {comunidades &&
                 comunidades
-                  .filter((c) => c.toLowerCase() !== 'feed')
+                  .filter((c) => c.toLowerCase() !== 'bonde-geral')
                   .map((c) => (
                     <option key={c} value={c}>
                       {c}

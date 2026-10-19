@@ -72,7 +72,7 @@ afterEach(cleanup);
 describe('TelaPerfil', () => {
   it('mostra o perfil dos outros com os números do servidor e segue pela porta', async () => {
     const portaPerfil: PortaDePerfil = portaDePerfil();
-    render(<TelaPerfil handle="betao" portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta()} {...props} />);
+    render(<TelaPerfil handle="betao" portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta(false)} {...props} />);
 
     expect(await screen.findByText('@betao', { selector: 'b' })).toBeDefined();
     expect(screen.getByText('91')).toBeDefined();
@@ -88,19 +88,16 @@ describe('TelaPerfil', () => {
     expect(await screen.findByText('Esse arrotador não existe.')).toBeDefined();
   });
 
-  it('meu perfil: conta anônima oferece criar conta; handle em uso aparece como erro', async () => {
+  it('visitante não ganha perfil próprio: a tela pede promoção sem consultar ou editar perfil', async () => {
     const portaPerfil: PortaDePerfil = portaDePerfil({
       atualizarMeuPerfil: vi.fn(async () => ({ ok: false as const, motivo: 'handleEmUso' as const })),
     });
     render(<TelaPerfil portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta(true)} {...props} />);
 
-    expect(await screen.findByText('Sua conta é anônima')).toBeDefined();
+    expect(await screen.findByText('Seu perfil público começa com uma conta')).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
     expect(props.aoEntrar).toHaveBeenCalledWith('cadastro');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Editar perfil' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar' }));
-    expect(await screen.findByText(/já é de outra pessoa/)).toBeDefined();
+    expect(portaPerfil.obterMeuPerfil).not.toHaveBeenCalled();
   });
 
   it('conta com e-mail mostra o e-mail e permite sair', async () => {

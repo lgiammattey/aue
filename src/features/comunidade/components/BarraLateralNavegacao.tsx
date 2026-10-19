@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
-export type TabNavegacao = 'feed' | 'arena' | 'comm' | 'desafios';
+export type TabNavegacao = 'feed' | 'arena' | 'comm' | 'desafios' | 'perfil';
 
 interface BarraLateralNavegacaoProps {
   abaAtiva: TabNavegacao;
@@ -178,29 +178,36 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
         </a>
 
         {/* Perfil */}
-        {aoAbrirPerfil && (
-          <button
-            type="button"
-            onClick={aoAbrirPerfil}
-            aria-label="Perfil"
-            style={{ ...navBtnBase, color: 'var(--muted)' }}
-          >
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+        {aoAbrirPerfil && (() => {
+          const ativo = abaAtiva === 'perfil';
+          return (
+            <button
+              type="button"
+              onClick={aoAbrirPerfil}
+              aria-label="Perfil"
+              style={{
+                ...navBtnBase,
+                fontWeight: ativo ? 700 : 400,
+                color: ativo ? 'var(--fg)' : 'var(--muted)',
+              }}
             >
-              <path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21v-1a8 8 0 0116 0v1" />
-            </svg>
-            {wide && <span>Perfil</span>}
-          </button>
-        )}
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={ativo ? 2.4 : 1.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21v-1a8 8 0 0116 0v1" />
+              </svg>
+              {wide && <span>Perfil</span>}
+            </button>
+          );
+        })()}
 
         {/* Início / Apresentação Pública */}
         <a

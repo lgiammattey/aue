@@ -26,13 +26,14 @@ function traduzirErro(mensagem: string): ResultadoDaConta {
 export function criarContaWeb(): PortaDeConta {
   return {
     async estado(): Promise<EstadoDaConta> {
-      if (configuracaoAusente) return { temSessao: false, anonima: false };
+      if (configuracaoAusente) return { temSessao: false, anonima: false, podeParticiparSocialmente: false };
       const { data } = await supabase.auth.getSession();
       const usuario = data.session?.user;
-      if (!usuario) return { temSessao: false, anonima: false };
+      if (!usuario) return { temSessao: false, anonima: false, podeParticiparSocialmente: false };
       return {
         temSessao: true,
         anonima: Boolean(usuario.is_anonymous),
+        podeParticiparSocialmente: !usuario.is_anonymous,
         email: usuario.email || undefined,
       };
     },
@@ -54,7 +55,7 @@ export function criarContaWeb(): PortaDeConta {
         if (atual?.is_anonymous) {
           // O @ e o apelido primeiro: se o @ já é de outra pessoa, nada mudou
           // na conta e a tela pede outro.
-          const { error: erroDoPerfil } = await supabase.rpc('atualizar_meu_perfil', {
+          const { error: erroDoPerfil } = await supabase.rpc('preparar_promocao_social', {
             p_apelido: pedido.apelido.trim(),
             p_handle: handle ?? null,
           });
@@ -82,6 +83,14 @@ export function criarContaWeb(): PortaDeConta {
             await updateProfile(data.user.id, { apelido: pedido.apelido.trim() });
           } catch {
             // segue; dá para acertar no perfil
+          }
+          const { error: erroDaPromocao } = await supabase.rpc('preparar_promocao_social', {
+            p_apelido: pedido.apelido.trim(),
+            p_handle: handle ?? null,
+          });
+          if (erroDaPromocao) {
+            if ((erroDaPromocao as { code?: string }).code === '23505') return { ok: false, motivo: 'handleEmUso' };
+            return { ok: false, motivo: 'handleInvalido' };
           }
           return { ok: true };
         }

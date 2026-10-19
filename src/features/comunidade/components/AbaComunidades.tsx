@@ -12,6 +12,7 @@ interface AbaComunidadesProps {
   causos?: readonly CausoPostado[];
   aoPostarCauso?: (comunidadeSlug: string, texto: string) => Promise<boolean>;
   aoCurtirCauso?: (id: string) => void;
+  /** Repassado ao detalhe legado; o card não oferece repost enquanto não houver distribuição real. */
   aoRepostarCauso?: (id: string) => void;
   aoDuvidarCauso?: (causo: CausoPostado) => void;
   aoCompartilharCauso?: (causo: CausoPostado) => void;
@@ -193,6 +194,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
           <button
             type="button"
             onClick={() => aoAlternarParticipacao(c.slug)}
+            aria-pressed={estaDentro}
             style={{
               height: '40px',
               padding: '0 20px',

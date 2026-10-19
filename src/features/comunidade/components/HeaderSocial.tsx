@@ -5,8 +5,8 @@ export type TabHeaderSocial = 'feed' | 'arena' | 'comm' | 'desafios';
 
 interface HeaderSocialProps {
   abaAtiva: TabHeaderSocial;
-  filtroFeed: 'todos' | 'minhas';
-  aoMudarFiltroFeed: (filtro: 'todos' | 'minhas') => void;
+  filtroFeed: 'todos' | 'seguindo';
+  aoMudarFiltroFeed: (filtro: 'todos' | 'seguindo') => void;
   isMobile: boolean;
   perfil?: PerfilUsuario;
   aoAbrirPerfil?: () => void;
@@ -241,14 +241,14 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => aoMudarFiltroFeed('minhas')}
+            onClick={() => aoMudarFiltroFeed('seguindo')}
             style={{
               flex: 1,
               height: '52px',
               border: 0,
               background: 'none',
-              color: filtroFeed === 'minhas' ? 'var(--fg)' : 'var(--muted)',
-              fontWeight: filtroFeed === 'minhas' ? 700 : 500,
+              color: filtroFeed === 'seguindo' ? 'var(--fg)' : 'var(--muted)',
+              fontWeight: filtroFeed === 'seguindo' ? 700 : 500,
               fontSize: '15px',
               cursor: 'pointer',
               display: 'flex',
@@ -261,11 +261,11 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
                 height: '52px',
                 display: 'flex',
                 alignItems: 'center',
-                borderBottom: filtroFeed === 'minhas' ? '4px solid var(--ind)' : '4px solid transparent',
+                borderBottom: filtroFeed === 'seguindo' ? '4px solid var(--ind)' : '4px solid transparent',
                 boxSizing: 'border-box',
               }}
             >
-              Minhas comunidades
+              Seguindo
             </span>
           </button>
         </div>

@@ -5,7 +5,8 @@ import { ArvoreDeComentarios } from './ArvoreDeComentarios';
 interface CardDeCausoProps {
   causo: CausoPostado;
   aoCurtir: (id: string) => void;
-  aoRepostar: (id: string) => void;
+  /** Reservado para quando repost tiver distribuição real no Bonde. */
+  aoRepostar?: (id: string) => void;
   aoDuvidar: (causo: CausoPostado) => void;
   aoCompartilhar: (causo: CausoPostado) => void;
   aoResponder: (causoId: string, texto: string, respostaAId?: string) => void;
@@ -21,7 +22,7 @@ interface CardDeCausoProps {
 export const CardDeCauso: React.FC<CardDeCausoProps> = ({
   causo,
   aoCurtir,
-  aoRepostar,
+  aoRepostar: _aoRepostar,
   aoDuvidar,
   aoCompartilhar,
   aoResponder,
@@ -228,6 +229,8 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               type="button"
               onClick={() => setMenuAberto((v) => !v)}
               aria-label="Mais"
+              aria-haspopup="true"
+              aria-expanded={menuAberto}
               style={{
                 width: '32px',
                 height: '32px',
@@ -252,6 +255,10 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
 
             {menuAberto && (
               <div
+                role="menu"
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setMenuAberto(false);
+                }}
                 style={{
                   position: 'absolute',
                   right: 0,
@@ -267,6 +274,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               >
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={handleDenunciar}
                   style={{
                     background: 'transparent',
@@ -286,6 +294,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                 {causo.meu && aoApagar && (
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={() => {
                       setMenuAberto(false);
                       void aoApagar(causo);
@@ -436,7 +445,11 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               ))}
             </div>
 
-            <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: '12px', color: 'var(--muted)' }}>
+            <span
+              style={{ fontFamily: 'ui-monospace, monospace', fontSize: '12px', color: 'var(--muted)' }}
+              aria-label={`Duração do arroto: ${formatarDuracao(causo.duracaoSegundos)}`}
+              title={`Duração: ${formatarDuracao(causo.duracaoSegundos)}`}
+            >
               {formatarDuracao(causo.duracaoSegundos)}
             </span>
           </div>
@@ -469,29 +482,6 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               <path d="M21 12a8 8 0 01-11.6 7.1L3 21l1.9-6.4A8 8 0 1121 12z" />
             </svg>
             <span>{totalDeComentarios}</span>
-          </button>
-
-          {/* Repost */}
-          <button
-            type="button"
-            onClick={() => aoRepostar(causo.id)}
-            style={actBtnStyle(causo.repostadoPorMim)}
-            aria-label="Repostar"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3" />
-            </svg>
-            <span>{causo.reposts || 0}</span>
           </button>
 
           {/* Like com coração */}

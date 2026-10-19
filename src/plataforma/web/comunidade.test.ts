@@ -91,7 +91,7 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
     }
   });
 
-  it('publica causo com sucesso quando o consentimento é fornecido', async () => {
+  it('não inventa publicação local quando não há servidor', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     const resultado = await adapter.postarCauso({
       comunidadeSlug: 'eu-arroto-e-dai',
@@ -101,18 +101,10 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
       consentimentoAudioPublico: true,
     });
 
-    expect(resultado.ok).toBe(true);
-    if (resultado.ok) {
-      expect(resultado.causo.conteudo).toContain('Teams');
-      expect(resultado.causo.comunidadeSlug).toBe('eu-arroto-e-dai');
-
-      // Aparece no topo do feed
-      const feed = await adapter.listarFeed();
-      expect(feed[0].id).toBe(resultado.causo.id);
-    }
+    expect(resultado).toEqual({ ok: false, motivo: 'semRede' });
   });
 
-  it('alterna reações no causo (adiciona e remove ao tocar de novo)', async () => {
+  it('não aceita reação local sem o contrato do servidor', async () => {
     const causoTeste: CausoPostado = {
       id: 'causo-teste',
       comunidadeId: 'comu-1',
@@ -132,18 +124,11 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
       forcarOffline: true,
     });
 
-    // Reage com fogo
     const r1 = await adapter.alternarReacao('causo-teste', 'fogo');
-    expect(r1.ok).toBe(true);
-    expect(r1.reacoes.fogo).toBe(3);
-
-    // Toca fogo de novo -> remove
-    const r2 = await adapter.alternarReacao('causo-teste', 'fogo');
-    expect(r2.ok).toBe(true);
-    expect(r2.reacoes.fogo).toBe(2);
+    expect(r1.ok).toBe(false);
   });
 
-  it('denunciar causo oculta o post do feed', async () => {
+  it('não marca denúncia local como se fosse registrada', async () => {
     const causoTeste: CausoPostado = {
       id: 'causo-denuncia',
       comunidadeId: 'comu-1',
@@ -162,13 +147,10 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
       forcarOffline: true,
     });
     const denunciou = await adapter.denunciarCauso('causo-denuncia', 'Spam');
-    expect(denunciou).toBe(true);
-
-    const feedDepois = await adapter.listarFeed();
-    expect(feedDepois.some((c) => c.id === 'causo-denuncia')).toBe(false);
+    expect(denunciou).toBe(false);
   });
 
-  it('alterna curtidas estilo twitter (incrementa e decrementa)', async () => {
+  it('não aceita curtida local sem o contrato do servidor', async () => {
     const causoTeste: CausoPostado = {
       id: 'causo-curtida',
       comunidadeId: 'comu-1',
@@ -190,17 +172,10 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
     });
 
     const c1 = await adapter.alternarCurtida('causo-curtida');
-    expect(c1.ok).toBe(true);
-    expect(c1.curtidas).toBe(11);
-    expect(c1.curtido).toBe(true);
-
-    const c2 = await adapter.alternarCurtida('causo-curtida');
-    expect(c2.ok).toBe(true);
-    expect(c2.curtidas).toBe(10);
-    expect(c2.curtido).toBe(false);
+    expect(c1.ok).toBe(false);
   });
 
-  it('permite adicionar e listar respostas reais a um causo', async () => {
+  it('não cria comentário local sem o contrato do servidor', async () => {
     const causoTeste: CausoPostado = {
       id: 'causo-respostas',
       comunidadeId: 'comu-1',
@@ -220,19 +195,14 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
     });
 
     const resp = await adapter.adicionarResposta('causo-respostas', 'Isso foi absurdo!', 'Luiz', 'luiz_prod');
-    expect(resp).not.toBeNull();
-    expect(resp?.conteudo).toBe('Isso foi absurdo!');
-    expect(resp?.autorHandle).toBe('luiz_prod');
-
-    const respostas = await adapter.listarRespostas('causo-respostas');
-    expect(respostas.some((r) => r.conteudo === 'Isso foi absurdo!')).toBe(true);
+    expect(resp).toBeNull();
   });
 
-  it('permite entrar e sair de comunidades com persistência', async () => {
+  it('não guarda comunidade no aparelho como se fosse participação', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     await adapter.entrarComunidade('churrasco-raiz');
     let minhas = await adapter.listarMinhasComunidades();
-    expect(minhas.includes('churrasco-raiz')).toBe(true);
+    expect(minhas.includes('churrasco-raiz')).toBe(false);
 
     await adapter.sairComunidade('churrasco-raiz');
     minhas = await adapter.listarMinhasComunidades();

@@ -172,6 +172,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
           <button
             type="button"
             onClick={aoAlternarParticipacao}
+            aria-pressed={estaDentro}
             style={{
               height: '36px',
               padding: '0 20px',

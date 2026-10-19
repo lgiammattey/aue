@@ -85,13 +85,9 @@ export function criarPerfilRemoto(): PortaDePerfil {
       try {
         const sessao = await garantirSessao();
         if (!sessao?.user?.id) return null;
-        const { data, error } = await supabase
-          .from('perfis')
-          .select('handle')
-          .eq('id', sessao.user.id)
-          .single();
-        if (error || !data?.handle) return null;
-        return await porHandle(data.handle as string);
+        const { data, error } = await supabase.rpc('meu_handle_social');
+        if (error || !data) return null;
+        return await porHandle(data as string);
       } catch (erro) {
         console.error('Falha ao ler o meu perfil', erro);
         return null;

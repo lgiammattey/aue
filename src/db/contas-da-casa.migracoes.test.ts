@@ -216,11 +216,11 @@ describe('feed e perfil (20261018000009)', () => {
     expect(sql).toContain('GRANT EXECUTE ON FUNCTION public.obter_perfil_publico(text) TO anon, authenticated');
   });
 
-  it('a última definição das duas funções é a desta migração', () => {
+  it('a migração social posterior preserva a origem da conta da casa', () => {
     const nomes = readdirSync(`${RAIZ}/supabase/migrations`).filter((n) => n.endsWith('.sql')).sort();
     for (const funcao of ['listar_feed_de_causos', 'obter_perfil_publico']) {
       const definem = nomes.filter((n) => new RegExp(`CREATE\\s+(?:OR REPLACE\\s+)?FUNCTION public\\.${funcao}\\(`).test(semComentarios(lerMigracao(n))));
-      expect(definem.at(-1), funcao).toBe(ARQUIVO_FEED);
+      expect(definem.at(-1), funcao).toBe('20261018000010_rede_social_promovida.sql');
     }
   });
 });

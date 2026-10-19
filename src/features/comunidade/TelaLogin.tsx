@@ -402,12 +402,12 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
           )}
 
           {err && (
-            <span role="alert" style={{ color: 'var(--danger)', fontSize: 14 }}>
+            <span role="alert" aria-live="assertive" style={{ color: 'var(--danger)', fontSize: 14 }}>
               {err}
             </span>
           )}
           {info && (
-            <span role="status" style={{ color: 'var(--fg)', fontSize: 14, lineHeight: 1.4 }}>
+            <span role="status" aria-live="polite" style={{ color: 'var(--fg)', fontSize: 14, lineHeight: 1.4 }}>
               {info}
             </span>
           )}

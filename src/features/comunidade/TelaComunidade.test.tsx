@@ -83,20 +83,38 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     expect((await screen.findAllByText(/Tiago do Bonde/)).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('permite curtir um causo no feed com coração', async () => {
+  it('visitante não curte: pede promoção e não dá sucesso local', async () => {
     const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
-    render(<TelaComunidade porta={adapter} />);
+    const aoEntrar = vi.fn();
+    render(<TelaComunidade porta={adapter} portaConta={contaFalsa(true)} aoEntrar={aoEntrar} />);
 
     const botoesCurtir = await screen.findAllByRole('button', { name: 'Curtir' });
     expect(botoesCurtir.length).toBeGreaterThan(0);
 
     fireEvent.click(botoesCurtir[0]);
-    expect(botoesCurtir[0]).toBeDefined();
+    expect(aoEntrar).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('Crie sua conta para entrar no Bonde.')).toBeDefined();
   });
 
-  it('publica um novo causo no feed através do composer rápido', async () => {
+  it('visitante não ganha uma aba Seguindo inventada', async () => {
+    const aoEntrar = vi.fn();
+    render(
+      <TelaComunidade
+        porta={criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true })}
+        portaConta={contaFalsa(true)}
+        aoEntrar={aoEntrar}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Seguindo' }));
+    expect(aoEntrar).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('Crie sua conta para entrar no Bonde.')).toBeDefined();
+  });
+
+  it('visitante não publica pelo composer: a ação leva para promoção', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
-    render(<TelaComunidade porta={adapter} />);
+    const aoEntrar = vi.fn();
+    render(<TelaComunidade porta={adapter} portaConta={contaFalsa(true)} aoEntrar={aoEntrar} />);
 
     const textarea = screen.getByPlaceholderText('O que tá rolando no bonde?');
     fireEvent.change(textarea, { target: { value: 'Soltei um arroto monstro no almoço.' } });
@@ -106,7 +124,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     const btnPostarComposer = botoesPostar[botoesPostar.length - 1];
     fireEvent.click(btnPostarComposer);
 
-    expect(await screen.findByText('Soltei um arroto monstro no almoço.')).toBeDefined();
+    expect(aoEntrar).toHaveBeenCalledTimes(1);
   });
 
   it('chama onArrotar ao tocar no botão de Jogar o Auê', async () => {
@@ -155,9 +173,10 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     expect(screen.getByText('Stories / WhatsApp')).toBeDefined();
   });
 
-  it('expande thread de respostas e permite responder', async () => {
+  it('visitante lê thread, mas responder pede promoção', async () => {
     const adapter = criarComunidadeWeb({ causosIniciais: CAUSOS_MOCK_TESTE, forcarOffline: true });
-    render(<TelaComunidade porta={adapter} />);
+    const aoEntrar = vi.fn();
+    render(<TelaComunidade porta={adapter} portaConta={contaFalsa(true)} aoEntrar={aoEntrar} />);
 
     const botoesResponder = await screen.findAllByRole('button', { name: 'Responder' });
     expect(botoesResponder.length).toBeGreaterThan(0);
@@ -172,7 +191,8 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     const btnEnviar = screen.getByRole('button', { name: 'Enviar resposta' });
     fireEvent.click(btnEnviar);
 
-    expect(await screen.findByText('Comentário épico no arroto!')).toBeDefined();
+    expect(aoEntrar).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Comentário épico no arroto!')).toBeNull();
   });
 
   it('abre o Hub de Detalhe da Comunidade Eu Arroto, e Daí? com abas Posts e Sobre e botão Telegram', async () => {
@@ -245,17 +265,10 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     expect(await screen.findByRole('button', { name: /arrotar|toque para começar/i })).toBeDefined();
   });
 
-  it('garante que o botão postar publica o causo com sucesso e limpa o composer mesmo com adaptador simulando falha de rede', async () => {
-    const adapterOriginal = criarComunidadeWeb({ forcarOffline: true });
-    // Adaptador onde a chamada remota simula erro mas o fallback local salva com sucesso
-    const adapter = {
-      ...adapterOriginal,
-      postarCauso: async (pedido: Parameters<typeof adapterOriginal.postarCauso>[0]) => {
-        return adapterOriginal.postarCauso(pedido);
-      },
-    };
-
-    render(<TelaComunidade porta={adapter} />);
+  it('offline não inventa postagem local para uma conta promovida', async () => {
+    const adapter = criarComunidadeWeb({ forcarOffline: true });
+    render(<TelaComunidade porta={adapter} portaConta={contaFalsa(false)} />);
+    await screen.findAllByRole('button', { name: 'Sair da conta' });
 
     const textarea = screen.getByPlaceholderText('O que tá rolando no bonde?');
     fireEvent.change(textarea, { target: { value: 'Arroto pós-feijoada sensacional.' } });
@@ -264,16 +277,17 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     const btnPostar = botoesPostar[botoesPostar.length - 1];
     fireEvent.click(btnPostar);
 
-    expect(await screen.findByText('Arroto pós-feijoada sensacional.')).toBeDefined();
+    expect(await screen.findByText('Não foi possível postar.')).toBeDefined();
   });
 
-  it('permite postar no Feed sem grupo e não exibe o rótulo "Postado em..." no card', async () => {
+  it('conta promovida mantém Feed como destino padrão, mas offline não finge publicação', async () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
-    render(<TelaComunidade porta={adapter} />);
+    render(<TelaComunidade porta={adapter} portaConta={contaFalsa(false)} />);
+    await screen.findAllByRole('button', { name: 'Sair da conta' });
 
-    // Destino padrão deve ser 'feed'
+    // Feed é a praça real Bonde Geral, não um destino fictício no cliente.
     const seletorDestino = screen.getByLabelText('Destino da publicação') as HTMLSelectElement;
-    expect(seletorDestino.value).toBe('feed');
+    expect(seletorDestino.value).toBe('bonde-geral');
 
     const textarea = screen.getByPlaceholderText('O que tá rolando no bonde?');
     fireEvent.change(textarea, { target: { value: 'Meu causo livre e solto no Feed!' } });
@@ -281,11 +295,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     const botoesPostar = screen.getAllByRole('button', { name: 'Postar' });
     fireEvent.click(botoesPostar[botoesPostar.length - 1]);
 
-    // O texto deve aparecer no feed
-    expect(await screen.findByText('Meu causo livre e solto no Feed!')).toBeDefined();
-
-    // Não deve existir rótulo 'Postado em feed'
-    expect(screen.queryByText(/Postado em feed/i)).toBeNull();
+    expect(await screen.findByText('Não foi possível postar.')).toBeDefined();
   });
 
   it('conta com e-mail tem Sair; sair chama a porta e leva ao login', async () => {

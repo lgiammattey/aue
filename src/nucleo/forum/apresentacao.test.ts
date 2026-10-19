@@ -8,6 +8,7 @@ import {
   montarArvoreDeRespostas,
   nomeDoAutor,
   normalizarQuebras,
+  proximaRespostaAposApagar,
   numeroPtBr,
   ordenarComunidades,
   tempoRelativo,
@@ -123,6 +124,27 @@ describe('montarArvoreDeRespostas', () => {
     expect(arvore.map((n) => n.resposta.id)).toEqual(['1', '4']);
     expect(arvore[0].filhas[0].resposta.id).toBe('2');
     expect(arvore[0].filhas[0].filhas[0].resposta.id).toBe('3');
+  });
+});
+
+describe('proximaRespostaAposApagar', () => {
+  const arvore = montarArvoreDeRespostas([
+    { id: '1', paiId: null },
+    { id: '2', paiId: '1' },
+    { id: '3', paiId: '2' },
+    { id: '4', paiId: '1' },
+    { id: '5', paiId: null },
+  ]);
+  it('pula as filhas de quem foi apagado e vai à próxima na ordem de leitura', () => {
+    expect(proximaRespostaAposApagar(arvore, '1')).toBe('5');
+    expect(proximaRespostaAposApagar(arvore, '2')).toBe('4');
+    expect(proximaRespostaAposApagar(arvore, '3')).toBe('4');
+    expect(proximaRespostaAposApagar(arvore, '4')).toBe('5');
+  });
+  it('sem próxima (última da conversa) ou id que não está na lista: null, e o foco vai para o composer', () => {
+    expect(proximaRespostaAposApagar(arvore, '5')).toBeNull();
+    expect(proximaRespostaAposApagar(arvore, 'nao-existe')).toBeNull();
+    expect(proximaRespostaAposApagar([], '1')).toBeNull();
   });
 });
 

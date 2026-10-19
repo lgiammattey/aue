@@ -37,5 +37,11 @@ export function useEnvio() {
     [],
   );
 
-  return { enviando, enviar };
+  /** Solta a trava que `travarSeOk` deixou: quem chama já limpou o campo e a tela já reflete isso. */
+  const liberar = useCallback(() => {
+    emVoo.current = false;
+    setEnviando(false);
+  }, []);
+
+  return { enviando, enviar, liberar };
 }

@@ -175,6 +175,37 @@ export function montarArvoreDeRespostas<R extends { readonly id: string; readonl
 }
 
 /**
+ * Para onde vai o foco depois de apagar a resposta `id`: a próxima na ordem em que a conversa é
+ * lida (pai, depois filhas) que NÃO seja uma das filhas dela (que continuam sob a casca, ou sobem
+ * com ela). `null` quando não há próxima: o foco vai para o composer.
+ */
+export function proximaRespostaAposApagar<R extends { readonly id: string; readonly paiId: string | null }>(
+  arvore: readonly NoDeResposta<R>[],
+  id: string,
+): string | null {
+  const ordem: string[] = [];
+  const dentro = new Set<string>();
+  let achou = false;
+  const andar = (nos: readonly NoDeResposta<R>[], noSubarvore: boolean) => {
+    for (const no of nos) {
+      const eh = no.resposta.id === id;
+      const sub = noSubarvore || eh;
+      if (eh) achou = true;
+      ordem.push(no.resposta.id);
+      if (sub) dentro.add(no.resposta.id);
+      andar(no.filhas, sub);
+    }
+  };
+  andar(arvore, false);
+  if (!achou) return null;
+  const i = ordem.indexOf(id);
+  for (let k = i + 1; k < ordem.length; k += 1) {
+    if (!dentro.has(ordem[k])) return ordem[k];
+  }
+  return null;
+}
+
+/**
  * Endereço de imagem que veio do servidor só entra na página se for http(s).
  * `javascript:`, `data:` e o resto viram `null` e a tela cai no monograma.
  */

@@ -24,10 +24,12 @@ interface PropsDoTopo {
   readonly titulo: string;
   /** Telas raiz (Comunidades, Explorar): o título é o H1. Telas aninhadas: o H1 está no conteúdo. */
   readonly voltar?: { readonly para: string; readonly rotulo: string };
+  /** Terceiro encaixe (direita): o menu de ações do tópico. */
+  readonly acoes?: ReactNode;
 }
 
 /** Preenche a barra do topo. */
-export function TopoDaTela({ titulo, voltar }: PropsDoTopo) {
+export function TopoDaTela({ titulo, voltar, acoes }: PropsDoTopo) {
   const { topo, definirRaiz } = useContext(ContextoDosEncaixes);
   const h1 = useRef<HTMLHeadingElement>(null);
   const raiz = !voltar;
@@ -59,6 +61,7 @@ export function TopoDaTela({ titulo, voltar }: PropsDoTopo) {
           {titulo}
         </p>
       )}
+      {acoes && <div className="forum-topo__acoes">{acoes}</div>}
     </>,
     topo,
   );

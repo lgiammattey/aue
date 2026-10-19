@@ -98,6 +98,8 @@ export const TEXTO_SEM_CONFIRMACAO =
   'Não deu pra confirmar o envio. Seu texto continua aqui. Antes de tentar de novo, confere se já apareceu.';
 export const TEXTO_RECUSADO = 'Não deu para enviar. Seu texto continua aqui, tenta de novo.';
 export const TEXTO_SEM_INTERNET = 'Sem internet. Seu texto continua aqui.';
+/** Apagar e denunciar não têm texto para guardar: sem o "seu texto continua aqui" (6.3 e 6.4). */
+export const TEXTO_SEM_INTERNET_SEM_TEXTO = 'Sem internet. Confere a conexão e tenta de novo.';
 export const TEXTO_SESSAO_ACABOU =
   'Sua sessão acabou ou essa conta não pode participar. Entra de novo, seu texto fica aqui.';
 

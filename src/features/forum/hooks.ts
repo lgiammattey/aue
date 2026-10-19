@@ -132,6 +132,8 @@ function foiEsquecidaDepoisDe(chave: string, abertaNoNumero: number): boolean {
   return false;
 }
 
+const PAGINAS_NO_MAXIMO_AO_RECARREGAR = 20;
+
 export type FaseDaLista = 'carregando' | 'pronto' | 'erro';
 
 export interface ListaPaginada<T, C> {
@@ -149,6 +151,13 @@ export interface ListaPaginada<T, C> {
   readonly anuncio: { readonly texto: string; readonly n: number } | null;
   readonly verMais: () => void;
   readonly recarregar: () => void;
+  /**
+   * Lê a lista inteira de novo, do começo até o fim (até 20 páginas), SEM voltar para "carregando":
+   * a tela fica como está até o servidor responder (depois de responder, editar ou apagar a
+   * conversa vem do servidor, não do que o cliente acha que ficou). `false` se alguma página
+   * falhou: o que estava na tela fica e quem chamou diz isso à pessoa.
+   */
+  readonly recarregarTudo: () => Promise<boolean>;
 }
 
 interface Opcoes<T, C extends CursorDoForum> {
@@ -313,5 +322,47 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
 
   const recarregar = useCallback(() => setTentativa((t) => t + 1), []);
 
-  return { fase, itens, proximo, motivo, carregandoMais, falhouAoCarregarMais, idParaFocar, anuncio, verMais, recarregar };
+  const recarregarTudo = useCallback(async (): Promise<boolean> => {
+    const minha = ++geracao.current;
+    buscandoMais.current = true;
+    setCarregandoMais(false);
+    const numeroNaCarga = numeroDoEsquecimento;
+    let acumulado: readonly T[] = [];
+    let cursor: C | null = null;
+    for (let pagina = 0; pagina < PAGINAS_NO_MAXIMO_AO_RECARREGAR; pagina += 1) {
+      const r: ResultadoDaLeitura<PaginaDoForum<C, T>> = await carregarRef
+        .current(cursor)
+        .catch((): ResultadoDaLeitura<PaginaDoForum<C, T>> => ({ ok: false, motivo: 'falhou' }));
+      if (geracao.current !== minha) return false;
+      if (!r.ok) {
+        buscandoMais.current = false;
+        return false;
+      }
+      acumulado = juntarPorId<T>(acumulado, r.valor.itens).itens;
+      cursor = r.valor.proximo;
+      if (cursor === null) break;
+    }
+    buscandoMais.current = false;
+    abertaNoNumero.current = numeroNaCarga;
+    setItens(acumulado);
+    setProximo(cursor);
+    setMotivo(null);
+    setFalhouAoCarregarMais(false);
+    setFase('pronto');
+    return true;
+  }, []);
+
+  return {
+    fase,
+    itens,
+    proximo,
+    motivo,
+    carregandoMais,
+    falhouAoCarregarMais,
+    idParaFocar,
+    anuncio,
+    verMais,
+    recarregar,
+    recarregarTudo,
+  };
 }

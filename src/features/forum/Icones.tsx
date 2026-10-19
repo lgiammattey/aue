@@ -36,3 +36,4 @@ export const IconeFechado = (p: Props) => <Svg d="M6 11h12v9H6zM8 11V8a4 4 0 018
 export const IconeTema = (p: Props) => (
   <Svg d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M12 17a5 5 0 100-10 5 5 0 000 10z" {...p} />
 );
+export const IconeMaisOpcoes = (p: Props) => <Svg d="M5 12h.01M12 12h.01M19 12h.01" traco={3} {...p} />;

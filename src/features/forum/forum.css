@@ -1659,3 +1659,134 @@ html:has(.forum-dialogo[open]) {
     padding: 8px;
   }
 }
+
+/* ------------------------------------------------ Abas do perfil (pedaço 2d) */
+
+/*
+  O perfil segue na casca antiga: os tokens de cor vêm do tema global (mesmos nomes),
+  então aqui só entram o que a casca do fórum dava de graça (reset, medidas, foco).
+*/
+.forum-embutido {
+  --gut: 16px;
+  --recuo: 12px;
+  /* Os tokens do fórum que o tema global não tem (mesmos valores da casca, 3:1 para contornos). */
+  --border-strong: #74725f;
+  --fg-soft-forte: color-mix(in srgb, var(--fg) 11%, transparent);
+  color: var(--fg);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+[data-theme='light'] .forum-embutido {
+  --border-strong: #85836f;
+}
+.forum-embutido *,
+.forum-embutido *::before,
+.forum-embutido *::after {
+  box-sizing: border-box;
+}
+.forum-embutido :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+}
+.forum-embutido :where(ul, ol) {
+  list-style: none;
+  padding: 0;
+}
+.forum-embutido a,
+.forum-embutido button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.forum-embutido :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.forum-embutido time {
+  white-space: nowrap;
+}
+.forum-embutido :focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.forum-abas {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.forum-aba {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 var(--recuo);
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--duration-fast, 160ms) var(--easing-standard, ease);
+}
+.forum-aba:hover {
+  background: var(--fg-soft);
+}
+.forum-aba[aria-selected='true'] {
+  color: var(--fg);
+  font-weight: 700;
+}
+/* Sublinhado de 3px na aba ativa; fica por cima da linha fina de baixo. */
+.forum-aba[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: var(--fg);
+}
+.forum-aba:focus-visible {
+  outline-offset: -3px;
+}
+.forum-painel:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Meta do perfil: comunidade (link de 44px) e o resto na mesma linha. */
+.forum-perfil-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.forum-perfil-meta__comunidade {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  max-width: 100%;
+  font-weight: 600;
+}
+/* Área tocável de 44px sem engordar a linha (13px de cada lado de 18px de texto): vale também quando o nome quebra em duas linhas. */
+.forum-perfil-meta__comunidade::before {
+  content: '';
+  position: absolute;
+  inset: -13px 0;
+}
+.forum-perfil-meta__comunidade:hover {
+  text-decoration: underline;
+}
+.forum-linha__titulo--resposta {
+  font-size: 0.9375rem;
+}
+.forum-linha__titulo--resposta a {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+.forum-linha__corpo {
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}

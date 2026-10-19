@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderizarSemRota, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { TelaPerfil } from './TelaPerfil';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
-import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
+import type { TopicoDoAutor } from '../../portas/forum';
+import { dependencias, forumFalso } from '../forum/dublesParaTeste';
 import type { PortaDeConta } from '../../portas/conta';
 
 const base: PerfilPublico = {
@@ -20,15 +23,6 @@ const base: PerfilPublico = {
   euSigo: false,
   souEu: false,
 };
-
-const comunidade = {
-  listarFeed: vi.fn(async () => []),
-  alternarCurtida: vi.fn(),
-  alternarRepost: vi.fn(),
-  listarRespostas: vi.fn(async () => []),
-  adicionarResposta: vi.fn(),
-  denunciarCauso: vi.fn(),
-} as unknown as PortaDeComunidade;
 
 const conta = (anonima = true): PortaDeConta => ({
   estado: vi.fn(async () => ({ temSessao: true, anonima, email: anonima ? undefined : 'b@aue.com' })),
@@ -54,10 +48,11 @@ function portaDePerfil(sobrepor: Partial<PortaDePerfil> = {}): PortaDePerfil {
   };
 }
 
+const render = (ui: ReactElement) => renderizarSemRota(<MemoryRouter>{ui}</MemoryRouter>);
+
 const props = {
   aoVoltar: vi.fn(),
   aoArrotar: vi.fn(),
-  aoAbrirHistoria: vi.fn(),
   aoAbrirPerfil: vi.fn(),
   aoEntrar: vi.fn(),
 };
@@ -67,28 +62,29 @@ afterEach(cleanup);
 
 const ROTULO_SIMBOLO = 'Usuário da casa, Burpzilla';
 
-const causoDaCasa: CausoPostado = {
-  id: 'c1',
-  comunidadeId: 'x',
-  comunidadeSlug: 'feed',
-  autorNome: 'Giam',
-  autorHandle: 'giam',
-  autorHandleDoServidor: true,
-  conteudo: 'Burpzilla acordou.',
-  reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
-  curtidas: 0,
-  reposts: 0,
-  totalComentarios: 0,
+const topicoDaCasa: TopicoDoAutor = {
+  id: 't1',
+  comunidade: { id: 'c1', slug: 'bonde-geral', nome: 'Bonde Geral' },
+  titulo: 'Burpzilla acordou.',
+  corpo: 'Burpzilla acordou.',
+  status: 'aberto',
+  fixado: false,
   criadoEm: '2026-08-28T12:00:00Z',
+  editadoEm: null,
+  ultimaAtividadeEm: '2026-08-28T12:00:00Z',
+  respostasTotal: 0,
 };
 
-function renderizar(perfil: PerfilPublico, causos: CausoPostado[] = []) {
+function renderizar(perfil: PerfilPublico, topicos: TopicoDoAutor[] = []) {
+  const forum = forumFalso({
+    listarTopicosDoAutor: vi.fn(async () => ({ ok: true as const, valor: { itens: topicos, proximo: null } })),
+  });
   return render(
     <TelaPerfil
       handle={perfil.handle}
       portaPerfil={portaDePerfil({ obterPerfil: vi.fn(async () => perfil) })}
-      portaComunidade={{ ...comunidade, listarFeed: vi.fn(async () => causos) } as unknown as PortaDeComunidade}
       portaConta={conta()}
+      dependenciasDoForum={dependencias({ forum })}
       {...props}
     />,
   );
@@ -112,11 +108,10 @@ describe('TelaPerfil: símbolo Burpzilla', () => {
     expect(screen.queryByRole('img', { name: ROTULO_SIMBOLO })).toBeNull();
   });
 
-  it('nunca aparece nos cards do perfil, nem do perfil da casa', async () => {
-    const { container } = renderizar({ ...base, handle: 'giam', apelido: 'Giam', daCasa: true }, [causoDaCasa]);
-    const card = await screen.findByTestId('card-causo-c1');
-    expect(card.querySelector('svg[role="img"]')).toBeNull();
-    expect(card.textContent).not.toMatch(/Burpzilla\s*$/);
+  it('nunca aparece nas linhas das abas, nem no perfil da casa', async () => {
+    const { container } = renderizar({ ...base, handle: 'giam', apelido: 'Giam', daCasa: true }, [topicoDaCasa]);
+    const linha = (await screen.findByRole('link', { name: 'Burpzilla acordou.' })).closest('li')!;
+    expect(linha.querySelector('svg[role="img"]')).toBeNull();
     expect(container.querySelectorAll(`[aria-label="${ROTULO_SIMBOLO}"]`).length).toBe(1);
   });
 
@@ -135,7 +130,7 @@ describe('TelaPerfil: estados', () => {
       soltar = r;
     });
     render(
-      <TelaPerfil handle="betao" portaPerfil={portaDePerfil({ obterPerfil: vi.fn(() => demora) })} portaComunidade={comunidade} portaConta={conta()} {...props} />,
+      <TelaPerfil handle="betao" portaPerfil={portaDePerfil({ obterPerfil: vi.fn(() => demora) })} portaConta={conta()} {...props} />,
     );
     const status = screen.getByRole('status');
     expect(status.getAttribute('aria-live')).toBe('polite');
@@ -147,7 +142,7 @@ describe('TelaPerfil: estados', () => {
   it('perfil inexistente oferece Voltar ao Bonde', async () => {
     const aoVoltar = vi.fn();
     render(
-      <TelaPerfil handle="fantasma" portaPerfil={portaDePerfil({ obterPerfil: vi.fn(async () => null) })} portaComunidade={comunidade} portaConta={conta()} {...props} aoVoltar={aoVoltar} />,
+      <TelaPerfil handle="fantasma" portaPerfil={portaDePerfil({ obterPerfil: vi.fn(async () => null) })} portaConta={conta()} {...props} aoVoltar={aoVoltar} />,
     );
     expect(await screen.findByText('Esse arrotador não existe.')).toBeDefined();
     expect(screen.queryByText(/Não deu para abrir o perfil/)).toBeNull();
@@ -159,7 +154,7 @@ describe('TelaPerfil: estados', () => {
     const aoVoltar = vi.fn();
     const obterPerfil = vi.fn().mockRejectedValueOnce(new Error('sem rede')).mockResolvedValue(base);
     render(
-      <TelaPerfil handle="betao" portaPerfil={portaDePerfil({ obterPerfil })} portaComunidade={comunidade} portaConta={conta()} {...props} aoVoltar={aoVoltar} />,
+      <TelaPerfil handle="betao" portaPerfil={portaDePerfil({ obterPerfil })} portaConta={conta()} {...props} aoVoltar={aoVoltar} />,
     );
     expect(await screen.findByText('Não deu para abrir o perfil. Tenta de novo.')).toBeDefined();
     expect(screen.queryByText('Esse arrotador não existe.')).toBeNull();

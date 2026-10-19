@@ -178,7 +178,6 @@ function EntradaDoPerfil({ handle }: { handle?: string }) {
       boasVindas={!handle && new URLSearchParams(location.search).get('boas-vindas') === '1'}
       aoVoltar={() => navigate('/feed')}
       aoArrotar={() => navigate('/arena')}
-      aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
       aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
       aoEntrar={(modo) => irParaLogin(modo === 'cadastro' ? 'cadastro' : 'entrar')}
     />

@@ -249,7 +249,7 @@ export const sondas: { navegar: ReturnType<typeof useNavigate> | null; caminho: 
   caminho: '',
 };
 
-function Sonda() {
+export function Sonda() {
   const local = useLocation();
   sondas.navegar = useNavigate();
   sondas.caminho = local.pathname + local.search;

@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderizarSemRota, screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { TelaPerfil } from './TelaPerfil';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
-import type { PortaDeComunidade } from '../../portas/comunidade';
+import { dependencias, forumFalso } from '../forum/dublesParaTeste';
 import type { PortaDeConta } from '../../portas/conta';
 
 const base: PerfilPublico = {
@@ -20,15 +22,6 @@ const base: PerfilPublico = {
   euSigo: false,
   souEu: false,
 };
-
-const comunidade = {
-  listarFeed: vi.fn(async () => []),
-  alternarCurtida: vi.fn(),
-  alternarRepost: vi.fn(),
-  listarRespostas: vi.fn(async () => []),
-  adicionarResposta: vi.fn(),
-  denunciarCauso: vi.fn(),
-} as unknown as PortaDeComunidade;
 
 const conta = (anonima = true, perfilSocialPendente = false): PortaDeConta => ({
   estado: vi.fn(async () => ({ temSessao: true, anonima, perfilSocialPendente, email: anonima ? undefined : 'b@aue.com' })),
@@ -61,10 +54,17 @@ const compartilhamentoFalso = (resultado: 'ok' | 'indisponivel' = 'ok') =>
     copiar: vi.fn(async () => true),
   });
 
+const render = (ui: ReactElement) => renderizarSemRota(<MemoryRouter>{ui}</MemoryRouter>);
+
+const vazia = async () => ({ ok: true as const, valor: { itens: [], proximo: null } });
+const dependenciasDoForum = dependencias({
+  forum: forumFalso({ listarTopicosDoAutor: vi.fn(vazia), listarRespostasDoAutor: vi.fn(vazia) }),
+});
+
 const props = {
+  dependenciasDoForum,
   aoVoltar: vi.fn(),
   aoArrotar: vi.fn(),
-  aoAbrirHistoria: vi.fn(),
   aoAbrirPerfil: vi.fn(),
   aoEntrar: vi.fn(),
 };
@@ -74,7 +74,7 @@ afterEach(cleanup);
 describe('TelaPerfil', () => {
   it('mostra o perfil dos outros com os números do servidor e segue pela porta', async () => {
     const portaPerfil: PortaDePerfil = portaDePerfil();
-    render(<TelaPerfil handle="betao" portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta(false)} {...props} />);
+    render(<TelaPerfil handle="betao" portaPerfil={portaPerfil} portaConta={conta(false)} {...props} />);
 
     expect(await screen.findByText('@betao', { selector: 'b' })).toBeDefined();
     expect(screen.getByText('91')).toBeDefined();
@@ -86,15 +86,57 @@ describe('TelaPerfil', () => {
 
   it('perfil que não existe diz isso, em vez de mostrar um inventado', async () => {
     const portaPerfil: PortaDePerfil = portaDePerfil({ obterPerfil: vi.fn(async () => null) });
-    render(<TelaPerfil handle="fantasma" portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta()} {...props} />);
+    const forum = forumFalso({ listarTopicosDoAutor: vi.fn(vazia), listarRespostasDoAutor: vi.fn(vazia) });
+    render(
+      <TelaPerfil
+        handle="fantasma"
+        portaPerfil={portaPerfil}
+        portaConta={conta()}
+        {...props}
+        dependenciasDoForum={dependencias({ forum })}
+      />,
+    );
     expect(await screen.findByText('Esse arrotador não existe.')).toBeDefined();
+    // "Não achei" é do cabeçalho: não existe aba nem texto de "sem tópicos ainda" para um @ que não existe.
+    expect(screen.queryByRole('tablist')).toBeNull();
+    expect(screen.queryByText(/ainda não abriu/)).toBeNull();
+    expect(forum.listarTopicosDoAutor).not.toHaveBeenCalled();
+  });
+
+  it('as abas são Tópicos e Respostas, lidas pelo @ que o servidor devolveu', async () => {
+    const forum = forumFalso({
+      listarTopicosDoAutor: vi.fn(vazia),
+      listarRespostasDoAutor: vi.fn(vazia),
+    });
+    render(
+      <TelaPerfil
+        handle="BETAO"
+        portaPerfil={portaDePerfil()}
+        portaConta={conta(false)}
+        {...props}
+        dependenciasDoForum={dependencias({ forum })}
+      />,
+    );
+    expect(await screen.findByRole('heading', { level: 1, name: 'Betão' })).toBeDefined();
+    const abas = await screen.findAllByRole('tab');
+    expect(abas.map((a) => a.textContent)).toEqual(['Tópicos', 'Respostas']);
+    expect(screen.queryByText(/resenhas$|curtidos|com áudio/i, { selector: '[role="tab"]' })).toBeNull();
+    // Outra pessoa: o texto do vazio fala dela.
+    expect(await screen.findByRole('heading', { name: '@betao ainda não abriu nenhum tópico.' })).toBeDefined();
+    expect(forum.listarTopicosDoAutor).toHaveBeenCalledWith('betao', { limite: 30, cursor: null });
+  });
+
+  it('no próprio perfil o vazio fala com a pessoa e leva às comunidades', async () => {
+    render(<TelaPerfil portaPerfil={portaDePerfil()} portaConta={conta(false)} {...props} />);
+    expect(await screen.findByRole('heading', { name: 'Você ainda não abriu nenhum tópico.' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Ver comunidades' }).getAttribute('href')).toBe('/comunidades');
   });
 
   it('visitante não ganha perfil próprio: a tela pede promoção sem consultar ou editar perfil', async () => {
     const portaPerfil: PortaDePerfil = portaDePerfil({
       atualizarMeuPerfil: vi.fn(async () => ({ ok: false as const, motivo: 'handleEmUso' as const })),
     });
-    render(<TelaPerfil portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta(true)} {...props} />);
+    render(<TelaPerfil portaPerfil={portaPerfil} portaConta={conta(true)} {...props} />);
 
     expect(await screen.findByText('Seu perfil público começa com uma conta')).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
@@ -105,7 +147,7 @@ describe('TelaPerfil', () => {
   it('conta com e-mail mostra o e-mail e permite sair', async () => {
     const portaConta = conta(false);
     const portaPerfil: PortaDePerfil = portaDePerfil();
-    render(<TelaPerfil portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={portaConta} {...props} />);
+    render(<TelaPerfil portaPerfil={portaPerfil} portaConta={portaConta} {...props} />);
     expect(await screen.findByText('b@aue.com')).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: 'Sair' }));
     expect(portaConta.sair).toHaveBeenCalled();
@@ -118,7 +160,6 @@ describe('TelaPerfil', () => {
       <TelaPerfil
         boasVindas
         portaPerfil={portaDePerfil({ concluirMeuPerfilSocial })}
-        portaComunidade={comunidade}
         portaConta={conta(false)}
         {...props}
         aoVoltar={aoVoltar}
@@ -144,7 +185,6 @@ describe('TelaPerfil', () => {
       <TelaPerfil
         boasVindas
         portaPerfil={portaDePerfil({ concluirMeuPerfilSocial })}
-        portaComunidade={comunidade}
         portaConta={conta(false)}
         {...props}
         aoVoltar={aoVoltar}
@@ -161,7 +201,6 @@ describe('TelaPerfil', () => {
     render(
       <TelaPerfil
         portaPerfil={portaPerfil}
-        portaComunidade={comunidade}
         portaConta={conta(false, true)}
         {...props}
       />,
@@ -179,7 +218,7 @@ describe('TelaPerfil', () => {
       .mockResolvedValueOnce({ ok: true, perfil: { ...base, souEu: true, avatarUrl: 'https://x/foto.jpg' } })
       .mockResolvedValueOnce({ ok: false, motivo: 'formatoInvalido' });
     const portaPerfil = portaDePerfil({ enviarFoto });
-    render(<TelaPerfil portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta(false)} {...props} />);
+    render(<TelaPerfil portaPerfil={portaPerfil} portaConta={conta(false)} {...props} />);
 
     const entrada = (await screen.findByLabelText('Trocar foto do perfil')) as HTMLInputElement;
     const arquivo = new File(['x'], 'eu.png', { type: 'image/png' });
@@ -199,7 +238,6 @@ describe('TelaPerfil', () => {
       <TelaPerfil
         handle="betao"
         portaPerfil={portaDePerfil({ listarConexoes })}
-        portaComunidade={comunidade}
         portaConta={conta()}
         {...props}
       />,
@@ -216,7 +254,6 @@ describe('TelaPerfil', () => {
       <TelaPerfil
         handle="betao"
         portaPerfil={portaDePerfil({ obterPerfil: vi.fn(async () => perfil) })}
-        portaComunidade={comunidade}
         portaConta={conta()}
         {...props}
       />,
@@ -233,7 +270,6 @@ describe('TelaPerfil', () => {
       <TelaPerfil
         handle="betao"
         portaPerfil={portaDePerfil()}
-        portaComunidade={comunidade}
         portaConta={conta()}
         compartilhamento={indisponivel}
         {...props}

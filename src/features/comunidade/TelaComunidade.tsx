@@ -21,6 +21,7 @@ import { ModalNovoCauso, type DadosDoCausoComArroto } from './ModalNovoCauso';
 import { ColunaTendencias } from './components/ColunaTendencias';
 import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../nucleo/comunidade/limites';
 import { ModalCardCompartilhamento } from './ModalCardCompartilhamento';
+import { ORIGEM_CANONICA } from '../../shared/enderecoPublico';
 import { Arena } from '../../arena/Arena';
 import './Comunidade.css';
 
@@ -141,6 +142,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   const [desafioAtivoCodigo, setDesafioAtivoCodigo] = useState<string | undefined>(undefined);
   const [termoBusca, setTermoBusca] = useState<string>('');
   const [carregando, setCarregando] = useState<boolean>(true);
+  const [falhaAoCarregar, setFalhaAoCarregar] = useState(false);
 
   // Modais e Feedback
   const [modalNovoAberto, setModalNovoAberto] = useState<boolean>(false);
@@ -149,22 +151,18 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   const [novoTipoModal, setNovoTipoModal] = useState<'texto' | 'audio' | 'desafio'>('texto');
   const [modalShareAberto, setModalShareAberto] = useState<boolean>(false);
   const [itemParaCompartilhar, setItemParaCompartilhar] = useState<{
-    nota: number | string;
+    nota?: number | string;
     autorNome: string;
     comunidadeNome?: string;
     textoCauso?: string;
-    codigoDesafio?: string;
+    url: string;
+    rotuloLink: string;
   } | null>(null);
 
   const [toastMsg, setToastMsg] = useState<string>('');
 
   const [perfil] = useState<PerfilUsuario>(() => {
-    const p = obterPerfilLocal();
-    if (p.vitoriasX1 === 0 && p.derrotasX1 === 0) {
-      p.vitoriasX1 = 7;
-      p.derrotasX1 = 3;
-    }
-    return p;
+    return obterPerfilLocal();
   });
 
   const avisar = (msg: string) => {
@@ -204,17 +202,21 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Carregamento de dados da porta
   const carregarDados = useCallback(async () => {
     setCarregando(true);
+    setFalhaAoCarregar(false);
     try {
-      const [comus, minhas, listaFeed] = await Promise.all([
+      // O feed não depende da lista de comunidades: uma falha não derruba a outra.
+      const [comus, minhas, listaFeed] = await Promise.allSettled([
         adaptador.listarComunidades(),
         adaptador.listarMinhasComunidades(),
         adaptador.listarFeed(),
       ]);
-      setComunidades(comus);
-      setMinhasComunidades(minhas ?? []);
-      setCausos(listaFeed);
+      if (comus.status === 'fulfilled') setComunidades(comus.value);
+      if (minhas.status === 'fulfilled') setMinhasComunidades(minhas.value ?? []);
+      if (listaFeed.status === 'rejected') throw listaFeed.reason;
+      setCausos(listaFeed.value);
     } catch {
-      // fallback gracioso
+      // Falha de leitura não é lista vazia: a tela mostra o erro e o botão de tentar de novo.
+      setFalhaAoCarregar(true);
     } finally {
       setCarregando(false);
     }
@@ -286,7 +288,13 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Abrir a conversa: traz os comentários do servidor
   const handleAbrirConversa = async (causoId: string) => {
-    const lista = await adaptador.listarRespostas(causoId);
+    let lista: Awaited<ReturnType<typeof adaptador.listarRespostas>>;
+    try {
+      lista = await adaptador.listarRespostas(causoId);
+    } catch {
+      avisar('Não deu para carregar as respostas. Tenta de novo.');
+      return;
+    }
     setCausos((prev) =>
       prev.map((c) =>
         c.id === causoId
@@ -297,8 +305,11 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   // Responder
-  const handleResponder = async (causoId: string, texto: string, respostaAId?: string) => {
-    if (!contaLogada) return pedirPromocao();
+  const handleResponder = async (causoId: string, texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
+    if (!contaLogada) {
+      pedirPromocao();
+      return 'sem-conta';
+    }
     const nova = await adaptador.adicionarResposta(causoId, texto, perfil.nome, perfil.handle, respostaAId);
     if (nova) {
       setCausos((prev) =>
@@ -313,9 +324,10 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         }),
       );
       avisar('Resposta enviada.');
-    } else {
-      avisar('Não deu para enviar a resposta. Tenta de novo.');
+      return true;
     }
+    avisar('Não deu para enviar a resposta. Tenta de novo.');
+    return false;
   };
 
   // Denunciar
@@ -374,14 +386,14 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
 
   // Postar via composer rápido
   const handlePostarRapido = async (
-    dados: string | { texto: string; autorNome?: string; videoUrl?: string; imagemUrl?: string; comunidadeSlug?: string },
+    dados: string | { texto: string; videoUrl?: string; imagemUrl?: string; comunidadeSlug?: string },
   ) => {
     if (!contaLogada) {
       pedirPromocao();
       return false;
     }
     const texto = typeof dados === 'string' ? dados : dados.texto;
-    const autorNome = typeof dados === 'string' ? perfil.nome : (dados.autorNome || perfil.nome);
+    const autorNome = perfil.nome;
     const videoUrl = typeof dados === 'string' ? undefined : dados.videoUrl;
     const imagemUrl = typeof dados === 'string' ? undefined : dados.imagemUrl;
     const comunidadeSlug = typeof dados === 'string' ? 'bonde-geral' : (dados.comunidadeSlug || 'bonde-geral');
@@ -454,7 +466,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
     if (!arrotoParaPublicar) return false;
     const res = await adaptador.postarCauso({
       comunidadeSlug: dados.comunidadeSlug,
-      autorNome: dados.autorNome,
+      // Só rótulo provisório: a autoria real é a conta, resolvida no servidor.
+      autorNome: perfil.nome,
       conteudo: dados.conteudo,
       arroto: arrotoParaPublicar.arroto,
       consentimentoAudioPublico: dados.consentimentoAudioPublico,
@@ -483,12 +496,18 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   };
 
   const handleCompartilharCauso = (causo: CausoPostado) => {
+    // Causo que só existe neste aparelho não tem página: o link abriria 404 para quem recebe.
+    if (causo.somenteNesteAparelho) {
+      avisar('Essa resenha ainda não subiu pro Auê. Sem link pra compartilhar por enquanto.');
+      return;
+    }
     setItemParaCompartilhar({
-      nota: causo.nota !== undefined ? causo.nota : 90,
+      nota: causo.nota,
       autorNome: causo.autorNome,
       comunidadeNome: causo.comunidadeSlug,
       textoCauso: causo.conteudo,
-      codigoDesafio: causo.id ? causo.id.slice(0, 4) : 'k4x9',
+      url: `${ORIGEM_CANONICA}/historia/${causo.id}`,
+      rotuloLink: 'Copiar link da resenha',
     });
     setModalShareAberto(true);
   };
@@ -499,7 +518,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
       autorNome: desafio.jogadorA,
       comunidadeNome: 'Desafio X1',
       textoCauso: desafio.titulo,
-      codigoDesafio: desafio.codigo,
+      url: `${ORIGEM_CANONICA}/x1/${desafio.codigo}`,
+      rotuloLink: 'Copiar link do X1',
     });
     setModalShareAberto(true);
   };
@@ -696,6 +716,20 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
               {carregando || (filtroFeed === 'seguindo' && carregandoSeguindo) ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontSize: '15px' }}>
                   Carregando o bonde...
+                </div>
+              ) : falhaAoCarregar ? (
+                <div role="alert" style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--muted)' }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--fg)', marginBottom: '8px' }}>
+                    Não deu pra carregar
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>O servidor não respondeu. Tenta de novo.</div>
+                  <button
+                    type="button"
+                    onClick={() => void carregarDados()}
+                    style={{ minHeight: '44px', padding: '0 20px', borderRadius: '999px', border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--fg)', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Tentar de novo
+                  </button>
                 </div>
               ) : causosFiltrados.length > 0 ? (
                 causosFiltrados.map((c) => (
@@ -1069,7 +1103,6 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
         aberto={arrotoParaPublicar !== null}
         comunidades={comunidades}
         comunidadeAtualSlug={comunidadeAtivaSlug ?? undefined}
-        apelidoInicial={perfil.nome}
         notaResultado={arrotoParaPublicar?.nota}
         onSubmit={handlePublicarArroto}
         onFechar={() => setArrotoParaPublicar(null)}
@@ -1083,7 +1116,8 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
           autorNome={itemParaCompartilhar.autorNome}
           comunidadeNome={itemParaCompartilhar.comunidadeNome}
           textoCauso={itemParaCompartilhar.textoCauso}
-          codigoDesafio={itemParaCompartilhar.codigoDesafio}
+          url={itemParaCompartilhar.url}
+          rotuloLink={itemParaCompartilhar.rotuloLink}
           onFechar={() => {
             setModalShareAberto(false);
             setItemParaCompartilhar(null);

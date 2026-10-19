@@ -4,7 +4,6 @@ import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
 export interface DadosNovoPost {
   texto: string;
-  autorNome?: string;
   comunidadeSlug?: string;
 }
 
@@ -26,7 +25,6 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
   comunidadeInicial = 'bonde-geral',
 }) => {
   const [texto, setTexto] = useState('');
-  const [nickname, setNickname] = useState(perfil.nome || '');
   const [comunidadeDestino, setComunidadeDestino] = useState(comunidadeInicial);
   const [enviando, setEnviando] = useState(false);
 
@@ -44,7 +42,6 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
     try {
       const payload: DadosNovoPost = {
         texto: texto.trim(),
-        autorNome: nickname.trim() || perfil.nome || 'Arrotador',
         comunidadeSlug: comunidadeDestino,
       };
 
@@ -112,24 +109,8 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
       </div>
 
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {/* Linha de Apelido (Nickname) e Destino do Causo */}
+        {/* Destino do Causo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            placeholder="Seu apelido (nickname)"
-            style={{
-              background: 'none',
-              border: '1px solid var(--border)',
-              borderRadius: '999px',
-              padding: '4px 12px',
-              fontSize: '13px',
-              color: 'var(--fg)',
-              outline: 'none',
-              maxWidth: '180px',
-            }}
-          />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 500 }}>Destino:</span>

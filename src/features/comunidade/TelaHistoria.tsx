@@ -4,12 +4,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { CausoPostado, RespostaDeCauso, PortaDeComunidade } from '../../portas/comunidade';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
+import { soltar, tocarExclusivo } from '../../plataforma/web/audioUnico';
 import type { PortaDeConta } from '../../portas/conta';
 import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import { BarraLateralNavegacao } from './components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from './components/BarraInferiorMobile';
 import { ColunaTendencias } from './components/ColunaTendencias';
 import { cabeNoLimite, caracteresRestantes, LIMITE_COMENTARIO } from '../../nucleo/comunidade/limites';
+import { MENSAGEM_DE_ERRO_DE_RESPOSTA, useEnvioDeResposta } from './components/useEnvioDeResposta';
+import { LARGURA_CELULAR, LARGURA_COLUNA_DIREITA, useLarguraJanela, useTema } from './useLayoutDaConversa';
 
 interface TelaHistoriaProps {
   onArrotar?: () => void;
@@ -26,6 +29,11 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   const [conta] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
   const [podeParticiparSocialmente, setPodeParticiparSocialmente] = useState(false);
   const perfil = obterPerfilLocal();
+  const largura = useLarguraJanela();
+  const [tema, alternarTema] = useTema();
+  const celular = largura < LARGURA_CELULAR;
+  const mostrarLateral = !celular;
+  const mostrarColunaDireita = largura >= LARGURA_COLUNA_DIREITA;
 
   const [causo, setCauso] = useState<CausoPostado | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -33,6 +41,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   const [curtido, setCurtido] = useState(false);
   const [curtidas, setCurtidas] = useState(0);
   const [textoResposta, setTextoResposta] = useState('');
+  const [falhaNasRespostas, setFalhaNasRespostas] = useState(false);
   const [apelidoResposta, setApelidoResposta] = useState('');
   const [comentarios, setComentarios] = useState<readonly RespostaDeCauso[]>([]);
   const [copiado, setCopiado] = useState(false);
@@ -58,7 +67,15 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
     (async () => {
       const encontrado = id ? await porta.obterCauso(id) : null;
-      const respostas = encontrado ? await porta.listarRespostas(encontrado.id) : [];
+      let respostas: readonly RespostaDeCauso[] = [];
+      let respostasFalharam = false;
+      if (encontrado) {
+        try {
+          respostas = await porta.listarRespostas(encontrado.id);
+        } catch {
+          respostasFalharam = true;
+        }
+      }
       if (!ativo) return;
       if (encontrado) {
         setCauso(encontrado);
@@ -66,6 +83,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
         setCurtidas(encontrado.curtidas || 0);
         setComentarios(respostas);
       }
+      setFalhaNasRespostas(respostasFalharam);
       setCarregando(false);
     })();
 
@@ -76,23 +94,50 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
 
   const playerRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => () => playerRef.current?.pause(), []);
+  const montadoRef = useRef(true);
+
+  useEffect(() => {
+    montadoRef.current = true;
+    return () => {
+      montadoRef.current = false;
+      const player = playerRef.current;
+      if (!player) return;
+      player.pause();
+      soltar(player);
+    };
+  }, []);
 
   const togglePlay = async () => {
     if (!causo?.enderecoDoAudio) return;
     if (tocando) {
-      playerRef.current?.pause();
+      const atual = playerRef.current;
+      atual?.pause();
+      if (atual) soltar(atual);
       setTocando(false);
       return;
     }
     // Endereço assinado vence em minutos: pedido na hora de tocar.
     const endereco = await causo.enderecoDoAudio();
-    if (!endereco) return;
+    // A tela pode ter saído enquanto o endereço vinha: não toca áudio órfão.
+    if (!montadoRef.current || !endereco) return;
     const player = new Audio(endereco);
-    player.onended = () => setTocando(false);
+    player.onended = () => {
+      soltar(player);
+      setTocando(false);
+    };
+    player.onpause = () => setTocando(false);
+    player.onerror = () => {
+      soltar(player);
+      setTocando(false);
+    };
     playerRef.current = player;
     try {
-      await player.play();
+      await tocarExclusivo(player, () => setTocando(false));
+      if (!montadoRef.current) {
+        player.pause();
+        soltar(player);
+        return;
+      }
       setTocando(true);
     } catch {
       setTocando(false);
@@ -132,13 +177,17 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     if (registrou) setDenunciado(true);
   };
 
-  const responderComentario = async (texto: string, respostaAId?: string) => {
-    if (!exigirContaSocial()) return;
-    if (!causo) return;
+  const responderComentario = async (texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
+    if (!exigirContaSocial()) return 'sem-conta';
+    if (!causo) return false;
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
     const nova = await porta.adicionarResposta(causo.id, texto, nome, nome.toLowerCase().replace(/\s+/g, '_'), respostaAId);
-    if (nova) setComentarios((prev) => [...prev, nova]);
+    if (!nova) return false;
+    setComentarios((prev) => [...prev, nova]);
+    return true;
   };
+
+  const envioDoComentario = useEnvioDeResposta();
 
   const enviarComentario = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,31 +197,29 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
     const nome = apelidoResposta.trim() || 'Arrotador Anônimo';
     const handle = nome.toLowerCase().replace(/\s+/g, '_');
 
-    const nova = await porta.adicionarResposta(
-      causo.id,
-      textoResposta.trim(),
-      nome,
-      handle,
-    );
-
-    if (nova) {
+    const ok = await envioDoComentario.enviar(async () => {
+      const nova = await porta.adicionarResposta(causo.id, textoResposta.trim(), nome, handle);
+      if (!nova) return false;
       setComentarios((prev) => [...prev, nova]);
-      setTextoResposta('');
-    }
+      return true;
+    });
+    if (ok) setTextoResposta('');
   };
 
   return (
     <div style={{ minHeight: '100svh', background: 'var(--bg)', color: 'var(--fg)', display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: '1280px', display: 'flex' }}>
-        {/* Barra lateral desktop */}
+        {/* Barra lateral: só tablet e desktop */}
+        {mostrarLateral && (
         <BarraLateralNavegacao
           abaAtiva="feed"
           aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
           aoAbrirComposer={() => navigate('/arena')}
-          tema="dark"
-          aoAlternarTema={() => {}}
+          tema={tema}
+          aoAlternarTema={alternarTema}
           perfil={perfil}
         />
+        )}
 
         {/* Coluna Central */}
         <main
@@ -180,9 +227,11 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
             flex: 1,
             minWidth: 0,
             maxWidth: '600px',
-            borderRight: '1px solid var(--border)',
-            borderLeft: '1px solid var(--border)',
-            paddingBottom: '80px',
+            borderRight: celular ? 0 : '1px solid var(--border)',
+            borderLeft: celular ? 0 : '1px solid var(--border)',
+            // Barra inferior (56px) + área segura do iPhone, só no celular.
+            paddingBottom: celular ? 'calc(72px + env(safe-area-inset-bottom, 0px))' : '40px',
+            overflowWrap: 'anywhere',
           }}
         >
           {/* Header com botão voltar e botão Jogar Auê */}
@@ -501,7 +550,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                     </span>
                     <button
                       type="submit"
-                      disabled={!textoResposta.trim() || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO)}
+                      disabled={!textoResposta.trim() || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO) || envioDoComentario.enviando}
                       style={{
                         background: 'var(--accent, #c6ff00)',
                         color: 'var(--accent-on, #000)',
@@ -514,9 +563,14 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                         opacity: textoResposta.trim() ? 1 : 0.6,
                       }}
                     >
-                      Comentar
+                      {envioDoComentario.enviando ? 'Enviando…' : 'Comentar'}
                     </button>
                   </div>
+                  {envioDoComentario.erro && (
+                    <p role="alert" style={{ margin: 0, color: 'var(--muted)', fontSize: '13px' }}>
+                      {MENSAGEM_DE_ERRO_DE_RESPOSTA}
+                    </p>
+                  )}
                 </form> : (
                   <button
                     type="button"
@@ -525,6 +579,12 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                   >
                     Cria sua conta pra comentar e entrar na zoeira.
                   </button>
+                )}
+
+                {falhaNasRespostas && (
+                  <p role="alert" style={{ color: 'var(--muted)', fontSize: '14px' }}>
+                    Não deu pra carregar as respostas agora. Atualiza a página pra tentar de novo.
+                  </p>
                 )}
 
                 <ArvoreDeComentarios
@@ -536,18 +596,22 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
           )}
         </main>
 
-        {/* Coluna Tendências desktop */}
-        <ColunaTendencias
-          aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
-        />
+        {/* Coluna Tendências: só em tela larga */}
+        {mostrarColunaDireita && (
+          <ColunaTendencias
+            aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
+          />
+        )}
       </div>
 
-      {/* Barra Inferior Mobile */}
-      <BarraInferiorMobile
-        abaAtiva="feed"
-        aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
-        aoAbrirPerfil={() => navigate('/perfil')}
-      />
+      {/* Barra inferior: só no celular */}
+      {celular && (
+        <BarraInferiorMobile
+          abaAtiva="feed"
+          aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
+          aoAbrirPerfil={() => navigate('/perfil')}
+        />
+      )}
     </div>
   );
 };

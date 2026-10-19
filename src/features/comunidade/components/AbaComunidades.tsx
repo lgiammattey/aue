@@ -1,3 +1,4 @@
+import type { ResultadoDoEnvio } from './useEnvioDeResposta';
 import React, { useState } from 'react';
 import type { CausoPostado, Comunidade } from '../../../portas/comunidade';
 import { DetalheComunidade, type ComunidadeInfo } from './DetalheComunidade';
@@ -16,7 +17,7 @@ interface AbaComunidadesProps {
   aoRepostarCauso?: (id: string) => void;
   aoDuvidarCauso?: (causo: CausoPostado) => void;
   aoCompartilharCauso?: (causo: CausoPostado) => void;
-  aoResponderCauso?: (id: string, texto: string, respostaAId?: string) => void;
+  aoResponderCauso?: (id: string, texto: string, respostaAId?: string) => ResultadoDoEnvio;
   aoAbrirConversaCauso?: (id: string) => void | Promise<void>;
   aoDenunciarCauso?: (id: string) => void;
   aoAbrirPerfil?: (handle: string, nome?: string) => void;
@@ -45,7 +46,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
   aoRepostarCauso = () => {},
   aoDuvidarCauso = () => {},
   aoCompartilharCauso = () => {},
-  aoResponderCauso = () => {},
+  aoResponderCauso = () => false,
   aoAbrirConversaCauso,
   aoDenunciarCauso = () => {},
   aoAbrirPerfil: _aoAbrirPerfil,

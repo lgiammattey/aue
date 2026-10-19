@@ -70,6 +70,7 @@ export function DialogoDeDenuncia({ alvo, denunciar, aoSucesso, aoCancelar, aoFe
       idDoTitulo={idDoTitulo}
       classe="forum-dialogo--pequeno"
       aoCancelar={aoCancelar}
+      bloqueado={enviando}
       focoInicial={campo}
       aoFechar={aoFechar}
     >
@@ -104,7 +105,7 @@ export function DialogoDeDenuncia({ alvo, denunciar, aoSucesso, aoCancelar, aoFe
           aoFocar={() => ambiente.centralizarCampo(idDoCampo)}
         />
         <div className="forum-confirmacao__acoes">
-          <button type="button" className="forum-botao forum-botao--contorno" onClick={aoCancelar}>
+          <button type="button" className="forum-botao forum-botao--contorno" onClick={aoCancelar} disabled={enviando}>
             Cancelar
           </button>
           <button type="submit" className="forum-botao forum-botao--escuro" aria-busy={enviando || undefined}>

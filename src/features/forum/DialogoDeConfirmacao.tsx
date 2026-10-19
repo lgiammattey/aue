@@ -67,6 +67,7 @@ export function DialogoDeConfirmacao({
       idDoTitulo={idDoTitulo}
       classe="forum-dialogo--pequeno"
       aoCancelar={aoCancelar}
+      bloqueado={enviando}
       focoInicial={cancelar}
       aoFechar={aoFechar}
     >
@@ -86,7 +87,13 @@ export function DialogoDeConfirmacao({
           </div>
         )}
         <div className="forum-confirmacao__acoes">
-          <button ref={cancelar} type="button" className="forum-botao forum-botao--contorno" onClick={aoCancelar}>
+          <button
+            ref={cancelar}
+            type="button"
+            className="forum-botao forum-botao--contorno"
+            onClick={aoCancelar}
+            disabled={enviando}
+          >
             Cancelar
           </button>
           <button

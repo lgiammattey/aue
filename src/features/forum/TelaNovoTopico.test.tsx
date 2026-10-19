@@ -282,14 +282,14 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
     const { forum } = abrir({ armazenamento });
     await abrirFormulario();
     preencher();
-    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico(SLUG))).toBe(true);
+    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico('conta-a', SLUG))).toBe(true);
     enviarFormulario();
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' })).toBeDefined();
     expect(sondas.caminho).toBe(`/c/${SLUG}/t/${ID_NOVO}`);
     // O que aparece é o que o SERVIDOR devolveu em obter_topico, não o que o cliente digitou.
     expect(forum.obterTopico).toHaveBeenCalledWith(ID_NOVO);
-    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico(SLUG))).toBe(false);
+    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico('conta-a', SLUG))).toBe(false);
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(screen.getAllByText('Tópico criado.').length).toBeGreaterThan(0);
   });
@@ -407,7 +407,7 @@ describe('falhas: texto intacto e frase por motivo (spec 6.6)', () => {
     expect(alerta.closest('[role="alert"]')).not.toBeNull();
     expect(campoTitulo().value).toBe('Meu título');
     expect(campoCorpo().value).toBe('Minha mensagem');
-    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeTopico(SLUG))!)).toEqual({ titulo: 'Meu título', corpo: 'Minha mensagem' });
+    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeTopico('conta-a', SLUG))!)).toEqual({ titulo: 'Meu título', corpo: 'Minha mensagem' });
     expect(screen.getByRole('dialog')).toBeDefined();
     expect(sondas.caminho).toBe(`/c/${SLUG}/novo`);
     if (onde === 'titulo') expect(document.activeElement).toBe(campoTitulo());
@@ -510,7 +510,7 @@ describe('falha ambígua (semConfirmacao): pode ter gravado, nunca reenvia sozin
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     await waitFor(() => expect((forum.listarTopicos as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(antes));
     expect(criarTopico).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeTopico(SLUG))!)).toEqual({ titulo: 'T', corpo: 'M' });
+    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeTopico('conta-a', SLUG))!)).toEqual({ titulo: 'T', corpo: 'M' });
   });
 
   it('a pessoa decide: depois de conferir, pode reabrir e reenviar com o texto de volta', async () => {
@@ -565,7 +565,7 @@ describe('rascunho (spec 6.8): fechar nunca apaga', () => {
     abrir({ armazenamento });
     await abrirFormulario();
     fireEvent.change(campoTitulo(), { target: { value: 'Oi' } });
-    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeTopico(SLUG))!)).toEqual({ titulo: 'Oi', corpo: '' });
+    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeTopico('conta-a', SLUG))!)).toEqual({ titulo: 'Oi', corpo: '' });
   });
 
   it('Cancelar fecha, devolve o foco ao botão "Novo tópico" e o texto volta quando reabre', async () => {
@@ -591,7 +591,7 @@ describe('rascunho (spec 6.8): fechar nunca apaga', () => {
     fireEvent(dialogo, cancel);
     expect(cancel.defaultPrevented).toBe(true);
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico(SLUG))).toBe(true);
+    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico('conta-a', SLUG))).toBe(true);
     expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Novo tópico' }));
   });
 
@@ -618,7 +618,7 @@ describe('rascunho (spec 6.8): fechar nunca apaga', () => {
 
   it('recarregar a página: o texto vem do armazenamento, sem a memória da sessão', async () => {
     const armazenamento = armazenamentoFalso();
-    armazenamento.gravar(chaveDoRascunhoDeTopico(SLUG), JSON.stringify({ titulo: 'Guardado', corpo: 'Do disco' }));
+    armazenamento.gravar(chaveDoRascunhoDeTopico('conta-a', SLUG), JSON.stringify({ titulo: 'Guardado', corpo: 'Do disco' }));
     abrir({ armazenamento });
     await abrirFormulario();
     expect(campoTitulo().value).toBe('Guardado');
@@ -628,7 +628,7 @@ describe('rascunho (spec 6.8): fechar nunca apaga', () => {
 
   it('o rascunho de uma comunidade não aparece em outra', async () => {
     const armazenamento = armazenamentoFalso();
-    armazenamento.gravar(chaveDoRascunhoDeTopico('outra-comunidade'), JSON.stringify({ titulo: 'Alheio', corpo: 'x' }));
+    armazenamento.gravar(chaveDoRascunhoDeTopico('conta-a', 'outra-comunidade'), JSON.stringify({ titulo: 'Alheio', corpo: 'x' }));
     abrir({ armazenamento });
     await abrirFormulario();
     expect(campoTitulo().value).toBe('');
@@ -654,8 +654,61 @@ describe('rascunho (spec 6.8): fechar nunca apaga', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Descartar rascunho' }));
     expect(campoTitulo().value).toBe('');
     expect(campoCorpo().value).toBe('');
-    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico(SLUG))).toBe(false);
+    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico('conta-a', SLUG))).toBe(false);
     expect(screen.queryByRole('button', { name: 'Descartar rascunho' })).toBeNull();
     expect(document.activeElement).toBe(campoTitulo());
+  });
+});
+
+describe('rascunho é de uma conta só (privacidade no mesmo navegador)', () => {
+  it('conta B, no mesmo navegador, não vê o rascunho da conta A', async () => {
+    const armazenamento = armazenamentoFalso();
+    armazenamento.gravar(chaveDoRascunhoDeTopico('conta-a', SLUG), JSON.stringify({ titulo: 'Segredo da A', corpo: 'texto da A' }));
+    abrir({ armazenamento, conta: { ...CONTA, id: 'conta-b' } });
+    await abrirFormulario();
+    expect(campoTitulo().value).toBe('');
+    expect(campoCorpo().value).toBe('');
+    fireEvent.change(campoTitulo(), { target: { value: 'da B' } });
+    expect(armazenamento.dados.has(chaveDoRascunhoDeTopico('conta-b', SLUG))).toBe(true);
+    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeTopico('conta-a', SLUG))!).titulo).toBe('Segredo da A');
+  });
+
+  it('a conta A volta e encontra o dela', async () => {
+    const armazenamento = armazenamentoFalso();
+    armazenamento.gravar(chaveDoRascunhoDeTopico('conta-a', SLUG), JSON.stringify({ titulo: 'Da A', corpo: 'x' }));
+    abrir({ armazenamento });
+    await abrirFormulario();
+    expect(campoTitulo().value).toBe('Da A');
+  });
+});
+
+describe('enviando, o formulário não fecha (o resultado não pode ficar escondido)', () => {
+  it('Cancelar fica desabilitado (celular e desktop) e Esc é ignorado até a resposta chegar', async () => {
+    let soltar!: (r: ResultadoDaEscrita<TopicoCriado>) => void;
+    const criarTopico = vi.fn(() => new Promise<ResultadoDaEscrita<TopicoCriado>>((r) => (soltar = r)));
+    abrir({ criarTopico });
+    const dialogo = await abrirFormulario();
+    preencher();
+    enviarFormulario();
+    for (const b of screen.getAllByRole('button', { name: 'Cancelar' })) expect((b as HTMLButtonElement).disabled).toBe(true);
+    const cancel = new Event('cancel', { cancelable: true });
+    fireEvent(dialogo, cancel);
+    expect(cancel.defaultPrevented).toBe(true);
+    expect(screen.getByRole('dialog')).toBeDefined();
+    expect(sondas.caminho).toBe(`/c/${SLUG}/novo`);
+    await act(async () => soltar(falha('falhou')));
+    expect(await screen.findByText('Não deu para enviar. Seu texto continua aqui, tenta de novo.')).toBeDefined();
+    for (const b of screen.getAllByRole('button', { name: 'Cancelar' })) expect((b as HTMLButtonElement).disabled).toBe(false);
+    fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+});
+
+describe('o campo da mensagem não colapsa (D2)', () => {
+  it('tem piso de 6 linhas (>= 168px com linha de 24px) e o rótulo "Mensagem"', async () => {
+    abrir();
+    await abrirFormulario();
+    expect(campoCorpo().style.minHeight).toBe('calc(9em + 26px)');
+    expect(campoCorpo().rows).toBe(6);
   });
 });

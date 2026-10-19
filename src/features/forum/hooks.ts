@@ -155,9 +155,9 @@ export interface ListaPaginada<T, C> {
    * Lê a lista inteira de novo, do começo até o fim (até 20 páginas), SEM voltar para "carregando":
    * a tela fica como está até o servidor responder (depois de responder, editar ou apagar a
    * conversa vem do servidor, não do que o cliente acha que ficou). `false` se alguma página
-   * falhou: o que estava na tela fica e quem chamou diz isso à pessoa.
+   * falhou (`null`): o que estava na tela fica e quem chamou diz isso à pessoa. Sucesso devolve o que foi lido.
    */
-  readonly recarregarTudo: () => Promise<boolean>;
+  readonly recarregarTudo: () => Promise<readonly T[] | null>;
 }
 
 interface Opcoes<T, C extends CursorDoForum> {
@@ -322,7 +322,7 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
 
   const recarregar = useCallback(() => setTentativa((t) => t + 1), []);
 
-  const recarregarTudo = useCallback(async (): Promise<boolean> => {
+  const recarregarTudo = useCallback(async (): Promise<readonly T[] | null> => {
     const minha = ++geracao.current;
     buscandoMais.current = true;
     setCarregandoMais(false);
@@ -333,10 +333,10 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
       const r: ResultadoDaLeitura<PaginaDoForum<C, T>> = await carregarRef
         .current(cursor)
         .catch((): ResultadoDaLeitura<PaginaDoForum<C, T>> => ({ ok: false, motivo: 'falhou' }));
-      if (geracao.current !== minha) return false;
+      if (geracao.current !== minha) return null;
       if (!r.ok) {
         buscandoMais.current = false;
-        return false;
+        return null;
       }
       acumulado = juntarPorId<T>(acumulado, r.valor.itens).itens;
       cursor = r.valor.proximo;
@@ -349,7 +349,7 @@ export function useListaPaginada<T extends { readonly id: string }, C extends Cu
     setMotivo(null);
     setFalhouAoCarregarMais(false);
     setFase('pronto');
-    return true;
+    return acumulado;
   }, []);
 
   return {

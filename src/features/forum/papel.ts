@@ -12,7 +12,7 @@ import type { PortaDeConta } from '../../portas/conta';
 export type Papel =
   | { readonly tipo: 'carregando' }
   | { readonly tipo: 'visitante' }
-  | { readonly tipo: 'conta'; readonly slugsDeMembro: ReadonlySet<string> }
+  | { readonly tipo: 'conta'; readonly contaId: string; readonly slugsDeMembro: ReadonlySet<string> }
   | { readonly tipo: 'desconhecido' };
 
 export function useDescobrirPapel(conta: PortaDeConta, comunidade: PortaDeComunidade): Papel {
@@ -41,7 +41,7 @@ export function useDescobrirPapel(conta: PortaDeConta, comunidade: PortaDeComuni
       } catch {
         slugs = [];
       }
-      if (ativo) setPapel({ tipo: 'conta', slugsDeMembro: new Set(slugs) });
+      if (ativo) setPapel({ tipo: 'conta', contaId: estado.id ?? 'sem-id', slugsDeMembro: new Set(slugs) });
     })();
     return () => {
       ativo = false;

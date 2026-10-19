@@ -15,6 +15,8 @@ export interface EstadoDaConta {
   /** Conta promovida que ainda precisa concluir apelido e @ antes do Bonde. */
   readonly perfilSocialPendente?: boolean;
   readonly email?: string;
+  /** Id da conta (uid). O rascunho do fórum é guardado por ele: outra conta no mesmo navegador não o enxerga. */
+  readonly id?: string;
 }
 
 export type ResultadoDaConta =

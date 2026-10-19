@@ -25,7 +25,7 @@ import {
 import { chaveDoRascunhoDeResposta } from '../../portas/armazenamento';
 import type { CursorDoForum, RespostaCriada, RespostaDoForum, TopicoDoForum } from '../../portas/forum';
 import { BotaoParticipar } from './AcoesDaComunidade';
-import { CompositorDeResposta } from './CompositorDeResposta';
+import { CompositorDeResposta, type ResultadoDaConferencia } from './CompositorDeResposta';
 import { Avatar, BotaoVerMais, EstadoDeErro, Esqueleto, NomeDoAutor, Tempo } from './componentes';
 import { ConviteDeVisitante } from './ConviteDeVisitante';
 import { useDependenciasDoForum } from './contexto';
@@ -67,8 +67,10 @@ interface ContextoDaConversa {
   readonly depoisDeEnviar: (valor: unknown) => Promise<void>;
   readonly depoisDeEditar: (id: string) => Promise<void>;
   readonly moverParaPrincipal: (texto: string) => void;
-  readonly conferir: () => Promise<void>;
-  readonly estadoDoTopicoMudou: () => void;
+  /** Relê a conversa; diz se alguma resposta lida casa com `casa` (a tentativa ambígua já gravou). */
+  readonly conferir: (casa: (r: RespostaDoForum) => boolean) => Promise<ResultadoDaConferencia>;
+  readonly estadoDoTopicoMudou: (acao: 'topicoFechado' | 'topicoIndisponivel') => void;
+  readonly contaId: string;
 }
 
 const Contexto = createContext<ContextoDaConversa | null>(null);
@@ -86,7 +88,7 @@ function ComposerInline({ resposta, devolverFoco }: { readonly resposta: Respost
   const c = useConversa();
   const { forum, armazenamento } = useDependenciasDoForum();
   const local = useLocation();
-  const chave = chaveDoRascunhoDeResposta(c.topicoId, resposta.id);
+  const chave = chaveDoRascunhoDeResposta(c.contaId, c.topicoId, resposta.id);
   const [texto, setTexto] = useState(() => lerRascunhoDeResposta(armazenamento, chave));
   const mudar = (t: string) => {
     setTexto(t);
@@ -112,7 +114,7 @@ function ComposerInline({ resposta, devolverFoco }: { readonly resposta: Respost
       focarAoMontar
       acento={false}
       aoEstadoDoTopicoMudar={c.estadoDoTopicoMudou}
-      aoConferir={() => void c.conferir()}
+      aoConferir={(t) => c.conferir((r) => r.souAutor && r.paiId === resposta.id && r.corpo?.trim() === t.trim())}
       aoDescartar={() => mudar('')}
       aoResponderNoTopico={() => {
         const t = texto;
@@ -148,7 +150,7 @@ function EdicaoInline({ resposta, devolverFoco }: { readonly resposta: RespostaD
       focarAoMontar
       acento={false}
       aoEstadoDoTopicoMudar={c.estadoDoTopicoMudou}
-      aoConferir={() => void c.conferir()}
+      aoConferir={(t) => c.conferir((r) => r.id === resposta.id && r.corpo?.trim() === t.trim())}
     />
   );
 }
@@ -167,6 +169,16 @@ function ItemDeResposta({ no, agora }: { readonly no: NoDeResposta<RespostaDoFor
   useEffect(() => {
     if (c.foco?.alvo === r.id) li.current?.focus();
   }, [c.foco, r.id]);
+
+  // Cancelar a edição: o menu estava escondido enquanto editava; o foco volta a ele depois que reaparece.
+  const voltarAoMenu = useRef(false);
+  const editando = c.modo?.tipo === 'editar' && c.modo.id === r.id;
+  useEffect(() => {
+    if (!editando && voltarAoMenu.current) {
+      voltarAoMenu.current = false;
+      botaoMenu.current?.focus();
+    }
+  }, [editando]);
 
   const casca = r.status !== 'visivel' || r.corpo === null;
   const nome = nomeDoAutor(r.autor);
@@ -201,11 +213,16 @@ function ItemDeResposta({ no, agora }: { readonly no: NoDeResposta<RespostaDoFor
           </p>
           {respondeNivelDois && <p className="forum-resposta__referencia">Respondendo a @{handleDoPai}</p>}
           {editandoAqui ? (
-            <EdicaoInline resposta={r} devolverFoco={() => botaoMenu.current?.focus()} />
+            <EdicaoInline
+              resposta={r}
+              devolverFoco={() => {
+                voltarAoMenu.current = true;
+              }}
+            />
           ) : (
             <p className="forum-resposta__corpo">{normalizarQuebras(r.corpo ?? '')}</p>
           )}
-          {(podeResponderAqui || itens.length > 0) && (
+          {!editandoAqui && (podeResponderAqui || itens.length > 0) && (
             <div className="forum-resposta__acoes">
               {podeResponderAqui && (
                 <button
@@ -282,7 +299,7 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
   const tituloRef = useRef<HTMLHeadingElement>(null);
   const caminho = local.pathname + local.search;
 
-  const chavePrincipal = chaveDoRascunhoDeResposta(id, null);
+  const chavePrincipal = chaveDoRascunhoDeResposta(papel.tipo === 'conta' ? papel.contaId : 'sem-conta', id, null);
   const [textoPrincipal, setTextoPrincipal] = useState(() => lerRascunhoDeResposta(armazenamento, chavePrincipal));
   const mudarTextoPrincipal = useCallback(
     (t: string) => {
@@ -310,11 +327,11 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
   }, [comunidade.slug]);
 
   const relerTudo = useCallback(
-    async (avisoSeFalhar: string): Promise<boolean> => {
-      const ok = await lista.recarregarTudo();
+    async (avisoSeFalhar: string): Promise<readonly RespostaDoForum[] | null> => {
+      const lidas = await lista.recarregarTudo();
       aoMudarConversa();
-      setAvisoDeAtualizacao(ok ? null : avisoSeFalhar);
-      return ok;
+      setAvisoDeAtualizacao(lidas ? null : avisoSeFalhar);
+      return lidas;
     },
     [lista, aoMudarConversa],
   );
@@ -351,9 +368,33 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
     if (await relerTudo('A resposta foi apagada, mas não deu pra atualizar a conversa.')) pedirFoco(proxima ?? 'composer');
   };
 
-  const conferir = useCallback(async () => {
+  const atualizarConversa = useCallback(async () => {
     if (await relerTudo('Não deu pra atualizar a conversa. Tenta de novo.')) anunciar('Conversa atualizada.');
   }, [relerTudo, anunciar]);
+
+  // Falha ambígua: relê e diz se o que a pessoa tentou enviar já está lá, para ela não duplicar.
+  const conferir = useCallback(
+    async (casa: (r: RespostaDoForum) => boolean): Promise<ResultadoDaConferencia> => {
+      const lidas = await relerTudo('Não deu pra atualizar a conversa. Tenta de novo.');
+      if (!lidas) return 'falhou';
+      anunciar('Conversa atualizada.');
+      return lidas.some(casa) ? 'jaEsta' : 'naoEsta';
+    },
+    [relerTudo, anunciar],
+  );
+
+  // `topico_fechado` ao enviar: a tela relê o tópico e o composer vira a faixa. Diz uma vez por quê.
+  const [avisoDeFechado, setAvisoDeFechado] = useState(false);
+  const estadoDoTopicoMudou = useCallback(
+    (acao: 'topicoFechado' | 'topicoIndisponivel') => {
+      if (acao === 'topicoFechado') {
+        setAvisoDeFechado(true);
+        anunciar('Esse tópico foi fechado. Não aceita mais respostas.');
+      }
+      aoMudarConversa();
+    },
+    [anunciar, aoMudarConversa],
+  );
 
   const moverParaPrincipal = useCallback(
     (texto: string) => {
@@ -404,7 +445,8 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
     depoisDeEditar,
     moverParaPrincipal,
     conferir,
-    estadoDoTopicoMudou: aoMudarConversa,
+    estadoDoTopicoMudou,
+    contaId: papel.tipo === 'conta' ? papel.contaId : 'sem-conta',
   };
 
   let corpo;
@@ -447,7 +489,7 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
         {avisoDeAtualizacao && (
           <div className="forum-form__alerta forum-conversa__aviso" role="alert">
             <p>{avisoDeAtualizacao}</p>
-            <button type="button" className="forum-botao forum-botao--contorno" onClick={() => void conferir()}>
+            <button type="button" className="forum-botao forum-botao--contorno" onClick={() => void atualizarConversa()}>
               Atualizar a conversa
             </button>
           </div>
@@ -462,7 +504,7 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
       )}
       {aberto && ehConta && !souMembro && (
         <div className="forum-faixa-convite" ref={conviteRef} tabIndex={-1}>
-          <p>Entre em {comunidade.nome} para responder.</p>
+          <p>Entre na comunidade para responder.</p>
           <BotaoParticipar
             pendente={participar.pendente === 'entrar'}
             aoClicar={() => {
@@ -471,6 +513,9 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
           />
           {participar.erro && <p className="forum-campo__erro" role="alert">{participar.erro}</p>}
         </div>
+      )}
+      {!aberto && avisoDeFechado && (
+        <p className="forum-faixa-fechado forum-compositor-area">Esse tópico foi fechado. Não aceita mais respostas.</p>
       )}
       {podeResponder && (
         <div className="forum-compositor-area">
@@ -485,8 +530,8 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
             comunidade={comunidade}
             caminhoDeVolta={caminho}
             campoRef={compositorRef}
-            aoEstadoDoTopicoMudar={aoMudarConversa}
-            aoConferir={() => void conferir()}
+            aoEstadoDoTopicoMudar={estadoDoTopicoMudou}
+            aoConferir={(t) => conferir((r) => r.souAutor && r.paiId === null && r.corpo?.trim() === t.trim())}
             aoDescartar={() => mudarTextoPrincipal('')}
             aoMudarParticipacao={aoMudarConversa}
           />

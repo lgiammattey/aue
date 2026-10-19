@@ -1,5 +1,7 @@
 import type { PerfilUsuario } from '../../nucleo/usuario/perfil';
 import { criarPerfilPadrao } from '../../nucleo/usuario/perfil';
+import { esquecerRascunhosDaSessao } from '../../nucleo/forum/rascunho';
+import { PREFIXO_DO_FORUM } from '../../portas/armazenamento';
 
 const CHAVE_PERFIL = 'aue.perfil.v1';
 
@@ -40,10 +42,15 @@ export function obterPerfilLocal(): PerfilUsuario {
  * e os rascunhos de quem saiu.
  */
 export function limparDadosLocaisDaConta(): void {
+  esquecerRascunhosDaSessao();
   try {
     if (typeof localStorage === 'undefined') return;
     localStorage.removeItem(CHAVE_PERFIL);
     localStorage.removeItem('aue.causos.v3');
+    // Rascunhos do fórum (texto escrito e não enviado) são de quem saiu.
+    for (const chave of Object.keys(localStorage)) {
+      if (chave.startsWith(PREFIXO_DO_FORUM)) localStorage.removeItem(chave);
+    }
   } catch {
     // ignora erro em modo privado
   }

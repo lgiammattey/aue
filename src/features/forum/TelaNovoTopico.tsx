@@ -45,10 +45,10 @@ export function TelaNovoTopico() {
   if (papel.tipo !== 'conta' || !contexto.souMembro) {
     return <Navigate to={enderecoDaComunidade(contexto.comunidade.slug)} replace />;
   }
-  return <NovoTopico key={contexto.comunidade.slug} contexto={contexto} />;
+  return <NovoTopico key={contexto.comunidade.slug} contexto={contexto} contaId={papel.contaId} />;
 }
 
-function NovoTopico({ contexto }: { readonly contexto: ContextoDaComunidade }) {
+function NovoTopico({ contexto, contaId }: { readonly contexto: ContextoDaComunidade; readonly contaId: string }) {
   const { comunidade, gatilho } = contexto;
   const { forum, armazenamento } = useDependenciasDoForum();
   const navegar = useNavigate();
@@ -56,7 +56,7 @@ function NovoTopico({ contexto }: { readonly contexto: ContextoDaComunidade }) {
   const anunciar = useAnunciar();
   const toast = useToast();
   const slug = comunidade.slug;
-  const chave = chaveDoRascunhoDeTopico(slug);
+  const chave = chaveDoRascunhoDeTopico(contaId, slug);
   const [inicial] = useState(() => lerRascunhoDeTopico(armazenamento, chave) ?? { titulo: '', corpo: '' });
 
   // Quem chegou pela lista volta pelo histórico; quem caiu aqui por URL direta vai para a comunidade.

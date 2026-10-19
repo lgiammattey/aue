@@ -253,6 +253,7 @@ function ConversaDoTopico({ topico, atualizar }: { readonly topico: TopicoDoForu
           aoCancelar={fecharDialogo}
           aoFechar={devolverFoco}
           caminhoDeVolta={caminho}
+          aoEstadoDoTopicoMudar={aoMudarConversa}
         />
       )}
       {dialogo === 'apagar' && (

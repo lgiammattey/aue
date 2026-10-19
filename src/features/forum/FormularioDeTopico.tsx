@@ -41,6 +41,8 @@ interface Props {
   readonly aoConferir?: () => void;
   /** Lê a comunidade de novo depois de entrar (números do servidor). */
   readonly aoMudarParticipacao?: () => void;
+  /** O servidor disse que o tópico fechou ou sumiu: a tela relê o tópico. O texto continua no formulário. */
+  readonly aoEstadoDoTopicoMudar?: () => void;
 }
 
 /**
@@ -61,6 +63,7 @@ export function FormularioDeTopico({
   caminhoDeVolta,
   aoConferir,
   aoMudarParticipacao,
+  aoEstadoDoTopicoMudar,
 }: Props) {
   const { ambiente } = useDependenciasDoForum();
   const anunciar = useAnunciar();
@@ -104,7 +107,9 @@ export function FormularioDeTopico({
     e.preventDefault();
     if (enviando) return;
     const titulo = erroDoCampo(texto.titulo, LIMITE_TITULO_TOPICO, 'Falta o título.');
-    const corpo = erroDoCampo(texto.corpo, LIMITE_TEXTO_TOPICO, 'Falta a mensagem.');
+    // Tópico migrado pode não ter mensagem: editar só o título vale (o servidor só valida o corpo se ele vier).
+    const corpoOpcional = !criando && inicial.corpo.trim() === '' && texto.corpo.trim() === '';
+    const corpo = corpoOpcional ? null : erroDoCampo(texto.corpo, LIMITE_TEXTO_TOPICO, 'Falta a mensagem.');
     setErrosDoCampo({ titulo, corpo });
     if (titulo) return void tituloRef.current?.focus();
     if (corpo) return void corpoRef.current?.focus();
@@ -130,6 +135,7 @@ export function FormularioDeTopico({
     setErroDoServidor(erro);
     if (erro.onde === 'titulo') tituloRef.current?.focus();
     else if (erro.onde === 'corpo') corpoRef.current?.focus();
+    if (erro.acao === 'topicoFechado' || erro.acao === 'topicoIndisponivel') aoEstadoDoTopicoMudar?.();
   }
 
   const temTexto = texto.titulo !== '' || texto.corpo !== '';
@@ -145,12 +151,13 @@ export function FormularioDeTopico({
       idDoTitulo={idDoDialogo}
       classe="forum-dialogo--formulario"
       aoCancelar={cancelar}
+      bloqueado={enviando}
       focoInicial={tituloRef}
       aoFechar={aoFechar}
     >
       <form className="forum-form" onSubmit={aoEnviar} noValidate>
         <div className="forum-form__cabecalho">
-          <button type="button" className="forum-botao-texto forum-form__so-celular" onClick={cancelar}>
+          <button type="button" className="forum-botao-texto forum-form__so-celular" onClick={cancelar} disabled={enviando}>
             Cancelar
           </button>
           <h2 id={idDoDialogo} className="forum-form__titulo">
@@ -243,7 +250,7 @@ export function FormularioDeTopico({
         </div>
 
         <div className="forum-form__rodape forum-form__so-desktop">
-          <button type="button" className="forum-botao forum-botao--contorno" onClick={cancelar}>
+          <button type="button" className="forum-botao forum-botao--contorno" onClick={cancelar} disabled={enviando}>
             Cancelar
           </button>
           <button

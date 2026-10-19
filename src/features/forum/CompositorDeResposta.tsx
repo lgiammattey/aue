@@ -18,6 +18,8 @@ import { useOnline } from './hooks';
 import { useEnvio } from './useEnvio';
 import { useParticiparDaComunidade } from './useParticiparDaComunidade';
 
+export type ResultadoDaConferencia = 'jaEsta' | 'naoEsta' | 'falhou';
+
 interface Props {
   /** Nome acessível do campo ("Sua resposta", "Sua resposta a Bia Lima", "Editar resposta"). */
   readonly rotulo: string;
@@ -43,9 +45,9 @@ interface Props {
   readonly acento?: boolean;
   readonly campoRef?: RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   /** O servidor disse que o estado do tópico mudou (fechado, sumiu): a tela relê. O texto fica guardado. */
-  readonly aoEstadoDoTopicoMudar?: () => void;
-  /** Falha ambígua: relê a conversa para a pessoa conferir. */
-  readonly aoConferir?: () => void;
+  readonly aoEstadoDoTopicoMudar?: (acao: 'topicoFechado' | 'topicoIndisponivel') => void;
+  /** Falha ambígua: relê a conversa e diz se uma resposta igual do próprio autor já está lá. */
+  readonly aoConferir?: (texto: string) => Promise<ResultadoDaConferencia>;
   /** Falha ambígua: joga o texto fora (a pessoa viu que já apareceu). */
   readonly aoDescartar?: () => void;
   /** `pai_invalido`: move o texto para o composer principal. */
@@ -90,6 +92,9 @@ export function CompositorDeResposta({
   const campo = campoRef ?? interno;
   const [erroLocalDoCampo, setErroDoCampo] = useState<string | null>(null);
   const [erroDoServidor, setErroDoServidor] = useState<ErroDeEnvio | null>(null);
+  // Depois de "Conferir": a resposta já está lá (não reenviar) ou não achamos (a pessoa decide).
+  const [conferencia, setConferencia] = useState<'jaEsta' | 'naoEsta' | null>(null);
+  const [conferindo, setConferindo] = useState(false);
 
   useEffect(() => {
     if (!focarAoMontar) return;
@@ -128,75 +133,101 @@ export function CompositorDeResposta({
     const erro = erroDeEnvio(r.motivo, operacao);
     setErroDoServidor(erro);
     if (erro.onde === 'corpo') campo.current?.focus();
-    if (erro.acao === 'topicoFechado' || erro.acao === 'topicoIndisponivel') aoEstadoDoTopicoMudar?.();
+    if (erro.acao === 'topicoFechado' || erro.acao === 'topicoIndisponivel') aoEstadoDoTopicoMudar?.(erro.acao);
   }
 
   const aoTeclar = (e: KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Escape' && aoCancelar) {
       e.preventDefault();
       e.stopPropagation();
-      aoCancelar();
+      // Enviando, fechar esconderia o resultado: Esc é ignorado até a resposta chegar.
+      if (!enviando) aoCancelar();
     }
   };
 
   const erroNoCampo = erroLocalDoCampo ?? (erroDoServidor?.onde === 'corpo' ? erroDoServidor.texto : null);
   const erroGeral = erroDoServidor && erroDoServidor.onde !== 'corpo' ? erroDoServidor : null;
+  async function conferir() {
+    if (!aoConferir || conferindo) return;
+    setConferindo(true);
+    const r = await aoConferir(texto);
+    setConferindo(false);
+    if (r === 'falhou') return;
+    setConferencia(r);
+  }
+
   const rotuloAtual = enviando ? 'Enviando…' : rotuloDoEnvio;
 
   return (
     <form className="forum-compositor" onSubmit={aoEnviar} onKeyDown={aoTeclar} noValidate>
       {referencia && <p className="forum-compositor__referencia">Respondendo a @{referencia}</p>}
-      {erroGeral && (
-        <div className="forum-form__alerta" role="alert">
-          <p>{erroGeral.texto}</p>
-          {erroGeral.acao === 'participar' && (
-            <BotaoParticipar
-              pendente={participar.pendente === 'entrar'}
-              aoClicar={() => {
-                void participar.entrar().then((ok) => {
-                  if (!ok) return;
-                  setErroDoServidor(null);
-                  anunciar(`Você entrou em ${comunidade.nome}. Pode enviar de novo.`);
-                });
-              }}
-              acento={false}
-            />
-          )}
-          {erroGeral.acao === 'entrar' && (
-            <Link className="forum-botao forum-botao--contorno" to={enderecoDoLoginComVolta(caminhoDeVolta, 'entrar')}>
-              Entrar
-            </Link>
-          )}
-          {erroGeral.acao === 'responderNoTopico' && aoResponderNoTopico && (
-            <button type="button" className="forum-botao forum-botao--contorno" onClick={aoResponderNoTopico}>
-              Responder no tópico
-            </button>
-          )}
-          {erroGeral.acao === 'conferir' && (
-            <div className="forum-form__alerta-acoes">
-              {aoConferir && (
-                <button type="button" className="forum-botao forum-botao--contorno" onClick={aoConferir}>
-                  Conferir a conversa
-                </button>
-              )}
-              {aoDescartar && (
-                <button type="button" className="forum-botao-texto" onClick={aoDescartar}>
-                  Descartar texto
-                </button>
-              )}
-            </div>
-          )}
-          {participar.erro && <p className="forum-campo__erro">{participar.erro}</p>}
-        </div>
-      )}
       <CampoComContador
         id={`${id}-campo`}
         rotulo={rotulo}
+        rotuloOculto
         tipo="area"
         linhas={2}
         linhasMaximas={8}
+        meio={
+          <>
+          {erroGeral && (
+            <div className="forum-form__alerta" role="alert">
+              <p>{conferencia === 'jaEsta' ? 'Sua resposta já está na conversa.' : erroGeral.texto}</p>
+              {erroGeral.acao === 'participar' && (
+                <BotaoParticipar
+                  pendente={participar.pendente === 'entrar'}
+                  aoClicar={() => {
+                    void participar.entrar().then((ok) => {
+                      if (!ok) return;
+                      setErroDoServidor(null);
+                      anunciar(`Você entrou em ${comunidade.nome}. Pode enviar de novo.`);
+                    });
+                  }}
+                  acento={false}
+                />
+              )}
+              {erroGeral.acao === 'entrar' && (
+                <Link className="forum-botao forum-botao--contorno" to={enderecoDoLoginComVolta(caminhoDeVolta, 'entrar')}>
+                  Entrar
+                </Link>
+              )}
+              {erroGeral.acao === 'responderNoTopico' && aoResponderNoTopico && (
+                <button type="button" className="forum-botao forum-botao--contorno" onClick={aoResponderNoTopico}>
+                  Responder no tópico
+                </button>
+              )}
+              {erroGeral.acao === 'conferir' && (
+                <div className="forum-form__alerta-acoes">
+                  {aoConferir && conferencia !== 'jaEsta' && (
+                    <button
+                      type="button"
+                      className="forum-botao forum-botao--contorno"
+                      onClick={() => void conferir()}
+                      aria-disabled={conferindo || undefined}
+                    >
+                      {conferindo ? 'Conferindo…' : 'Conferir a conversa'}
+                    </button>
+                  )}
+                  {aoDescartar && (
+                    <button type="button" className="forum-botao-texto" onClick={aoDescartar}>
+                      Descartar texto
+                    </button>
+                  )}
+                </div>
+              )}
+              {participar.erro && <p className="forum-campo__erro">{participar.erro}</p>}
+            </div>
+          )}
+            {conferencia === 'naoEsta' && (
+              <p className="forum-compositor__aviso" role="status">
+                Conversa atualizada. Se sua resposta já está aí, descarta o texto.
+              </p>
+            )}
+          </>
+        }
         valor={texto}
         aoMudar={(novo) => {
+          setConferencia(null);
           aoMudarTexto(novo);
           if (erroLocalDoCampo) setErroDoCampo(null);
           if (erroDoServidor && erroDoServidor.acao !== 'participar') setErroDoServidor(null);
@@ -210,17 +241,19 @@ export function CompositorDeResposta({
       />
       <div className="forum-compositor__acoes">
         {aoCancelar && (
-          <button type="button" className="forum-botao forum-botao--contorno" onClick={aoCancelar}>
+          <button type="button" className="forum-botao forum-botao--contorno" onClick={aoCancelar} disabled={enviando}>
             Cancelar
           </button>
         )}
-        <button
-          type="submit"
-          className={`forum-botao ${acento ? 'forum-botao--acento' : 'forum-botao--escuro'}`}
-          aria-busy={enviando || undefined}
-        >
-          {rotuloAtual}
-        </button>
+        {conferencia !== 'jaEsta' && (
+          <button
+            type="submit"
+            className={`forum-botao ${acento ? 'forum-botao--acento' : 'forum-botao--escuro'}`}
+            aria-busy={enviando || undefined}
+          >
+            {rotuloAtual}
+          </button>
+        )}
       </div>
     </form>
   );

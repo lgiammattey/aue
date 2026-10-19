@@ -6,6 +6,8 @@ interface Props {
   readonly classe?: string;
   /** Esc (o `cancel` do navegador). Quem usa decide se fecha; rascunho nunca se perde por isso. */
   readonly aoCancelar: () => void;
+  /** Enviando: Esc não fecha. Fechar esconderia o resultado (e o texto, se falhar). */
+  readonly bloqueado?: boolean;
   /** Onde o foco entra ao abrir. Sem isso, o navegador escolhe o primeiro item focável. */
   readonly focoInicial?: RefObject<HTMLElement | null>;
   /** Chamado depois de fechar: devolve o foco ao gatilho (ou ao H1, se o gatilho sumiu). */
@@ -19,7 +21,7 @@ interface Props {
  * quando quer abrir e desmonta quando quer fechar. No navegador que não tem `showModal`
  * (testes em jsdom), abre como dialog comum e o resto da lógica vale igual.
  */
-export function DialogoDoForum({ idDoTitulo, classe, aoCancelar, focoInicial, aoFechar, children }: Props) {
+export function DialogoDoForum({ idDoTitulo, classe, aoCancelar, bloqueado, focoInicial, aoFechar, children }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const ultimoAoFechar = useRef(aoFechar);
   ultimoAoFechar.current = aoFechar;
@@ -51,7 +53,7 @@ export function DialogoDoForum({ idDoTitulo, classe, aoCancelar, focoInicial, ao
       aria-labelledby={idDoTitulo}
       onCancel={(e) => {
         e.preventDefault();
-        aoCancelar();
+        if (!bloqueado) aoCancelar();
       }}
     >
       {children}

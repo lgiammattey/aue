@@ -123,6 +123,9 @@ export function erroDeEnvio(motivo: MotivoDeEscrita, operacao: OperacaoDeEscrita
     case 'naoEMembro':
       return erro('Entre na comunidade antes de participar.', 'geral', 'participar');
     case 'topicoFechado':
+      if (operacao === 'edicaoDeTopico' || operacao === 'edicaoDeResposta') {
+        return erro('Esse tópico foi fechado. Não dá mais pra editar.', 'geral', 'topicoFechado');
+      }
       return erro('Esse tópico foi fechado. Não aceita mais respostas.', 'geral', 'topicoFechado');
     case 'topicoNaoEncontrado':
       return erro('Esse tópico não está mais disponível.', 'geral', 'topicoIndisponivel');
@@ -141,7 +144,8 @@ export function erroDeEnvio(motivo: MotivoDeEscrita, operacao: OperacaoDeEscrita
     case 'precisaEntrar':
       return erro(TEXTO_SESSAO_ACABOU, 'geral', 'entrar');
     case 'semConfirmacao':
-      // Apagar e denunciar repetem sem estrago (o servidor ignora a repetição).
+      // Apagar e denunciar podem ser repetidos: denunciar de novo é ignorado pelo servidor; apagar de novo, se a
+      // primeira chegou, devolve *_nao_encontrado (a frase de "não deu pra apagar" e o próximo clique resolvem).
       if (operacao === 'apagar') return erro('Não deu pra apagar. Tenta de novo.');
       if (operacao === 'denuncia') return erro('Não deu pra enviar a denúncia. Tenta de novo.');
       return erro(TEXTO_SEM_CONFIRMACAO, 'geral', 'conferir', true);

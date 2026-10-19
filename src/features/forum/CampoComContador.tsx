@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { avisoDeContador, excessoDoCampo, lerCampo, type LeituraDoCampo } from '../../nucleo/forum/escrita';
 
 interface Props {
@@ -24,6 +24,8 @@ interface Props {
   readonly aoFocar?: () => void;
   /** Enter num campo de uma linha (o título passa para a mensagem em vez de enviar). */
   readonly aoEnter?: () => void;
+  /** Aviso entre o campo e o contador (o alerta de envio não empurra o campo para baixo). */
+  readonly meio?: ReactNode;
 }
 
 /**
@@ -50,6 +52,7 @@ export function CampoComContador({
   enterKeyHint,
   aoFocar,
   aoEnter,
+  meio,
 }: Props) {
   const leitura = lerCampo(valor, limite);
   const anterior = useRef<LeituraDoCampo | null>(null);
@@ -68,8 +71,9 @@ export function CampoComContador({
   useLayoutEffect(() => {
     const el = area.current;
     if (!el || tipo !== 'area') return;
+    // Dentro de um <dialog> ainda fechado o scrollHeight é 0: não encolhe o campo (o piso em `min-height` segura).
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    if (el.scrollHeight > 0) el.style.height = `${el.scrollHeight}px`;
   }, [valor, tipo, linhasMaximas]);
 
   const idDoErro = `${id}-erro`;
@@ -125,10 +129,15 @@ export function CampoComContador({
         <textarea
           ref={guardarRef}
           rows={linhas}
-          style={{ maxHeight: `calc(${linhasMaximas} * 1.5em + 24px)` }}
+          style={{
+            // Piso de `linhas` linhas (24px de linha + 24px de padding + 2px de borda): o campo nunca colapsa.
+            minHeight: `calc(${linhas} * 1.5em + 26px)`,
+            maxHeight: `calc(${linhasMaximas} * 1.5em + 26px)`,
+          }}
           {...comuns}
         />
       )}
+      {meio}
       <div className="forum-campo__rodape">
         {erro ? (
           <p id={idDoErro} className="forum-campo__erro" role="alert">

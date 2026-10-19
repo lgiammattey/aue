@@ -1623,3 +1623,19 @@ html:has(.forum-dialogo[open]) {
     width: calc(100% - 32px);
   }
 }
+
+/* Menu da resposta: abre para a direita do botão (dentro da tela, em qualquer nível e em 320px) e alinha o ícone com o texto. */
+.forum-resposta__acoes .forum-menu__lista {
+  right: auto;
+  left: 0;
+  min-width: 136px;
+}
+.forum-resposta__acoes > .forum-menu:first-child .forum-menu__botao {
+  margin-left: -12px;
+}
+.forum-compositor__aviso {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}

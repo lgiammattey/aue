@@ -120,16 +120,16 @@ describe('o que cada papel vê no fim da conversa (spec 5 e 9.5)', () => {
     expect(screen.queryByLabelText('Sua resposta')).toBeNull();
   });
 
-  it('conta que não participa: "Entre em {comunidade} para responder." e Participar; entrou, o composer aparece com o foco', async () => {
+  it('conta que não participa: "Entre na comunidade para responder." e Participar; entrou, o composer aparece com o foco', async () => {
     const { porta } = abrir({ souMembro: false });
     await esperarConversa();
-    expect(await screen.findByText('Entre em Na reunião da firma para responder.')).toBeDefined();
+    expect(await screen.findByText('Entre na comunidade para responder.')).toBeDefined();
     expect(screen.queryByLabelText('Sua resposta')).toBeNull();
     fireEvent.click(screen.getAllByRole('button', { name: 'Participar' })[0]);
     await waitFor(() => expect(porta.entrarComunidade).toHaveBeenCalledWith('reuniao-da-firma'));
     const caixa = await screen.findByLabelText('Sua resposta');
     await waitFor(() => expect(document.activeElement).toBe(caixa));
-    expect(screen.queryByText('Entre em Na reunião da firma para responder.')).toBeNull();
+    expect(screen.queryByText('Entre na comunidade para responder.')).toBeNull();
   });
 
   it('tópico fechado: nenhum composer, nenhum Responder; a faixa de fechado explica', async () => {
@@ -260,7 +260,7 @@ describe('responder o tópico', () => {
     abrir({ armazenamento, forum: { responderTopico: vi.fn(async () => ok(criada())) } });
     await esperarConversa();
     digitar('rascunho aqui');
-    const chave = chaveDoRascunhoDeResposta(ID, null);
+    const chave = chaveDoRascunhoDeResposta('conta-a', ID, null);
     expect(JSON.parse(armazenamento.dados.get(chave)!)).toEqual({ corpo: 'rascunho aqui' });
     cleanup();
     abrir({ armazenamento, forum: { responderTopico: vi.fn(async () => ok(criada())) } });
@@ -278,7 +278,7 @@ describe('responder o tópico', () => {
     enviar();
     await screen.findByText('Não deu para enviar. Seu texto continua aqui, tenta de novo.');
     expect(campo().value).toBe('não pode sumir');
-    expect(armazenamento.dados.has(chaveDoRascunhoDeResposta(ID, null))).toBe(true);
+    expect(armazenamento.dados.has(chaveDoRascunhoDeResposta('conta-a', ID, null))).toBe(true);
   });
 
   it('armazenamento barrado: nada lança e o texto vive na sessão', async () => {
@@ -343,9 +343,9 @@ describe('responder: cada motivo do servidor (spec 6.6)', () => {
     await esperarConversa();
     digitar('meu texto');
     enviar();
-    expect(await screen.findByText(frase)).toBeDefined();
+    expect((await screen.findAllByText(frase)).length).toBeGreaterThan(0);
     expect(campo().value).toBe('meu texto');
-    expect(armazenamento.dados.has(chaveDoRascunhoDeResposta(ID, null))).toBe(true);
+    expect(armazenamento.dados.has(chaveDoRascunhoDeResposta('conta-a', ID, null))).toBe(true);
   });
 
   it('42501 sem HINT: link Entrar volta para este tópico', async () => {
@@ -366,7 +366,7 @@ describe('responder: cada motivo do servidor (spec 6.6)', () => {
     enviar();
     await screen.findByText(/Este tópico está fechado/);
     await waitFor(() => expect(screen.queryByLabelText('Sua resposta')).toBeNull());
-    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeResposta(ID, null))!)).toEqual({ corpo: 'guardado' });
+    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeResposta('conta-a', ID, null))!)).toEqual({ corpo: 'guardado' });
   });
 
   it('topico_nao_encontrado: a tela relê e vira "Esse tópico não está disponível."', async () => {
@@ -481,12 +481,12 @@ describe('responder uma resposta (aninhamento travado no nível 2)', () => {
     fireEvent.keyDown(campo('Sua resposta a Bia Lima'), { key: 'Escape' });
     expect(screen.queryByLabelText('Sua resposta a Bia Lima')).toBeNull();
     expect(document.activeElement).toBe(botao);
-    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeResposta(ID, 'r1'))!)).toEqual({ corpo: 'rascunho do pai' });
+    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeResposta('conta-a', ID, 'r1'))!)).toEqual({ corpo: 'rascunho do pai' });
     fireEvent.click(botao);
     expect(campo('Sua resposta a Bia Lima').value).toBe('rascunho do pai');
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
     expect(document.activeElement).toBe(botao);
-    expect(armazenamento.dados.has(chaveDoRascunhoDeResposta(ID, 'r1'))).toBe(true);
+    expect(armazenamento.dados.has(chaveDoRascunhoDeResposta('conta-a', ID, 'r1'))).toBe(true);
   });
 
   it('o rascunho de uma resposta não vaza para o composer principal nem para outra resposta', async () => {
@@ -650,7 +650,8 @@ describe('editar a própria resposta', () => {
     expect(campo('Editar resposta').value).toBe('mudei');
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
     expect(screen.getByText('texto antigo')).toBeDefined();
-    expect(document.activeElement).toBe(menu);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ações da resposta de Bia Lima' }));
+    void menu;
   });
 
   it('falha ambígua ao editar manda conferir', async () => {
@@ -884,5 +885,253 @@ describe('aside do desktop: a ação da pessoa na comunidade', () => {
     await esperarConversa();
     const aside = await screen.findByRole('complementary', { name: 'Sobre a comunidade' });
     expect(within(aside).queryByRole('button')).toBeNull();
+  });
+});
+
+describe('enviando, nada fecha (B2)', () => {
+  it('composer inline: Cancelar desabilitado e Esc ignorado até a resposta chegar; depois da falha volta ao normal', async () => {
+    let soltar!: (r: ResultadoDaEscrita<RespostaCriada>) => void;
+    const responder = vi.fn(() => new Promise<ResultadoDaEscrita<RespostaCriada>>((r) => (soltar = r)));
+    abrir({ respostas: [resposta({ id: 'r1' })], forum: { responderTopico: responder } });
+    await screen.findByText('texto r1');
+    fireEvent.click(screen.getByRole('button', { name: 'Responder a Bia Lima' }));
+    digitar('oi', 'Sua resposta a Bia Lima');
+    enviar('Sua resposta a Bia Lima');
+    expect((screen.getByRole('button', { name: 'Cancelar' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.keyDown(campo('Sua resposta a Bia Lima'), { key: 'Escape' });
+    expect(screen.getByLabelText('Sua resposta a Bia Lima')).toBeDefined();
+    await act(async () => soltar(falha('falhou')));
+    await screen.findByText('Não deu para enviar. Seu texto continua aqui, tenta de novo.');
+    expect((screen.getByRole('button', { name: 'Cancelar' }) as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.keyDown(campo('Sua resposta a Bia Lima'), { key: 'Escape' });
+    expect(screen.queryByLabelText('Sua resposta a Bia Lima')).toBeNull();
+  });
+
+  it('edição inline: mesma regra', async () => {
+    let soltar!: (r: ResultadoDaEscrita<{ id: string; corpo: string; editadoEm: string }>) => void;
+    const editar = vi.fn(() => new Promise<ResultadoDaEscrita<{ id: string; corpo: string; editadoEm: string }>>((r) => (soltar = r)));
+    abrir({ respostas: [resposta({ id: 'r1', souAutor: true, corpo: 'antigo' })], forum: { editarResposta: editar } });
+    await screen.findByText('antigo');
+    escolher(screen.getByRole('button', { name: 'Ações da resposta de Bia Lima' }), 'Editar');
+    digitar('novo', 'Editar resposta');
+    enviar('Editar resposta');
+    expect((screen.getByRole('button', { name: 'Cancelar' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.keyDown(campo('Editar resposta'), { key: 'Escape' });
+    expect(screen.getByLabelText('Editar resposta')).toBeDefined();
+    await act(async () => soltar(falha('falhou')));
+    await waitFor(() => expect((screen.getByRole('button', { name: 'Cancelar' }) as HTMLButtonElement).disabled).toBe(false));
+  });
+
+  it('dialog de apagar: Cancelar desabilitado e Esc ignorado enquanto apaga', async () => {
+    let soltar!: (r: ResultadoDaEscrita<true>) => void;
+    const apagar = vi.fn(() => new Promise<ResultadoDaEscrita<true>>((r) => (soltar = r)));
+    abrir({ respostas: [resposta({ id: 'r1', souAutor: true })], forum: { apagarResposta: apagar } });
+    await screen.findByText('texto r1');
+    escolher(screen.getByRole('button', { name: 'Ações da resposta de Bia Lima' }), 'Apagar');
+    const d = await screen.findByRole('dialog');
+    fireEvent.click(within(d).getByRole('button', { name: 'Apagar resposta' }));
+    expect((within(d).getByRole('button', { name: 'Cancelar' }) as HTMLButtonElement).disabled).toBe(true);
+    const cancel = new Event('cancel', { cancelable: true });
+    fireEvent(d, cancel);
+    expect(cancel.defaultPrevented).toBe(true);
+    expect(screen.getByRole('dialog')).toBeDefined();
+    await act(async () => soltar(falha('falhou')));
+    expect(await within(d).findByText('Não deu pra apagar. Tenta de novo.')).toBeDefined();
+    expect((within(d).getByRole('button', { name: 'Cancelar' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('dialog de denúncia e de edição do tópico: idem', async () => {
+    let soltar!: (r: ResultadoDaEscrita<true>) => void;
+    const denunciar = vi.fn(() => new Promise<ResultadoDaEscrita<true>>((r) => (soltar = r)));
+    abrir({ forum: { denunciarTopico: denunciar } });
+    await esperarConversa();
+    escolher(menuDoTopico(), 'Denunciar');
+    const d = await screen.findByRole('dialog');
+    fireEvent.submit(d.querySelector('form')!);
+    expect((within(d).getByRole('button', { name: 'Cancelar' }) as HTMLButtonElement).disabled).toBe(true);
+    const cancel = new Event('cancel', { cancelable: true });
+    fireEvent(d, cancel);
+    expect(screen.getByRole('dialog')).toBeDefined();
+    await act(async () => soltar(falha('falhou')));
+    await within(d).findByText('Não deu pra enviar a denúncia. Tenta de novo.');
+  });
+
+  it('formulário de editar tópico: Cancelar desabilitado (celular e desktop) e Esc ignorado enquanto salva', async () => {
+    let soltar!: (r: ResultadoDaEscrita<{ id: string; titulo: string; corpo: string; editadoEm: string }>) => void;
+    const editar = vi.fn(() => new Promise<ResultadoDaEscrita<{ id: string; titulo: string; corpo: string; editadoEm: string }>>((r) => (soltar = r)));
+    abrir({ topico: { souAutor: true }, forum: { editarTopico: editar } });
+    await esperarConversa();
+    escolher(menuDoTopico(), 'Editar');
+    const d = await screen.findByRole('dialog', { name: 'Editar tópico' });
+    fireEvent.change(within(d).getByLabelText('Título'), { target: { value: 'outro' } });
+    fireEvent.submit(d.querySelector('form')!);
+    for (const b of within(d).getAllByRole('button', { name: 'Cancelar' })) expect((b as HTMLButtonElement).disabled).toBe(true);
+    const cancel = new Event('cancel', { cancelable: true });
+    fireEvent(d, cancel);
+    expect(screen.getByRole('dialog')).toBeDefined();
+    await act(async () => soltar(falha('falhou')));
+    await within(d).findByText('Não deu para enviar. Seu texto continua aqui, tenta de novo.');
+  });
+});
+
+describe('duplo toque ao editar', () => {
+  it('editar resposta: uma chamada só', async () => {
+    let soltar!: (r: ResultadoDaEscrita<{ id: string; corpo: string; editadoEm: string }>) => void;
+    const editar = vi.fn(() => new Promise<ResultadoDaEscrita<{ id: string; corpo: string; editadoEm: string }>>((r) => (soltar = r)));
+    abrir({ respostas: [resposta({ id: 'r1', souAutor: true, corpo: 'antigo' })], forum: { editarResposta: editar } });
+    await screen.findByText('antigo');
+    escolher(screen.getByRole('button', { name: 'Ações da resposta de Bia Lima' }), 'Editar');
+    digitar('novo', 'Editar resposta');
+    const form = campo('Editar resposta').closest('form')!;
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+    fireEvent.click(screen.getByRole('button', { name: 'Enviando…' }));
+    expect(editar).toHaveBeenCalledTimes(1);
+    await act(async () => soltar(ok({ id: 'r1', corpo: 'novo', editadoEm: '2026-10-19T15:10:00Z' })));
+  });
+
+  it('editar tópico: uma chamada só', async () => {
+    let soltar!: (r: ResultadoDaEscrita<{ id: string; titulo: string; corpo: string; editadoEm: string }>) => void;
+    const editar = vi.fn(() => new Promise<ResultadoDaEscrita<{ id: string; titulo: string; corpo: string; editadoEm: string }>>((r) => (soltar = r)));
+    abrir({ topico: { souAutor: true }, forum: { editarTopico: editar } });
+    await esperarConversa();
+    escolher(menuDoTopico(), 'Editar');
+    const d = await screen.findByRole('dialog', { name: 'Editar tópico' });
+    fireEvent.change(within(d).getByLabelText('Título'), { target: { value: 'novo título' } });
+    const form = d.querySelector('form')!;
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+    expect(editar).toHaveBeenCalledTimes(1);
+    await act(async () => soltar(ok({ id: ID, titulo: 'novo título', corpo: 'Saiu na hora do café.', editadoEm: '2026-10-19T15:10:00Z' })));
+  });
+});
+
+describe('editar tópico migrado e topico_fechado na edição', () => {
+  it('tópico sem mensagem: dá para editar só o título (o corpo não vai)', async () => {
+    const editar = vi.fn(async () => ok({ id: ID, titulo: 'só título', corpo: '', editadoEm: '2026-10-19T15:10:00Z' }));
+    abrir({ topico: { souAutor: true, corpo: '' }, forum: { editarTopico: editar } });
+    await esperarConversa();
+    escolher(menuDoTopico(), 'Editar');
+    const d = await screen.findByRole('dialog', { name: 'Editar tópico' });
+    fireEvent.change(within(d).getByLabelText('Título'), { target: { value: 'só título' } });
+    fireEvent.submit(d.querySelector('form')!);
+    await waitFor(() => expect(editar).toHaveBeenCalledWith({ topicoId: ID, titulo: 'só título' }));
+    expect(within(d).queryByText('Falta a mensagem.')).toBeNull();
+  });
+
+  it('topico_fechado ao editar: frase de edição (não "respostas") e o tópico é relido', async () => {
+    const { forum } = abrir({ topico: { souAutor: true }, forum: { editarTopico: vi.fn(async () => falha('topicoFechado')) } });
+    await esperarConversa();
+    escolher(menuDoTopico(), 'Editar');
+    const d = await screen.findByRole('dialog', { name: 'Editar tópico' });
+    fireEvent.change(within(d).getByLabelText('Título'), { target: { value: 'x' } });
+    const antes = (forum.obterTopico as ReturnType<typeof vi.fn>).mock.calls.length;
+    fireEvent.submit(d.querySelector('form')!);
+    expect(await within(d).findByText('Esse tópico foi fechado. Não dá mais pra editar.')).toBeDefined();
+    expect(within(d).queryByText(/aceita mais respostas/)).toBeNull();
+    await waitFor(() => expect((forum.obterTopico as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(antes));
+  });
+});
+
+describe('conferir diz o que achou (R1)', () => {
+  it('resposta igual do próprio autor já na conversa: "Sua resposta já está na conversa.", só Descartar (sem Enviar)', async () => {
+    const responder = vi.fn(async () => falha('semConfirmacao'));
+    const { estado } = abrir({ forum: { responderTopico: responder } });
+    await esperarConversa();
+    digitar('chegou lá');
+    enviar();
+    await screen.findByText(/Não deu pra confirmar o envio/);
+    estado.respostas = [resposta({ id: 'r9', corpo: 'chegou lá', souAutor: true })];
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir a conversa' }));
+    expect(await screen.findByText('Sua resposta já está na conversa.')).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Enviar' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Conferir a conversa' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar texto' }));
+    expect(campo().value).toBe('');
+    expect(responder).toHaveBeenCalledTimes(1);
+  });
+
+  it('não achou: status "Conversa atualizada. Se sua resposta já está aí, descarta o texto." e o Enviar continua', async () => {
+    abrir({ forum: { responderTopico: vi.fn(async () => falha('semConfirmacao')) } });
+    await esperarConversa();
+    digitar('talvez');
+    enviar();
+    await screen.findByText(/Não deu pra confirmar o envio/);
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir a conversa' }));
+    const msg = await screen.findByText('Conversa atualizada. Se sua resposta já está aí, descarta o texto.');
+    expect(msg.getAttribute('role')).toBe('status');
+    expect(screen.getByRole('button', { name: 'Enviar' })).toBeDefined();
+  });
+
+  it('resposta de OUTRA pessoa com o mesmo texto não conta como a minha', async () => {
+    const { estado } = abrir({ forum: { responderTopico: vi.fn(async () => falha('semConfirmacao')) } });
+    await esperarConversa();
+    digitar('igual');
+    enviar();
+    await screen.findByText(/Não deu pra confirmar o envio/);
+    estado.respostas = [resposta({ id: 'r9', corpo: 'igual', souAutor: false })];
+    fireEvent.click(screen.getByRole('button', { name: 'Conferir a conversa' }));
+    await screen.findByText('Conversa atualizada. Se sua resposta já está aí, descarta o texto.');
+    expect(screen.queryByText('Sua resposta já está na conversa.')).toBeNull();
+  });
+});
+
+describe('topico_fechado ao enviar (R2): diz por quê, uma vez', () => {
+  it('mostra e anuncia "Esse tópico foi fechado. Não aceita mais respostas." quando o tópico relido está fechado', async () => {
+    const { estado } = abrir({ forum: { responderTopico: vi.fn(async () => falha('topicoFechado')) } });
+    await esperarConversa();
+    digitar('tarde');
+    estado.topico = { ...estado.topico, status: 'fechado' };
+    enviar();
+    await waitFor(() => expect(screen.queryByLabelText('Sua resposta')).toBeNull());
+    expect(document.querySelectorAll('.forum-faixa-fechado.forum-compositor-area').length).toBe(1);
+    expect(screen.getAllByText('Esse tópico foi fechado. Não aceita mais respostas.').length).toBeGreaterThan(0);
+    expect(statusDaCasca()).toBe('Esse tópico foi fechado. Não aceita mais respostas.');
+  });
+});
+
+describe('detalhes do composer (R3, R4, R5)', () => {
+  it('R3: o menu e o "Responder" somem enquanto a resposta está em edição e voltam ao cancelar', async () => {
+    abrir({ respostas: [resposta({ id: 'r1', souAutor: true, corpo: 'antigo' })] });
+    await screen.findByText('antigo');
+    escolher(screen.getByRole('button', { name: 'Ações da resposta de Bia Lima' }), 'Editar');
+    expect(screen.queryByRole('button', { name: 'Ações da resposta de Bia Lima' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Responder a Bia Lima' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    expect(screen.getByRole('button', { name: 'Ações da resposta de Bia Lima' })).toBeDefined();
+  });
+
+  it('R4: o rótulo do composer é só para leitor de tela (sem rótulo visível), o placeholder fica', async () => {
+    abrir({ respostas: [resposta({ id: 'r1' })] });
+    await screen.findByText('texto r1');
+    expect(campo().labels![0].className).toBe('forum-sr');
+    fireEvent.click(screen.getByRole('button', { name: 'Responder a Bia Lima' }));
+    expect(campo('Sua resposta a Bia Lima').labels![0].className).toBe('forum-sr');
+    expect(campo().placeholder).toBe('Escreve sua resposta');
+  });
+
+  it('R5: o alerta de envio fica entre o campo e o contador (não empurra o campo para baixo)', async () => {
+    abrir({ forum: { responderTopico: vi.fn(async () => falha('falhou')) } });
+    await esperarConversa();
+    digitar('oi');
+    enviar();
+    const alerta = (await screen.findByText('Não deu para enviar. Seu texto continua aqui, tenta de novo.')).closest('[role="alert"]')!;
+    const caixa = campo();
+    const contador = document.getElementById(caixa.id + '-contador')!;
+    expect(caixa.compareDocumentPosition(alerta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(alerta.compareDocumentPosition(contador) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
+describe('rascunho de resposta é de uma conta só (B1)', () => {
+  it('a conta B não vê o rascunho da A no mesmo navegador', async () => {
+    const armazenamento = armazenamentoFalso();
+    armazenamento.gravar(chaveDoRascunhoDeResposta('conta-a', ID, null), JSON.stringify({ corpo: 'segredo da A' }));
+    abrir({ armazenamento, conta: { ...CONTA, id: 'conta-b' } });
+    await esperarConversa();
+    expect(campo().value).toBe('');
+    digitar('da B');
+    expect(armazenamento.dados.has(chaveDoRascunhoDeResposta('conta-b', ID, null))).toBe(true);
+    expect(JSON.parse(armazenamento.dados.get(chaveDoRascunhoDeResposta('conta-a', ID, null))!).corpo).toBe('segredo da A');
   });
 });

@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Outlet, useParams, useSearchParams } from 'react-router-dom';
+import type { RefObject } from 'react';
 import type { ComunidadeDoForum, CursorDeTopicos } from '../../portas/forum';
 import { nomeDoAutor } from '../../nucleo/forum/apresentacao';
 import {
@@ -12,23 +13,44 @@ import {
   Monograma,
   type DadosDaLinhaDeTopico,
 } from './componentes';
+import { AcoesDaComunidade } from './AcoesDaComunidade';
 import { useDependenciasDoForum } from './contexto';
 import { useLeitura, useListaPaginada, useOnline } from './hooks';
 import { ListaDeTopicos } from './ListaDeTopicos';
 import { metaDoCabecalho } from './metaDoCabecalho';
 import { ordemDaUrl } from './ordem';
-import { usePapel } from './papel';
+import { usePapel, useSouMembro } from './papel';
 import { AsideDeRegras, RegrasEmDetalhes } from './RegrasDaCasa';
 import { NoAside, TopoDaTela } from './ShellDoForum';
+import type { ContextoDaComunidade } from './TelaNovoTopico';
 import { useTituloDoDocumento } from './encaixes';
 
 const TAMANHO_DA_PAGINA = 30;
 
-function Cabecalho({ comunidade, souMembro }: { readonly comunidade: ComunidadeDoForum; readonly souMembro: boolean }) {
-  const h1 = useRef<HTMLHeadingElement>(null);
+/** Spec 8.4: o vazio aponta para a ação que a pessoa tem de verdade, sem repetir o botão. */
+function linhaDoVazio(papel: 'carregando' | 'visitante' | 'conta' | 'desconhecido', souMembro: boolean): string {
+  if (souMembro) return 'Abre o primeiro. O botão Novo tópico está aí em cima.';
+  if (papel === 'visitante') return 'Cria sua conta pra abrir o primeiro.';
+  if (papel === 'conta') return 'Participa da comunidade pra abrir o primeiro.';
+  return 'Ninguém abriu assunto por aqui ainda.';
+}
+
+function Cabecalho({
+  comunidade,
+  souMembro,
+  h1,
+  gatilho,
+  aoMudarParticipacao,
+}: {
+  readonly comunidade: ComunidadeDoForum;
+  readonly souMembro: boolean;
+  readonly h1: RefObject<HTMLHeadingElement | null>;
+  readonly gatilho: RefObject<HTMLAnchorElement | null>;
+  readonly aoMudarParticipacao: () => void;
+}) {
   useEffect(() => {
     h1.current?.focus({ preventScroll: true });
-  }, [comunidade.slug]);
+  }, [comunidade.slug, h1]);
 
   return (
     <section className="forum-cabecalho" aria-labelledby="forum-h1">
@@ -40,13 +62,28 @@ function Cabecalho({ comunidade, souMembro }: { readonly comunidade: ComunidadeD
       </div>
       {comunidade.descricao && <p className="forum-cabecalho__descricao">{comunidade.descricao}</p>}
       <p className="forum-meta">{metaDoCabecalho(comunidade)}</p>
-      {souMembro && <p className="forum-meta forum-meta--forte">Você participa</p>}
+      <AcoesDaComunidade
+        comunidade={comunidade}
+        souMembro={souMembro}
+        gatilho={gatilho}
+        aoMudarParticipacao={aoMudarParticipacao}
+      />
       <RegrasEmDetalhes />
     </section>
   );
 }
 
-function TopicosDaComunidade({ comunidade }: { readonly comunidade: ComunidadeDoForum }) {
+function TopicosDaComunidade({
+  comunidade,
+  versao,
+  souMembro,
+}: {
+  readonly comunidade: ComunidadeDoForum;
+  /** Sobe quando a pessoa pede para conferir a lista (falha ambígua ao criar): a lista recomeça do servidor. */
+  readonly versao: number;
+  readonly souMembro: boolean;
+}) {
+  const papel = usePapel();
   const { forum, ambiente } = useDependenciasDoForum();
   const online = useOnline(ambiente);
   const [params, setParams] = useSearchParams();
@@ -54,7 +91,7 @@ function TopicosDaComunidade({ comunidade }: { readonly comunidade: ComunidadeDo
   const slug = comunidade.slug;
 
   const lista = useListaPaginada<DadosDaLinhaDeTopico, CursorDeTopicos>({
-    chave: `${slug}|${ordem}`,
+    chave: `${slug}|${ordem}|${versao}`,
     chaveDeMemoria: `c:${slug}|${ordem}`,
     substantivo: 'tópicos',
     // A lista não usa corpo nem caminho de áudio: não entram no estado (spec 2.4, item 2).
@@ -95,10 +132,7 @@ function TopicosDaComunidade({ comunidade }: { readonly comunidade: ComunidadeDo
         offline={!online}
         agora={ambiente.agora()}
         vazio={
-          <EstadoVazio
-            titulo="Nenhum tópico ainda."
-            linha="Ninguém abriu assunto por aqui ainda."
-          />
+          <EstadoVazio titulo="Nenhum tópico ainda." linha={linhaDoVazio(papel.tipo, souMembro)} />
         }
       />
     </>
@@ -114,10 +148,16 @@ function TopicosDaComunidade({ comunidade }: { readonly comunidade: ComunidadeDo
 export function TelaComunidadeDoForum() {
   const { slug = '' } = useParams<{ slug: string }>();
   const { forum, ambiente } = useDependenciasDoForum();
-  const papel = usePapel();
   const online = useOnline(ambiente);
 
-  const { estado, recarregar } = useLeitura(() => forum.obterComunidadeDoForum(slug), `comunidade:${slug}`);
+  const { estado, recarregar, atualizar } = useLeitura(() => forum.obterComunidadeDoForum(slug), `comunidade:${slug}`);
+  const [versaoDaLista, setVersaoDaLista] = useState(0);
+  const gatilho = useRef<HTMLAnchorElement>(null);
+  const h1 = useRef<HTMLHeadingElement>(null);
+  const conferirLista = useCallback(() => setVersaoDaLista((v) => v + 1), []);
+  const atualizarComunidade = useCallback(() => void atualizar(), [atualizar]);
+  const focarTitulo = useCallback(() => h1.current?.focus({ preventScroll: true }), []);
+  const souMembro = useSouMembro(slug, estado.fase === 'pronto' && estado.valor ? estado.valor.souMembro : false);
   const nome = estado.fase === 'pronto' && estado.valor ? estado.valor.nome : null;
   useTituloDoDocumento(nome ?? 'Comunidade');
 
@@ -154,7 +194,14 @@ export function TelaComunidadeDoForum() {
     );
   }
 
-  const souMembro = comunidade.souMembro || (papel.tipo === 'conta' && papel.slugsDeMembro.has(comunidade.slug));
+  const contexto: ContextoDaComunidade = {
+    comunidade,
+    souMembro,
+    gatilho,
+    conferirLista,
+    atualizarComunidade,
+    focarTitulo,
+  };
 
   return (
     <>
@@ -162,8 +209,15 @@ export function TelaComunidadeDoForum() {
       <NoAside>
         <AsideDeRegras />
       </NoAside>
-      <Cabecalho comunidade={comunidade} souMembro={souMembro} />
-      <TopicosDaComunidade comunidade={comunidade} />
+      <Cabecalho
+        comunidade={comunidade}
+        souMembro={souMembro}
+        h1={h1}
+        gatilho={gatilho}
+        aoMudarParticipacao={atualizarComunidade}
+      />
+      <TopicosDaComunidade comunidade={comunidade} versao={versaoDaLista} souMembro={souMembro} />
+      <Outlet context={contexto} />
     </>
   );
 }

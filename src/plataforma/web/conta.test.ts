@@ -111,6 +111,7 @@ describe('conta: estado social persistido', () => {
       podeParticiparSocialmente: false,
       perfilSocialPendente: true,
       email: 'a@b.com',
+      id: 'u',
     });
     expect(rpc).toHaveBeenCalledWith('meu_estado_social');
   });

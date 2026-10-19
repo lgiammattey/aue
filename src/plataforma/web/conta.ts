@@ -46,6 +46,7 @@ export function criarContaWeb(): PortaDeConta {
         podeParticiparSocialmente: concluido,
         perfilSocialPendente: Boolean(estado?.conta_promovida && !estado.perfil_social_concluido),
         email: usuario.email || undefined,
+        id: usuario.id,
       };
     },
 

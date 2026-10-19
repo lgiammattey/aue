@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -15,7 +16,8 @@ import { useDependenciasDoForum, useDependenciasOuPadrao, ForumProvider } from '
 import { ContextoDosEncaixes } from './encaixes';
 import { useOnline } from './hooks';
 import { IconeArena, IconeComunidades, IconeExplorar, IconePerfil, IconeTema, IconeVoltar } from './Icones';
-import { ContextoDoPapel, useDescobrirPapel } from './papel';
+import { ContextoDaParticipacao, ContextoDoPapel, useDescobrirPapel, type Participacao } from './papel';
+import { ProvedorDeToast } from './ProvedorDeToast';
 import './forum.css';
 
 interface PropsDoTopo {
@@ -149,6 +151,20 @@ function Casca({ children }: { readonly children: ReactNode }) {
     setTema(novo);
   }, [ambiente, tema]);
 
+  // Entrou ou saiu nesta sessão: só depois que o servidor disse `true` (ver `useParticiparDaComunidade`).
+  const [acoesDeParticipacao, setAcoesDeParticipacao] = useState<ReadonlyMap<string, boolean>>(new Map());
+  const participacao = useMemo<Participacao>(
+    () => ({
+      ehMembro: (slug, doServidor) => acoesDeParticipacao.get(slug) ?? doServidor,
+      definirMembro: (slug, membro) => setAcoesDeParticipacao((m) => new Map(m).set(slug, membro)),
+    }),
+    [acoesDeParticipacao],
+  );
+
+  // Teclado aberto no celular: a barra inferior sai da frente (spec 4.3 e 4.7).
+  const [emCampo, setEmCampo] = useState(false);
+  useEffect(() => ambiente.aoMudarFocoEmCampo(setEmCampo), [ambiente]);
+
   const [topo, setTopo] = useState<HTMLElement | null>(null);
   const [aside, setAside] = useState<HTMLElement | null>(null);
   const [telaRaiz, setTelaRaiz] = useState(true);
@@ -164,9 +180,14 @@ function Casca({ children }: { readonly children: ReactNode }) {
   }, [online, anunciar]);
 
   // Navegar para uma tela nova começa no topo; voltar (POP) deixa a lista restaurar a rolagem.
+  // Abrir ou fechar o formulário de novo tópico (`/c/:slug/novo`) não é tela nova: a lista fica onde está.
+  const telaAnterior = useRef(local.pathname.replace(/\/novo$/, ''));
   useLayoutEffect(() => {
-    if (tipoDeNavegacao !== 'POP') ambiente.rolarPara(0);
-  }, [local.key, tipoDeNavegacao, ambiente]);
+    const tela = local.pathname.replace(/\/novo$/, '');
+    const mudouDeTela = tela !== telaAnterior.current;
+    telaAnterior.current = tela;
+    if (tipoDeNavegacao !== 'POP' && mudouDeTela) ambiente.rolarPara(0);
+  }, [local.pathname, tipoDeNavegacao, ambiente]);
 
   const principal = useRef<HTMLElement>(null);
   const visitante = papel.tipo === 'visitante';
@@ -174,68 +195,72 @@ function Casca({ children }: { readonly children: ReactNode }) {
 
   return (
     <ContextoDoPapel.Provider value={papel}>
-      <ContextoDosEncaixes.Provider value={{ topo, aside, anunciar, definirRaiz: setTelaRaiz }}>
-        <div className="forum-shell" data-forum-tema={tema}>
-          <a
-            className="forum-pular"
-            href="#conteudo"
-            onClick={(e) => {
-              e.preventDefault();
-              principal.current?.focus();
-            }}
-          >
-            Pular para o conteúdo
-          </a>
+      <ContextoDaParticipacao.Provider value={participacao}>
+        <ContextoDosEncaixes.Provider value={{ topo, aside, anunciar, definirRaiz: setTelaRaiz }}>
+          <div className="forum-shell" data-forum-tema={tema} data-teclado={emCampo ? 'aberto' : undefined}>
+            <ProvedorDeToast>
+              <a
+                className="forum-pular"
+                href="#conteudo"
+                onClick={(e) => {
+                  e.preventDefault();
+                  principal.current?.focus();
+                }}
+              >
+                Pular para o conteúdo
+              </a>
 
-          <div className="forum-lateral">
-            <Link className="forum-marca" to="/" aria-label="Auê!, página inicial">
-              <span className="forum-marca__cheia">AUÊ!</span>
-              <span className="forum-marca__curta" aria-hidden="true">
-                A!
-              </span>
-            </Link>
-            <Navegacao ativo={itemAtivoDe(local.pathname)} papelEhVisitante={visitante} />
-            <div className="forum-lateral__rodape">
-              <BotaoDeTema tema={tema} aoAlternar={alternarTema} classe="forum-tema forum-tema--lateral" />
-              {visitante && (
-                <Link className="forum-entrar forum-entrar--cheio" to={enderecoDeEntrar}>
-                  Entrar
+              <div className="forum-lateral">
+                <Link className="forum-marca" to="/" aria-label="Auê!, página inicial">
+                  <span className="forum-marca__cheia">AUÊ!</span>
+                  <span className="forum-marca__curta" aria-hidden="true">
+                    A!
+                  </span>
                 </Link>
-              )}
-            </div>
-          </div>
-
-          <div className="forum-centro">
-            <header className={`forum-topo${telaRaiz ? '' : ' forum-topo--aninhado'}`}>
-              <div className="forum-topo__miolo" ref={setTopo} />
-              <div className="forum-topo__direita">
-                <BotaoDeTema tema={tema} aoAlternar={alternarTema} classe="forum-tema forum-tema--topo" />
-                {visitante && (
-                  <Link className="forum-entrar forum-entrar--texto" to={enderecoDeEntrar}>
-                    Entrar
-                  </Link>
-                )}
+                <Navegacao ativo={itemAtivoDe(local.pathname)} papelEhVisitante={visitante} />
+                <div className="forum-lateral__rodape">
+                  <BotaoDeTema tema={tema} aoAlternar={alternarTema} classe="forum-tema forum-tema--lateral" />
+                  {visitante && (
+                    <Link className="forum-entrar forum-entrar--cheio" to={enderecoDeEntrar}>
+                      Entrar
+                    </Link>
+                  )}
+                </div>
               </div>
-            </header>
 
-            {!online && (
-              <p className="forum-faixa-offline">
-                Sem internet. Dá pra ler o que já abriu, mas não dá pra enviar nem carregar mais.
-              </p>
-            )}
+              <div className="forum-centro">
+                <header className={`forum-topo${telaRaiz ? '' : ' forum-topo--aninhado'}`}>
+                  <div className="forum-topo__miolo" ref={setTopo} />
+                  <div className="forum-topo__direita">
+                    <BotaoDeTema tema={tema} aoAlternar={alternarTema} classe="forum-tema forum-tema--topo" />
+                    {visitante && (
+                      <Link className="forum-entrar forum-entrar--texto" to={enderecoDeEntrar}>
+                        Entrar
+                      </Link>
+                    )}
+                  </div>
+                </header>
 
-            <main id="conteudo" className="forum-principal" tabIndex={-1} ref={principal}>
-              {children}
-            </main>
+                {!online && (
+                  <p className="forum-faixa-offline">
+                    Sem internet. Dá pra ler o que já abriu, mas não dá pra enviar nem carregar mais.
+                  </p>
+                )}
+
+                <main id="conteudo" className="forum-principal" tabIndex={-1} ref={principal}>
+                  {children}
+                </main>
+              </div>
+
+              <aside className="forum-aside" aria-label="Sobre a comunidade" ref={setAside} />
+
+              <div className="forum-sr" role="status" aria-live="polite">
+                <span key={anuncio.n}>{anuncio.texto}</span>
+              </div>
+            </ProvedorDeToast>
           </div>
-
-          <aside className="forum-aside" aria-label="Sobre a comunidade" ref={setAside} />
-
-          <div className="forum-sr" role="status" aria-live="polite">
-            <span key={anuncio.n}>{anuncio.texto}</span>
-          </div>
-        </div>
-      </ContextoDosEncaixes.Provider>
+        </ContextoDosEncaixes.Provider>
+      </ContextoDaParticipacao.Provider>
     </ContextoDoPapel.Provider>
   );
 }

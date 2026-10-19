@@ -11,6 +11,12 @@
 export const LIMITE_CAUSO = 1000;
 export const LIMITE_COMENTARIO = 500;
 
+/** Fórum de comunidades (RPCs `criar_topico`, `responder_topico`, `denunciar_*`; ADR 0010). */
+export const LIMITE_TITULO_TOPICO = 120;
+export const LIMITE_TEXTO_TOPICO = 1000;
+export const LIMITE_RESPOSTA = 500;
+export const LIMITE_MOTIVO_DE_DENUNCIA = 500;
+
 /** Caracteres como o `char_length` do Postgres conta. */
 export function contarCaracteres(texto: string): number {
   let total = 0;

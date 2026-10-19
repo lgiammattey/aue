@@ -5,7 +5,7 @@ import type { ComunidadeDoForum } from '../../portas/forum';
 import { EstadoDeErro, EstadoVazio, Esqueleto, LinhaDeComunidade } from './componentes';
 import { useDependenciasDoForum } from './contexto';
 import { useLeitura, useOnline } from './hooks';
-import { usePapel } from './papel';
+import { useParticipacao, usePapel } from './papel';
 import { TopoDaTela } from './ShellDoForum';
 import { useTituloDoDocumento } from './encaixes';
 
@@ -23,6 +23,7 @@ function ListaDeComunidades({ comunidades, agora }: { readonly comunidades: read
 export function TelaDiretorio() {
   const { forum, ambiente } = useDependenciasDoForum();
   const papel = usePapel();
+  const participacao = useParticipacao();
   const online = useOnline(ambiente);
   const local = useLocation();
   useTituloDoDocumento('Comunidades');
@@ -40,8 +41,10 @@ export function TelaDiretorio() {
   } else {
     const ordenadas = ordenarComunidades(estado.valor);
     if (papel.tipo === 'conta') {
-      const dela = ordenadas.filter((c) => c.souMembro || papel.slugsDeMembro.has(c.slug));
-      const outras = ordenadas.filter((c) => !(c.souMembro || papel.slugsDeMembro.has(c.slug)));
+      // Entrar ou sair nesta sessão vale mais que a leitura e a lista inicial, que ficam velhas.
+      const ehDela = (c: ComunidadeDoForum) => participacao.ehMembro(c.slug, c.souMembro || papel.slugsDeMembro.has(c.slug));
+      const dela = ordenadas.filter(ehDela);
+      const outras = ordenadas.filter((c) => !ehDela(c));
       corpo = (
         <>
           <section aria-labelledby="forum-suas">

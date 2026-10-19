@@ -22,9 +22,9 @@ function CaminhoAtual() {
   return <output data-testid="caminho-atual">{`${location.pathname}${location.search}`}</output>;
 }
 
-function montar(conta: PortaDeConta) {
+function montar(conta: PortaDeConta, entrada = '/login') {
   render(
-    <MemoryRouter initialEntries={['/login']}>
+    <MemoryRouter initialEntries={[entrada]}>
       <TelaLogin portaConta={conta} />
       <CaminhoAtual />
     </MemoryRouter>,
@@ -147,5 +147,23 @@ describe('TelaLogin (cartão estilo Google, só pra quem já tem conta)', () => 
 
     expect(screen.getByRole('link', { name: 'ouça as comunidades' }).getAttribute('href')).toBe('/comunidade');
     expect(screen.getByRole('link', { name: 'arrote como convidado' }).getAttribute('href')).toBe('/arena');
+  });
+
+  it('quem veio por um link de conversa volta para ela depois de entrar', async () => {
+    montar(contaFalsa(), '/login?modo=cadastro&volta=%2Fhistoria%2Fabc');
+    irParaSenha();
+    fireEvent.change(screen.getByPlaceholderText('Digite sua senha'), { target: { value: 'senha-valida-1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() => expect(screen.getByTestId('caminho-atual').textContent).toBe('/historia/abc'));
+  });
+
+  it('destino de volta que sai do site é ignorado', async () => {
+    montar(contaFalsa(), '/login?volta=https%3A%2F%2Fevil.com');
+    irParaSenha();
+    fireEvent.change(screen.getByPlaceholderText('Digite sua senha'), { target: { value: 'senha-valida-1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() => expect(screen.getByTestId('caminho-atual').textContent).toBe('/'));
   });
 });

@@ -115,6 +115,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [aba, setAba] = useState<Aba>('causos');
   const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
   const [carregandoCausos, setCarregandoCausos] = useState(false);
+  const [falhaNosCausos, setFalhaNosCausos] = useState(false);
   const [aviso, setAviso] = useState('');
   const [editando, setEditando] = useState(false);
   const [hoverFoto, setHoverFoto] = useState(false);
@@ -229,6 +230,13 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       .then((lista) => {
         if (!ativo) return;
         setCausos(aba === 'audios' ? lista.filter((c) => c.temAudio) : lista);
+        setFalhaNosCausos(false);
+        setCarregandoCausos(false);
+      })
+      .catch(() => {
+        if (!ativo) return;
+        setCausos([]);
+        setFalhaNosCausos(true);
         setCarregandoCausos(false);
       });
     return () => {
@@ -405,25 +413,29 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     else avisar('Não deu para repostar agora.');
   };
   const abrirConversa = async (id: string) => {
-    const lista = await comunidade.listarRespostas(id);
-    atualizar(id, { comentarios: lista });
+    try {
+      atualizar(id, { comentarios: await comunidade.listarRespostas(id) });
+    } catch {
+      avisar('Não deu para carregar as respostas. Tenta de novo.');
+    }
   };
-  const responder = async (id: string, texto: string, respostaAId?: string) => {
+  const responder = async (id: string, texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
     if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
       avisar('Crie sua conta para responder no Bonde.');
       aoEntrar('cadastro');
-      return;
+      return 'sem-conta';
     }
     const causo = causos.find((c) => c.id === id);
     const nova = await comunidade.adicionarResposta(id, texto, perfil?.apelido ?? 'Você', perfil?.handle, respostaAId);
     if (!nova) {
       avisar('Não deu para enviar a resposta.');
-      return;
+      return false;
     }
     atualizar(id, {
       comentarios: [...(causo?.comentarios ?? []), nova],
       totalComentarios: (causo?.totalComentarios ?? 0) + 1,
     });
+    return true;
   };
   const apagar = async (causo: CausoPostado) => {
     const comAudio = Boolean(causo.temAudio);
@@ -1028,7 +1040,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               </nav>
 
               {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
-              {!carregandoCausos && causos.length === 0 && (
+              {!carregandoCausos && falhaNosCausos && (
+                <p role="alert" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
+                  Não deu pra carregar as resenhas agora. Atualiza a página pra tentar de novo.
+                </p>
+              )}
+              {!carregandoCausos && !falhaNosCausos && causos.length === 0 && (
                 <p style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
                   {aba === 'curtidos'
                     ? 'Nada curtido ainda.'

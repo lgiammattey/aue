@@ -1,9 +1,9 @@
+import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../../nucleo/comunidade/limites';
 import React, { useState } from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
 export interface DadosNovoPost {
   texto: string;
-  autorNome?: string;
   comunidadeSlug?: string;
 }
 
@@ -25,7 +25,6 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
   comunidadeInicial = 'bonde-geral',
 }) => {
   const [texto, setTexto] = useState('');
-  const [nickname, setNickname] = useState(perfil.nome || '');
   const [comunidadeDestino, setComunidadeDestino] = useState(comunidadeInicial);
   const [enviando, setEnviando] = useState(false);
 
@@ -34,7 +33,8 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
     : (perfil.nome?.slice(0, 2) || 'VC')
   ).toUpperCase();
 
-  const podePostar = Boolean(texto.trim());
+  const restantes = caracteresRestantes(texto, LIMITE_CAUSO);
+  const podePostar = Boolean(texto.trim()) && cabeNoLimite(texto, LIMITE_CAUSO);
 
   const handlePostar = async () => {
     if (!podePostar || enviando) return;
@@ -42,7 +42,6 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
     try {
       const payload: DadosNovoPost = {
         texto: texto.trim(),
-        autorNome: nickname.trim() || perfil.nome || 'Arrotador',
         comunidadeSlug: comunidadeDestino,
       };
 
@@ -110,24 +109,8 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
       </div>
 
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {/* Linha de Apelido (Nickname) e Destino do Causo */}
+        {/* Destino do Causo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            placeholder="Seu apelido (nickname)"
-            style={{
-              background: 'none',
-              border: '1px solid var(--border)',
-              borderRadius: '999px',
-              padding: '4px 12px',
-              fontSize: '13px',
-              color: 'var(--fg)',
-              outline: 'none',
-              maxWidth: '180px',
-            }}
-          />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 500 }}>Destino:</span>
@@ -166,6 +149,7 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
           onChange={(e) => setTexto(e.target.value)}
           placeholder="O que tá rolando no bonde?"
           rows={2}
+          aria-describedby={restantes <= 100 ? 'contador-composer' : undefined}
           style={{
             background: 'none',
             border: 0,
@@ -238,6 +222,15 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
             </button>
           </div>
 
+          {restantes <= 100 && (
+            <span
+              id="contador-composer"
+              role="status"
+              style={{ fontSize: '13px', color: restantes < 0 ? 'var(--danger)' : 'var(--muted)' }}
+            >
+              {restantes}
+            </span>
+          )}
           <button
             type="button"
             onClick={handlePostar}

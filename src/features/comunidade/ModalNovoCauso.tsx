@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import type { Comunidade } from '../../portas/comunidade';
+import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../nucleo/comunidade/limites';
 
 export interface DadosDoCausoComArroto {
   comunidadeSlug: string;
-  autorNome: string;
   conteudo: string;
   consentimentoAudioPublico: boolean;
 }
@@ -12,7 +12,6 @@ interface ModalNovoCausoProps {
   aberto: boolean;
   comunidades: readonly Comunidade[];
   comunidadeAtualSlug?: string;
-  apelidoInicial?: string;
   /** Nota que a Arena mostrou. A publicada é a que o servidor calcula. */
   notaResultado?: number;
   /** Devolve `true` quando publicou; `false` mantém o modal aberto. */
@@ -24,7 +23,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
   aberto,
   comunidades,
   comunidadeAtualSlug,
-  apelidoInicial,
   notaResultado,
   onSubmit,
   onFechar,
@@ -32,7 +30,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
   const [comunidadeSlug, setComunidadeSlug] = useState(
     comunidadeAtualSlug || comunidades[0]?.slug || 'eu-arroto-e-dai',
   );
-  const [autorNome, setAutorNome] = useState(apelidoInicial ?? '');
   const [falhou, setFalhou] = useState(false);
   const [conteudo, setConteudo] = useState('');
   const [consentimentoAudio, setConsentimentoAudio] = useState(false);
@@ -41,7 +38,9 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
   if (!aberto) return null;
 
   // O aceite é a condição para o arroto sair: sem marcar, não publica.
-  const podeEnviar = conteudo.trim().length > 0 && consentimentoAudio && !enviando;
+  const restantes = caracteresRestantes(conteudo, LIMITE_CAUSO);
+  const podeEnviar =
+    conteudo.trim().length > 0 && cabeNoLimite(conteudo, LIMITE_CAUSO) && consentimentoAudio && !enviando;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +51,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
     try {
       const publicou = await onSubmit({
         comunidadeSlug,
-        autorNome: autorNome.trim() || 'Arrotador Anônimo',
         conteudo: conteudo.trim(),
         consentimentoAudioPublico: consentimentoAudio,
       });
@@ -95,18 +93,6 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="input-nome">Seu Apelido</label>
-            <input
-              id="input-nome"
-              type="text"
-              placeholder="Ex: Betão da TI, Zé do Bar"
-              value={autorNome}
-              onChange={(e) => setAutorNome(e.target.value)}
-              maxLength={40}
-            />
-          </div>
-
-          <div className="form-group">
             <label htmlFor="textarea-causo">A Resenha / Contexto</label>
             <textarea
               id="textarea-causo"
@@ -115,7 +101,16 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
               onChange={(e) => setConteudo(e.target.value)}
               rows={3}
               required
+              aria-describedby="contador-causo"
             />
+            <span
+              id="contador-causo"
+              role="status"
+              className="consent-text"
+              style={{ color: restantes < 0 ? 'var(--danger)' : undefined }}
+            >
+              {restantes < 0 ? `${-restantes} caracteres a mais que o limite` : `${restantes} caracteres restantes`}
+            </span>
           </div>
 
           {(

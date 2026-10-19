@@ -18,9 +18,11 @@ const semComentarios = (sql: string) => sql.replace(/--[^\n]*/g, '');
 
 const ARQUIVO_CONTAS = '20261018000008_contas_da_casa.sql';
 const ARQUIVO_FEED = '20261018000009_feed_e_perfil_da_casa.sql';
+const ARQUIVO_POSTS_NO_BONDE = '20261019000012_posts_da_casa_no_bonde.sql';
 const contas = lerMigracao(ARQUIVO_CONTAS);
 const contasSemComentario = semComentarios(contas);
 const feed = lerMigracao(ARQUIVO_FEED);
+const postsNoBonde = semComentarios(lerMigracao(ARQUIVO_POSTS_NO_BONDE));
 
 /** O corpo de uma função (do CREATE até o `$$;` que fecha). */
 function corpoDa(sql: string, nome: string): string {
@@ -222,6 +224,23 @@ describe('feed e perfil (20261018000009)', () => {
       const definem = nomes.filter((n) => new RegExp(`CREATE\\s+(?:OR REPLACE\\s+)?FUNCTION public\\.${funcao}\\(`).test(semComentarios(lerMigracao(n))));
       expect(definem.at(-1), funcao).toBe('20261018000010_rede_social_promovida.sql');
     }
+  });
+});
+
+describe('posts da casa no Bonde (20261019000012)', () => {
+  it('corrige o acervo sem grupo e a carga futura já grava em comunidade real', () => {
+    expect(postsNoBonde).toMatch(/UPDATE public\.posts_comunidade p[\s\S]*p\.group_id IS NULL/);
+    expect(postsNoBonde).toContain("'eu-arroto-e-dai'");
+    expect(postsNoBonde).toContain("'bonde-geral'");
+    expect(postsNoBonde).toContain('INSERT INTO public.posts_comunidade(id,group_id,user_id');
+    expect(postsNoBonde).toContain('ON CONFLICT(id) DO NOTHING');
+  });
+
+  it('mantém a carga idempotente e não abre a função ao cliente', () => {
+    expect(postsNoBonde).toContain('WHERE id = p_id');
+    expect(postsNoBonde).toContain('AND group_id IS NULL');
+    expect(postsNoBonde).toContain('REVOKE ALL ON FUNCTION public.publicar_da_casa(uuid,uuid,text,text,timestamptz,text) FROM PUBLIC, anon, authenticated');
+    expect(postsNoBonde).toContain('GRANT EXECUTE ON FUNCTION public.publicar_da_casa(uuid,uuid,text,text,timestamptz,text) TO service_role');
   });
 });
 

@@ -15,6 +15,7 @@ const lerSql = (arquivo: string) => readFileSync(resolve(raiz, 'supabase/migrati
 const adaptador = readFileSync(resolve(raiz, 'src/plataforma/web/comunidade.ts'), 'utf8');
 const feedSql = lerSql('20261018000002_feed_de_causos_contrato.sql');
 const socialSql = lerSql('20261018000010_rede_social_promovida.sql');
+const perfilInicialSql = lerSql('20261018000011_perfil_social_inicial.sql');
 
 describe('contrato do feed de causos', () => {
   it('toda RPC chamada pelo adaptador existe no SQL do feed ou na 036', () => {
@@ -70,6 +71,7 @@ describe('contrato do perfil', () => {
       lerSql('20261018000009_feed_e_perfil_da_casa.sql') +
       lerSql('20261018000004_perfil_e_comentarios_aninhados.sql') +
       socialSql +
+      perfilInicialSql +
       lerSql('20260807000036_nomenclatura_ptbr_mvp1.sql');
     for (const nome of new Set(chamadas)) {
       expect(sql, `RPC ${nome}`).toMatch(new RegExp(`FUNCTION public\\.${nome}\\(`));

@@ -94,6 +94,40 @@ export function criarPerfilRemoto(): PortaDePerfil {
       }
     },
 
+    async obterMeuPerfilParaEdicao(): Promise<DadosDoPerfil | null> {
+      if (configuracaoAusente) return null;
+      try {
+        const sessao = await garantirSessao();
+        if (!sessao?.user?.id) return null;
+        const { data, error } = await supabase.rpc('meu_perfil_social_para_edicao');
+        if (error) throw error;
+        const linha = ((data ?? []) as Array<{
+          apelido: string | null;
+          handle: string | null;
+          bio: string | null;
+          cidade: string | null;
+          instagram: string | null;
+          tiktok: string | null;
+          youtube: string | null;
+          twitter: string | null;
+        }>)[0];
+        if (!linha) return null;
+        return {
+          apelido: linha.apelido ?? undefined,
+          handle: linha.handle ?? undefined,
+          bio: linha.bio ?? undefined,
+          cidade: linha.cidade ?? undefined,
+          instagram: linha.instagram ?? undefined,
+          tiktok: linha.tiktok ?? undefined,
+          youtube: linha.youtube ?? undefined,
+          twitter: linha.twitter ?? undefined,
+        };
+      } catch (erro) {
+        console.error('Falha ao ler o rascunho do perfil', erro);
+        return null;
+      }
+    },
+
     async alternarSeguir(perfilId: string) {
       if (configuracaoAusente) return { ok: false, seguindo: false };
       try {
@@ -105,6 +139,38 @@ export function criarPerfilRemoto(): PortaDePerfil {
       } catch (erro) {
         console.error('Falha ao seguir', erro);
         return { ok: false, seguindo: false };
+      }
+    },
+
+    async concluirMeuPerfilSocial(dados: DadosDoPerfil): Promise<ResultadoDaEdicao> {
+      if (configuracaoAusente) return { ok: false, motivo: 'semRede' };
+      const apelido = dados.apelido?.trim();
+      const handle = dados.handle?.trim().replace(/^@/, '').toLowerCase();
+      if (!apelido || !handle) {
+        return { ok: false, motivo: 'invalido', detalhe: 'Apelido e @ são obrigatórios.' };
+      }
+      try {
+        const sessao = await garantirSessao();
+        if (!sessao?.user?.id) return { ok: false, motivo: 'semConta' };
+        const { error } = await supabase.rpc('concluir_meu_perfil_social', {
+          p_apelido: apelido,
+          p_handle: handle,
+          p_bio: dados.bio ?? null,
+          p_cidade: dados.cidade ?? null,
+          p_instagram: dados.instagram ?? null,
+          p_tiktok: dados.tiktok ?? null,
+          p_youtube: dados.youtube ?? null,
+          p_twitter: dados.twitter ?? null,
+        });
+        if (error) {
+          if ((error as { code?: string }).code === '23505') return { ok: false, motivo: 'handleEmUso' };
+          return { ok: false, motivo: 'invalido', detalhe: error.message };
+        }
+        const meu = await this.obterMeuPerfil();
+        return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'semRede' };
+      } catch (erro) {
+        console.error('Falha ao concluir o perfil', erro);
+        return { ok: false, motivo: 'semRede' };
       }
     },
 

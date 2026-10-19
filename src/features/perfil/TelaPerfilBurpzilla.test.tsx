@@ -43,7 +43,9 @@ function portaDePerfil(sobrepor: Partial<PortaDePerfil> = {}): PortaDePerfil {
   return {
     obterPerfil: vi.fn(async () => base),
     obterMeuPerfil: vi.fn(async () => ({ ...base, souEu: true })),
+    obterMeuPerfilParaEdicao: vi.fn(async () => ({ apelido: 'Betão', handle: 'betao' })),
     alternarSeguir: vi.fn(async () => ({ ok: true, seguindo: true })),
+    concluirMeuPerfilSocial: vi.fn(),
     atualizarMeuPerfil: vi.fn(),
     enviarFoto: vi.fn(),
     removerFoto: vi.fn(),

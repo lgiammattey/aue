@@ -100,6 +100,32 @@ describe('conta: cadastro por e-mail e senha', () => {
   });
 });
 
+describe('conta: estado social persistido', () => {
+  it('não libera Bonde enquanto a conta promovida não concluiu a ficha', async () => {
+    getSession.mockResolvedValue({ data: { session: { user: { id: 'u', is_anonymous: false, email: 'a@b.com' } } } });
+    rpc.mockResolvedValue({ data: [{ conta_promovida: true, perfil_social_concluido: false }], error: null });
+
+    await expect(criarContaWeb().estado()).resolves.toEqual({
+      temSessao: true,
+      anonima: false,
+      podeParticiparSocialmente: false,
+      perfilSocialPendente: true,
+      email: 'a@b.com',
+    });
+    expect(rpc).toHaveBeenCalledWith('meu_estado_social');
+  });
+
+  it('libera a rede no próximo login quando a ficha já está concluída', async () => {
+    getSession.mockResolvedValue({ data: { session: { user: { id: 'u', is_anonymous: false, email: 'a@b.com' } } } });
+    rpc.mockResolvedValue({ data: [{ conta_promovida: true, perfil_social_concluido: true }], error: null });
+
+    await expect(criarContaWeb().estado()).resolves.toMatchObject({
+      podeParticiparSocialmente: true,
+      perfilSocialPendente: false,
+    });
+  });
+});
+
 describe('conta: sair', () => {
   it('sair apaga o perfil e os causos locais para o próximo a entrar não ver', async () => {
     localStorage.setItem('aue.perfil.v1', '{"nome":"Zé"}');

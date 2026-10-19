@@ -80,8 +80,18 @@ export interface PortaDePerfil {
   obterPerfil(handle: string): Promise<PerfilPublico | null>;
   /** O perfil de quem está jogando agora. */
   obterMeuPerfil(): Promise<PerfilPublico | null>;
+  /**
+   * Rascunho privado da própria ficha, inclusive enquanto ela ainda não é um
+   * perfil público. Nunca serve para ler dados de outra pessoa.
+   */
+  obterMeuPerfilParaEdicao(): Promise<DadosDoPerfil | null>;
   /** Segue ou deixa de seguir. `ok: false` quando o servidor não aceitou. */
   alternarSeguir(perfilId: string): Promise<{ readonly ok: boolean; readonly seguindo: boolean }>;
+  /**
+   * Fecha a ficha inicial de uma conta promovida. Apelido e @ são obrigatórios
+   * e só este ato torna o perfil público e libera a parte social.
+   */
+  concluirMeuPerfilSocial(dados: DadosDoPerfil): Promise<ResultadoDaEdicao>;
   atualizarMeuPerfil(dados: DadosDoPerfil): Promise<ResultadoDaEdicao>;
   /** Troca a foto. A imagem é reduzida antes de subir. */
   enviarFoto(imagem: Blob): Promise<ResultadoDaFoto>;

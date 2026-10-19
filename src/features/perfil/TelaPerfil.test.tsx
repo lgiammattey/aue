@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TelaPerfil } from './TelaPerfil';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import type { PortaDeComunidade } from '../../portas/comunidade';
@@ -30,8 +30,8 @@ const comunidade = {
   denunciarCauso: vi.fn(),
 } as unknown as PortaDeComunidade;
 
-const conta = (anonima = true): PortaDeConta => ({
-  estado: vi.fn(async () => ({ temSessao: true, anonima, email: anonima ? undefined : 'b@aue.com' })),
+const conta = (anonima = true, perfilSocialPendente = false): PortaDeConta => ({
+  estado: vi.fn(async () => ({ temSessao: true, anonima, perfilSocialPendente, email: anonima ? undefined : 'b@aue.com' })),
   cadastrar: vi.fn(),
   entrar: vi.fn(),
   enviarLinkDeRedefinicao: vi.fn(),
@@ -43,7 +43,9 @@ function portaDePerfil(sobrepor: Partial<PortaDePerfil> = {}): PortaDePerfil {
   return {
     obterPerfil: vi.fn(async () => base),
     obterMeuPerfil: vi.fn(async () => ({ ...base, souEu: true })),
+    obterMeuPerfilParaEdicao: vi.fn(async () => ({ apelido: 'Betão', handle: 'betao' })),
     alternarSeguir: vi.fn(async () => ({ ok: true, seguindo: true })),
+    concluirMeuPerfilSocial: vi.fn(),
     atualizarMeuPerfil: vi.fn(),
     enviarFoto: vi.fn(),
     removerFoto: vi.fn(),
@@ -107,6 +109,68 @@ describe('TelaPerfil', () => {
     expect(await screen.findByText('b@aue.com')).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: 'Sair' }));
     expect(portaConta.sair).toHaveBeenCalled();
+  });
+
+  it('primeira chegada abre a ficha curta e entra no Bonde só depois de salvar', async () => {
+    const concluirMeuPerfilSocial = vi.fn(async () => ({ ok: true as const, perfil: { ...base, souEu: true } }));
+    const aoVoltar = vi.fn();
+    render(
+      <TelaPerfil
+        boasVindas
+        portaPerfil={portaDePerfil({ concluirMeuPerfilSocial })}
+        portaComunidade={comunidade}
+        portaConta={conta(false)}
+        {...props}
+        aoVoltar={aoVoltar}
+      />,
+    );
+
+    expect(await screen.findByRole('heading', { name: 'Seu perfil' })).toBeDefined();
+    expect((screen.getByLabelText('Apelido') as HTMLInputElement).value).toBe('Betão');
+    expect((screen.getByLabelText('Seu @') as HTMLInputElement).value).toBe('betao');
+    expect(screen.queryByRole('tablist')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Voltar' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Feed' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar no Bonde' }));
+    await waitFor(() => expect(concluirMeuPerfilSocial).toHaveBeenCalledWith(expect.objectContaining({ apelido: 'Betão', handle: 'betao' })));
+    await waitFor(() => expect(aoVoltar).toHaveBeenCalledTimes(1));
+  });
+
+  it('primeira chegada mostra erro e não abre o feed se o perfil não salvar', async () => {
+    const concluirMeuPerfilSocial = vi.fn(async () => ({ ok: false as const, motivo: 'handleEmUso' as const }));
+    const aoVoltar = vi.fn();
+    render(
+      <TelaPerfil
+        boasVindas
+        portaPerfil={portaDePerfil({ concluirMeuPerfilSocial })}
+        portaComunidade={comunidade}
+        portaConta={conta(false)}
+        {...props}
+        aoVoltar={aoVoltar}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Entrar no Bonde' }));
+    expect((await screen.findByRole('alert')).textContent).toContain('Esse @ já é de outra pessoa');
+    expect(aoVoltar).not.toHaveBeenCalled();
+  });
+
+  it('estado persistente pendente abre a ficha mesmo sem a query de boas-vindas', async () => {
+    const portaPerfil = portaDePerfil();
+    render(
+      <TelaPerfil
+        portaPerfil={portaPerfil}
+        portaComunidade={comunidade}
+        portaConta={conta(false, true)}
+        {...props}
+      />,
+    );
+
+    expect(await screen.findByRole('heading', { name: 'Seu perfil' })).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Voltar' })).toBeNull();
+    expect(portaPerfil.obterMeuPerfilParaEdicao).toHaveBeenCalledTimes(1);
+    expect(portaPerfil.obterMeuPerfil).not.toHaveBeenCalled();
   });
 
   it('foto: manda o arquivo pela porta e mostra a nova; falha vira aviso', async () => {

@@ -18,6 +18,8 @@ import { ColunaTendencias } from '../comunidade/components/ColunaTendencias';
 interface TelaPerfilProps {
   /** Sem handle, mostra o perfil de quem está jogando. */
   handle?: string;
+  /** Primeira parada depois de criar conta: uma ficha curta, antes do feed. */
+  boasVindas?: boolean;
   portaPerfil?: PortaDePerfil;
   portaComunidade?: PortaDeComunidade;
   portaConta?: PortaDeConta;
@@ -56,6 +58,7 @@ function urlDaRede(rede: keyof typeof NOMES_DAS_REDES, usuario: string): string 
 
 export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   handle,
+  boasVindas = false,
   portaPerfil,
   portaComunidade,
   portaConta,
@@ -76,8 +79,6 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
 
   const isMobile = larguraJanela < 700;
   const isWide = larguraJanela >= 1060;
-  const showLeft = larguraJanela >= 700;
-  const showRight = larguraJanela >= 1000;
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof localStorage !== 'undefined') {
@@ -103,6 +104,11 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
 
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
   const [conta, setConta] = useState<EstadoDaConta | null>(null);
+  // A ficha inaugural não é um perfil navegável: a pessoa termina o básico
+  // antes de entrar no Bonde. O guard de rota reforça isso fora da tela.
+  const bloqueiaSaidaDaFicha = !handle && (boasVindas || Boolean(conta?.perfilSocialPendente));
+  const showLeft = larguraJanela >= 700 && !bloqueiaSaidaDaFicha;
+  const showRight = larguraJanela >= 1000 && !bloqueiaSaidaDaFicha;
   const [carregando, setCarregando] = useState(true);
   const [falhou, setFalhou] = useState(false);
   const [tentativa, setTentativa] = useState(0);
@@ -140,12 +146,44 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       const c = await contaPort.estado();
       if (!ativo) return;
       // A identidade anônima é da Arena, não é um perfil público nem "meu perfil".
-      if (!handle && !(c.podeParticiparSocialmente ?? (c.temSessao && !c.anonima))) {
+      if (!handle && !c.perfilSocialPendente && !(c.podeParticiparSocialmente ?? (c.temSessao && !c.anonima))) {
         setPerfil(null);
         setConta(c);
         setFalhou(false);
         setCarregando(false);
         return;
+      }
+      // A ficha pendente ainda não é pública. Ela só pode ser lida pela porta
+      // privada de edição, nunca pela resolução do perfil público.
+      if (!handle && c.perfilSocialPendente) {
+        try {
+          const dados = await perfilPort.obterMeuPerfilParaEdicao();
+          if (!ativo) return;
+          if (dados) {
+            setForm({
+              apelido: dados.apelido ?? '',
+              handle: dados.handle ?? '',
+              bio: dados.bio ?? '',
+              cidade: dados.cidade ?? '',
+              instagram: dados.instagram ?? '',
+              tiktok: dados.tiktok ?? '',
+              youtube: dados.youtube ?? '',
+              twitter: dados.twitter ?? '',
+            });
+          }
+          setPerfil(null);
+          setConta(c);
+          setFalhou(!dados);
+          setCarregando(false);
+          return;
+        } catch {
+          if (!ativo) return;
+          setPerfil(null);
+          setConta(c);
+          setFalhou(true);
+          setCarregando(false);
+          return;
+        }
       }
       // Perfil de outra pessoa: `null` é "não existe", exceção é "não deu para abrir".
       const buscar = async (): Promise<{ p: PerfilPublico | null; deuErro: boolean }> => {
@@ -158,6 +196,18 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       const { p, deuErro } = await buscar();
       if (!ativo) return;
       setPerfil(p);
+      if (boasVindas && !handle && p) {
+        setForm({
+          apelido: p.apelido,
+          handle: p.handle,
+          bio: p.bio ?? '',
+          cidade: p.cidade ?? '',
+          instagram: p.instagram ?? '',
+          tiktok: p.tiktok ?? '',
+          youtube: p.youtube ?? '',
+          twitter: p.twitter ?? '',
+        });
+      }
       setConta(c);
       setFalhou(deuErro);
       setCarregando(false);
@@ -165,7 +215,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     return () => {
       ativo = false;
     };
-  }, [handle, perfilPort, contaPort, tentativa]);
+  }, [handle, perfilPort, contaPort, tentativa, boasVindas]);
 
   useEffect(() => {
     if (!perfil) return;
@@ -208,6 +258,11 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     [souEu],
   );
 
+  const primeiraChegada = Boolean(
+    !handle &&
+      ((conta?.perfilSocialPendente && form.apelido && form.handle) || (boasVindas && souEu && perfil)),
+  );
+
   const seguir = async () => {
     if (!perfil) return;
     if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
@@ -243,20 +298,29 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     setEditando(true);
   };
 
-  const salvar = async (e: React.FormEvent) => {
+  const salvar = async (e: React.FormEvent, entrarNoBonde = false) => {
     e.preventDefault();
     setSalvando(true);
     setErroDoForm('');
-    const res = await perfilPort.atualizarMeuPerfil(form);
-    setSalvando(false);
-    if (res.ok) {
-      setPerfil(res.perfil);
-      setEditando(false);
-      avisar('Perfil salvo.');
-      if (res.perfil.handle !== handle && handle) aoAbrirPerfil(res.perfil.handle);
-      return;
+    try {
+      const res = await (entrarNoBonde ? perfilPort.concluirMeuPerfilSocial(form) : perfilPort.atualizarMeuPerfil(form));
+      if (res.ok) {
+        setPerfil(res.perfil);
+        setEditando(false);
+        if (entrarNoBonde) {
+          aoVoltar();
+          return;
+        }
+        avisar('Perfil salvo.');
+        if (res.perfil.handle !== handle && handle) aoAbrirPerfil(res.perfil.handle);
+        return;
+      }
+      setErroDoForm(res.motivo === 'invalido' ? res.detalhe : MENSAGENS_DE_EDICAO[res.motivo]);
+    } catch {
+      setErroDoForm('Não deu para salvar agora. Nada mudou.');
+    } finally {
+      setSalvando(false);
     }
-    setErroDoForm(res.motivo === 'invalido' ? res.detalhe : MENSAGENS_DE_EDICAO[res.motivo]);
   };
 
   const trocarFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -395,7 +459,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     avisar('Denúncia registrada.');
   };
 
-  const inicial = (perfil?.apelido ?? 'A').slice(0, 2).toUpperCase();
+  const inicial = (perfil?.apelido || form.apelido || 'A').slice(0, 2).toUpperCase();
   const desde = perfil ? new Date(perfil.criadoEm).getFullYear() : undefined;
 
   const campo: React.CSSProperties = {
@@ -537,15 +601,17 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               borderBottom: '1px solid var(--border)',
             }}
           >
-            <button
-              type="button"
-              onClick={aoVoltar}
-              aria-label="Voltar"
-              style={{ ...botaoSecundario, border: 0, padding: 0, width: '44px' }}
-            >
-              ←
-            </button>
-            <b style={{ fontSize: '18px' }}>{perfil ? `@${perfil.handle}` : 'Perfil'}</b>
+            {!bloqueiaSaidaDaFicha && (
+              <button
+                type="button"
+                onClick={aoVoltar}
+                aria-label="Voltar"
+                style={{ ...botaoSecundario, border: 0, padding: 0, width: '44px' }}
+              >
+                ←
+              </button>
+            )}
+            <b style={{ fontSize: '18px' }}>{primeiraChegada ? 'Seu perfil' : perfil ? `@${perfil.handle}` : 'Perfil'}</b>
           </header>
 
           {aviso && (
@@ -626,7 +692,89 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
             </div>
           )}
 
-          {perfil && (
+          {primeiraChegada && (
+            <section
+              aria-labelledby="titulo-seu-perfil"
+              style={{
+                width: '100%',
+                maxWidth: 480,
+                margin: isMobile ? '0 auto' : '40px auto',
+                padding: isMobile ? '24px 20px' : '32px',
+                boxSizing: 'border-box',
+                display: 'grid',
+                gap: 24,
+              }}
+            >
+              <div style={{ display: 'grid', gap: 8 }}>
+                <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                  Sua ficha no Bonde
+                </p>
+                <h1 id="titulo-seu-perfil" style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 34, fontWeight: 400, lineHeight: 1 }}>
+                  Seu perfil
+                </h1>
+                <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.45 }}>
+                  É assim que a galera vai te reconhecer. O básico já está aqui; o resto é opcional.
+                </p>
+              </div>
+
+              <form onSubmit={(e) => salvar(e, true)} style={{ display: 'grid', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <label
+                    title="Adicionar foto"
+                    style={{ ...estiloAvatar, width: 72, height: 72, cursor: enviandoFoto ? 'progress' : 'pointer', border: '1px solid var(--border-strong)' }}
+                  >
+                    {perfil?.avatarUrl ? <img src={perfil.avatarUrl} alt={perfil.apelido} style={estiloFoto} /> : inicial}
+                    <span aria-hidden="true" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,.42)', color: '#fff', fontSize: 22 }}>
+                      +
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-label="Adicionar foto ao perfil"
+                      onChange={trocarFoto}
+                      disabled={enviandoFoto}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <div style={{ display: 'grid', gap: 2 }}>
+                    <b>Foto de perfil</b>
+                    <span style={{ color: 'var(--muted)', fontSize: 14 }}>{enviandoFoto ? 'Enviando foto…' : 'Opcional. JPG, PNG ou WebP.'}</span>
+                  </div>
+                </div>
+
+                <fieldset style={{ margin: 0, padding: 0, border: 0, display: 'grid', gap: 12 }}>
+                  <legend style={{ marginBottom: 8, fontWeight: 700 }}>Quem é você</legend>
+                  <label style={{ display: 'grid', gap: 6, fontSize: 14 }}>
+                    Apelido
+                    <input aria-label="Apelido" required style={campo} value={form.apelido} maxLength={30} onChange={(e) => setForm({ ...form, apelido: e.target.value })} />
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: 14 }}>
+                    @
+                    <input aria-label="Seu @" required style={campo} value={form.handle} maxLength={20} autoCapitalize="none" onChange={(e) => setForm({ ...form, handle: e.target.value.toLowerCase() })} />
+                  </label>
+                </fieldset>
+
+                <fieldset style={{ margin: 0, padding: 0, border: 0, display: 'grid', gap: 12 }}>
+                  <legend style={{ marginBottom: 8, fontWeight: 700 }}>Um pouco mais, se quiser</legend>
+                  <label style={{ display: 'grid', gap: 6, fontSize: 14 }}>
+                    Bio <span style={{ color: 'var(--muted)', fontWeight: 400 }}>({160 - form.bio.length} restantes)</span>
+                    <textarea aria-label="Bio" style={{ ...campo, minHeight: 84, padding: 12, resize: 'vertical' }} value={form.bio} maxLength={160} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: 14 }}>
+                    Cidade
+                    <input aria-label="Cidade" style={campo} value={form.cidade} maxLength={60} onChange={(e) => setForm({ ...form, cidade: e.target.value })} />
+                  </label>
+                </fieldset>
+
+                {erroDoForm && <p role="alert" style={{ margin: 0, color: 'var(--danger, #ff4d4f)', lineHeight: 1.4 }}>{erroDoForm}</p>}
+                <button type="submit" disabled={salvando || enviandoFoto} style={{ minHeight: 48, border: 0, borderRadius: 14, background: 'var(--accent)', color: 'var(--accent-on)', fontWeight: 800, fontSize: 16, cursor: salvando ? 'progress' : 'pointer' }}>
+                  {salvando ? 'Salvando…' : 'Entrar no Bonde'}
+                </button>
+              </form>
+            </section>
+          )}
+
+          {perfil && !primeiraChegada && (
             <>
               {/* Capa Canônica: 160px */}
               <div
@@ -920,7 +1068,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       </div>
 
       {/* Navegação Mobile Inferior */}
-      {isMobile && (
+      {isMobile && !bloqueiaSaidaDaFicha && (
         <BarraInferiorMobile
           abaAtiva="feed"
           aoMudarAba={(nova) => {
@@ -980,62 +1128,76 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               <button
                 type="button"
                 onClick={() => setEditando(false)}
-                style={{ background: 'none', border: 0, color: 'var(--muted)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                style={{ minHeight: 44, padding: '0 8px', background: 'none', border: 0, color: 'var(--muted)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
               >
                 Fechar
               </button>
             </div>
 
-            <form onSubmit={salvar} style={{ display: 'grid', gap: 12 }}>
-              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                Apelido
+            <form onSubmit={salvar} style={{ display: 'grid', gap: 20 }}>
+              <p style={{ margin: '-6px 0 0', color: 'var(--muted)', lineHeight: 1.4 }}>
+                Primeiro o que aparece no Bonde. Depois, só o que você quiser mostrar.
+              </p>
+              <fieldset style={{ margin: 0, padding: 0, border: 0, display: 'grid', gap: 12 }}>
+                <legend style={{ marginBottom: 8, fontWeight: 800 }}>Identidade</legend>
+                <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                  Apelido
                 <input
+                  aria-label="Apelido"
                   style={campo}
                   value={form.apelido}
+                  required
                   maxLength={30}
                   onChange={(e) => setForm({ ...form, apelido: e.target.value })}
                 />
-              </label>
-              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                @ (3 a 20: letras minúsculas, números e _)
+                </label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                  @ (3 a 20: letras minúsculas, números e _)
                 <input
+                  aria-label="Seu @"
                   style={campo}
                   value={form.handle}
+                  required
                   maxLength={20}
                   autoCapitalize="none"
-                  onChange={(e) => setForm({ ...form, handle: e.target.value })}
+                  onChange={(e) => setForm({ ...form, handle: e.target.value.toLowerCase() })}
                 />
-              </label>
-              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                Bio ({160 - form.bio.length})
+                </label>
+              </fieldset>
+              <fieldset style={{ margin: 0, padding: 0, border: 0, display: 'grid', gap: 12 }}>
+                <legend style={{ marginBottom: 8, fontWeight: 800 }}>Sobre você <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(opcional)</span></legend>
+                <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                  Bio ({160 - form.bio.length})
                 <textarea
+                  aria-label="Bio"
                   style={{ ...campo, minHeight: 80, padding: 12, resize: 'none' }}
                   value={form.bio}
                   maxLength={160}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })}
                 />
-              </label>
-              <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                Cidade
+                </label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                  Cidade
                 <input
+                  aria-label="Cidade"
                   style={campo}
                   value={form.cidade}
                   maxLength={60}
                   onChange={(e) => setForm({ ...form, cidade: e.target.value })}
                 />
-              </label>
-              {(['instagram', 'tiktok', 'youtube', 'twitter'] as const).map((rede) => (
-                <label key={rede} style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
-                  {NOMES_DAS_REDES[rede]} (só o @, sem link)
-                  <input
-                    style={campo}
-                    value={form[rede]}
-                    maxLength={31}
-                    autoCapitalize="none"
-                    onChange={(e) => setForm({ ...form, [rede]: e.target.value })}
-                  />
                 </label>
-              ))}
+              </fieldset>
+              <details>
+                <summary style={{ cursor: 'pointer', fontWeight: 700, minHeight: 44, display: 'flex', alignItems: 'center' }}>Redes sociais <span style={{ color: 'var(--muted)', fontWeight: 400, marginLeft: 6 }}>(opcional)</span></summary>
+                <div style={{ display: 'grid', gap: 12, paddingTop: 8 }}>
+                  {(['instagram', 'tiktok', 'youtube', 'twitter'] as const).map((rede) => (
+                    <label key={rede} style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--muted)' }}>
+                      {NOMES_DAS_REDES[rede]} (só o @, sem link)
+                      <input aria-label={NOMES_DAS_REDES[rede]} style={campo} value={form[rede]} maxLength={31} autoCapitalize="none" onChange={(e) => setForm({ ...form, [rede]: e.target.value })} />
+                    </label>
+                  ))}
+                </div>
+              </details>
               {perfil?.avatarUrl && (
                 <button type="button" onClick={tirarFoto} style={botaoSecundario}>
                   Remover foto

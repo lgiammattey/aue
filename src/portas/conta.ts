@@ -12,6 +12,8 @@ export interface EstadoDaConta {
   readonly anonima: boolean;
   /** Só uma conta promovida participa de perfil, Bonde e comunidades. */
   readonly podeParticiparSocialmente?: boolean;
+  /** Conta promovida que ainda precisa concluir apelido e @ antes do Bonde. */
+  readonly perfilSocialPendente?: boolean;
   readonly email?: string;
 }
 

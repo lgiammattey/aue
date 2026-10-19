@@ -57,8 +57,8 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
     }
   }, []);
 
-  const enter = () => {
-    navigate('/');
+  const enter = (destino = '/') => {
+    navigate(destino);
   };
 
   // Alinha o perfil guardado no aparelho com o do servidor, para o nome certo
@@ -99,6 +99,11 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
       if (mode === 'in') {
         const r = await conta.entrar(email, pass);
         if (!r.ok) return setErr(mensagemDe(r));
+        const estado = await conta.estado();
+        if (estado.perfilSocialPendente) {
+          enter('/perfil?boas-vindas=1');
+          return;
+        }
         await sincronizarPerfilLocal();
         enter();
         return;
@@ -116,8 +121,10 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
           `Mandamos um link para ${email.trim()}. Abre e confirma: é isso que prende a conta ao seu e-mail. Seus arrotos e causos continuam seus.`,
         );
       }
-      await sincronizarPerfilLocal();
-      enter();
+      // Cadastro não termina no feed: a primeira parada é a ficha que vai
+      // representar a pessoa no Bonde. O perfil remoto é carregado na próxima
+      // tela; não atrasamos essa chegada por um espelho local.
+      enter('/perfil?boas-vindas=1');
     } finally {
       setCarregando(false);
     }

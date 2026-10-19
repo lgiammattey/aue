@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { TelaLogin } from './TelaLogin';
 import * as supabaseModule from '../../db/supabase';
 import type { PortaDeConta } from '../../portas/conta';
@@ -20,6 +20,11 @@ function contaFalsa(sobrepor: Partial<PortaDeConta> = {}): PortaDeConta {
     sair: vi.fn(async () => true),
     ...sobrepor,
   };
+}
+
+function CaminhoAtual() {
+  const location = useLocation();
+  return <output data-testid="caminho-atual">{`${location.pathname}${location.search}`}</output>;
 }
 
 describe('TelaLogin (Autenticação do Auê)', () => {
@@ -109,6 +114,42 @@ describe('TelaLogin (Autenticação do Auê)', () => {
       apelido: 'Betão da TI',
       handle: 'betao_da_ti',
     });
+  });
+
+  it('leva quem acabou de criar conta para a ficha do perfil antes do feed', async () => {
+    const conta = contaFalsa();
+    render(
+      <MemoryRouter>
+        <TelaLogin portaConta={conta} />
+        <CaminhoAtual />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
+    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
+    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
+
+    await waitFor(() => expect(screen.getByTestId('caminho-atual').textContent).toBe('/perfil?boas-vindas=1'));
+  });
+
+  it('login de conta com ficha pendente volta para o perfil, não para o feed', async () => {
+    const conta = contaFalsa({
+      estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: true })),
+    });
+    render(
+      <MemoryRouter>
+        <TelaLogin portaConta={conta} />
+        <CaminhoAtual />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() => expect(screen.getByTestId('caminho-atual').textContent).toBe('/perfil?boas-vindas=1'));
   });
 
   it('@ que já é de outra pessoa vira mensagem clara e não prende o cadastro', async () => {

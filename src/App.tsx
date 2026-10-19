@@ -31,7 +31,7 @@ function EntradaPorLink() {
 
 function EntradaInicial() {
   const navigate = useNavigate();
-  const [estaLogado, setEstaLogado] = useState<boolean | null>(null);
+  const [destino, setDestino] = useState<'landing' | 'feed' | 'perfil' | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -40,22 +40,26 @@ function EntradaInicial() {
       .estado()
       .then((e) => {
         if (ativo) {
-          setEstaLogado(e.temSessao && !e.anonima);
+          setDestino(e.perfilSocialPendente ? 'perfil' : e.temSessao && !e.anonima ? 'feed' : 'landing');
         }
       })
       .catch(() => {
-        if (ativo) setEstaLogado(false);
+        if (ativo) setDestino('landing');
       });
     return () => {
       ativo = false;
     };
   }, []);
 
-  if (estaLogado === null) {
+  if (destino === null) {
     return null;
   }
 
-  if (estaLogado) {
+  if (destino === 'perfil') {
+    return <Navigate to="/perfil?boas-vindas=1" replace />;
+  }
+
+  if (destino === 'feed') {
     return <EntradaPrincipal />;
   }
 
@@ -84,6 +88,26 @@ function EntradaArena() {
 function EntradaPrincipal() {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [perfilPendente, setPerfilPendente] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let ativo = true;
+    criarContaWeb().estado().then(
+      (conta) => {
+        if (ativo) setPerfilPendente(Boolean(conta.perfilSocialPendente));
+      },
+      () => {
+        if (ativo) setPerfilPendente(false);
+      },
+    );
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  if (perfilPendente === null) return null;
+  if (perfilPendente) return <Navigate to="/perfil?boas-vindas=1" replace />;
+
   return (
     <TelaComunidade
       initialTab="feed"
@@ -131,9 +155,11 @@ function EntradaPerfilHandle() {
 
 function EntradaDoPerfil({ handle }: { handle?: string }) {
   const navigate = useNavigate();
+  const location = useLocation();
   return (
     <TelaPerfil
       handle={handle}
+      boasVindas={!handle && new URLSearchParams(location.search).get('boas-vindas') === '1'}
       aoVoltar={() => navigate('/feed')}
       aoArrotar={() => navigate('/arena')}
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}

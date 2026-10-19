@@ -27,3 +27,51 @@ describe('obterPerfil: inexistente não é falha', () => {
     await expect(criarPerfilRemoto().obterPerfil('betao')).rejects.toThrow('timeout');
   });
 });
+
+describe('concluirMeuPerfilSocial', () => {
+  beforeEach(() => rpc.mockReset());
+
+  it('não tenta concluir sem apelido e @', async () => {
+    await expect(criarPerfilRemoto().concluirMeuPerfilSocial({ apelido: 'Betão' })).resolves.toEqual({
+      ok: false,
+      motivo: 'invalido',
+      detalhe: 'Apelido e @ são obrigatórios.',
+    });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it('manda a conclusão explícita para a RPC, sem inferir pelo login', async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { code: '23505', message: 'Esse handle já é de outra pessoa' } });
+    await expect(criarPerfilRemoto().concluirMeuPerfilSocial({ apelido: 'Betão', handle: '@betao' })).resolves.toEqual({
+      ok: false,
+      motivo: 'handleEmUso',
+    });
+    expect(rpc).toHaveBeenCalledWith('concluir_meu_perfil_social', expect.objectContaining({
+      p_apelido: 'Betão',
+      p_handle: 'betao',
+    }));
+  });
+});
+
+describe('obterMeuPerfilParaEdicao', () => {
+  beforeEach(() => rpc.mockReset());
+
+  it('lê apenas o rascunho da própria ficha, inclusive antes de ela ficar pública', async () => {
+    rpc.mockResolvedValue({
+      data: [{ apelido: 'Betão', handle: 'betao', bio: null, cidade: 'São Paulo', instagram: null, tiktok: null, youtube: null, twitter: null }],
+      error: null,
+    });
+
+    await expect(criarPerfilRemoto().obterMeuPerfilParaEdicao()).resolves.toEqual({
+      apelido: 'Betão',
+      handle: 'betao',
+      bio: undefined,
+      cidade: 'São Paulo',
+      instagram: undefined,
+      tiktok: undefined,
+      youtube: undefined,
+      twitter: undefined,
+    });
+    expect(rpc).toHaveBeenCalledWith('meu_perfil_social_para_edicao');
+  });
+});

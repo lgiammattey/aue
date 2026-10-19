@@ -30,10 +30,21 @@ export function criarContaWeb(): PortaDeConta {
       const { data } = await supabase.auth.getSession();
       const usuario = data.session?.user;
       if (!usuario) return { temSessao: false, anonima: false, podeParticiparSocialmente: false };
+      if (usuario.is_anonymous) {
+        return { temSessao: true, anonima: true, podeParticiparSocialmente: false, perfilSocialPendente: false };
+      }
+      const { data: estadoSocial, error } = await supabase.rpc('meu_estado_social');
+      if (error) {
+        console.error('Falha ao ler o estado social da conta', error);
+        return { temSessao: true, anonima: false, podeParticiparSocialmente: false, perfilSocialPendente: true, email: usuario.email || undefined };
+      }
+      const estado = (estadoSocial as Array<{ conta_promovida: boolean; perfil_social_concluido: boolean }> | null)?.[0];
+      const concluido = Boolean(estado?.conta_promovida && estado.perfil_social_concluido);
       return {
         temSessao: true,
-        anonima: Boolean(usuario.is_anonymous),
-        podeParticiparSocialmente: !usuario.is_anonymous,
+        anonima: false,
+        podeParticiparSocialmente: concluido,
+        perfilSocialPendente: Boolean(estado?.conta_promovida && !estado.perfil_social_concluido),
         email: usuario.email || undefined,
       };
     },

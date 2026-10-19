@@ -11,11 +11,10 @@ import {
 import { createPortal } from 'react-dom';
 import { Link, Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import { enderecoDoLoginComVolta } from '../../nucleo/comunidade/caminhoDeVolta';
-import type { TemaDoForum } from '../../portas/ambienteDoForum';
 import { useDependenciasDoForum, useDependenciasOuPadrao, ForumProvider } from './contexto';
 import { ContextoDosEncaixes } from './encaixes';
 import { useOnline } from './hooks';
-import { IconeArena, IconeComunidades, IconeExplorar, IconePerfil, IconeTema, IconeVoltar } from './Icones';
+import { IconeVoltar } from './Icones';
 import { ContextoDaParticipacao, ContextoDoPapel, useDescobrirPapel, type Participacao } from './papel';
 import { ProvedorDeToast } from './ProvedorDeToast';
 import './forum.css';
@@ -76,68 +75,6 @@ export function NoAside({ children }: { readonly children: ReactNode }) {
 }
 
 // ---------------------------------------------------------------------------
-// Navegação: quatro itens, fonte única
-// ---------------------------------------------------------------------------
-
-type ItemAtivo = 'comunidades' | 'explorar' | 'arena' | 'perfil' | null;
-
-function itemAtivoDe(caminho: string): ItemAtivo {
-  if (caminho === '/comunidades' || caminho.startsWith('/c/')) return 'comunidades';
-  if (caminho === '/explorar') return 'explorar';
-  if (caminho === '/arena') return 'arena';
-  if (caminho === '/perfil') return 'perfil';
-  return null;
-}
-
-function Navegacao({ ativo, papelEhVisitante }: { readonly ativo: ItemAtivo; readonly papelEhVisitante: boolean }) {
-  const itens = [
-    { id: 'comunidades', rotulo: 'Comunidades', para: '/comunidades', Icone: IconeComunidades },
-    { id: 'explorar', rotulo: 'Explorar', para: '/explorar', Icone: IconeExplorar },
-    { id: 'arena', rotulo: 'Arena', para: '/arena', Icone: IconeArena },
-    {
-      id: 'perfil',
-      rotulo: 'Perfil',
-      // Visitante que toca em Perfil entra e volta para ele.
-      para: papelEhVisitante ? enderecoDoLoginComVolta('/perfil', 'entrar') : '/perfil',
-      Icone: IconePerfil,
-    },
-  ] as const;
-
-  return (
-    <nav className="forum-nav" aria-label="Principal">
-      <ul>
-        {itens.map(({ id, rotulo, para, Icone }) => {
-          const atual = ativo === id;
-          return (
-            <li key={id}>
-              <Link
-                to={para}
-                className="forum-nav__item"
-                aria-current={atual ? 'page' : undefined}
-                title={rotulo}
-              >
-                <Icone traco={atual ? 2.4 : 1.8} />
-                <span className="forum-nav__rotulo">{rotulo}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
-}
-
-function BotaoDeTema({ tema, aoAlternar, classe }: { tema: TemaDoForum; aoAlternar: () => void; classe: string }) {
-  const rotulo = tema === 'claro' ? 'Tema escuro' : 'Tema claro';
-  return (
-    <button type="button" className={classe} onClick={aoAlternar} aria-label={rotulo} title={rotulo}>
-      <IconeTema />
-      <span className="forum-tema__rotulo">{rotulo}</span>
-    </button>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // A casca
 // ---------------------------------------------------------------------------
 
@@ -148,15 +85,10 @@ function Casca({ children }: { readonly children: ReactNode }) {
   const local = useLocation();
   const tipoDeNavegacao = useNavigationType();
 
-  const [tema, setTema] = useState<TemaDoForum>(() => ambiente.temaEscolhido() ?? 'claro');
+  // Comunidades compartilha o tema claro fixo das páginas públicas.
   useLayoutEffect(() => {
-    ambiente.aplicarTema(tema, false);
-  }, [ambiente, tema]);
-  const alternarTema = useCallback(() => {
-    const novo: TemaDoForum = tema === 'claro' ? 'escuro' : 'claro';
-    ambiente.aplicarTema(novo, true);
-    setTema(novo);
-  }, [ambiente, tema]);
+    ambiente.aplicarTema('claro', false);
+  }, [ambiente]);
 
   // Entrou ou saiu nesta sessão: só depois que o servidor disse `true` (ver `useParticiparDaComunidade`).
   const [acoesDeParticipacao, setAcoesDeParticipacao] = useState<ReadonlyMap<string, boolean>>(new Map());
@@ -217,7 +149,7 @@ function Casca({ children }: { readonly children: ReactNode }) {
     <ContextoDoPapel.Provider value={papel}>
       <ContextoDaParticipacao.Provider value={participacao}>
         <ContextoDosEncaixes.Provider value={{ topo, aside, anunciar, definirRaiz: setTelaRaiz }}>
-          <div className="forum-shell" data-forum-tema={tema} data-teclado={emCampo ? 'aberto' : undefined}>
+          <div className="forum-shell" data-forum-tema="claro" data-teclado={emCampo ? 'aberto' : undefined}>
             <ProvedorDeToast>
               <a
                 className="forum-pular"
@@ -230,35 +162,32 @@ function Casca({ children }: { readonly children: ReactNode }) {
                 Pular para o conteúdo
               </a>
 
-              <div className="forum-lateral">
-                <Link className="forum-marca" to="/comunidades" aria-label="Auê!, comunidades">
-                  <span className="forum-marca__cheia">AUÊ!</span>
-                  <span className="forum-marca__curta" aria-hidden="true">
-                    A!
-                  </span>
-                </Link>
-                <Navegacao ativo={itemAtivoDe(local.pathname)} papelEhVisitante={visitante} />
-                <div className="forum-lateral__rodape">
-                  <BotaoDeTema tema={tema} aoAlternar={alternarTema} classe="forum-tema forum-tema--lateral" />
-                  {visitante && (
-                    <Link className="forum-entrar forum-entrar--cheio" to={enderecoDeEntrar}>
+              <header className="forum-publico-cabecalho">
+                <div className="forum-publico-cabecalho__miolo">
+                  <Link className="forum-publico-marca" to="/" aria-label="Auê!, início">
+                    auê<span>!</span>
+                  </Link>
+                  <nav className="forum-publico-nav" aria-label="Principal">
+                    <Link to="/">O Auê</Link>
+                    <Link to="/comunidades" aria-current="page">
+                      Comunidades
+                    </Link>
+                  </nav>
+                  {visitante ? (
+                    <Link className="forum-publico-entrar" to={enderecoDeEntrar}>
                       Entrar
+                    </Link>
+                  ) : (
+                    <Link className="forum-publico-entrar" to="/perfil">
+                      Perfil
                     </Link>
                   )}
                 </div>
-              </div>
+              </header>
 
               <div className="forum-centro">
                 <header className={`forum-topo${telaRaiz ? '' : ' forum-topo--aninhado'}`}>
                   <div className="forum-topo__miolo" ref={setTopo} />
-                  <div className="forum-topo__direita">
-                    <BotaoDeTema tema={tema} aoAlternar={alternarTema} classe="forum-tema forum-tema--topo" />
-                    {visitante && (
-                      <Link className="forum-entrar forum-entrar--texto" to={enderecoDeEntrar}>
-                        Entrar
-                      </Link>
-                    )}
-                  </div>
                 </header>
 
                 {!online && (

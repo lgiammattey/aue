@@ -87,8 +87,9 @@ export function TelaDiretorio() {
       <TopoDaTela titulo="Comunidades" />
       {papel.tipo === 'visitante' && (
         <section className="forum-abertura" aria-label="Boas-vindas">
-          <p className="forum-abertura__lead">Encontre sua turma. Entre nas comunidades e participe da resenha.</p>
-          <p className="forum-abertura__apoio">Só quer ouvir? Fica à vontade. Dá pra ler tudo sem conta.</p>
+          <p className="forum-abertura__sobra">O bonde tá aqui.</p>
+          <p className="forum-abertura__lead">Encontra sua turma, lê os causos e entra na resenha quando quiser.</p>
+          <p className="forum-abertura__apoio">Dá pra bisbilhotar tudo sem conta.</p>
           <div className="forum-abertura__acoes">
             <Link
               className="forum-botao forum-botao--acento"

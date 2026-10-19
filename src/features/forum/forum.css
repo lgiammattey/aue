@@ -51,6 +51,168 @@
   color-scheme: light;
 }
 
+/* ------------------------------------------------------------------ Público
+   Cartão 0021: Comunidades deixou de ser um produto à parte. Esta camada vem
+   por último de propósito: os componentes do fórum continuam usando seus
+   nomes e seus contratos, mas recebem a régua visual das páginas públicas. */
+
+.forum-shell[data-forum-tema] {
+  --bg: #f7f8f5;
+  --surface: #eef4e7;
+  --surface-2: #e2ebd8;
+  --fg: #202824;
+  --muted: #5c675d;
+  --border: #e7ebe3;
+  --border-strong: #c9d1c4;
+  --accent: #c6ff00;
+  --accent-on: #000;
+  --publico-verde: #2f5d0a;
+  background: var(--bg);
+  color-scheme: light;
+}
+
+.forum-publico-cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  width: 100%;
+  min-height: 60px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.forum-publico-cabecalho__miolo {
+  box-sizing: border-box;
+  width: min(1080px, 100%);
+  min-height: 60px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.forum-publico-marca {
+  flex: none;
+  color: var(--fg);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -.07em;
+  line-height: 1;
+}
+.forum-publico-marca span { color: var(--publico-verde); }
+.forum-publico-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.forum-publico-nav::-webkit-scrollbar { display: none; }
+.forum-publico-nav a {
+  flex: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: .9375rem;
+  font-weight: 650;
+}
+.forum-publico-nav a[aria-current='page'] { color: var(--fg); }
+.forum-publico-entrar {
+  flex: none;
+  margin-left: auto;
+  min-height: 38px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: .875rem;
+  font-weight: 700;
+}
+
+.forum-lateral,
+.forum-nav { display: none !important; }
+.forum-shell { display: block; max-width: none; margin: 0; }
+.forum-centro {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+.forum-aside { display: none !important; }
+.forum-topo {
+  position: static;
+  min-height: 0;
+  padding: 52px 0 16px;
+  background: transparent;
+  border: 0;
+  display: block;
+}
+.forum-topo__miolo { display: block; }
+.forum-topo__esquerda:empty { display: none; }
+.forum-topo__titulo {
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: clamp(2.25rem, 5vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: -.065em;
+  line-height: .96;
+}
+.forum-principal { min-height: 0; padding-bottom: 0; }
+.forum-faixa-offline {
+  margin-inline: -20px;
+  padding-inline: 20px;
+  background: var(--surface-2);
+}
+.forum-abertura {
+  margin: 8px 0 38px;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.forum-abertura__sobra {
+  margin-bottom: 12px;
+  color: var(--publico-verde);
+  font-size: .8125rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.forum-abertura__lead { max-width: 620px; font-size: clamp(1.25rem, 2vw, 1.75rem); line-height: 1.18; }
+.forum-abertura__apoio { max-width: 500px; }
+.forum-botao--acento { background: var(--fg); color: var(--bg); }
+.forum-shell[data-forum-tema='claro'] .forum-botao--acento { box-shadow: none; }
+.forum-secao {
+  padding: 0 0 12px;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.forum-aviso { padding: 0 0 24px; }
+.forum-lista { border-top: 1px solid var(--border); }
+.forum-linha-comunidade__link { padding: 20px 0; gap: 16px; }
+.forum-linha-comunidade__link:hover { background: transparent; color: var(--publico-verde); }
+.forum-linha-comunidade__nome { font-size: 1.125rem; font-weight: 800; letter-spacing: -.02em; }
+.forum-linha-comunidade__descricao { max-width: 680px; font-size: 1rem; }
+.forum-linha-comunidade__meta { font-size: .8125rem; }
+.forum-monograma { background: var(--surface-2); border-color: var(--border); border-radius: 12px; }
+.forum-rodape-externo { padding: 44px 0 0; }
+.forum-rodape-externo a,
+.forum-link-texto { color: var(--publico-verde); }
+
+@media (max-width: 699px) {
+  .forum-publico-cabecalho__miolo { gap: 16px; padding-inline: 16px; }
+  .forum-publico-nav { gap: 14px; }
+  .forum-publico-nav a:first-child { display: none; }
+  .forum-publico-entrar { padding-inline: 14px; }
+  .forum-centro { padding: 0 16px 40px; }
+  .forum-topo { padding: 34px 0 14px; }
+  .forum-abertura { margin-bottom: 28px; padding: 22px 20px; }
+}
+
 .forum-shell *,
 .forum-shell *::before,
 .forum-shell *::after {

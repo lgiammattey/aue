@@ -293,7 +293,6 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({
             <Link
               to="/arena"
               onClick={() => {
-                try { localStorage.setItem('aue.visitou', 'true'); } catch {}
                 if (onArrotar) onArrotar();
               }}
               style={{
@@ -317,7 +316,6 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({
             <Link
               to="/feed"
               onClick={() => {
-                try { localStorage.setItem('aue.visitou', 'true'); } catch {}
                 if (onEntrarSemConta) onEntrarSemConta();
               }}
               style={{

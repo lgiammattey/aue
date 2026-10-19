@@ -14,6 +14,7 @@ interface BarraLateralNavegacaoProps {
   aoAbrirPerfil?: () => void;
   contaLogada?: boolean;
   aoSair?: () => void;
+  aoEntrar?: () => void;
 }
 
 export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
@@ -26,6 +27,10 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
   aoAbrirPerfil,
   contaLogada,
   aoSair,
+  aoEntrar = () => {
+    window.location.href = '/login';
+  },
+  perfil,
 }) => {
   const wide = !compacto;
   const largura = wide ? 275 : 76;
@@ -68,6 +73,8 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
     color: 'var(--fg)',
     cursor: 'pointer',
     fontSize: '20px',
+    textDecoration: 'none',
+    boxSizing: 'border-box',
   };
 
   const themeIcon =
@@ -89,6 +96,7 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
         flexDirection: 'column',
         justifyContent: 'space-between',
         zIndex: 5,
+        overflowY: 'auto',
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: navAlign }}>
@@ -111,7 +119,7 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
           {wide ? 'AUÊ!' : 'A!'}
         </div>
 
-        {/* Abas */}
+        {/* Abas Principais */}
         {abas.map((t) => {
           const ativo = abaAtiva === t.id;
           return (
@@ -144,6 +152,32 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
           );
         })}
 
+        {/* Atalho para Vídeos de Arroto */}
+        <a
+          href="/videos-de-arroto"
+          style={{
+            ...navBtnBase,
+            color: 'var(--muted)',
+          }}
+          aria-label="Vídeos de arroto"
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          {wide && <span>Vídeos</span>}
+        </a>
+
+        {/* Perfil */}
         {aoAbrirPerfil && (
           <button
             type="button"
@@ -151,12 +185,47 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
             aria-label="Perfil"
             style={{ ...navBtnBase, color: 'var(--muted)' }}
           >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
               <path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21v-1a8 8 0 0116 0v1" />
             </svg>
             {wide && <span>Perfil</span>}
           </button>
         )}
+
+        {/* Início / Apresentação Pública */}
+        <a
+          href="/landing"
+          style={{
+            ...navBtnBase,
+            color: 'var(--muted)',
+          }}
+          aria-label="Início e apresentação do Auê"
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          {wide && <span>Início</span>}
+        </a>
 
         {/* Botão Postar */}
         <button
@@ -192,6 +261,177 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
         >
           {wide ? 'Postar' : '+'}
         </button>
+
+        {/* Status de Autenticação Nítido */}
+        {!contaLogada ? (
+          wide ? (
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '12px 14px',
+                borderRadius: '16px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: 'var(--muted)',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: 'var(--muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '.04em',
+                  }}
+                >
+                  Modo Visitante
+                </span>
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--fg)', lineHeight: 1.3 }}>
+                Você está deslogado. Crie uma conta para salvar seus causos.
+              </div>
+              <button
+                type="button"
+                onClick={aoEntrar}
+                style={{
+                  height: '36px',
+                  borderRadius: '999px',
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--fg)',
+                  color: 'var(--bg)',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                Entrar na conta
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={aoEntrar}
+              style={{
+                ...navBtnBase,
+                marginTop: '12px',
+                color: 'var(--accent)',
+              }}
+              title="Modo Visitante — Toque para entrar"
+              aria-label="Modo Visitante — Toque para entrar"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+              </svg>
+            </button>
+          )
+        ) : (
+          wide ? (
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '10px 14px',
+                borderRadius: '16px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: 'var(--accent)',
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      color: 'var(--fg)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {perfil?.nome || perfil?.handle || 'Logado'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Conta ativa</div>
+                </div>
+              </div>
+              {aoSair && (
+                <button
+                  type="button"
+                  onClick={aoSair}
+                  style={{
+                    border: 0,
+                    background: 'none',
+                    color: 'var(--muted)',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    padding: '4px 6px',
+                  }}
+                  title="Sair da conta"
+                >
+                  Sair
+                </button>
+              )}
+            </div>
+          ) : (
+            aoSair && (
+              <button
+                type="button"
+                onClick={aoSair}
+                style={{ ...navBtnBase, marginTop: '12px', color: 'var(--muted)' }}
+                title="Sair da conta"
+                aria-label="Sair da conta"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                </svg>
+              </button>
+            )
+          )
+        )}
       </div>
 
       {/* Rodapé: Alternar Tema */}
@@ -222,29 +462,6 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
           </svg>
           {wide && <span>{tema === 'light' ? 'Tema escuro' : 'Tema claro'}</span>}
         </button>
-        {contaLogada && aoSair && (
-          <button
-            type="button"
-            onClick={aoSair}
-            style={{ ...navBtnBase, height: '44px', fontSize: '15px', color: 'var(--muted)' }}
-            aria-label="Sair da conta"
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-            </svg>
-            {wide && <span>Sair</span>}
-          </button>
-        )}
       </div>
     </header>
   );

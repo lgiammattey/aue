@@ -116,6 +116,184 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
           Entrar no Telegram
         </a>
       </section>
+
+      {/* Seção Explorar o Auê (Páginas Públicas e Conteúdo) */}
+      <section
+        style={{
+          background: 'var(--surface)',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          border: '1px solid var(--border)',
+          padding: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+        }}
+      >
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: '14px',
+            color: 'var(--muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '.05em',
+          }}
+        >
+          Explorar o Auê
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <a
+            href="/videos-de-arroto"
+            style={{
+              color: 'var(--fg)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>🎬 Vídeos de Arroto</span>
+            <span style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 400 }}>YouTube</span>
+          </a>
+
+          <a
+            href="/ranking-de-arrotos"
+            style={{
+              color: 'var(--fg)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>🏆 Ranking & Recordes</span>
+            <span style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 400 }}>Decibéis</span>
+          </a>
+
+          <a
+            href="/como-arrotar"
+            style={{
+              color: 'var(--fg)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>💨 Como Arrotar</span>
+            <span style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 400 }}>Técnicas</span>
+          </a>
+
+          <a
+            href="/tipos-de-arroto"
+            style={{
+              color: 'var(--fg)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>⚡ Tipos de Arroto</span>
+            <span style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 400 }}>Estilos</span>
+          </a>
+
+          <a
+            href="/como-jogar"
+            style={{
+              color: 'var(--fg)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>🎮 Como Jogar</span>
+            <span style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 400 }}>Regras</span>
+          </a>
+
+          <a
+            href="/grupos"
+            style={{
+              color: 'var(--fg)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>👥 Grupos & Comunidades</span>
+            <span style={{ color: 'var(--muted)', fontSize: '12px', fontWeight: 400 }}>WhatsApp</span>
+          </a>
+
+          <a
+            href="/landing"
+            style={{
+              color: 'var(--accent)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 700,
+              paddingTop: '8px',
+              borderTop: '1px solid var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>🏠 Ver Apresentação / Início</span>
+            <span>↗</span>
+          </a>
+        </div>
+      </section>
+
+      {/* Rodapé Legal e Institucional */}
+      <footer
+        style={{
+          padding: '0 4px 24px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px 12px',
+          fontSize: '12px',
+          color: 'var(--muted)',
+          lineHeight: 1.4,
+        }}
+      >
+        <a href="/como-jogar" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Como Jogar
+        </a>
+        <a href="/videos-de-arroto" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Vídeos
+        </a>
+        <a href="/ranking-de-arrotos" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Ranking
+        </a>
+        <a href="/grupos" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Grupos
+        </a>
+        <a href="/termos" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Termos
+        </a>
+        <a href="/privacidade" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Privacidade
+        </a>
+        <a href="/landing" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
+          Sobre
+        </a>
+        <span>© 2026 Auê!</span>
+      </footer>
     </aside>
   );
 };

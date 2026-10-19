@@ -23,8 +23,17 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.getByRole('link', { name: 'Explorar o feed sem conta' })).toBeTruthy();
   });
 
-  it('vai direto para o Feed na raiz "/" quando o usuário já visitou o site antes', async () => {
+  it('mantém o visitante deslogado na Landing na raiz "/" sem forçar o feed', async () => {
     localStorage.setItem('aue.visitou', 'true');
+    render(<App />);
+
+    // Mesmo com dados no localStorage, deslogado permanece na Landing com opções públicas
+    expect(await screen.findByRole('heading', { level: 1, name: 'Tá rolando agora' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Explorar o feed sem conta' })).toBeTruthy();
+  });
+
+  it('exibe o Feed diretamente quando acessa a rota "/feed"', async () => {
+    window.history.pushState({}, 'Feed', '/feed');
     render(<App />);
 
     // Deve exibir o Feed do Bonde do Arroto diretamente

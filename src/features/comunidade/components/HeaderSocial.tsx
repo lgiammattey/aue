@@ -24,7 +24,7 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
   filtroFeed,
   aoMudarFiltroFeed,
   isMobile: _isMobile,
-  perfil: _perfil,
+  perfil,
   aoAbrirPerfil: _aoAbrirPerfil,
   aoAbrirArena,
   tema,
@@ -107,24 +107,41 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
             </button>
           )}
           {contaLogada && aoSair && (
-            <button
-              type="button"
-              onClick={aoSair}
-              aria-label="Sair da conta"
-              style={{
-                minHeight: '36px',
-                padding: '0 12px',
-                borderRadius: '999px',
-                border: '1px solid var(--border-strong)',
-                background: 'none',
-                color: 'var(--fg)',
-                fontWeight: 600,
-                fontSize: '13px',
-                cursor: 'pointer',
-              }}
-            >
-              Sair
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {(perfil?.handle || perfil?.nome) && (
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--muted)',
+                    fontWeight: 600,
+                    maxWidth: '110px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  @{perfil.handle || perfil.nome}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={aoSair}
+                aria-label="Sair da conta"
+                style={{
+                  minHeight: '34px',
+                  padding: '0 10px',
+                  borderRadius: '999px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                  color: 'var(--fg)',
+                  fontWeight: 600,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                Sair
+              </button>
+            </div>
           )}
           {!contaLogada && aoEntrar && (
             <button
@@ -132,18 +149,29 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
               onClick={aoEntrar}
               aria-label="Entrar na conta"
               style={{
-                minHeight: '36px',
-                padding: '0 12px',
+                minHeight: '34px',
+                padding: '0 14px',
                 borderRadius: '999px',
                 border: '1px solid var(--border-strong)',
-                background: 'none',
-                color: 'var(--fg)',
-                fontWeight: 600,
+                background: 'var(--fg)',
+                color: 'var(--bg)',
+                fontWeight: 700,
                 fontSize: '13px',
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              Entrar
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: 'var(--accent)',
+                }}
+              />
+              <span>Entrar</span>
             </button>
           )}
           <button

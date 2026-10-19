@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
+import { criarContaWeb } from './plataforma/web/conta';
 
 const ChallengeView = lazy(() => import('./features/audio/ChallengeView').then((m) => ({ default: m.ChallengeView })));
 const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePrivacidade').then((m) => ({ default: m.PoliticaDePrivacidade })));
@@ -30,33 +31,38 @@ function EntradaPorLink() {
 
 function EntradaInicial() {
   const navigate = useNavigate();
-  const jaVisitou = (() => {
-    try {
-      if (typeof window === 'undefined' || !window.localStorage) return false;
-      return Boolean(
-        localStorage.getItem('aue.visitou') ||
-        localStorage.getItem('aue.usuario.perfil.v1') ||
-        localStorage.getItem('aue.causos.v2')
-      );
-    } catch {
-      return false;
-    }
-  })();
+  const [estaLogado, setEstaLogado] = useState<boolean | null>(null);
 
-  if (jaVisitou) {
+  useEffect(() => {
+    let ativo = true;
+    const conta = criarContaWeb();
+    conta
+      .estado()
+      .then((e) => {
+        if (ativo) {
+          setEstaLogado(e.temSessao && !e.anonima);
+        }
+      })
+      .catch(() => {
+        if (ativo) setEstaLogado(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  if (estaLogado === null) {
+    return null;
+  }
+
+  if (estaLogado) {
     return <EntradaPrincipal />;
   }
 
   return (
     <TelaLanding
-      onEntrarSemConta={() => {
-        try { localStorage.setItem('aue.visitou', 'true'); } catch {}
-        navigate('/feed');
-      }}
-      onArrotar={() => {
-        try { localStorage.setItem('aue.visitou', 'true'); } catch {}
-        navigate('/arena');
-      }}
+      onEntrarSemConta={() => navigate('/feed')}
+      onArrotar={() => navigate('/arena')}
     />
   );
 }

@@ -510,6 +510,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
             aoAbrirPerfil={aoAbrirPerfil ? () => aoAbrirPerfil() : undefined}
             contaLogada={contaLogada}
             aoSair={handleSair}
+            aoEntrar={aoEntrar}
             tema={theme}
             aoAlternarTema={toggleTheme}
             perfil={perfil}
@@ -548,6 +549,49 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
           {/* 1. ABA FEED */}
           {tab === 'feed' && (
             <div>
+              {/* Banner de Modo Visitante */}
+              {!contaLogada && (
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    background: 'var(--surface)',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    fontSize: '13px',
+                    color: 'var(--fg)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '16px' }}>👀</span>
+                    <span>
+                      Você está navegando como <strong>visitante</strong>.
+                    </span>
+                  </div>
+                  {aoEntrar && (
+                    <button
+                      type="button"
+                      onClick={aoEntrar}
+                      style={{
+                        border: '1px solid var(--border-strong)',
+                        borderRadius: '999px',
+                        background: 'var(--fg)',
+                        color: 'var(--bg)',
+                        padding: '6px 14px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                      }}
+                    >
+                      Entrar ou Criar conta
+                    </button>
+                  )}
+                </div>
+              )}
               {/* Barra de Busca Ativa */}
               {termoBusca.trim() && (
                 <div

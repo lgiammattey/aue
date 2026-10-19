@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Comunidade } from '../../portas/comunidade';
+import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../nucleo/comunidade/limites';
 
 export interface DadosDoCausoComArroto {
   comunidadeSlug: string;
@@ -41,7 +42,9 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
   if (!aberto) return null;
 
   // O aceite é a condição para o arroto sair: sem marcar, não publica.
-  const podeEnviar = conteudo.trim().length > 0 && consentimentoAudio && !enviando;
+  const restantes = caracteresRestantes(conteudo, LIMITE_CAUSO);
+  const podeEnviar =
+    conteudo.trim().length > 0 && cabeNoLimite(conteudo, LIMITE_CAUSO) && consentimentoAudio && !enviando;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +118,16 @@ export const ModalNovoCauso: React.FC<ModalNovoCausoProps> = ({
               onChange={(e) => setConteudo(e.target.value)}
               rows={3}
               required
+              aria-describedby="contador-causo"
             />
+            <span
+              id="contador-causo"
+              role="status"
+              className="consent-text"
+              style={{ color: restantes < 0 ? 'var(--danger)' : undefined }}
+            >
+              {restantes < 0 ? `${-restantes} caracteres a mais que o limite` : `${restantes} caracteres restantes`}
+            </span>
           </div>
 
           {(

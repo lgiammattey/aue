@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { CausoPostado } from '../../../portas/comunidade';
 import { ArvoreDeComentarios } from './ArvoreDeComentarios';
+import { cabeNoLimite, LIMITE_COMENTARIO } from '../../../nucleo/comunidade/limites';
 
 interface CardDeCausoProps {
   causo: CausoPostado;
@@ -78,7 +79,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
 
   const enviarResposta = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!textoResposta.trim()) return;
+    if (!textoResposta.trim() || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO)) return;
     aoResponder(causo.id, textoResposta.trim());
     setTextoResposta('');
   };
@@ -572,6 +573,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
             <form onSubmit={enviarResposta} style={{ display: 'flex', gap: '8px' }}>
               <input
                 value={textoResposta}
+                maxLength={LIMITE_COMENTARIO}
                 onChange={(e) => setTextoResposta(e.target.value)}
                 placeholder={`Responder a @${handle}`}
                 style={{

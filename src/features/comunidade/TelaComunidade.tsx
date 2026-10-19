@@ -19,6 +19,7 @@ import { AbaComunidades } from './components/AbaComunidades';
 import { AbaDesafios, type DesafioSocialItem } from './components/AbaDesafios';
 import { ModalNovoCauso, type DadosDoCausoComArroto } from './ModalNovoCauso';
 import { ColunaTendencias } from './components/ColunaTendencias';
+import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../nucleo/comunidade/limites';
 import { ModalCardCompartilhamento } from './ModalCardCompartilhamento';
 import { Arena } from '../../arena/Arena';
 import './Comunidade.css';
@@ -413,7 +414,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Postar via Modal
   const handlePublicarModal = async () => {
     if (!contaLogada) return pedirPromocao();
-    if (!novoTextoModal.trim()) {
+    if (!novoTextoModal.trim() || !cabeNoLimite(novoTextoModal, LIMITE_CAUSO)) {
       avisar('Escreve alguma coisa.');
       return;
     }
@@ -1031,10 +1032,10 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                 <span
                   style={{
                     fontSize: '13px',
-                    color: novoTextoModal.length > 280 ? 'var(--danger)' : 'var(--muted)',
+                    color: !cabeNoLimite(novoTextoModal, LIMITE_CAUSO) ? 'var(--danger)' : 'var(--muted)',
                   }}
                 >
-                  {280 - novoTextoModal.length}
+                  {caracteresRestantes(novoTextoModal, LIMITE_CAUSO)}
                 </span>
                 <button
                   type="button"

@@ -1,3 +1,4 @@
+import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../../nucleo/comunidade/limites';
 import React, { useState } from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';
 
@@ -34,7 +35,8 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
     : (perfil.nome?.slice(0, 2) || 'VC')
   ).toUpperCase();
 
-  const podePostar = Boolean(texto.trim());
+  const restantes = caracteresRestantes(texto, LIMITE_CAUSO);
+  const podePostar = Boolean(texto.trim()) && cabeNoLimite(texto, LIMITE_CAUSO);
 
   const handlePostar = async () => {
     if (!podePostar || enviando) return;
@@ -166,6 +168,7 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
           onChange={(e) => setTexto(e.target.value)}
           placeholder="O que tá rolando no bonde?"
           rows={2}
+          aria-describedby="contador-composer"
           style={{
             background: 'none',
             border: 0,
@@ -238,6 +241,15 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
             </button>
           </div>
 
+          {restantes <= 100 && (
+            <span
+              id="contador-composer"
+              role="status"
+              style={{ fontSize: '13px', color: restantes < 0 ? 'var(--danger)' : 'var(--muted)' }}
+            >
+              {restantes}
+            </span>
+          )}
           <button
             type="button"
             onClick={handlePostar}

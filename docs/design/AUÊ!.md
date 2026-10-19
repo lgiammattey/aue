@@ -6,7 +6,7 @@
 **Status:** Direção de arte canônica  
 **Produto:** Auê!  
 **Categoria:** Jogo mobile casual competitivo  
-**Direção:** 2D · flat · dark · expressivo · áudio-reativo
+**Direção:** 2D · flat · expressivo · áudio-reativo. A Arena é escura; o resto do app é claro por padrão ([`tema-e-publicar.md`](tema-e-publicar.md))
 
 Este Art Bible consolida a direção artística do Auê. A máquina de estados segue
 [`../jogo/ARENA.md`](../jogo/ARENA.md), a geometria e o comportamento seguem o
@@ -185,7 +185,7 @@ O visual evita:
 
 `#0a0a08`
 
-É o espaço onde a competição acontece.
+É o espaço onde a competição acontece: o fundo da **Arena**, que fica escura fixa por enquanto. No resto do app o fundo padrão é o creme `#f5f3ea` e o carvão é o tema escuro opcional.
 
 Nunca deve parecer preto digital puro sem personalidade.
 
@@ -1636,7 +1636,7 @@ Correto:
 
 informação vivendo no palco e nas faixas da Arena.
 
-O fundo escuro é a superfície.
+O fundo escuro é a superfície **da Arena**. Se a Arena um dia seguir o tema, o verde vira placa com contorno e o número da nota vira selo, como provado no protótipo (`tema-e-publicar.md` §1.3).
 
 ---
 

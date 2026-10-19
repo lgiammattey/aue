@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,26 +16,46 @@
 <div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:56px">
 <header>
 <div style="font-family:Anton,Impact,sans-serif;font-size:44px;text-transform:uppercase;line-height:1">Auê! Design System</div>
-<p style="color:var(--muted);font-size:16px;margin:10px 0 0;max-width:620px;text-wrap:pretty">Os tokens e componentes usados neste protótipo. Tema escuro e claro, fundo chapado, sem cards, sem gradiente. Verde ácido só em até 2 lugares por estado.</p>
-<div style="display:flex;gap:16px;margin-top:12px;font-size:15px;align-items:center"><button onClick="{{ toggleTheme }}" style="height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--border-strong);background:transparent;color:var(--fg);font:inherit;font-size:14px;cursor:pointer">{{ themeLabel }}</button><a href="Bonde do Arroto.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Bonde</a><a href="Jornada.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Jornada</a><a href="Arena.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Arena</a><a href="Landing.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Landing</a></div>
+<p style="color:var(--muted);font-size:16px;margin:10px 0 0;max-width:620px;text-wrap:pretty">Os tokens e componentes usados neste protótipo. Claro, creme, é o padrão; o escuro é opcional. Fundo chapado, sem cards, sem gradiente. Verde ácido só em até 2 lugares por estado.</p>
+<div style="display:flex;gap:16px;margin-top:12px;font-size:15px;align-items:center"><button onClick="{{ toggleTheme }}" style="height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--border-strong);background:transparent;color:var(--fg);font:inherit;font-size:14px;cursor:pointer">{{ themeLabel }}</button><a href="Publicar.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Publicar</a><a href="Jornada.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Jornada</a><a href="Arena.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Arena</a><a href="Landing.dc.html" style="color:var(--fg)" style-hover="color:var(--muted)">Landing</a></div>
 </header>
 
 <section style="display:flex;flex-direction:column;gap:20px">
-<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">01 · Cor</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px">
-<sc-for list="{{ colors }}" as="c" hint-placeholder-count="10">
-<div style="display:flex;flex-direction:column;gap:8px">
-<div style="height:64px;border-radius:12px;border:1px solid var(--border);background:{{ c.bg }}"></div>
-<div style="font-size:14px;font-weight:600">{{ c.name }}</div>
-<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ c.hex }}</div>
-<div style="font-size:12px;color:var(--muted);text-wrap:pretty">{{ c.use }}</div>
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">01 · Cor, os dois temas</div>
+<div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:0 16px;align-items:center">
+<div style="font-size:12px;color:var(--muted);padding-bottom:8px">Token</div><div style="font-size:12px;font-weight:700;padding-bottom:8px">Claro (padrão)</div><div style="font-size:12px;font-weight:700;padding-bottom:8px">Escuro</div>
+<sc-for list="{{ colors }}" as="c" hint-placeholder-count="14">
+<div style="padding:10px 0;border-top:1px solid var(--border)"><div style="font-size:14px;font-weight:600">{{ c.name }}</div><div style="font-size:12px;color:var(--muted);text-wrap:pretty">{{ c.use }}</div></div>
+<div style="padding:10px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px"><span style="width:56px;height:40px;flex:none;border-radius:12px;border:1px solid var(--border-strong);background:{{ c.l }}"></span><span style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ c.l }}</span></div>
+<div style="padding:10px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px"><span style="width:56px;height:40px;flex:none;border-radius:12px;border:1px solid var(--border-strong);background:{{ c.d }}"></span><span style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ c.d }}</span></div>
+</sc-for>
+</div>
+<p style="font-size:13px;color:var(--muted);margin:0;max-width:720px;text-wrap:pretty">Derivados, sempre por color-mix sobre os tokens acima e nunca hex novo: --fg-soft (6% de --fg), --fg-soft-forte (11%), --overlay-scrim (92% de --bg), --accent-contorno (50% de --fg no claro, nenhum no escuro). Sem preferência guardada, o app abre claro, mesmo com o sistema no escuro.</p>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px;border-top:1px solid var(--border);padding-top:32px">
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">02 · O verde nos dois fundos</div>
+<p style="font-size:15px;margin:0;max-width:720px;text-wrap:pretty">Sobre o creme o verde elétrico dá 1,07:1 e some. Nos dois temas ele é placa, nunca texto, borda nem foco. No claro a placa leva contorno interno de 50% de --fg (3,86:1) e o número da nota vira selo (Anton, --accent-on sobre --accent). Orçamento: no máximo 2 por estado.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+<sc-for list="{{ blocos }}" as="b" hint-placeholder-count="3">
+<div data-theme="{{ b.tema }}" style="background:var(--bg);color:var(--fg);border:1px solid var(--border-strong);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:18px">
+<div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">{{ b.rotulo }}</div>
+<sc-if value="{{ b.errado }}"><div style="display:flex;align-items:center;gap:16px"><span style="font-family:var(--font-display);font-size:64px;line-height:.86;color:var(--accent)">91</span><span style="font-size:13px;color:var(--danger);max-width:22ch">Errado: número em verde sobre o creme, 1,07:1. Parece que a nota sumiu.</span></div></sc-if>
+<sc-if value="{{ b.certo }}">
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+<x-import component-from-global-scope="AuDesignSystem_226135.NotaNaBolha" valor="{{ 91 }}" rotulo="Valendo" tamanho="resultado" hint-size="120px,100px"></x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.BolhaAue" modo="recording" size="{{ 110 }}" nivel="{{ 0.4 }}" hint-size="110px,110px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" tamanho="compacto" hint-size="100%,52px">Chamar pro X1</x-import><x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" tamanho="compacto" hint-size="100%,52px">Publicar</x-import></div>
+</sc-if>
+<div style="font-size:13px;color:var(--muted);text-wrap:pretty">{{ b.nota }}</div>
 </div>
 </sc-for>
 </div>
 </section>
 
 <section style="display:flex;flex-direction:column;gap:20px;border-top:1px solid var(--border);padding-top:32px">
-<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">02 · Tipografia</div>
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">03 · Tipografia</div>
 <div style="display:flex;flex-direction:column;gap:20px">
 <sc-for list="{{ types }}" as="t" hint-placeholder-count="5">
 <div style="display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr);gap:24px;align-items:baseline">
@@ -47,7 +67,7 @@
 </section>
 
 <section style="display:flex;flex-direction:column;gap:20px;border-top:1px solid var(--border);padding-top:32px">
-<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">03 · Espaço e raio</div>
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">04 · Espaço e raio</div>
 <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end">
 <sc-for list="{{ spaces }}" as="s" hint-placeholder-count="8">
 <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
@@ -67,7 +87,7 @@
 </section>
 
 <section style="display:flex;flex-direction:column;gap:24px;border-top:1px solid var(--border);padding-top:32px">
-<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">04 · Componentes</div>
+<div style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">05 · Componentes</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:40px 32px">
 <div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:14px;color:var(--muted)">Botão · primário, contorno, fantasma</div>
 <x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" hint-size="100%,56px">Arrotar</x-import>
@@ -86,16 +106,17 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { light: false };
+  state = { light: true };
+  componentDidMount() { try { const q = new URLSearchParams(location.search); const t = q.get('tema'); const stored = localStorage.getItem('bda-theme-v') === '2' && localStorage.getItem('bda-theme') === 'dark'; const light = t ? t === 'claro' : !stored; this.setState({ light }); document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark'); } catch (x) {} }
   renderVals() {
     const L = this.state.light;
-    const vars = L ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', '--fg-soft': 'rgba(10,10,8,.04)', '--overlay-scrim': 'rgba(245,243,234,.92)', '--page-bg': '#f5f3ea', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
-    const rootStyle = { ...vars, minHeight: '100vh', background: L ? '#f5f3ea' : 'var(--page-bg)', color: 'var(--fg)', fontFamily: '"Google Sans Flex", var(--font-body)', padding: '40px 32px', boxSizing: 'border-box' };
-    const C = (n, d, l, u) => ({ name: n, hex: L ? l : d, bg: 'var(' + n + ')', use: u });
-    const colors = [C('--bg','#0a0a08','#f5f3ea','Fundo único'),C('--surface','#171712','#ebe9de','Superfície'),C('--surface-2','#1f1f18','#dedcd0','Superfície 2'),C('--fg','#f5f3ea','#0a0a08','Texto'),C('--muted','#93917f','#57554a','Texto secundário'),C('--border','#2b2a22','#d6d4c6','Filete 1px'),C('--border-strong','#74725f','#85836f','Contorno de botão e campo'),C('--ind','#c6ff00','#0a0a08','Indicador ativo (aba, toggle)'),C('--accent','#c6ff00','#c6ff00','CTA, Score, Bolha. Máx. 2'),C('--accent-on','#0a0a08','#0a0a08','Texto sobre accent'),C('--gold','#f4c430','#f4c430','Recorde'),C('--danger','#ff3d3f','#c4161a','Só erro técnico'),C('--silver','#c7cad1','#c7cad1','Pódio 2º'),C('--bronze','#c98a4b','#c98a4b','Pódio 3º')];
+    const rootStyle = { minHeight: '100vh', background: 'var(--page-bg)', color: 'var(--fg)', fontFamily: '"Google Sans Flex", var(--font-body)', padding: '40px 32px', boxSizing: 'border-box' };
+    const C = (n, d, l, u) => ({ name: n, d, l, use: u });
+    const colors = [C('--bg','#0a0a08','#f5f3ea','Fundo único'),C('--surface','#171712','#ebe9de','Superfície'),C('--surface-2','#1f1f18','#dedcd0','Superfície 2'),C('--fg','#f5f3ea','#0a0a08','Texto'),C('--muted','#93917f','#57554a','Texto secundário'),C('--border','#2b2a22','#d6d4c6','Filete 1px'),C('--border-strong','#74725f','#85836f','Contorno de botão e campo'),C('--ind','#f5f3ea','#0a0a08','Indicador ativo (aba, toggle): igual a --fg, sem verde'),C('--accent','#c6ff00','#c6ff00','Placa de CTA, nota e Bolha. Máx. 2. Nunca texto, borda nem foco'),C('--accent-on','#0a0a08','#0a0a08','Texto sobre accent'),C('--gold','#f4c430','#f4c430','Recorde e vencedor. No claro, só como placa com texto --fg'),C('--danger','#ff3d3f','#c4161a','Só erro técnico'),C('--silver','#c7cad1','#c7cad1','Pódio 2º'),C('--bronze','#c98a4b','#c98a4b','Pódio 3º')];
     const A = "font-family:Anton,Impact,sans-serif;";
     const types = [['Display 2xl · Anton',A+'font-size:92px;line-height:1','87'],['Display lg · Anton',A+'font-size:40px;line-height:1.1','Caralho. Veio forte.'],['Wordmark · Anton',A+'font-size:26px;letter-spacing:.02em','AUÊ!'],['Título de overlay · Anton',A+'font-size:22px','COMPARTILHAR'],['Body lg · 700','font-weight:700;font-size:20px;text-transform:uppercase','Arrotar'],['Body md · 400','font-size:16px','Corpo de texto e pílula de origem.'],['Body xs · 400','font-size:13px;color:var(--muted)','Rótulo de métrica e dica.'],['Caption · 700','font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em','Auê Score'],['Mono','font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)','eyebrow · timestamp · link']].map(a => ({ label: a[0], style: a[1], sample: a[2] }));
-    return { rootStyle, colors, types, themeLabel: L ? 'Tema: claro' : 'Tema: escuro', toggleTheme: () => this.setState(s => ({ light: !s.light })), spaces: [8,16,24,32,40,48,56,64].map(px => ({ px })), radii: [{name:'sm',px:12,label:'chip'},{name:'md',px:18,label:'botão'},{name:'lg',px:24,label:'overlay'},{name:'full',px:48,label:'pílula'}] };
+    const blocos = [{ tema: 'light', rotulo: 'Claro · certo', certo: true, errado: false, nota: 'Selo da nota, Bolha com contorno --fg de 2px, botão com contorno interno. Verde: selo e botão primário, são 2.' }, { tema: 'light', rotulo: 'Claro · errado', certo: false, errado: true, nota: 'É o que o verde vira sem a regra: só existe o fundo.' }, { tema: 'dark', rotulo: 'Escuro · certo', certo: true, errado: false, nota: 'Nada muda: nota em verde sobre o carvão (16,7:1), Bolha cheia, botão sem contorno.' }];
+    return { rootStyle, colors, blocos, types, themeLabel: L ? 'Tema: claro' : 'Tema: escuro', toggleTheme: () => this.setState(s => { document.documentElement.setAttribute('data-theme', s.light ? 'dark' : 'light'); return { light: !s.light }; }), spaces: [8,16,24,32,40,48,56,64].map(px => ({ px })), radii: [{name:'sm',px:12,label:'chip'},{name:'md',px:18,label:'botão'},{name:'lg',px:24,label:'overlay'},{name:'full',px:48,label:'pílula'}] };
   }
 }
 </script>

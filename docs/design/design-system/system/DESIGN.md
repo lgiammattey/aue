@@ -12,6 +12,7 @@ canonical_refs:
   - "docs/design/prototipo/Comunidades.dc.html"
   - "docs/design/prototipo/Jornada.dc.html"
   - "docs/design/prototipo/Versões Webapp.dc.html"
+  - "docs/design/prototipo/Publicar.dc.html"
 colors:
   dark:
     bg: "#0a0a08"
@@ -21,7 +22,7 @@ colors:
     muted: "#93917f"
     border: "#2b2a22"
     border-strong: "#74725f"
-    ind: "#c6ff00"
+    ind: "#f5f3ea"
     accent: "#c6ff00"
     accent-on: "#0a0a08"
     gold: "#f4c430"
@@ -64,15 +65,18 @@ Os arquivos em `docs/design/prototipo/` e este Design System são as referência
 | **Landing** | [`docs/design/prototipo/Landing.dc.html`](../prototipo/Landing.dc.html) | Recepção estilo Twitter ("Tá rolando agora"), login social e atalho para arrotar |
 | **Login** | [`docs/design/prototipo/Login.dc.html`](../prototipo/Login.dc.html) | Autenticação simples (Google, Apple, E-mail/Senha/Apelido) ou Convidado |
 | **Jornada** | [`docs/design/prototipo/Jornada.dc.html`](../prototipo/Jornada.dc.html) | O fluxo completo em 6 fases de decisão e resiliência |
+| **Publicar** | [`docs/design/prototipo/Publicar.dc.html`](../prototipo/Publicar.dc.html) | Formulário depois da nota (Destino, autorização), convite, perfil com "No perfil", tópico publicado |
 | **Versões Webapp** | [`docs/design/prototipo/Versões Webapp.dc.html`](../prototipo/Vers%C3%B5es%20Webapp.dc.html) | Responsividade em 3 larguras: Desktop (1280px), Tablet (820px) e Celular (390px) |
 
 ---
 
 ## 2. Cores e Temas
 
-O sistema suporta oficialmente **Tema Escuro** (padrão) e **Tema Claro**, persistido via `localStorage ('bda-theme')`.
+O sistema tem dois temas. **O padrão é o Tema Claro (creme)**, para todo mundo, mesmo com o sistema operacional no escuro. Sem preferência guardada a página abre clara. A escolha da pessoa só existe depois que ela toca no botão de tema, e é guardada em `localStorage` (`bda-theme`) com o marcador `bda-theme-v = 2`; um `dark` guardado sem o marcador é o padrão antigo e vale como claro. Cada token é definido **uma vez** por tema; nenhum hex solto em componente. Desenho completo, medições e inventário em [`docs/design/tema-e-publicar.md`](../../tema-e-publicar.md).
 
-### 2.1 Tema Escuro (`dark`)
+> **Arena:** fica **escura fixa** por enquanto (decisão pendente do Luiz sobre seguir o tema). A fixação é da rota inteira e não grava preferência; o botão de tema não aparece nela. O claro da Arena está provado no protótipo com as regras da seção 2.3.
+
+### 2.1 Tema Escuro (`dark`, opcional)
 - `--bg`: `#0a0a08` — Fundo único e contínuo
 - `--surface`: `#171712` — Primeira camada de elevação (aside, cards, inputs)
 - `--surface-2`: `#1f1f18` — Segunda camada (avatares, capas, badges)
@@ -80,7 +84,7 @@ O sistema suporta oficialmente **Tema Escuro** (padrão) e **Tema Claro**, persi
 - `--muted`: `#93917f` — Metadados, timestamps, handles e bordas secundárias
 - `--border`: `#2b2a22` — Divisores finos de 1px
 - `--border-strong`: `#74725f` — Contornos de inputs e botões secundários
-- `--ind`: `#c6ff00` — Indicador ativo de abas e toggles
+- `--ind`: igual a `--fg` — Indicador ativo de abas e toggles (sem verde)
 - `--accent`: `#c6ff00` — Verde ácido elétrico: CTA primário, Auê Score, Bolha ativa (máx. 2 por tela)
 - `--accent-strong`: `#a8d900` — Hover e estado pressionado do accent
 - `--accent-on`: `#0a0a08` — Texto escuro obrigatório sobre accent
@@ -89,7 +93,7 @@ O sistema suporta oficialmente **Tema Escuro** (padrão) e **Tema Claro**, persi
 - `--bronze`: `#c98a4b` — 3º lugar
 - `--danger`: `#ff3d3f` — Mensagens de erro técnico crítico
 
-### 2.2 Tema Claro (`light`)
+### 2.2 Tema Claro (`light`, padrão)
 - `--bg`: `#f5f3ea` — Fundo claro único
 - `--surface`: `#ebe9de` — Superfície clara
 - `--surface-2`: `#dedcd0` — Superfície contrastante
@@ -98,17 +102,23 @@ O sistema suporta oficialmente **Tema Escuro** (padrão) e **Tema Claro**, persi
 - `--border`: `#d6d4c6` — Divisores de 1px
 - `--border-strong`: `#85836f` — Contornos de botão e campos
 - `--ind`: `#0a0a08` — Indicador preto de abas ativas
-- `--accent`: `#c6ff00` — Mantido como destaque
+- `--accent`: `#c6ff00` — Mantido, mas só como **placa** (ver 2.3)
 - `--accent-on`: `#0a0a08` — Texto escuro sobre accent
-- `--danger`: `#c4161a` — Vermelho de erro técnico adaptado para contraste
+- `--accent-contorno`: `--fg` a 50% — contorno interno de 1px de toda placa verde (3,86:1 sobre o creme). No escuro não existe
+- `--danger`: `#c4161a` — Vermelho de erro técnico adaptado para contraste (nunca sobre `--surface-2`: 4,4:1)
 
 ### 2.3 Regra de Uso do Accent
-> **Orçamento:** No máximo 2 aparições simultâneas de `--accent` por estado.
+> **Orçamento:** no máximo 2 aparições simultâneas de `--accent` por estado.
 > - Prioridade 1: Bolha em gravação / pico
 > - Prioridade 2: Auê Score em destaque
-> - Prioridade 3: CTA primário ("Arrotar", "Postar", "Criar conta")
-> 
-> Proibido pintar tudo de verde. O contraste repousa na sobriedade do fundo chapado.
+> - Prioridade 3: CTA primário ("Arrotar", "Criar conta", "Criar tópico", "Enviar"). "Postar" não existe mais.
+>
+> Proibido pintar tudo de verde.
+
+**O verde é placa, nunca texto, borda nem foco.** Sobre o creme ele dá 1,07:1 e some; por isso, nos dois temas:
+- botão primário e selo de nota são placas `--accent` com texto `--accent-on`; no claro levam o contorno interno `--accent-contorno`;
+- foco visível é `outline: 2px solid var(--fg)`;
+- no claro a Bolha ganha contorno `--fg` de 2px em todos os modos, o Auê Score vira selo (Anton `--accent-on` sobre placa), o aviso do cronômetro e o vencedor viram placa `--gold` com texto `--fg`.
 
 ---
 
@@ -206,4 +216,8 @@ O Auê roda exclusivamente no navegador com excelência em 3 cenários:
    - Área central sem padding lateral excessivo.
    - **Barra de navegação inferior fixa (56px):** 4 a 5 ícones com alvos de toque >= 44px (`--hit-target-min`).
    - Botão flutuante de ação (FAB) circular verde `--accent` para novo post/arroto.
-   - Respeito a safe areas: `--safe-top`, `--safe-bottom`.
+   - Respeito a safe areas: `--safe-top`, `--safe-bottom`, pintadas com `--bg` (sem faixa de outra cor sob a barra inferior nem acima do cabeçalho).
+
+### Barra do navegador
+- `<meta name="theme-color">` único, `#f5f3ea` por padrão e `#0a0a08` no escuro (e na Arena fixa); páginas públicas usam `#f7f8f5`. Manifest `theme_color` e `background_color` em `#f5f3ea`.
+- iPhone com o app na tela de início: `apple-mobile-web-app-status-bar-style` é estático; proposto `default` (texto escuro). Não acompanha o tema; provar em aparelho.

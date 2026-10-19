@@ -10,6 +10,7 @@ import { obterPerfilLocal } from '../../plataforma/web/perfil';
 import { BarraLateralNavegacao } from './components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from './components/BarraInferiorMobile';
 import { ColunaTendencias } from './components/ColunaTendencias';
+import { LARGURA_CELULAR, LARGURA_COLUNA_DIREITA, useLarguraJanela, useTema } from './useLayoutDaConversa';
 
 interface TelaHistoriaProps {
   onArrotar?: () => void;
@@ -26,6 +27,11 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   const [conta] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
   const [podeParticiparSocialmente, setPodeParticiparSocialmente] = useState(false);
   const perfil = obterPerfilLocal();
+  const largura = useLarguraJanela();
+  const [tema, alternarTema] = useTema();
+  const celular = largura < LARGURA_CELULAR;
+  const mostrarLateral = !celular;
+  const mostrarColunaDireita = largura >= LARGURA_COLUNA_DIREITA;
 
   const [causo, setCauso] = useState<CausoPostado | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -191,15 +197,17 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
   return (
     <div style={{ minHeight: '100svh', background: 'var(--bg)', color: 'var(--fg)', display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: '1280px', display: 'flex' }}>
-        {/* Barra lateral desktop */}
+        {/* Barra lateral: só tablet e desktop */}
+        {mostrarLateral && (
         <BarraLateralNavegacao
           abaAtiva="feed"
           aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
           aoAbrirComposer={() => navigate('/arena')}
-          tema="dark"
-          aoAlternarTema={() => {}}
+          tema={tema}
+          aoAlternarTema={alternarTema}
           perfil={perfil}
         />
+        )}
 
         {/* Coluna Central */}
         <main
@@ -207,9 +215,11 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
             flex: 1,
             minWidth: 0,
             maxWidth: '600px',
-            borderRight: '1px solid var(--border)',
-            borderLeft: '1px solid var(--border)',
-            paddingBottom: '80px',
+            borderRight: celular ? 0 : '1px solid var(--border)',
+            borderLeft: celular ? 0 : '1px solid var(--border)',
+            // Barra inferior (56px) + área segura do iPhone, só no celular.
+            paddingBottom: celular ? 'calc(72px + env(safe-area-inset-bottom, 0px))' : '40px',
+            overflowWrap: 'anywhere',
           }}
         >
           {/* Header com botão voltar e botão Jogar Auê */}
@@ -552,18 +562,22 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
           )}
         </main>
 
-        {/* Coluna Tendências desktop */}
-        <ColunaTendencias
-          aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
-        />
+        {/* Coluna Tendências: só em tela larga */}
+        {mostrarColunaDireita && (
+          <ColunaTendencias
+            aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
+          />
+        )}
       </div>
 
-      {/* Barra Inferior Mobile */}
-      <BarraInferiorMobile
-        abaAtiva="feed"
-        aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
-        aoAbrirPerfil={() => navigate('/perfil')}
-      />
+      {/* Barra inferior: só no celular */}
+      {celular && (
+        <BarraInferiorMobile
+          abaAtiva="feed"
+          aoMudarAba={(aba) => navigate(aba === 'feed' ? '/feed' : aba === 'arena' ? '/arena' : aba === 'comm' ? '/comunidade' : '/desafios')}
+          aoAbrirPerfil={() => navigate('/perfil')}
+        />
+      )}
     </div>
   );
 };

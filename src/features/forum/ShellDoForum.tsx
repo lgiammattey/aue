@@ -84,6 +84,8 @@ type ItemAtivo = 'comunidades' | 'explorar' | 'arena' | 'perfil' | null;
 function itemAtivoDe(caminho: string): ItemAtivo {
   if (caminho === '/comunidades' || caminho.startsWith('/c/')) return 'comunidades';
   if (caminho === '/explorar') return 'explorar';
+  if (caminho === '/arena') return 'arena';
+  if (caminho === '/perfil') return 'perfil';
   return null;
 }
 
@@ -229,7 +231,7 @@ function Casca({ children }: { readonly children: ReactNode }) {
               </a>
 
               <div className="forum-lateral">
-                <Link className="forum-marca" to="/" aria-label="Auê!, página inicial">
+                <Link className="forum-marca" to="/comunidades" aria-label="Auê!, comunidades">
                   <span className="forum-marca__cheia">AUÊ!</span>
                   <span className="forum-marca__curta" aria-hidden="true">
                     A!

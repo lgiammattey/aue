@@ -41,7 +41,7 @@ function EntradaPorLink() {
 
 function EntradaInicial() {
   const navigate = useNavigate();
-  const [destino, setDestino] = useState<'landing' | 'feed' | 'perfil' | null>(null);
+  const [destino, setDestino] = useState<'landing' | 'comunidades' | 'perfil' | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -50,7 +50,7 @@ function EntradaInicial() {
       .estado()
       .then((e) => {
         if (ativo) {
-          setDestino(e.perfilSocialPendente ? 'perfil' : e.temSessao && !e.anonima ? 'feed' : 'landing');
+          setDestino(e.perfilSocialPendente ? 'perfil' : e.temSessao && !e.anonima ? 'comunidades' : 'landing');
         }
       })
       .catch(() => {
@@ -69,13 +69,13 @@ function EntradaInicial() {
     return <Navigate to="/perfil?boas-vindas=1" replace />;
   }
 
-  if (destino === 'feed') {
-    return <EntradaPrincipal />;
+  if (destino === 'comunidades') {
+    return <Navigate to="/comunidades" replace />;
   }
 
   return (
     <TelaLanding
-      onEntrarSemConta={() => navigate('/feed')}
+      onEntrarSemConta={() => navigate('/comunidades')}
       onArrotar={() => navigate('/arena')}
     />
   );
@@ -139,16 +139,6 @@ function EntradaHistoria() {
   return <TelaHistoria onArrotar={() => navigate('/arena')} aoEntrar={() => irParaLogin()} />;
 }
 
-function EntradaBondes() {
-  const navigate = useNavigate();
-  const irParaLogin = useIrParaLogin();
-  return (
-    <TelaComunidade initialTab="comm" onArrotar={() => navigate('/arena')} aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
-      aoSair={() => navigate('/login')}
-      aoEntrar={() => irParaLogin()} />
-  );
-}
-
 function EntradaDesafios() {
   const navigate = useNavigate();
   const irParaLogin = useIrParaLogin();
@@ -185,20 +175,11 @@ function EntradaDoPerfil({ handle }: { handle?: string }) {
   );
 }
 
-function EntradaComunidadeSlug() {
+/** Mantém links antigos de comunidades vivos, levando-os ao endereço novo equivalente. */
+function AliasDeComunidade() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
-  const irParaLogin = useIrParaLogin();
-  return (
-    <TelaComunidade
-      initialTab="comm"
-      comunidadeSlugInicial={slug}
-      onArrotar={() => navigate('/arena')}
-      aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
-      aoSair={() => navigate('/login')}
-      aoEntrar={() => irParaLogin()}
-    />
-  );
+  const location = useLocation();
+  return <Navigate to={`/c/${slug}${location.search}`} replace />;
 }
 
 export function App() {
@@ -215,17 +196,17 @@ export function App() {
           {/* Arena de Arrotos */}
           <Route path="/arena" element={<EntradaArena />} />
 
-          {/* Comunidades (Singular, Plural e Aliases) */}
-          <Route path="/comunidade" element={<EntradaBondes />} />
-          <Route path="/bondes" element={<EntradaBondes />} />
-          <Route path="/comm" element={<Navigate to="/comunidade" replace />} />
+          {/* Comunidades (endereços sociais antigos caem no diretório novo) */}
+          <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />
+          <Route path="/bondes" element={<Navigate to="/comunidades" replace />} />
+          <Route path="/comm" element={<Navigate to="/comunidades" replace />} />
           {/*
             Telas de leitura do fórum (cartão 0017, pedaço 2b): /comunidades, /explorar,
             /c/:slug e /c/:slug/t/:id. As rotas antigas ao lado seguem como estavam até o corte (2e).
           */}
           {rotasDoForum()}
-          <Route path="/comunidade/:slug" element={<EntradaComunidadeSlug />} />
-          <Route path="/comunidades/:slug" element={<EntradaComunidadeSlug />} />
+          <Route path="/comunidade/:slug" element={<AliasDeComunidade />} />
+          <Route path="/comunidades/:slug" element={<AliasDeComunidade />} />
 
           {/* Desafios e Duelos X1 */}
           <Route path="/desafios" element={<EntradaDesafios />} />

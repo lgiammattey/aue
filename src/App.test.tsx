@@ -1,12 +1,21 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { App } from './App';
+
+const estadoDaConta = vi.hoisted(() => ({
+  valor: { temSessao: false, anonima: false, perfilSocialPendente: false },
+}));
+
+vi.mock('./plataforma/web/conta', () => ({
+  criarContaWeb: () => ({ estado: vi.fn(async () => estadoDaConta.valor) }),
+}));
 
 describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => {
   beforeEach(() => {
     localStorage.clear();
     window.history.pushState({}, 'Test', '/');
+    estadoDaConta.valor = { temSessao: false, anonima: false, perfilSocialPendente: false };
   });
 
   afterEach(() => {
@@ -23,13 +32,21 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.getByRole('link', { name: 'Só quero ouvir' })).toBeTruthy();
   });
 
+  it('abre Comunidades na raiz "/" para uma conta pronta', async () => {
+    estadoDaConta.valor = { temSessao: true, anonima: false, perfilSocialPendente: false };
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
+    expect(window.location.pathname).toBe('/comunidades');
+  });
+
   it('mantém o visitante deslogado na Landing na raiz "/" sem forçar o feed', async () => {
     localStorage.setItem('aue.visitou', 'true');
     render(<App />);
 
     // Mesmo com dados no localStorage, deslogado permanece na Landing com opções públicas
     expect(await screen.findByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Só quero ouvir' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Só quero ouvir' }).getAttribute('href')).toBe('/comunidades');
   });
 
   it('exibe o Feed diretamente quando acessa a rota "/feed"', async () => {
@@ -86,10 +103,22 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(await screen.findByText('Deu ruim pra carregar o tópico.')).toBeTruthy();
   });
 
-  it('as rotas antigas "/comunidade/:slug" e "/comunidades/:slug" seguem na tela antiga', async () => {
+  it('os aliases sociais levam para o diretório novo, sem passar pela tela antiga', async () => {
+    for (const caminho of ['/comm', '/comunidade', '/bondes']) {
+      window.history.pushState({}, 'Comunidades', caminho);
+      const { unmount } = render(<App />);
+
+      expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
+      expect(screen.queryByRole('button', { name: 'Comunidade' })).toBeNull();
+      unmount();
+    }
+  });
+
+  it('os aliases com slug levam para a comunidade nova equivalente', async () => {
     window.history.pushState({}, 'Comunidade', '/comunidades/reuniao-da-firma');
     render(<App />);
 
-    expect(await screen.findByRole('button', { name: 'Comunidade' })).toBeTruthy();
+    expect(await screen.findByText('Deu ruim pra carregar a comunidade.')).toBeTruthy();
+    expect(window.location.pathname).toBe('/c/reuniao-da-firma');
   });
 });

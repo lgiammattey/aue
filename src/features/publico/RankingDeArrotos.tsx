@@ -1,19 +1,25 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
-import { LayoutPublico, SecaoPublica } from './LayoutPublico';
-import { IconeTrofeu, IconeDecibel, IconeVolume } from './IconesTecnica';
+import { CartoesPublicos, LayoutPublico, LinksPublicos, ListaPublica, SecaoPublica } from './LayoutPublico';
+import type { ItemDaListaPublica } from './LayoutPublico';
 
 const faixasDeNota = [
-  { pontos: '0 – 19', veredito: 'Foi isso?', descricao: 'Nem o cachorro ouviu. Faltou ar, faltou garra, sobrou vergonha.' },
-  { pontos: '20 – 39', veredito: 'Tá fraco, hein.', descricao: 'Saiu com som de porta rangendo. Dá pra melhorar sem muito esforço.' },
-  { pontos: '40 – 59', veredito: 'Dá pro gasto.', descricao: 'Arroto mediano de almoço de família. Não passa vergonha, mas não ganha X1.' },
-  { pontos: '60 – 74', veredito: 'Aí sim, porra.', descricao: 'Arroto de respeito. Vibrou a garganta e impôs respeito na sala.' },
-  { pontos: '75 – 84', veredito: 'Caralho, veio forte.', descricao: 'Potência acima da média. Entra fácil no ranking do Bonde do Arroto.' },
-  { pontos: '85 – 94', veredito: 'Tá maluco.', descricao: 'Estrondo de tremer janela. Oponente no X1 já começa a tremer na base.' },
-  { pontos: '95 – 99', veredito: 'Esse bagulho tá apelão.', descricao: 'Nível quase sobre-humano. Duração longa e potência de show de rock.' },
+  { pontos: '0–19', veredito: 'Foi isso?', descricao: 'Nem o cachorro ouviu. Faltou ar, faltou garra, sobrou vergonha.' },
+  { pontos: '20–39', veredito: 'Tá fraco, hein.', descricao: 'Saiu com som de porta rangendo. Dá pra melhorar sem muito esforço.' },
+  { pontos: '40–59', veredito: 'Dá pro gasto.', descricao: 'Arroto mediano de almoço de família. Não passa vergonha, mas não ganha X1.' },
+  { pontos: '60–74', veredito: 'Aí sim, porra.', descricao: 'Arroto de respeito. Vibrou a garganta e impôs respeito na sala.' },
+  { pontos: '75–84', veredito: 'Caralho, veio forte.', descricao: 'Potência acima da média. Entra fácil no ranking do Bonde do Arroto.' },
+  { pontos: '85–94', veredito: 'Tá maluco.', descricao: 'Estrondo de tremer janela. Oponente no X1 já começa a tremer na base.' },
+  { pontos: '95–99', veredito: 'Esse bagulho tá apelão.', descricao: 'Nível quase sobre-humano. Duração longa e potência de show de rock.' },
   { pontos: '100', veredito: 'Tá roubado. Não é possível.', descricao: 'A lenda. Alinhamento planetário do estômago com a acústica perfeita.' },
 ];
+
+const faixas: readonly ItemDaListaPublica[] = faixasDeNota.map(({ pontos, veredito, descricao }) => ({
+  numero: pontos,
+  eyebrow: 'Faixa oficial',
+  titulo: veredito,
+  texto: [descricao],
+}));
 
 /**
  * `/ranking-de-arrotos` — Tabela oficial de notas do Auê e recordes mundiais.
@@ -34,24 +40,20 @@ export const RankingDeArrotos: React.FC = () => (
         números assustam:
       </p>
 
-      <div className="publico-dois-tipos">
-        <div className="publico-tipo-card">
-          <IconeTrofeu />
-          <h3>Neville Sharp (Austrália) · 112,4 dB</h3>
-          <p>
-            Em 2021, o australiano atingiu 112,4 decibéis — mais alto que uma britadeira elétrica em
-            operação ou um show de heavy metal na primeira fila.
-          </p>
-        </div>
-        <div className="publico-tipo-card">
-          <IconeDecibel />
-          <h3>Kimberly Winter (EUA) · 107,3 dB</h3>
-          <p>
-            Em 2023, a americana bateu o recorde mundial feminino em uma estação de rádio,
-            superando o som de uma motocicleta em aceleração máxima.
-          </p>
-        </div>
-      </div>
+      <CartoesPublicos
+        cartoes={[
+          {
+            titulo: 'Neville Sharp (Austrália) · 112,4 dB',
+            texto:
+              'Em 2021, o australiano atingiu 112,4 decibéis — mais alto que uma britadeira elétrica em operação ou um show de heavy metal na primeira fila.',
+          },
+          {
+            titulo: 'Kimberly Winter (EUA) · 107,3 dB',
+            texto:
+              'Em 2023, a americana bateu o recorde mundial feminino em uma estação de rádio, superando o som de uma motocicleta em aceleração máxima.',
+          },
+        ]}
+      />
 
       <p>
         O lendário britânico Paul Hunn manteve o trono por mais de uma década com 109,9 dB (2009).
@@ -59,24 +61,7 @@ export const RankingDeArrotos: React.FC = () => (
       </p>
     </SecaoPublica>
 
-    <section className="desktop-shell desktop-section publico-section">
-      <div className="publico-section-head">
-        <span className="desktop-eyebrow">A escala de 0 a 100</span>
-        <h2>A tabela de vereditos do Auê</h2>
-      </div>
-
-      <div className="publico-tecnicas">
-        {faixasDeNota.map(({ pontos, veredito, descricao }) => (
-          <article className="desktop-step desktop-step-icone" key={pontos}>
-            <IconeVolume />
-            <span>{pontos}</span>
-            <p className="publico-tecnica-eyebrow">Faixa oficial</p>
-            <h3>{veredito}</h3>
-            <p>{descricao}</p>
-          </article>
-        ))}
-      </div>
-    </section>
+    <ListaPublica eyebrow="A escala de 0 a 100" titulo="A tabela de vereditos do Auê" itens={faixas} />
 
     <SecaoPublica eyebrow="Sem sorteio" titulo="Como o algoritmo calcula sua pontuação">
       <p>
@@ -95,12 +80,13 @@ export const RankingDeArrotos: React.FC = () => (
         <strong>3. Duelo X1:</strong> Com a nota calculada, você pode desafiar um amigo por link no
         WhatsApp. O placar confronta as métricas e define quem paga a próxima rodada.
       </p>
-    </SecaoPublica>
-
-    <div className="desktop-shell publico-extra">
       <p>Pronto para testar sua capacidade pulmonar?</p>
-      <Link to="/como-jogar">Como funciona a disputa no X1 ↗</Link>
-      <Link to="/tipos-de-arroto">Descubra qual é o seu estilo de arroto ↗</Link>
-    </div>
+      <LinksPublicos
+        links={[
+          { para: '/como-jogar', rotulo: 'Como funciona a disputa no X1' },
+          { para: '/tipos-de-arroto', rotulo: 'Descubra qual é o seu estilo de arroto' },
+        ]}
+      />
+    </SecaoPublica>
   </LayoutPublico>
 );

@@ -17,8 +17,8 @@ export const TelaGrupos: React.FC<{ porta?: PortaDeGrupos }> = ({ porta }) => (
     titulo="Grupos de arroto e peido"
     resumo="Grupos de WhatsApp, Telegram e TikTok de quem arrota com orgulho. Entra num, ou cadastra o seu."
   >
-    <div className="desktop-shell" style={{ paddingBottom: 48 }}>
-      <SecaoDeGrupos porta={porta} titulo="Todos os grupos" />
+    <div style={{ paddingBottom: 48 }}>
+      <SecaoDeGrupos porta={porta} titulo="Todos os grupos" variante="publica" />
     </div>
   </LayoutPublico>
 );

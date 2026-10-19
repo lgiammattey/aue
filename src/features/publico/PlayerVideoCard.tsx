@@ -16,27 +16,15 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
   const [reproduzindo, setReproduzindo] = useState(false);
 
   return (
-    <article
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: '16px',
-        background: 'var(--surface, #14140f)',
-        border: '1px solid var(--border, #26261f)',
-        overflow: 'hidden',
-        transition: 'transform 0.2s ease, border-color 0.2s ease',
-      }}
-    >
-      {/* Moldura de Vídeo 16:9 */}
+    <article style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Moldura de vídeo 16:9 */}
       <div
         style={{
           position: 'relative',
           width: '100%',
           aspectRatio: '16 / 9',
-          background: '#050504',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          borderRadius: '16px',
+          background: 'var(--surface-2)',
           overflow: 'hidden',
         }}
       >
@@ -73,41 +61,36 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '12px',
+              gap: '10px',
             }}
           >
-            {/* Overlay escuro sutil para contraste */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0,0,0,0.3)',
-                transition: 'background 0.2s ease',
-              }}
-            />
+            {/* Véu escuro pra o botão e o texto lerem sobre qualquer capa */}
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
 
-            {/* Botão de Play com o estilo Auê (Accent Verde Elétrico) */}
+            {/*
+              Botão escuro, não verde elétrico: numa grade de vídeos o verde
+              apareceria uma vez por card, e a faixa do fim da página já usa
+              a única aparição dele.
+            */}
             <div
               style={{
                 position: 'relative',
-                width: '64px',
-                height: '64px',
+                width: '56px',
+                height: '56px',
                 borderRadius: '50%',
-                background: 'var(--accent, #c6ff00)',
-                color: '#0a0a08',
+                background: 'rgba(23, 34, 28, 0.88)',
+                color: '#f7f8f5',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 8px 24px rgba(198, 255, 0, 0.35)',
-                transition: 'transform 0.15s ease',
               }}
             >
               <svg
-                width="24"
-                height="24"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                style={{ marginLeft: '4px' }}
+                style={{ marginLeft: '3px' }}
                 aria-hidden="true"
               >
                 <path d="M8 5v14l11-7z" />
@@ -120,8 +103,7 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
                 fontSize: '13px',
                 fontWeight: 700,
                 color: '#fff',
-                textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                letterSpacing: '0.02em',
+                textShadow: '0 1px 3px rgba(0,0,0,0.8)',
               }}
             >
               Assistir arroto
@@ -130,99 +112,34 @@ export const PlayerVideoCard: React.FC<PlayerVideoCardProps> = ({ video }) => {
         )}
       </div>
 
-      {/* Metadados e Informações do Vídeo */}
-      <div
-        style={{
-          padding: '16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          flex: 1,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span
-              style={{
-                fontSize: '11px',
-                fontFamily: 'var(--font-mono, monospace)',
-                textTransform: 'uppercase',
-                color: 'var(--muted, #a3a39a)',
-                background: 'var(--bg, #0a0a08)',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                border: '1px solid var(--border, #26261f)',
-              }}
-            >
-              YouTube
-            </span>
-            <span
-              style={{
-                fontSize: '11px',
-                color: 'var(--accent, #c6ff00)',
-                background: 'rgba(198, 255, 0, 0.08)',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontWeight: 600,
-              }}
-            >
-              {ROTULOS_CATEGORIAS[video.categoria]}
-            </span>
-          </div>
-          <span
-            style={{
-              fontSize: '12px',
-              color: 'var(--muted, #a3a39a)',
-              fontWeight: 600,
-            }}
-          >
-            {video.autor}
-          </span>
-        </div>
-
-        <h3
-          style={{
-            margin: 0,
-            fontSize: '18px',
-            fontFamily: 'var(--font-display, Anton, sans-serif)',
-            fontWeight: 400,
-            color: 'var(--fg, #f4f4ee)',
-            lineHeight: 1.25,
-          }}
-        >
+      {/* Título, origem e descrição */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, lineHeight: 1.3, color: 'var(--fg)' }}>
           {video.titulo}
         </h3>
-
-        <p
-          style={{
-            margin: 0,
-            fontSize: '13px',
-            color: 'var(--muted, #a3a39a)',
-            lineHeight: 1.4,
-            flex: 1,
-          }}
-        >
+        <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+          {ROTULOS_CATEGORIAS[video.categoria]} · YouTube · {video.autor}
+        </span>
+        <p style={{ margin: '4px 0 0', fontSize: '14px', lineHeight: 1.5, color: 'var(--muted)' }}>
           {video.descricao}
         </p>
-
-        <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border, #26261f)' }}>
-          <a
-            href={video.urlOriginal}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              fontSize: '12px',
-              color: 'var(--muted, #a3a39a)',
-              textDecoration: 'none',
-              fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            Ver original no YouTube ↗
-          </a>
-        </div>
+        <a
+          href={video.urlOriginal}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            alignSelf: 'flex-start',
+            minHeight: '32px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'var(--fg)',
+            textDecoration: 'none',
+          }}
+        >
+          Ver original no YouTube ↗
+        </a>
       </div>
     </article>
   );

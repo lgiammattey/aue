@@ -1,9 +1,9 @@
 /**
- * `/como-jogar` e `/como-arrotar` passaram a usar `LayoutPublico`, a mesma
- * família visual da landing de desktop, em vez de `LayoutLegal`. O conteúdo
- * (título, texto, ordem) não mudou — só a moldura. Este arquivo trava as duas
- * coisas: que o conteúdo continua lá, e que a moldura é mesmo a compartilhada
- * (`desktop-*`), não uma reinvenção por página.
+ * As páginas públicas de conteúdo usam `LayoutPublico`, a moldura desenhada em
+ * `docs/design/prototipo/Páginas Públicas.dc.html`. O conteúdo (título, texto,
+ * ordem) não mudou quando a moldura mudou. Este arquivo trava as duas coisas:
+ * que o conteúdo continua lá, e que a moldura é mesmo a compartilhada
+ * (`publico-*`), não uma reinvenção por página.
  */
 import { describe, expect, it } from 'vitest';
 import { createElement } from 'react';
@@ -21,7 +21,7 @@ function montar(componente: FC): string {
   return renderToStaticMarkup(createElement(MemoryRouter, null, createElement(componente)));
 }
 
-describe('/como-jogar com a moldura da landing', () => {
+describe('/como-jogar com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(ComoJogar);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
@@ -36,11 +36,11 @@ describe('/como-jogar com a moldura da landing', () => {
     expect(html).toContain('burp game');
   });
 
-  it('usa a casca compartilhada com a landing, não uma própria', () => {
+  it('usa a casca pública compartilhada, não uma própria', () => {
     const html = montar(ComoJogar);
-    expect(html).toContain('desktop-site');
-    expect(html).toContain('desktop-topbar');
-    expect(html).toContain('desktop-footer');
+    expect(html).toContain('publico-site');
+    expect(html).toContain('publico-topo');
+    expect(html).toContain('publico-rodape');
   });
 
   it('leva pra política de privacidade e de volta pro jogo', () => {
@@ -49,7 +49,7 @@ describe('/como-jogar com a moldura da landing', () => {
     expect(html).toContain('href="/"');
   });
 
-  it('o rodapé tem os quatro links institucionais, igual a landing', () => {
+  it('o rodapé tem os links institucionais', () => {
     const html = montar(ComoJogar);
     expect(html).toContain('href="/como-jogar"');
     expect(html).toContain('href="/como-arrotar"');
@@ -58,7 +58,7 @@ describe('/como-jogar com a moldura da landing', () => {
   });
 });
 
-describe('/como-arrotar com a moldura da landing', () => {
+describe('/como-arrotar com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(ComoArrotar);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
@@ -78,11 +78,11 @@ describe('/como-arrotar com a moldura da landing', () => {
     expect(html).toContain('não de jogo');
   });
 
-  it('usa a casca compartilhada com a landing, não uma própria', () => {
+  it('usa a casca pública compartilhada, não uma própria', () => {
     const html = montar(ComoArrotar);
-    expect(html).toContain('desktop-site');
-    expect(html).toContain('desktop-topbar');
-    expect(html).toContain('desktop-footer');
+    expect(html).toContain('publico-site');
+    expect(html).toContain('publico-topo');
+    expect(html).toContain('publico-rodape');
   });
 
   it('leva de volta pro jogo e pra como jogar', () => {
@@ -92,7 +92,7 @@ describe('/como-arrotar com a moldura da landing', () => {
   });
 });
 
-describe('/tipos-de-arroto com a moldura da landing', () => {
+describe('/tipos-de-arroto com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(TiposDeArroto);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
@@ -112,13 +112,13 @@ describe('/tipos-de-arroto com a moldura da landing', () => {
 
   it('usa a casca compartilhada e links de retorno', () => {
     const html = montar(TiposDeArroto);
-    expect(html).toContain('desktop-site');
+    expect(html).toContain('publico-site');
     expect(html).toContain('href="/como-arrotar"');
     expect(html).toContain('href="/ranking-de-arrotos"');
   });
 });
 
-describe('/ranking-de-arrotos com a moldura da landing', () => {
+describe('/ranking-de-arrotos com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(RankingDeArrotos);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
@@ -137,13 +137,13 @@ describe('/ranking-de-arrotos com a moldura da landing', () => {
 
   it('usa a casca compartilhada e links de retorno', () => {
     const html = montar(RankingDeArrotos);
-    expect(html).toContain('desktop-site');
+    expect(html).toContain('publico-site');
     expect(html).toContain('href="/como-jogar"');
     expect(html).toContain('href="/tipos-de-arroto"');
   });
 });
 
-describe('/videos-de-arroto com a moldura da landing', () => {
+describe('/videos-de-arroto com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(VideosDeArroto);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
@@ -164,7 +164,7 @@ describe('/videos-de-arroto com a moldura da landing', () => {
 
   it('usa a casca compartilhada e links de navegação', () => {
     const html = montar(VideosDeArroto);
-    expect(html).toContain('desktop-site');
+    expect(html).toContain('publico-site');
     expect(html).toContain('href="/ranking-de-arrotos"');
     expect(html).toContain('href="/grupos"');
   });

@@ -2,10 +2,18 @@ import React, { useState } from 'react';
 import type { GrupoExterno } from '../../portas/grupos';
 import { ROTULO_DA_PLATAFORMA, ROTULO_DO_BOTAO } from './rotulos';
 
+/**
+ * `app`: o cartão da aba Comunidade. `publica`: o de `/grupos`, medido em
+ * `docs/design/prototipo/Páginas Públicas.dc.html` — sem borda, mais respiro,
+ * avatar escuro com as iniciais em Archivo.
+ */
+export type VarianteDeGrupos = 'app' | 'publica';
+
 interface CartaoDeGrupoProps {
   grupo: GrupoExterno;
   /** Ausente: o botão de denunciar não aparece (ex.: grupo oficial). */
   aoDenunciar?: (grupo: GrupoExterno) => void;
+  variante?: VarianteDeGrupos;
 }
 
 const LIMITE_DA_DESCRICAO = 180;
@@ -15,7 +23,8 @@ function iniciais(nome: string): string {
   return letras.join('').toUpperCase();
 }
 
-export const CartaoDeGrupo: React.FC<CartaoDeGrupoProps> = ({ grupo, aoDenunciar }) => {
+export const CartaoDeGrupo: React.FC<CartaoDeGrupoProps> = ({ grupo, aoDenunciar, variante = 'app' }) => {
+  const publica = variante === 'publica';
   const [aberto, setAberto] = useState(false);
   const longa = grupo.descricao.length > LIMITE_DA_DESCRICAO;
   const texto = !longa || aberto ? grupo.descricao : `${grupo.descricao.slice(0, LIMITE_DA_DESCRICAO).trimEnd()}…`;
@@ -25,46 +34,62 @@ export const CartaoDeGrupo: React.FC<CartaoDeGrupoProps> = ({ grupo, aoDenunciar
       aria-label={grupo.nome}
       style={{
         background: 'var(--surface)',
-        border: '1px solid var(--border)',
+        border: publica ? 0 : '1px solid var(--border)',
         borderRadius: '20px',
-        padding: '16px',
+        padding: publica ? '24px' : '16px',
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: publica ? '14px' : '12px' }}>
         {grupo.imagemUrl ? (
           <img
             src={grupo.imagemUrl}
             alt=""
-            width={56}
-            height={56}
+            width={publica ? 52 : 56}
+            height={publica ? 52 : 56}
             loading="lazy"
-            style={{ width: 56, height: 56, borderRadius: 14, objectFit: 'cover', flex: 'none', background: 'var(--surface-2)' }}
+            style={{ width: publica ? 52 : 56, height: publica ? 52 : 56, borderRadius: 14, objectFit: 'cover', flex: 'none', background: 'var(--surface-2)' }}
           />
         ) : (
           <div
             aria-hidden="true"
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 14,
-              background: 'var(--surface-2)',
-              color: 'var(--muted)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'var(--font-display)',
-              fontSize: 22,
-              flex: 'none',
-            }}
+            style={
+              publica
+                ? {
+                    width: 52,
+                    height: 52,
+                    borderRadius: 14,
+                    background: 'var(--fg)',
+                    color: 'var(--bg)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: 18,
+                    flex: 'none',
+                  }
+                : {
+                    width: 56,
+                    height: 56,
+                    borderRadius: 14,
+                    background: 'var(--surface-2)',
+                    color: 'var(--muted)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 22,
+                    flex: 'none',
+                  }
+            }
           >
             {iniciais(grupo.nome)}
           </div>
         )}
         <div style={{ minWidth: 0 }}>
-          <b style={{ display: 'block', fontSize: 17, color: 'var(--fg)', overflowWrap: 'anywhere' }}>{grupo.nome}</b>
+          <b style={{ display: 'block', fontSize: publica ? 19 : 17, color: 'var(--fg)', overflowWrap: 'anywhere' }}>{grupo.nome}</b>
           <span
             style={{
               display: 'inline-block',

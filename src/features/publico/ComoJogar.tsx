@@ -1,7 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-
-import { LayoutPublico, SecaoPublica } from './LayoutPublico';
+import { LayoutPublico, LinksPublicos, SecaoPublica } from './LayoutPublico';
 
 /**
  * `/como-jogar` — o único lugar público onde o Auê se explica por escrito.
@@ -18,11 +16,9 @@ import { LayoutPublico, SecaoPublica } from './LayoutPublico';
  * caminho de quem só quer jogar.
  *
  * **Ela não cria estado, não muda o loop e não é alcançável de dentro da
- * Arena.** É uma URL pública, como a landing e as duas páginas legais — e usa
- * `LayoutPublico`, a mesma família visual da landing de desktop
- * (`src/features/desktop/TelaDesktop.tsx`), adaptada pra rolar numa coluna só
- * em tela de celular. Ela NÃO usa o gate `ehDesktop`: quem chega por busca abre
- * do telefone.
+ * Arena.** É uma URL pública, como a landing e as duas páginas legais, e usa
+ * `LayoutPublico`, a moldura das páginas públicas. Ela NÃO usa o gate
+ * `ehDesktop`: quem chega por busca abre do telefone.
  *
  * O QUE ESTÁ ESCRITO AQUI É SÓ O QUE O JOGO FAZ HOJE. Nada de "em breve", nada
  * de recurso desligado por flag. Prometer no buscador o que a tela não entrega
@@ -69,10 +65,7 @@ export const ComoJogar: React.FC = () => (
         cadastro. Lá fora chamam esse tipo de jogo de <em>burp game</em>; aqui é
         só o Auê.
       </p>
+      <LinksPublicos links={[{ para: '/privacidade', rotulo: 'O que o Auê faz com o seu áudio' }]} />
     </SecaoPublica>
-
-    <div className="desktop-shell publico-extra">
-      <Link to="/privacidade">O que o Auê faz com o seu áudio ↗</Link>
-    </div>
   </LayoutPublico>
 );

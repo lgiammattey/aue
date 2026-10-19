@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
-import { LayoutPublico, SecaoPublica } from './LayoutPublico';
+import { LayoutPublico, LinksPublicos, SecaoPublica } from './LayoutPublico';
 import { PlayerVideoCard } from './PlayerVideoCard';
 import { PLAYLIST_VIDEOS_ARROTO } from '../../nucleo/midia/playlistDeVideos';
 import type { VideoCurado } from '../../nucleo/midia/playlistDeVideos';
@@ -44,40 +44,20 @@ export const VideosDeArroto: React.FC = () => {
       titulo="Vídeos de Arroto: Os Maiores Estrondos do YouTube"
       resumo="Uma seleção curada dos arrotos mais barulhentos, bizarros e engraçados do YouTube. Do clássico estrondo no microfone às maiores aulas e compilações da internet."
     >
-      {/* Barra de Filtros por Categoria/Estilo */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          marginBottom: '32px',
-        }}
-      >
+      <div className="publico-filtros" role="group" aria-label="Filtrar por estilo">
         {categoriasDisponiveis.map((cat) => {
           const total =
             cat === 'todos'
               ? PLAYLIST_VIDEOS_ARROTO.length
               : PLAYLIST_VIDEOS_ARROTO.filter((v) => v.categoria === cat).length;
-          const ativo = categoria === cat;
 
           return (
             <button
               key={cat}
               type="button"
+              className="publico-filtro"
+              aria-pressed={categoria === cat}
               onClick={() => setCategoria(cat)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '999px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: '1px solid var(--border)',
-                background: ativo ? 'var(--fg)' : 'var(--surface)',
-                color: ativo ? 'var(--bg)' : 'var(--muted)',
-                fontFamily: 'inherit',
-                transition: 'all 0.15s ease',
-              }}
             >
               {ROTULOS_CATEGORIAS[cat]} ({total})
             </button>
@@ -85,21 +65,12 @@ export const VideosDeArroto: React.FC = () => {
         })}
       </div>
 
-      {/* Grade de Vídeos */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '24px',
-          alignItems: 'start',
-        }}
-      >
+      <div className="publico-grade-videos">
         {videosFiltrados.map((video) => (
           <PlayerVideoCard key={video.id} video={video} />
         ))}
       </div>
 
-      {/* Chamada para a Arena */}
       <SecaoPublica eyebrow="Sua vez" titulo="Acha que seu arroto bate de frente?">
         <p>
           Assistir aos outros é divertido, mas o Auê existe para testar a sua própria potência.
@@ -110,34 +81,21 @@ export const VideosDeArroto: React.FC = () => {
           Depois da nota, você pode compartilhar o áudio com os amigos no WhatsApp e chamar qualquer
           um para a revanche no duelo X1.
         </p>
-        <div style={{ marginTop: '24px' }}>
-          <Link to="/" className="desktop-pill desktop-pill-primary desktop-pill-large">
+        <div>
+          <Link to="/" className="publico-pilula publico-pilula-grande publico-pilula-escura">
             Entrar na Arena e Arrotar
           </Link>
         </div>
+        <p>Veja também:</p>
+        <LinksPublicos
+          links={[
+            { para: '/ranking-de-arrotos', rotulo: 'Ranking e recordes de decibéis' },
+            { para: '/como-arrotar', rotulo: 'Como arrotar alto e de propósito' },
+            { para: '/tipos-de-arroto', rotulo: 'Os estilos de arroto' },
+            { para: '/grupos', rotulo: 'Grupos no WhatsApp e comunidades' },
+          ]}
+        />
       </SecaoPublica>
-
-      {/* Navegação Cruzada */}
-      <div className="desktop-shell publico-extra" style={{ marginTop: '48px' }}>
-        <p style={{ color: 'var(--muted)', fontSize: '14px', textAlign: 'center' }}>
-          Veja também:{' '}
-          <Link to="/ranking-de-arrotos" style={{ color: 'var(--fg)', fontWeight: 600 }}>
-            Ranking e recordes de decibéis
-          </Link>{' '}
-          ·{' '}
-          <Link to="/como-arrotar" style={{ color: 'var(--fg)', fontWeight: 600 }}>
-            Como arrotar alto e de propósito
-          </Link>{' '}
-          ·{' '}
-          <Link to="/tipos-de-arroto" style={{ color: 'var(--fg)', fontWeight: 600 }}>
-            Os estilos de arroto
-          </Link>{' '}
-          ·{' '}
-          <Link to="/grupos" style={{ color: 'var(--fg)', fontWeight: 600 }}>
-            Grupos no WhatsApp e comunidades
-          </Link>
-        </p>
-      </div>
     </LayoutPublico>
   );
 };

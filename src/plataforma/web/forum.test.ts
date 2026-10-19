@@ -185,6 +185,59 @@ describe('cursor com microssegundo', () => {
     });
   });
 
+  it('cursor de tópicos leva o fixado da última linha e o devolve ao servidor (ordem atividade)', async () => {
+    rpc.mockResolvedValueOnce({
+      data: [linhaDeTopico({ id: ID_A, fixado: true, ultima_atividade_em: '2026-10-19T13:00:00.000009+00:00' })],
+      error: null,
+    });
+    const f = criarForumWeb();
+    const r1 = await f.listarTopicos('bonde-geral', { limite: 1, ordem: 'recentes' });
+    expect(rpc).toHaveBeenLastCalledWith('listar_topicos', expect.objectContaining({ p_ordem: 'recentes' }));
+    expect(r1.ok && r1.valor.proximo?.fixado).toBe(true);
+    if (!r1.ok) return;
+    rpc.mockResolvedValueOnce({ data: [], error: null });
+    await f.listarTopicos('bonde-geral', { cursor: r1.valor.proximo });
+    expect(rpc).toHaveBeenLastCalledWith('listar_topicos', expect.objectContaining({ p_cursor_fixado: true, p_cursor_id: ID_A }));
+  });
+
+  it('explorarTopicos manda ordem, limite e cursor como vieram (e sem p_slug)', async () => {
+    rpc.mockResolvedValue({ data: [], error: null });
+    await criarForumWeb().explorarTopicos({
+      ordem: 'recentes',
+      limite: 7,
+      cursor: { valor: '2026-10-19T12:00:00.111111+00:00', id: ID_B },
+    });
+    expect(rpc).toHaveBeenCalledWith('explorar_topicos', {
+      p_limite: 7,
+      p_ordem: 'recentes',
+      p_cursor_valor: '2026-10-19T12:00:00.111111+00:00',
+      p_cursor_id: ID_B,
+    });
+  });
+
+  it('listarRespostasDoAutor traduz a linha e pagina por criado_em sem conversão', async () => {
+    rpc.mockResolvedValue({
+      data: [
+        {
+          id: ID_A, topico_id: ID_B, topico_titulo: 'Título', ...COM, pai_id: null, nivel: 0,
+          corpo: 'oi', criado_em: '2026-10-19T12:00:00.424242+00:00', editado_em: null,
+        },
+      ],
+      error: null,
+    });
+    const f = criarForumWeb();
+    const r = await f.listarRespostasDoAutor('zeca', { limite: 1 });
+    expect(r.ok && r.valor.itens[0]).toMatchObject({ topicoId: ID_B, topicoTitulo: 'Título', comunidade: { slug: 'bonde-geral' } });
+    expect(r.ok && r.valor.proximo).toEqual({ valor: '2026-10-19T12:00:00.424242+00:00', id: ID_A });
+    await f.listarRespostasDoAutor('zeca', { cursor: { valor: '2026-10-19T12:00:00.424242+00:00', id: ID_A } });
+    expect(rpc).toHaveBeenLastCalledWith('listar_respostas_do_autor', {
+      p_handle: 'zeca',
+      p_limite: 30,
+      p_cursor_criado_em: '2026-10-19T12:00:00.424242+00:00',
+      p_cursor_id: ID_A,
+    });
+  });
+
   it('o limite pedido nunca passa do máximo do servidor (senão página cheia pareceria curta)', async () => {
     rpc.mockResolvedValue({ data: [], error: null });
     await criarForumWeb().listarTopicos('x', { limite: 500 });

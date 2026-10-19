@@ -437,10 +437,18 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   border-radius: 999px;
   font-size: 0.9375rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 .forum-entrar--cheio {
   background: var(--fg);
   color: var(--bg);
+}
+/* Lateral de 76px (60px úteis): o rótulo cabe sem quebrar, sem encolher o alvo de 44px. */
+@media (min-width: 700px) and (max-width: 1199px) {
+  .forum-entrar--cheio {
+    padding: 0 4px;
+    font-size: 0.875rem;
+  }
 }
 
 .forum-faixa-offline {
@@ -876,8 +884,8 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
 }
 .forum-migalha a {
   display: inline-block;
-  padding: 13px 0;
-  margin: -13px 0;
+  padding: 15px 0;
+  margin: -15px 0;
   font-weight: 600;
 }
 .forum-migalha a:hover {

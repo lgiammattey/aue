@@ -299,16 +299,16 @@ describe('voltar da conversa para a lista (#234)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais tópicos' }));
     await screen.findByRole('link', { name: 'Tópico 2' });
     ambiente.rolarAte(640);
+    // Na saída o documento encolhe e a posição do navegador cai para 0 sem evento:
+    // ler a rolagem só no cleanup guardaria 0 em vez dos 640 que o evento já viu.
+    ambiente.encolherDocumento();
+    expect(ambiente.y).toBe(0);
 
     // abre a conversa (a leitura do tópico falha de propósito: só interessa sair da lista)
     await act(async () => {
       sondas.navegar!('/c/reuniao-da-firma/t/00000000-0000-4000-8000-000000000002');
     });
     expect(screen.queryByRole('link', { name: 'Tópico 1' })).toBeNull();
-    // Na saída o documento já encolheu: a rolagem de agora não é a de quem saiu.
-    // Só vale o que o evento de rolagem guardou enquanto a lista estava na tela.
-    expect(ambiente.y).toBe(0);
-
     ambiente.rolagens.length = 0;
     await act(async () => {
       sondas.navegar!(-1);

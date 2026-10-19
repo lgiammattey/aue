@@ -129,6 +129,8 @@ export interface AmbienteDeTeste extends AmbienteDoForum {
   readonly rolagens: number[];
   /** A pessoa rolou até `y`: atualiza a posição e dispara o evento de rolagem. */
   rolarAte(y: number): void;
+  /** O documento encolhe (a lista sai da tela): o navegador puxa a posição para 0 sem esperar evento. */
+  encolherDocumento(): void;
   titulo: string;
   tema: TemaDoForum | null;
   y: number;
@@ -162,6 +164,9 @@ export function ambienteFalso(opcoes: { online?: boolean } = {}): AmbienteDeTest
     rolarAte(y) {
       a.y = y;
       ouvintesDeRolagem.forEach((o) => o(y));
+    },
+    encolherDocumento() {
+      a.y = 0;
     },
     rolarPara(y) {
       a.rolagens.push(y);

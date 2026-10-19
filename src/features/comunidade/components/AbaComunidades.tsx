@@ -6,6 +6,8 @@ import { SecaoDeGrupos } from '../../grupos/SecaoDeGrupos';
 
 interface AbaComunidadesProps {
   comunidades: readonly Comunidade[];
+  /** A lista de comunidades ainda está vindo do servidor. */
+  carregando?: boolean;
   minhasComunidades: readonly string[];
   aoAlternarParticipacao: (slug: string) => void;
   aoFiltrarPorComunidade: (slug: string) => void;
@@ -32,10 +34,24 @@ const COMUNIDADE_RAIZ: ComunidadeInfo = {
   ano: 2004,
 };
 
+/** Dados de exibição de uma comunidade da lista. Só a oficial tem ano e categoria próprios. */
+function infoDaComunidade(c: Comunidade): ComunidadeInfo {
+  if (c.slug.toLowerCase() === COMUNIDADE_RAIZ.slug) return COMUNIDADE_RAIZ;
+  return {
+    slug: c.slug,
+    nome: c.nome,
+    ini: c.nome.slice(0, 2).toUpperCase(),
+    cat: 'Comunidade',
+    desc: c.descricao,
+    ano: 0,
+  };
+}
+
 const TELEGRAM_GRUPO_URL = 'https://t.me/+KQjRJFCibjliYzRh';
 
 export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
-  comunidades: _comunidades,
+  comunidades,
+  carregando = false,
   minhasComunidades,
   aoAlternarParticipacao,
   aoFiltrarPorComunidade: _aoFiltrar,
@@ -53,16 +69,42 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
 }) => {
   const [slugSelecionado, setSlugSelecionado] = useState<string | null>(comunidadeAtivaSlug ?? null);
 
-  const comuAtiva = slugSelecionado ? COMUNIDADE_RAIZ : null;
+  // A comunidade vem da lista real, por slug exato. Slug desconhecido NÃO cai na oficial.
+  const comuDaLista = slugSelecionado
+    ? comunidades.find((c) => c.slug.toLowerCase() === slugSelecionado.toLowerCase())
+    : undefined;
+  const comuAtiva: ComunidadeInfo | null = comuDaLista ? infoDaComunidade(comuDaLista) : null;
+
+  if (slugSelecionado && !comuAtiva) {
+    // Lista vazia depois de carregar = a leitura falhou, não "esse slug não existe".
+    const listaNaoVeio = !carregando && comunidades.length === 0;
+    return (
+      <div role="status" style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--muted)' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--fg)', marginBottom: '8px' }}>
+          {carregando ? 'Carregando a comunidade…' : listaNaoVeio ? 'Não deu pra carregar' : 'Comunidade não encontrada'}
+        </div>
+        {!carregando && (
+          <div style={{ marginBottom: '16px' }}>
+            {listaNaoVeio ? 'As comunidades não vieram. Atualiza a página pra tentar de novo.' : 'Esse endereço não leva a nenhuma comunidade do Auê.'}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setSlugSelecionado(null)}
+          style={{ minHeight: '44px', padding: '0 20px', borderRadius: '999px', border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--fg)', fontWeight: 600, cursor: 'pointer' }}
+        >
+          Ver comunidades
+        </button>
+      </div>
+    );
+  }
 
   if (comuAtiva) {
     const estaDentro =
       minhasComunidades.includes(comuAtiva.slug) || minhasComunidades.includes(comuAtiva.nome);
+    // Só o que pertence a ESTA comunidade, pelo slug que o servidor mandou.
     const causosDestaComu = causos.filter(
-      (p) =>
-        p.comunidadeSlug?.toLowerCase() === comuAtiva.slug.toLowerCase() ||
-        p.comunidadeSlug?.toLowerCase() === comuAtiva.nome.toLowerCase() ||
-        p.comunidadeSlug?.toLowerCase().includes('arroto'),
+      (p) => p.comunidadeSlug?.toLowerCase() === comuAtiva.slug.toLowerCase(),
     );
 
     return (
@@ -74,7 +116,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
         causosDaComunidade={causosDestaComu}
         aoPostarCauso={async (texto) => {
           if (!aoPostarCauso) return false;
-          return await aoPostarCauso(comuAtiva.nome, texto);
+          return await aoPostarCauso(comuAtiva.slug, texto);
         }}
         aoCurtirCauso={aoCurtirCauso}
         aoRepostarCauso={aoRepostarCauso}

@@ -167,7 +167,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
           <div>
             <b style={{ fontSize: '22px', color: 'var(--fg)' }}>{comunidade.nome}</b>
             <div style={{ color: 'var(--muted)', fontSize: '14px', marginTop: '2px' }}>
-              {comunidade.cat} · criada em {comunidade.ano}
+              {comunidade.ano > 0 ? `${comunidade.cat} · criada em ${comunidade.ano}` : comunidade.cat}
             </div>
           </div>
           <button

@@ -1,486 +1,179 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { signInWithGoogle } from '../../db/supabase';
-import { FLAGS } from '../../shared/flags';
-import { criarContaWeb } from '../../plataforma/web/conta';
-import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
-import { obterPerfilLocal, salvarPerfilLocal } from '../../plataforma/web/perfil';
-import {
-  emailParece,
-  handleValido,
-  SENHA_MINIMA,
-  sugerirHandle,
-  type PortaDeConta,
-  type ResultadoDaConta,
-} from '../../portas/conta';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const MENSAGENS: Record<string, string> = {
-  emailInvalido: 'E-mail inválido.',
-  senhaFraca: `Senha com no mínimo ${SENHA_MINIMA} caracteres.`,
-  emailEmUso: 'Este e-mail já está cadastrado. Entra com ele.',
-  credenciaisInvalidas: 'E-mail ou senha incorretos.',
-  handleEmUso: 'Esse @ já é de outra pessoa. Escolhe outro.',
-  handleInvalido: '@: de 3 a 20 letras minúsculas, números ou _.',
-  semServidor: 'Sem conexão com o servidor do Auê. Tenta de novo daqui a pouco.',
-};
+import '../../shared/publico/tema-claro.css';
+import './TelaLogin.css';
+import { useEntrarNaConta } from './useEntrarNaConta';
+import { emailParece, type PortaDeConta } from '../../portas/conta';
 
-function mensagemDe(r: Extract<ResultadoDaConta, { ok: false }>): string {
-  return r.motivo === 'falhou' ? 'Não deu certo agora. Tenta de novo.' : MENSAGENS[r.motivo];
-}
-
+/**
+ * O `/login`, no cartão estilo Google de `docs/design/prototipo/Login.dc.html`.
+ *
+ * Só entra quem já tem conta. Criar conta, convite e Google não existem aqui:
+ * o convite ainda não tem backend, e o botão que não funciona fica desabilitado
+ * em vez de fingir. A entrada é em dois passos (e-mail, depois senha).
+ */
 interface TelaLoginProps {
   portaConta?: PortaDeConta;
 }
 
+type Passo = 'email' | 'senha' | 'esqueci';
+
+const TITULOS: Record<Passo, string> = {
+  email: 'Fazer login',
+  senha: 'Olá',
+  esqueci: 'Esqueceu a senha?',
+};
+
 export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const [conta] = useState<PortaDeConta>(() => portaConta ?? criarContaWeb());
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [mode, setMode] = useState<'in' | 'up'>(params.get('modo') === 'cadastro' ? 'up' : 'in');
-  const [esqueci, setEsqueci] = useState(false);
+  const { erro, info, carregando, entrar, mandarLinkDeSenha, limpar, setErro } = useEntrarNaConta(portaConta);
+  const [passo, setPasso] = useState<Passo>('email');
   const [email, setEmail] = useState('');
-  const [pass, setPass] = useState('');
-  const [nick, setNick] = useState('');
-  const [handle, setHandle] = useState('');
-  const [handleMexido, setHandleMexido] = useState(false);
-  const [err, setErr] = useState('');
-  const [info, setInfo] = useState('');
-  const [carregando, setCarregando] = useState(false);
+  const [senha, setSenha] = useState('');
+  const [mostrar, setMostrar] = useState(false);
 
-  useEffect(() => {
-    try {
-      const t = localStorage.getItem('bda-theme') as 'dark' | 'light' | null;
-      if (t) setTheme(t);
-    } catch {
-      // Ignora erro
-    }
-  }, []);
-
-  const enter = (destino = '/') => {
-    navigate(destino);
+  const voltarAoEmail = () => {
+    setPasso('email');
+    setSenha('');
+    limpar();
   };
 
-  // Alinha o perfil guardado no aparelho com o do servidor, para o nome certo
-  // aparecer no composer logo depois de entrar.
-  const sincronizarPerfilLocal = async () => {
-    try {
-      const meu = await criarPerfilRemoto().obterMeuPerfil();
-      if (!meu) return;
-      const local = obterPerfilLocal();
-      salvarPerfilLocal({ ...local, id: meu.id, nome: meu.apelido, handle: meu.handle });
-    } catch {
-      // o servidor é a fonte de verdade; o espelho local pode esperar
+  const avancar = () => {
+    if (carregando) return;
+    if (passo === 'email') {
+      if (!emailParece(email)) return setErro('E-mail inválido.');
+      limpar();
+      setPasso('senha');
+      return;
     }
+    if (passo === 'esqueci') {
+      void mandarLinkDeSenha(email);
+      return;
+    }
+    void entrar(email, senha);
   };
 
-  const submit = async () => {
-    setErr('');
-    setInfo('');
-
-    if (esqueci) {
-      if (!emailParece(email)) return setErr(MENSAGENS.emailInvalido);
-      setCarregando(true);
-      const r = await conta.enviarLinkDeRedefinicao(email);
-      setCarregando(false);
-      if (!r.ok) return setErr(mensagemDe(r));
-      return setInfo('Se esse e-mail tiver conta, o link de nova senha já está a caminho. Olha também o spam.');
-    }
-
-    if (!emailParece(email)) return setErr(MENSAGENS.emailInvalido);
-    if (pass.length < SENHA_MINIMA) return setErr(MENSAGENS.senhaFraca);
-    if (mode === 'up' && nick.trim().replace(/^@/, '').length < 2) return setErr('Escolhe um apelido.');
-    if (mode === 'up' && !handleValido(handle.trim().replace(/^@/, '').toLowerCase())) {
-      return setErr(MENSAGENS.handleInvalido);
-    }
-
-    setCarregando(true);
-    try {
-      if (mode === 'in') {
-        const r = await conta.entrar(email, pass);
-        if (!r.ok) return setErr(mensagemDe(r));
-        const estado = await conta.estado();
-        if (estado.perfilSocialPendente) {
-          enter('/perfil?boas-vindas=1');
-          return;
-        }
-        await sincronizarPerfilLocal();
-        enter();
-        return;
-      }
-
-      const r = await conta.cadastrar({
-        email,
-        senha: pass,
-        apelido: nick.trim().replace(/^@/, ''),
-        handle: handle.trim().replace(/^@/, '').toLowerCase(),
-      });
-      if (!r.ok) return setErr(mensagemDe(r));
-      if (r.aviso === 'confirmeNoEmail') {
-        return setInfo(
-          `Mandamos um link para ${email.trim()}. Abre e confirma: é isso que prende a conta ao seu e-mail. Seus arrotos e causos continuam seus.`,
-        );
-      }
-      // Cadastro não termina no feed: a primeira parada é a ficha que vai
-      // representar a pessoa no Bonde. O perfil remoto é carregado na próxima
-      // tela; não atrasamos essa chegada por um espelho local.
-      enter('/perfil?boas-vindas=1');
-    } finally {
-      setCarregando(false);
-    }
+  const enviar = (e: React.FormEvent) => {
+    e.preventDefault();
+    avancar();
   };
-
-  const handleGoogle = async () => {
-    try {
-      await signInWithGoogle();
-    } catch {
-      setErr('Não foi possível conectar com o Google.');
-    }
-  };
-
-  const light = theme === 'light';
-  const vars: React.CSSProperties = (light
-    ? {
-        '--bg': '#ffffff',
-        '--surface': '#f7f7f8',
-        '--surface-2': '#ededf0',
-        '--fg': '#000000',
-        '--muted': '#666666',
-        '--border': '#e5e5e8',
-        '--border-strong': '#888888',
-        '--accent': '#000000',
-        '--accent-on': '#ffffff',
-        '--accent-strong': '#24231f',
-        '--danger': '#c4161a',
-        colorScheme: 'light',
-      }
-    : {
-        '--bg': '#000000',
-        '--surface': '#121212',
-        '--surface-2': '#1c1c1e',
-        '--fg': '#ffffff',
-        '--muted': '#8e8e93',
-        '--border': '#222222',
-        '--border-strong': '#3a3a3c',
-        '--accent': '#c6ff00',
-        '--accent-on': '#000000',
-        '--accent-strong': '#b8f000',
-        '--danger': '#ef4444',
-        colorScheme: 'dark',
-      }) as any as React.CSSProperties;
-
-  const isSignup = mode === 'up';
-  const titulo = esqueci ? 'Esqueceu a senha?' : isSignup ? 'Entra pro bonde.' : 'Bora de novo?';
-  const cta = esqueci ? 'Mandar o link' : isSignup ? 'Criar conta' : 'Entrar';
 
   return (
-    <div
-      style={{
-        ...vars,
-        width: '100%',
-        minHeight: '100vh',
-        background: 'var(--bg)',
-        color: 'var(--fg)',
-        fontFamily: 'var(--font-body, "Archivo", sans-serif)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-        boxSizing: 'border-box',
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <Link
-          to="/landing"
-          style={{
-            textDecoration: 'none',
-            fontFamily: 'var(--font-display, "Anton", sans-serif)',
-            fontSize: 34,
-            lineHeight: 1,
-            background: 'var(--accent)',
-            color: 'var(--accent-on)',
-            padding: '6px 14px',
-            borderRadius: 10,
-            alignSelf: 'center',
-            display: 'inline-block',
-            letterSpacing: '.02em',
-          }}
-        >
-          Auê!
-        </Link>
-
-        <div
-          style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 24,
-            padding: 24,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-          }}
-        >
-          {/* Abas Entrar / Criar Conta */}
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
-            <button
-              onClick={() => {
-                setMode('in');
-                setEsqueci(false);
-                setErr('');
-                setInfo('');
-              }}
-              aria-label="Aba Entrar"
-              style={{
-                flex: 1,
-                height: 44,
-                background: 'none',
-                border: 0,
-                borderBottom: mode === 'in' ? '3px solid var(--accent)' : '3px solid transparent',
-                color: mode === 'in' ? 'var(--fg)' : 'var(--muted)',
-                fontWeight: mode === 'in' ? 700 : 500,
-                fontSize: 15,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
-            >
-              Entrar
+    <div className="publico-site login">
+      <div className="login-centro">
+        <div className="login-cartao">
+          <Link className="publico-marca" to="/" aria-label="Auê! início">
+            auê<span>!</span>
+          </Link>
+          <h1>{TITULOS[passo]}</h1>
+          {passo === 'senha' ? (
+            <button type="button" className="login-chip" onClick={voltarAoEmail} aria-label={`Trocar o e-mail ${email}`}>
+              <span aria-hidden="true">{(email[0] || 'V').toUpperCase()}</span>
+              {email}
             </button>
-            <button
-              onClick={() => {
-                setMode('up');
-                setEsqueci(false);
-                setErr('');
-                setInfo('');
-              }}
-              aria-label="Aba Criar conta"
-              style={{
-                flex: 1,
-                height: 44,
-                background: 'none',
-                border: 0,
-                borderBottom: mode === 'up' ? '3px solid var(--accent)' : '3px solid transparent',
-                color: mode === 'up' ? 'var(--fg)' : 'var(--muted)',
-                fontWeight: mode === 'up' ? 700 : 500,
-                fontSize: 15,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
-            >
-              Criar conta
-            </button>
-          </div>
-
-          <h1
-            style={{
-              fontFamily: 'var(--font-display, "Anton", sans-serif)',
-              fontWeight: 400,
-              fontSize: 32,
-              margin: '4px 0 0',
-              textTransform: 'uppercase',
-              lineHeight: 1.1,
-            }}
-          >
-            {titulo}
-          </h1>
-
-          {FLAGS.loginSocial && (
-          <button
-            onClick={handleGoogle}
-            type="button"
-            style={{
-              height: 48,
-              borderRadius: 999,
-              border: '1px solid var(--border)',
-              background: 'var(--bg)',
-              color: 'var(--fg)',
-              fontWeight: 600,
-              fontSize: 15,
-              cursor: 'pointer',
-            }}
-          >
-            Continuar com Google
-          </button>
+          ) : (
+            <p className="login-sub">
+              {passo === 'esqueci' ? 'Mandamos um link pro seu e-mail.' : 'Ir para o Auê!'}
+            </p>
           )}
 
-          {FLAGS.loginSocial && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              color: 'var(--muted)',
-              fontSize: 13,
-            }}
-          >
-            <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-            ou
-            <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          </div>
+          <form className="login-form" onSubmit={enviar} noValidate>
+            {passo !== 'senha' && (
+              <input
+                className="publico-campo"
+                type="email"
+                placeholder="E-mail"
+                aria-label="E-mail"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  limpar();
+                }}
+              />
+            )}
+            {passo === 'senha' && (
+              <>
+                <input
+                  className="publico-campo"
+                  type={mostrar ? 'text' : 'password'}
+                  placeholder="Digite sua senha"
+                  aria-label="Senha"
+                  autoComplete="current-password"
+                  value={senha}
+                  onChange={(e) => {
+                    setSenha(e.target.value);
+                    limpar();
+                  }}
+                />
+                <label className="login-mostrar">
+                  <input type="checkbox" checked={mostrar} onChange={() => setMostrar((v) => !v)} />
+                  Mostrar senha
+                </label>
+              </>
+            )}
+            {erro && (
+              <p className="publico-erro" role="alert">
+                {erro}
+              </p>
+            )}
+            {info && (
+              <p className="publico-aviso" role="status">
+                {info}
+              </p>
+            )}
+            {passo === 'senha' && (
+              <button
+                type="button"
+                className="login-link"
+                onClick={() => {
+                  setPasso('esqueci');
+                  limpar();
+                }}
+              >
+                Esqueceu a senha?
+              </button>
+            )}
+            {passo === 'esqueci' && (
+              <button type="button" className="login-link" onClick={voltarAoEmail}>
+                Voltar pra entrada
+              </button>
+            )}
+            <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
+          </form>
+
+          {passo === 'email' && (
+            <p className="login-convidado">
+              Não tem conta? O Auê ainda não abre cadastro novo. Dá pra{' '}
+              <Link to="/arena">arrotar como convidado</Link>; pra postar e salvar o placar, precisa de conta.
+            </p>
           )}
 
-          {isSignup && !esqueci && (
-            <input
-              value={nick}
-              onChange={(e) => {
-                setNick(e.target.value);
-                // O @ acompanha o apelido até a pessoa mexer nele.
-                if (!handleMexido) setHandle(sugerirHandle(e.target.value));
-              }}
-              placeholder="Apelido (ex: Betão da TI)"
-              aria-label="Apelido"
-              style={{
-                height: 48,
-                borderRadius: 12,
-                border: '1px solid var(--border)',
-                background: 'var(--bg)',
-                color: 'var(--fg)',
-                padding: '0 14px',
-                fontSize: 15,
-                fontFamily: 'inherit',
-                outline: 'none',
-              }}
-            />
-          )}
-          {isSignup && !esqueci && (
-            <input
-              value={handle}
-              onChange={(e) => {
-                setHandleMexido(true);
-                setHandle(e.target.value.toLowerCase());
-              }}
-              placeholder="Seu @ (ex: betao_da_ti)"
-              aria-label="Seu @"
-              autoCapitalize="none"
-              autoCorrect="off"
-              maxLength={21}
-              style={{
-                height: 48,
-                borderRadius: 12,
-                border: '1px solid var(--border)',
-                background: 'var(--bg)',
-                color: 'var(--fg)',
-                padding: '0 14px',
-                fontSize: 15,
-                fontFamily: 'inherit',
-                outline: 'none',
-              }}
-            />
-          )}
-
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            autoComplete="email"
-            placeholder="E-mail"
-            style={{
-              height: 48,
-              borderRadius: 12,
-              border: '1px solid var(--border)',
-              background: 'var(--bg)',
-              color: 'var(--fg)',
-              padding: '0 14px',
-              fontSize: 15,
-              fontFamily: 'inherit',
-              outline: 'none',
-            }}
-          />
-
-          {!esqueci && (
-          <input
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-            type="password"
-            autoComplete={isSignup ? 'new-password' : 'current-password'}
-            placeholder="Senha"
-            style={{
-              height: 48,
-              borderRadius: 12,
-              border: '1px solid var(--border)',
-              background: 'var(--bg)',
-              color: 'var(--fg)',
-              padding: '0 14px',
-              fontSize: 15,
-              fontFamily: 'inherit',
-              outline: 'none',
-            }}
-          />
-          )}
-
-          {err && (
-            <span role="alert" aria-live="assertive" style={{ color: 'var(--danger)', fontSize: 14 }}>
-              {err}
-            </span>
-          )}
-          {info && (
-            <span role="status" aria-live="polite" style={{ color: 'var(--fg)', fontSize: 14, lineHeight: 1.4 }}>
-              {info}
-            </span>
-          )}
-          {!esqueci && mode === 'in' && (
+          <div className="login-acoes">
             <button
               type="button"
-              onClick={() => {
-                setEsqueci(true);
-                setErr('');
-                setInfo('');
-              }}
-              style={{ background: 'none', border: 0, color: 'var(--muted)', textDecoration: 'underline', cursor: 'pointer', minHeight: 44, fontSize: 14, fontFamily: 'inherit' }}
+              className="publico-pilula login-secundaria"
+              disabled
+              title="Em breve"
             >
-              Esqueci minha senha
+              Pedir convite
             </button>
-          )}
-          {esqueci && (
             <button
               type="button"
-              onClick={() => {
-                setEsqueci(false);
-                setErr('');
-                setInfo('');
-              }}
-              style={{ background: 'none', border: 0, color: 'var(--muted)', textDecoration: 'underline', cursor: 'pointer', minHeight: 44, fontSize: 14, fontFamily: 'inherit' }}
+              className="publico-pilula publico-pilula-escura"
+              onClick={avancar}
+              disabled={carregando}
             >
-              Voltar pro login
+              {passo === 'email' ? 'Avançar' : passo === 'esqueci' ? 'Mandar o link' : 'Entrar'}
             </button>
-          )}
-
-          <button
-            onClick={submit}
-            type="button"
-            disabled={carregando}
-            style={{
-              height: 56,
-              border: 0,
-              borderRadius: 18,
-              background: carregando ? 'var(--muted)' : 'var(--accent)',
-              color: 'var(--accent-on)',
-              fontWeight: 700,
-              fontSize: 17,
-              cursor: carregando ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {carregando ? 'Um instante…' : cta}
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', textAlign: 'center' }}>
-          <span style={{ color: 'var(--muted)', fontSize: 14, maxWidth: '34ch', lineHeight: 1.45 }}>
-            Não quer conta agora?{' '}
-            <Link
-              to="/arena"
-              style={{
-                color: 'var(--fg)',
-                fontWeight: 600,
-                textDecoration: 'underline',
-              }}
-            >
-              Arrota como convidado
-            </Link>
-            . Sem conta, seus causos ficam só neste navegador.
-          </span>
+          </div>
         </div>
       </div>
+
+      <footer className="login-rodape">
+        <Link to="/privacidade">Privacidade</Link>
+        <Link to="/termos">Termos</Link>
+      </footer>
     </div>
   );
 };

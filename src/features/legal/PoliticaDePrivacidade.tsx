@@ -30,7 +30,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
   const contato = import.meta.env.VITE_CONTATO_PRIVACIDADE as string | undefined;
 
   return (
-    <LayoutLegal rotulo="Privacidade">
+    <LayoutLegal rotulo="Política de privacidade">
       <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>
         Em linguagem direta, sem letra miúda. Se algo aqui não bater com o que o
         app faz, o errado é o app.

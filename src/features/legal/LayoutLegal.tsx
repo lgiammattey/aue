@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import { MolduraPublica } from '../publico/LayoutPublico';
+import './LayoutLegal.css';
+
 /**
  * A moldura comum das páginas legais.
  *
@@ -31,31 +34,19 @@ import { Link } from 'react-router-dom';
  * O preço é a moldura repetida, e é ela que este arquivo elimina.
  */
 export const LayoutLegal: React.FC<{
-  /** Aparece em versalete embaixo da marca. Diz em qual dos dois documentos a pessoa está. */
+  /** O título do documento (H1) e o que diz em qual dos dois a pessoa está. */
   rotulo: string;
   children: React.ReactNode;
 }> = ({ rotulo, children }) => (
-  <div className="app-shell">
-    <header className="appbar">
-      <Link to="/" style={{ display: 'flex', flexDirection: 'column' }}>
-        <span className="appbar-title">Auê!</span>
-        <span
-          style={{
-            fontSize: 11,
-            color: 'var(--muted)',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-          }}
-        >
-          {rotulo}
-        </span>
-      </Link>
-    </header>
-
-    <main className="screen" style={{ gap: 'var(--space-5)', paddingBottom: 'var(--space-6)' }}>
-      {children}
+  <MolduraPublica>
+    <main className="publico-shell publico-legal">
+      <section className="publico-hero">
+        <span className="publico-eyebrow">Documento</span>
+        <h1>{rotulo}</h1>
+      </section>
+      <div className="publico-legal-corpo">{children}</div>
     </main>
-  </div>
+  </MolduraPublica>
 );
 
 /** Um bloco com título. A única variação tipográfica destas páginas. */
@@ -63,22 +54,9 @@ export const Secao: React.FC<{ titulo: string; children: React.ReactNode }> = ({
   titulo,
   children,
 }) => (
-  <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-    <h2
-      style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 17,
-        textTransform: 'uppercase',
-        margin: 0,
-      }}
-    >
-      {titulo}
-    </h2>
-    <div
-      style={{ fontSize: 14.5, lineHeight: 1.6, color: 'var(--muted)', display: 'grid', gap: 10 }}
-    >
-      {children}
-    </div>
+  <section className="publico-legal-secao">
+    <h2>{titulo}</h2>
+    <div className="publico-legal-texto">{children}</div>
   </section>
 );
 
@@ -93,11 +71,9 @@ export const RodapeLegal: React.FC<{ paraOnde: '/privacidade' | '/termos'; rotul
   paraOnde,
   rotulo,
 }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-    <Link to={paraOnde} style={{ color: 'var(--accent)', fontSize: 14 }}>
-      {rotulo}
-    </Link>
-    <Link to="/" className="btn btn-secondary">
+  <div className="publico-legal-rodape">
+    <Link to={paraOnde}>{rotulo}</Link>
+    <Link to="/" className="publico-pilula publico-pilula-clara">
       Voltar ao Auê
     </Link>
   </div>

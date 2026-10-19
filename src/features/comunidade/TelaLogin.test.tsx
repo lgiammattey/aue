@@ -3,16 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { TelaLogin } from './TelaLogin';
-import * as supabaseModule from '../../db/supabase';
 import type { PortaDeConta } from '../../portas/conta';
-
-vi.mock('../../shared/flags', () => ({
-  FLAGS: { loginSocial: true, disputaLocal: false, disputaNaArena: false },
-}));
 
 function contaFalsa(sobrepor: Partial<PortaDeConta> = {}): PortaDeConta {
   return {
-    estado: vi.fn(async () => ({ temSessao: true, anonima: true })),
+    estado: vi.fn(async () => ({ temSessao: true, anonima: false })),
     cadastrar: vi.fn(async () => ({ ok: true as const })),
     entrar: vi.fn(async () => ({ ok: true as const })),
     enviarLinkDeRedefinicao: vi.fn(async () => ({ ok: true as const })),
@@ -27,205 +22,130 @@ function CaminhoAtual() {
   return <output data-testid="caminho-atual">{`${location.pathname}${location.search}`}</output>;
 }
 
-describe('TelaLogin (Autenticação do Auê)', () => {
+function montar(conta: PortaDeConta) {
+  render(
+    <MemoryRouter initialEntries={['/login']}>
+      <TelaLogin portaConta={conta} />
+      <CaminhoAtual />
+    </MemoryRouter>,
+  );
+}
+
+function irParaSenha(email = 'betao@aue.com') {
+  fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: email } });
+  fireEvent.click(screen.getByRole('button', { name: 'Avançar' }));
+}
+
+describe('TelaLogin (cartão estilo Google, só pra quem já tem conta)', () => {
   afterEach(() => {
     cleanup();
-    localStorage.clear();
-    vi.restoreAllMocks();
   });
 
-  it('valida campos obrigatórios e formato de e-mail e senha antes de submeter', async () => {
-    render(
-      <MemoryRouter>
-        <TelaLogin />
-      </MemoryRouter>,
-    );
+  it('não deixa criar conta nem entrar com Google, e o convite fica desabilitado', () => {
+    montar(contaFalsa());
 
-    const btnSubmit = screen.getByRole('button', { name: 'Entrar' });
+    expect(screen.queryByRole('button', { name: /Criar conta/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: /Criar conta/ })).toBeNull();
+    expect(screen.queryByText(/Google/)).toBeNull();
+    expect((screen.getByRole('button', { name: 'Pedir convite' }) as HTMLButtonElement).disabled).toBe(true);
+  });
 
-    // Tenta submeter vazio
-    fireEvent.click(btnSubmit);
+  it('o primeiro passo só avança com e-mail válido', async () => {
+    montar(contaFalsa());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Avançar' }));
     expect(await screen.findByText('E-mail inválido.')).toBeDefined();
-
-    // Preenche e-mail válido mas senha curta
-    const inputEmail = screen.getByPlaceholderText('E-mail');
-    fireEvent.change(inputEmail, { target: { value: 'arrotador@aue.com' } });
-    fireEvent.click(btnSubmit);
-    expect(await screen.findByText('Senha com no mínimo 8 caracteres.')).toBeDefined();
+    expect(screen.queryByPlaceholderText('Digite sua senha')).toBeNull();
   });
 
-  it('no modo criar conta, exige apelido válido', async () => {
-    render(
-      <MemoryRouter>
-        <TelaLogin />
-      </MemoryRouter>,
-    );
+  it('o segundo passo mostra o e-mail num chip e exige a senha mínima', async () => {
+    const conta = contaFalsa();
+    montar(conta);
 
-    // Muda para Criar conta pela aba
-    const btnCriarContaTab = screen.getByRole('button', { name: 'Aba Criar conta' });
-    fireEvent.click(btnCriarContaTab);
+    irParaSenha();
+    expect(screen.getByRole('button', { name: /Trocar o e-mail betao@aue.com/ })).toBeDefined();
 
-    const inputEmail = screen.getByPlaceholderText('E-mail');
-    const inputSenha = screen.getByPlaceholderText('Senha');
-    fireEvent.change(inputEmail, { target: { value: 'novato@aue.com' } });
-    fireEvent.change(inputSenha, { target: { value: '12345678' } });
+    fireEvent.change(screen.getByPlaceholderText('Digite sua senha'), { target: { value: 'curta' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    const btnCriarSubmit = screen.getByRole('button', { name: 'Criar conta' });
-    fireEvent.click(btnCriarSubmit);
+    expect(await screen.findByText('Senha com no mínimo 8 caracteres.')).toBeDefined();
+    expect(conta.entrar).not.toHaveBeenCalled();
+  });
 
-    expect(await screen.findByText('Escolhe um apelido.')).toBeDefined();
+  it('trocar o e-mail pelo chip volta ao primeiro passo', () => {
+    montar(contaFalsa());
+
+    irParaSenha();
+    fireEvent.click(screen.getByRole('button', { name: /Trocar o e-mail/ }));
+
+    expect(screen.getByPlaceholderText('E-mail')).toBeDefined();
+  });
+
+  it('mostra a senha quando a pessoa pede', () => {
+    montar(contaFalsa());
+
+    irParaSenha();
+    const campo = screen.getByPlaceholderText('Digite sua senha') as HTMLInputElement;
+    expect(campo.type).toBe('password');
+    fireEvent.click(screen.getByLabelText('Mostrar senha'));
+    expect(campo.type).toBe('text');
   });
 
   it('exibe mensagem honesta de credenciais inválidas se o login falhar', async () => {
-    const conta = contaFalsa({ entrar: vi.fn(async () => ({ ok: false as const, motivo: 'credenciaisInvalidas' as const })) });
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-      </MemoryRouter>,
+    montar(
+      contaFalsa({ entrar: vi.fn(async () => ({ ok: false as const, motivo: 'credenciaisInvalidas' as const })) }),
     );
 
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'errado@aue.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaerrada' } });
+    irParaSenha('errado@aue.com');
+    fireEvent.change(screen.getByPlaceholderText('Digite sua senha'), { target: { value: 'senhaerrada' } });
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
     expect(await screen.findByText('E-mail ou senha incorretos.')).toBeDefined();
   });
 
-  it('cadastro promove a conta e avisa para confirmar no e-mail, sem fingir que já entrou', async () => {
-    const conta = contaFalsa({ cadastrar: vi.fn(async () => ({ ok: true as const, aviso: 'confirmeNoEmail' as const })) });
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
-    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão da TI' } });
-    // O @ nasce do apelido, sem acento e com _.
-    expect((screen.getByLabelText('Seu @') as HTMLInputElement).value).toBe('betao_da_ti');
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
-
-    expect(await screen.findByText(/Mandamos um link para betao@aue.com/)).toBeDefined();
-    expect(conta.cadastrar).toHaveBeenCalledWith({
-      email: 'betao@aue.com',
-      senha: 'senhaboa123',
-      apelido: 'Betão da TI',
-      handle: 'betao_da_ti',
-    });
-  });
-
-  it('leva quem acabou de criar conta para a ficha do perfil antes do feed', async () => {
+  it('entra e leva pra home', async () => {
     const conta = contaFalsa();
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-        <CaminhoAtual />
-      </MemoryRouter>,
-    );
+    montar(conta);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
-    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
+    irParaSenha();
+    fireEvent.change(screen.getByPlaceholderText('Digite sua senha'), { target: { value: 'senhaboa123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    await waitFor(() => expect(screen.getByTestId('caminho-atual').textContent).toBe('/perfil?boas-vindas=1'));
+    await waitFor(() => expect(screen.getByTestId('caminho-atual').textContent).toBe('/'));
+    expect(conta.entrar).toHaveBeenCalledWith('betao@aue.com', 'senhaboa123');
   });
 
   it('login de conta com ficha pendente volta para o perfil, não para o feed', async () => {
-    const conta = contaFalsa({
-      estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: true })),
-    });
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-        <CaminhoAtual />
-      </MemoryRouter>,
+    montar(
+      contaFalsa({
+        estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: true })),
+      }),
     );
 
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
+    irParaSenha();
+    fireEvent.change(screen.getByPlaceholderText('Digite sua senha'), { target: { value: 'senhaboa123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
     await waitFor(() => expect(screen.getByTestId('caminho-atual').textContent).toBe('/perfil?boas-vindas=1'));
   });
 
-  it('@ que já é de outra pessoa vira mensagem clara e não prende o cadastro', async () => {
-    const conta = contaFalsa({ cadastrar: vi.fn(async () => ({ ok: false as const, motivo: 'handleEmUso' as const })) });
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
-    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
-    expect(await screen.findByText(/Esse @ já é de outra pessoa/)).toBeDefined();
-  });
-
-  it('@ inválido nem chega ao servidor', async () => {
-    const conta = contaFalsa();
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
-    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
-    fireEvent.change(screen.getByLabelText('Seu @'), { target: { value: 'oi' } });
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
-    expect(await screen.findByText(/3 a 20 letras minúsculas/)).toBeDefined();
-    expect(conta.cadastrar).not.toHaveBeenCalled();
-  });
-
-  it('e-mail já cadastrado vira mensagem clara', async () => {
-    const conta = contaFalsa({ cadastrar: vi.fn(async () => ({ ok: false as const, motivo: 'emailEmUso' as const })) });
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Aba Criar conta' }));
-    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Betão' } });
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'betao@aue.com' } });
-    fireEvent.change(screen.getByPlaceholderText('Senha'), { target: { value: 'senhaboa123' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
-    expect(await screen.findByText(/já está cadastrado/)).toBeDefined();
-  });
-
   it('esqueci a senha manda o link e responde igual exista a conta ou não', async () => {
     const conta = contaFalsa();
-    render(
-      <MemoryRouter>
-        <TelaLogin portaConta={conta} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Esqueci minha senha' }));
-    expect(screen.queryByPlaceholderText('Senha')).toBeNull();
-    fireEvent.change(screen.getByPlaceholderText('E-mail'), { target: { value: 'alguem@aue.com' } });
+    montar(conta);
+
+    irParaSenha('alguem@aue.com');
+    fireEvent.click(screen.getByRole('button', { name: 'Esqueceu a senha?' }));
+    expect(screen.queryByPlaceholderText('Digite sua senha')).toBeNull();
+
     fireEvent.click(screen.getByRole('button', { name: 'Mandar o link' }));
     expect(await screen.findByText(/Se esse e-mail tiver conta/)).toBeDefined();
     expect(conta.enviarLinkDeRedefinicao).toHaveBeenCalledWith('alguem@aue.com');
   });
 
-  it('aciona signInWithGoogle ao clicar no botão de Google', async () => {
-    const googleSpy = vi.spyOn(supabaseModule, 'signInWithGoogle').mockResolvedValueOnce({} as any);
+  it('oferece arrotar como convidado, que leva pra Arena', () => {
+    montar(contaFalsa());
 
-    render(
-      <MemoryRouter>
-        <TelaLogin />
-      </MemoryRouter>,
-    );
-
-    const btnGoogle = screen.getByRole('button', { name: 'Continuar com Google' });
-    fireEvent.click(btnGoogle);
-
-    expect(googleSpy).toHaveBeenCalledTimes(1);
+    const link = screen.getByRole('link', { name: 'arrotar como convidado' });
+    expect(link.getAttribute('href')).toBe('/arena');
   });
 });

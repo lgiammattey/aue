@@ -1,0 +1,386 @@
+/*
+  A landing de `/`, medida em `docs/design/prototipo/Landing.dc.html`. Tokens,
+  marca, pílulas e campos vêm de `src/shared/publico/tema-claro.css`.
+*/
+.landing {
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-topo,
+.landing-miolo,
+.landing-passos-inner,
+.landing-arena-inner,
+.landing-rodape {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 24px;
+  box-sizing: border-box;
+}
+
+.landing-topo {
+  padding-block: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.landing-topo .publico-marca {
+  font-size: 34px;
+}
+
+.landing-olhada {
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.landing-miolo {
+  padding-block: 24px 72px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 56px;
+  align-items: start;
+}
+
+.landing-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: landingEntra .4s ease-out;
+}
+
+.landing-texto h1 {
+  margin: 0 0 16px;
+  font-size: clamp(40px, 6vw, 68px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+  text-wrap: balance;
+}
+
+.landing-texto > div > p {
+  max-width: 44ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 19px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* ---------- prévia ---------- */
+
+.landing-previa {
+  max-width: 520px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.landing-previa-topo {
+  padding: 12px 16px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.landing-previa-corpo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.landing-previa-corpo > b {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.landing-fala {
+  display: flex;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.landing-avatar {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.landing-audio {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing-play {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-onda {
+  flex: 1;
+  height: 24px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.landing-onda i {
+  width: 3px;
+  flex: none;
+  border-radius: 2px;
+  background: var(--muted);
+}
+
+.landing-nota {
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-on);
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* ---------- cartão de entrada ---------- */
+
+.landing-cartao {
+  padding: 28px 32px 32px;
+  border: 1px solid var(--border-strong);
+  border-radius: 24px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  animation: landingEntra .4s .08s ease-out both;
+}
+
+.landing-abas {
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface);
+  display: flex;
+  gap: 4px;
+}
+
+.landing-aba {
+  flex: 1;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.landing-aba[aria-selected='true'] {
+  background: var(--bg);
+  color: var(--fg);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+}
+
+.landing-aba:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.landing-cartao h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.landing-cartao form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.landing-link {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.landing-nota-rodape {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ---------- passos e faixa da Arena ---------- */
+
+.landing-passos {
+  border-block: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.landing-passos-inner {
+  padding-block: 56px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 32px;
+}
+
+.landing-passo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-passo > span {
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1;
+}
+
+.landing-passo b {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.landing-passo p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.landing-arena {
+  background: var(--publico-faixa);
+  color: var(--publico-faixa-fg);
+}
+
+.landing-arena-inner {
+  padding-block: 64px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.landing-arena-texto {
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.landing-arena-texto h2 {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 400;
+  line-height: .95;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+
+.landing-arena-texto p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  opacity: .85;
+  text-wrap: pretty;
+}
+
+.landing-arena .publico-pilula {
+  height: 52px;
+  padding-inline: 32px;
+  font-size: 17px;
+}
+
+.landing-arena *:focus-visible {
+  outline-color: var(--accent);
+}
+
+/* ---------- rodapé ---------- */
+
+.landing-rodape {
+  padding-block: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.landing-rodape nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.landing-rodape a {
+  color: var(--muted);
+}
+
+.landing-rodape a:hover {
+  color: var(--fg);
+}
+
+@keyframes landingEntra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-cartao {
+    padding: 24px 20px 28px;
+  }
+}

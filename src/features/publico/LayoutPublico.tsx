@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
+import '../../shared/publico/tema-claro.css';
 import './LayoutPublico.css';
 
 /**
@@ -36,15 +37,11 @@ const ABAS: ReadonlyArray<{ para: string; rotulo: string }> = [
 const classeDaAba = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'publico-aba publico-aba-ativa' : 'publico-aba';
 
-export const LayoutPublico: React.FC<{
-  /** Vai acima do H1. Curto, no tom do jogo. */
-  eyebrow: string;
-  /** O H1 da página. */
-  titulo: string;
-  /** O parágrafo de abertura, logo abaixo do H1. */
-  resumo: string;
-  children: React.ReactNode;
-}> = ({ eyebrow, titulo, resumo, children }) => (
+/**
+ * Topo com abas e rodapé, sem hero nem faixa final. É o que as páginas de
+ * conteúdo e os documentos legais têm em comum.
+ */
+export const MolduraPublica: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="publico-site">
     <header className="publico-topo">
       <div className="publico-shell publico-topo-inner">
@@ -64,24 +61,7 @@ export const LayoutPublico: React.FC<{
       </div>
     </header>
 
-    <main className="publico-shell">
-      <section className="publico-hero">
-        <span className="publico-eyebrow">{eyebrow}</span>
-        <h1>{titulo}</h1>
-        <p>{resumo}</p>
-      </section>
-
-      {children}
-
-      <section className="publico-cta">
-        <span className="publico-eyebrow">Chega de ler</span>
-        <h2>Agora entra na competição.</h2>
-        <p>Pega o celular, solta o primeiro arroto e arruma alguém pra tentar bater tua nota.</p>
-        <Link className="publico-pilula publico-pilula-grande publico-pilula-accent" to="/">
-          Arrotar agora
-        </Link>
-      </section>
-    </main>
+    {children}
 
     <footer className="publico-rodape">
       <div className="publico-shell publico-rodape-inner">
@@ -100,6 +80,37 @@ export const LayoutPublico: React.FC<{
       </div>
     </footer>
   </div>
+);
+
+export const LayoutPublico: React.FC<{
+  /** Vai acima do H1. Curto, no tom do jogo. */
+  eyebrow: string;
+  /** O H1 da página. */
+  titulo: string;
+  /** O parágrafo de abertura, logo abaixo do H1. */
+  resumo: string;
+  children: React.ReactNode;
+}> = ({ eyebrow, titulo, resumo, children }) => (
+  <MolduraPublica>
+    <main className="publico-shell">
+      <section className="publico-hero">
+        <span className="publico-eyebrow">{eyebrow}</span>
+        <h1>{titulo}</h1>
+        <p>{resumo}</p>
+      </section>
+
+      {children}
+
+      <section className="publico-cta">
+        <span className="publico-eyebrow">Chega de ler</span>
+        <h2>Agora entra na competição.</h2>
+        <p>Pega o celular, solta o primeiro arroto e arruma alguém pra tentar bater tua nota.</p>
+        <Link className="publico-pilula publico-pilula-grande publico-pilula-accent" to="/">
+          Arrotar agora
+        </Link>
+      </section>
+    </main>
+  </MolduraPublica>
 );
 
 /**

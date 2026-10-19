@@ -13,7 +13,8 @@ import type { PortaDeConta } from '../../portas/conta';
  * - só entra quem já tem conta (e-mail e senha, a mesma entrada do `/login`);
  * - "Tenho convite" e "Pedir convite" aparecem desabilitados, porque o convite
  *   ainda não existe no backend. Botão sem backend não finge que funciona;
- * - não há "Criar conta" nem "Continuar com Google".
+ * - não há "Criar conta" nem "Continuar com Google";
+ * - quem só quer ouvir vai direto pras comunidades, sem conta.
  *
  * Tema claro fixo, como as páginas públicas. O cartão de exemplo é marcado como
  * exemplo: o que está nele não é conversa de verdade.
@@ -29,18 +30,18 @@ const ONDA = Array.from({ length: 30 }, (_, i) => 5 + Math.abs(Math.sin(i * 1.7 
 const PASSOS = [
   {
     n: '01',
-    t: 'Arrote na Arena',
-    d: 'Grave, receba a nota de 0 a 100 e tente de novo se não gostar do número.',
+    t: 'Ache sua turma',
+    d: 'Entre nas comunidades. Tem gente que arrota, gente que quer aprender e gente que só gosta de ouvir.',
   },
   {
     n: '02',
-    t: 'Conte o causo',
-    d: 'Publique no Bonde e entre nas comunidades de quem arrota como você.',
+    t: 'Participe da resenha',
+    d: 'Conte uma história, ouça os áudios e responda quem está na conversa.',
   },
   {
     n: '03',
-    t: 'Chame pro X1',
-    d: 'Mande o link, o amigo arrota a resposta e as duas notas se enfrentam.',
+    t: 'Teste na Arena',
+    d: 'Grave um arroto, veja a nota e chame alguém pro X1.',
   },
 ];
 
@@ -62,8 +63,8 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
         <span className="publico-marca" aria-label="Auê!">
           auê<span>!</span>
         </span>
-        <Link className="landing-olhada" to="/feed" onClick={() => onEntrarSemConta?.()}>
-          Só dar uma olhada
+        <Link className="landing-olhada" to="/comunidades" onClick={() => onEntrarSemConta?.()}>
+          Só quero ouvir
         </Link>
       </header>
 
@@ -71,10 +72,10 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
         <section className="landing-miolo">
           <div className="landing-texto">
             <div>
-              <h1>Encontre sua turma. Conte o causo. Arrote.</h1>
+              <h1>Arrotar é um dom. Aqui, ele tem turma.</h1>
               <p>
-                O Auê é uma rede pra quem gosta de arrotos, histórias e desafios. Arrote, receba a
-                nota e conte o causo na sua comunidade.
+                O Auê é a comunidade de quem gosta de arrotar: histórias, áudios e desafios.
+                Arrota, aprende ou só vem ouvir. O importante é participar da resenha.
               </p>
             </div>
 
@@ -210,7 +211,8 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
             </form>
 
             <p className="landing-nota-rodape">
-              Qualquer um pode ler e ouvir sem conta. A piada é com o arroto, nunca com a pessoa.
+              Só quer ouvir? Fica à vontade: qualquer pessoa lê e ouve sem conta. A piada é com o
+              arroto, nunca com a pessoa.
             </p>
           </div>
         </section>
@@ -230,15 +232,15 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
         <section className="landing-arena">
           <div className="landing-arena-inner">
             <div className="landing-arena-texto">
-              <h2>A Arena é onde a bagunça acontece</h2>
-              <p>Grave um arroto e receba a nota. Publicar o resultado é sempre uma escolha sua.</p>
+              <h2>Acha que arrota bem?</h2>
+              <p>Solta um e vê a nota. Publicar o resultado é sempre escolha sua.</p>
             </div>
             <Link
               className="publico-pilula publico-pilula-accent"
               to="/arena"
               onClick={() => onArrotar?.()}
             >
-              Arrotar sem conta
+              Ir pra Arena
             </Link>
           </div>
         </section>
@@ -248,8 +250,8 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
         <span>© 2026 Auê!</span>
         <nav aria-label="Links institucionais">
           <Link to="/como-jogar">Como funciona</Link>
-          <Link to="/bondes">Comunidades</Link>
-          <Link to="/grupos">Grupos</Link>
+          <Link to="/comunidade">Comunidades</Link>
+          <Link to="/grupos">Grupos externos</Link>
           <Link to="/videos-de-arroto">Vídeos</Link>
           <Link to="/termos">Termos</Link>
           <Link to="/privacidade">Privacidade</Link>

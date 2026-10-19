@@ -17,6 +17,86 @@ regra de que rótulo de botão nunca varia.
 
 ---
 
+# Direção editorial (19/10/2026)
+
+**Esta seção vale para o texto do site:** landing, login, páginas públicas,
+comunidades, SEO e legais. Onde ela discordar do resto deste arquivo, vale ela.
+A fala da Arena (reações por estado e por faixa de nota) continua regida pelas
+seções abaixo até o Luiz decidir o contrário. Hoje essas falas têm palavrão, e
+o site não deve ter em excesso.
+
+## Posicionamento
+
+O Auê é a comunidade de quem gosta de arrotar. Arrotadores se encontram,
+contam histórias, mostram o que sabem fazer, trocam experiência e competem de
+forma divertida. Também acolhe quem quer aprender e quem só gosta de ouvir.
+
+Conceito central: **arrotar é um dom. No Auê, esse dom encontra sua turma.**
+
+Duas frases de referência, que funcionam juntas. A primeira cria orgulho e
+identidade, a segunda abre a porta pra todo mundo:
+
+> Arrotar é um dom. Aqui, ele tem turma.
+>
+> Arrota, aprende ou só vem ouvir. O importante é participar da resenha.
+
+O Auê não é "um jogo de arroto" nem "um Twitter de arroto". A Arena, onde o
+arroto ganha nota, é uma parte da comunidade, não a identidade inteira.
+Ninguém precisa provar nada pra participar.
+
+## Tom
+
+Fala de arrotador pra arrotador, como quem participa da comunidade, não como
+empresa falando com consumidor.
+
+- **Direto.** Frase curta, sem enrolação.
+- **Natural.** Conversa de gente, sem tom de anúncio nem de corporação.
+- **Orgulhoso.** Valoriza quem sabe arrotar sem diminuir quem está aprendendo.
+- **Descontraído.** Humor que nasce da situação e da história. Não precisa
+  estar em toda frase, e a marca não fica tentando ser engraçada o tempo todo.
+- **Acolhedor.** Quem arrota, aprende ou só ouve também faz parte.
+- **Adulto, sem fetiche.** O interesse é social, recreativo e competitivo.
+  Nada de erotização, insinuação sexual ou linguagem infantil.
+
+Pode usar "bora", "manda essa", "quero ver superar", "solta esse arroto",
+"conta essa história", "esse veio forte", quando sair natural.
+
+## Regras
+
+- **Não usar "causo".** Fala-se em resenha, história, conversa.
+- **Não chamar o Auê só de jogo.**
+- **Não confundir a comunidade do Auê com grupos externos.** Os grupos de
+  WhatsApp e Telegram do diretório `/grupos` ficam fora do Auê, e a página diz isso.
+- **Sem promessa do que não existe.** O texto descreve o que o produto faz hoje.
+  Se um recurso ainda não está no app, ele não entra na copy.
+- **Sem número sem dado.** Nada de "a maior comunidade", "milhares de membros",
+  "ranking mundial" ou recorde de terceiros sem fonte conferida.
+- **Sem emoji, meme forçado, fetiche nem excesso de palavrão.**
+- **Escrever pouco, com significado.** Não aumentar texto pra bater número de
+  palavras. A copy passa pelo [filtro anti-IA](../../.agents/skills/filtro-anti-ia/SKILL.md).
+
+## SEO
+
+- Cada página pública indexável tem título, meta description, H1 e texto de
+  apoio próprios, com uma intenção de busca clara e sem repetir palavra-chave à toa.
+- Termos como "comunidade de arrotadores", "como arrotar", "aprender a arrotar",
+  "áudios de arrotos" e "desafio de arroto" entram só onde são relevantes.
+- Na home, o primeiro bloco diz em poucos segundos o que é o Auê, pra quem é e
+  o que a pessoa pode fazer.
+- O conteúdo das comunidades complementa o SEO com conversa de verdade, nunca
+  com texto genérico fabricado pra buscador.
+
+## Exemplos de tom (referências, não texto obrigatório)
+
+- Chamada: "Arrotar é um dom. Aqui, ele tem turma."
+- Apresentação: "Um lugar pra quem gosta de arrotar, trocar ideia e mostrar o que sabe fazer."
+- Comunidades: "Encontre sua turma. Entre nas comunidades e participe da resenha."
+- Arena: "Acha que arrota bem? Solta um e vê a nota."
+- Aprendizado: "Não sabe arrotar? Dá pra aprender. Chega mais."
+- Visitante: "Só quer ouvir? Fica à vontade."
+
+---
+
 # A voz em uma frase
 
 O Auê fala como um jovem-adulto carioca que cresceu jogando videogame nos anos 90/2000, está com os amigos no estacionamento do shopping, alguém solta um arroto absurdo e a primeira reação é:

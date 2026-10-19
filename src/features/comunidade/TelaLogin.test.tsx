@@ -142,10 +142,10 @@ describe('TelaLogin (cartão estilo Google, só pra quem já tem conta)', () => 
     expect(conta.enviarLinkDeRedefinicao).toHaveBeenCalledWith('alguem@aue.com');
   });
 
-  it('oferece arrotar como convidado, que leva pra Arena', () => {
+  it('oferece ouvir as comunidades e arrotar como convidado, sem conta', () => {
     montar(contaFalsa());
 
-    const link = screen.getByRole('link', { name: 'arrotar como convidado' });
-    expect(link.getAttribute('href')).toBe('/arena');
+    expect(screen.getByRole('link', { name: 'ouça as comunidades' }).getAttribute('href')).toBe('/comunidade');
+    expect(screen.getByRole('link', { name: 'arrote como convidado' }).getAttribute('href')).toBe('/arena');
   });
 });

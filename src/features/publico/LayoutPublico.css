@@ -57,6 +57,79 @@
   font-weight: 800;
 }
 
+/* ---------- menu hambúrguer (celular) ---------- */
+
+.publico-menu-botao {
+  display: none;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin-right: -8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.publico-site .publico-menu-botao:hover {
+  background: var(--surface);
+}
+
+.publico-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: 0 12px 24px rgba(23, 34, 28, .08);
+}
+
+.publico-menu[hidden] {
+  display: none;
+}
+
+.publico-menu .publico-shell {
+  padding-block: 8px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.publico-menu .publico-aba {
+  height: 48px;
+  padding: 0 14px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+
+@media (max-width: 960px) {
+  .publico-abas {
+    display: none;
+  }
+
+  .publico-topo-inner {
+    justify-content: space-between;
+  }
+
+  .publico-topo-entrar {
+    margin-left: auto;
+  }
+
+  .publico-menu-botao {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 961px) {
+  .publico-menu {
+    display: none;
+  }
+}
+
 /* ---------- hero ---------- */
 
 .publico-hero {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutPublico } from '../publico/LayoutPublico';
+import { LayoutPublico, LinksPublicos } from '../publico/LayoutPublico';
 import { SecaoDeGrupos } from './SecaoDeGrupos';
 import type { PortaDeGrupos } from '../../portas/grupos';
 
@@ -13,11 +13,14 @@ import type { PortaDeGrupos } from '../../portas/grupos';
  */
 export const TelaGrupos: React.FC<{ porta?: PortaDeGrupos }> = ({ porta }) => (
   <LayoutPublico
-    eyebrow="Diretório"
-    titulo="Grupos de arroto e peido"
-    resumo="Grupos de WhatsApp, Telegram e TikTok de quem arrota com orgulho. Entra num, ou cadastra o seu."
+    eyebrow="Fora do Auê"
+    titulo="Grupos externos de arroto"
+    resumo="Grupos de WhatsApp, Telegram e TikTok que a galera cadastrou. As comunidades do Auê ficam dentro do app; aqui você só acha o convite pra outras plataformas."
   >
     <div style={{ paddingBottom: 48 }}>
+      <div style={{ paddingBottom: 24 }}>
+        <LinksPublicos links={[{ para: '/comunidade', rotulo: 'Conhecer as comunidades do Auê' }]} />
+      </div>
       <SecaoDeGrupos porta={porta} titulo="Todos os grupos" variante="publica" />
     </div>
   </LayoutPublico>

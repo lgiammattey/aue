@@ -25,7 +25,7 @@ describe('/como-jogar com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(ComoJogar);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
-    expect(html).toMatch(/<h1>[\s\S]*Como jogar o Auê/);
+    expect(html).toMatch(/<h1>[\s\S]*Como funciona o Auê/);
   });
 
   it('mantém o conteúdo que já existia', () => {
@@ -33,7 +33,8 @@ describe('/como-jogar com a moldura pública', () => {
     expect(html).toContain('nota de 0 a 100');
     expect(html).toContain('Depois da nota, chame alguém para o X1');
     expect(html).toContain('sem baixar app');
-    expect(html).toContain('burp game');
+    expect(html).not.toContain('burp game');
+    expect(html).toContain('Os grupos de WhatsApp e Telegram são outra coisa');
   });
 
   it('usa a casca pública compartilhada, não uma própria', () => {
@@ -122,13 +123,13 @@ describe('/ranking-de-arrotos com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(RankingDeArrotos);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
-    expect(html).toMatch(/<h1>[\s\S]*Ranking e Recordes de Arroto/);
+    expect(html).toMatch(/<h1>[\s\S]*Ranking e notas de arroto/);
   });
 
-  it('traz os recordes mundiais e as faixas de nota oficiais', () => {
+  it('traz as faixas de nota oficiais e não repete recorde sem fonte', () => {
     const html = montar(RankingDeArrotos);
-    expect(html).toContain('112,4 dB');
-    expect(html).toContain('Neville Sharp');
+    expect(html).not.toContain('Guinness');
+    expect(html).not.toContain('112,4 dB');
     expect(html).toContain('Foi isso?');
     expect(html).toContain('Tá maluco.');
     expect(html).toContain('Tá roubado. Não é possível.');
@@ -147,7 +148,7 @@ describe('/videos-de-arroto com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(VideosDeArroto);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
-    expect(html).toMatch(/<h1>[\s\S]*Vídeos de Arroto/);
+    expect(html).toMatch(/<h1>[\s\S]*Vídeos de arroto pra ouvir e aprender/);
   });
 
   it('lista os vídeos curados do YouTube com capas nativas e links originais', () => {
@@ -158,7 +159,7 @@ describe('/videos-de-arroto com a moldura pública', () => {
     expect(html).toContain('Gamer Burps 38');
     expect(html).toContain('Aula de Arroto com Professor Moises');
     expect(html).toContain('Assistir arroto');
-    expect(html).toContain('Entrar na Arena e Arrotar');
+    expect(html).toContain('Ir pra Arena');
     expect(html).toContain('Ver original no YouTube ↗');
   });
 
@@ -167,5 +168,38 @@ describe('/videos-de-arroto com a moldura pública', () => {
     expect(html).toContain('publico-site');
     expect(html).toContain('href="/ranking-de-arrotos"');
     expect(html).toContain('href="/grupos"');
+  });
+});
+
+describe('voz das páginas públicas', () => {
+  const paginas: ReadonlyArray<[string, FC]> = [
+    ['/como-jogar', ComoJogar],
+    ['/como-arrotar', ComoArrotar],
+    ['/tipos-de-arroto', TiposDeArroto],
+    ['/ranking-de-arrotos', RankingDeArrotos],
+    ['/videos-de-arroto', VideosDeArroto],
+  ];
+
+  it.each(paginas)('%s não chama o Auê de jogo de arroto nem fala em "causo"', (_rota, componente) => {
+    const texto = montar(componente).replace(/<[^>]+>/g, ' ').toLowerCase();
+
+    expect(texto).not.toContain('jogo de arroto');
+    expect(texto).not.toMatch(/\bcausos?\b/);
+  });
+
+  it('a faixa final convida pra participar, sem falar em competição', () => {
+    const html = montar(ComoArrotar);
+
+    expect(html).toContain('Arrota, aprende ou só vem ouvir. O importante é participar da resenha.');
+    expect(html).not.toContain('entra na competição');
+  });
+
+  it('o menu do celular existe, fechado, e a navegação tem as comunidades', () => {
+    const html = montar(ComoJogar);
+
+    expect(html).toContain('aria-label="Abrir menu"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain('id="menu-publico"');
+    expect(html).toContain('href="/comunidade"');
   });
 });

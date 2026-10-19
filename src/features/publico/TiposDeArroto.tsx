@@ -10,7 +10,7 @@ const tipos: readonly ItemDaListaPublica[] = [
     titulo: 'O Trovão',
     texto: [
       'Volume absurdo, impacto seco e ressonância grave no peito. É o arroto clássico de quem bebeu meio copo de cerveja de uma vez e soltou tudo sem filtro.',
-      'Na pontuação do Auê: bate no teto de potência sonora e profundidade de graves. Se passar de 85 decibéis reais no celular, já briga pelo pódio da rodada.',
+      'Na pontuação do Auê: bate no teto de potência sonora e de profundidade de graves.',
     ],
   },
   {
@@ -61,7 +61,7 @@ export const TiposDeArroto: React.FC = () => (
   <LayoutPublico
     eyebrow="Estilos & Acústica"
     titulo="Tipos de arroto"
-    resumo="Nem todo arroto é igual. Tem arroto que racha parede, tem arroto que parece trator e tem aquele sopro oco que não assusta ninguém. Conheça as cinco variantes principais e como cada uma pontua no juiz do Auê."
+    resumo="Nem todo arroto é igual. Tem o que racha parede, o que parece trator e o sopro oco que não assusta ninguém. Conheça as cinco variantes e como cada uma pontua na Arena."
   >
     <SecaoPublica eyebrow="Como o som se forma" titulo="O que separa um trovão de um sopro">
       <p>
@@ -92,9 +92,9 @@ export const TiposDeArroto: React.FC = () => (
       </p>
     </SecaoPublica>
 
-    <ListaPublica eyebrow="As cinco categorias" titulo="Os estilos no campo de batalha" itens={tipos} />
+    <ListaPublica eyebrow="As cinco categorias" titulo="Os cinco estilos" itens={tipos} />
 
-    <SecaoPublica eyebrow="Dicas da bancada" titulo="Como tirar nota máxima na Arena">
+    <SecaoPublica eyebrow="Dicas" titulo="Como subir a nota na Arena">
       <p>
         Para transformar qualquer tipo de arroto em nota alta no Auê, três detalhes mecânicos fazem
         a diferença:

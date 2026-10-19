@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
 import '../../shared/publico/tema-claro.css';
@@ -7,6 +7,10 @@ import './LayoutPublico.css';
 /**
  * A moldura das páginas públicas de conteúdo: `/como-jogar`, `/como-arrotar`,
  * `/tipos-de-arroto`, `/ranking-de-arrotos`, `/grupos` e `/videos-de-arroto`.
+ *
+ * No celular as abas viram um menu hambúrguer (abaixo de 960px). Teclado: Esc
+ * fecha. Esta pasta não toca em `window`/`document`, então o fechamento vem do
+ * `onKeyDown` do próprio `<header>`.
  *
  * O DESENHO VEM DE `docs/design/prototipo/Páginas Públicas.dc.html`
  * ----------------------------------------------------------------
@@ -26,7 +30,8 @@ import './LayoutPublico.css';
  */
 
 const ABAS: ReadonlyArray<{ para: string; rotulo: string }> = [
-  { para: '/como-jogar', rotulo: 'Como jogar' },
+  { para: '/como-jogar', rotulo: 'Como funciona' },
+  { para: '/comunidade', rotulo: 'Comunidades' },
   { para: '/como-arrotar', rotulo: 'Como arrotar' },
   { para: '/tipos-de-arroto', rotulo: 'Tipos de arroto' },
   { para: '/ranking-de-arrotos', rotulo: 'Ranking' },
@@ -41,46 +46,81 @@ const classeDaAba = ({ isActive }: { isActive: boolean }) =>
  * Topo com abas e rodapé, sem hero nem faixa final. É o que as páginas de
  * conteúdo e os documentos legais têm em comum.
  */
-export const MolduraPublica: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="publico-site">
-    <header className="publico-topo">
-      <div className="publico-shell publico-topo-inner">
-        <Link className="publico-marca" to="/" aria-label="Auê! início">
-          auê<span>!</span>
-        </Link>
-        <nav className="publico-abas" aria-label="Navegação">
-          {ABAS.map(({ para, rotulo }) => (
-            <NavLink key={para} to={para} className={classeDaAba}>
-              {rotulo}
-            </NavLink>
-          ))}
+export const MolduraPublica: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [menuAberto, setMenuAberto] = useState(false);
+  const fechar = () => setMenuAberto(false);
+
+  return (
+    <div className="publico-site">
+      <header
+        className="publico-topo"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') fechar();
+        }}
+      >
+        <div className="publico-shell publico-topo-inner">
+          <Link className="publico-marca" to="/" aria-label="Auê! início" onClick={fechar}>
+            auê<span>!</span>
+          </Link>
+          <nav className="publico-abas" aria-label="Navegação">
+            {ABAS.map(({ para, rotulo }) => (
+              <NavLink key={para} to={para} className={classeDaAba}>
+                {rotulo}
+              </NavLink>
+            ))}
+          </nav>
+          <Link className="publico-pilula publico-pilula-escura publico-topo-entrar" to="/login">
+            Entrar
+          </Link>
+          <button
+            type="button"
+            className="publico-menu-botao"
+            aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+            aria-expanded={menuAberto}
+            aria-controls="menu-publico"
+            onClick={() => setMenuAberto((v) => !v)}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+              {menuAberto ? (
+                <path d="M5 5l14 14M19 5L5 19" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+        <nav id="menu-publico" className="publico-menu" aria-label="Menu" hidden={!menuAberto}>
+          <div className="publico-shell">
+            {ABAS.map(({ para, rotulo }) => (
+              <NavLink key={para} to={para} className={classeDaAba} onClick={fechar}>
+                {rotulo}
+              </NavLink>
+            ))}
+          </div>
         </nav>
-        <Link className="publico-pilula publico-pilula-escura" to="/login">
-          Entrar
-        </Link>
-      </div>
-    </header>
+      </header>
 
     {children}
 
     <footer className="publico-rodape">
       <div className="publico-shell publico-rodape-inner">
-        <span>© 2026 Auê! · Competição de arroto levada a sério demais.</span>
+        <span>© 2026 Auê! · A comunidade de quem gosta de arrotar.</span>
         <nav aria-label="Links institucionais">
-          <Link to="/como-jogar">Como jogar</Link>
+          <Link to="/como-jogar">Como funciona</Link>
           <Link to="/como-arrotar">Como arrotar</Link>
           <Link to="/tipos-de-arroto">Tipos de arroto</Link>
           <Link to="/ranking-de-arrotos">Ranking</Link>
-          <Link to="/comunidade">Bonde & Comunidades</Link>
-          <Link to="/grupos">Grupos</Link>
+          <Link to="/comunidade">Comunidades</Link>
+          <Link to="/grupos">Grupos externos</Link>
           <Link to="/videos-de-arroto">Vídeos</Link>
           <Link to="/privacidade">Política de privacidade</Link>
           <Link to="/termos">Termos de uso</Link>
         </nav>
       </div>
     </footer>
-  </div>
-);
+    </div>
+  );
+};
 
 export const LayoutPublico: React.FC<{
   /** Vai acima do H1. Curto, no tom do jogo. */
@@ -102,11 +142,11 @@ export const LayoutPublico: React.FC<{
       {children}
 
       <section className="publico-cta">
-        <span className="publico-eyebrow">Chega de ler</span>
-        <h2>Agora entra na competição.</h2>
-        <p>Pega o celular, solta o primeiro arroto e arruma alguém pra tentar bater tua nota.</p>
+        <span className="publico-eyebrow">Quer participar?</span>
+        <h2>Chega mais.</h2>
+        <p>Arrota, aprende ou só vem ouvir. O importante é participar da resenha.</p>
         <Link className="publico-pilula publico-pilula-grande publico-pilula-accent" to="/">
-          Arrotar agora
+          Ir pro Auê
         </Link>
       </section>
     </main>

@@ -676,7 +676,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
               <b style={{ fontSize: 18 }}>{handle ? 'Esse arrotador não existe.' : 'Seu perfil não abriu.'}</b>
               <span style={{ color: 'var(--muted)' }}>
                 {handle
-                  ? 'O @ pode ter mudado. Procura pelo causo no Bonde.'
+                  ? 'O @ pode ter mudado. Procura pela resenha no Bonde.'
                   : 'Precisa de conexão com o servidor. Tenta de novo daqui a pouco.'}
               </span>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

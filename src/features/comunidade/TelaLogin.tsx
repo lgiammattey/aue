@@ -144,8 +144,9 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
 
           {passo === 'email' && (
             <p className="login-convidado">
-              Não tem conta? O Auê ainda não abre cadastro novo. Dá pra{' '}
-              <Link to="/arena">arrotar como convidado</Link>; pra postar e salvar o placar, precisa de conta.
+              Ainda sem conta? O cadastro vai abrir por convite. Enquanto isso,{' '}
+              <Link to="/comunidade">ouça as comunidades</Link> ou{' '}
+              <Link to="/arena">arrote como convidado</Link>.
             </p>
           )}
 

@@ -36,10 +36,10 @@ describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
 
     expect(screen.getByLabelText('Auê!')).toBeTruthy();
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Encontre sua turma. Conte o causo. Arrote.' }),
+      screen.getByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' }),
     ).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Só dar uma olhada' }).getAttribute('href')).toBe('/feed');
-    expect(screen.getByRole('link', { name: 'Arrotar sem conta' }).getAttribute('href')).toBe('/arena');
+    expect(screen.getByRole('link', { name: 'Só quero ouvir' }).getAttribute('href')).toBe('/comunidades');
+    expect(screen.getByRole('link', { name: 'Ir pra Arena' }).getAttribute('href')).toBe('/arena');
   });
 
   it('o Auê está fechado: sem criar conta, sem Google, e o convite fica desabilitado', () => {
@@ -144,10 +144,23 @@ describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('link', { name: 'Só dar uma olhada' }));
-    fireEvent.click(screen.getByRole('link', { name: 'Arrotar sem conta' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Só quero ouvir' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Ir pra Arena' }));
 
     expect(onEntrarSemConta).toHaveBeenCalledTimes(1);
     expect(onArrotar).toHaveBeenCalledTimes(1);
+  });
+
+  it('fala como a comunidade, sem "causo" e sem chamar o Auê de jogo', () => {
+    render(
+      <MemoryRouter>
+        <TelaLanding portaConta={contaFalsa()} />
+      </MemoryRouter>,
+    );
+
+    const texto = (document.body.textContent ?? '').toLowerCase();
+    expect(texto).toContain('arrota, aprende ou só vem ouvir');
+    expect(texto).not.toMatch(/\bcausos?\b/);
+    expect(texto).not.toContain('jogo de arroto');
   });
 });

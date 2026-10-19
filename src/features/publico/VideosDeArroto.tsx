@@ -19,8 +19,7 @@ const ROTULOS_CATEGORIAS: Record<CategoriaFiltro, string> = {
 /**
  * `/videos-de-arroto` — Galeria pública de vídeos de arroto do YouTube.
  *
- * Página de alta atração para SEO e tráfego orgânico, conectando
- * a zoeira audiovisual da internet à Arena do Auê!.
+ * Seleção de vídeos pra ouvir e aprender, que leva pra Arena do Auê!.
  */
 export const VideosDeArroto: React.FC = () => {
   const [categoria, setCategoria] = useState<CategoriaFiltro>('todos');
@@ -40,9 +39,9 @@ export const VideosDeArroto: React.FC = () => {
 
   return (
     <LayoutPublico
-      eyebrow="Playlist & Zoeira"
-      titulo="Vídeos de Arroto: Os Maiores Estrondos do YouTube"
-      resumo="Uma seleção curada dos arrotos mais barulhentos, bizarros e engraçados do YouTube. Do clássico estrondo no microfone às maiores aulas e compilações da internet."
+      eyebrow="Playlist"
+      titulo="Vídeos de arroto pra ouvir e aprender"
+      resumo="Uma seleção de arrotos do YouTube: compilações, aulas e uns clássicos da internet."
     >
       <div className="publico-filtros" role="group" aria-label="Filtrar por estilo">
         {categoriasDisponiveis.map((cat) => {
@@ -71,19 +70,14 @@ export const VideosDeArroto: React.FC = () => {
         ))}
       </div>
 
-      <SecaoPublica eyebrow="Sua vez" titulo="Acha que seu arroto bate de frente?">
+      <SecaoPublica eyebrow="Sua vez" titulo="Acha que arrota bem?">
         <p>
-          Assistir aos outros é divertido, mas o Auê existe para testar a sua própria potência.
-          Abra a Arena pelo celular ou computador, solte o som no microfone e deixe o juiz dar
-          sua nota oficial de 0 a 100.
-        </p>
-        <p>
-          Depois da nota, você pode compartilhar o áudio com os amigos no WhatsApp e chamar qualquer
-          um para a revanche no duelo X1.
+          Solta um na Arena e vê a nota de 0 a 100. Depois, se quiser, publique na comunidade ou
+          chame alguém pro X1.
         </p>
         <div>
           <Link to="/" className="publico-pilula publico-pilula-grande publico-pilula-escura">
-            Entrar na Arena e Arrotar
+            Ir pra Arena
           </Link>
         </div>
         <p>Veja também:</p>
@@ -92,7 +86,7 @@ export const VideosDeArroto: React.FC = () => {
             { para: '/ranking-de-arrotos', rotulo: 'Ranking e recordes de decibéis' },
             { para: '/como-arrotar', rotulo: 'Como arrotar alto e de propósito' },
             { para: '/tipos-de-arroto', rotulo: 'Os estilos de arroto' },
-            { para: '/grupos', rotulo: 'Grupos no WhatsApp e comunidades' },
+            { para: '/grupos', rotulo: 'Grupos externos de WhatsApp e Telegram' },
           ]}
         />
       </SecaoPublica>

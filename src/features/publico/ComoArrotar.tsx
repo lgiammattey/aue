@@ -57,8 +57,8 @@ const tecnicas: readonly ItemDaListaPublica[] = [
  *
  * "como arrotar", "como arrotar de propósito", "como arrotar alto": é isso que
  * as pessoas digitam, e sem esta página o Auê não respondia nada disso.
- * `/como-jogar` explica o JOGO; esta explica o ARROTO, e termina empurrando pro
- * jogo.
+ * `/como-jogar` explica o Auê; esta explica o ARROTO, pra quem quer aprender, e
+ * termina empurrando pra Arena.
  *
  * MESMA MOLDURA DE `/como-jogar`, via `LayoutPublico`.
  * Não é estado da Arena, não muda o loop e não é alcançável de dentro da Arena.
@@ -66,7 +66,7 @@ const tecnicas: readonly ItemDaListaPublica[] = [
  * das vezes.
  *
  * O QUE ELA NÃO FAZ: conselho médico. Dor, refluxo, azia e tratamento não são
- * território de um jogo de arroto. Em vez de fingir que o assunto não existe, a
+ * território de uma comunidade de arrotadores. Em vez de fingir que o assunto não existe, a
  * página diz com todas as letras que ali o caminho é médico, não Auê.
  *
  * As cinco técnicas são a lista numerada de `ListaPublica`, como no
@@ -76,7 +76,7 @@ export const ComoArrotar: React.FC = () => (
   <LayoutPublico
     eyebrow="Antes de jogar"
     titulo="Como arrotar"
-    resumo="Arroto é ar que entrou e resolveu voltar. A parte que dá pra treinar é a entrada. O resto o corpo resolve sozinho."
+    resumo="Não sabe arrotar? Dá pra aprender. Arroto é ar que entrou e resolveu voltar: a entrada dá pra treinar, o resto o corpo resolve sozinho."
   >
     <SecaoPublica eyebrow="Antes das técnicas" titulo="Tem arroto de ar e tem arroto de estômago">
       <p>Tem dois jeitos de um arroto nascer.</p>
@@ -95,7 +95,7 @@ export const ComoArrotar: React.FC = () => (
         ]}
       />
 
-      <p>Nenhum dos dois é melhor. O jogo não julga a origem, julga o resultado.</p>
+      <p>Nenhum dos dois é melhor. A Arena não julga a origem, julga o som.</p>
     </SecaoPublica>
 
     <ListaPublica itens={tecnicas} />
@@ -106,8 +106,13 @@ export const ComoArrotar: React.FC = () => (
         Se forçar dói, incomoda ou vira azia, para — isso é assunto de médico, não de jogo. O Auê é
         brincadeira, não consultório.
       </p>
-      <p>Aprendeu? Agora vê quanto vale esse arroto.</p>
-      <LinksPublicos links={[{ para: '/como-jogar', rotulo: 'Como jogar o Auê' }]} />
+      <p>Aprendeu? Leva pra Arena e vê a nota.</p>
+      <LinksPublicos
+        links={[
+          { para: '/arena', rotulo: 'Ir pra Arena' },
+          { para: '/como-jogar', rotulo: 'Como funciona o Auê' },
+        ]}
+      />
     </SecaoPublica>
   </LayoutPublico>
 );

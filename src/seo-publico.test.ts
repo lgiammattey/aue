@@ -310,80 +310,102 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
 /**
  * O POSICIONAMENTO — o que o buscador precisa entender sem renderizar nada.
  *
- * O defeito que estes testes travam não é um erro de sintaxe: é o produto ser
- * descrito pela MECÂNICA e nunca pela CATEGORIA. "Grave seu arroto e desafie os
- * amigos" explica o que se faz e não diz o que a coisa é — quem indexa fica sem
- * saber se isto é jogo, rede social ou gravador de voz.
+ * O Auê é a comunidade de quem gosta de arrotar. Até 19/10/2026 estes testes
+ * travavam a frase "jogo de arroto online" como categoria; Luiz trocou o
+ * posicionamento: a Arena (onde o arroto ganha nota) é uma parte da comunidade,
+ * não a identidade inteira. A voz e as regras de copy estão em
+ * `docs/jogo/VOZ.md`, seção "Direção editorial".
  *
- * A frase que decide é **jogo de arroto online**, e ela é verdade
- * (`docs/jogo/VISAO.md`), não enfeite de busca. Estes testes existem para que
- * uma revisão de copy futura não a apague sem perceber o que está apagando.
+ * O defeito que continua valendo é o mesmo: o produto descrito só pela
+ * mecânica deixa o buscador sem saber o que ele é. A categoria agora é
+ * "comunidade", e uma revisão de copy não pode apagá-la sem perceber.
  */
-describe('SEO público — o Auê se declara um jogo de arroto', () => {
+describe('SEO público — o Auê se declara uma comunidade de arrotadores', () => {
   const home = () => ler('../index.html');
   const comoJogar = () => ler('../como-jogar.html');
 
-  it('o título e a descrição da home nomeiam a categoria', () => {
+  it('o título e a descrição da home dizem que é uma comunidade', () => {
     const html = home();
     const titulo = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? '';
     const descricao = /<meta name="description" content="([^"]+)"/.exec(html)?.[1] ?? '';
 
-    expect(titulo.toLowerCase()).toContain('jogo de arroto online');
-    expect(descricao.toLowerCase()).toContain('jogo de arroto');
+    expect(titulo.toLowerCase()).toContain('comunidade de quem gosta de arrotar');
+    expect(descricao.toLowerCase()).toContain('comunidade de arrotadores');
   });
 
-  it('o card compartilhado também diz o que é, não só o que faz', () => {
+  it('o card compartilhado também diz quem somos, não só o que se faz', () => {
     // O card é o que chega no grupo do WhatsApp. Se ele descrever só a
     // mecânica, o link continua parecendo qualquer coisa.
     const html = home();
-    for (const tag of ['og:title', 'twitter:title']) {
-      const valor =
-        new RegExp(`(?:property|name)="${tag}" content="([^"]+)"`).exec(html)?.[1] ?? '';
-      expect(valor.toLowerCase(), `${tag} sem a categoria`).toContain('jogo de arroto');
-    }
+    expect(metaDe(html, 'og:title')?.toLowerCase()).toContain('comunidade');
+    expect(metaDe(html, 'twitter:title')?.toLowerCase()).toContain('comunidade');
+    expect(metaDe(html, 'og:description')).toContain('Arrota, aprende ou só vem ouvir');
   });
 
   it('os termos do produto aparecem no texto que o rastreador lê sem JavaScript', () => {
     /*
-      Não é keyword stuffing: são as quatro formas pelas quais alguém procura
-      exatamente este produto, e todas descrevem o que o jogo faz de verdade. O
-      lugar delas é o <noscript> da home e a página que explica o jogo — o único
-      conteúdo que existe antes do React montar.
+      Não é keyword stuffing: são formas pelas quais alguém procura este
+      produto, e todas descrevem o que ele faz de verdade. O lugar delas é o
+      <noscript> da home e a página que explica o Auê: o único conteúdo que
+      existe antes do React montar.
     */
     const textoIndexavel = `${home()} ${comoJogar()}`.toLowerCase();
 
     for (const termo of [
-      'jogo de arroto',
-      'competição de arroto',
-      'desafiar amigos',
-      'burp game',
+      'comunidade de quem gosta de arrotar',
+      'comunidades de arrotadores',
+      'áudios',
+      'nota de 0 a 100',
     ]) {
       expect(textoIndexavel, `sumiu do conteúdo indexável: ${termo}`).toContain(termo);
     }
   });
 
-  it('o JSON-LD da home declara jogo e declara gratuito', () => {
+  it('nenhuma página indexável chama o Auê só de jogo, nem fala em "causo"', () => {
+    for (const { arquivo, temOpenGraph } of ENTRADAS) {
+      if (!temOpenGraph) continue;
+      const html = ler(arquivo).replace(/<!--[\s\S]*?-->/g, '');
+      const visivel = html.toLowerCase();
+
+      expect(visivel, `${arquivo} voltou a chamar o Auê de jogo de arroto`).not.toContain(
+        'jogo de arroto',
+      );
+      expect(visivel, `${arquivo} usa "causo"`).not.toMatch(/\bcausos?\b/);
+      expect(visivel, `${arquivo} usa "peido"`).not.toContain('peido');
+    }
+  });
+
+  it('o JSON-LD da home declara rede social e declara gratuito', () => {
     const bloco = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(home())?.[1];
     expect(bloco, 'a home ficou sem dados estruturados').toBeTruthy();
 
     const dados = JSON.parse(bloco as string) as Record<string, unknown>;
-    expect(dados.applicationCategory).toBe('GameApplication');
+    expect(dados.applicationCategory).toBe('SocialNetworkingApplication');
     expect(dados.isAccessibleForFree).toBe(true);
-    expect(String(dados.description).toLowerCase()).toContain('jogo de arroto');
+    expect(String(dados.description).toLowerCase()).toContain('comunidade');
     expect(dados.url).toBe(URL_CANONICA_DA_HOME);
   });
 
-  it('a página de como jogar responde as cinco perguntas, sem JavaScript', () => {
+  it('a página de como funciona responde as perguntas básicas, sem JavaScript', () => {
     // Se o texto só existisse no React, um rastreador que não renderiza veria
     // uma página vazia — e uma página vazia no sitemap é pior que nenhuma.
     const html = comoJogar().toLowerCase();
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
 
-    expect(noscript).toContain('jogo de arroto');
+    expect(noscript).toContain('comunidade');
     expect(noscript).toContain('nota');
     expect(noscript).toContain('x1');
     expect(noscript).toContain('navegador');
     expect(noscript).toContain('de graça');
+  });
+
+  it('o diretório de grupos deixa claro que são grupos externos, não as comunidades do Auê', () => {
+    const html = ler('../grupos.html');
+    const titulo = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? '';
+    const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
+
+    expect(titulo.toLowerCase()).toContain('grupos externos');
+    expect(noscript).toContain('As comunidades do Auê ficam dentro do app');
   });
 
   it('batalha e desafio continuam FORA do sitemap', () => {
@@ -463,7 +485,7 @@ describe('SEO público — o Auê se declara um jogo de arroto', () => {
     )?.[1];
 
     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
-    for (const termo of ['engole o ar', 'arrotar alto', 'gás', 'médico', 'jogo de arroto']) {
+    for (const termo of ['engole o ar', 'arrotar alto', 'gás', 'médico', 'arena']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
   });
@@ -473,7 +495,7 @@ describe('SEO público — o Auê se declara um jogo de arroto', () => {
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
 
     expect(noscript, 'tipos-de-arroto.html sem <noscript>').toBeTruthy();
-    for (const termo of ['trovão', 'trator', 'rajada', 'fraseado', 'sopro oco', 'jogo de arroto']) {
+    for (const termo of ['trovão', 'trator', 'rajada', 'fraseado', 'sopro oco', 'arena']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
 
@@ -481,14 +503,17 @@ describe('SEO público — o Auê se declara um jogo de arroto', () => {
     expect(html).toContain('"@type": "FAQPage"');
   });
 
-  it('a página de ranking de arrotos traz os recordes mundiais e as faixas oficiais, sem JavaScript', () => {
+  it('a página de ranking de arrotos traz as faixas oficiais, sem recorde sem fonte, sem JavaScript', () => {
     const html = ler('../ranking-de-arrotos.html');
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
 
     expect(noscript, 'ranking-de-arrotos.html sem <noscript>').toBeTruthy();
-    for (const termo of ['112,4 db', 'guinness', 'foi isso?', 'tá maluco', 'tá roubado', 'jogo de arroto']) {
+    for (const termo of ['foi isso?', 'tá maluco', 'tá roubado', 'arena']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
+    // Recorde de decibéis de terceiros, sem fonte conferida, não entra.
+    expect(html.toLowerCase()).not.toContain('guinness');
+    expect(html).not.toContain('112,4');
 
     // Valida JSON-LD FAQPage
     expect(html).toContain('"@type": "FAQPage"');

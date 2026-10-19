@@ -1,69 +1,64 @@
 import React from 'react';
+
 import { LayoutPublico, LinksPublicos, SecaoPublica } from './LayoutPublico';
 
 /**
- * `/como-jogar` — o único lugar público onde o Auê se explica por escrito.
+ * `/como-jogar` — a página que explica o Auê por escrito. A URL fica (ela está
+ * no sitemap e no canonical); o texto agora diz "como funciona", porque o Auê
+ * é a comunidade de quem gosta de arrotar e a Arena é só uma parte dela.
  *
- * POR QUE ELA EXISTE, E POR QUE NÃO É UM ESTADO DA ARENA
- * -----------------------------------------------------
- * A Arena é uma superfície de estado
- * ([`docs/jogo/ARENA.md`](../../../docs/jogo/ARENA.md)): dez estados, nenhum
- * deles "manual". Explicar o jogo dentro do jogo é atrito no lugar errado —
- * quem abriu quer arrotar, não ler.
+ * A ordem segue a jornada: comunidades, Arena, X1, navegador.
  *
- * Mas quem chega pelo buscador ainda não sabe o que vai encontrar, e a home,
- * sendo a Arena, não tem texto que responda isso. Esta página responde, fora do
- * caminho de quem só quer jogar.
+ * Ela não cria estado da Arena, não muda o loop e não é alcançável de dentro
+ * da Arena. Também não usa o gate `ehDesktop`: quem chega por busca abre do
+ * telefone.
  *
- * **Ela não cria estado, não muda o loop e não é alcançável de dentro da
- * Arena.** É uma URL pública, como a landing e as duas páginas legais, e usa
- * `LayoutPublico`, a moldura das páginas públicas. Ela NÃO usa o gate
- * `ehDesktop`: quem chega por busca abre do telefone.
- *
- * O QUE ESTÁ ESCRITO AQUI É SÓ O QUE O JOGO FAZ HOJE. Nada de "em breve", nada
- * de recurso desligado por flag. Prometer no buscador o que a tela não entrega
- * é a pior primeira impressão possível — e a mesma regra que a descrição da
- * home já segue.
+ * O QUE ESTÁ ESCRITO AQUI É SÓ O QUE O PRODUTO FAZ HOJE. Nada de "em breve",
+ * nada de recurso desligado por flag.
  */
 export const ComoJogar: React.FC = () => (
   <LayoutPublico
     eyebrow="Guia rápido"
-    titulo="Como jogar o Auê"
-    resumo="O Auê é um jogo de arroto online. Você arrota no celular, ele ouve e devolve uma nota de 0 a 100 — analisando duração, potência, profundidade e textura do som. Não é sorteio: o que não for arroto não vira nota."
+    titulo="Como funciona o Auê"
+    resumo="O Auê é a comunidade de quem gosta de arrotar. Você entra, ouve, conversa e, quando quiser, solta um arroto na Arena pra ver a nota."
   >
-    <SecaoPublica eyebrow="O loop" titulo="Arrotar e receber a nota">
+    <SecaoPublica eyebrow="As comunidades" titulo="Cada turma tem seu canto">
       <p>
-        Toque em ARROTAR e solte. O microfone só é pedido nessa hora, nunca
-        antes. O Auê grava, julga e mostra a nota com as quatro medidas.
+        Quem gosta de arrotar se junta por comunidade. Dá pra ler e ouvir tudo sem conta; pra
+        publicar e responder, precisa de conta.
       </p>
-      <p>Não gostou do número? Manda outro. Ninguém precisa saber que você tentou.</p>
+      <p>Os grupos de WhatsApp e Telegram são outra coisa: ficam fora do Auê.</p>
+      <LinksPublicos
+        links={[
+          { para: '/comunidade', rotulo: 'Ver as comunidades' },
+          { para: '/grupos', rotulo: 'Grupos externos' },
+        ]}
+      />
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="O X1" titulo="Desafiar um amigo">
+    <SecaoPublica eyebrow="A Arena" titulo="Solta um e vê a nota">
       <p>
-        Depois da nota, chame alguém para o X1. O jogo gera um link privado:
-        quem abrir ouve o seu arroto, arrota a resposta no próprio aparelho, e
-        as duas notas se enfrentam.
+        Toque em ARROTAR e solte. O microfone só é pedido nessa hora. O Auê ouve e mostra a nota de
+        0 a 100, com as quatro medidas: duração, potência, profundidade e textura.
       </p>
       <p>
-        No fim tem placar e tem revanche. É a competição de arroto resolvida no
-        grupo, com número em vez de discussão.
-      </p>
-    </SecaoPublica>
-
-    <SecaoPublica eyebrow="Sem instalar" titulo="Funciona direto no navegador">
-      <p>
-        Não precisa instalar nada. O Auê abre no navegador do celular, Android
-        ou iPhone, e quem recebe o desafio joga pelo mesmo link — sem baixar app
-        e sem criar conta.
+        Não é sorteio: o que não for arroto não vira nota. Não gostou do número? Manda outro. O
+        arroto só vai pra comunidade se você escolher publicar.
       </p>
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="De graça" titulo="É de graça">
+    <SecaoPublica eyebrow="O X1" titulo="Desafie alguém">
       <p>
-        Jogar não custa nada: sem assinatura, sem moeda dentro do jogo, sem
-        cadastro. Lá fora chamam esse tipo de jogo de <em>burp game</em>; aqui é
-        só o Auê.
+        Depois da nota, chame alguém para o X1. O Auê gera um link privado: quem abrir ouve o seu
+        arroto, arrota a resposta no próprio aparelho e as duas notas se enfrentam.
+      </p>
+      <p>No fim tem placar e tem revanche.</p>
+    </SecaoPublica>
+
+    <SecaoPublica eyebrow="Sem instalar" titulo="Direto no navegador, de graça">
+      <p>
+        Funciona no navegador do celular, Android ou iPhone. Quem recebe um desafio joga pelo mesmo
+        link, sem baixar app e sem criar conta. Não tem assinatura nem moeda dentro do app.
       </p>
       <LinksPublicos links={[{ para: '/privacidade', rotulo: 'O que o Auê faz com o seu áudio' }]} />
     </SecaoPublica>

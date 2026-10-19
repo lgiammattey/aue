@@ -419,22 +419,23 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
       avisar('Não deu para carregar as respostas. Tenta de novo.');
     }
   };
-  const responder = async (id: string, texto: string, respostaAId?: string) => {
+  const responder = async (id: string, texto: string, respostaAId?: string): Promise<boolean | 'sem-conta'> => {
     if (!(conta?.podeParticiparSocialmente ?? (conta?.temSessao && !conta?.anonima))) {
       avisar('Crie sua conta para responder no Bonde.');
       aoEntrar('cadastro');
-      return;
+      return 'sem-conta';
     }
     const causo = causos.find((c) => c.id === id);
     const nova = await comunidade.adicionarResposta(id, texto, perfil?.apelido ?? 'Você', perfil?.handle, respostaAId);
     if (!nova) {
       avisar('Não deu para enviar a resposta.');
-      return;
+      return false;
     }
     atualizar(id, {
       comentarios: [...(causo?.comentarios ?? []), nova],
       totalComentarios: (causo?.totalComentarios ?? 0) + 1,
     });
+    return true;
   };
   const apagar = async (causo: CausoPostado) => {
     const comAudio = Boolean(causo.temAudio);

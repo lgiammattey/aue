@@ -60,6 +60,19 @@ describe('TelaHistoria — layout por largura', () => {
     expect(screen.queryByRole('navigation', { name: 'Navegação móvel' })).toBeNull();
   });
 
+  it.each([
+    [699, true, false],
+    [700, false, false],
+    [999, false, false],
+    [1000, false, true],
+  ])('fronteira em %ipx: barra inferior=%s, coluna direita=%s', async (largura, barraInferior, colunaDireita) => {
+    abrirCom(largura);
+    await screen.findByText(/Conto de teste do layout/);
+    expect(!!screen.queryByRole('navigation', { name: 'Navegação móvel' })).toBe(barraInferior);
+    // ColunaTendencias só entra a partir de 1000px: procura o campo de busca dela.
+    expect(!!screen.queryByPlaceholderText(/buscar/i)).toBe(colunaDireita);
+  });
+
   it('o botão de tema troca o tema de verdade', async () => {
     abrirCom(1280);
     await screen.findByText(/Conto de teste do layout/);

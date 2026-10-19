@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
 /** Mesmos breakpoints da TelaComunidade: celular < 700, lateral direita >= 1000. */
 export const LARGURA_CELULAR = 700;
@@ -31,7 +31,8 @@ export function useTema(): [Tema, () => void] {
     }
   });
 
-  useEffect(() => {
+  // Antes da primeira pintura: quem entra por link com tema claro não vê um quadro escuro.
+  useLayoutEffect(() => {
     try {
       document.documentElement.setAttribute('data-theme', tema);
       localStorage.setItem('bda-theme', tema);

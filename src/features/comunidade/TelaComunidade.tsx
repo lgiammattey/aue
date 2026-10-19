@@ -414,8 +414,12 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
   // Postar via Modal
   const handlePublicarModal = async () => {
     if (!contaLogada) return pedirPromocao();
-    if (!novoTextoModal.trim() || !cabeNoLimite(novoTextoModal, LIMITE_CAUSO)) {
+    if (!novoTextoModal.trim()) {
       avisar('Escreve alguma coisa.');
+      return;
+    }
+    if (!cabeNoLimite(novoTextoModal, LIMITE_CAUSO)) {
+      avisar(`Passou do limite de ${LIMITE_CAUSO} caracteres. Encurta o texto.`);
       return;
     }
     try {
@@ -1040,6 +1044,7 @@ export const TelaComunidade: React.FC<TelaComunidadeProps> = ({
                 <button
                   type="button"
                   onClick={handlePublicarModal}
+                  disabled={!novoTextoModal.trim() || !cabeNoLimite(novoTextoModal, LIMITE_CAUSO)}
                   style={{
                     height: '36px',
                     padding: '0 20px',

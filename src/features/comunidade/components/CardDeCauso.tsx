@@ -573,7 +573,6 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
             <form onSubmit={enviarResposta} style={{ display: 'flex', gap: '8px' }}>
               <input
                 value={textoResposta}
-                maxLength={LIMITE_COMENTARIO}
                 onChange={(e) => setTextoResposta(e.target.value)}
                 placeholder={`Responder a @${handle}`}
                 style={{
@@ -593,6 +592,8 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
               />
               <button
                 type="submit"
+                disabled={!cabeNoLimite(textoResposta, LIMITE_COMENTARIO)}
+                title={cabeNoLimite(textoResposta, LIMITE_COMENTARIO) ? undefined : `Passou do limite de ${LIMITE_COMENTARIO} caracteres`}
                 aria-label="Enviar resposta"
                 style={{
                   height: '40px',

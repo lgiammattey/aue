@@ -168,7 +168,7 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
           onChange={(e) => setTexto(e.target.value)}
           placeholder="O que tá rolando no bonde?"
           rows={2}
-          aria-describedby="contador-composer"
+          aria-describedby={restantes <= 100 ? 'contador-composer' : undefined}
           style={{
             background: 'none',
             border: 0,

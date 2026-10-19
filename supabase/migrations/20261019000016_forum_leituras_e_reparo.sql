@@ -13,23 +13,46 @@
 --   2. aue_reconciliar_acervo(): REPARA o que o espelho (20261019000015) perdeu.
 --      Interna, sem grant a ninguém. Roda uma vez no fim desta migração.
 --   3. Dois índices parciais em `topicos` para o Explorar (ordem global).
+--   4. ÚNICA alteração de objeto existente: CREATE OR REPLACE de
+--      aue_trigger_espelhar_escondido (criada na 15; mesmo nome, mesma assinatura,
+--      mesmo EXCEPTION WHEN OTHERS que nunca derruba o UPDATE antigo). Mostrar o
+--      post antigo deixa de reabrir tópico ocultado por 3 ou mais denunciantes
+--      distintos do lado novo (a mesma regra do reparo). O resto do corpo é igual.
+--      O down desta migração restaura o corpo original, copiado da 15.
 --
 -- O QUE NÃO FAZ
---   - Não altera, remove nem renomeia objeto existente (nem as 14 e 15).
---     aue_conferir_acervo continua como está.
+--   - Não remove nem renomeia objeto existente, e fora o item 4 não altera nenhum
+--     (nem as 14 e 15). aue_conferir_acervo continua como está.
 --   - Não copia post nem comentário que falta (isso é aue_migrar_acervo_para_topicos).
 --
 -- REGRAS DE VISIBILIDADE (iguais às de listar_topicos / listar_respostas_do_topico)
 --   - Tópico visível = status aberto ou fechado E autor com conta promovida
 --     (aue_e_conta_promovida). Resposta visível = status 'visivel' E autor promovido
 --     E tópico visível. Oculto e removido nunca saem.
---   - Só aparece comunidade com slug (é o que a UI usa no link /c/:slug). Tópico de
---     grupo antigo sem slug não entra em lista nenhuma desta migração.
+--   - Só aparece comunidade com slug de verdade (nulo, '' e só espaços não valem:
+--     é o que a UI usa no link /c/:slug). Tópico de grupo sem slug não entra em
+--     lista nenhuma desta migração.
 --   - Nenhum caminho de áudio sai daqui: estas leituras listam texto e endereço de
 --     navegação (comunidade + tópico). O player continua em obter_topico.
 --
 -- NÃO ENUMERA PERFIL: handle inexistente, conta sem promoção e conta promovida
 -- sem conteúdo devolvem a MESMA coisa (zero linhas, sem erro).
+--
+-- GRANTS
+--   - As 5 leituras públicas: anon e authenticated, e o service_role mantém o que o
+--     default privileges do Supabase dá (mesmo padrão das 14 e 15).
+--   - Os 2 helpers internos (aue_autor_publico_por_handle, aue_ler_comunidades_do_forum)
+--     e o reparo: sem grant a anon, authenticated e service_role. Só o dono.
+--
+-- PENDÊNCIAS REGISTRADAS (não implementadas aqui)
+--   - ACH-1, desempenho do diretório: aue_ler_comunidades_do_forum chama
+--     aue_e_conta_promovida uma vez por membro e por tópico de cada comunidade.
+--     Medido local: 175 ms com 5 mil membros e 5 mil tópicos. Medir de novo quando
+--     passar de ~10 mil tópicos ou membros; se for o caso, cache ou contagem
+--     materializada.
+--   - Perda do estado 'fechado': esconder o post antigo leva o tópico de 'fechado'
+--     para 'oculto' e mostrar volta como 'aberto' (trigger da 15 e este reparo).
+--     Abrir issue antes da #260 (moderação), que precisa guardar o estado anterior.
 --
 -- COMO O OPERADOR USA aue_reconciliar_acervo()
 --   No SQL Editor do Supabase (papel postgres), quando suspeitar que um esconder,
@@ -106,7 +129,7 @@ AS $$
          AND t.status IN ('aberto', 'fechado')
          AND public.aue_e_conta_promovida(t.autor_id)
     ) tp
-   WHERE g.slug IS NOT NULL
+   WHERE nullif(btrim(g.slug), '') IS NOT NULL
      AND (p_slug IS NULL OR lower(g.slug) = lower(btrim(p_slug)))
      AND (lower(g.slug) <> 'acervo' OR tp.total > 0)
    ORDER BY g.nome, g.id
@@ -177,7 +200,7 @@ BEGIN
          (SELECT count(*) FROM public.respostas x
            WHERE x.topico_id = t.id AND x.status = 'visivel' AND public.aue_e_conta_promovida(x.autor_id))
     FROM public.topicos t
-    JOIN public.grupos g ON g.id = t.comunidade_id AND g.slug IS NOT NULL
+    JOIN public.grupos g ON g.id = t.comunidade_id AND nullif(btrim(g.slug), '') IS NOT NULL
    WHERE t.autor_id = v_autor
      AND t.status IN ('aberto', 'fechado')
      AND (p_cursor_id IS NULL OR (t.criado_em, t.id) < (p_cursor_criado_em, p_cursor_id))
@@ -217,7 +240,7 @@ BEGIN
     FROM public.respostas r
     JOIN public.topicos t ON t.id = r.topico_id AND t.status IN ('aberto', 'fechado')
                          AND public.aue_e_conta_promovida(t.autor_id)
-    JOIN public.grupos g ON g.id = t.comunidade_id AND g.slug IS NOT NULL
+    JOIN public.grupos g ON g.id = t.comunidade_id AND nullif(btrim(g.slug), '') IS NOT NULL
    WHERE r.autor_id = v_autor
      AND r.status = 'visivel'
      AND (p_cursor_id IS NULL OR (r.criado_em, r.id) < (p_cursor_criado_em, p_cursor_id))
@@ -273,7 +296,7 @@ BEGIN
            (SELECT count(*) FROM public.respostas x
              WHERE x.topico_id = t.id AND x.status = 'visivel' AND public.aue_e_conta_promovida(x.autor_id))
       FROM public.topicos t
-      JOIN public.grupos g ON g.id = t.comunidade_id AND g.slug IS NOT NULL
+      JOIN public.grupos g ON g.id = t.comunidade_id AND nullif(btrim(g.slug), '') IS NOT NULL
       JOIN public.perfis pf ON pf.id = t.autor_id AND public.aue_e_conta_promovida(t.autor_id)
      WHERE t.status IN ('aberto', 'fechado')
        %s
@@ -368,6 +391,29 @@ END;
 $$;
 
 
+-- Mostrar o post antigo reabre o tópico oculto pelo espelho, mas NÃO o que 3 ou mais
+-- pessoas distintas denunciaram no lado novo (denunciar_topico). Corpo idêntico ao da
+-- 20261019000015, exceto a condição de denúncias no ramo de "mostrar".
+CREATE OR REPLACE FUNCTION public.aue_trigger_espelhar_escondido()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp
+AS $$
+BEGIN
+  BEGIN
+    IF NEW.esta_escondido THEN
+      UPDATE public.topicos SET status = 'oculto' WHERE legado_post_id = NEW.id AND status IN ('aberto', 'fechado');
+    ELSE
+      UPDATE public.topicos t SET status = 'aberto'
+       WHERE t.legado_post_id = NEW.id AND t.status = 'oculto'
+         AND (SELECT count(DISTINCT d.usuario_id) FROM public.denuncias_conversa d WHERE d.topico_id = t.id) < 3;
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'aue: espelho do estado do post % falhou (%): %', NEW.id, SQLSTATE, SQLERRM;
+  END;
+  RETURN NULL;
+END;
+$$;
+
+
 -- -----------------------------------------------------------------------------
 -- 5. Grants
 -- -----------------------------------------------------------------------------
@@ -383,8 +429,13 @@ REVOKE ALL ON FUNCTION
   public.aue_reconciliar_acervo()
 FROM PUBLIC, anon, authenticated;
 
--- Reparo: nem o service_role. Só o operador (papel postgres) executa.
-REVOKE ALL ON FUNCTION public.aue_reconciliar_acervo() FROM service_role;
+-- Helpers e reparo: nem o service_role. As 5 leituras públicas mantêm o service_role
+-- (padrão das 14 e 15). O reparo é do operador (papel postgres).
+REVOKE ALL ON FUNCTION
+  public.aue_autor_publico_por_handle(text),
+  public.aue_ler_comunidades_do_forum(text),
+  public.aue_reconciliar_acervo()
+FROM service_role;
 
 GRANT EXECUTE ON FUNCTION
   public.listar_comunidades_do_forum(),

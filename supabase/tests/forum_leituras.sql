@@ -166,7 +166,9 @@ BEGIN
     PERFORM t_forum.ok(NOT has_function_privilege('anon', v_fn, 'EXECUTE') AND NOT has_function_privilege('authenticated', v_fn, 'EXECUTE'),
       'interna fechada para anon e authenticated: ' || v_fn);
   END LOOP;
-  PERFORM t_forum.ok(NOT has_function_privilege('service_role', 'public.aue_reconciliar_acervo()', 'EXECUTE'), 'reparo fechado para service_role');
+  FOREACH v_fn IN ARRAY ARRAY['public.aue_autor_publico_por_handle(text)', 'public.aue_ler_comunidades_do_forum(text)', 'public.aue_reconciliar_acervo()'] LOOP
+    PERFORM t_forum.ok(NOT has_function_privilege('service_role', v_fn, 'EXECUTE'), 'helper/reparo fechado para service_role: ' || v_fn);
+  END LOOP;
   PERFORM t_forum.ok(NOT EXISTS (
     SELECT 1 FROM pg_proc p, aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) a
      WHERE p.oid = 'public.aue_reconciliar_acervo()'::regprocedure AND a.grantee <> p.proowner), 'reparo sem grant a ninguém além do dono (inclui PUBLIC)');
@@ -220,6 +222,7 @@ END $t$;
 :como_admin
 -- Grupo antigo sem slug, com tópico: não pode aparecer em lista nenhuma.
 INSERT INTO public.grupos (nome, descricao) VALUES ('Grupo velho sem slug', 'legado');
+INSERT INTO public.grupos (nome, slug, descricao) VALUES ('Grupo slug vazio', '', 'legado'), ('Grupo slug de espacos', '   ', 'legado');
 -- Quem não conta como membro real: sem ficha social e sessão anônima.
 INSERT INTO public.membros_grupo (group_id, user_id)
 SELECT g.id, u FROM public.grupos g, unnest(ARRAY['b1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000005']::uuid[]) u
@@ -279,6 +282,13 @@ SELECT 'b2000000-0000-0000-0000-000000000007', g.id, 'b1000000-0000-0000-0000-00
 INSERT INTO public.topicos (id, comunidade_id, autor_id, titulo, corpo)
 SELECT 'b2000000-0000-0000-0000-000000000008', g.id, 'b1000000-0000-0000-0000-000000000001', 'T8 em grupo sem slug', 'x' FROM public.grupos g WHERE g.nome = 'Grupo velho sem slug';
 DO $t$ BEGIN PERFORM t_forum.guardar('T7', 'b2000000-0000-0000-0000-000000000007'); END $t$;
+INSERT INTO public.topicos (id, comunidade_id, autor_id, titulo, corpo)
+SELECT v.id::uuid, g.id, 'b1000000-0000-0000-0000-000000000001', v.t, 'x' FROM public.grupos g
+  JOIN (VALUES ('b2000000-0000-0000-0000-000000000009', 'Grupo slug vazio', 'T9 em grupo de slug vazio'),
+               ('b2000000-0000-0000-0000-00000000000a', 'Grupo slug de espacos', 'T10 em grupo de slug só espaços')) v(id, n, t) ON v.n = g.nome;
+INSERT INTO public.respostas (id, topico_id, autor_id, corpo) VALUES
+  ('b3000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000009', 'b1000000-0000-0000-0000-000000000001', 'ana em grupo de slug vazio'),
+  ('b3000000-0000-0000-0000-00000000000a', 'b2000000-0000-0000-0000-00000000000a', 'b1000000-0000-0000-0000-000000000001', 'ana em grupo de slug só espaços');
 DO $t$ BEGIN PERFORM t_forum.guardar('T8', 'b2000000-0000-0000-0000-000000000008'); END $t$;
 INSERT INTO public.respostas (id, topico_id, autor_id, corpo) VALUES
   ('b3000000-0000-0000-0000-000000000001', t_forum.pegar('T1'), 'b1000000-0000-0000-0000-000000000004', 'dede em T1 (sem ficha)'),
@@ -316,7 +326,7 @@ DECLARE r record; v_lista jsonb; v_um jsonb; v_n integer;
 BEGIN
   SELECT count(*) INTO v_n FROM public.listar_comunidades_do_forum();
   PERFORM t_forum.ok(v_n = 9, 'visitante lê o diretório: 9 comunidades com slug (sem acervo vazio, sem grupo sem slug): ' || v_n);
-  PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.listar_comunidades_do_forum() c WHERE c.slug IS NULL OR c.nome = 'Grupo velho sem slug'), 'grupo sem slug não aparece');
+  PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.listar_comunidades_do_forum() c WHERE nullif(btrim(c.slug), '') IS NULL OR c.nome LIKE 'Grupo %slug%'), 'grupo com slug nulo, vazio ou só espaços não aparece');
   PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.listar_comunidades_do_forum() c WHERE lower(c.slug) = 'acervo'), 'acervo sem tópico visível não aparece');
 
   SELECT * INTO r FROM public.listar_comunidades_do_forum() c WHERE c.slug = 'refri-cia';
@@ -362,7 +372,7 @@ END $t$;
 DO $t$
 DECLARE r record;
 BEGIN
-  FOR r IN SELECT g.slug FROM public.grupos g WHERE g.slug IS NOT NULL LOOP
+  FOR r IN SELECT g.slug FROM public.grupos g WHERE nullif(btrim(g.slug), '') IS NOT NULL LOOP
     IF lower(r.slug) = 'acervo' THEN CONTINUE; END IF;
     PERFORM t_forum.ok((SELECT c.membros_total FROM public.aue_ler_comunidades_do_forum(r.slug) c)
       = (SELECT count(*) FROM public.membros_grupo m JOIN public.grupos g2 ON g2.id = m.group_id AND g2.slug = r.slug
@@ -435,8 +445,9 @@ BEGIN
   -- A tem T1,T3,T6 (fechado),TC1,TB1 visíveis. Fora: T4 oculto, T5 removido, T8 em grupo sem slug.
   SELECT array_agg(x.id ORDER BY x.criado_em DESC, x.id DESC) INTO v_ids FROM public.listar_topicos_do_autor('ana_forum', 100) x;
   PERFORM t_forum.ok(cardinality(v_ids) = 5, 'ana: 5 tópicos visíveis: ' || cardinality(v_ids));
-  PERFORM t_forum.ok(NOT (t_forum.pegar('T4') = ANY (v_ids)) AND NOT (t_forum.pegar('T5') = ANY (v_ids)) AND NOT (t_forum.pegar('T8') = ANY (v_ids)),
-    'oculto, removido e grupo sem slug não saem');
+  PERFORM t_forum.ok(NOT (t_forum.pegar('T4') = ANY (v_ids)) AND NOT (t_forum.pegar('T5') = ANY (v_ids)) AND NOT (t_forum.pegar('T8') = ANY (v_ids))
+    AND NOT ('b2000000-0000-0000-0000-000000000009' = ANY (v_ids)) AND NOT ('b2000000-0000-0000-0000-00000000000a' = ANY (v_ids)),
+    'oculto, removido e grupo sem slug (nulo, vazio, só espaços) não saem');
   PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.listar_topicos_do_autor('ana_forum', 100) x WHERE x.titulo IN ('T4 vai ser ocultado', 'T5 vai ser apagado')), 'nem título de oculto/removido');
   FOR r IN SELECT * FROM public.listar_topicos_do_autor('ana_forum', 100) LOOP
     PERFORM t_forum.ok(r.comunidade_slug IS NOT NULL AND r.comunidade_nome IS NOT NULL AND r.comunidade_id IS NOT NULL AND r.titulo <> '', 'item de tópico do autor traz comunidade e título: ' || r.id);
@@ -455,7 +466,8 @@ BEGIN
   SELECT array_agg(x.id) INTO v_ids FROM public.listar_respostas_do_autor('ana_forum', 100) x;
   PERFORM t_forum.ok(cardinality(v_ids) = 5, 'ana: 5 respostas visíveis: ' || cardinality(v_ids));
   PERFORM t_forum.ok(NOT (t_forum.pegar('R_a_T2_oculta') = ANY (v_ids)) AND NOT (t_forum.pegar('R_a_T2_apagada') = ANY (v_ids))
-    AND NOT (t_forum.pegar('R_a_T4') = ANY (v_ids)) AND NOT (t_forum.pegar('R_a_T7') = ANY (v_ids)) AND NOT (t_forum.pegar('R_a_T8') = ANY (v_ids)),
+    AND NOT (t_forum.pegar('R_a_T4') = ANY (v_ids)) AND NOT (t_forum.pegar('R_a_T7') = ANY (v_ids)) AND NOT (t_forum.pegar('R_a_T8') = ANY (v_ids))
+    AND NOT ('b3000000-0000-0000-0000-000000000009' = ANY (v_ids)) AND NOT ('b3000000-0000-0000-0000-00000000000a' = ANY (v_ids)),
     'resposta oculta, apagada, em tópico oculto, em tópico de autor sem ficha e em grupo sem slug não saem');
   FOR r IN SELECT * FROM public.listar_respostas_do_autor('ana_forum', 100) LOOP
     PERFORM t_forum.ok(r.topico_id IS NOT NULL AND r.topico_titulo IS NOT NULL AND r.comunidade_slug IS NOT NULL AND r.comunidade_nome IS NOT NULL AND r.corpo <> '',
@@ -517,13 +529,13 @@ UPDATE public.perfis SET perfil_social_concluido_em = now() WHERE id = 'b1000000
 :como_admin
 INSERT INTO t_forum.arr
 SELECT 'topicos_ana', array_agg(t.id ORDER BY t.criado_em DESC, t.id DESC)
-  FROM public.topicos t JOIN public.grupos g ON g.id = t.comunidade_id AND g.slug IS NOT NULL
+  FROM public.topicos t JOIN public.grupos g ON g.id = t.comunidade_id AND nullif(btrim(g.slug), '') IS NOT NULL
  WHERE t.autor_id = 'b1000000-0000-0000-0000-000000000001' AND t.status IN ('aberto', 'fechado');
 INSERT INTO t_forum.arr
 SELECT 'respostas_ana', array_agg(r.id ORDER BY r.criado_em DESC, r.id DESC)
   FROM public.respostas r
   JOIN public.topicos t ON t.id = r.topico_id AND t.status IN ('aberto', 'fechado') AND t.autor_id IN (SELECT id FROM t_forum.promovidas)
-  JOIN public.grupos g ON g.id = t.comunidade_id AND g.slug IS NOT NULL
+  JOIN public.grupos g ON g.id = t.comunidade_id AND nullif(btrim(g.slug), '') IS NOT NULL
  WHERE r.autor_id = 'b1000000-0000-0000-0000-000000000001' AND r.status = 'visivel';
 :como_visitante
 DO $t$
@@ -561,6 +573,7 @@ BEGIN
   PERFORM t_forum.ok(NOT (t_forum.pegar('T4') = ANY (v_ids)) AND NOT (t_forum.pegar('T5') = ANY (v_ids)), 'oculto e removido não saem');
   PERFORM t_forum.ok(NOT (t_forum.pegar('T7') = ANY (v_ids)), 'tópico de autor sem ficha social não sai');
   PERFORM t_forum.ok(NOT (t_forum.pegar('T8') = ANY (v_ids)), 'tópico de grupo sem slug não sai (a UI não tem como linkar)');
+  PERFORM t_forum.ok(NOT ('b2000000-0000-0000-0000-000000000009' = ANY (v_ids)) AND NOT ('b2000000-0000-0000-0000-00000000000a' = ANY (v_ids)), 'tópico de grupo com slug vazio ou só espaços não sai');
   FOR r IN SELECT * FROM public.explorar_topicos(100) LOOP
     PERFORM t_forum.ok(r.comunidade_id IS NOT NULL AND r.comunidade_slug IS NOT NULL AND r.comunidade_nome IS NOT NULL AND r.titulo <> ''
       AND r.handle IS NOT NULL, 'todo item do explorar tem comunidade, título e autor: ' || r.id);
@@ -587,10 +600,10 @@ DO $t$
 DECLARE v_esp_a uuid[]; v_esp_r uuid[];
 BEGIN
   SELECT array_agg(t.id ORDER BY t.ultima_atividade_em DESC, t.id DESC) INTO v_esp_a
-    FROM public.topicos t JOIN public.grupos g ON g.id = t.comunidade_id AND g.slug IS NOT NULL
+    FROM public.topicos t JOIN public.grupos g ON g.id = t.comunidade_id AND nullif(btrim(g.slug), '') IS NOT NULL
    WHERE t.status IN ('aberto', 'fechado') AND t.autor_id IN (SELECT id FROM t_forum.promovidas);
   SELECT array_agg(t.id ORDER BY t.criado_em DESC, t.id DESC) INTO v_esp_r
-    FROM public.topicos t JOIN public.grupos g ON g.id = t.comunidade_id AND g.slug IS NOT NULL
+    FROM public.topicos t JOIN public.grupos g ON g.id = t.comunidade_id AND nullif(btrim(g.slug), '') IS NOT NULL
    WHERE t.status IN ('aberto', 'fechado') AND t.autor_id IN (SELECT id FROM t_forum.promovidas);
   PERFORM t_forum.ok(cardinality(v_esp_a) = 8 AND cardinality(v_esp_r) = 8, 'oráculo do explorar: 8');
   -- Há empate real nas duas ordens (senão o teste de cursor não prova nada).
@@ -803,6 +816,108 @@ BEGIN
   PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.topicos WHERE legado_post_id = 'b5000000-0000-0000-0000-0000000000aa'), 'reparo não cria tópico');
   PERFORM public.aue_migrar_acervo_para_topicos();
   PERFORM t_forum.ok((public.aue_reconciliar_acervo()->>'posts_sem_topico')::int = 0, 'depois do backfill, o contador zera');
+END $t$;
+
+-- =============================================================================
+-- 7. Teto de 100 linhas por chamada (limite 1000 devolve 100)
+-- =============================================================================
+:como_admin
+INSERT INTO auth.users (id, email, is_anonymous) VALUES ('b1000000-0000-0000-0000-000000000007', 'volume@forum.aue', false);
+UPDATE public.perfis SET perfil_social_concluido_em = now() WHERE id = 'b1000000-0000-0000-0000-000000000007';
+DO $t$ BEGIN PERFORM set_config('aue.perfil_social', 'sim', true); END $t$;
+UPDATE public.perfis SET handle = 'volume_forum' WHERE id = 'b1000000-0000-0000-0000-000000000007';
+DO $t$ BEGIN PERFORM set_config('aue.perfil_social', '', true); END $t$;
+INSERT INTO public.topicos (comunidade_id, autor_id, titulo, corpo, criado_em, ultima_atividade_em)
+SELECT g.id, 'b1000000-0000-0000-0000-000000000007', 'volume ' || i, 'x', '2026-04-01 10:00+00'::timestamptz + i * interval '1 minute', '2026-04-01 10:00+00'::timestamptz + i * interval '1 minute'
+  FROM public.grupos g, generate_series(1, 105) i WHERE g.slug = 'primeiro-encontro';
+INSERT INTO public.respostas (topico_id, autor_id, corpo, criado_em)
+SELECT t.id, 'b1000000-0000-0000-0000-000000000007', 'resposta ' || i, '2026-04-02 10:00+00'::timestamptz + i * interval '1 minute'
+  FROM public.topicos t, generate_series(1, 105) i
+ WHERE t.autor_id = 'b1000000-0000-0000-0000-000000000007' AND t.titulo = 'volume 1';
+:como_visitante
+DO $t$ BEGIN
+  PERFORM t_forum.ok((SELECT count(*) FROM public.explorar_topicos(1000)) = 100, 'explorar: limite 1000 devolve 100');
+  PERFORM t_forum.ok((SELECT count(*) FROM public.listar_topicos_do_autor('volume_forum', 1000)) = 100, 'tópicos do autor: limite 1000 devolve 100');
+  PERFORM t_forum.ok((SELECT count(*) FROM public.listar_respostas_do_autor('volume_forum', 1000)) = 100, 'respostas do autor: limite 1000 devolve 100');
+  PERFORM t_forum.ok(cardinality(t_forum.pag_topicos_autor('volume_forum', 1000)) = 105, 'cursor leva às 105 (100 + 5), sem perder nenhuma');
+  PERFORM t_forum.ok(cardinality(t_forum.pag_respostas_autor('volume_forum', 1000)) = 105, 'cursor leva às 105 respostas');
+  PERFORM t_forum.ok((SELECT topicos_total FROM public.obter_comunidade_do_forum('primeiro-encontro')) = 105, 'topicos_total não é aparado pelo teto');
+END $t$;
+
+-- =============================================================================
+-- 8. Trigger de mostrar (ACH-2) e reparo: 0, 2 e exatamente 3 denunciantes
+-- =============================================================================
+:como_admin
+INSERT INTO public.posts_comunidade (id, group_id, user_id, post_type, topic, content, created_at)
+SELECT v.id::uuid, g.id, 'b1000000-0000-0000-0000-000000000001', 'text_announcement', 'x', v.txt, v.criado::timestamptz
+  FROM (VALUES
+    ('b7000000-0000-0000-0000-000000000000', 'TR0 sem denúncia',  '2026-05-01 10:00+00'),
+    ('b7000000-0000-0000-0000-000000000002', 'TR2 duas denúncias','2026-05-01 11:00+00'),
+    ('b7000000-0000-0000-0000-000000000003', 'TR3 três denúncias','2026-05-01 12:00+00'),
+    ('b7000000-0000-0000-0000-000000000010', 'RP0 sem denúncia',  '2026-05-01 13:00+00'),
+    ('b7000000-0000-0000-0000-000000000012', 'RP2 duas denúncias','2026-05-01 14:00+00'),
+    ('b7000000-0000-0000-0000-000000000013', 'RP3 três denúncias','2026-05-01 15:00+00')
+  ) AS v(id, txt, criado), public.grupos g WHERE g.slug = 'historias-de-arroto';
+:como_a
+DO $t$ BEGIN
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000002', 'r1');
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000003', 'r1');
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000012', 'r1');
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000013', 'r1');
+END $t$;
+:como_b
+DO $t$ BEGIN
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000002', 'r2');
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000003', 'r2');
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000012', 'r2');
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000013', 'r2');
+END $t$;
+:como_c
+DO $t$ BEGIN
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000003', 'r3');
+  PERFORM public.denunciar_topico('b7000000-0000-0000-0000-000000000013', 'r3');
+END $t$;
+:como_admin
+DO $t$ BEGIN
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000002') = 'aberto', 'com 2 denúncias o tópico segue aberto');
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000003') = 'oculto', 'com 3 denúncias o tópico fica oculto');
+END $t$;
+
+-- 8a. Trigger (ligado): esconder e mostrar no lado antigo.
+UPDATE public.posts_comunidade SET esta_escondido = true WHERE id::text LIKE 'b7000000-0000-0000-0000-0000000000_0' OR id::text LIKE 'b7000000-0000-0000-0000-0000000000_2' OR id::text LIKE 'b7000000-0000-0000-0000-0000000000_3';
+DO $t$ BEGIN
+  PERFORM t_forum.ok((SELECT count(*) FROM public.topicos WHERE legado_post_id::text LIKE 'b7000000-%' AND status = 'oculto') = 6, 'esconder no antigo oculta os 6 tópicos');
+END $t$;
+UPDATE public.posts_comunidade SET esta_escondido = false WHERE id IN ('b7000000-0000-0000-0000-000000000000', 'b7000000-0000-0000-0000-000000000002', 'b7000000-0000-0000-0000-000000000003');
+DO $t$ BEGIN
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000000') = 'aberto', 'trigger: sem denúncia, mostrar reabre (como hoje)');
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000002') = 'aberto', 'trigger: com 2 denunciantes, mostrar reabre');
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000003') = 'oculto', 'trigger: com 3 denunciantes, mostrar NÃO reabre');
+  -- Esconder de novo continua funcionando.
+  UPDATE public.posts_comunidade SET esta_escondido = true WHERE id = 'b7000000-0000-0000-0000-000000000000';
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000000') = 'oculto', 'trigger: esconder continua ocultando');
+  -- O UPDATE antigo nunca falha por causa do espelho: o EXCEPTION segue no corpo.
+  PERFORM t_forum.ok((SELECT prosrc FROM pg_proc WHERE proname = 'aue_trigger_espelhar_escondido') LIKE '%EXCEPTION WHEN OTHERS THEN%RAISE WARNING%',
+    'trigger mantém o EXCEPTION WHEN OTHERS (nunca derruba o UPDATE antigo)');
+  PERFORM t_forum.ok(has_function_privilege('anon', 'public.aue_trigger_espelhar_escondido()', 'EXECUTE') = false
+    AND has_function_privilege('authenticated', 'public.aue_trigger_espelhar_escondido()', 'EXECUTE') = false, 'trigger segue sem grant');
+END $t$;
+
+-- 8b. Reparo com o espelho perdido: 0 e 2 denunciantes reabrem; exatamente 3 não.
+ALTER TABLE public.posts_comunidade DISABLE TRIGGER aue_espelha_escondido_no_topico;
+UPDATE public.posts_comunidade SET esta_escondido = false WHERE id IN ('b7000000-0000-0000-0000-000000000010', 'b7000000-0000-0000-0000-000000000012', 'b7000000-0000-0000-0000-000000000013', 'b7000000-0000-0000-0000-000000000000');
+ALTER TABLE public.posts_comunidade ENABLE TRIGGER aue_espelha_escondido_no_topico;
+DO $t$
+DECLARE v jsonb;
+BEGIN
+  PERFORM t_forum.ok((SELECT count(*) FROM public.topicos WHERE legado_post_id IN ('b7000000-0000-0000-0000-000000000010', 'b7000000-0000-0000-0000-000000000012', 'b7000000-0000-0000-0000-000000000013', 'b7000000-0000-0000-0000-000000000000') AND status = 'oculto') = 4, 'antes do reparo: 4 ocultos com o post já visível');
+  v := public.aue_reconciliar_acervo();
+  PERFORM t_forum.ok((v->>'topicos_reabertos')::int = 3, 'reparo reabre 3 (sem denúncia, 2 denunciantes e TR0): ' || v::text);
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000010') = 'aberto', 'reparo: 0 denunciantes reabre');
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000012') = 'aberto', 'reparo: exatamente 2 denunciantes reabre');
+  PERFORM t_forum.ok((SELECT status FROM public.topicos WHERE id = 'b7000000-0000-0000-0000-000000000013') = 'oculto', 'reparo: exatamente 3 denunciantes NÃO reabre');
+  PERFORM t_forum.ok((SELECT count(DISTINCT usuario_id) FROM public.denuncias_conversa WHERE topico_id = 'b7000000-0000-0000-0000-000000000013') = 3, 'e são 3 denunciantes distintos');
+  PERFORM t_forum.ok((public.aue_reconciliar_acervo()->>'corrigidos')::int = 0, 'reparo segue idempotente');
 END $t$;
 
 -- =============================================================================

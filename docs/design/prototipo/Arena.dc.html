@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -69,7 +69,7 @@
 <sc-if value="{{ isResult }}">
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
 <x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" tamanho="compacto" onClick="{{ x1 }}" hint-size="100%,52px">Chamar pro X1</x-import>
-<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" tamanho="compacto" onClick="{{ postar }}" hint-size="100%,52px">Postar no bonde</x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" tamanho="compacto" onClick="{{ postar }}" hint-size="100%,52px">Publicar</x-import>
 </div>
 <x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="fantasma" onClick="{{ rec }}" hint-size="100%,52px">Mandar outro</x-import>
 </sc-if>
@@ -102,8 +102,8 @@
 </div>
 
 <sc-if value="{{ mobile }}">
-<nav style="position:fixed;left:0;right:0;bottom:0;height:56px;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--border);background:var(--bg);z-index:6">
-<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" aria-label="{{ t.label }}" style="display:flex;align-items:center;justify-content:center;color:{{ t.color }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg></a></sc-for>
+<nav style="position:fixed;left:0;right:0;bottom:0;height:56px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);background:var(--bg);z-index:6">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:{{ t.color }};font-size:11px;font-weight:{{ t.fw }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg><span>{{ t.label }}</span></a></sc-for>
 </nav>
 </sc-if>
 
@@ -114,7 +114,13 @@
 class Component extends DCLogic {
   state = { theme: 'dark', w: 1200, e: 'IDLE', secs: 0, nota: 91, jaGravou: false, contagem: 3, toast: '', draw: false, best: 88 };
   componentDidMount() {
-    try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); } catch (x) {}
+    // Arena ESCURA FIXA (decisão do Luiz, cartão 0019): ignora o tema guardado. O claro existe aqui só como PROVA
+    // (docs/design/tema-e-publicar.md §3) e nunca grava preferência. ?tema=claro|escuro, ?estado=RESULT e ?nota=91 servem para os quadros de Versões Webapp.
+    try {
+      const q = new URLSearchParams(location.search), t = q.get('tema') === 'claro' ? 'light' : 'dark', e = q.get('estado'), n = parseInt(q.get('nota'), 10);
+      document.documentElement.setAttribute('data-theme', t);
+      this.setState({ theme: t, ...(e ? { e, jaGravou: true } : {}), ...(n ? { nota: n } : {}) });
+    } catch (x) {}
     this._rs = () => this.setState({ w: window.innerWidth }); this._rs(); window.addEventListener('resize', this._rs);
   }
   componentWillUnmount() { window.removeEventListener('resize', this._rs); clearInterval(this._r); (this._ts || []).forEach(clearTimeout); clearTimeout(this._t); }
@@ -138,16 +144,16 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state, e = s.e, w = s.w, light = s.theme === 'light';
     const mobile = w < 700, wide = w >= 1060, showRight = w >= 1000;
-    const vars = light ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', '--fg-soft': 'rgba(10,10,8,.04)', '--overlay-scrim': 'rgba(245,243,234,.92)', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
+    const vars = {};
     const navB = { display: 'flex', alignItems: 'center', gap: 16, height: 52, padding: wide ? '0 20px 0 12px' : 0, width: wide ? 'auto' : 52, justifyContent: wide ? 'flex-start' : 'center', borderRadius: 999, color: 'var(--fg)', fontSize: 20, boxSizing: 'border-box' };
-    const items = [['Início', 'M3 11l9-8 9 8v10h-6v-6H9v6H3z', 'Bonde do Arroto.dc.html'], ['Auê', 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3', '#'], ['Comunidades', 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2', 'Comunidades.dc.html'], ['Desafios', 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3', 'Bonde do Arroto.dc.html'], ['Perfil', 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0', 'Bonde do Arroto.dc.html']];
+    const items = [['Comunidades', 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2', 'Comunidades.dc.html'], ['Explorar', 'M12 22a10 10 0 100-20 10 10 0 000 20zM16 8l-2 6-6 2 2-6z', '#'], ['Arena', 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3', '#'], ['Perfil', 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0', 'Publicar.dc.html?vista=perfil']];
     const labels = { IDLE: 'Pronto', RECORDING: 'Gravando', VALIDATING: 'Conferindo', JUDGING: 'Julgando', RESULT_REVEAL: 'Nota', RESULT: 'Resultado', CHALLENGE_CREATED: 'X1 criado', WAITING_OPPONENT: 'Esperando', SCOREBOARD: 'Placar', DRAW: 'Empate', REMATCH: 'Revanche' };
     const modos = { IDLE: ['idle', 220], RECORDING: ['recording', 260], VALIDATING: ['checking', 200], JUDGING: ['judging', 180], CHALLENGE_CREATED: ['holding', 176], WAITING_OPPONENT: ['waiting', 176] };
     const bm = modos[e] || ['idle', 220];
     const n = s.nota, rv = n - 13;
     const fala = n >= 85 ? 'Tá maluco.' : n >= 60 ? 'Caralho, veio forte.' : 'Foi isso?';
     const titles = { IDLE: 'Bora?', JUDGING: 'Tô julgando essa porra.', RESULT_REVEAL: fala, RESULT: fala, DRAW: 'Ninguém ganhou.' };
-    const subs = { IDLE: 'Solta o primeiro e vê quanto dá.', VALIDATING: 'Conferindo…', RESULT: 'Manda isso no bonde e vê se alguém peita.', CHALLENGE_CREATED: 'Link pronto. Manda pro infeliz.', WAITING_OPPONENT: 'Ninguém aceitou ainda.' };
+    const subs = { IDLE: 'Solta o primeiro e vê quanto dá.', VALIDATING: 'Conferindo…', RESULT: 'Chama alguém no X1 ou publica e vê quem peita.', CHALLENGE_CREATED: 'Link pronto. Manda pro infeliz.', WAITING_OPPONENT: 'Ninguém aceitou ainda.' };
     const rank = [['Dani Gás', 94], ['Você', s.best], ['Rafa Fôlego', 81], ['Mari Grave', 68], ['Tio Beto', 61]].sort((a, b) => b[1] - a[1]).slice(0, 5);
     const stageH = { IDLE: 'clamp(200px,30vh,264px)', RESULT: 'clamp(170px,24vh,200px)', SCOREBOARD: 'clamp(150px,23vh,196px)', DRAW: 'clamp(150px,23vh,196px)', CHALLENGE_CREATED: 'clamp(160px,25vh,200px)', WAITING_OPPONENT: 'clamp(160px,25vh,200px)' }[e] || 'clamp(230px,38vh,308px)';
     return {
@@ -156,10 +162,10 @@ class Component extends DCLogic {
       leftStyle: { width: wide ? 275 : 76, flex: 'none', position: 'sticky', top: 0, height: '100vh', padding: wide ? '0 12px 12px' : '0 8px 12px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' },
       mainStyle: { width: '100%', maxWidth: 600, flex: '1 1 0', minWidth: 0, borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', minHeight: '100vh', boxSizing: 'border-box' },
       gridStyle: { minHeight: 'calc(100vh - 53px)', display: 'grid', gridTemplateRows: `minmax(0,${stageH}) 1fr auto`, padding: '16px 24px 0', boxSizing: 'border-box', transition: 'grid-template-rows var(--duration-slow) var(--easing-standard)' },
-      tabs: items.map(([l, d, href]) => { const on = l === 'Auê'; return { label: l, d, href, sw: on ? 2.4 : 1.8, color: on ? 'var(--fg)' : 'var(--muted)', style: { ...navB, fontWeight: on ? 700 : 400 } }; }),
+      tabs: items.map(([l, d, href]) => { const on = l === 'Arena'; return { label: l, d, href, sw: on ? 2.4 : 1.8, fw: on ? 700 : 500, color: on ? 'var(--fg)' : 'var(--muted)', style: { ...navB, fontWeight: on ? 700 : 400 } }; }),
       themeIcon: light ? 'M21 13A9 9 0 1111 3a7 7 0 0010 10z' : 'M12 17a5 5 0 100-10 5 5 0 000 10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1',
-      themeLabel: light ? 'Tema escuro' : 'Tema claro', themeBtn: { ...navB, height: 44, fontSize: 15, color: 'var(--muted)', border: 0, background: 'none', cursor: 'pointer' },
-      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); try { localStorage.setItem('bda-theme', t); } catch (x) {} },
+      themeLabel: light ? 'Prova: voltar ao escuro' : 'Prova: Arena no claro', themeBtn: { ...navB, height: 44, fontSize: 15, color: 'var(--muted)', border: 0, background: 'none', cursor: 'pointer' },
+      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); document.documentElement.setAttribute('data-theme', t); },
       bottomPad: mobile ? 72 : 8, stateLabel: labels[e] || '',
       showBolha: !!modos[e], bolhaModo: bm[0], bolhaSize: bm[1],
       nivel: () => (Math.sin(Date.now() / 250) + 1) / 2,
@@ -173,7 +179,7 @@ class Component extends DCLogic {
       noop: () => {}, showLink: e === 'CHALLENGE_CREATED', copiar: async () => { this.say('Link copiado.'); return true; },
       showPlacar: e === 'SCOREBOARD', youLead: true, rivalLead: false, rivalNota: rv,
       isIdle: e === 'IDLE', jaGravou: s.jaGravou, rec: this.rec, isRec: e === 'RECORDING', parar: this.parar,
-      isResult: e === 'RESULT', x1: () => this.go('CHALLENGE_CREATED'), postar: () => { try { const q = JSON.parse(localStorage.getItem('bda-pending') || '[]'); q.push({ id: Date.now(), community: 'Bonde do Arroto', text: 'Direto do Auê. Nota ' + n + '.', dur: '0:0' + Math.max(3, Math.min(9, s.secs || 6)), score: n }); localStorage.setItem('bda-pending', JSON.stringify(q)); } catch (x) {} this.say('Postado no Bonde do Arroto com nota ' + n + '.'); setTimeout(() => { location.href = 'Bonde do Arroto.dc.html'; }, 900); },
+      isResult: e === 'RESULT', x1: () => this.go('CHALLENGE_CREATED'), postar: () => { location.href = 'Publicar.dc.html?nota=' + n + '&tema=' + (light ? 'claro' : 'escuro'); },
       isCreated: e === 'CHALLENGE_CREATED', esperar: () => this.go('WAITING_OPPONENT'),
       isWaiting: e === 'WAITING_OPPONENT', empate: () => this.setState({ e: 'DRAW' }), placar: () => this.go('SCOREBOARD'),
       isEnd: e === 'SCOREBOARD' || e === 'DRAW', revanche: this.revanche, sair: () => this.setState({ e: 'IDLE' }),

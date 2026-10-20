@@ -4,7 +4,31 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-f
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 svg{display:block}
 h1,h2,h3,p{margin:0}
-a{color:var(--accent);text-decoration:none}
-a:hover{color:var(--accent-strong)}
+/* Verde nunca é cor de texto, de link nem de foco (DESIGN.md §2.3). */
+a{color:inherit;text-decoration:none}
 [hidden]{display:none !important}
-button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+
+/*
+  ARENA NO CLARO — o que muda quando o verde cai sobre o creme (docs/design/tema-e-publicar.md §3).
+
+  O verde elétrico sobre `--bg` claro dá 1,07:1: some. Cada regra abaixo devolve ao
+  verde o papel de PLACA (fundo com texto `--accent-on` e contorno), nunca de texto,
+  borda ou foco, sem criar cor nova e sem mudar o orçamento de 2 verdes por estado.
+  No escuro nenhuma regra daqui vale. `!important` só porque os componentes do
+  bundle pintam com estilo inline.
+*/
+/* 1. A Bolha ganha contorno --fg em todos os modos. Sem ele, só a silhueta de recording (verde) existiria, e a 1,07:1. */
+[data-theme='light'] svg[aria-label="Bolha Auê"] path{stroke:var(--fg);stroke-width:2}
+/* 2. Botão primário: placa verde + contorno interno 50% --fg (3,86:1 sobre o creme). */
+[data-theme='light'] .au-botao--primario{box-shadow:inset 0 0 0 1px var(--accent-contorno);outline-color:transparent !important}
+/* 3. Gatilho do microfone, mesma regra: o anel vira --fg. */
+[data-theme='light'] .bola{box-shadow:inset 0 0 0 1px var(--accent-contorno);outline-color:var(--fg) !important}
+/* 4. A nota vira SELO: Anton --accent-on sobre placa --accent (o mesmo selo de nota do fórum). */
+[data-theme='light'] .au-nota{color:var(--accent-on) !important;background:var(--accent);box-shadow:inset 0 0 0 1px var(--accent-contorno);border-radius:var(--radius-sm);padding:.1em .22em .02em}
+/* 5. Cronômetro: --fg; o aviso dos 8s vira placa --gold. */
+[data-theme='light'] .au-cronometro{color:var(--fg) !important}
+[data-theme='light'] .au-cronometro--aviso{background:var(--gold);box-shadow:inset 0 0 0 1px var(--accent-contorno);border-radius:var(--radius-sm);padding:2px 8px}
+/* 6. Ouro: o número do vencedor vira placa --gold com texto --fg; "Líder" e a nota da linha ficam --fg em peso 700. Ouro como texto no creme dá 1,48:1. */
+[data-theme='light'] .au-ouro{color:var(--fg) !important;background:var(--gold);border-radius:var(--radius-sm);padding:0 .18em}
+[data-theme='light'] .au-ouro-texto{color:var(--fg) !important;font-weight:700}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -233,7 +233,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { ptab: 'posts',
-    theme: 'dark', w: 1200, tab: 'feed', filter: 'all', composing: false, ctype: 'texto', text: '', qtext: '', opp: '', commSel: 'Bonde do Arroto',
+    theme: 'light', w: 1200, tab: 'feed', filter: 'all', composing: false, ctype: 'texto', text: '', qtext: '', opp: '', commSel: 'Bonde do Arroto',
     rec: false, secs: 0, recorded: 0, playing: null, sharing: null, gen: -1, toast: '',
     joined: ['Bonde do Arroto', 'Cerveja Gelada'], following: [], openReply: null, replyText: '', editing: false,
     profile: { name: 'Você', handle: 'voce_arrota', city: 'Rio de Janeiro', bio: 'Arroto de respeito, sem moral.' }, ed: {},
@@ -252,7 +252,7 @@ class Component extends DCLogic {
     ]
   };
   componentDidMount() {
-    try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); } catch (e) {}
+    try { const t = localStorage.getItem('bda-theme'); const v = localStorage.getItem('bda-theme-v') === '2'; const th = v && t === 'dark' ? 'dark' : 'light'; this.setState({ theme: th }); document.documentElement.setAttribute('data-theme', th); } catch (e) {}
     try { const pf = JSON.parse(localStorage.getItem('bda-profile') || 'null'); if (pf) this.setState({ profile: pf });
       const q = JSON.parse(localStorage.getItem('bda-pending') || '[]');
       if (q.length) { localStorage.removeItem('bda-pending'); const ps = q.map(x => ({ id: x.id, name: this.state.profile.name, handle: this.state.profile.handle, ini: 'VC', when: 'agora', community: x.community, text: x.text, audio: true, dur: x.dur, score: x.score, likes: 0, replies: 0, reposts: 0, mine: true })); this.setState(st => ({ posts: [...ps, ...st.posts] })); setTimeout(() => this.say('Arroto do Auê postado no ' + ps[0].community + '.'), 400); } } catch (e) {}
@@ -305,9 +305,7 @@ class Component extends DCLogic {
     const s = this.state, light = s.theme === 'light', w = s.w;
     const mobile = w < 700, wide = w >= 1060, showRight = w >= 1000;
     const tab = (k) => s.tab === k;
-    const vars = light
-      ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', '--fg-soft': 'rgba(10,10,8,.04)', '--overlay-scrim': 'rgba(245,243,234,.92)', colorScheme: 'light' }
-      : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
+    const vars = {};
     const rootStyle = { ...vars, minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', fontFamily: '"Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', boxSizing: 'border-box' };
     const sheet = { width: '100%', maxWidth: 560, background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: mobile ? '24px 24px 0 0' : 24, padding: '20px 16px 24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 14, boxShadow: '0 8px 32px rgba(0,0,0,.35)', animation: 'bdaPop .22s cubic-bezier(.2,.8,.2,1)', maxHeight: '92vh', overflowY: 'auto' };
     const scrim = (z) => ({ position: 'fixed', inset: 0, background: 'var(--overlay-scrim)', backdropFilter: 'blur(2px)', animation: 'bdaFade .18s ease-out', display: 'flex', alignItems: mobile ? 'flex-end' : 'center', justifyContent: 'center', zIndex: z, padding: mobile ? 0 : 16, boxSizing: 'border-box' });
@@ -352,7 +350,7 @@ class Component extends DCLogic {
       postLabel: wide ? 'Postar' : '+', arenaLink: { ...navB, textDecoration: 'none' },
       themeIcon: light ? 'M21 13A9 9 0 1111 3a7 7 0 0010 10z' : 'M12 17a5 5 0 100-10 5 5 0 000 10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1',
       themeLabel: light ? 'Tema escuro' : 'Tema claro', themeBtn: { ...navB, height: 44, fontSize: 15, color: 'var(--muted)' },
-      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); try { localStorage.setItem('bda-theme', t); } catch (e) {} },
+      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('bda-theme', t); localStorage.setItem('bda-theme-v', '2'); } catch (e) {} },
       meBtn: { display: 'flex', alignItems: 'center', gap: 12, padding: 8, border: 0, borderRadius: 999, background: 'none', color: 'var(--fg)', cursor: 'pointer' },
       goPerfil: () => this.setState({ tab: 'perfil' }),
       pageTitle: titles[s.tab], bottomPad: mobile ? 140 : 40,

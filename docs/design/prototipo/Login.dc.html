@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,12 +43,12 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { theme: 'dark', step: 'email', email: '', pass: '', nick: '', err: '', show: false };
-  componentDidMount() { try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); } catch (x) {} }
+  state = { theme: 'light', step: 'email', email: '', pass: '', nick: '', err: '', show: false };
+  componentDidMount() { try { const t = localStorage.getItem('bda-theme'); const v = localStorage.getItem('bda-theme-v') === '2'; const th = v && t === 'dark' ? 'dark' : 'light'; this.setState({ theme: th }); document.documentElement.setAttribute('data-theme', th); } catch (x) {} }
   go = () => { window.location.href = 'Bonde do Arroto.dc.html'; };
   renderVals() {
     const s = this.state, light = s.theme === 'light', st = s.step;
-    const vars = light ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
+    const vars = {};
     const set = (k) => (e) => this.setState({ [k]: e.target.value, err: '' });
     const pt = s.show ? 'text' : 'password';
     const fields = { email: [{ label: 'E-mail', value: s.email, type: 'email', ac: 'username', input: set('email') }], pass: [{ label: 'Digite sua senha', value: s.pass, type: pt, ac: 'current-password', input: set('pass') }], signup: [{ label: 'Apelido (ex: voce_arrota)', value: s.nick, type: 'text', ac: 'nickname', input: set('nick') }, { label: 'E-mail', value: s.email, type: 'email', ac: 'username', input: set('email') }, { label: 'Senha', value: s.pass, type: pt, ac: 'new-password', input: set('pass') }] }[st];
@@ -73,7 +73,7 @@ class Component extends DCLogic {
         this.go();
       },
       themeLabel: light ? 'Tema escuro' : 'Tema claro',
-      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); try { localStorage.setItem('bda-theme', t); } catch (x) {} }
+      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('bda-theme', t); localStorage.setItem('bda-theme-v', '2'); } catch (x) {} }
     };
   }
 }

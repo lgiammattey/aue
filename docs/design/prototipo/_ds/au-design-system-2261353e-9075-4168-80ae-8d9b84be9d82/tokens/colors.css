@@ -1,32 +1,83 @@
-:root{
-  /* Base — DESIGN.md §2.1 */
-  --bg:#0a0a08;
-  --surface:#171712;
-  --surface-2:#1f1f18;
-  --fg:#f5f3ea;
-  --muted:#93917f;
-  --border:#2b2a22;
+/*
+  Cores do Auê! — DESIGN.md v5, §2.
 
-  /* Accent — verde ácido elétrico. Orçamento: máx. 2 aparições simultâneas
-     por estado (Bolha viva > Auê Score > CTA primário). Nunca no wordmark,
-     métrica, pílula de link ou player. */
-  --accent:#c6ff00;
-  --accent-strong:#a8d900;
-  --accent-on:#0a0a08;
+  CLARO É O PADRÃO (decisão do Luiz, 19/10/2026, cartão 0019). Sem atributo, a
+  página sai clara, creme. O escuro vem só de `data-theme="dark"` em qualquer
+  elemento (no `<html>` para a página toda, ou num bloco para ver os dois lado a lado).
+
+  Cada token é definido UMA vez por tema, aqui. Nenhum hex solto em componente.
+  Os valores são os mesmos de `docs/design/design-system/system/DESIGN.md` §2.1 e §2.2.
+*/
+
+:root,
+[data-theme='light'] {
+  /* Base */
+  --bg: #f5f3ea;
+  --surface: #ebe9de;
+  --surface-2: #dedcd0;
+  --fg: #0a0a08;
+  --muted: #57554a;
+  --border: #d6d4c6;
+  --border-strong: #85836f;
+  --ind: var(--fg);
+
+  /* Accent — verde ácido. Orçamento: máx. 2 aparições por estado. Sobre o
+     creme ele some (1,07:1): só como PLACA com texto `--accent-on` e contorno
+     `--accent-contorno`. Nunca como cor de texto, de borda ou de foco. */
+  --accent: #c6ff00;
+  --accent-strong: #a8d900;
+  --accent-on: #0a0a08;
+  --accent-contorno: color-mix(in srgb, var(--fg) 50%, transparent);
 
   /* Semânticos */
-  --gold:#f4c430;
-  --gold-strong:#d9ac1c;
-  --danger:#ff3d3f;
-  --danger-strong:#e11a1c;
-  --silver:#c7cad1;
-  --bronze:#c98a4b;
+  --gold: #f4c430;
+  --gold-strong: #d9ac1c;
+  --danger: #c4161a;
+  --danger-strong: #9e1013;
+  --silver: #c7cad1;
+  --bronze: #c98a4b;
 
   /* Derivados — sempre color-mix sobre os tokens acima. Nunca hex novo. */
-  --accent-soft:color-mix(in oklch, var(--accent) 14%, transparent);
-  --fg-soft:color-mix(in oklch, var(--fg) 6%, transparent);
-  --page-bg:color-mix(in oklch, var(--bg) 60%, black);
-  --overlay-scrim:color-mix(in oklch, var(--bg) 94%, transparent);
+  --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+  --fg-soft: color-mix(in srgb, var(--fg) 6%, transparent);
+  --fg-soft-forte: color-mix(in srgb, var(--fg) 11%, transparent);
+  --page-bg: var(--bg);
+  --overlay-scrim: color-mix(in srgb, var(--bg) 92%, transparent);
+  --scrim: rgba(0, 0, 0, 0.5);
+  --sombra-dialog: 0 8px 32px rgba(0, 0, 0, 0.2);
 
-  color-scheme:dark;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #0a0a08;
+  --surface: #171712;
+  --surface-2: #1f1f18;
+  --fg: #f5f3ea;
+  --muted: #93917f;
+  --border: #2b2a22;
+  --border-strong: #74725f;
+  --ind: var(--fg);
+
+  --accent: #c6ff00;
+  --accent-strong: #a8d900;
+  --accent-on: #0a0a08;
+  --accent-contorno: transparent;
+
+  --gold: #f4c430;
+  --gold-strong: #d9ac1c;
+  --danger: #ff3d3f;
+  --danger-strong: #e11a1c;
+  --silver: #c7cad1;
+  --bronze: #c98a4b;
+
+  --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+  --fg-soft: color-mix(in srgb, var(--fg) 6%, transparent);
+  --fg-soft-forte: color-mix(in srgb, var(--fg) 11%, transparent);
+  --page-bg: color-mix(in oklch, var(--bg) 60%, black);
+  --overlay-scrim: color-mix(in srgb, var(--bg) 94%, transparent);
+  --scrim: rgba(0, 0, 0, 0.5);
+  --sombra-dialog: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
 }

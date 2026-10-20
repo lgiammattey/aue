@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -139,7 +139,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    theme: 'dark', w: 1200, ltab: 'suas', cat: 'Todas', q: '', sel: null, dtab: 'posts', draft: '', creating: false, toast: '', nf: { name: '', cat: 'Cerveja', desc: '' },
+    theme: 'light', w: 1200, ltab: 'suas', cat: 'Todas', q: '', sel: null, dtab: 'posts', draft: '', creating: false, toast: '', nf: { name: '', cat: 'Cerveja', desc: '' },
     joined: ['Bonde do Arroto', 'Cerveja Gelada'], liked: {},
     comms: [
       { name: 'Bonde do Arroto', ini: 'BA', cat: 'Oficial', members: '48,2 mil', year: 2026, today: 340, desc: 'A comunidade oficial do Auê!. A praça central: todo mundo arrota aqui.' },
@@ -152,7 +152,7 @@ class Component extends DCLogic {
     extra: {}
   };
   componentDidMount() {
-    try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); const j0 = JSON.parse(localStorage.getItem('bda-joined') || 'null'), j = j0 && j0.map(x => x === 'Bonde Geral' ? 'Bonde do Arroto' : x); if (j) this.setState({ joined: j }); } catch (x) {}
+    try { const t = localStorage.getItem('bda-theme'); const v = localStorage.getItem('bda-theme-v') === '2'; const th = v && t === 'dark' ? 'dark' : 'light'; this.setState({ theme: th }); document.documentElement.setAttribute('data-theme', th); const j0 = JSON.parse(localStorage.getItem('bda-joined') || 'null'), j = j0 && j0.map(x => x === 'Bonde Geral' ? 'Bonde do Arroto' : x); if (j) this.setState({ joined: j }); } catch (x) {}
     this._rs = () => this.setState({ w: window.innerWidth }); this._rs(); window.addEventListener('resize', this._rs);
   }
   componentWillUnmount() { window.removeEventListener('resize', this._rs); clearTimeout(this._t); }
@@ -161,7 +161,7 @@ class Component extends DCLogic {
   toggle(c) { const j = this.state.joined, on = j.includes(c.name), n = on ? j.filter(x => x !== c.name) : [...j, c.name]; this.setState({ joined: n }); this.saveJ(n); this.say(on ? 'Saiu de ' + c.name : 'Você entrou em ' + c.name); }
   renderVals() {
     const s = this.state, light = s.theme === 'light', w = s.w, mobile = w < 700, wide = w >= 1060, showRight = w >= 1000;
-    const vars = light ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', '--fg-soft': 'rgba(10,10,8,.04)', '--overlay-scrim': 'rgba(245,243,234,.92)', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };
+    const vars = {};
     const navB = { display: 'flex', alignItems: 'center', gap: 16, height: 52, padding: wide ? '0 20px 0 12px' : 0, width: wide ? 'auto' : 52, justifyContent: wide ? 'flex-start' : 'center', borderRadius: 999, color: 'var(--fg)', fontSize: 20, boxSizing: 'border-box' };
     const items = [['Início', 'M3 11l9-8 9 8v10h-6v-6H9v6H3z', 'Bonde do Arroto.dc.html'], ['Auê', 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3', 'Arena.dc.html'], ['Comunidades', 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2', '#'], ['Desafios', 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3', 'Bonde do Arroto.dc.html'], ['Perfil', 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0', 'Bonde do Arroto.dc.html']];
     const pill = (on) => ({ flex: 1, height: 52, border: 0, background: 'none', color: on ? 'var(--fg)' : 'var(--muted)', fontWeight: on ? 700 : 500, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' });
@@ -189,7 +189,7 @@ class Component extends DCLogic {
       postLabel: wide ? 'Criar comunidade' : '+',
       themeIcon: light ? 'M21 13A9 9 0 1111 3a7 7 0 0010 10z' : 'M12 17a5 5 0 100-10 5 5 0 000 10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1',
       themeLabel: light ? 'Tema escuro' : 'Tema claro', themeBtn: { ...navB, height: 44, fontSize: 15, color: 'var(--muted)', border: 0, background: 'none', cursor: 'pointer' },
-      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); try { localStorage.setItem('bda-theme', t); } catch (x) {} },
+      toggleTheme: () => { const t = light ? 'dark' : 'light'; this.setState({ theme: t }); document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('bda-theme', t); localStorage.setItem('bda-theme-v', '2'); } catch (x) {} },
       bottomPad: mobile ? 72 : 40,
       isList: stage === 'list', isDetail: stage === 'detail',
       ltabs: [['suas', 'Suas'], ['desc', 'Descobrir']].map(([k, l]) => ({ label: l, style: pill(s.ltab === k), inner: ul(s.ltab === k), go: () => this.setState({ ltab: k }) })),

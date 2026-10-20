@@ -283,6 +283,7 @@ function Botao({
     type: type,
     disabled: disabled,
     onClick: onClick,
+    className: 'au-botao au-botao--' + variante,
     style: base,
     onMouseDown: e => {
       if (!disabled) e.currentTarget.style.transform = 'translateY(2px) scale(0.985)';
@@ -314,6 +315,7 @@ function Cronometro({
       color: aviso ? 'var(--gold)' : 'var(--accent)',
       fontVariantNumeric: 'tabular-nums'
     },
+    className: aviso ? 'au-cronometro au-cronometro--aviso' : 'au-cronometro',
     "aria-live": "off"
   }, "0:", String(Math.max(0, maximo - segundos)).padStart(2, '0'));
 }
@@ -659,6 +661,7 @@ function NotaNaBolha({
     }
   }, rotulo), /*#__PURE__*/React.createElement("span", {
     "data-sound": impacto ? 'var(--sound-reveal)' : undefined,
+    className: 'au-nota',
     "data-haptic": impacto ? 'var(--haptic-heavy)' : undefined,
     style: {
       fontFamily: 'var(--font-display)',
@@ -1008,7 +1011,8 @@ function BlocoVersus({
       lineHeight: 1,
       fontVariantNumeric: 'tabular-nums',
       color: cor(lado)
-    }
+    },
+    className: lado.venceu && !empate ? 'au-ouro' : undefined
   }, Math.round(lado.nota)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 13,
@@ -1083,6 +1087,7 @@ function LinhaDoPlacar({
       whiteSpace: 'nowrap'
     }
   }, nome), lider && /*#__PURE__*/React.createElement("span", {
+    className: 'au-ouro-texto',
     style: {
       fontFamily: 'var(--font-mono)',
       fontSize: 10,
@@ -1091,6 +1096,7 @@ function LinhaDoPlacar({
       color: 'var(--gold)'
     }
   }, "L\xEDder"), /*#__PURE__*/React.createElement("b", {
+    className: lider ? 'au-ouro-texto' : undefined,
     style: {
       fontWeight: 600,
       fontVariantNumeric: 'tabular-nums',

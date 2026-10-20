@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>body{margin:0}button,a,select,input,textarea{font-family:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}select,input,textarea{outline:none}@keyframes pubFade{from{opacity:0}to{opacity:1}}@keyframes pubUp{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}.pub-campo::placeholder{color:var(--muted);opacity:1}.pub-foco:focus-visible,.pub-campo:focus-visible{outline:2px solid var(--fg);outline-offset:2px}.pub-campo:focus{border-color:var(--fg)!important}input[type=checkbox].pub-caixa{appearance:none;-webkit-appearance:none;width:22px;height:22px;margin:0;border:1.5px solid var(--border-strong);border-radius:6px;background:transparent;display:grid;place-content:center;flex:none;cursor:pointer}input[type=checkbox].pub-caixa:checked{background:var(--fg);border-color:var(--fg)}input[type=checkbox].pub-caixa:checked::after{content:"";width:6px;height:11px;border:solid var(--bg);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}input[type=checkbox].pub-caixa:disabled{opacity:.45;cursor:not-allowed}input[type=checkbox].pub-caixa:focus-visible{outline:2px solid var(--fg);outline-offset:2px}</style>
+</helmet>
+
+<div style="{{ rootStyle }}">
+
+<!-- PAINEL DE REVISÃO: não é do produto. Some com ?painel=0 (usado nos quadros de Versões Webapp). -->
+<sc-if value="{{ painel }}">
+<div style="position:relative;z-index:50;background:var(--surface-2);border-bottom:1px solid var(--border-strong);padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:12px">
+<span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Revisão · não é do produto</span>
+<sc-for list="{{ painelVistas }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.go }}" style="{{ p.style }}">{{ p.label }}</button></sc-for>
+<span style="color:var(--muted)">|</span>
+<sc-for list="{{ painelEstados }}" as="p" hint-placeholder-count="8"><button onClick="{{ p.go }}" style="{{ p.style }}">{{ p.label }}</button></sc-for>
+<span style="color:var(--muted)">|</span>
+<button onClick="{{ trocaTema }}" style="{{ pillStyle }}">{{ temaPainel }}</button>
+</div>
+</sc-if>
+
+<div style="max-width:1280px;margin:0 auto;display:flex;justify-content:center;align-items:flex-start;position:relative">
+
+<!-- LATERAL (tablet e desktop) -->
+<sc-if value="{{ showLeft }}">
+<header style="{{ leftStyle }}">
+<div style="display:flex;flex-direction:column;gap:4px;align-items:{{ navAlign }}">
+<a href="Arena.dc.html" style="height:52px;display:flex;align-items:center;padding:0 12px;font-family:var(--font-display);font-size:26px;letter-spacing:.02em">{{ brand }}</a>
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+<a href="{{ t.href }}" style="{{ t.style }}" aria-current="{{ t.current }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg><sc-if value="{{ wide }}"><span>{{ t.label }}</span></sc-if></a>
+</sc-for>
+</div>
+<button onClick="{{ trocaTema }}" style="{{ themeBtn }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ themeIcon }}"></path></svg><sc-if value="{{ wide }}"><span>{{ themeLabel }}</span></sc-if></button>
+</header>
+</sc-if>
+
+<main style="{{ mainStyle }}">
+
+<!-- ===== Cenário atrás do dialog (desktop): a Arena em RESULT, a tela de onde a pessoa veio ===== -->
+<sc-if value="{{ showCenario }}">
+<div aria-hidden="true" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-top:64px;gap:14px;text-align:center">
+<span style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Resultado</span>
+<span class="au-nota" style="font-family:var(--font-display);font-size:64px;line-height:.86;color:var(--accent);display:inline-block">{{ nota }}</span>
+<h2 style="font-family:var(--font-display);font-size:40px;font-weight:400;margin:12px 0 0">Tá maluco.</h2>
+<div style="display:flex;gap:8px;margin-top:24px"><span class="au-botao au-botao--primario" style="{{ cenarioBtnVerde }}">Chamar pro X1</span><span style="{{ cenarioBtnContorno }}">Publicar</span></div>
+</div>
+</sc-if>
+
+<!-- ===== Barra do topo das telas comuns (perfil e tópico) ===== -->
+<sc-if value="{{ showTopo }}">
+<div style="position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top)">
+<div style="height:53px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:0 {{ gutter }}px">
+<sc-if value="{{ topoVoltar }}"><a href="{{ topoVoltarHref }}" aria-label="Voltar" class="pub-foco" style="width:44px;height:44px;display:grid;place-items:center;border-radius:999px;margin-left:-12px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></a></sc-if>
+<sc-if value="{{ topoSemVoltar }}"><span></span></sc-if>
+<span style="font-size:20px;font-weight:700;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ topoTitulo }}</span>
+<span></span>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ VISTA: PERFIL, ABA TÓPICOS ============ -->
+<sc-if value="{{ vPerfil }}">
+<div style="padding:20px {{ gutter }}px 0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:16px">
+<span style="width:64px;height:64px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:22px;flex:none">DG</span>
+<div style="min-width:0;flex:1"><h1 style="font-size:22px;font-weight:800;line-height:1.15;letter-spacing:-.01em">Dani Gás</h1><div style="font-size:15px;color:var(--muted)">@danigas</div></div>
+</div>
+<p style="font-size:15px;line-height:1.5;max-width:60ch">Solto um grave por rodada e sigo a resenha.</p>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:13px;color:var(--muted)">Melhor nota</span><span style="font-family:var(--font-display);font-size:24px;line-height:1;background:var(--surface-2);color:var(--fg);padding:6px 10px;border-radius:12px">{{ nota }}</span><span style="flex:1"></span><button class="pub-foco" style="height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--border-strong);background:transparent;color:var(--fg);font-size:15px;font-weight:700">Editar perfil</button></div>
+</div>
+<div role="tablist" style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+<sc-for list="{{ abas }}" as="a" hint-placeholder-count="2"><button role="tab" aria-selected="{{ a.on }}" onClick="{{ a.go }}" class="pub-foco" style="{{ a.style }}">{{ a.label }}<span style="{{ a.barra }}"></span></button></sc-for>
+</div>
+<ul style="list-style:none;margin:0;padding:0" role="tabpanel">
+<sc-for list="{{ linhas }}" as="l" hint-placeholder-count="3">
+<li style="border-bottom:1px solid var(--border);padding:14px {{ gutter }}px;min-height:72px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<sc-if value="{{ l.resposta }}"><span style="font-size:15px;font-weight:600;line-height:1.3">Em: {{ l.titulo }}</span><span style="font-size:15px;line-height:1.5;color:var(--fg);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">{{ l.corpo }}</span></sc-if>
+<sc-if value="{{ l.topico }}"><a href="{{ l.href }}" class="pub-foco" style="font-size:17px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ l.titulo }}</a></sc-if>
+<div style="font-size:13px;line-height:1.4;color:var(--muted);display:flex;align-items:center;flex-wrap:wrap;gap:0 6px">
+<sc-if value="{{ l.noPerfil }}"><span style="display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--fg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0"></path></svg>No perfil</span></sc-if>
+<sc-if value="{{ l.naComunidade }}"><a href="#" class="pub-foco" style="text-decoration:underline;text-underline-offset:2px">{{ l.comunidade }}</a></sc-if>
+<span aria-hidden="true">·</span><span>{{ l.meta }}</span>
+</div>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+
+<!-- ============ VISTA: TÓPICO RECÉM-CRIADO ============ -->
+<sc-if value="{{ vTopico }}">
+<article style="padding:20px {{ gutter }}px 0;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+<sc-if value="{{ topicoNoPerfil }}"><span style="display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--fg)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0"></path></svg>No perfil de <a href="Publicar.dc.html?vista=perfil" class="pub-foco" style="text-decoration:underline;text-underline-offset:2px">@danigas</a></span></sc-if>
+<sc-if value="{{ topicoNaComunidade }}"><a href="#" class="pub-foco" style="text-decoration:underline;text-underline-offset:2px;color:var(--fg);font-weight:600">{{ destinoNome }}</a><span aria-hidden="true">›</span><span>Tópico</span></sc-if>
+</div>
+<h1 style="font-size:{{ h1 }}px;font-weight:800;line-height:1.15;letter-spacing:-.01em;overflow-wrap:anywhere">{{ tituloFinal }}</h1>
+<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap"><span style="width:32px;height:32px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font-weight:700;font-size:11px;color:var(--fg)" aria-hidden="true">DG</span><span><b style="color:var(--fg);font-weight:600">Dani Gás</b> · @danigas · agora</span></div>
+<p style="font-size:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-width:65ch;margin:0">{{ corpoFinal }}</p>
+<sc-if value="{{ topicoComAudio }}">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border)">
+<div style="flex:1;min-width:0"><x-import component-from-global-scope="AuDesignSystem_226135.Player" rotulo="Arroto de Dani Gás" duracao="0:07" progresso="{{ 0 }}" hint-size="100%,56px"></x-import></div>
+<span style="{{ seloOn }}" aria-label="Nota {{ nota }}">{{ nota }}</span>
+</div>
+</sc-if>
+</article>
+<section style="padding:24px {{ gutter }}px 0;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--border);margin-top:8px">
+<h2 style="font-size:20px;font-weight:700;line-height:1.3">Sem respostas</h2>
+<p style="font-size:15px;color:var(--muted);margin:0">Ninguém respondeu ainda. Manda a primeira.</p>
+<label for="resp" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Sua resposta</label>
+<textarea id="resp" class="pub-campo" rows="2" placeholder="Escreve sua resposta" style="{{ campoRespStyle }}"></textarea>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="font-size:13px;color:var(--muted)">0/500</span><button class="au-botao au-botao--primario pub-foco" style="{{ btnVerde }}">Enviar</button></div>
+</section>
+</sc-if>
+
+<!-- ============ VISTA: FORMULÁRIO / CONVITE (rota /novo-topico, só alcançável pela Arena) ============ -->
+<sc-if value="{{ vNovo }}">
+<div style="{{ overlayStyle }}">
+<div role="dialog" aria-modal="true" aria-labelledby="pub-titulo" style="{{ sheetStyle }}">
+
+<!-- Celular: cabeçalho próprio, Cancelar à esquerda, ação principal à direita (nunca no rodapé, por causa do teclado) -->
+<sc-if value="{{ mobile }}">
+<div style="position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top)">
+<div style="height:53px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px;padding:0 8px">
+<button onClick="{{ cancelar }}" disabled="{{ enviando }}" class="pub-foco" style="justify-self:start;height:44px;min-width:44px;padding:0 8px;border:0;background:none;color:var(--fg);font-size:16px;font-weight:500;border-radius:999px;white-space:nowrap;opacity:{{ cancelarOp }}">{{ cancelarLabel }}</button>
+<span id="pub-titulo" style="font-size:{{ tituloTelaPx }}px;font-weight:700;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ tituloTela }}</span>
+<sc-if value="{{ vForm }}"><button onClick="{{ criar }}" aria-busy="{{ enviando }}" class="au-botao au-botao--primario pub-foco" style="{{ criarStyle }}">{{ criarLabel }}</button></sc-if>
+<sc-if value="{{ vConvite }}"><span></span></sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- Desktop e tablet: título dentro do dialog -->
+<sc-if value="{{ desk }}">
+<div style="padding:24px 24px 0"><h2 id="pub-titulo" style="font-size:20px;font-weight:700;line-height:1.3">{{ tituloTela }}</h2></div>
+</sc-if>
+
+<div style="{{ corpoStyle }}">
+
+<!-- ---------- CONVITE (visitante) ---------- -->
+<sc-if value="{{ vConvite }}">
+<div style="display:flex;flex-direction:column;gap:8px;padding:{{ conviteTopPad }}px 0 8px">
+<h2 style="font-size:24px;font-weight:800;line-height:1.15;letter-spacing:-.01em">Publicar precisa de conta.</h2>
+<p style="font-size:15px;line-height:1.5;color:var(--muted);max-width:46ch">Jogar na Arena você faz sem conta. Pra publicar o arroto e a nota, precisa de uma.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<a href="Login.dc.html" class="au-botao au-botao--primario pub-foco" style="{{ btnVerdeLink }}">Criar conta</a>
+<a href="Login.dc.html" class="pub-foco" style="{{ btnContorno }}">Já tenho conta</a>
+<button onClick="{{ cancelar }}" class="pub-foco" style="{{ btnFantasma }}">Agora não</button>
+</div>
+</sc-if>
+
+<!-- ---------- FORMULÁRIO ---------- -->
+<sc-if value="{{ vForm }}">
+
+<sc-if value="{{ alertaTopo }}">
+<div role="alert" style="background:var(--surface);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45">
+<b style="color:var(--danger);font-size:15px">{{ alertaTitulo }}</b>
+<span>{{ alertaTexto }}</span>
+<sc-if value="{{ alertaAcao }}"><button onClick="{{ criar }}" class="pub-foco" style="align-self:flex-start;height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--border-strong);background:transparent;color:var(--fg);font-size:15px;font-weight:700">{{ alertaAcao }}</button></sc-if>
+</div>
+</sc-if>
+
+<!-- Destino -->
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="pub-destino" style="font-size:15px;font-weight:600">Destino</label>
+<div style="position:relative">
+<select id="pub-destino" class="pub-campo" value="{{ destino }}" onChange="{{ onDestino }}" disabled="{{ enviando }}" aria-describedby="pub-destino-ajuda" aria-invalid="{{ erroDestinoOn }}" style="{{ selectStyle }}">
+<option value="" disabled>Escolhe onde publicar</option>
+<sc-for list="{{ comunidades }}" as="c" hint-placeholder-count="3"><option value="{{ c.id }}">{{ c.nome }}</option></sc-for>
+<option value="perfil">Meu perfil</option>
+</select>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;right:14px;top:14px;pointer-events:none;color:var(--muted)"><path d="M6 9l6 6 6-6"></path></svg>
+</div>
+<span id="pub-destino-ajuda" style="font-size:13px;line-height:1.4;color:var(--muted)">{{ destinoAjuda }}<sc-if value="{{ semComunidades }}"> <a href="Comunidades.dc.html" style="color:var(--fg);font-weight:600;text-decoration:underline;text-underline-offset:2px">Ver comunidades</a></sc-if></span>
+<sc-if value="{{ erroDestino }}"><span role="alert" style="font-size:13px;color:var(--danger)">{{ erroDestino }}</span></sc-if>
+</div>
+
+<!-- Título -->
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="pub-t" style="font-size:15px;font-weight:600">Título</label>
+<input id="pub-t" class="pub-campo" value="{{ titulo }}" onInput="{{ onTitulo }}" readonly="{{ enviando }}" placeholder="Sobre o que é a conversa?" autocomplete="off" enterkeyhint="next" style="{{ campoInputStyle }}"></input>
+<div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span role="alert" style="color:var(--danger)">{{ erroTitulo }}</span><span style="color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums">{{ contaTitulo }}</span></div>
+</div>
+
+<!-- Mensagem -->
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="pub-m" style="font-size:15px;font-weight:600">Mensagem</label>
+<textarea id="pub-m" class="pub-campo" rows="6" value="{{ corpo }}" onInput="{{ onCorpo }}" readonly="{{ enviando }}" placeholder="Conta o que rolou ou o que você quer perguntar." style="{{ campoAreaStyle }}"></textarea>
+<div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span role="alert" style="color:var(--danger)">{{ erroCorpo }}</span><span style="color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums">{{ contaCorpo }}</span></div>
+</div>
+
+<!-- Seu arroto desta rodada -->
+<sc-if value="{{ comAudio }}">
+<section style="display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--border);padding-top:16px" aria-labelledby="pub-arroto">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<h3 id="pub-arroto" style="font-size:16px;font-weight:700;line-height:1.3">Seu arroto desta rodada</h3>
+<span style="{{ seloStyle }}" aria-label="{{ seloAria }}">{{ nota }}</span>
+</div>
+<x-import component-from-global-scope="AuDesignSystem_226135.Player" rotulo="Seu arroto" duracao="0:07" progresso="{{ 0 }}" hint-size="100%,56px"></x-import>
+<label style="display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:4px 0;cursor:{{ caixaCursor }}">
+<input type="checkbox" class="pub-caixa" checked="{{ autoriza }}" disabled="{{ caixaOff }}" onChange="{{ onAutoriza }}" aria-describedby="pub-caixa-ajuda" style="margin-top:2px"></input>
+<span style="font-size:15px;line-height:1.5;color:{{ caixaCor }}">{{ caixaTexto }}</span>
+</label>
+<span id="pub-caixa-ajuda" style="font-size:13px;line-height:1.4;color:var(--muted);padding-left:34px" role="status">{{ caixaAjuda }}</span>
+</section>
+</sc-if>
+<sc-if value="{{ semAudio }}">
+<section style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:16px">
+<h3 style="font-size:16px;font-weight:700;line-height:1.3">Seu arroto desta rodada</h3>
+<p style="font-size:14px;line-height:1.5;color:var(--muted)">O áudio desta rodada não ficou guardado neste aparelho. O tópico sai só com texto.</p>
+</section>
+</sc-if>
+
+<sc-if value="{{ temRascunho }}"><button onClick="{{ descartar }}" class="pub-foco" style="align-self:flex-start;height:44px;padding:0 4px;border:0;background:none;color:var(--muted);font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px">Descartar rascunho</button></sc-if>
+
+<sc-if value="{{ mobile }}"><span role="status" style="font-size:13px;color:var(--muted);min-height:1em">{{ statusEnvio }}</span></sc-if>
+
+</sc-if>
+</div>
+<!-- Rodapé de ação (desktop e tablet) -->
+<sc-if value="{{ deskForm }}">
+<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;border-top:1px solid var(--border);padding:16px 24px;flex:none">
+<span role="status" style="font-size:13px;color:var(--muted);margin-right:auto">{{ statusEnvio }}</span>
+<button onClick="{{ cancelar }}" disabled="{{ enviando }}" class="pub-foco" style="{{ btnCancelarStyle }}">{{ cancelarLabel }}</button>
+<button onClick="{{ criar }}" aria-busy="{{ enviando }}" class="au-botao au-botao--primario pub-foco" style="{{ criarStyle }}">{{ criarLabel }}</button>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}"><div role="status" style="{{ toastStyle }}">{{ toast }}</div></sc-if>
+</main>
+
+<sc-if value="{{ showAside }}"><aside aria-hidden="true" style="width:320px;flex:none;padding:12px 0 12px 24px;box-sizing:border-box"></aside></sc-if>
+</div>
+
+<!-- Barra inferior (celular, menos no formulário, que é tela cheia) -->
+<sc-if value="{{ showBottom }}">
+<nav style="position:fixed;left:0;right:0;bottom:0;height:calc(56px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);background:var(--bg);z-index:6">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4"><a href="{{ t.href }}" aria-current="{{ t.current }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:56px;color:{{ t.color }};font-size:11px;font-weight:{{ t.fw }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ t.d }}"></path></svg><span>{{ t.label }}</span></a></sc-for>
+</nav>
+</sc-if>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    w: 1280, tema: 'light', vista: 'novo', painel: true, nota: 91, aba: 'topicos', sim: 'ok', idem: false,
+    destino: '', titulo: '', corpo: '', autoriza: false, envio: 'repouso', erros: {}, alerta: null, semAudioFlag: false, semCom: false, toast: '',
+    ultimoDestino: '', ultimoTitulo: '', ultimoCorpo: '', ultimoAutoriza: false
+  };
+  COMS = [{ id: 'cerveja', nome: 'Cerveja Gelada' }, { id: 'eu-arroto', nome: 'Eu Arroto, e daí?' }, { id: 'refri', nome: 'Refri & Cia' }];
+  componentDidMount() {
+    let q = new URLSearchParams(location.search), st = {};
+    // Tema: padrão CLARO. Só vale o escuro guardado quando existe o marcador bda-theme-v=2 (cartão 0019). ?tema= manda no protótipo.
+    let tema = 'light';
+    try { if (localStorage.getItem('bda-theme-v') === '2' && localStorage.getItem('bda-theme') === 'dark') tema = 'dark'; } catch (x) {}
+    if (q.get('tema') === 'escuro') tema = 'dark'; if (q.get('tema') === 'claro') tema = 'light';
+    st.tema = tema;
+    const v = q.get('vista'); if (v) st.vista = v === 'perfil' ? 'perfil' : v === 'topico' ? 'topico' : v === 'convite' ? 'convite' : 'novo';
+    if (v === 'topico') { st.ultimoDestino = q.get('destino') || 'cerveja'; st.ultimoAutoriza = q.get('auto') === '1'; st.ultimoTitulo = 'Arroto de long neck gelada no calor'; st.ultimoCorpo = 'Abri a terceira e saiu esse. Quem segura mais que isso?'; }
+    if (q.get('painel') === '0') st.painel = false;
+    const n = parseInt(q.get('nota'), 10); if (n) st.nota = n;
+    if (q.get('sim')) st.sim = q.get('sim'); if (q.get('idem') === '1') st.idem = true;
+    this.setState(st);
+    document.documentElement.setAttribute('data-theme', tema);
+    const e = q.get('estado');
+    if (e) this.preset(e, q); else { try { const r = JSON.parse(sessionStorage.getItem('pub-rascunho') || 'null'); if (r) this.setState(r); } catch (x) {} }
+    this._rs = () => this.setState({ w: window.innerWidth }); this._rs(); window.addEventListener('resize', this._rs);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._rs); clearTimeout(this._t); clearTimeout(this._e); }
+  preset = (e, q) => {
+    const T = 'Arroto de long neck gelada no calor', M = 'Abri a terceira e saiu esse. Quem segura mais que isso?';
+    const base = { vista: 'novo', envio: 'repouso', erros: {}, alerta: null, semAudioFlag: false, semCom: false, destino: '', titulo: '', corpo: '', autoriza: false };
+    const auto = q && q.get('auto') === '1';
+    const m = {
+      vazio: {},
+      comunidade: { destino: 'cerveja', titulo: T, corpo: M },
+      perfil: { destino: 'perfil', titulo: T, corpo: M },
+      autorizado: { destino: 'cerveja', titulo: T, corpo: M, autoriza: true },
+      'autorizado-perfil': { destino: 'perfil', titulo: T, corpo: M, autoriza: true },
+      enviando: { destino: 'cerveja', titulo: T, corpo: M, autoriza: true, envio: 'enviando' },
+      erro: { destino: '', titulo: '', corpo: M.slice(0, 0), erros: { destino: 'Falta escolher o destino.', titulo: 'Falta o título.', corpo: 'Falta a mensagem.' } },
+      rede: { destino: 'cerveja', titulo: T, corpo: M, autoriza: true, alerta: 'rede' },
+      falha: { destino: 'perfil', titulo: T, corpo: M, alerta: 'falha' },
+      semaudio: { destino: 'perfil', titulo: T, corpo: M, semAudioFlag: true },
+      semcomunidade: { destino: '', titulo: '', corpo: '', semCom: true },
+      'estourado': { destino: 'cerveja', titulo: T + ' '.repeat(0) + 'x'.repeat(80), corpo: M + ' ' + 'blá '.repeat(240), autoriza: true, erros: { titulo: 'Passou do limite em 7 caracteres.', corpo: 'Passou do limite em 30 caracteres.' } }
+    };
+    const s = Object.assign({}, base, m[e] || {}); if (auto) s.autoriza = true;
+    this.setState(s);
+  };
+  say = (t) => { this.setState({ toast: t }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 3000); };
+  guardar = (patch) => {
+    const s = Object.assign({}, this.state, patch);
+    try { sessionStorage.setItem('pub-rascunho', JSON.stringify({ destino: s.destino, titulo: s.titulo, corpo: s.corpo, autoriza: s.autoriza })); } catch (x) {}
+  };
+  contar = (t) => Array.from(t || '').length;
+  criar = () => {
+    const s = this.state; if (s.envio === 'enviando') return;
+    const er = {};
+    if (!s.destino) er.destino = 'Falta escolher o destino.';
+    if (!s.titulo.trim()) er.titulo = 'Falta o título.'; else if (this.contar(s.titulo) > 120) er.titulo = 'Passou do limite em ' + (this.contar(s.titulo) - 120) + ' caracteres.';
+    if (!s.corpo.trim()) er.corpo = 'Falta a mensagem.'; else if (this.contar(s.corpo) > 1000) er.corpo = 'Passou do limite em ' + (this.contar(s.corpo) - 1000) + ' caracteres.';
+    if (Object.keys(er).length) { this.setState({ erros: er, alerta: null }); return; }
+    this.setState({ erros: {}, alerta: null, envio: 'enviando' });
+    this._e = setTimeout(() => {
+      if (this.state.sim === 'erro') return this.setState({ envio: 'repouso', alerta: 'falha' });
+      if (this.state.sim === 'rede') return this.setState({ envio: 'repouso', alerta: 'rede' });
+      const f = this.state; this._tp = { destino: f.destino, titulo: f.titulo, corpo: f.corpo, autoriza: f.autoriza && !f.semAudioFlag };
+      try { sessionStorage.removeItem('pub-rascunho'); } catch (x) {}
+      this.setState({ envio: 'repouso', vista: 'topico', ultimoDestino: f.destino, ultimoTitulo: f.titulo, ultimoCorpo: f.corpo, ultimoAutoriza: f.autoriza && !f.semAudioFlag, destino: '', titulo: '', corpo: '', autoriza: false });
+      this.say('Tópico criado.');
+    }, 1300);
+  };
+  renderVals() {
+    const s = this.state, w = s.w, light = s.tema === 'light', mobile = w < 700, desk = !mobile, wide = w >= 1200, showAside = w >= 1000 && s.vista !== 'novo';
+    const v = s.vista, vNovo = v === 'novo' || v === 'convite', vForm = v === 'novo', vConvite = v === 'convite';
+    const gutter = w >= 700 ? 24 : 16;
+    const dest = this.COMS.find(c => c.id === s.destino), noPerfil = s.destino === 'perfil';
+    const enviando = s.envio === 'enviando';
+    const nota = s.nota;
+    const comunidades = s.semCom ? [] : this.COMS;
+    const semComunidades = s.semCom;
+    const tCount = this.contar(s.titulo), mCount = this.contar(s.corpo);
+    const er = s.erros || {};
+    const contaCor = (n, max) => n > max ? 'var(--danger)' : n >= max * 0.9 ? 'var(--fg)' : 'var(--muted)';
+    // ---- Texto da caixa: cita o destino ----
+    const semDestino = !s.destino;
+    let caixaTexto, caixaAjuda;
+    if (semDestino) { caixaTexto = 'Escolhe o destino acima pra poder autorizar o arroto.'; caixaAjuda = 'Sem marcar, o tópico sai só com texto e o arroto continua privado.'; }
+    else {
+      const onde = noPerfil ? 'neste tópico, no meu perfil' : 'neste tópico, em ' + dest.nome;
+      caixaTexto = 'Autorizo publicar meu arroto ' + onde + '. Qualquer pessoa pode ouvir, e quem tiver o endereço do áudio ouve mesmo fora do tópico. Posso apagar depois.';
+      caixaAjuda = s.autoriza ? 'Apagar tira o áudio do ar, mas não desfaz quem já ouviu.' : 'Sem marcar, o tópico sai só com texto e o arroto continua privado.';
+    }
+    const destinoAjuda = semComunidades ? 'Você ainda não participa de nenhuma comunidade. Dá pra publicar no perfil, ou entrar numa antes.'
+      : semDestino ? 'Escolhe onde o tópico vai ficar.'
+      : noPerfil ? 'Vai só pro seu perfil, na aba Tópicos. Não entra em comunidade nem no Explorar.'
+      : 'Aparece em ' + dest.nome + ' e na aba Tópicos do seu perfil.';
+    const alertas = {
+      rede: { t: 'Não deu pra confirmar o envio.', x: s.idem ? 'Seu texto continua aqui. Pode tentar de novo: se o tópico já tiver saído, ele não é criado duas vezes.' : 'Seu texto continua aqui. Antes de tentar de novo, confere se já apareceu.', a: s.idem ? 'Tentar de novo' : '' },
+      falha: { t: 'Não deu pra enviar.', x: 'Seu texto continua aqui, tenta de novo.', a: 'Tentar de novo' }
+    };
+    const al = alertas[s.alerta] || {};
+    const selo = (on) => ({ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1, padding: '6px 10px', borderRadius: 12, flex: 'none', background: on ? 'var(--accent)' : 'var(--surface-2)', color: on ? 'var(--accent-on)' : 'var(--fg)', boxShadow: on ? 'inset 0 0 0 1px var(--accent-contorno)' : 'inset 0 0 0 1px var(--border-strong)' });
+    const comAudio = vForm && !s.semAudioFlag;
+    const campo = { width: '100%', boxSizing: 'border-box', border: '1px solid var(--border-strong)', borderRadius: 12, background: 'transparent', color: 'var(--fg)', fontSize: 16, fontFamily: 'inherit' };
+    const btn = { display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', width: '100%', minHeight: 48, borderRadius: 999, fontSize: 16, fontWeight: 700, border: '1px solid transparent', background: 'var(--accent)', color: 'var(--accent-on)', padding: '0 20px' };
+    const navItems = [['Comunidades', 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2', 'Comunidades.dc.html'], ['Explorar', 'M12 22a10 10 0 100-20 10 10 0 000 20zM16 8l-2 6-6 2 2-6z', '#'], ['Arena', 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3', 'Arena.dc.html'], ['Perfil', 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0', 'Publicar.dc.html?vista=perfil']];
+    const ativo = vNovo ? 'Arena' : (v === 'perfil' || (v === 'topico' && s.ultimoDestino === 'perfil')) ? 'Perfil' : 'Comunidades';
+    const navB = { display: 'flex', alignItems: 'center', gap: 16, height: 52, padding: wide ? '0 20px 0 12px' : 0, width: wide ? 'auto' : 52, justifyContent: wide ? 'flex-start' : 'center', borderRadius: 999, fontSize: 20, boxSizing: 'border-box' };
+    const tabs = navItems.map(([l, d, href]) => { const on = l === ativo; return { label: l, d, href, current: on ? 'page' : undefined, sw: on ? 2.4 : 1.8, fw: on ? 700 : 500, color: on ? 'var(--fg)' : 'var(--muted)', style: { ...navB, color: on ? 'var(--fg)' : 'var(--muted)', fontWeight: on ? 700 : 500 } }; });
+    const pill = (on) => ({ height: 28, padding: '0 10px', borderRadius: 999, border: '1px solid var(--border-strong)', background: on ? 'var(--fg)' : 'transparent', color: on ? 'var(--bg)' : 'var(--fg)', fontSize: 12, cursor: 'pointer' });
+    const link = (href) => () => { location.href = href; };
+    const painelVistas = [['Formulário', 'novo'], ['Convite', 'convite'], ['Perfil', 'perfil'], ['Tópico', 'topico']].map(([l, k]) => ({ label: l, style: pill(v === k), go: () => { if (k === 'topico' && !s.ultimoTitulo) this.setState({ vista: 'topico', ultimoDestino: 'perfil', ultimoTitulo: 'Arroto de long neck gelada no calor', ultimoCorpo: 'Abri a terceira e saiu esse. Quem segura mais que isso?', ultimoAutoriza: true }); else this.setState({ vista: k }); } }));
+    const painelEstados = [['vazio', 'vazio'], ['comunidade', 'comunidade'], ['perfil', 'perfil'], ['autorizado', 'autorizado'], ['autorizado perfil', 'autorizado-perfil'], ['enviando', 'enviando'], ['erro de campo', 'erro'], ['falha', 'falha'], ['sem confirmação', 'rede'], ['estourado', 'estourado'], ['sem áudio', 'semaudio'], ['sem comunidade', 'semcomunidade']].map(([l, k]) => ({ label: l, style: pill(false), go: () => this.preset(k) }));
+    const cenarioBtn = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 44, padding: '0 20px', borderRadius: 18, fontFamily: 'var(--font-display)', textTransform: 'uppercase', fontSize: 16, boxSizing: 'border-box' };
+    // topo e vistas
+    const topoTitulo = v === 'perfil' ? 'Perfil' : (s.ultimoDestino === 'perfil' ? 'No perfil' : (this.COMS.find(c => c.id === s.ultimoDestino) || {}).nome || 'Cerveja Gelada');
+    const tituloFinal = s.ultimoTitulo || 'Arroto de long neck gelada no calor', corpoFinal = s.ultimoCorpo || 'Abri a terceira e saiu esse. Quem segura mais que isso?';
+    const novoNaLista = v === 'perfil';
+    const topicosLista = [
+      { topico: true, titulo: s.ultimoTitulo || 'Arroto de long neck gelada no calor', href: 'Publicar.dc.html?vista=topico', noPerfil: s.ultimoDestino !== 'cerveja' && s.ultimoDestino !== 'eu-arroto' && s.ultimoDestino !== 'refri', meta: 'Sem respostas · agora' },
+      { topico: true, titulo: 'Quem segura mais depois da feijoada?', href: '#', naComunidade: true, comunidade: 'Eu Arroto, e daí?', meta: '8 respostas · atividade há 3 h' },
+      { topico: true, titulo: 'Grave de refri: técnica ou dom?', href: '#', noPerfil: true, meta: '2 respostas · atividade há 2 d' }
+    ];
+    const respostasLista = [{ resposta: true, titulo: 'Arrotos em lugares proibidos', corpo: 'Já arrotei no banheiro do shopping e achar que ninguém ouviu foi o meu maior erro. O eco entregou tudo.', naComunidade: true, comunidade: 'Eu Arroto, e daí?', meta: 'há 2 d' }];
+    const lista = (s.aba === 'respostas' ? respostasLista : topicosLista).map(l => ({ ...l, naComunidade: !!l.naComunidade }));
+    const abas = [['topicos', 'Tópicos'], ['respostas', 'Respostas']].map(([k, l]) => ({ label: l, on: s.aba === k, go: () => this.setState({ aba: k }), style: { position: 'relative', flex: '1 1 0', height: 52, border: 0, background: 'none', color: s.aba === k ? 'var(--fg)' : 'var(--muted)', fontSize: 15, fontWeight: s.aba === k ? 700 : 500 }, barra: { position: 'absolute', left: '25%', right: '25%', bottom: 0, height: s.aba === k ? 3 : 0, background: 'var(--fg)', borderRadius: 3 } }));
+    const overlayStyle = mobile ? { minHeight: '100svh', background: 'var(--bg)' } : { position: 'fixed', inset: 0, zIndex: 20, background: 'var(--scrim)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, boxSizing: 'border-box', animation: 'pubFade .16s ease-out' };
+    const sheetStyle = mobile ? { minHeight: '100svh', display: 'flex', flexDirection: 'column', background: 'var(--bg)' } : { width: '100%', maxWidth: 560, maxHeight: 'calc(100vh - 48px)', overflow: 'hidden', background: 'var(--bg)', color: 'var(--fg)', borderRadius: 24, boxShadow: 'var(--sombra-dialog)', display: 'flex', flexDirection: 'column' };
+    const rotuloCriar = enviando ? 'Enviando…' : 'Criar tópico';
+    return {
+      rootStyle: { minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', fontFamily: 'var(--font-body)', boxSizing: 'border-box' },
+      painel: s.painel, painelVistas, painelEstados, pillStyle: pill(false), temaPainel: light ? 'Tema: claro' : 'Tema: escuro',
+      trocaTema: () => { const t = light ? 'dark' : 'light'; this.setState({ tema: t }); document.documentElement.setAttribute('data-theme', t); },
+      mobile, desk, wide, gutter, nota,
+      showLeft: !mobile && !(vNovo && false), brand: wide ? 'AUÊ!' : 'A!', navAlign: wide ? 'stretch' : 'center',
+      leftStyle: { width: wide ? 275 : 76, flex: 'none', position: 'sticky', top: 0, height: '100vh', padding: wide ? '0 12px 12px' : '0 8px 12px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' },
+      mainStyle: { width: '100%', maxWidth: mobile ? 'none' : 640, flex: '1 1 0', minWidth: 0, minHeight: '100vh', boxSizing: 'border-box', paddingBottom: mobile && !vNovo ? 'calc(56px + env(safe-area-inset-bottom) + 16px)' : 0 },
+      tabs, themeIcon: light ? 'M21 13A9 9 0 1111 3a7 7 0 0010 10z' : 'M12 17a5 5 0 100-10 5 5 0 000 10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1', themeLabel: light ? 'Tema escuro' : 'Tema claro',
+      themeBtn: { ...navB, height: 44, fontSize: 15, color: 'var(--muted)', border: 0, background: 'none' },
+      showAside: showAside, showBottom: mobile && !vNovo,
+      showCenario: vNovo && desk, cenarioBtnVerde: { ...cenarioBtn, background: 'var(--accent)', color: 'var(--accent-on)', border: '1px solid transparent' }, cenarioBtnContorno: { ...cenarioBtn, border: '1px solid var(--border-strong)' },
+      showTopo: !vNovo, topoVoltar: v === 'topico', topoSemVoltar: v !== 'topico', topoVoltarHref: s.ultimoDestino === 'perfil' ? 'Publicar.dc.html?vista=perfil' : '#', topoTitulo,
+      vPerfil: v === 'perfil', vTopico: v === 'topico', vNovo, vForm, vConvite,
+      abas, linhas: lista,
+      h1: w >= 700 ? 28 : w >= 360 ? 24 : 22, tituloFinal, corpoFinal, topicoNoPerfil: s.ultimoDestino === 'perfil', topicoNaComunidade: s.ultimoDestino !== 'perfil', destinoNome: (this.COMS.find(c => c.id === s.ultimoDestino) || { nome: 'Cerveja Gelada' }).nome,
+      topicoComAudio: s.ultimoAutoriza, seloOn: selo(true), campoInputStyle: { ...campo, height: 48, padding: '0 14px', borderColor: er.titulo ? 'var(--danger)' : 'var(--border-strong)' }, campoAreaStyle: { ...campo, minHeight: 152, padding: '12px 14px', resize: 'vertical', lineHeight: 1.5, borderColor: er.corpo ? 'var(--danger)' : 'var(--border-strong)' }, campoRespStyle: { ...campo, minHeight: 96, padding: '12px 14px', resize: 'vertical', lineHeight: 1.5 }, btnVerdeLink: { ...btn, textDecoration: 'none' }, btnCancelarStyle: { height: 44, padding: '0 20px', borderRadius: 999, border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--fg)', fontSize: 15, fontWeight: 700, opacity: enviando ? 0.4 : 1 }, btnVerde: { ...btn, width: 'auto', minHeight: 44 }, btnContorno: { ...btn, background: 'transparent', color: 'var(--fg)', border: '1px solid var(--border-strong)' }, btnFantasma: { ...btn, background: 'transparent', color: 'var(--muted)', fontWeight: 600 },
+      overlayStyle, sheetStyle, corpoStyle: { padding: mobile ? '16px 16px calc(24px + env(safe-area-inset-bottom))' : '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1, minHeight: 0, overflowY: mobile ? 'visible' : 'auto' }, deskForm: desk && vForm,
+      tituloTela: vConvite ? 'Publicar' : 'Novo tópico', tituloTelaPx: w < 360 ? 16 : 17, conviteTopPad: mobile ? 8 : 0,
+      cancelar: () => { if (enviando) return; this.guardar({}); location.href = 'Arena.dc.html?estado=RESULT&nota=' + nota + '&tema=' + (light ? 'claro' : 'escuro'); },
+      cancelarLabel: 'Cancelar', cancelarOp: enviando ? 0.4 : 1, enviando, criar: this.criar,
+      criarLabel: rotuloCriar, criarStyle: mobile ? { height: 44, justifySelf: 'end', whiteSpace: 'nowrap', padding: w < 360 ? '0 12px' : '0 16px', borderRadius: 999, border: '1px solid transparent', background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 15, fontWeight: 700, opacity: enviando ? 0.7 : 1 } : { height: 44, padding: '0 22px', borderRadius: 999, border: '1px solid transparent', background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 15, fontWeight: 700, opacity: enviando ? 0.7 : 1 },
+      statusEnvio: enviando ? (s.autoriza && !s.semAudioFlag ? 'Enviando o arroto e criando o tópico…' : 'Criando o tópico…') : '',
+      alertaTopo: !!s.alerta, alertaTitulo: al.t, alertaTexto: al.x, alertaAcao: al.a,
+      comunidades, semComunidades, destino: s.destino || '', onDestino: (e) => { const d = e.target.value; const patch = { destino: d, autoriza: false, erros: { ...er, destino: '' } }; this.guardar(patch); this.setState(patch); }, erroDestino: er.destino || '', erroDestinoOn: !!er.destino, destinoAjuda,
+      selectStyle: { ...campo, height: 48, padding: '0 40px 0 14px', appearance: 'none', WebkitAppearance: 'none', borderColor: er.destino ? 'var(--danger)' : 'var(--border-strong)', color: s.destino ? 'var(--fg)' : 'var(--muted)' },
+      titulo: s.titulo, onTitulo: (e) => { const p = { titulo: e.target.value, erros: { ...er, titulo: '' } }; this.guardar(p); this.setState(p); }, erroTitulo: er.titulo || '', contaTitulo: tCount + '/120',
+      corpo: s.corpo, onCorpo: (e) => { const p = { corpo: e.target.value, erros: { ...er, corpo: '' } }; this.guardar(p); this.setState(p); }, erroCorpo: er.corpo || '', contaCorpo: mCount + '/1000',
+      comAudio, semAudio: vForm && s.semAudioFlag,
+      seloStyle: selo(s.autoriza && !semDestino), seloAria: 'Nota da rodada: ' + nota + (s.autoriza ? '. Vai junto com o tópico.' : '. Só vai se você autorizar.'),
+      autoriza: s.autoriza, caixaOff: semDestino || enviando, caixaCursor: semDestino ? 'not-allowed' : 'pointer', caixaCor: semDestino ? 'var(--muted)' : 'var(--fg)', caixaTexto, caixaAjuda,
+      onAutoriza: (e) => { const p = { autoriza: e.target.checked }; this.guardar(p); this.setState(p); },
+      temRascunho: !!(s.titulo || s.corpo), descartar: () => { this.guardar({ titulo: '', corpo: '', autoriza: false }); this.setState({ titulo: '', corpo: '', autoriza: false, erros: {}, alerta: null }); try { sessionStorage.removeItem('pub-rascunho'); } catch (x) {} },
+      toast: s.toast, toastStyle: { position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: mobile ? 'calc(56px + env(safe-area-inset-bottom) + 12px)' : 32, zIndex: 30, background: 'var(--fg)', color: 'var(--bg)', borderRadius: 12, padding: '12px 20px', fontSize: 14, fontWeight: 600, animation: 'pubUp .2s ease-out' },
+      semDestino
+    };
+  }
+}
+</script>
+</body>
+</html>

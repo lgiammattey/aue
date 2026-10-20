@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,13 +13,15 @@
 <style>body{margin:0}a{color:var(--fg)}a:hover{color:var(--muted)}</style>
 </helmet>
 <div style="min-height:100vh;background:var(--page-bg);color:var(--fg);font-family:var(--font-body);padding:40px 32px;box-sizing:border-box">
-<div style="max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:40px">
-<div><span style="font-family:var(--font-display);font-size:36px;text-transform:uppercase">Bonde do Arroto · Webapp</span><p style="color:var(--muted);font-size:16px;margin:8px 0 0">Mesmo app, três larguras. Desktop em 3 colunas, tablet com menu em ícones, celular com barra inferior.</p>
-<div style="display:flex;gap:16px;margin-top:12px;font-size:15px"><a href="Landing.dc.html" style="color:var(--fg)">Landing</a><a href="Login.dc.html" style="color:var(--fg)">Login</a></div></div>
-<sc-for list="{{ frames }}" as="f" hint-placeholder-count="3">
+<div style="max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:32px">
+<div><span style="font-family:var(--font-display);font-size:36px;text-transform:uppercase">Auê! · Versões Webapp</span><p style="color:var(--muted);font-size:16px;margin:8px 0 0;max-width:720px">A mesma tela em 320, 375, 430, 768 e 1280, nos dois temas. Claro é o padrão. A Arena segue escura fixa; o claro dela é prova (ver docs/design/tema-e-publicar.md).</p>
+<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+<sc-for list="{{ telas }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</div></div>
+<sc-for list="{{ frames }}" as="f" hint-placeholder-count="10">
 <section style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;gap:16px;align-items:baseline"><b style="font-size:18px">{{ f.title }}</b><span style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ f.size }}</span><a href="{{ f.src }}" style="color:var(--fg);font-size:14px">Abrir</a></div>
-<div style="{{ f.box }}"><iframe src="{{ f.src }}" style="{{ f.frame }}" title="{{ f.title }}"></iframe></div>
+<div style="display:flex;gap:16px;align-items:baseline"><b style="font-size:18px">{{ f.title }}</b><span style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">{{ f.size }}</span><a href="{{ f.src }}" style="color:var(--fg);font-size:14px;text-decoration:underline">Abrir</a></div>
+<div style="{{ f.box }}"><iframe src="{{ f.src }}" style="{{ f.frame }}" title="{{ f.title }}" loading="lazy"></iframe></div>
 </section>
 </sc-for>
 </div>
@@ -27,9 +29,24 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
+  state = { tela: 0 };
   renderVals() {
-    const mk = (title, src, w, h, k) => ({ title, src, size: w + ' × ' + h, box: { width: w * k, height: h * k, border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', background: 'var(--bg)' }, frame: { width: w, height: h, border: 0, transform: 'scale(' + k + ')', transformOrigin: '0 0' } });
-    return { frames: [mk('Desktop · Feed', 'Bonde do Arroto.dc.html', 1280, 800, 0.9), mk('Desktop · Arena', 'Arena.dc.html', 1280, 800, 0.9), mk('Tablet · Feed', 'Bonde do Arroto.dc.html', 820, 900, 0.8), mk('Celular · Feed', 'Bonde do Arroto.dc.html', 390, 844, 0.8), mk('Celular · Arena', 'Arena.dc.html', 390, 844, 0.8)] };
+    const T = [
+      ['Arena · RESULT', 'Arena.dc.html', 'estado=RESULT&nota=91', true],
+      ['Publicar · formulário', 'Publicar.dc.html', 'estado=autorizado&painel=0', false],
+      ['Publicar · perfil, aba Tópicos', 'Publicar.dc.html', 'vista=perfil&painel=0', false],
+      ['Publicar · tópico no perfil', 'Publicar.dc.html', 'vista=topico&destino=perfil&auto=1&painel=0', false]
+    ];
+    const W = [[320, 640], [375, 812], [430, 860], [768, 900], [1280, 800]];
+    const sel = T[this.state.tela];
+    const frames = [];
+    for (const [w, h] of W) for (const tema of ['claro', 'escuro']) {
+      const k = w >= 1000 ? 0.45 : w >= 700 ? 0.55 : 0.7;
+      const src = sel[1] + '?' + sel[2] + '&tema=' + tema;
+      frames.push({ title: sel[0] + ' · ' + tema, size: w + ' × ' + h, src, box: { width: w * k, height: h * k, border: '1px solid var(--border-strong)', borderRadius: 12, overflow: 'hidden', background: 'var(--bg)' }, frame: { width: w, height: h, border: 0, transform: 'scale(' + k + ')', transformOrigin: '0 0' } });
+    }
+    const telas = T.map((t, i) => ({ label: t[0], go: () => this.setState({ tela: i }), style: { height: 36, padding: '0 14px', borderRadius: 999, border: '1px solid var(--border-strong)', background: i === this.state.tela ? 'var(--fg)' : 'transparent', color: i === this.state.tela ? 'var(--bg)' : 'var(--fg)', fontSize: 14, cursor: 'pointer' } }));
+    return { frames, telas };
   }
 }
 </script>

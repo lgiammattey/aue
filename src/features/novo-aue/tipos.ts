@@ -21,3 +21,11 @@ export interface DetalhesDaComunidade {
   readonly rules: readonly string[];
   readonly moderators: readonly (readonly [string, string])[];
 }
+
+export interface ItemComentario {
+  readonly id: string;
+  readonly autorNome: string;
+  readonly autorHandle?: string;
+  readonly conteudo: string;
+  readonly criadoEm: string;
+}

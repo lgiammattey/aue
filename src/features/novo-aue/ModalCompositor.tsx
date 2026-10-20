@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { ComunidadeDoForum } from '../../portas/forum';
 
 interface Props {
@@ -21,11 +22,22 @@ export function ModalCompositor({
   aoFechar,
   aoPublicar,
 }: Props) {
+  const navigate = useNavigate();
   const [tipo, setTipo] = useState<'Texto' | 'Áudio' | 'Vídeo'>('Texto');
   const [titulo, setTitulo] = useState('');
   const [corpo, setCorpo] = useState('');
-  const [comunidadeSlug, setComunidadeSlug] = useState(comunidadePadraoSlug ?? comunidades[0]?.slug ?? 'arena-do-arroto');
+  const [comunidadeSlug, setComunidadeSlug] = useState(
+    comunidadePadraoSlug ?? comunidades[0]?.slug ?? 'arena-do-arroto',
+  );
   const [enviando, setEnviando] = useState(false);
+
+  useEffect(() => {
+    if (comunidadePadraoSlug) {
+      setComunidadeSlug(comunidadePadraoSlug);
+    } else if (comunidades.length > 0 && (!comunidadeSlug || !comunidades.some((c) => c.slug === comunidadeSlug))) {
+      setComunidadeSlug(comunidades[0].slug);
+    }
+  }, [comunidadePadraoSlug, comunidades, comunidadeSlug]);
 
   if (!aberto) return null;
 
@@ -94,6 +106,25 @@ export function ModalCompositor({
             required
             aria-label="Título da publicação"
           />
+
+          {tipo === 'Áudio' && (
+            <div style={{ background: 'var(--aue-surface-2)', border: '1px solid var(--aue-line)', borderRadius: 8, padding: 12, marginBottom: 12 }}>
+              <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--aue-muted)' }}>
+                Quer gravar seu arroto com medição real do algoritmo YAMNet e receber a nota da banca?
+              </p>
+              <button
+                type="button"
+                className="tab"
+                style={{ border: '1px solid var(--aue-accent)', color: 'var(--aue-accent)' }}
+                onClick={() => {
+                  aoFechar();
+                  navigate('/arena');
+                }}
+              >
+                🎙 Abrir a Arena de Gravação
+              </button>
+            </div>
+          )}
 
           <textarea
             placeholder={

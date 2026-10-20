@@ -82,7 +82,19 @@ export const CardDoPost = memo(function CardDoPost({
           )}
         </div>
 
-        <h3>{post.titulo}</h3>
+        <h3
+          onClick={aoAbrirComentarios}
+          style={{ cursor: aoAbrirComentarios ? 'pointer' : 'default' }}
+          tabIndex={aoAbrirComentarios ? 0 : undefined}
+          onKeyDown={(e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && aoAbrirComentarios) {
+              e.preventDefault();
+              aoAbrirComentarios();
+            }
+          }}
+        >
+          {post.titulo}
+        </h3>
 
         {post.corpo && <p>{post.corpo}</p>}
 

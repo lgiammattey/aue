@@ -12,11 +12,12 @@ import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
 import { CardDoPost } from './CardDoPost';
 import { ModalCompositor } from './ModalCompositor';
+import { ModalComentarios } from './ModalComentarios';
 import { ModalEditarPerfil } from './ModalEditarPerfil';
 import { ModalFundarComunidade } from './ModalFundarComunidade';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
 import { PainelDireito } from './PainelDireito';
-import type { DetalhesDaComunidade, ItemDoFeed } from './tipos';
+import type { DetalhesDaComunidade, ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
 import './InicioOpenDesign.css';
 
@@ -160,6 +161,11 @@ export function InicioOpenDesign({
 
   // Modais
   const [modalCompositorAberto, setModalCompositorAberto] = useState(abrirCompositor);
+  const [modalComentariosAberto, setModalComentariosAberto] = useState(false);
+  const [postComentariosAtivo, setPostComentariosAtivo] = useState<ItemDoFeed | null>(null);
+  const [listaComentarios, setListaComentarios] = useState<readonly ItemComentario[]>([]);
+  const [carregandoComentarios, setCarregandoComentarios] = useState(false);
+  const [enviandoComentario, setEnviandoComentario] = useState(false);
   const [modalFundarAberto, setModalFundarAberto] = useState(false);
   const [modalGerirComunidadeAberto, setModalGerirComunidadeAberto] = useState(false);
   const [modalInstitucionalAberto, setModalInstitucionalAberto] = useState(false);
@@ -508,30 +514,177 @@ export function InicioOpenDesign({
     setAuthStatus('Pedido recebido. Você será avisado por e-mail.');
   };
 
+  const abrirComentarios = async (post: ItemDoFeed) => {
+    setPostComentariosAtivo(post);
+    setModalComentariosAberto(true);
+    setCarregandoComentarios(true);
+    setListaComentarios([]);
+
+    try {
+      if (post.tipo === 'topico') {
+        const topicoId = post.id.replace('topico-', '');
+        const res = await forum.listarRespostasDoTopico?.(topicoId);
+        if (res && res.ok) {
+          setListaComentarios(
+            res.valor.itens.map((r) => ({
+              id: r.id,
+              autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
+              autorHandle: r.autor?.handle ?? undefined,
+              conteudo: r.corpo ?? '',
+              criadoEm: r.criadoEm,
+            })),
+          );
+        }
+      } else {
+        const causoId = post.id.replace('causo-', '');
+        const res = await comunidadePort.listarRespostas?.(causoId);
+        if (res) {
+          setListaComentarios(
+            res.map((r) => ({
+              id: r.id,
+              autorNome: r.autorNome,
+              autorHandle: r.autorHandle,
+              conteudo: r.conteudo,
+              criadoEm: r.criadoEm,
+            })),
+          );
+        }
+      }
+    } catch {
+      // Mantém lista vazia sem interromper navegação
+    } finally {
+      setCarregandoComentarios(false);
+    }
+  };
+
+  const enviarComentario = async (conteudo: string) => {
+    if (!postComentariosAtivo || !conteudo.trim()) return;
+    setEnviandoComentario(true);
+
+    try {
+      const meuNome = meuPerfil?.apelido ?? 'Você';
+      const meuHandle = meuPerfil?.handle ?? 'arrotador';
+
+      if (postComentariosAtivo.tipo === 'topico') {
+        const topicoId = postComentariosAtivo.id.replace('topico-', '');
+        const res = await forum.responderTopico?.({
+          topicoId,
+          corpo: conteudo.trim(),
+        });
+        if (res && !res.ok && res.motivo === 'precisaEntrar') {
+          exibirToast('Entre na sua conta para comentar.');
+          if (aoEntrar) {
+            aoEntrar();
+          } else {
+            setViewAtual('auth');
+          }
+          return;
+        }
+      } else {
+        const causoId = postComentariosAtivo.id.replace('causo-', '');
+        await comunidadePort.adicionarResposta?.(
+          causoId,
+          conteudo.trim(),
+          meuNome,
+          meuHandle,
+        );
+      }
+
+      const novoComentario: ItemComentario = {
+        id: `comentario-${Date.now()}`,
+        autorNome: meuNome,
+        autorHandle: meuHandle,
+        conteudo: conteudo.trim(),
+        criadoEm: new Date().toISOString(),
+      };
+
+      setListaComentarios((prev) => [...prev, novoComentario]);
+
+      const incrementar = (itens: readonly ItemDoFeed[]) =>
+        itens.map((it) =>
+          it.id === postComentariosAtivo.id
+            ? { ...it, respostasTotal: it.respostasTotal + 1 }
+            : it,
+        );
+
+      setItensFeed(incrementar);
+      setTopicosDaComunidade(incrementar);
+      exibirToast('Comentário publicado na roda!');
+    } catch {
+      exibirToast('Não foi possível enviar o comentário agora.');
+    } finally {
+      setEnviandoComentario(false);
+    }
+  };
+
   const publicarPost = async (dados: {
     titulo: string;
     corpo: string;
     comunidadeSlug: string;
     tipo: 'Texto' | 'Áudio' | 'Vídeo';
   }) => {
-    await forum.criarTopico?.({
-      comunidadeSlug: dados.comunidadeSlug,
-      titulo: dados.titulo,
-      corpo: dados.corpo,
-    });
-    exibirToast('Publicado com sucesso.');
-    setItensFeed((prev) => [
-      {
-        id: `topico-${Date.now()}`,
-        tipo: 'topico',
+    const meuNome = meuPerfil?.apelido ?? 'Você';
+    const meuHandle = meuPerfil?.handle;
+    let postCriadoId = `topico-${Date.now()}`;
+
+    try {
+      const resForum = await forum.criarTopico?.({
         comunidadeSlug: dados.comunidadeSlug,
         titulo: dados.titulo,
         corpo: dados.corpo,
-        autorNome: meuPerfil?.apelido ?? 'Você',
-        autorHandle: meuPerfil?.handle,
+      });
+      if (resForum && resForum.ok) {
+        postCriadoId = `topico-${resForum.valor.id}`;
+      }
+    } catch {
+      // segue para causo
+    }
+
+    try {
+      await comunidadePort.postarCauso?.({
+        conteudo: dados.corpo ? `${dados.titulo}\n\n${dados.corpo}` : dados.titulo,
+        comunidadeSlug: dados.comunidadeSlug,
+        autorNome: meuNome,
+        autorHandle: meuHandle,
+        consentimentoAudioPublico: true,
+      });
+    } catch {
+      // fallback
+    }
+
+    exibirToast('Publicado com sucesso.');
+
+    const novoItem: ItemDoFeed = {
+      id: postCriadoId,
+      tipo: 'topico',
+      comunidadeSlug: dados.comunidadeSlug,
+      titulo: dados.titulo,
+      corpo: dados.corpo,
+      autorNome: meuNome,
+      autorHandle: meuHandle,
+      criadoEm: new Date().toISOString(),
+      votos: 1,
+      respostasTotal: 0,
+    };
+
+    setItensFeed((prev) => [novoItem, ...prev]);
+    setTopicosDaComunidade((prev) => [novoItem, ...prev]);
+    setCausosDoPerfil((prev) => [
+      {
+        id: postCriadoId,
+        comunidadeId: '1',
+        comunidadeSlug: dados.comunidadeSlug,
+        autorNome: meuNome,
+        autorHandle: meuHandle,
+        conteudo: dados.titulo,
         criadoEm: new Date().toISOString(),
-        votos: 1,
-        respostasTotal: 0,
+        reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
+        curtidas: 0,
+        curtidoPorMim: false,
+        reposts: 0,
+        repostadoPorMim: false,
+        totalComentarios: 0,
+        meu: true,
       },
       ...prev,
     ]);
@@ -661,7 +814,7 @@ export function InicioOpenDesign({
                   aoVotar={(delta) => alternarVoto(post.id, delta)}
                   aoAlternarSalvar={() => alternarSalvo(post.id)}
                   aoTocarAudio={alternarAudio}
-                  aoAbrirComentarios={() => {}}
+                  aoAbrirComentarios={() => void abrirComentarios(post)}
                 />
               ))}
             </div>
@@ -779,6 +932,7 @@ export function InicioOpenDesign({
                       aoVotar={(delta) => alternarVoto(post.id, delta)}
                       aoAlternarSalvar={() => alternarSalvo(post.id)}
                       aoTocarAudio={alternarAudio}
+                      aoAbrirComentarios={() => void abrirComentarios(post)}
                     />
                   ))}
                 </div>
@@ -1110,6 +1264,33 @@ export function InicioOpenDesign({
         comunidadePadraoSlug={comunidadeSlug}
         aoFechar={() => setModalCompositorAberto(false)}
         aoPublicar={publicarPost}
+      />
+
+      <ModalComentarios
+        aberto={modalComentariosAberto}
+        post={postComentariosAtivo}
+        comentarios={listaComentarios}
+        carregando={carregandoComentarios}
+        enviando={enviandoComentario}
+        aoFechar={() => {
+          setModalComentariosAberto(false);
+          setPostComentariosAtivo(null);
+        }}
+        aoEnviarComentario={enviarComentario}
+        aoIrParaConversaCompleta={
+          postComentariosAtivo
+            ? () => {
+                setModalComentariosAberto(false);
+                if (postComentariosAtivo.tipo === 'topico') {
+                  const topicoId = postComentariosAtivo.id.replace('topico-', '');
+                  navigate(`/c/${postComentariosAtivo.comunidadeSlug}/t/${topicoId}`);
+                } else {
+                  const causoId = postComentariosAtivo.id.replace('causo-', '');
+                  navigate(`/historia/${causoId}`);
+                }
+              }
+            : undefined
+        }
       />
 
       <ModalFundarComunidade

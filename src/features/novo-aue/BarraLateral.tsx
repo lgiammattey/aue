@@ -97,10 +97,7 @@ export const BarraLateral = memo(function BarraLateral({
         <button
           className="create-side"
           type="button"
-          onClick={() => {
-            navigate('/arena');
-            aoAbrirCompositor();
-          }}
+          onClick={aoAbrirCompositor}
         >
           + Soltar um arroto
         </button>

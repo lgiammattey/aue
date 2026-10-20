@@ -42,7 +42,26 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     obterComunidadeDoForum: vi.fn(),
     listarTopicos: vi.fn(),
     obterTopico: vi.fn(),
-    listarRespostasDoTopico: vi.fn(),
+    listarRespostasDoTopico: vi.fn(async () => ({
+      ok: true as const,
+      valor: {
+        itens: [
+          {
+            id: 'resp-1',
+            topicoId: 'topico-1',
+            paiId: null,
+            nivel: 0 as const,
+            autor: { id: 'autor-2', handle: 'pedro_som', apelido: 'Pedro Som', avatarUrl: null },
+            corpo: 'Esse som foi histórico na firma!',
+            status: 'publicado' as const,
+            criadoEm: '2026-10-19T11:00:00Z',
+            editadoEm: null,
+            souAutor: false,
+          },
+        ],
+        proximo: null,
+      },
+    })),
     explorarTopicos: vi.fn(async () => ({
       ok: true as const,
       valor: {
@@ -237,5 +256,49 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     const btnConvite = screen.getByRole('button', { name: 'Pedir convite' });
     fireEvent.click(btnConvite);
     expect(screen.getByRole('heading', { level: 1, name: 'Pedir convite' })).toBeTruthy();
+  });
+
+  it('permite abrir o modal de comentários, ler a conversa e responder na roda', async () => {
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={mockComunidade}
+          autenticado={true}
+        />
+      </MemoryRouter>,
+    );
+
+    // Espera o post carregar
+    expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
+
+    // Clica no botão de comentários
+    const btnComentarios = screen.getByRole('button', { name: /12 comentários/i });
+    fireEvent.click(btnComentarios);
+
+    // Diálogo aberto com cabeçalho
+    expect(await screen.findByRole('heading', { level: 2, name: 'Resenha na roda' })).toBeTruthy();
+
+    // Comentário da porta carregado
+    expect(await screen.findByText('Esse som foi histórico na firma!')).toBeTruthy();
+    expect(screen.getByText('Pedro Som')).toBeTruthy();
+
+    // Digita e envia uma resposta
+    const inputResposta = screen.getByPlaceholderText('Responder para a roda…');
+    fireEvent.change(inputResposta, { target: { value: 'Eu estava lá e confirmo o eco!' } });
+
+    const btnEnviar = screen.getByRole('button', { name: 'Responder' });
+    fireEvent.click(btnEnviar);
+
+    await waitFor(() => {
+      expect(mockForum.responderTopico).toHaveBeenCalledWith(
+        expect.objectContaining({
+          corpo: 'Eu estava lá e confirmo o eco!',
+        }),
+      );
+    });
+
+    // Nova resposta renderizada na lista
+    expect(await screen.findByText('Eu estava lá e confirmo o eco!')).toBeTruthy();
   });
 });

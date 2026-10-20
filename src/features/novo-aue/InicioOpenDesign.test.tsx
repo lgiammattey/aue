@@ -4,6 +4,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeForum } from '../../portas/forum';
+import type { PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
+import type { CapturaDeAudio } from '../../portas/captura';
 import { InicioOpenDesign } from './InicioOpenDesign';
 
 describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
@@ -53,7 +55,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
             nivel: 0 as const,
             autor: { id: 'autor-2', handle: 'pedro_som', apelido: 'Pedro Som', avatarUrl: null },
             corpo: 'Esse som foi histórico na firma!',
-            status: 'publicado' as const,
+            status: 'visivel' as const,
             criadoEm: '2026-10-19T11:00:00Z',
             editadoEm: null,
             souAutor: false,
@@ -142,6 +144,10 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     // Feed com tópico real carregado da porta
     expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
     expect(screen.getByText('u/ze_do_eco')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Abrir perfil de u/ze_do_eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
+    expect(screen.queryByLabelText('Votar positivo')).toBeNull();
+    expect(screen.getByRole('button', { name: '♡ Curtir' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '🔥' })).toBeTruthy();
 
     // Comunidades reais na sidebar e rightbar
     expect(screen.getAllByText('r/arena-do-arroto').length).toBeGreaterThan(0);
@@ -167,7 +173,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getByText('Comunidade · Top')).toBeTruthy();
   });
 
-  it('abre o modal de publicação ao clicar em Soltar um arroto e envia dados reais', async () => {
+  it('abre o diálogo de gravação direta ao clicar em Soltar um arroto', async () => {
     render(
       <MemoryRouter>
         <InicioOpenDesign
@@ -181,21 +187,73 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     const btnSoltar = screen.getByRole('button', { name: '+ Soltar um arroto' });
     fireEvent.click(btnSoltar);
 
-    // Modal aberto
-    expect(screen.getByRole('heading', { level: 2, name: 'Soltar um arroto' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Gravar um arroto' })).toBeTruthy();
+    expect(screen.getByText('Gravação direta: não passa pelo motor e não recebe nota.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Gravar agora/ })).toBeTruthy();
+    expect(screen.queryByLabelText('Título da publicação')).toBeNull();
+  });
 
-    // Preenche e publica
-    const inputTitulo = screen.getByLabelText('Título da publicação');
-    fireEvent.change(inputTitulo, { target: { value: 'Meu novo causo épico' } });
+  it('grava, torna a visibilidade explícita e entrega o áudio para o perfil marcado', async () => {
+    const captura: CapturaDeAudio = {
+      pedir: vi.fn(async () => ({ ok: true as const })),
+      comecar: vi.fn(() => true),
+      parar: vi.fn(async () => ({
+        dados: new Blob(['arroto'], { type: 'audio/webm' }),
+        formato: 'audio/webm',
+        duracaoMs: 1200,
+        resumo: { rms: 0.2, pico: 0.4 },
+      })),
+      nivelAtual: vi.fn(() => 0),
+      soltar: vi.fn(),
+      estaVivo: vi.fn(() => false),
+      estaGravando: vi.fn(() => false),
+    };
+    const arrotos: PortaDeArrotosDoPerfil = {
+      prepararArroto: vi.fn(async () => ({
+        ok: true as const,
+        rascunho: {
+          id: 'arroto-1', caminhoDoAudio: 'eu/arroto-1', perfilDestinoId: 'destino',
+          perfilDestinoHandle: 'bia', perfilDestinoApelido: 'Bia',
+        },
+      })),
+      publicarArroto: vi.fn(async () => ({
+        ok: true as const,
+        arroto: {
+          id: 'arroto-1', perfilId: 'destino', autorId: 'eu', autorHandle: 'gio', autorApelido: 'Gio',
+          duracaoSegundos: 1.2, criadoEm: '2026-10-20T12:00:00Z', meu: true, possoOcultar: true,
+          enderecoDoAudio: vi.fn(async () => 'https://audio.test/arroto-1'),
+        },
+      })),
+      listarArrotos: vi.fn(async () => []),
+      ocultarArroto: vi.fn(async () => true),
+    };
 
-    const btnPublicar = screen.getByRole('button', { name: 'Publicar no Auê' });
-    fireEvent.click(btnPublicar);
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={mockComunidade}
+          portaArrotosDoPerfil={arrotos}
+          capturaDireta={captura}
+          autenticado
+        />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '+ Soltar um arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: /Gravar agora/ }));
+    await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce());
+    fireEvent.click(screen.getByRole('button', { name: /Parar gravação/ }));
+    expect(await screen.findByText(/visível no grupo Arrotos do perfil escolhido/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('radio', { name: /Perfil de outra pessoa/i }));
+    fireEvent.change(screen.getByLabelText('@ de quem vai receber o arroto'), { target: { value: '@Bia' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar arroto' }));
 
     await waitFor(() => {
-      expect(mockForum.criarTopico).toHaveBeenCalledWith(
-        expect.objectContaining({
-          titulo: 'Meu novo causo épico',
-        }),
+      expect(arrotos.prepararArroto).toHaveBeenCalledWith('bia');
+      expect(arrotos.publicarArroto).toHaveBeenCalledWith(
+        expect.objectContaining({ perfilDestinoHandle: 'bia' }), expect.any(Blob), 1.2,
       );
     });
   });
@@ -282,6 +340,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     // Comentário da porta carregado
     expect(await screen.findByText('Esse som foi histórico na firma!')).toBeTruthy();
     expect(screen.getByText('Pedro Som')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Abrir perfil de Zé do Eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
+    expect(screen.getByRole('link', { name: 'Abrir perfil de Pedro Som' }).getAttribute('href')).toBe('/u/pedro_som');
 
     // Digita e envia uma resposta
     const inputResposta = screen.getByPlaceholderText('Responder para a roda…');

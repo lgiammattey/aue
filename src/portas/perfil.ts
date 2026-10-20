@@ -10,6 +10,8 @@ export interface PerfilPublico {
   readonly handle: string;
   readonly apelido: string;
   readonly avatarUrl?: string;
+  /** URL pública derivada do caminho próprio e da revisão da capa no servidor. */
+  readonly capaUrl?: string;
   readonly bio?: string;
   readonly cidade?: string;
   readonly titulo?: string;
@@ -63,6 +65,14 @@ export type ResultadoDaFoto =
   | { readonly ok: false; readonly motivo: 'semConta' }
   | { readonly ok: false; readonly motivo: 'falhou' };
 
+/** Resultado explícito da troca da capa pública do perfil. */
+export type ResultadoDaCapa =
+  | { readonly ok: true; readonly perfil: PerfilPublico }
+  | { readonly ok: false; readonly motivo: 'formatoInvalido' }
+  | { readonly ok: false; readonly motivo: 'grandeDemais' }
+  | { readonly ok: false; readonly motivo: 'semConta' }
+  | { readonly ok: false; readonly motivo: 'falhou' };
+
 export type ResultadoDaEdicao =
   | { readonly ok: true; readonly perfil: PerfilPublico }
   | { readonly ok: false; readonly motivo: 'handleEmUso' }
@@ -96,5 +106,8 @@ export interface PortaDePerfil {
   /** Troca a foto. A imagem é reduzida antes de subir. */
   enviarFoto(imagem: Blob): Promise<ResultadoDaFoto>;
   removerFoto(): Promise<ResultadoDaFoto>;
+  /** Troca a capa. A imagem é reduzida antes de subir e nunca aceita URL externa. */
+  enviarCapa(imagem: Blob): Promise<ResultadoDaCapa>;
+  removerCapa(): Promise<ResultadoDaCapa>;
   listarConexoes(handle: string, tipo: 'seguidores' | 'seguindo'): Promise<readonly Conexao[]>;
 }

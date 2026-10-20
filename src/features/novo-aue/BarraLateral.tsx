@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { ComunidadeDoForum } from '../../portas/forum';
 
 interface Props {
-  readonly viewAtual: 'feed' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewAtual: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
   readonly comunidadeAtivaSlug?: string;
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly estaAutenticado: boolean;
-  readonly aoMudarView: (view: 'feed' | 'auth' | 'perfil' | 'comunidade' | 'comunidades', slug?: string) => void;
+  readonly aoMudarView: (view: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades', slug?: string) => void;
   readonly aoAbrirCompositor: () => void;
   readonly aoAbrirFundar: () => void;
   readonly aoSair: () => void;
@@ -56,24 +56,24 @@ export const BarraLateral = memo(function BarraLateral({
           <span className="ico">⌂</span>Início
         </button>
         <button
-          className="nav-item"
+          className={`nav-item ${viewAtual === 'emAlta' ? 'active' : ''}`}
           type="button"
           onClick={() => {
-            aoMudarView('feed');
-            navigate('/');
+            aoMudarView('emAlta');
+            navigate('/em-alta');
           }}
         >
           <span className="ico">↗</span>Em alta
         </button>
         <button
-          className="nav-item"
+          className={`nav-item ${viewAtual === 'seguindo' ? 'active' : ''}`}
           type="button"
           onClick={() => {
             if (!estaAutenticado) {
               aoEntrar?.();
             } else {
-              aoMudarView('feed');
-              navigate('/');
+              aoMudarView('seguindo');
+              navigate('/seguindo');
             }
           }}
         >

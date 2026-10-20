@@ -10,6 +10,10 @@ describe('Comunidades padrão do Auê 3.0', () => {
     expect(raiz?.icone).toBe('🦍');
   });
 
+  it('encontra a comunidade de vídeos pelo slug usado no feed', () => {
+    expect(obterComunidadePorSlug('arrotos-youtube')?.nome).toBe('Arrotos no YouTube');
+  });
+
   it('todas as comunidades têm slug, nome e ícone válidos', () => {
     expect(COMUNIDADES_PADRAO.length).toBeGreaterThanOrEqual(4);
     for (const comu of COMUNIDADES_PADRAO) {

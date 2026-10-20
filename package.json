@@ -10,6 +10,8 @@
     "elenco:preparar": "node scripts/elenco-burpzilla/preparar-audio.ts",
     "elenco:sortear": "node scripts/elenco-burpzilla/sortear.ts",
     "elenco:backfill": "node scripts/elenco-burpzilla/aplicar.ts",
+    "squad:contas": "node scripts/agentes-da-squad/aplicar.ts",
+    "squad:rodada": "node scripts/rodada-da-squad/aplicar.ts",
     "assets:marca": "node docs/design/design-system/system/scripts/gerar-marca.mjs && python docs/design/design-system/system/scripts/build-favicons.py",
     "typecheck": "tsc -b && tsc -p tsconfig.test.json",
     "test": "NODE_OPTIONS=\"--no-experimental-webstorage\" vitest run",

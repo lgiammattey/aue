@@ -15,7 +15,7 @@ const perfil: PerfilPublico = {
 function portas(perfilAtual: PerfilPublico | null = perfil) {
   const perfilPort: PortaDePerfil = {
     obterPerfil: vi.fn(), obterMeuPerfil: vi.fn(async () => perfilAtual), obterMeuPerfilParaEdicao: vi.fn(), alternarSeguir: vi.fn(),
-    concluirMeuPerfilSocial: vi.fn(), atualizarMeuPerfil: vi.fn(), enviarFoto: vi.fn(), removerFoto: vi.fn(), listarConexoes: vi.fn(async () => []),
+    concluirMeuPerfilSocial: vi.fn(), atualizarMeuPerfil: vi.fn(), enviarFoto: vi.fn(), removerFoto: vi.fn(), enviarCapa: vi.fn(), removerCapa: vi.fn(), listarConexoes: vi.fn(async () => []),
   };
   const comunidadePort = { listarFeed: vi.fn(async () => [{ id: 'c1', comunidadeId: 'g1', comunidadeSlug: 'firma', autorNome: 'Betão', conteudo: 'Foi alto.', reacoes: { fogo: 0, nojo: 0, trofeu: 0 }, curtidas: 0, reposts: 0, totalComentarios: 0, criadoEm: '2026-10-02T12:00:00Z' }]) } as unknown as PortaDeComunidade;
   const contaPort: PortaDeConta = { estado: vi.fn(async () => ({ temSessao: true, anonima: false, podeParticiparSocialmente: true })), cadastrar: vi.fn(), entrar: vi.fn(), enviarLinkDeRedefinicao: vi.fn(), redefinirSenha: vi.fn(), sair: vi.fn(async () => true) };

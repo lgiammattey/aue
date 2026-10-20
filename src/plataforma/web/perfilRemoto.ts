@@ -6,6 +6,7 @@ import type {
   DadosDoPerfil,
   PerfilPublico,
   PortaDePerfil,
+  ResultadoDaCapa,
   ResultadoDaEdicao,
   ResultadoDaFoto,
 } from '../../portas/perfil';
@@ -16,6 +17,8 @@ export interface LinhaDePerfil {
   handle: string;
   apelido: string | null;
   url_do_avatar: string | null;
+  caminho_da_capa: string | null;
+  revisao_da_capa: number | null;
   bio: string | null;
   cidade: string | null;
   titulo: string | null;
@@ -34,12 +37,13 @@ export interface LinhaDePerfil {
   conta_da_casa: boolean;
 }
 
-export function traduzirPerfil(l: LinhaDePerfil): PerfilPublico {
+export function traduzirPerfil(l: LinhaDePerfil, capaUrl?: string): PerfilPublico {
   return {
     id: l.id,
     handle: l.handle,
     apelido: l.apelido?.trim() || 'Arrotador',
     avatarUrl: l.url_do_avatar ?? undefined,
+    capaUrl,
     bio: l.bio ?? undefined,
     cidade: l.cidade ?? undefined,
     titulo: l.titulo ?? undefined,
@@ -59,13 +63,59 @@ export function traduzirPerfil(l: LinhaDePerfil): PerfilPublico {
   };
 }
 
+const TIPOS_DE_IMAGEM = ['image/jpeg', 'image/png', 'image/webp'];
+const LIMITE_DA_IMAGEM = 15 * 1024 * 1024;
+const BUCKET_DE_CAPAS = 'capas_de_perfil';
+
+/**
+ * Recorta a capa na proporção 3:1 e não sobe o original. Vive aqui porque
+ * canvas e createImageBitmap pertencem ao adaptador web, nunca à tela.
+ */
+async function reduzirParaCapa(arquivo: Blob): Promise<Blob | null> {
+  try {
+    const bitmap = await createImageBitmap(arquivo);
+    const largura = bitmap.width;
+    const altura = bitmap.height;
+    const proporcao = 3;
+    let origemX = 0;
+    let origemY = 0;
+    let origemLargura = largura;
+    let origemAltura = altura;
+
+    if (largura / altura > proporcao) {
+      origemLargura = altura * proporcao;
+      origemX = (largura - origemLargura) / 2;
+    } else {
+      origemAltura = largura / proporcao;
+      origemY = (altura - origemAltura) / 2;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1500;
+    canvas.height = 500;
+    const contexto = canvas.getContext('2d');
+    if (!contexto) return null;
+    contexto.drawImage(bitmap, origemX, origemY, origemLargura, origemAltura, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    return await new Promise<Blob | null>((resolver) => canvas.toBlob((imagem) => resolver(imagem), 'image/jpeg', 0.85));
+  } catch {
+    return null;
+  }
+}
+
+function urlPublicaDaCapa(caminho: string | null, revisao: number | null): string | undefined {
+  if (!caminho || revisao === null || !Number.isFinite(revisao)) return undefined;
+  const { data } = supabase.storage.from(BUCKET_DE_CAPAS).getPublicUrl(caminho);
+  return `${data.publicUrl}?v=${revisao}`;
+}
+
 /** Adaptador web da porta de perfil. */
 export function criarPerfilRemoto(): PortaDePerfil {
   async function porHandle(handle: string): Promise<PerfilPublico | null> {
     const { data, error } = await supabase.rpc('obter_perfil_publico', { p_handle: handle });
     if (error) throw error;
     const linha = ((data ?? []) as LinhaDePerfil[])[0];
-    return linha ? traduzirPerfil(linha) : null;
+    return linha ? traduzirPerfil(linha, urlPublicaDaCapa(linha.caminho_da_capa, linha.revisao_da_capa)) : null;
   }
 
   return {
@@ -203,10 +253,10 @@ export function criarPerfilRemoto(): PortaDePerfil {
 
     async enviarFoto(imagem: Blob): Promise<ResultadoDaFoto> {
       if (configuracaoAusente) return { ok: false, motivo: 'falhou' };
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(imagem.type)) {
+      if (!TIPOS_DE_IMAGEM.includes(imagem.type)) {
         return { ok: false, motivo: 'formatoInvalido' };
       }
-      if (imagem.size > 15 * 1024 * 1024) return { ok: false, motivo: 'grandeDemais' };
+      if (imagem.size > LIMITE_DA_IMAGEM) return { ok: false, motivo: 'grandeDemais' };
       try {
         const sessao = await garantirSessao();
         const uid = sessao?.user?.id;
@@ -250,6 +300,51 @@ export function criarPerfilRemoto(): PortaDePerfil {
         return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'falhou' };
       } catch (erro) {
         console.error('Falha ao remover a foto', erro);
+        return { ok: false, motivo: 'falhou' };
+      }
+    },
+
+    async enviarCapa(imagem: Blob): Promise<ResultadoDaCapa> {
+      if (configuracaoAusente) return { ok: false, motivo: 'falhou' };
+      if (!TIPOS_DE_IMAGEM.includes(imagem.type)) return { ok: false, motivo: 'formatoInvalido' };
+      if (imagem.size > LIMITE_DA_IMAGEM) return { ok: false, motivo: 'grandeDemais' };
+      try {
+        const sessao = await garantirSessao();
+        const uid = sessao?.user?.id;
+        if (!uid) return { ok: false, motivo: 'semConta' };
+        const reduzida = await reduzirParaCapa(imagem);
+        if (!reduzida) return { ok: false, motivo: 'falhou' };
+
+        const caminho = `${uid}/capa.jpg`;
+        const { error: erroDoUpload } = await supabase.storage
+          .from(BUCKET_DE_CAPAS)
+          .upload(caminho, reduzida, { upsert: true, contentType: 'image/jpeg' });
+        if (erroDoUpload) throw erroDoUpload;
+
+        const { error } = await supabase.rpc('definir_minha_capa', { p_caminho_da_capa: caminho });
+        if (error) throw error;
+        const meu = await this.obterMeuPerfil();
+        return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'falhou' };
+      } catch (erro) {
+        console.error('Falha ao trocar a capa', erro);
+        return { ok: false, motivo: 'falhou' };
+      }
+    },
+
+    async removerCapa(): Promise<ResultadoDaCapa> {
+      if (configuracaoAusente) return { ok: false, motivo: 'falhou' };
+      try {
+        const sessao = await garantirSessao();
+        const uid = sessao?.user?.id;
+        if (!uid) return { ok: false, motivo: 'semConta' };
+        const { error } = await supabase.rpc('remover_minha_capa');
+        if (error) throw error;
+        const { error: erroDaRemocao } = await supabase.storage.from(BUCKET_DE_CAPAS).remove([`${uid}/capa.jpg`]);
+        if (erroDaRemocao) throw erroDaRemocao;
+        const meu = await this.obterMeuPerfil();
+        return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'falhou' };
+      } catch (erro) {
+        console.error('Falha ao remover a capa', erro);
         return { ok: false, motivo: 'falhou' };
       }
     },

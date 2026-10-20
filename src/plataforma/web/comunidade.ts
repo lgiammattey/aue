@@ -112,6 +112,8 @@ export interface LinhaDoFeed {
   comunidade_id?: string | null;
   comunidade_slug?: string | null;
   comunidade_nome?: string | null;
+  rede_social?: string | null;
+  url_social?: string | null;
 }
 
 /** Resposta de `alternar_reacao_do_causo`. */
@@ -158,6 +160,7 @@ export function traduzirLinha(l: LinhaDoFeed, meuId: string | null): CausoPostad
     autorHandleDoServidor: Boolean(l.handle),
     autorAvatarUrl: l.url_do_avatar ?? undefined,
     conteudo: l.conteudo ?? '',
+    videoUrl: l.rede_social === 'YouTube' ? l.url_social ?? undefined : undefined,
     resultadoId: l.resultado_id ?? undefined,
     // Post da casa não tem resultado: o servidor manda nota nula e ela fica sem nota.
     nota: l.nota ?? undefined,

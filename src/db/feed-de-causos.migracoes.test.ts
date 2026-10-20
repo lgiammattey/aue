@@ -60,6 +60,7 @@ describe('contrato do feed de causos', () => {
 
 describe('contrato do perfil', () => {
   const perfilSql = lerSql('20261018000005_perfil_foto_redes_conexoes.sql');
+  const capaDoPerfilSql = lerSql('20261020000017_capa_de_perfil.sql');
   const adaptadorDePerfil = readFileSync(resolve(raiz, 'src/plataforma/web/perfilRemoto.ts'), 'utf8');
   const adaptadorDeConta = readFileSync(resolve(raiz, 'src/plataforma/web/conta.ts'), 'utf8');
 
@@ -72,6 +73,7 @@ describe('contrato do perfil', () => {
       lerSql('20261018000004_perfil_e_comentarios_aninhados.sql') +
       socialSql +
       perfilInicialSql +
+      capaDoPerfilSql +
       lerSql('20260807000036_nomenclatura_ptbr_mvp1.sql');
     for (const nome of new Set(chamadas)) {
       expect(sql, `RPC ${nome}`).toMatch(new RegExp(`FUNCTION public\\.${nome}\\(`));
@@ -87,6 +89,14 @@ describe('contrato do perfil', () => {
 
   it('a foto só aceita arquivo da própria pasta do bucket avatars', () => {
     expect(perfilSql).toContain("'/storage/v1/object/public/avatars/' || v_id::text || '/'");
+  });
+
+  it('a capa só aceita caminho próprio e a URL nasce do caminho e da revisão', () => {
+    expect(capaDoPerfilSql).toContain("caminho_da_capa = id::text || '/capa.jpg'");
+    expect(capaDoPerfilSql).toContain('public.aue_e_conta_promovida(auth.uid())');
+    expect(capaDoPerfilSql).toContain("(storage.foldername(name))[1] = auth.uid()::text");
+    expect(adaptadorDePerfil).toContain('getPublicUrl(caminho)');
+    expect(adaptadorDePerfil).toContain('?v=${revisao}');
   });
 });
 
@@ -113,18 +123,18 @@ describe('contrato da última definição do feed e do perfil', () => {
 
   it('LinhaDoFeed tem exatamente as colunas que a última listar_feed_de_causos devolve', () => {
     const { arquivo, colunas } = colunasDaUltimaDefinicao('listar_feed_de_causos');
-    expect(arquivo).toBe('20261019000013_corrige_tipo_do_feed.sql');
+    expect(arquivo).toBe('20261020060000_comunidade_arrotos_youtube.sql');
     expect(camposDaInterface(adaptador, 'LinhaDoFeed').sort()).toEqual([...colunas].sort());
-    expect(colunas.slice(-5)).toEqual(['minhas', 'caminho_do_audio_da_casa', 'comunidade_id', 'comunidade_slug', 'comunidade_nome']);
+    expect(colunas.slice(-7)).toEqual(['minhas', 'caminho_do_audio_da_casa', 'comunidade_id', 'comunidade_slug', 'comunidade_nome', 'rede_social', 'url_social']);
   });
 
   it('a última RPC converte o nome varchar da comunidade para o text declarado', () => {
-    expect(lerSql('20261019000013_corrige_tipo_do_feed.sql')).toContain('g.nome::text');
+    expect(lerSql('20261020060000_comunidade_arrotos_youtube.sql')).toContain('g.nome::text');
   });
 
   it('LinhaDePerfil tem exatamente as colunas que a última obter_perfil_publico devolve', () => {
     const { arquivo, colunas } = colunasDaUltimaDefinicao('obter_perfil_publico');
-    expect(arquivo).toBe('20261018000010_rede_social_promovida.sql');
+    expect(arquivo).toBe('20261020000017_capa_de_perfil.sql');
     const perfil = readFileSync(resolve(raiz, 'src/plataforma/web/perfilRemoto.ts'), 'utf8');
     expect(camposDaInterface(perfil, 'LinhaDePerfil').sort()).toEqual([...colunas].sort());
   });

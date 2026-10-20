@@ -43,7 +43,6 @@ export default defineConfig({
         rankingDeArrotos: entrada('ranking-de-arrotos.html'),
         comunidade: entrada('comunidade.html'),
         grupos: entrada('grupos.html'),
-        videosDeArroto: entrada('videos-de-arroto.html'),
       },
     },
   },

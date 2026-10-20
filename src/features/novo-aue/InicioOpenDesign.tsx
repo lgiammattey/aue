@@ -2,8 +2,12 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
+import { criarCapturaWeb } from '../../plataforma/web/captura';
 import { criarForumWeb } from '../../plataforma/web/forum';
+import { criarArrotosDoPerfilRemoto } from '../../plataforma/web/arrotosDoPerfil';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
+import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
+import type { AudioCapturado, CapturaDeAudio } from '../../portas/captura';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeConta } from '../../portas/conta';
 import type { ComunidadeDoForum, PortaDeForum } from '../../portas/forum';
@@ -15,8 +19,10 @@ import { ModalCompositor } from './ModalCompositor';
 import { ModalComentarios } from './ModalComentarios';
 import { ModalEditarPerfil } from './ModalEditarPerfil';
 import { ModalFundarComunidade } from './ModalFundarComunidade';
+import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDireta } from './ModalGravarArroto';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
 import { PainelDireito } from './PainelDireito';
+import { PlayerDoArroto } from './PlayerDoArroto';
 import type { DetalhesDaComunidade, ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
 import './InicioOpenDesign.css';
@@ -26,8 +32,10 @@ interface Props {
   readonly portaComunidade?: PortaDeComunidade;
   readonly portaPerfil?: PortaDePerfil;
   readonly portaConta?: PortaDeConta;
+  readonly portaArrotosDoPerfil?: PortaDeArrotosDoPerfil;
+  readonly capturaDireta?: CapturaDeAudio;
   readonly autenticado?: boolean;
-  readonly viewInicial?: 'feed' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewInicial?: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
   readonly slugInicial?: string;
   readonly handleInicial?: string;
   readonly abrirCompositor?: boolean;
@@ -82,6 +90,8 @@ export function InicioOpenDesign({
   portaComunidade,
   portaPerfil,
   portaConta,
+  portaArrotosDoPerfil,
+  capturaDireta,
   autenticado: autenticadoProp,
   viewInicial = 'feed',
   slugInicial,
@@ -98,9 +108,11 @@ export function InicioOpenDesign({
   const [comunidadePort] = useState(() => portaComunidade ?? criarComunidadeWeb());
   const [perfilPort] = useState(() => portaPerfil ?? criarPerfilRemoto());
   const [contaPort] = useState(() => portaConta ?? criarContaWeb());
+  const [arrotosPort] = useState(() => portaArrotosDoPerfil ?? criarArrotosDoPerfilRemoto());
+  const [capturaDoArroto] = useState(() => capturaDireta ?? criarCapturaWeb());
 
-  const [viewAtual, setViewAtual] = useState<'feed' | 'auth' | 'perfil' | 'comunidade' | 'comunidades'>(() => {
-    if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades') return viewInicial;
+  const [viewAtual, setViewAtual] = useState<'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades'>(() => {
+    if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades' || viewInicial === 'emAlta' || viewInicial === 'seguindo') return viewInicial;
     if (handleParam) return 'perfil';
     if (slugParam || viewInicial === 'comunidade') return 'comunidade';
     return 'feed';
@@ -128,10 +140,16 @@ export function InicioOpenDesign({
   // Perfil
   const [perfilAtivo, setPerfilAtivo] = useState<PerfilPublico | null>(null);
   const [causosDoPerfil, setCausosDoPerfil] = useState<readonly CausoPostado[]>([]);
-  const [perfilNome, setPerfilNome] = useState('Arrotador');
-  const [perfilBio, setPerfilBio] = useState('');
-  const [perfilCidade, setPerfilCidade] = useState('');
+  const [arrotosDoPerfil, setArrotosDoPerfil] = useState<readonly ArrotoDoPerfil[]>([]);
+  const [estadoArrotosDoPerfil, setEstadoArrotosDoPerfil] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
+  const [estadoPerfil, setEstadoPerfil] = useState<'carregando' | 'pronto' | 'pendente' | 'inexistente' | 'erro'>('carregando');
+  const [estadoCausosDoPerfil, setEstadoCausosDoPerfil] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
+  const [tentativaDoPerfil, setTentativaDoPerfil] = useState(0);
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
+  const [fotoEnviando, setFotoEnviando] = useState(false);
+  const [capaEnviando, setCapaEnviando] = useState(false);
+  const inputDaFoto = useRef<HTMLInputElement | null>(null);
+  const inputDaCapa = useRef<HTMLInputElement | null>(null);
 
   // Auth
   const [painelAuth, setPainelAuth] = useState<'login' | 'recover' | 'invite'>('login');
@@ -147,20 +165,30 @@ export function InicioOpenDesign({
 
   const [comunidades, setComunidades] = useState<readonly ComunidadeDoForum[]>([]);
   const [itensFeed, setItensFeed] = useState<readonly ItemDoFeed[]>([]);
+  const [itensSeguindo, setItensSeguindo] = useState<readonly ItemDoFeed[]>([]);
+  const [estadoSeguindo, setEstadoSeguindo] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro' | 'semConta'>('ocioso');
   const [busca, setBusca] = useState('');
   const [abaOrdenacao, setAbaOrdenacao] = useState<'Quentes' | 'Novos' | 'Top'>('Quentes');
 
   // Interações
-  const [votosUsuario, setVotosUsuario] = useState<Record<string, 1 | -1>>({});
   const [salvosUsuario, setSalvosUsuario] = useState<Record<string, boolean>>({});
   const [comunidadesEntradas, setComunidadesEntradas] = useState<Record<string, boolean>>({});
 
   // Audio player
   const [audioTocandoId, setAudioTocandoId] = useState<string | null>(null);
+  const [audioSelecionadoId, setAudioSelecionadoId] = useState<string | null>(null);
+  const [tempoAtualDoAudio, setTempoAtualDoAudio] = useState(0);
+  const [duracaoDoAudio, setDuracaoDoAudio] = useState<number | null>(null);
   const elementoAudio = useRef<HTMLAudioElement | null>(null);
+  const pedidoDeAudioAtual = useRef(0);
 
   // Modais
   const [modalCompositorAberto, setModalCompositorAberto] = useState(abrirCompositor);
+  const [modalGravarArrotoAberto, setModalGravarArrotoAberto] = useState(false);
+  const [estadoGravacaoDireta, setEstadoGravacaoDireta] = useState<EstadoDaGravacaoDireta>('ocioso');
+  const [audioDireto, setAudioDireto] = useState<AudioCapturado | null>(null);
+  const [erroDaGravacaoDireta, setErroDaGravacaoDireta] = useState<string | null>(null);
+  const [enviandoArrotoDireto, setEnviandoArrotoDireto] = useState(false);
   const [modalComentariosAberto, setModalComentariosAberto] = useState(false);
   const [postComentariosAtivo, setPostComentariosAtivo] = useState<ItemDoFeed | null>(null);
   const [listaComentarios, setListaComentarios] = useState<readonly ItemComentario[]>([]);
@@ -187,68 +215,110 @@ export function InicioOpenDesign({
         if (!ativo) return;
         const logado = e.temSessao && !e.anonima && !e.perfilSocialPendente;
         setEstaAutenticado(logado);
-        if (logado) {
-          const perfil = await perfilPort.obterMeuPerfil?.();
-          if (ativo && perfil) {
-            setMeuPerfil(perfil);
-            if (!handleParam) {
-              setPerfilAtivo(perfil);
-              setPerfilNome(perfil.apelido);
-              setPerfilBio(perfil.bio ?? '');
-              setPerfilCidade(perfil.cidade ?? '');
-            }
+        if (!logado) {
+          if (!handleParam) setEstadoPerfil('pendente');
+          return;
+        }
+
+        // Meu perfil sustenta a sessão na casca inteira, inclusive quando a
+        // pessoa está visitando /u/:handle. O perfil visitado é carregado no
+        // efeito abaixo; ele não pode apagar a identidade de quem está logado.
+        const perfil = await perfilPort.obterMeuPerfil?.();
+        if (ativo && perfil) {
+          setMeuPerfil(perfil);
+          if (!handleParam) {
+            setPerfilAtivo(perfil);
+            setSeguindoPerfil(perfil.euSigo);
+            setEstadoPerfil('pronto');
           }
+        } else if (ativo && !handleParam) {
+            setEstadoPerfil('pendente');
         }
       })
       .catch(() => {
-        if (ativo) setEstaAutenticado(false);
+        if (ativo) {
+          setEstaAutenticado(false);
+          if (!handleParam) setEstadoPerfil('erro');
+        }
       });
     return () => {
       ativo = false;
     };
-  }, [contaPort, perfilPort, handleParam]);
+  }, [contaPort, perfilPort, handleParam, tentativaDoPerfil]);
 
   // Carregar perfil solicitado pelo handle
   useEffect(() => {
     let ativo = true;
     if (handleParam) {
       setViewAtual('perfil');
+      setEstadoPerfil('carregando');
+      setPerfilAtivo(null);
       perfilPort
         .obterPerfil?.(handleParam)
         .then((perfil) => {
           if (!ativo) return;
           if (perfil) {
             setPerfilAtivo(perfil);
-            setPerfilNome(perfil.apelido);
-            setPerfilBio(perfil.bio ?? '');
-            setPerfilCidade(perfil.cidade ?? '');
-          }
+            setSeguindoPerfil(perfil.euSigo);
+            setEstadoPerfil('pronto');
+          } else setEstadoPerfil('inexistente');
         })
-        .catch(() => {});
+        .catch(() => {
+          if (ativo) setEstadoPerfil('erro');
+        });
     }
     return () => {
       ativo = false;
     };
-  }, [handleParam, perfilPort]);
+  }, [handleParam, perfilPort, tentativaDoPerfil]);
 
   // Carregar causos do perfil ativo
   useEffect(() => {
     let ativo = true;
     const alvo = perfilAtivo ?? meuPerfil;
     if (!alvo) return;
+    setEstadoCausosDoPerfil('carregando');
     comunidadePort
       .listarFeed?.({ autorId: alvo.id, limite: 50 })
       .then((lista) => {
         if (!ativo) return;
         setCausosDoPerfil(lista ?? []);
+        setEstadoCausosDoPerfil('pronto');
       })
       .catch(() => {
-        if (ativo) setCausosDoPerfil([]);
+        if (ativo) {
+          setCausosDoPerfil([]);
+          setEstadoCausosDoPerfil('erro');
+        }
       });
     return () => {
       ativo = false;
     };
   }, [perfilAtivo, meuPerfil, comunidadePort]);
+
+  useEffect(() => {
+    let ativo = true;
+    const alvo = perfilAtivo ?? meuPerfil;
+    if (!alvo) return;
+    setEstadoArrotosDoPerfil('carregando');
+    arrotosPort.listarArrotos(alvo.handle).then(
+      (lista) => {
+        if (!ativo) return;
+        setArrotosDoPerfil(lista);
+        setEstadoArrotosDoPerfil('pronto');
+      },
+      () => {
+        if (!ativo) return;
+        setArrotosDoPerfil([]);
+        setEstadoArrotosDoPerfil('erro');
+      },
+    );
+    return () => {
+      ativo = false;
+    };
+  }, [perfilAtivo, meuPerfil, arrotosPort]);
+
+  useEffect(() => () => capturaDoArroto.soltar(), [capturaDoArroto]);
 
   // Sincroniza se o slug vier pela URL
   useEffect(() => {
@@ -337,6 +407,7 @@ export function InicioOpenDesign({
             temAudio: c.temAudio,
             enderecoDoAudio: c.enderecoDoAudio,
             nota: c.nota,
+            videoUrl: c.videoUrl,
           });
         }
       }
@@ -393,6 +464,7 @@ export function InicioOpenDesign({
             temAudio: c.temAudio,
             enderecoDoAudio: c.enderecoDoAudio,
             nota: c.nota,
+            videoUrl: c.videoUrl,
           });
         }
         setItensFeed(itens);
@@ -404,42 +476,144 @@ export function InicioOpenDesign({
     };
   }, [forum, comunidadePort]);
 
+  useEffect(() => {
+    if (viewAtual !== 'seguindo') return;
+    if (!estaAutenticado) {
+      setEstadoSeguindo('semConta');
+      return;
+    }
+    let ativo = true;
+    setEstadoSeguindo('carregando');
+    comunidadePort.listarFeed({ seguindo: true, limite: 30 }).then(
+      (causos) => {
+        if (!ativo) return;
+        setItensSeguindo(causos.map((causo) => ({
+          id: `causo-${causo.id}`,
+          tipo: 'causo',
+          comunidadeSlug: causo.comunidadeSlug || 'arena-do-arroto',
+          titulo: causo.conteudo.slice(0, 65) + (causo.conteudo.length > 65 ? '…' : ''),
+          corpo: causo.conteudo,
+          autorNome: causo.autorNome,
+          autorHandle: causo.autorHandle,
+          criadoEm: causo.criadoEm || new Date().toISOString(),
+          votos: causo.nota ? Math.round(causo.nota) : 1,
+          respostasTotal: causo.totalComentarios || 0,
+          temAudio: causo.temAudio,
+          enderecoDoAudio: causo.enderecoDoAudio,
+          nota: causo.nota,
+          videoUrl: causo.videoUrl,
+        })));
+        setEstadoSeguindo('pronto');
+      },
+      () => { if (ativo) setEstadoSeguindo('erro'); },
+    );
+    return () => { ativo = false; };
+  }, [viewAtual, estaAutenticado, comunidadePort]);
+
+  useEffect(() => () => {
+    const audio = elementoAudio.current;
+    if (!audio) return;
+    audio.pause();
+    audio.onloadedmetadata = null;
+    audio.ondurationchange = null;
+    audio.ontimeupdate = null;
+    audio.onended = null;
+    audio.onerror = null;
+    audio.src = '';
+  }, []);
+
   // Áudio player handler
-  const alternarAudio = async (urlOuResolver?: string | (() => Promise<string | null>)) => {
+  const alternarAudio = async (
+    urlOuResolver?: string | (() => Promise<string | null>),
+    identificador?: string,
+  ) => {
     if (!urlOuResolver) return;
+    const pedido = ++pedidoDeAudioAtual.current;
+    const chave = identificador ?? (typeof urlOuResolver === 'string' ? urlOuResolver : null);
+    if (chave && audioTocandoId === chave) {
+      elementoAudio.current?.pause();
+      setAudioTocandoId(null);
+      return;
+    }
+    if (chave && audioSelecionadoId === chave && elementoAudio.current?.src) {
+      try {
+        await elementoAudio.current.play();
+        if (pedido === pedidoDeAudioAtual.current) setAudioTocandoId(chave);
+      } catch {
+        if (pedido === pedidoDeAudioAtual.current) setAudioTocandoId(null);
+      }
+      return;
+    }
     let url: string | null = null;
     if (typeof urlOuResolver === 'function') {
       url = await urlOuResolver();
     } else {
       url = urlOuResolver;
     }
-    if (!url) return;
-    if (audioTocandoId === url) {
-      elementoAudio.current?.pause();
-      setAudioTocandoId(null);
-      return;
-    }
+    if (!url || pedido !== pedidoDeAudioAtual.current) return;
     if (!elementoAudio.current) {
       elementoAudio.current = new Audio(url);
-      elementoAudio.current.onended = () => setAudioTocandoId(null);
     } else {
+      elementoAudio.current.pause();
       elementoAudio.current.src = url;
     }
-    elementoAudio.current.play().catch(() => {});
-    setAudioTocandoId(url);
+    const audio = elementoAudio.current;
+    const sincronizarDuracao = () => {
+      if (pedido !== pedidoDeAudioAtual.current) return;
+      setDuracaoDoAudio(Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : null);
+    };
+    audio.onloadedmetadata = sincronizarDuracao;
+    audio.ondurationchange = sincronizarDuracao;
+    audio.ontimeupdate = () => {
+      if (pedido === pedidoDeAudioAtual.current) setTempoAtualDoAudio(audio.currentTime || 0);
+    };
+    audio.onended = () => {
+      if (pedido !== pedidoDeAudioAtual.current) return;
+      setAudioTocandoId(null);
+      setTempoAtualDoAudio(0);
+    };
+    audio.onerror = () => {
+      if (pedido !== pedidoDeAudioAtual.current) return;
+      setAudioTocandoId(null);
+      setTempoAtualDoAudio(0);
+      setDuracaoDoAudio(null);
+    };
+    setTempoAtualDoAudio(0);
+    setDuracaoDoAudio(null);
+    setAudioSelecionadoId(chave ?? url);
+    try {
+      await audio.play();
+      if (pedido === pedidoDeAudioAtual.current) setAudioTocandoId(chave ?? url);
+      else audio.pause();
+    } catch {
+      if (pedido === pedidoDeAudioAtual.current) setAudioTocandoId(null);
+    }
   };
 
-  const alternarVoto = (id: string, delta: 1 | -1) => {
-    setVotosUsuario((prev) => {
-      const atual = prev[id];
-      if (atual === delta) {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      }
-      return { ...prev, [id]: delta };
-    });
+  const interagirNoPost = async (id: string, tipo: 'curtir' | 'fogo' | 'nojo' | 'trofeu') => {
+    if (!estaAutenticado) {
+      exibirToast('Entre na sua conta para reagir.');
+      (aoEntrar ?? (() => setViewAtual('auth')))();
+      return;
+    }
+    if (!id.startsWith('causo-')) return;
+    const causoId = id.replace('causo-', '');
+    const resultado = tipo === 'curtir'
+      ? await comunidadePort.alternarCurtida(causoId)
+      : await comunidadePort.alternarReacao(causoId, tipo);
+    if (!resultado.ok) {
+      exibirToast('Não deu para registrar sua reação agora.');
+      return;
+    }
+    exibirToast(tipo === 'curtir' ? 'Curtida atualizada.' : 'Reação enviada.');
   };
+
+  const acoesDeReacao = (post: ItemDoFeed) => post.tipo === 'causo'
+    ? {
+        aoCurtir: () => void interagirNoPost(post.id, 'curtir'),
+        aoReagir: (tipo: 'fogo' | 'nojo' | 'trofeu') => void interagirNoPost(post.id, tipo),
+      }
+    : {};
 
   const alternarSalvo = (id: string) => {
     setSalvosUsuario((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -447,13 +621,28 @@ export function InicioOpenDesign({
   };
 
   const [seguindoPerfil, setSeguindoPerfil] = useState(false);
+  const [alternandoSeguir, setAlternandoSeguir] = useState(false);
 
-  const alternarSeguirPerfil = () => {
-    const novoStatus = !seguindoPerfil;
-    setSeguindoPerfil(novoStatus);
-    exibirToast(novoStatus ? 'Você agora segue este perfil.' : 'Você deixou de seguir.');
-    if (perfilAtivo) {
-      perfilPort.alternarSeguir?.(perfilAtivo.id).catch(() => {});
+  const alternarSeguirPerfil = async () => {
+    if (!perfilAtivo || perfilAtivo.souEu || alternandoSeguir) return;
+    setAlternandoSeguir(true);
+    try {
+      const resultado = await perfilPort.alternarSeguir(perfilAtivo.id);
+      if (!resultado.ok) {
+        exibirToast('Não foi possível atualizar o follow agora.');
+        return;
+      }
+      setSeguindoPerfil(resultado.seguindo);
+      setPerfilAtivo((atual) => atual && {
+        ...atual,
+        euSigo: resultado.seguindo,
+        totalSeguidores: Math.max(0, atual.totalSeguidores + (resultado.seguindo === atual.euSigo ? 0 : resultado.seguindo ? 1 : -1)),
+      });
+      exibirToast(resultado.seguindo ? 'Agora vocês estão na mesma roda.' : 'Você deixou de seguir este perfil.');
+    } catch {
+      exibirToast('Não foi possível atualizar o follow agora.');
+    } finally {
+      setAlternandoSeguir(false);
     }
   };
 
@@ -697,18 +886,234 @@ export function InicioOpenDesign({
     navigate(`/c/${dados.slug}`);
   };
 
-  const salvarEdicaoPerfil = async (dados: { apelido: string; bio: string; cidade: string }) => {
-    setPerfilNome(dados.apelido);
-    setPerfilBio(dados.bio);
-    setPerfilCidade(dados.cidade);
+  const salvarEdicaoPerfil = async (dados: {
+    apelido: string;
+    handle: string;
+    bio: string;
+    cidade: string;
+    instagram: string;
+    tiktok: string;
+    youtube: string;
+    twitter: string;
+  }) => {
+    const resultado = await perfilPort.atualizarMeuPerfil(dados);
+    if (!resultado.ok) {
+      const mensagem = resultado.motivo === 'handleEmUso'
+        ? 'Esse @ já está ocupado.'
+        : resultado.motivo === 'invalido'
+          ? resultado.detalhe
+          : 'Não foi possível salvar seu perfil agora.';
+      throw new Error(mensagem);
+    }
+    setMeuPerfil(resultado.perfil);
+    setPerfilAtivo(resultado.perfil);
+    exibirToast('Perfil atualizado.');
+  };
+
+  const trocarFotoDoPerfil = async (arquivo?: File) => {
+    if (!arquivo || fotoEnviando) return;
+    setFotoEnviando(true);
     try {
-      const res = await perfilPort.atualizarMeuPerfil?.(dados);
-      if (res?.ok) {
-        setMeuPerfil(res.perfil);
+      const resultado = await perfilPort.enviarFoto(arquivo);
+      if (!resultado.ok) {
+        const mensagem = resultado.motivo === 'formatoInvalido'
+          ? 'Use JPG, PNG ou WebP para a foto.'
+          : resultado.motivo === 'grandeDemais'
+            ? 'A foto passa do limite de 15 MB.'
+            : 'Não foi possível trocar a foto agora.';
+        exibirToast(mensagem);
+        return;
       }
-      exibirToast('Perfil atualizado na hora.');
+      setMeuPerfil(resultado.perfil);
+      setPerfilAtivo(resultado.perfil);
+      exibirToast('Foto atualizada.');
     } catch {
-      exibirToast('Perfil salvo.');
+      exibirToast('Não foi possível trocar a foto agora.');
+    } finally {
+      setFotoEnviando(false);
+      if (inputDaFoto.current) inputDaFoto.current.value = '';
+    }
+  };
+
+  const removerFotoDoPerfil = async () => {
+    if (fotoEnviando) return;
+    setFotoEnviando(true);
+    try {
+      const resultado = await perfilPort.removerFoto();
+      if (!resultado.ok) {
+        exibirToast('Não foi possível remover a foto agora.');
+        return;
+      }
+      setMeuPerfil(resultado.perfil);
+      setPerfilAtivo(resultado.perfil);
+      exibirToast('Foto removida.');
+    } catch {
+      exibirToast('Não foi possível remover a foto agora.');
+    } finally {
+      setFotoEnviando(false);
+    }
+  };
+
+  const trocarCapaDoPerfil = async (arquivo?: File) => {
+    if (!arquivo || capaEnviando) return;
+    setCapaEnviando(true);
+    try {
+      const resultado = await perfilPort.enviarCapa(arquivo);
+      if (!resultado.ok) {
+        const mensagem = resultado.motivo === 'formatoInvalido'
+          ? 'Use JPG, PNG ou WebP para a capa.'
+          : resultado.motivo === 'grandeDemais'
+            ? 'A capa passa do limite de 15 MB.'
+            : 'Não foi possível trocar a capa agora.';
+        exibirToast(mensagem);
+        return;
+      }
+      setMeuPerfil(resultado.perfil);
+      setPerfilAtivo(resultado.perfil);
+      exibirToast('Capa atualizada.');
+    } catch {
+      exibirToast('Não foi possível trocar a capa agora.');
+    } finally {
+      setCapaEnviando(false);
+      if (inputDaCapa.current) inputDaCapa.current.value = '';
+    }
+  };
+
+  const removerCapaDoPerfil = async () => {
+    if (capaEnviando) return;
+    setCapaEnviando(true);
+    try {
+      const resultado = await perfilPort.removerCapa();
+      if (!resultado.ok) {
+        exibirToast('Não foi possível remover a capa agora.');
+        return;
+      }
+      setMeuPerfil(resultado.perfil);
+      setPerfilAtivo(resultado.perfil);
+      exibirToast('Capa removida.');
+    } catch {
+      exibirToast('Não foi possível remover a capa agora.');
+    } finally {
+      setCapaEnviando(false);
+    }
+  };
+
+  const compartilharPerfil = async () => {
+    if (!navigator.clipboard?.writeText) {
+      exibirToast('Seu navegador não liberou a cópia do link.');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      exibirToast('Link copiado.');
+    } catch {
+      exibirToast('Não foi possível copiar o link agora.');
+    }
+  };
+
+  const abrirGravacaoDireta = () => {
+    if (!estaAutenticado) {
+      (aoEntrar ?? (() => setViewAtual('auth')))();
+      return;
+    }
+    setAudioDireto(null);
+    setErroDaGravacaoDireta(null);
+    setEstadoGravacaoDireta('ocioso');
+    setModalGravarArrotoAberto(true);
+  };
+
+  const fecharGravacaoDireta = () => {
+    capturaDoArroto.soltar();
+    setModalGravarArrotoAberto(false);
+    setEstadoGravacaoDireta('ocioso');
+    setAudioDireto(null);
+    setErroDaGravacaoDireta(null);
+  };
+
+  const iniciarGravacaoDireta = async () => {
+    setErroDaGravacaoDireta(null);
+    setEstadoGravacaoDireta('solicitando');
+    const permissao = await capturaDoArroto.pedir();
+    if (!permissao.ok) {
+      capturaDoArroto.soltar();
+      setEstadoGravacaoDireta('erro');
+      setErroDaGravacaoDireta(
+        permissao.motivo === 'negado'
+          ? 'O microfone foi bloqueado. Libere o acesso no navegador e tente de novo.'
+          : permissao.motivo === 'semAparelho'
+            ? 'Não achei um microfone disponível neste aparelho.'
+            : 'Não deu para abrir o microfone agora.',
+      );
+      return;
+    }
+    if (!capturaDoArroto.comecar()) {
+      capturaDoArroto.soltar();
+      setEstadoGravacaoDireta('erro');
+      setErroDaGravacaoDireta('Não deu para começar a gravar agora.');
+      return;
+    }
+    setEstadoGravacaoDireta('gravando');
+  };
+
+  const pararGravacaoDireta = async () => {
+    const resultado = await capturaDoArroto.parar();
+    if ('motivo' in resultado) {
+      setEstadoGravacaoDireta('erro');
+      setErroDaGravacaoDireta('A gravação não saiu inteira. Tente de novo.');
+      return;
+    }
+    setAudioDireto(resultado);
+    setEstadoGravacaoDireta('pronto');
+  };
+
+  const enviarArrotoDireto = async (destino: DestinoDoArrotoDireto) => {
+    if (!audioDireto) throw new Error('Grave o arroto antes de enviar.');
+    if (destino.tipo === 'comunidade') {
+      throw new Error('Publicação em comunidade ainda não está pronta para áudio direto.');
+    }
+    setEnviandoArrotoDireto(true);
+    try {
+      const preparo = await arrotosPort.prepararArroto(
+        destino.tipo === 'perfil-marcado' ? destino.handle : undefined,
+      );
+      if (!preparo.ok) {
+        throw new Error(
+          preparo.motivo === 'destinoInexistente'
+            ? 'Esse @ não está na roda.'
+            : preparo.motivo === 'semConta'
+              ? 'Entre na sua conta antes de enviar um arroto.'
+              : 'Não deu para preparar o envio agora.',
+        );
+      }
+      const publicado = await arrotosPort.publicarArroto(
+        preparo.rascunho,
+        audioDireto.dados,
+        audioDireto.duracaoMs / 1000,
+      );
+      if (!publicado.ok) {
+        const mensagem = publicado.motivo === 'formatoInvalido'
+          ? 'Seu navegador gravou num formato que ainda não conseguimos enviar.'
+          : publicado.motivo === 'grandeDemais'
+            ? 'Esse áudio passou de 12 MB.'
+            : publicado.motivo === 'duracaoInvalida'
+              ? 'A gravação precisa ter até 90 segundos.'
+              : 'Não foi possível enviar. Seu arroto não foi publicado.';
+        throw new Error(mensagem);
+      }
+      setArrotosDoPerfil((anteriores) => (
+        perfilExibido?.id === publicado.arroto.perfilId ? [publicado.arroto, ...anteriores] : anteriores
+      ));
+      exibirToast(
+        destino.tipo === 'perfil-marcado'
+          ? `Arroto enviado para @${preparo.rascunho.perfilDestinoHandle}.`
+          : 'Arroto guardado no seu perfil.',
+      );
+      fecharGravacaoDireta();
+      if (destino.tipo === 'perfil-marcado') {
+        navigate(`/u/${preparo.rascunho.perfilDestinoHandle}`);
+      }
+    } finally {
+      setEnviandoArrotoDireto(false);
     }
   };
 
@@ -725,6 +1130,31 @@ export function InicioOpenDesign({
       return b.votos - a.votos;
     });
 
+  const postsSeguindo = itensSeguindo
+    .filter((p) => {
+      if (!busca.trim()) return true;
+      const termo = busca.toLowerCase();
+      return p.titulo.toLowerCase().includes(termo) || p.comunidadeSlug.toLowerCase().includes(termo);
+    })
+    .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
+
+  const postsEmAlta = itensFeed
+    .filter((p) => {
+      if (!busca.trim()) return true;
+      const termo = busca.toLowerCase();
+      return p.titulo.toLowerCase().includes(termo) || p.comunidadeSlug.toLowerCase().includes(termo);
+    })
+    .sort((a, b) => b.votos - a.votos);
+
+  const perfilExibido = perfilAtivo ?? meuPerfil;
+  const donoDoPerfil = Boolean(perfilExibido?.souEu);
+  const iniciaisDoPerfil = perfilExibido?.apelido
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((parte) => parte[0]?.toUpperCase())
+    .join('') ?? '';
+
   return (
     <div className="app">
       <BarraLateral
@@ -736,7 +1166,7 @@ export function InicioOpenDesign({
           setViewAtual(v);
           if (s) setComunidadeSlug(s);
         }}
-        aoAbrirCompositor={() => setModalCompositorAberto(true)}
+        aoAbrirCompositor={abrirGravacaoDireta}
         aoAbrirFundar={() => setModalFundarAberto(true)}
         aoSair={async () => {
           await contaPort.sair();
@@ -808,12 +1238,13 @@ export function InicioOpenDesign({
                 <CardDoPost
                   key={post.id}
                   post={post}
-                  voto={votosUsuario[post.id]}
+                  {...acoesDeReacao(post)}
                   salvo={Boolean(salvosUsuario[post.id])}
-                  audioTocando={audioTocandoId === post.enderecoDoAudio}
-                  aoVotar={(delta) => alternarVoto(post.id, delta)}
+                  audioTocando={audioTocandoId === post.id}
+                  tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
+                  duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
                   aoAlternarSalvar={() => alternarSalvo(post.id)}
-                  aoTocarAudio={alternarAudio}
+                  aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                   aoAbrirComentarios={() => void abrirComentarios(post)}
                 />
               ))}
@@ -828,6 +1259,56 @@ export function InicioOpenDesign({
                 Sobre o Auê
               </button>
             </footer>
+          </section>
+        )}
+
+        {viewAtual === 'emAlta' && (
+          <section aria-label="Causos em alta">
+            <div className="hero">
+              <span className="eyebrow">O que está fervendo</span>
+              <h1>Em alta</h1>
+              <p>Os causos e tópicos que mais estão movimentando as rodas.</p>
+            </div>
+            {postsEmAlta.length === 0 ? (
+              <section className="od-profile__state">
+                <h2>A roda está quieta agora.</h2>
+                <p>Quando alguém movimentar o Bonde, o que estiver em alta aparece aqui.</p>
+              </section>
+            ) : (
+              <div className="feed">
+                {postsEmAlta.map((post) => (
+                  <CardDoPost
+                    key={post.id}
+                    post={post}
+                    {...acoesDeReacao(post)}
+                    salvo={Boolean(salvosUsuario[post.id])}
+                    audioTocando={audioTocandoId === post.id}
+                    tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
+                    duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
+                    aoAlternarSalvar={() => alternarSalvo(post.id)}
+                    aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
+                    aoAbrirComentarios={() => void abrirComentarios(post)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {viewAtual === 'seguindo' && (
+          <section aria-label="Feed de quem você segue">
+            <div className="hero">
+              <span className="eyebrow">Seu bonde</span>
+              <h1>Seguindo</h1>
+              <p>Os causos de quem você escolheu acompanhar.</p>
+            </div>
+            {estadoSeguindo === 'semConta' && (
+              <section className="od-profile__state"><h2>Entre para ver seu bonde.</h2><p>Você precisa de uma conta para acompanhar outros arrotadores.</p><button className="tab" type="button" onClick={aoEntrar ?? (() => setViewAtual('auth'))}>Entrar</button></section>
+            )}
+            {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu bonde…</p>}
+            {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu bonde.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Seu bonde ainda está quieto.</h2><p>Siga alguns perfis para ver os causos deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Explorar o Bonde</button></section>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={Boolean(salvosUsuario[post.id])} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoAlternarSalvar={() => alternarSalvo(post.id)} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} />)}</div>}
           </section>
         )}
 
@@ -926,12 +1407,13 @@ export function InicioOpenDesign({
                     <CardDoPost
                       key={post.id}
                       post={post}
-                      voto={votosUsuario[post.id]}
+                      {...acoesDeReacao(post)}
                       salvo={Boolean(salvosUsuario[post.id])}
-                      audioTocando={audioTocandoId === post.enderecoDoAudio}
-                      aoVotar={(delta) => alternarVoto(post.id, delta)}
+                      audioTocando={audioTocandoId === post.id}
+                      tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
+                      duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
                       aoAlternarSalvar={() => alternarSalvo(post.id)}
-                      aoTocarAudio={alternarAudio}
+                      aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                       aoAbrirComentarios={() => void abrirComentarios(post)}
                     />
                   ))}
@@ -994,107 +1476,150 @@ export function InicioOpenDesign({
 
         {/* ==================== VIEW: PERFIL ==================== */}
         {viewAtual === 'perfil' && (
-          <section aria-label="Perfil do usuário">
-            <div
-              style={{
-                background: 'var(--aue-surface)',
-                border: '1px solid var(--aue-line)',
-                borderRadius: '12px',
-                padding: 24,
-                marginBottom: 20,
-              }}
-            >
-              <h1>{perfilNome}</h1>
-              <p style={{ color: 'var(--aue-muted)', margin: '4px 0 10px', fontSize: 14 }}>
-                u/{perfilAtivo?.handle ?? meuPerfil?.handle ?? 'arrotador'}
-              </p>
-              <p id="profileBio" style={{ margin: '0 0 10px', fontSize: 15 }}>
-                {perfilBio}
-              </p>
-              {perfilCidade && (
-                <p style={{ color: 'var(--aue-subtle)', fontSize: 13, margin: '0 0 16px' }}>
-                  📍 {perfilCidade}
-                </p>
-              )}
+          <section className="od-profile" aria-label="Perfil do usuário">
+            {estadoPerfil === 'carregando' && (
+              <section className="od-profile__state" aria-live="polite">
+                <h1>Abrindo perfil…</h1><p>Buscando a ficha desta pessoa na roda.</p>
+              </section>
+            )}
 
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {perfilAtivo && perfilAtivo.souEu === false ? (
-                  <button
-                    type="button"
-                    className="join"
-                    style={{ padding: '8px 18px', fontSize: 13 }}
-                    onClick={alternarSeguirPerfil}
+            {estadoPerfil === 'erro' && (
+              <section className="od-profile__state" role="alert">
+                <h1>Não deu para abrir este perfil.</h1>
+                <p>Pode ser uma falha de conexão. Tenta de novo.</p>
+                <button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button>
+              </section>
+            )}
+
+            {estadoPerfil === 'inexistente' && (
+              <section className="od-profile__state">
+                <h1>Esse @ não está na roda.</h1>
+                <p>O perfil pode ter mudado de nome ou não existir.</p>
+                <Link className="tab od-profile__button" to="/">Voltar para o Bonde</Link>
+              </section>
+            )}
+
+            {estadoPerfil === 'pendente' && (
+              <section className="od-profile__state">
+                <h1>Sua ficha ainda não está pronta.</h1>
+                <p>Entre na conta e escolha seu nome e @ antes de participar das rodas.</p>
+                <Link className="join od-profile__button" to="/login">Entrar na conta</Link>
+              </section>
+            )}
+
+            {estadoPerfil === 'pronto' && perfilExibido && (
+              <>
+                <article className="od-profile__hero">
+                  <div
+                    className={`od-profile__cover${perfilExibido.capaUrl ? ' od-profile__cover--photo' : ''}`}
+                    style={perfilExibido.capaUrl ? { backgroundImage: `url("${perfilExibido.capaUrl}")` } : undefined}
+                    aria-label={perfilExibido.capaUrl ? `Capa de ${perfilExibido.apelido}` : 'Capa neutra do perfil'}
                   >
-                    {seguindoPerfil ? 'Seguindo' : 'Seguir'}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="tab"
-                    style={{ border: '1px solid var(--aue-line)' }}
-                    onClick={() => setModalPerfilAberto(true)}
-                  >
-                    Editar perfil
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="tab"
-                  style={{ border: '1px solid var(--aue-line)' }}
-                  onClick={() => {
-                    if (navigator.clipboard) navigator.clipboard.writeText(window.location.href);
-                    exibirToast('Link copiado!');
-                  }}
-                >
-                  ↗ Compartilhar
-                </button>
-                <button
-                  type="button"
-                  className="tab"
-                  style={{ border: '1px solid var(--aue-line)' }}
-                  onClick={() => setModalCompositorAberto(true)}
-                >
-                  + Novo post
-                </button>
-              </div>
+                    {!perfilExibido.capaUrl && <span>AUÊ!</span>}
+                    {donoDoPerfil && (
+                      <div className="od-profile__cover-actions">
+                        <button type="button" className="od-profile__cover-action" onClick={() => inputDaCapa.current?.click()} disabled={capaEnviando}>{capaEnviando ? 'Enviando…' : 'Trocar capa'}</button>
+                        {perfilExibido.capaUrl && <button type="button" className="od-profile__cover-action" onClick={() => void removerCapaDoPerfil()} disabled={capaEnviando}>Remover</button>}
+                      </div>
+                    )}
+                    <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void trocarCapaDoPerfil(e.target.files?.[0])} />
+                  </div>
+                  <div className="od-profile__body">
+                    <div className="od-profile__topline">
+                      <div className="od-profile__avatar-wrap">
+                        <div className="od-profile__avatar" aria-label={`Avatar de ${perfilExibido.apelido}`}>
+                          {perfilExibido.avatarUrl ? <img src={perfilExibido.avatarUrl} alt="" /> : iniciaisDoPerfil}
+                        </div>
+                        {donoDoPerfil && (
+                          <button type="button" className="od-profile__photo-action" onClick={() => inputDaFoto.current?.click()} disabled={fotoEnviando}>
+                            {fotoEnviando ? 'Enviando…' : 'Trocar foto'}
+                          </button>
+                        )}
+                        <input ref={inputDaFoto} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova foto de perfil" onChange={(e) => void trocarFotoDoPerfil(e.target.files?.[0])} />
+                      </div>
+                      <div className="od-profile__actions">
+                        {donoDoPerfil ? (
+                          <button type="button" className="tab od-profile__button" onClick={() => setModalPerfilAberto(true)}>Editar perfil</button>
+                        ) : (
+                          <button type="button" className="join od-profile__button" onClick={() => void alternarSeguirPerfil()} disabled={alternandoSeguir}>
+                            {alternandoSeguir ? 'Atualizando…' : seguindoPerfil ? 'Seguindo' : 'Seguir'}
+                          </button>
+                        )}
+                        <button type="button" className="tab od-profile__button" onClick={() => void compartilharPerfil()}>Compartilhar</button>
+                      </div>
+                    </div>
 
-              <div style={{ display: 'flex', gap: 24, marginTop: 20, borderTop: '1px solid var(--aue-line)', paddingTop: 14 }}>
-                <div>
-                  <strong style={{ fontSize: 18, display: 'block' }}>
-                    {perfilAtivo?.totalCausos ? perfilAtivo.totalCausos * 12 : 42}
-                  </strong>
-                  <span style={{ fontSize: 11, color: 'var(--aue-subtle)' }}>karma de arroto</span>
-                </div>
-                <div>
-                  <strong style={{ fontSize: 18, display: 'block' }}>
-                    {perfilAtivo?.totalCausos ?? causosDoPerfil.length}
-                  </strong>
-                  <span style={{ fontSize: 11, color: 'var(--aue-subtle)' }}>posts publicados</span>
-                </div>
-                <div>
-                  <strong style={{ fontSize: 18, display: 'block' }}>
-                    {perfilAtivo?.totalSeguidores ?? 0}
-                  </strong>
-                  <span style={{ fontSize: 11, color: 'var(--aue-subtle)' }}>comentários certeiros</span>
-                </div>
-              </div>
-            </div>
+                    <div className="od-profile__identity">
+                      <h1>{perfilExibido.apelido}</h1>
+                      <p className="od-profile__handle">@{perfilExibido.handle}</p>
+                      {perfilExibido.bio && <p id="profileBio" className="od-profile__bio">{perfilExibido.bio}</p>}
+                      <div className="od-profile__meta">
+                        {perfilExibido.cidade && <span>⌖ {perfilExibido.cidade}</span>}
+                        <span>na roda desde {new Date(perfilExibido.criadoEm).getFullYear()}</span>
+                      </div>
+                      {(perfilExibido.instagram || perfilExibido.tiktok || perfilExibido.youtube || perfilExibido.twitter) && (
+                        <div className="od-profile__social" aria-label="Redes sociais">
+                          {perfilExibido.instagram && <a href={`https://instagram.com/${perfilExibido.instagram}`} target="_blank" rel="noreferrer">Instagram</a>}
+                          {perfilExibido.tiktok && <a href={`https://tiktok.com/@${perfilExibido.tiktok}`} target="_blank" rel="noreferrer">TikTok</a>}
+                          {perfilExibido.youtube && <a href={`https://youtube.com/@${perfilExibido.youtube}`} target="_blank" rel="noreferrer">YouTube</a>}
+                          {perfilExibido.twitter && <a href={`https://x.com/${perfilExibido.twitter}`} target="_blank" rel="noreferrer">X</a>}
+                        </div>
+                      )}
+                    </div>
 
-            <div className="profile-activity">
-              <h2 style={{ fontSize: 18, marginBottom: 12 }}>Atividade</h2>
-              {causosDoPerfil.length === 0 ? (
-                <p style={{ color: 'var(--aue-muted)' }}>Nenhum causo publicado ainda.</p>
-              ) : (
-                causosDoPerfil.map((c) => (
-                  <article key={c.id} className="post" style={{ padding: 16 }}>
-                    <h3>{c.conteudo}</h3>
-                    <small style={{ color: 'var(--aue-subtle)' }}>
-                      r/{c.comunidadeSlug || 'arena-do-arroto'}
-                    </small>
-                  </article>
-                ))
-              )}
-            </div>
+                    <dl className="od-profile__metrics">
+                      <div><dt>Causos</dt><dd>{perfilExibido.totalCausos}</dd></div>
+                      <div><dt>Seguidores</dt><dd>{perfilExibido.totalSeguidores}</dd></div>
+                      <div><dt>Seguindo</dt><dd>{perfilExibido.totalSeguindo}</dd></div>
+                      {perfilExibido.melhorNota !== undefined && <div><dt>Melhor nota</dt><dd>{perfilExibido.melhorNota}</dd></div>}
+                    </dl>
+
+                    {donoDoPerfil && (
+                      <div className="od-profile__owner-tools">
+                        {perfilExibido.avatarUrl && <button type="button" className="tab" onClick={() => void removerFotoDoPerfil()} disabled={fotoEnviando}>Remover foto</button>}
+                        <button type="button" className="tab od-profile__button" onClick={() => setModalCompositorAberto(true)}>+ Novo post</button>
+                      </div>
+                    )}
+                  </div>
+                </article>
+
+                <section className="od-profile__activity" aria-labelledby="profileActivity">
+                  <div className="od-profile__activity-head"><h2 id="profileActivity">Causos</h2><span>{perfilExibido.totalCausos}</span></div>
+                  {estadoCausosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando causos…</p>}
+                  {estadoCausosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os causos agora.</p>}
+                  {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.length === 0 && (
+                    <div className="od-profile__empty"><h3>Nenhum causo publicado ainda.</h3><p>{donoDoPerfil ? 'Quando soltar um, ele aparece aqui.' : 'Quando esta pessoa publicar, aparece aqui.'}</p></div>
+                  )}
+                  {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.map((c) => (
+                    <Link key={c.id} to={`/historia/${c.id}`} className="od-profile__post">
+                      <span>r/{c.comunidadeSlug}</span><h3>{c.conteudo}</h3><small>{c.totalComentarios} comentários · {c.curtidas} curtidas</small>
+                    </Link>
+                  ))}
+                </section>
+
+                <section className="od-profile__activity" aria-labelledby="profileArrotos">
+                  <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2><span>{arrotosDoPerfil.length}</span></div>
+                  {estadoArrotosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
+                  {estadoArrotosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
+                  {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.length === 0 && (
+                    <div className="od-profile__empty"><h3>Nenhum arroto aqui ainda.</h3><p>{donoDoPerfil ? 'Grave um para começar sua coleção.' : 'Quando alguém mandar um arroto para este perfil, ele aparece aqui.'}</p></div>
+                  )}
+                  {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.map((arroto) => (
+                    <article key={arroto.id} className="od-profile__post">
+                      <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
+                      <h3>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
+                      <PlayerDoArroto
+                        tocando={audioTocandoId === arroto.id}
+                        tempoAtualSegundos={audioSelecionadoId === arroto.id ? tempoAtualDoAudio : 0}
+                        duracaoSegundos={audioSelecionadoId === arroto.id ? duracaoDoAudio : arroto.duracaoSegundos}
+                        aoAlternar={() => void alternarAudio(arroto.enderecoDoAudio, arroto.id)}
+                      />
+                      {arroto.possoOcultar && <button type="button" className="tab" onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); })}>Ocultar</button>}
+                    </article>
+                  ))}
+                </section>
+              </>
+            )}
           </section>
         )}
 
@@ -1250,6 +1775,7 @@ export function InicioOpenDesign({
         viewAtual={viewAtual}
         moderadoresDaComunidade={moderadoresDaComunidade}
         regrasDaComunidade={regrasDaComunidade}
+        perfil={perfilExibido}
         aoAbrirComunidade={(slug) => {
           setComunidadeSlug(slug);
           setViewAtual('comunidade');
@@ -1264,6 +1790,25 @@ export function InicioOpenDesign({
         comunidadePadraoSlug={comunidadeSlug}
         aoFechar={() => setModalCompositorAberto(false)}
         aoPublicar={publicarPost}
+      />
+
+      <ModalGravarArroto
+        aberto={modalGravarArrotoAberto}
+        estado={estadoGravacaoDireta}
+        erro={erroDaGravacaoDireta}
+        enviando={enviandoArrotoDireto}
+        comunidades={comunidades.map((comunidade) => ({ slug: comunidade.slug, nome: comunidade.nome }))}
+        duracaoEmSegundos={audioDireto ? audioDireto.duracaoMs / 1000 : null}
+        aoFechar={fecharGravacaoDireta}
+        aoIniciarGravacao={iniciarGravacaoDireta}
+        aoPararGravacao={pararGravacaoDireta}
+        aoRegravar={() => {
+          capturaDoArroto.soltar();
+          setAudioDireto(null);
+          setErroDaGravacaoDireta(null);
+          setEstadoGravacaoDireta('ocioso');
+        }}
+        aoEnviar={enviarArrotoDireto}
       />
 
       <ModalComentarios
@@ -1301,9 +1846,16 @@ export function InicioOpenDesign({
 
       <ModalEditarPerfil
         aberto={modalPerfilAberto}
-        nomeInicial={perfilNome}
-        bioInicial={perfilBio}
-        cidadeInicial={perfilCidade}
+        nomeInicial={perfilExibido?.apelido ?? ''}
+        handleInicial={perfilExibido?.handle ?? ''}
+        bioInicial={perfilExibido?.bio ?? ''}
+        cidadeInicial={perfilExibido?.cidade ?? ''}
+        redesIniciais={{
+          instagram: perfilExibido?.instagram,
+          tiktok: perfilExibido?.tiktok,
+          youtube: perfilExibido?.youtube,
+          twitter: perfilExibido?.twitter,
+        }}
         aoFechar={() => setModalPerfilAberto(false)}
         aoSalvar={salvarEdicaoPerfil}
       />

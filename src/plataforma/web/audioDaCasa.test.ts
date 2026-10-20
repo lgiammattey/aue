@@ -72,6 +72,8 @@ describe('perfil: conta da casa', () => {
     handle: 'giam',
     apelido: 'Giam',
     url_do_avatar: null,
+    caminho_da_capa: null,
+    revisao_da_capa: 0,
     bio: 'personagem da casa, Burpzilla',
     cidade: null,
     titulo: null,

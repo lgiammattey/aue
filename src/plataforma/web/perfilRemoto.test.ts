@@ -75,3 +75,19 @@ describe('obterMeuPerfilParaEdicao', () => {
     expect(rpc).toHaveBeenCalledWith('meu_perfil_social_para_edicao');
   });
 });
+
+describe('enviarCapa', () => {
+  beforeEach(() => rpc.mockReset());
+
+  it('barra tipo inválido antes de tocar no storage ou anunciar sucesso', async () => {
+    const arquivo = new Blob(['não é imagem'], { type: 'text/plain' });
+    await expect(criarPerfilRemoto().enviarCapa(arquivo)).resolves.toEqual({ ok: false, motivo: 'formatoInvalido' });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it('barra arquivo grande antes de tocar no storage ou anunciar sucesso', async () => {
+    const arquivo = new Blob([new Uint8Array(15 * 1024 * 1024 + 1)], { type: 'image/jpeg' });
+    await expect(criarPerfilRemoto().enviarCapa(arquivo)).resolves.toEqual({ ok: false, motivo: 'grandeDemais' });
+    expect(rpc).not.toHaveBeenCalled();
+  });
+});

@@ -348,7 +348,9 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
         ? 'Use uma foto JPG, PNG ou WebP.'
         : res.motivo === 'grandeDemais'
           ? 'Essa foto é grande demais. Escolhe uma de até 15 MB.'
-          : 'Não deu para trocar a foto agora. Nada mudou.',
+          : res.motivo === 'semConta'
+            ? 'Entre com sua conta e conclua o perfil para ter foto.'
+            : 'Não deu para trocar a foto agora. Nada mudou.',
     );
   };
 

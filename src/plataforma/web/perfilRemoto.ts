@@ -63,6 +63,13 @@ export function traduzirPerfil(l: LinhaDePerfil, capaUrl?: string): PerfilPublic
   };
 }
 
+/** Conta anônima ou com perfil por concluir: RPC (42501) ou Storage (403) recusam. */
+function recusadoPorPermissao(erro: unknown): boolean {
+  const e = erro as { code?: string; statusCode?: string | number; status?: number; message?: string };
+  return e.code === '42501' || String(e.statusCode ?? e.status) === '403'
+    || /row-level security|Ação social exige/i.test(e.message ?? '');
+}
+
 const BUCKET_DE_CAPAS = 'capas_de_perfil';
 
 function urlPublicaDaCapa(caminho: string | null, revisao: number | null): string | undefined {
@@ -232,14 +239,20 @@ export function criarPerfilRemoto(): PortaDePerfil {
         const { error: erroDoUpload } = await supabase.storage
           .from('avatars')
           .upload(caminho, preparada.imagem, { upsert: true, contentType: 'image/jpeg' });
-        if (erroDoUpload) throw erroDoUpload;
+        if (erroDoUpload) {
+          if (recusadoPorPermissao(erroDoUpload)) return { ok: false, motivo: 'semConta' };
+          throw erroDoUpload;
+        }
 
         // O nome é fixo; o `?v=` quebra o cache do navegador e da CDN.
         const { data } = supabase.storage.from('avatars').getPublicUrl(caminho);
         const url = `${data.publicUrl}?v=${Date.now()}`;
 
         const { error } = await supabase.rpc('atualizar_meu_perfil', { p_url_do_avatar: url });
-        if (error) throw error;
+        if (error) {
+          if (recusadoPorPermissao(error)) return { ok: false, motivo: 'semConta' };
+          throw error;
+        }
 
         const meu = await this.obterMeuPerfil();
         return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'falhou' };
@@ -258,7 +271,8 @@ export function criarPerfilRemoto(): PortaDePerfil {
         const { error } = await supabase.rpc('atualizar_meu_perfil', { p_remover_avatar: true });
         if (error) throw error;
         // O arquivo some do bucket também; se não sair, a foto já não aparece.
-        await supabase.storage.from('avatars').remove([`${uid}/avatar.jpg`]);
+        const { error: erroDaRemocao } = await supabase.storage.from('avatars').remove([`${uid}/avatar.jpg`]);
+        if (erroDaRemocao) console.error('Foto saiu do perfil, mas o arquivo ficou no bucket', erroDaRemocao);
         const meu = await this.obterMeuPerfil();
         return meu ? { ok: true, perfil: meu } : { ok: false, motivo: 'falhou' };
       } catch (erro) {

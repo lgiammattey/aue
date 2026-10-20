@@ -1237,7 +1237,9 @@ export function InicioOpenDesign({
           ? 'Use JPG, PNG ou WebP para a foto.'
           : resultado.motivo === 'grandeDemais'
             ? 'A foto não coube no limite de envio.'
-            : 'Não foi possível trocar a foto agora.';
+            : resultado.motivo === 'semConta'
+              ? 'Entre com sua conta e conclua o perfil para ter foto.'
+              : 'Não foi possível trocar a foto agora.';
         exibirToast(mensagem);
         return { ok: false, mensagem };
       }

@@ -2,7 +2,7 @@
 name: "Auê! Design System"
 category: Brands
 surface: Rede social para arrotadores (Desktop e Webapp Mobile)
-status: "Design System canônico — v5 (Bonde do Arroto & Arena)"
+status: "Histórico — v5; substituído pelo Open Design em comunidade, feed, perfil e acesso"
 canonical_refs:
   - "docs/design/prototipo/Design System.dc.html"
   - "docs/design/prototipo/Bonde do Arroto.dc.html"
@@ -41,7 +41,11 @@ colors:
     danger: "#c4161a"
 ---
 
-# Auê! Design System
+# Auê! Design System v5 — histórico
+
+> Para comunidade, feed, perfil e acesso, a fonte vigente é
+> [`DESIGN_OPEN.md`](DESIGN_OPEN.md). Este arquivo permanece como referência da
+> Arena até ela receber revisão visual própria.
 
 > **Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.**
 

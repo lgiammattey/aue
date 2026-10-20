@@ -19,22 +19,31 @@
 
 ---
 
-## Decisão vigente — Comunidades usam a linguagem das páginas públicas
+## Decisão vigente — Open Design
 
-**Decisão do Luiz, 19/10/2026:** diretório, comunidade, tópico, respostas e formulários seguem o padrão visual de [`Páginas Públicas.dc.html`](prototipo/Páginas%20Públicas.dc.html). Esta seção vence qualquer trecho abaixo que mande em tema, fonte, casca ou navegação do fórum.
+**Decisão do Luiz, 19/10/2026:** diretório, comunidade, tópico, respostas,
+perfil e acesso seguem o [`Aue Open Design`](prototipo/Aue%20Open%20Design.md).
+Esta seção vence qualquer trecho abaixo que mande em tema, fonte, casca ou
+navegação do fórum.
 
-A comunidade continua sendo lugar de leitura e conversa. Lista, tópico, resposta, participação, rascunho e formulário não viram página estática. O que muda é a pele: clara, editorial e com respiro.
+A comunidade continua sendo lugar de leitura e conversa. Lista, tópico,
+resposta, participação, rascunho e formulário não viram página estática. A
+pele agora é escura, de comunidade e com três colunas no desktop:
 
-- tema claro fixo: `#f7f8f5` no fundo, `#eef4e7` e `#e2ebd8` nas superfícies, `#202824` no texto, `#5c675d` no secundário e `#e7ebe3` nas linhas;
-- Archivo em tudo, inclusive o wordmark `auê!`, em peso 900. Anton fica na Arena e na nota;
-- verde público `#2f5d0a` na marca, no foco e em detalhe editorial. O verde elétrico fica guardado para CTA dentro de faixa escura; não aparece solto sobre o fundo claro;
-- cabeçalho público sticky de 60px, com wordmark, navegação horizontal e ação de entrar. No celular a navegação rola na horizontal; não nasce uma barra inferior própria do fórum;
-- diretório e listas usam até 1080px. A leitura de comunidade, tópico e resposta fica em até 760px, com gutter de 20px;
-- linhas de 1px separam comunidades, tópicos e respostas. Cards só entram quando têm função. Nada de sombra decorativa, gradiente, blur ou um monte de caixinha;
-- botão escuro é a ação principal normal; pílula clara atende filtro e ação secundária. Cada estado tem uma chamada principal;
-- campos usam fundo claro, borda forte, 16px e raio 12px. Voltar é link real, com alvo de 44px.
+- `#101114` no fundo, `#191b20` e `#23262d` nas superfícies e `#323640` nas linhas;
+- roxo `#9b6cff` para navegação e ação social, coral `#ff765e` para marca,
+  avatar e voto, lima `#b7e35a` para ação principal e foco;
+- `ui-rounded`, Avenir Next, Trebuchet MS e system-ui em comunidade; Arena
+  segue com sua tipografia até decisão própria;
+- desktop 250px / miolo fluido / 292px, lateral direita ausente até 1100px e
+  barra inferior fixa até 760px;
+- cards funcionais usam raio 12px e linha de 1px; capa pode ter o gradiente do
+  protótipo; sombra e blur ficam restritos a modal;
+- dados e ações do snapshot são demonstração. Sem número, pessoa, regra,
+  moderador, voto, ranking, login ou publicação sem contrato real.
 
-Ainda falta atualizar o protótipo navegável antes de dar fidelidade 1:1 como aceita. Esta decisão basta para orientar o redesenho; não autoriza mudar regra de dados, participação, erro, privacidade, Arena ou o caminho da pessoa dentro da conversa.
+Esta decisão não muda regras de dados, participação, erro, privacidade, Arena
+nem o caminho da pessoa dentro da conversa.
 
 ---
 

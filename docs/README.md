@@ -32,8 +32,8 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 | Qual é a jornada do jogador? | [`jogo/JORNADA.md`](jogo/JORNADA.md) e [`design/prototipo/Jornada.dc.html`](design/prototipo/Jornada.dc.html) |
 | Que estados a Arena tem? | [`jogo/ARENA.md`](jogo/ARENA.md) |
 | Como o jogo pontua e o que não vale? | [`jogo/REGRAS.md`](jogo/REGRAS.md) |
-| Com o que a interface se parece? | Protótipos canônicos em [`design/prototipo/`](design/prototipo/) |
-| De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e [`design/prototipo/Design System.dc.html`](design/prototipo/Design%20System.dc.html) |
+| Com o que a interface se parece? | [`design/prototipo/Aue Open Design.md`](design/prototipo/Aue%20Open%20Design.md) para comunidade, feed, perfil e acesso; `Arena.dc.html` segue como referência da Arena. |
+| De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN_OPEN.md`](design/design-system/system/DESIGN_OPEN.md) |
 | Qual é a direção artística que une tudo? | [`design/AUÊ!.md`](design/AUÊ!.md) |
 | Isso pertence ao produto agora? | [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) |
 | O que pegar para fazer? | [`escopo/BACKLOG.md`](escopo/BACKLOG.md) |

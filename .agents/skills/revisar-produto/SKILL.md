@@ -31,7 +31,7 @@ Com a evidência do **Marcelo** (funcional e testes) e do **Rian** (fidelidade v
 
 1. **Necessidade:** Resolve uma dor real da pessoa no Bonde do Arroto ou na Arena sem adicionar fricção?
 2. **Valor:** Deixa o ato de arrotar, ouvir causos no feed, debater ou desafiar no X1 mais divertido?
-3. **Coerência:** Respeita o Design System v5 (Anton + Archivo, temas escuro/claro, sem gradientes falsos, máximo 2 verdes por estado)?
+3. **Coerência:** Comunidade, feed, perfil e acesso respeitam o Open Design (`DESIGN_OPEN.md`)? A Arena preserva sua referência própria até revisão explícita?
 4. **Experiência:** Está responsivo nas 3 larguras (Desktop 3 colunas, Tablet ícones, Webapp Mobile com alvos de toque >= 44px e safe area)?
 5. **Funcionamento Ponta a Ponta:** O áudio toca instantaneamente no feed? A Arena grava, valida e revela a nota sem engasgos?
 6. **Qualidade e Prova:** O Marcelo auditou testes, build e estados de resiliência (`MIC_ERROR`, `NO_SOUND`)? Falta de prova vira `NÃO VALIDADO`.

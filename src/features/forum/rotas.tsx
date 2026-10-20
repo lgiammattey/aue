@@ -11,18 +11,21 @@ import { TelaTopico } from './TelaTopico';
  * um `<Routes>`. Compartilham uma casca só: a navegação não remonta ao passar
  * de uma tela para outra.
  *
- * `/comunidade/:slug` e `/comunidades/:slug` NÃO estão aqui de propósito: seguem
- * na tela antiga até o corte (pedaço 2e).
+ * Diretório e comunidade pertencem ao OpenDesign. Não podem ser declarados de
+ * novo aqui: duas rotas idênticas deixam a escolha visual dependente da
+ * prioridade interna do React Router e podem trazer a casca antiga de volta.
  */
-export function rotasDoForum() {
+export function rotasDoForum({ incluirRaizesDaComunidade = true }: { readonly incluirRaizesDaComunidade?: boolean } = {}) {
   return (
     <Route element={<LayoutDoForum />}>
-      <Route path="/comunidades" element={<TelaDiretorio />} />
+      {incluirRaizesDaComunidade && <Route path="/comunidades" element={<TelaDiretorio />} />}
       <Route path="/explorar" element={<TelaExplorar />} />
-      <Route path="/c/:slug" element={<TelaComunidadeDoForum />}>
-        {/* Formulário de novo tópico: por cima da lista da comunidade (cartão 0017, pedaço 2c). */}
-        <Route path="novo" element={<TelaNovoTopico />} />
-      </Route>
+      {incluirRaizesDaComunidade && (
+        <Route path="/c/:slug" element={<TelaComunidadeDoForum />}>
+          {/* Formulário de novo tópico: por cima da lista da comunidade (cartão 0017, pedaço 2c). */}
+          <Route path="novo" element={<TelaNovoTopico />} />
+        </Route>
+      )}
       <Route path="/c/:slug/t/:id" element={<TelaTopico />} />
     </Route>
   );

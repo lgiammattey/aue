@@ -16,6 +16,7 @@ import { AdsterraNativeBanner } from './AdsterraNativeBanner';
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
 import { CardDoPost } from './CardDoPost';
+import { ThreadDeComentarios } from './ThreadDeComentarios';
 import { ModalCompositor, type AnexoRascunho } from './ModalCompositor';
 import { ModalComentarios } from './ModalComentarios';
 import { ModalEditarPerfil } from './ModalEditarPerfil';
@@ -1350,8 +1351,31 @@ export function InicioOpenDesign({
           aoEntrar={aoEntrar ?? (() => setViewAtual('auth'))}
         />}
 
-        {/* ==================== VIEW: FEED PRINCIPAL ==================== */}
-        {viewAtual === 'feed' && (
+        {/* ==================== VIEW: THREAD DE COMENTÁRIOS (PADRÃO TWITTER / FORA DO CARD) ==================== */}
+        {postComentariosAtivo ? (
+          <ThreadDeComentarios
+            post={postComentariosAtivo}
+            comentarios={listaComentarios}
+            carregando={carregandoComentarios}
+            enviando={enviandoComentario}
+            criarGravacao={forum.criarGravacaoLivreDoForum}
+            aoVoltar={() => {
+              setPostComentariosAtivo(null);
+              setListaComentarios([]);
+            }}
+            aoEnviarComentario={enviarComentario}
+            {...acoesDeReacao(postComentariosAtivo)}
+            aoAlternarSalvar={() => alternarSalvo(postComentariosAtivo.id)}
+            aoTocarAudio={(fonte) => void alternarAudio(fonte, postComentariosAtivo.id)}
+            salvo={Boolean(salvosUsuario[postComentariosAtivo.id])}
+            audioTocando={audioTocandoId === postComentariosAtivo.id}
+            tempoAtualDoAudio={audioSelecionadoId === postComentariosAtivo.id ? tempoAtualDoAudio : 0}
+            duracaoDoAudio={audioSelecionadoId === postComentariosAtivo.id ? duracaoDoAudio : null}
+          />
+        ) : (
+          <>
+            {/* ==================== VIEW: FEED PRINCIPAL ==================== */}
+            {viewAtual === 'feed' && (
           <section aria-label="Feed principal">
             <div className="hero">
               <span className="eyebrow">Rede social de arrotadores</span>
@@ -1824,6 +1848,8 @@ export function InicioOpenDesign({
             )}
           </section>
         )}
+      </>
+    )}
 
         {/* ==================== VIEW: AUTH ==================== */}
         {viewAtual === 'auth' && (

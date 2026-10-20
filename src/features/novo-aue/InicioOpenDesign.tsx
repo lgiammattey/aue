@@ -422,6 +422,7 @@ export function InicioOpenDesign({
             corpo: t.corpo,
             autorNome: t.autor.apelido ?? (t.autor.handle ? `@${t.autor.handle}` : 'Anônimo'),
             autorHandle: t.autor.handle ?? undefined,
+            autorAvatarUrl: t.autor.avatarUrl ?? undefined,
             criadoEm: t.criadoEm,
             votos: 1,
             respostasTotal: t.respostasTotal,
@@ -440,6 +441,7 @@ export function InicioOpenDesign({
             corpo: c.conteudo,
             autorNome: c.autorNome,
             autorHandle: c.autorHandle,
+            autorAvatarUrl: c.autorAvatarUrl ?? undefined,
             criadoEm: c.criadoEm,
             votos: c.curtidas,
             respostasTotal: c.totalComentarios,
@@ -482,6 +484,7 @@ export function InicioOpenDesign({
               corpo: '',
               autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo',
               autorHandle: t.autor.handle ?? undefined,
+              autorAvatarUrl: t.autor.avatarUrl ?? undefined,
               criadoEm: t.criadoEm,
               votos: Math.max(1, t.respostasTotal * 3),
               respostasTotal: t.respostasTotal,
@@ -497,6 +500,7 @@ export function InicioOpenDesign({
             corpo: c.conteudo,
             autorNome: c.autorNome,
             autorHandle: c.autorHandle,
+            autorAvatarUrl: c.autorAvatarUrl ?? undefined,
             criadoEm: c.criadoEm || new Date().toISOString(),
             votos: c.nota ? Math.round(c.nota) : 1,
             respostasTotal: c.totalComentarios || 0,
@@ -807,8 +811,15 @@ export function InicioOpenDesign({
   };
 
   const abrirComentarios = async (post: ItemDoFeed) => {
+    // Se a thread deste post já estiver aberta, fecha (recolhe)
+    if (postComentariosAtivo?.id === post.id) {
+      setPostComentariosAtivo(null);
+      setModalComentariosAberto(false);
+      setListaComentarios([]);
+      return;
+    }
+
     setPostComentariosAtivo(post);
-    setModalComentariosAberto(true);
     setCarregandoComentarios(true);
     setListaComentarios([]);
 
@@ -831,6 +842,7 @@ export function InicioOpenDesign({
                 id: r.id,
                 autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
                 autorHandle: r.autor?.handle ?? undefined,
+                autorAvatarUrl: r.autor?.avatarUrl ?? undefined,
                 conteudo: r.corpo ?? '',
                 criadoEm: r.criadoEm,
                 paiId: r.paiId,
@@ -953,6 +965,15 @@ export function InicioOpenDesign({
       setEnviandoComentario(false);
     }
   };
+
+  const propsDeComentariosDoPost = (post: ItemDoFeed) => ({
+    threadAberta: postComentariosAtivo?.id === post.id,
+    comentarios: postComentariosAtivo?.id === post.id ? listaComentarios : [],
+    carregandoComentarios: postComentariosAtivo?.id === post.id && carregandoComentarios,
+    enviandoComentario,
+    criarGravacao: forum.criarGravacaoLivreDoForum,
+    aoEnviarComentario: enviarComentario,
+  });
 
   const publicarPost = async (dados: { corpo: string; comunidadeSlug: string; anexo: AnexoRascunho | null }): Promise<boolean> => {
     const meuNome = meuPerfil?.apelido ?? 'Você';
@@ -1395,6 +1416,7 @@ export function InicioOpenDesign({
                       aoAlternarSalvar={() => alternarSalvo(post.id)}
                       aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                       aoAbrirComentarios={() => void abrirComentarios(post)}
+                      {...propsDeComentariosDoPost(post)}
                     />
                     {exibirBannerAqui && <AdsterraNativeBanner />}
                   </div>
@@ -1440,6 +1462,7 @@ export function InicioOpenDesign({
                     aoAlternarSalvar={() => alternarSalvo(post.id)}
                     aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                     aoAbrirComentarios={() => void abrirComentarios(post)}
+                    {...propsDeComentariosDoPost(post)}
                   />
                 ))}
               </div>
@@ -1460,7 +1483,7 @@ export function InicioOpenDesign({
             {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu bonde…</p>}
             {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu bonde.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Seu bonde ainda está quieto.</h2><p>Siga alguns perfis para ver os causos deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Explorar o Bonde</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={Boolean(salvosUsuario[post.id])} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoAlternarSalvar={() => alternarSalvo(post.id)} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} />)}</div>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={Boolean(salvosUsuario[post.id])} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoAlternarSalvar={() => alternarSalvo(post.id)} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
           </section>
         )}
 
@@ -1567,6 +1590,7 @@ export function InicioOpenDesign({
                       aoAlternarSalvar={() => alternarSalvo(post.id)}
                       aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                       aoAbrirComentarios={() => void abrirComentarios(post)}
+                      {...propsDeComentariosDoPost(post)}
                     />
                   ))}
                 </div>

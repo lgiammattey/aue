@@ -6,6 +6,7 @@ export interface ItemDoFeed {
   readonly corpo: string;
   readonly autorNome: string;
   readonly autorHandle?: string;
+  readonly autorAvatarUrl?: string;
   readonly criadoEm: string;
   readonly votos: number;
   readonly respostasTotal: number;
@@ -33,6 +34,7 @@ export interface ItemComentario {
   readonly id: string;
   readonly autorNome: string;
   readonly autorHandle?: string;
+  readonly autorAvatarUrl?: string;
   readonly conteudo: string;
   readonly criadoEm: string;
   readonly paiId?: string | null;

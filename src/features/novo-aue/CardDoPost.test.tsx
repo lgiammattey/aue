@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CardDoPost } from './CardDoPost';
-import type { ItemDoFeed } from './tipos';
+import type { ItemComentario, ItemDoFeed } from './tipos';
 
 describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
   afterEach(() => {
@@ -18,13 +18,26 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     corpo: 'Estava 0x0 quando soltei o trovão e a torcida calou.',
     autorNome: 'Mestre do Eco',
     autorHandle: 'mestre_eco',
+    autorAvatarUrl: 'https://cdn.test/avatar-mestre.jpg',
     criadoEm: '2026-10-20T12:00:00Z',
     votos: 42,
     respostasTotal: 7,
     nota: 88,
   };
 
-  it('renderiza o post com avatar lateral, autor com handle, tempo e badge de nota', () => {
+  const comentariosExemplo: ItemComentario[] = [
+    {
+      id: 'com-1',
+      autorNome: 'Pedro Som',
+      autorHandle: 'pedro_som',
+      autorAvatarUrl: 'https://cdn.test/avatar-pedro.jpg',
+      conteudo: 'Esse som foi histórico na firma!',
+      criadoEm: '2026-10-20T12:05:00Z',
+      nivel: 0,
+    },
+  ];
+
+  it('renderiza o post com avatar lateral em imagem, autor com handle, tempo e badge de nota', () => {
     render(
       <MemoryRouter>
         <CardDoPost
@@ -39,7 +52,9 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('M')).toBeTruthy();
+    const imgAvatar = screen.getByRole('img', { name: 'Mestre do Eco' });
+    expect(imgAvatar).toBeTruthy();
+    expect(imgAvatar.getAttribute('src')).toBe('https://cdn.test/avatar-mestre.jpg');
     expect(screen.getByText('Mestre do Eco')).toBeTruthy();
     expect(screen.getByText('u/mestre_eco')).toBeTruthy();
     expect(screen.getByText('r/arena-do-arroto')).toBeTruthy();
@@ -48,7 +63,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(screen.getByText('Estava 0x0 quando soltei o trovão e a torcida calou.')).toBeTruthy();
   });
 
-  it('dispara ação de curtir e abrir comentários com ícones estilo Twitter', () => {
+  it('dispara ação de curtir e alternar thread com ícones estilo Twitter', () => {
     const aoCurtir = vi.fn();
     const aoAbrirComentarios = vi.fn();
 
@@ -75,6 +90,51 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     const btnCurtir = screen.getByRole('button', { name: /Curtir/i });
     fireEvent.click(btnCurtir);
     expect(aoCurtir).toHaveBeenCalledOnce();
+  });
+
+  it('exibe thread inline de comentários e compositor com gravação de áudio', () => {
+    const aoEnviar = vi.fn(async () => true);
+
+    render(
+      <MemoryRouter>
+        <CardDoPost
+          post={postExemplo}
+          salvo={false}
+          audioTocando={false}
+          tempoAtualDoAudio={0}
+          duracaoDoAudio={null}
+          threadAberta={true}
+          comentarios={comentariosExemplo}
+          carregandoComentarios={false}
+          aoEnviarComentario={aoEnviar}
+          aoAlternarSalvar={vi.fn()}
+          aoTocarAudio={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    // Thread inline exibida no próprio card
+    expect(screen.getByRole('heading', { level: 2, name: 'Resenha na roda' })).toBeTruthy();
+    expect(screen.getByText('Esse som foi histórico na firma!')).toBeTruthy();
+    expect(screen.getByText('Pedro Som')).toBeTruthy();
+
+    // Avatar do comentarista com foto
+    const imgComentarista = screen.getByRole('img', { name: 'Pedro Som' });
+    expect(imgComentarista.getAttribute('src')).toBe('https://cdn.test/avatar-pedro.jpg');
+
+    // Botão de gravação de áudio com 1 clique disponível no compositor inline
+    expect(screen.getByRole('button', { name: /Gravar áudio/i })).toBeTruthy();
+
+    // Enviar comentário na thread inline
+    const input = screen.getByPlaceholderText('Responder para a roda…');
+    fireEvent.change(input, { target: { value: 'Comentário inline!' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+
+    expect(aoEnviar).toHaveBeenCalledWith({
+      conteudo: 'Comentário inline!',
+      paiId: null,
+      anexo: null,
+    });
   });
 
   it('copia link para o clipboard ao clicar em compartilhar', () => {

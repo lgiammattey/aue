@@ -11,7 +11,6 @@ const TiposDeArroto = lazy(() => import('./features/publico/TiposDeArroto').then
 const RankingDeArrotos = lazy(() => import('./features/publico/RankingDeArrotos').then((m) => ({ default: m.RankingDeArrotos })));
 const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade').then((m) => ({ default: m.TelaComunidade })));
 const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then((m) => ({ default: m.TelaLanding })));
-const VideosDeArroto = lazy(() => import('./features/publico/VideosDeArroto').then((m) => ({ default: m.VideosDeArroto })));
 const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
 const InicioOpenDesign = lazy(() => import('./features/novo-aue/InicioOpenDesign').then((m) => ({ default: m.InicioOpenDesign })));
 const TelaComunidadeOpenDesign = lazy(() => import('./features/novo-aue/TelaComunidadeOpenDesign').then((m) => ({ default: m.TelaComunidadeOpenDesign })));
@@ -152,6 +151,14 @@ function EntradaPerfilHandle() {
   return <TelaPerfilOpenDesign />;
 }
 
+function EntradaSeguindo() {
+  return <InicioOpenDesign viewInicial="seguindo" />;
+}
+
+function EntradaEmAlta() {
+  return <InicioOpenDesign viewInicial="emAlta" />;
+}
+
 /** Mantém links antigos de comunidades vivos, levando-os ao endereço novo equivalente. */
 function AliasDeComunidade() {
   const { slug } = useParams<{ slug: string }>();
@@ -169,6 +176,8 @@ export function App() {
           {/* Feed e Entrada Inteligente */}
           <Route path="/" element={<EntradaInicial />} />
           <Route path="/feed" element={<EntradaPrincipal />} />
+          <Route path="/em-alta" element={<EntradaEmAlta />} />
+          <Route path="/seguindo" element={<EntradaSeguindo />} />
 
           {/* Arena de Arrotos */}
           <Route path="/arena" element={<EntradaArena />} />
@@ -210,8 +219,8 @@ export function App() {
           <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
           <Route path="/ranking-de-arrotos" element={<RankingDeArrotos />} />
           <Route path="/ranking" element={<Navigate to="/ranking-de-arrotos" replace />} />
-          <Route path="/videos-de-arroto" element={<VideosDeArroto />} />
-          <Route path="/videos" element={<Navigate to="/videos-de-arroto" replace />} />
+          <Route path="/videos-de-arroto" element={<Navigate to="/c/arrotos-youtube" replace />} />
+          <Route path="/videos" element={<Navigate to="/c/arrotos-youtube" replace />} />
           <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
           <Route path="/termos" element={<TermosDeUso />} />
           <Route path="/grupos" element={<TelaGrupos />} />

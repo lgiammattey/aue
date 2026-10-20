@@ -49,6 +49,8 @@ function portaDePerfil(sobrepor: Partial<PortaDePerfil> = {}): PortaDePerfil {
     atualizarMeuPerfil: vi.fn(),
     enviarFoto: vi.fn(),
     removerFoto: vi.fn(),
+    enviarCapa: vi.fn(),
+    removerCapa: vi.fn(),
     listarConexoes: vi.fn(async () => []),
     ...sobrepor,
   };

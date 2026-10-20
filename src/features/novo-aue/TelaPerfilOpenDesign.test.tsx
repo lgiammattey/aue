@@ -114,6 +114,8 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
     })),
     enviarFoto: vi.fn(async () => ({ ok: true as const, perfil: mockPerfilLogado })),
     removerFoto: vi.fn(async () => ({ ok: true as const, perfil: mockPerfilLogado })),
+    enviarCapa: vi.fn(async () => ({ ok: true as const, perfil: mockPerfilLogado })),
+    removerCapa: vi.fn(async () => ({ ok: true as const, perfil: mockPerfilLogado })),
     listarConexoes: vi.fn(async () => []),
   };
 
@@ -168,27 +170,28 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
 
     // Hero com título, handle e bio reais
     expect(await screen.findByRole('heading', { level: 1, name: 'burpKing' })).toBeTruthy();
-    expect(screen.getByText(/u\/arrotador_3573/)).toBeTruthy();
+    expect(screen.getByText('@arrotador_3573')).toBeTruthy();
     expect(document.getElementById('profileBio')?.textContent).toBe('Colecionador de causos improváveis.');
     expect(screen.getAllByText(/São Paulo, SP/).length).toBeGreaterThan(0);
 
     // Botões de ação 1:1
     expect(screen.getByRole('button', { name: 'Editar perfil' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '↗ Compartilhar' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Compartilhar' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '+ Novo post' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Trocar foto' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Trocar capa' })).toBeTruthy();
 
-    // Stats
-    expect(screen.getByText('karma de arroto')).toBeTruthy();
-    expect(screen.getByText('posts publicados')).toBeTruthy();
-    expect(screen.getByText('comentários certeiros')).toBeTruthy();
+    // Métricas públicas reais, sem karma ou estatística inventada.
+    expect(screen.getAllByText('Causos').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Seguidores').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Seguindo').length).toBeGreaterThan(0);
+    expect(screen.queryByText('karma de arroto')).toBeNull();
 
     // Atividade com os causos reais do usuário
     expect(await screen.findByText('Coe galera')).toBeTruthy();
     expect(screen.getByText('oi na roda geral')).toBeTruthy();
 
-    // Painéis laterais 1:1
-    expect(screen.getByRole('heading', { level: 2, name: 'Conquistas' })).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 2, name: 'Comunidades favoritas' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Sobre esta ficha' })).toBeTruthy();
   });
 
   it('abre o modal Editar perfil e salva atualizações com feedback', async () => {
@@ -215,9 +218,11 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
     // Modal aberto 1:1 com campos
     expect(await screen.findByRole('heading', { level: 2, name: 'Editar perfil' })).toBeTruthy();
     const inputNome = screen.getByLabelText('Nome de exibição');
+    const inputHandle = screen.getByLabelText('@ do Auê');
     const inputBio = screen.getByLabelText('Bio');
 
     fireEvent.change(inputNome, { target: { value: 'burpMaster' } });
+    fireEvent.change(inputHandle, { target: { value: '@burp_master' } });
     fireEvent.change(inputBio, { target: { value: 'Nova bio da roda.' } });
 
     const btnSalvar = screen.getByRole('button', { name: 'Salvar mudanças' });
@@ -227,6 +232,7 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
       expect(mockPerfilPort.atualizarMeuPerfil).toHaveBeenCalledWith(
         expect.objectContaining({
           apelido: 'burpMaster',
+          handle: 'burp_master',
           bio: 'Nova bio da roda.',
         }),
       );
@@ -254,7 +260,10 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
     );
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Douglas Garcia' })).toBeTruthy();
-    expect(screen.getByText(/u\/douglas/)).toBeTruthy();
+    expect(screen.getByText('@douglas')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Seguir' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Abrir meu perfil' }).textContent).toContain('burpKing');
+    expect(screen.queryByRole('button', { name: '+ Novo post' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Editar perfil' })).toBeNull();
   });
 });

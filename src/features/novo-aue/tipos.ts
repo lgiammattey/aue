@@ -12,6 +12,7 @@ export interface ItemDoFeed {
   readonly temAudio?: boolean;
   readonly enderecoDoAudio?: string | (() => Promise<string | null>);
   readonly nota?: number;
+  readonly videoUrl?: string;
 }
 
 export interface DetalhesDaComunidade {

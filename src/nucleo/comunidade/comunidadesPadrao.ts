@@ -70,6 +70,13 @@ export const COMUNIDADES_PADRAO: readonly Comunidade[] = [
     descricao: 'Aquele que treme o vidro da sala, acorda o cachorro e assusta o vizinho.',
     icone: '⚡',
   },
+  {
+    id: 'comu-arrotos-youtube',
+    slug: 'arrotos-youtube',
+    nome: 'Arrotos no YouTube',
+    descricao: 'Vídeos que a roda trouxe do YouTube para assistir e comentar.',
+    icone: '▶',
+  },
 ] as const;
 
 export function obterComunidadePorSlug(slug: string): Comunidade | undefined {

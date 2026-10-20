@@ -150,7 +150,7 @@ describe('moldura das páginas legais', () => {
   it.each([
     ['política de privacidade', PoliticaDePrivacidade, 'Política de privacidade'],
     ['termos de uso', TermosDeUso, 'Termos de uso'],
-  ] as const)('%s usa a moldura pública clara, com o título como H1', (_nome, componente, titulo) => {
+  ] as const)('%s usa a moldura OpenDesign, com o título como H1', (_nome, componente, titulo) => {
     const html = montar(componente);
 
     expect(html).toContain('publico-site');
@@ -160,7 +160,20 @@ describe('moldura das páginas legais', () => {
     expect(html).toMatch(new RegExp(`<h1>${titulo}</h1>`));
   });
 
-  it('não carrega a casca escura do app', () => {
-    expect(montar(TermosDeUso)).not.toContain('app-shell');
+  it('entra na casca OpenDesign escura de três colunas', () => {
+    const html = montar(TermosDeUso);
+
+    expect(html).toContain('publico-app-shell');
+    expect(html).toContain('publico-lateral');
+    expect(html).toContain('publico-direita');
+  });
+
+  it('mantém os links institucionais separados no rodapé', () => {
+    const html = montar(TermosDeUso);
+
+    expect(html).toContain('href="/como-jogar"');
+    expect(html).toContain('href="/ranking-de-arrotos"');
+    expect(html).toContain('href="/termos"');
+    expect(html).toContain('href="/privacidade"');
   });
 });

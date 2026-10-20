@@ -1,15 +1,17 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import type { ComunidadeDoForum } from '../../portas/forum';
+import type { PerfilPublico } from '../../portas/perfil';
 
 interface Props {
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly aoAbrirComunidade: (slug: string) => void;
   readonly aoAlternarEntrar?: (slug: string) => void;
   readonly comunidadesEntradas?: Record<string, boolean>;
-  readonly viewAtual?: 'feed' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewAtual?: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
   readonly moderadoresDaComunidade?: readonly (readonly [string, string])[];
   readonly regrasDaComunidade?: readonly string[];
+  readonly perfil?: PerfilPublico | null;
 }
 
 export const PainelDireito = memo(function PainelDireito({
@@ -20,6 +22,7 @@ export const PainelDireito = memo(function PainelDireito({
   viewAtual = 'feed',
   moderadoresDaComunidade = [],
   regrasDaComunidade = [],
+  perfil,
 }: Props) {
   return (
     <aside className="rightbar" aria-label="Painel complementar">
@@ -51,17 +54,12 @@ export const PainelDireito = memo(function PainelDireito({
       )}
 
       {viewAtual === 'perfil' && (
-        <>
-          <div className="panel">
-            <h2>Conquistas</h2>
-            <p style={{ fontSize: 13 }}>🏆 Primeira erupção</p>
-            <p style={{ fontSize: 13 }}>⚡ Veterano do bonde</p>
-          </div>
-          <div className="panel">
-            <h2>Comunidades favoritas</h2>
-            <p style={{ fontSize: 13 }}>r/arena-do-arroto</p>
-          </div>
-        </>
+        <div className="panel">
+          <h2>Sobre esta ficha</h2>
+          {perfil ? (
+            <p>{perfil.souEu ? 'Esta é sua ficha pública no Auê.' : `Acompanhe os causos publicados por @${perfil.handle}.`}</p>
+          ) : <p>Os dados desta ficha aparecem aqui quando ela carregar.</p>}
+        </div>
       )}
 
       {viewAtual !== 'comunidade' && viewAtual !== 'perfil' && (

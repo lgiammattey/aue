@@ -1,12 +1,17 @@
 import { memo } from 'react';
+import { Link } from 'react-router-dom';
 import type { ItemDoFeed } from './tipos';
+import { PlayerDoArroto } from './PlayerDoArroto';
+import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 
 interface Props {
   readonly post: ItemDoFeed;
-  readonly voto: 1 | -1 | undefined;
   readonly salvo: boolean;
   readonly audioTocando: boolean;
-  readonly aoVotar: (delta: 1 | -1) => void;
+  readonly tempoAtualDoAudio: number;
+  readonly duracaoDoAudio: number | null;
+  readonly aoCurtir?: () => void;
+  readonly aoReagir?: (tipo: 'fogo' | 'nojo' | 'trofeu') => void;
   readonly aoAlternarSalvar: () => void;
   readonly aoTocarAudio: (urlOuResolver?: string | (() => Promise<string | null>)) => void;
   readonly aoAbrirComentarios?: () => void;
@@ -32,47 +37,31 @@ function formatarTempoRelativo(isoOuData: string): string {
 
 export const CardDoPost = memo(function CardDoPost({
   post,
-  voto,
   salvo,
   audioTocando,
-  aoVotar,
+  tempoAtualDoAudio,
+  duracaoDoAudio,
+  aoCurtir,
+  aoReagir,
   aoAlternarSalvar,
   aoTocarAudio,
   aoAbrirComentarios,
 }: Props) {
-  const pontuacaoAtual = post.votos + (voto ?? 0);
   const autorIdentificador = post.autorHandle ? `u/${post.autorHandle}` : post.autorNome;
   const comunidadeIdentificador = `r/${post.comunidadeSlug}`;
+  const video = post.videoUrl ? detectarLinkDeVideo(post.videoUrl) : null;
 
   return (
     <article className="post" data-post-id={post.id}>
-      <div className="vote" aria-label="Pontuação do post">
-        <button
-          type="button"
-          aria-label="Votar positivo"
-          className={voto === 1 ? 'voted' : ''}
-          onClick={() => aoVotar(1)}
-        >
-          ▲
-        </button>
-        <span className="score" aria-label={`${pontuacaoAtual} pontos`}>
-          {pontuacaoAtual}
-        </span>
-        <button
-          type="button"
-          aria-label="Votar negativo"
-          className={voto === -1 ? 'voted' : ''}
-          onClick={() => aoVotar(-1)}
-        >
-          ▼
-        </button>
-      </div>
-
       <div className="post-body">
         <div className="post-meta">
           <span className="badge">{comunidadeIdentificador}</span>
           <span>•</span>
-          <span>{autorIdentificador}</span>
+          {post.autorHandle ? (
+            <Link to={`/u/${post.autorHandle}`} aria-label={`Abrir perfil de ${autorIdentificador}`}>
+              {autorIdentificador}
+            </Link>
+          ) : <span>{autorIdentificador}</span>}
           <span>•</span>
           <span>{formatarTempoRelativo(post.criadoEm)}</span>
           {typeof post.nota === 'number' && post.nota > 0 && (
@@ -97,34 +86,22 @@ export const CardDoPost = memo(function CardDoPost({
         </h3>
 
         {post.corpo && <p>{post.corpo}</p>}
+        {video?.tipo === 'youtube' && <iframe className="post-video" src={video.embedUrl} title={`Vídeo: ${post.titulo}`} loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />}
 
         {(post.temAudio || post.enderecoDoAudio) && (
-          <div className="burp-player" role="region" aria-label="Player do arroto">
-            <button
-              type="button"
-              className="play"
-              aria-label={audioTocando ? 'Pausar áudio' : 'Ouvir áudio'}
-              onClick={() => aoTocarAudio(post.enderecoDoAudio)}
-            >
-              {audioTocando ? '❚❚' : '▶'}
-            </button>
-            <div className="wave" aria-hidden="true">
-              {[12, 22, 16, 26, 18, 14, 28, 20, 16, 24, 10, 18, 22, 14].map((h, i) => (
-                <i
-                  key={i}
-                  style={
-                    {
-                      '--h': `${audioTocando ? Math.max(6, (h * (i % 2 === 0 ? 1.2 : 0.8)) % 28) : h}px`,
-                    } as React.CSSProperties
-                  }
-                />
-              ))}
-            </div>
-            <span className="player-time">{audioTocando ? '0:02' : '0:03'}</span>
-          </div>
+          <PlayerDoArroto
+            tocando={audioTocando}
+            tempoAtualSegundos={tempoAtualDoAudio}
+            duracaoSegundos={duracaoDoAudio}
+            aoAlternar={() => aoTocarAudio(post.enderecoDoAudio)}
+          />
         )}
 
         <div className="post-actions">
+          <button type="button" onClick={aoCurtir} disabled={!aoCurtir}>♡ Curtir</button>
+          <button type="button" onClick={() => aoReagir?.('fogo')} disabled={!aoReagir}>🔥</button>
+          <button type="button" onClick={() => aoReagir?.('nojo')} disabled={!aoReagir}>🤢</button>
+          <button type="button" onClick={() => aoReagir?.('trofeu')} disabled={!aoReagir}>🏆</button>
           <button type="button" onClick={aoAbrirComentarios}>
             💬 {post.respostasTotal} comentários
           </button>

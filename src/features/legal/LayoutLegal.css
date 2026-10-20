@@ -5,8 +5,6 @@
   `--accent` vira o verde escuro, que o elétrico não lê sobre o claro.
 */
 .publico-legal {
-  --accent: var(--publico-verde);
-  --danger: #c4161a;
   padding-bottom: 56px;
 }
 
@@ -50,7 +48,7 @@
 
 .publico-legal-texto a,
 .publico-legal-rodape > a:first-child {
-  color: var(--publico-verde);
+  color: var(--accent);
   font-weight: 600;
   text-decoration: underline;
 }

@@ -1,40 +1,89 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 interface Props {
   readonly aberto: boolean;
   readonly nomeInicial: string;
+  readonly handleInicial: string;
   readonly bioInicial: string;
   readonly cidadeInicial: string;
+  readonly redesIniciais: {
+    readonly instagram?: string;
+    readonly tiktok?: string;
+    readonly youtube?: string;
+    readonly twitter?: string;
+  };
   readonly aoFechar: () => void;
-  readonly aoSalvar: (dados: { apelido: string; bio: string; cidade: string }) => Promise<void>;
+  readonly aoSalvar: (dados: {
+    apelido: string;
+    handle: string;
+    bio: string;
+    cidade: string;
+    instagram: string;
+    tiktok: string;
+    youtube: string;
+    twitter: string;
+  }) => Promise<void>;
 }
 
 export function ModalEditarPerfil({
   aberto,
   nomeInicial,
+  handleInicial,
   bioInicial,
   cidadeInicial,
+  redesIniciais,
   aoFechar,
   aoSalvar,
 }: Props) {
   const [apelido, setApelido] = useState(nomeInicial);
+  const [handle, setHandle] = useState(handleInicial);
   const [bio, setBio] = useState(bioInicial);
   const [cidade, setCidade] = useState(cidadeInicial);
+  const [instagram, setInstagram] = useState(redesIniciais.instagram ?? '');
+  const [tiktok, setTiktok] = useState(redesIniciais.tiktok ?? '');
+  const [youtube, setYoutube] = useState(redesIniciais.youtube ?? '');
+  const [twitter, setTwitter] = useState(redesIniciais.twitter ?? '');
   const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!aberto) return;
+    setApelido(nomeInicial);
+    setHandle(handleInicial);
+    setBio(bioInicial);
+    setCidade(cidadeInicial);
+    setInstagram(redesIniciais.instagram ?? '');
+    setTiktok(redesIniciais.tiktok ?? '');
+    setYoutube(redesIniciais.youtube ?? '');
+    setTwitter(redesIniciais.twitter ?? '');
+    setErro(null);
+    // Enquanto o diálogo está aberto, a pessoa é dona do rascunho. Atualizações
+    // assíncronas do perfil não podem sobrescrever o que ela acabou de digitar.
+  // Os valores iniciais são capturados a cada nova abertura.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aberto]);
 
   if (!aberto) return null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!apelido.trim()) return;
+    if (!apelido.trim() || !handle.trim()) return;
     setSalvando(true);
+    setErro(null);
     try {
       await aoSalvar({
         apelido: apelido.trim(),
+        handle: handle.trim().replace(/^@/, '').toLowerCase(),
         bio: bio.trim(),
         cidade: cidade.trim(),
+        instagram: instagram.trim().replace(/^@/, ''),
+        tiktok: tiktok.trim().replace(/^@/, ''),
+        youtube: youtube.trim().replace(/^@/, ''),
+        twitter: twitter.trim().replace(/^@/, ''),
       });
       aoFechar();
+    } catch (causa) {
+      setErro(causa instanceof Error ? causa.message : 'Não foi possível salvar seu perfil agora.');
     } finally {
       setSalvando(false);
     }
@@ -70,6 +119,20 @@ export function ModalEditarPerfil({
           </label>
 
           <label>
+            @ do Auê
+            <input
+              type="text"
+              id="profileHandleInput"
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+              required
+              aria-label="@ do Auê"
+              autoCapitalize="none"
+              spellCheck={false}
+            />
+          </label>
+
+          <label>
             Bio
             <textarea
               id="profileBioInput"
@@ -90,6 +153,28 @@ export function ModalEditarPerfil({
             />
           </label>
 
+          <fieldset className="profile-form__redes">
+            <legend>Onde te achar <span>(opcional)</span></legend>
+            <label>
+              Instagram
+              <input value={instagram} onChange={(e) => setInstagram(e.target.value)} aria-label="Instagram" autoCapitalize="none" />
+            </label>
+            <label>
+              TikTok
+              <input value={tiktok} onChange={(e) => setTiktok(e.target.value)} aria-label="TikTok" autoCapitalize="none" />
+            </label>
+            <label>
+              YouTube
+              <input value={youtube} onChange={(e) => setYoutube(e.target.value)} aria-label="YouTube" autoCapitalize="none" />
+            </label>
+            <label>
+              X / Twitter
+              <input value={twitter} onChange={(e) => setTwitter(e.target.value)} aria-label="X / Twitter" autoCapitalize="none" />
+            </label>
+          </fieldset>
+
+          {erro && <p className="profile-form__erro" role="alert">{erro}</p>}
+
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
             <button
               type="button"
@@ -103,7 +188,7 @@ export function ModalEditarPerfil({
               type="submit"
               className="submit"
               id="saveProfileBtn"
-              disabled={salvando || !apelido.trim()}
+              disabled={salvando || !apelido.trim() || !handle.trim()}
             >
               {salvando ? 'Salvando…' : 'Salvar mudanças'}
             </button>

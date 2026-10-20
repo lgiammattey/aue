@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 
 interface Props {
@@ -83,8 +84,11 @@ export function ModalComentarios({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--aue-muted)', marginBottom: 4 }}>
-            <strong>{post.autorNome}</strong>
-            {post.autorHandle && <span>@{post.autorHandle}</span>}
+            {post.autorHandle ? (
+              <Link className="author-profile-link" to={`/u/${post.autorHandle}`} onClick={aoFechar} aria-label={`Abrir perfil de ${post.autorNome}`}>
+                <strong>{post.autorNome}</strong> <span>@{post.autorHandle}</span>
+              </Link>
+            ) : <strong>{post.autorNome}</strong>}
             <span>·</span>
             <span>{formatarTempo(post.criadoEm)}</span>
           </div>
@@ -131,10 +135,12 @@ export function ModalComentarios({
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                      <strong style={{ fontSize: 13 }}>{c.autorNome}</strong>
-                      {c.autorHandle && (
-                        <span style={{ fontSize: 12, color: 'var(--aue-subtle)' }}>@{c.autorHandle}</span>
-                      )}
+                      {c.autorHandle ? (
+                        <Link className="author-profile-link" to={`/u/${c.autorHandle}`} onClick={aoFechar} aria-label={`Abrir perfil de ${c.autorNome}`}>
+                          <strong style={{ fontSize: 13 }}>{c.autorNome}</strong>{' '}
+                          <span style={{ fontSize: 12, color: 'var(--aue-subtle)' }}>@{c.autorHandle}</span>
+                        </Link>
+                      ) : <strong style={{ fontSize: 13 }}>{c.autorNome}</strong>}
                     </div>
                     <span style={{ fontSize: 11, color: 'var(--aue-subtle)' }}>{formatarTempo(c.criadoEm)}</span>
                   </div>

@@ -221,8 +221,8 @@ describe('feed e perfil (20261018000009)', () => {
   it('as correções posteriores preservam a origem da conta da casa', () => {
     const nomes = readdirSync(`${RAIZ}/supabase/migrations`).filter((n) => n.endsWith('.sql')).sort();
     for (const [funcao, arquivoEsperado] of [
-      ['listar_feed_de_causos', '20261019000013_corrige_tipo_do_feed.sql'],
-      ['obter_perfil_publico', '20261018000010_rede_social_promovida.sql'],
+      ['listar_feed_de_causos', '20261020060000_comunidade_arrotos_youtube.sql'],
+      ['obter_perfil_publico', '20261020000017_capa_de_perfil.sql'],
     ]) {
       const definem = nomes.filter((n) => new RegExp(`CREATE\\s+(?:OR REPLACE\\s+)?FUNCTION public\\.${funcao}\\(`).test(semComentarios(lerMigracao(n))));
       expect(definem.at(-1), funcao).toBe(arquivoEsperado);

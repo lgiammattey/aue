@@ -38,7 +38,6 @@ export function VersaoMobileOpenDesign({
   const [comunidades, setComunidades] = useState<readonly ComunidadeDoForum[]>([]);
   const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
   const [comunidadesEntradas, setComunidadesEntradas] = useState<Record<string, boolean>>({});
-  const [votosUsuario, setVotosUsuario] = useState<Record<string, 1 | -1>>({});
 
   // Compositor Mobile Bottom Sheet
   const [compositorAberto, setCompositorAberto] = useState(false);
@@ -99,6 +98,22 @@ export function VersaoMobileOpenDesign({
     } catch {
       // Reversão
     }
+  };
+
+  const interagirNoCauso = async (causoId: string, tipo: 'curtir' | 'fogo' | 'nojo' | 'trofeu') => {
+    if (!estaAutenticado) {
+      exibirToast('Entre na sua conta para reagir.');
+      aoEntrar?.();
+      return;
+    }
+
+    const resultado = tipo === 'curtir'
+      ? await comunidadePort.alternarCurtida(causoId)
+      : await comunidadePort.alternarReacao(causoId, tipo);
+
+    exibirToast(resultado.ok
+      ? (tipo === 'curtir' ? 'Curtida atualizada.' : 'Reação enviada.')
+      : 'Não deu para registrar sua reação agora.');
   };
 
   const publicarCauso = async (e: FormEvent) => {
@@ -246,9 +261,7 @@ export function VersaoMobileOpenDesign({
                             <p>Sem causos por aqui ainda.</p>
                           </div>
                         ) : (
-                          causosFiltrados.map((c) => {
-                            const voto = votosUsuario[c.id] ?? 0;
-                            return (
+                          causosFiltrados.map((c) => (
                               <article key={c.id} className="post" style={{ borderBottom: '1px solid var(--line)', padding: '14px 0' }}>
                                 <div className="post-body">
                                   <div className="post-meta">
@@ -260,15 +273,13 @@ export function VersaoMobileOpenDesign({
                                     <button
                                       type="button"
                                       className="text-button"
-                                      onClick={() =>
-                                        setVotosUsuario((prev) => ({
-                                          ...prev,
-                                          [c.id]: voto === 1 ? -1 : 1,
-                                        }))
-                                      }
+                                      onClick={() => void interagirNoCauso(c.id, 'curtir')}
                                     >
-                                      ▲ {Math.max(1, (c.nota ? Math.round(c.nota) : 1) + voto)}
+                                      ♡ Curtir
                                     </button>
+                                    <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'fogo')}>🔥</button>
+                                    <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'nojo')}>🤢</button>
+                                    <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'trofeu')}>🏆</button>
                                     <button
                                       type="button"
                                       className="text-button"
@@ -279,8 +290,7 @@ export function VersaoMobileOpenDesign({
                                   </div>
                                 </div>
                               </article>
-                            );
-                          })
+                          ))
                         )}
                       </div>
                     </section>

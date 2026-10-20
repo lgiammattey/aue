@@ -29,14 +29,14 @@
 
 | Critério observável | Dono da prova | Ambiente exigido | Estado |
 |---|---|---|---|
-| `/perfil` usa o módulo isolado novo | Marcelo | Código e teste | pendente |
-| ficha, edição, foto e conexões passam pela porta real | Marcelo | Teste | pendente |
-| feed é filtrado pelo id do perfil e não ganha dado local | Marcelo | Teste | pendente |
-| grade desktop e barra mobile respeitam Open Design | Rian | Navegador | pendente |
+| `/perfil` usa o módulo isolado novo | Marcelo | Código e teste | provado em teste |
+| ficha, edição, foto e conexões passam pela porta real | Marcelo | Teste | provado em teste; sessão real pendente |
+| feed é filtrado pelo id do perfil e não ganha dado local | Marcelo | Teste | provado em teste |
+| grade desktop e barra mobile respeitam Open Design | Rian | Navegador | provado localmente em desktop e 390px; aparelho real pendente |
 
 ## 5. Encerramento e Parecer Final
 
 - **Arquivos/módulos alterados:** `src/features/novo-aue/`, rota mínima de `/perfil` e testes próprios.
-- **Parecer do Marcelo:** pendente
+- **Parecer do Marcelo:** `AJUSTA` — a suíte global ainda tem quatro falhas fora deste módulo.
 - **Veredito Final do Tiago:** NÃO VALIDADO
-- **Pendências ou decisão necessária do Luiz:** validação numa sessão real e nos navegadores físicos.
+- **Pendências ou decisão necessária do Luiz:** validação numa sessão real e nos navegadores físicos; corrigir a suíte global antes de merge.

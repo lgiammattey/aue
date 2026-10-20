@@ -43,4 +43,14 @@ describe('PerfilConectado', () => {
     expect(await screen.findByText('Seu perfil ainda não está pronto.')).toBeTruthy();
     await waitFor(() => expect(comunidadePort.listarFeed).not.toHaveBeenCalled());
   });
+
+  it('mostra a falha de conexões, sem deixar uma ação parecer bem-sucedida', async () => {
+    const { perfilPort, comunidadePort, contaPort } = portas();
+    perfilPort.listarConexoes = vi.fn(async () => { throw new Error('indisponível'); });
+    render(<BrowserRouter><PerfilConectado portaPerfil={perfilPort} portaComunidade={comunidadePort} portaConta={contaPort} aoEntrar={vi.fn()} /></BrowserRouter>);
+
+    await screen.findByRole('heading', { name: 'Betão' });
+    screen.getAllByRole('button', { name: /seguidores/i })[0].click();
+    expect((await screen.findByRole('alert')).textContent).toBe('Não deu para carregar as conexões agora.');
+  });
 });

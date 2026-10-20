@@ -20,6 +20,7 @@ const texto = {
   editarTitulo: 'Editar perfil', nome: 'Nome', handle: 'Seu @', bio: 'Bio', cidade: 'Cidade', cancelar: 'Cancelar', salvar: 'Salvar',
   salvando: 'Salvando…', conexoes: 'Conexões', ninguem: 'Ninguém por aqui ainda.', fotoFalhou: 'Não deu para trocar a foto agora.',
   fotoTipo: 'Use uma foto JPG, PNG ou WebP.', fotoTamanho: 'Essa foto passa de 15 MB.', editarFalhou: 'Não deu para salvar agora. Nada mudou.',
+  conexoesFalharam: 'Não deu para carregar as conexões agora.',
   lateralTitulo: 'Comunidades de verdade', lateralTexto: 'Quando você entrar numa comunidade, ela aparece onde a porta devolver.', chegouEm: (ano: number) => `Chegou em ${ano}`,
 } as const;
 
@@ -47,6 +48,7 @@ export function PerfilConectado({ portaPerfil, portaComunidade, portaConta, aoEn
   const [form, setForm] = useState<Formulario>({ apelido: '', handle: '', bio: '', cidade: '' });
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
+  const [aviso, setAviso] = useState('');
   const [conexoes, setConexoes] = useState<{ titulo: string; lista: readonly Conexao[] } | null>(null);
   const dialogoEdicao = useRef<HTMLDialogElement>(null);
   const dialogoConexoes = useRef<HTMLDialogElement>(null);
@@ -87,15 +89,25 @@ export function PerfilConectado({ portaPerfil, portaComunidade, portaConta, aoEn
   };
   const trocarFoto = async (arquivo?: File) => {
     if (!arquivo) return;
-    const resultado = await perfilPort.enviarFoto(arquivo);
-    if (resultado.ok) setPerfil(resultado.perfil);
-    else setErro(resultado.motivo === 'formatoInvalido' ? texto.fotoTipo : resultado.motivo === 'grandeDemais' ? texto.fotoTamanho : texto.fotoFalhou);
+    setAviso('');
+    try {
+      const resultado = await perfilPort.enviarFoto(arquivo);
+      if (resultado.ok) setPerfil(resultado.perfil);
+      else setAviso(resultado.motivo === 'formatoInvalido' ? texto.fotoTipo : resultado.motivo === 'grandeDemais' ? texto.fotoTamanho : texto.fotoFalhou);
+    } catch {
+      setAviso(texto.fotoFalhou);
+    }
   };
   const abrirConexoes = async (tipo: 'seguidores' | 'seguindo') => {
     if (!perfil) return;
-    setConexoes({ titulo: tipo === 'seguidores' ? texto.seguidores : texto.seguindo, lista: [] }); dialogoConexoes.current?.showModal();
-    const lista = await perfilPort.listarConexoes(perfil.handle, tipo);
-    setConexoes({ titulo: tipo === 'seguidores' ? texto.seguidores : texto.seguindo, lista });
+    setConexoes({ titulo: tipo === 'seguidores' ? texto.seguidores : texto.seguindo, lista: [] }); dialogoConexoes.current?.showModal?.();
+    try {
+      const lista = await perfilPort.listarConexoes(perfil.handle, tipo);
+      setConexoes({ titulo: tipo === 'seguidores' ? texto.seguidores : texto.seguindo, lista });
+    } catch {
+      setAviso(texto.conexoesFalharam);
+      dialogoConexoes.current?.close?.();
+    }
   };
   const sair = async () => { if (await contaPort.sair()) aoEntrar(); };
 
@@ -109,7 +121,7 @@ export function PerfilConectado({ portaPerfil, portaComunidade, portaConta, aoEn
         <div className="novo-perfil__corpo">
           <label className="novo-perfil__avatar" title={texto.trocarFoto}><input aria-label={texto.trocarFoto} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => void trocarFoto(e.target.files?.[0])} />{perfil.avatarUrl ? <img src={perfil.avatarUrl} alt="" /> : iniciais(perfil)}</label>
           <div className="novo-perfil__acoes"><button className="novo-aue__acao" onClick={abrirEdicao}>{texto.editar}</button></div>
-          <div className="novo-perfil__copy"><h1>{perfil.apelido}</h1><p className="novo-perfil__handle">@{perfil.handle} · {texto.chegouEm(new Date(perfil.criadoEm).getFullYear())}</p>{perfil.bio && <p className="novo-perfil__bio">{perfil.bio}</p>}{perfil.cidade && <p className="novo-perfil__meta"><span>⌖ {perfil.cidade}</span></p>}</div>
+          <div className="novo-perfil__copy"><h1>{perfil.apelido}</h1><p className="novo-perfil__handle">@{perfil.handle} · {texto.chegouEm(new Date(perfil.criadoEm).getFullYear())}</p>{perfil.bio && <p className="novo-perfil__bio">{perfil.bio}</p>}{perfil.cidade && <p className="novo-perfil__meta"><span>⌖ {perfil.cidade}</span></p>}{aviso && <p className="novo-perfil__erro" role="alert">{aviso}</p>}</div>
           <div className="novo-perfil__stats"><div className="novo-perfil__stat"><strong>{perfil.totalCausos}</strong><span>{texto.resenhasNumero}</span></div><button onClick={() => void abrirConexoes('seguidores')}><strong>{perfil.totalSeguidores}</strong><span>{texto.seguidores}</span></button><button onClick={() => void abrirConexoes('seguindo')}><strong>{perfil.totalSeguindo}</strong><span>{texto.seguindo}</span></button></div>
         </div>
       </article>

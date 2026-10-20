@@ -19,7 +19,7 @@ const texto = {
   atividade: 'Atividade', posts: 'Posts', comentarios: 'Comentários', comunidade: 'Comunidade', buscarIndisponivel: 'Busca ainda indisponível',
   editarTitulo: 'Editar perfil', nome: 'Nome', handle: 'Seu @', bio: 'Bio', cidade: 'Cidade', cancelar: 'Cancelar', salvar: 'Salvar',
   salvando: 'Salvando…', conexoes: 'Conexões', ninguem: 'Ninguém por aqui ainda.', fotoFalhou: 'Não deu para trocar a foto agora.',
-  fotoTipo: 'Use uma foto JPG, PNG ou WebP.', fotoTamanho: 'Essa foto passa de 15 MB.', editarFalhou: 'Não deu para salvar agora. Nada mudou.',
+  fotoTipo: 'Use uma foto JPG, PNG ou WebP.', fotoSemConta: 'Entre com sua conta e conclua o perfil para ter foto.', fotoTamanho: 'Essa foto passa de 15 MB.', editarFalhou: 'Não deu para salvar agora. Nada mudou.',
   conexoesFalharam: 'Não deu para carregar as conexões agora.',
   lateralTitulo: 'Comunidades de verdade', lateralTexto: 'Quando você entrar numa comunidade, ela aparece onde a porta devolver.', chegouEm: (ano: number) => `Chegou em ${ano}`,
 } as const;
@@ -93,7 +93,7 @@ export function PerfilConectado({ portaPerfil, portaComunidade, portaConta, aoEn
     try {
       const resultado = await perfilPort.enviarFoto(arquivo);
       if (resultado.ok) setPerfil(resultado.perfil);
-      else setAviso(resultado.motivo === 'formatoInvalido' ? texto.fotoTipo : resultado.motivo === 'grandeDemais' ? texto.fotoTamanho : texto.fotoFalhou);
+      else setAviso(resultado.motivo === 'formatoInvalido' ? texto.fotoTipo : resultado.motivo === 'grandeDemais' ? texto.fotoTamanho : resultado.motivo === 'semConta' ? texto.fotoSemConta : texto.fotoFalhou);
     } catch {
       setAviso(texto.fotoFalhou);
     }

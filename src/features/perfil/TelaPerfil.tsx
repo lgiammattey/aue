@@ -550,14 +550,15 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
     >
       <div
         style={{
-          maxWidth: '1200px',
+          maxWidth: '1540px',
+          width: '100%',
           margin: '0 auto',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'flex-start',
         }}
       >
-        {/* Coluna Esquerda: Navegação Canônica (275px / 76px) */}
+        {/* Coluna Esquerda: Navegação Canônica (250px / 76px) */}
         {showLeft && (
           <BarraLateralNavegacao
             abaAtiva="perfil"
@@ -585,11 +586,10 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
           />
         )}
 
-        {/* Coluna Central: Perfil (Max 600px) */}
+        {/* Coluna Central: Perfil */}
         <main
           style={{
             width: '100%',
-            maxWidth: '600px',
             flex: '1 1 0',
             minWidth: 0,
             borderLeft: '1px solid var(--border)',

@@ -33,7 +33,7 @@ export const BarraLateralNavegacao: React.FC<BarraLateralNavegacaoProps> = ({
   perfil,
 }) => {
   const wide = !compacto;
-  const largura = wide ? 275 : 76;
+  const largura = wide ? 250 : 76;
   const navAlign = wide ? 'stretch' : 'center';
 
   const abas = [

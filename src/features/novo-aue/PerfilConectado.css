@@ -1,0 +1,23 @@
+.novo-perfil__capa { min-height: 132px; border-bottom: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0; background: linear-gradient(112deg, #241d36 0%, #1b1f29 60%, #16241f 100%); }
+.novo-perfil__corpo { padding: 0 22px 22px; }
+.novo-perfil__avatar { width: 92px; height: 92px; display: grid; place-items: center; overflow: hidden; margin-top: -46px; border: 4px solid var(--surface); border-radius: 50%; background: var(--coral); color: #26171c; font-size: 28px; font-weight: 900; }
+.novo-perfil__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.novo-perfil__cabecalho { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; margin-top: 12px; }
+.novo-perfil__cabecalho h2 { margin: 0; font-size: clamp(22px, 4vw, 30px); letter-spacing: -.04em; }
+.novo-perfil__handle, .novo-perfil__meta { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.novo-perfil__bio { max-width: 68ch; margin: 18px 0 0; line-height: 1.5; }
+.novo-perfil__meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.novo-perfil__stats { display: flex; gap: 22px; margin-top: 22px; }
+.novo-perfil__stats button { display: grid; gap: 2px; padding: 0; border: 0; background: transparent; color: var(--text); text-align: left; }
+.novo-perfil__stats strong { font-size: 18px; }.novo-perfil__stats span { color: var(--muted); font-size: 13px; }
+.novo-perfil__abas { display: flex; gap: 18px; margin-top: 30px; border-bottom: 1px solid var(--line); }
+.novo-perfil__abas button { min-height: 44px; padding: 0 4px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-weight: 800; }
+.novo-perfil__abas button[aria-selected="true"] { border-color: var(--purple); color: var(--text); }
+.novo-perfil__lista { display: grid; gap: 12px; margin-top: 16px; }
+.novo-perfil__resenha { padding: 18px; }.novo-perfil__resenha p { margin: 0; line-height: 1.5; }.novo-perfil__resenha small { display: block; margin-top: 12px; color: var(--subtle); }
+.novo-perfil__dialogo { width: min(560px, calc(100% - 32px)); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: 0 16px 40px rgba(0,0,0,.22); }
+.novo-perfil__dialogo::backdrop { background: rgba(0,0,0,.66); }.novo-perfil__dialogo form { display: grid; gap: 14px; padding: 22px; }.novo-perfil__dialogo h2 { margin: 0; }
+.novo-perfil__campo { display: grid; gap: 6px; color: var(--muted); font-size: 13px; font-weight: 750; }.novo-perfil__campo input, .novo-perfil__campo textarea { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--text); }.novo-perfil__campo textarea { min-height: 92px; resize: vertical; }
+.novo-perfil__botoes { display: flex; justify-content: flex-end; gap: 10px; }.novo-perfil__erro { margin: 0; color: var(--coral); }
+.novo-perfil__conexao { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }.novo-perfil__conexao:first-of-type { border-top: 0; }.novo-perfil__mini-avatar { width: 36px; height: 36px; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: var(--coral); color: #26171c; font-size: 12px; font-weight: 900; }.novo-perfil__mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 760px) { .novo-perfil__corpo { padding: 0 16px 18px; }.novo-perfil__cabecalho { flex-direction: column; }.novo-perfil__acao-linha { width: 100%; }.novo-perfil__acao-linha button { width: 100%; } }

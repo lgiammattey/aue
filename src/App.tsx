@@ -14,7 +14,8 @@ const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then(
 const VideosDeArroto = lazy(() => import('./features/publico/VideosDeArroto').then((m) => ({ default: m.VideosDeArroto })));
 const TelaLogin = lazy(() => import('./features/comunidade/TelaLogin').then((m) => ({ default: m.TelaLogin })));
 const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
-const TelaPerfil = lazy(() => import('./features/perfil/TelaPerfil').then((m) => ({ default: m.TelaPerfil })));
+const PerfilConectado = lazy(() => import('./features/novo-aue/PerfilConectado').then((m) => ({ default: m.PerfilConectado })));
+const TelaPerfilLegado = lazy(() => import('./features/perfil/TelaPerfil').then((m) => ({ default: m.TelaPerfil })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
@@ -162,10 +163,13 @@ function EntradaDoPerfil({ handle }: { handle?: string }) {
   const navigate = useNavigate();
   const irParaLogin = useIrParaLogin();
   const location = useLocation();
+  if (!handle) {
+    return <PerfilConectado aoEntrar={() => irParaLogin('cadastro')} />;
+  }
   return (
-    <TelaPerfil
+    <TelaPerfilLegado
       handle={handle}
-      boasVindas={!handle && new URLSearchParams(location.search).get('boas-vindas') === '1'}
+      boasVindas={new URLSearchParams(location.search).get('boas-vindas') === '1'}
       aoVoltar={() => navigate('/comunidades')}
       aoArrotar={() => navigate('/arena')}
       aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}

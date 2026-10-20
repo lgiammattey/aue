@@ -1,3 +1,13 @@
+/**
+ * LEGADO / TRANSIÇÃO — TelaComunidade
+ * 
+ * ATENÇÃO: Esta tela foi mantida para compatibilidade de rotas específicas (/feed, /desafios)
+ * e cobertura de testes legados.
+ * 
+ * Para a experiência canônica do Bonde do Arroto, comunidades e perfil (OpenDesign 1:1),
+ * utilize e altere os componentes em `src/features/novo-aue/` (InicioOpenDesign, CardDoPost, etc.).
+ * Consulte: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';

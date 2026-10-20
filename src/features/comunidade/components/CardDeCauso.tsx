@@ -1,3 +1,10 @@
+/**
+ * LEGADO — CardDeCauso
+ * 
+ * ATENÇÃO: NÃO EDITAR PARA NOVAS FEATURES DO BONDE DO ARROTO.
+ * O componente canônico e ativo de cards de post é `src/features/novo-aue/CardDoPost.tsx`.
+ * Consulte: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import type { CausoPostado } from '../../../portas/comunidade';
 import { ArvoreDeComentarios } from './ArvoreDeComentarios';

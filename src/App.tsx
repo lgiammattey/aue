@@ -190,8 +190,9 @@ export function App() {
           <Route path="/comunidades" element={<TelaDiretorioOpenDesign />} />
           <Route path="/c/:slug" element={<TelaComunidadeOpenDesign />} />
           <Route path="/c/:slug/novo" element={<TelaComunidadeOpenDesign abrirCompositor />} />
-          {/* Sub-rotas do fórum como /c/:slug/t/:id e /explorar */}
-          {rotasDoForum({ incluirRaizesDaComunidade: false })}
+          <Route path="/c/:slug/t/:id" element={<TelaComunidadeOpenDesign />} />
+          {/* Sub-rotas do fórum como /explorar */}
+          {rotasDoForum({ incluirRaizesDaComunidade: false, incluirTopico: false })}
           <Route path="/comunidade/:slug" element={<AliasDeComunidade />} />
           <Route path="/comunidades/:slug" element={<AliasDeComunidade />} />
 

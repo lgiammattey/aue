@@ -77,7 +77,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
         proximo: null,
       },
     })),
-    obterTopico: vi.fn(),
+    obterTopico: vi.fn(async () => ({ ok: false as const, motivo: 'falhou' as const })),
     listarRespostasDoTopico: vi.fn(),
     explorarTopicos: vi.fn(async () => ({ ok: true as const, valor: { itens: [], proximo: null } })),
     listarTopicosDoAutor: vi.fn(),
@@ -238,5 +238,59 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     expect(screen.getByRole('button', { name: '+ Fundar comunidade' })).toBeTruthy();
     expect(screen.getAllByText('r/arena-do-arroto').length).toBeGreaterThan(0);
     expect(screen.getAllByText('r/arroto-em-video').length).toBeGreaterThan(0);
+  });
+
+  it('alterna entre as abas Causos e Sobre exibindo regras e moderadores', async () => {
+    render(
+      <MemoryRouter initialEntries={['/c/arena-do-arroto']}>
+        <Routes>
+          <Route
+            path="/c/:slug"
+            element={
+              <TelaComunidadeOpenDesign
+                portaForum={mockForum}
+                portaComunidade={mockComunidade}
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    // Inicialmente na aba Causos
+    expect(await screen.findByRole('heading', { level: 2, name: 'Feed da comunidade' })).toBeTruthy();
+
+    // Clica na aba Sobre
+    const btnSobre = screen.getByRole('button', { name: 'Sobre' });
+    fireEvent.click(btnSobre);
+
+    // Verifica que exibiu Regras rápidas e Moderadores
+    expect(screen.getAllByRole('heading', { level: 2, name: 'Regras rápidas' }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole('heading', { level: 2, name: 'Moderadores' }).length).toBeGreaterThanOrEqual(1);
+
+    // Volta para a aba Posts
+    const btnPosts = screen.getByRole('button', { name: /Posts|Causos/ });
+    fireEvent.click(btnPosts);
+    expect(screen.getByRole('heading', { level: 2, name: 'Feed da comunidade' })).toBeTruthy();
+  });
+
+  it('exibe erro caso a rota direta de tópico /c/:slug/t/:id não encontre o tópico', async () => {
+    render(
+      <MemoryRouter initialEntries={['/c/arena-do-arroto/t/inexistente']}>
+        <Routes>
+          <Route
+            path="/c/:slug/t/:id"
+            element={
+              <TelaComunidadeOpenDesign
+                portaForum={mockForum}
+                portaComunidade={mockComunidade}
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Deu ruim pra carregar o tópico.')).toBeTruthy();
   });
 });

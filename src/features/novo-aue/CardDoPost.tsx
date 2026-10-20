@@ -1,3 +1,11 @@
+/**
+ * CANÔNICO ATIVO — Card de Post do Bonde do Arroto (OpenDesign)
+ * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
+ * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
+ * 
+ * NUNCA altere o CardDeCauso legado para novos comportamentos de feed.
+ * Toda melhoria no card de post (ações, avatar, player, notas) deve ser feita aqui.
+ */
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { ItemComentario, ItemDoFeed } from './tipos';
@@ -185,19 +193,17 @@ export const CardDoPost = memo(function CardDoPost({
           </div>
         </header>
 
-        {/* Título do Causo / Tópico */}
-        <h3 className="post-title">
-          {post.autorHandle ? (
-            <Link to={`/c/${post.comunidadeSlug}`} className="post-title-link">
-              {post.titulo}
-            </Link>
-          ) : (
-            post.titulo
-          )}
-        </h3>
+        {/* Tag de Tópico (só quando há título distinto do corpo do post) */}
+        {post.corpo && post.titulo && post.titulo.trim() !== post.corpo.trim() && !post.corpo.startsWith(post.titulo) && (
+          <div className="post-topic-tag">
+            <span className="post-topic-tag__label">{post.titulo}</span>
+          </div>
+        )}
 
         {/* Corpo do Texto */}
-        {post.corpo && <p className="post-body">{post.corpo}</p>}
+        {(post.corpo || post.titulo) && (
+          <p className="post-body">{post.corpo || post.titulo}</p>
+        )}
 
         {/* Player de Áudio integrado */}
         {(post.temAudio || post.enderecoDoAudio || (post.anexo?.tipo === 'audio' && post.anexo.url)) && (

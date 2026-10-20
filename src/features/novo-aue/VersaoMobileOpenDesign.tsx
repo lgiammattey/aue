@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ADSTERRA_CONFIG, anunciosAdsterraHabilitados } from '../../plataforma/web/adsterra';
 import { AdsterraNativeBanner } from './AdsterraNativeBanner';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
@@ -29,6 +29,7 @@ export function VersaoMobileOpenDesign({
   portaConta,
   aoEntrar,
 }: Props) {
+  const navigate = useNavigate();
   const [forum] = useState(() => portaForum ?? criarForumWeb());
   const [comunidadePort] = useState(() => portaComunidade ?? criarComunidadeWeb());
   const [perfilPort] = useState(() => portaPerfil ?? criarPerfilRemoto());
@@ -205,7 +206,7 @@ export function VersaoMobileOpenDesign({
                       <h1 className="page-title" id="homeTitle">
                         O que arrotaram hoje?
                       </h1>
-                      <p className="page-lead">Causos, áudios e vídeos da galera. Sem cerimônia.</p>
+                      <p className="page-lead">Posts, áudios e vídeos da galera. Sem cerimônia.</p>
 
                       <div className="story">
                         <span className="eyebrow">Desafio em alta</span>
@@ -250,14 +251,14 @@ export function VersaoMobileOpenDesign({
                           type="button"
                           onClick={() => setFiltroTipo('causo')}
                         >
-                          Causos
+                          Posts
                         </button>
                       </div>
 
                       <div className="feed" id="feed">
                         {causosFiltrados.length === 0 ? (
                           <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--muted)' }}>
-                            <p>Sem causos por aqui ainda.</p>
+                            <p>Sem posts por aqui ainda.</p>
                           </div>
                         ) : (
                           causosFiltrados.map((c, idx) => {
@@ -292,9 +293,9 @@ export function VersaoMobileOpenDesign({
                                   duracaoDoAudio={null}
                                   aoCurtir={() => void interagirNoCauso(c.id, 'curtir')}
                                   aoReagir={(tipo) => void interagirNoCauso(c.id, tipo)}
-                                  aoAlternarSalvar={() => exibirToast('Causo salvo nos seus favoritos.')}
+                                  aoAlternarSalvar={() => exibirToast('Post salvo nos seus favoritos.')}
                                   aoTocarAudio={() => exibirToast('Reproduzindo arroto…')}
-                                  aoAbrirComentarios={() => exibirToast('Resenha do causo.')}
+                                  aoAbrirComentarios={() => exibirToast('Resenha do post.')}
                                 />
                                 {exibirBannerAqui && <AdsterraNativeBanner />}
                               </div>
@@ -318,21 +319,36 @@ export function VersaoMobileOpenDesign({
                         {comunidades.map((c) => {
                           const entrou = Boolean(comunidadesEntradas[c.slug]);
                           return (
-                            <button
+                            <div
                               key={c.id}
                               className="community-row"
-                              type="button"
-                              onClick={() => void alternarEntrarComunidade(c.slug)}
+                              role="button"
+                              tabIndex={0}
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => navigate(`/c/${c.slug}`)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  navigate(`/c/${c.slug}`);
+                                }
+                              }}
                             >
                               <span className="community-avatar">{c.nome.slice(0, 1).toUpperCase()}</span>
                               <span className="community-copy">
                                 <strong>r/{c.slug}</strong>
                                 <small className="od-truncate">{c.nome}</small>
                               </span>
-                              <span className={`join-button ${entrou ? 'joined' : ''}`}>
+                              <button
+                                type="button"
+                                className={`join-button ${entrou ? 'joined' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void alternarEntrarComunidade(c.slug);
+                                }}
+                              >
                                 {entrou ? 'Entrou' : 'Entrar'}
-                              </span>
-                            </button>
+                              </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -509,7 +525,7 @@ export function VersaoMobileOpenDesign({
                     />
                   </div>
                   <div className="field">
-                    <label htmlFor="postTextMobile">Causo</label>
+                    <label htmlFor="postTextMobile">Post</label>
                     <textarea
                       id="postTextMobile"
                       maxLength={280}

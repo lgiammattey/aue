@@ -1,3 +1,11 @@
+/**
+ * CANÔNICO ATIVO — Experiência Principal do Bonde do Arroto (OpenDesign)
+ * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
+ * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
+ * 
+ * Orquestra o layout de 3 colunas (desktop) e webapp mobile (via VersaoMobileOpenDesign).
+ * Gerencia as views centrais: 'feed', 'emAlta', 'seguindo', 'comunidade', 'comunidades', 'perfil' e 'auth'.
+ */
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
@@ -40,6 +48,7 @@ interface Props {
   readonly viewInicial?: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
   readonly slugInicial?: string;
   readonly handleInicial?: string;
+  readonly topicoIdInicial?: string;
   readonly abrirCompositor?: boolean;
   readonly aoEntrar?: () => void;
 }
@@ -98,13 +107,15 @@ export function InicioOpenDesign({
   viewInicial = 'feed',
   slugInicial,
   handleInicial,
+  topicoIdInicial,
   abrirCompositor = false,
   aoEntrar,
 }: Props) {
   const navigate = useNavigate();
-  const params = useParams<{ slug?: string; handle?: string }>();
+  const params = useParams<{ slug?: string; handle?: string; id?: string }>();
   const slugParam = slugInicial ?? params.slug;
   const handleParam = handleInicial ?? params.handle;
+  const topicoIdParam = topicoIdInicial ?? params.id;
 
   const [forum] = useState(() => portaForum ?? criarForumWeb());
   const [comunidadePort] = useState(() => portaComunidade ?? criarComunidadeWeb());
@@ -116,7 +127,7 @@ export function InicioOpenDesign({
   const [viewAtual, setViewAtual] = useState<'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades'>(() => {
     if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades' || viewInicial === 'emAlta' || viewInicial === 'seguindo') return viewInicial;
     if (handleParam) return 'perfil';
-    if (slugParam || viewInicial === 'comunidade') return 'comunidade';
+    if (slugParam || topicoIdParam || viewInicial === 'comunidade') return 'comunidade';
     return 'feed';
   });
 
@@ -136,10 +147,13 @@ export function InicioOpenDesign({
     ];
   });
   const [falhaComunidade, setFalhaComunidade] = useState(false);
+  const [falhaTopico, setFalhaTopico] = useState(false);
+  const [secaoComunidade, setSecaoComunidade] = useState<'causos' | 'sobre'>('causos');
   const [abaComunidade, setAbaComunidade] = useState<'Quentes' | 'Novos'>('Quentes');
   const [topicosDaComunidade, setTopicosDaComunidade] = useState<readonly ItemDoFeed[]>([]);
 
   // Perfil
+  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'arrotos' | 'salvos'>('posts');
   const [perfilAtivo, setPerfilAtivo] = useState<PerfilPublico | null>(null);
   const [causosDoPerfil, setCausosDoPerfil] = useState<readonly CausoPostado[]>([]);
   const [arrotosDoPerfil, setArrotosDoPerfil] = useState<readonly ArrotoDoPerfil[]>([]);
@@ -460,6 +474,63 @@ export function InicioOpenDesign({
       ativo = false;
     };
   }, [comunidadeSlug, forum, comunidadePort, abaComunidade]);
+
+  // Carregar tópico específico via URL direta (/c/:slug/t/:id)
+  useEffect(() => {
+    let ativo = true;
+    if (!topicoIdParam) return;
+
+    const promessa = forum.obterTopico?.(topicoIdParam);
+    if (!promessa) {
+      setFalhaTopico(true);
+      return;
+    }
+
+    promessa
+      .then(async (res) => {
+        if (!ativo) return;
+        if (res.ok && res.valor) {
+          const t = res.valor;
+          let anexoItem: ItemDoFeed['anexo'] = undefined;
+          if (forum.listarAnexosDoForum) {
+            const leituraAnexo = await forum.listarAnexosDoForum({ topicoIds: [t.id] });
+            if (leituraAnexo.ok && leituraAnexo.valor[0]) {
+              const a = leituraAnexo.valor[0];
+              const url = a.caminho && forum.assinarAnexoDoForum
+                ? await forum.assinarAnexoDoForum(a.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+                : a.urlVideo ?? undefined;
+              anexoItem = { tipo: a.tipo, url, duracaoMs: a.duracaoMs };
+            }
+          }
+          const post: ItemDoFeed = {
+            id: `topico-${t.id}`,
+            tipo: 'topico',
+            comunidadeSlug: t.comunidade.slug,
+            titulo: t.titulo,
+            corpo: t.corpo,
+            autorNome: t.autor.apelido ?? (t.autor.handle ? `@${t.autor.handle}` : 'Anônimo'),
+            autorHandle: t.autor.handle ?? undefined,
+            autorAvatarUrl: t.autor.avatarUrl ?? undefined,
+            criadoEm: t.criadoEm,
+            votos: 1,
+            respostasTotal: t.respostasTotal,
+            temAudio: Boolean(t.audio?.resultadoId || t.audio?.caminhoDoAudio),
+            anexo: anexoItem,
+          };
+          setPostComentariosAtivo(post);
+          void abrirComentarios(post);
+        } else {
+          setFalhaTopico(true);
+        }
+      })
+      .catch(() => {
+        if (ativo) setFalhaTopico(true);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [topicoIdParam, forum]);
 
   // Carregar feed geral e lista de comunidades
   useEffect(() => {
@@ -1362,6 +1433,9 @@ export function InicioOpenDesign({
             aoVoltar={() => {
               setPostComentariosAtivo(null);
               setListaComentarios([]);
+              if (topicoIdParam) {
+                navigate(`/c/${comunidadeSlug}`);
+              }
             }}
             aoEnviarComentario={enviarComentario}
             {...acoesDeReacao(postComentariosAtivo)}
@@ -1514,110 +1588,212 @@ export function InicioOpenDesign({
         {/* ==================== VIEW: COMUNIDADE ESPECÍFICA ==================== */}
         {viewAtual === 'comunidade' && (
           <section aria-label={`Comunidade r/${comunidadeSlug}`}>
-            {falhaComunidade ? (
+            {falhaTopico ? (
+              <div className="panel" style={{ padding: 24 }}>
+                <p>Deu ruim pra carregar o tópico.</p>
+              </div>
+            ) : falhaComunidade ? (
               <div className="panel" style={{ padding: 24 }}>
                 <p>Deu ruim pra carregar a comunidade.</p>
               </div>
             ) : (
               <>
+                <div style={{ position: 'sticky', top: 0, zIndex: 5, background: 'var(--aue-bg, #0d0e12)', borderBottom: '1px solid var(--aue-line)', display: 'flex', alignItems: 'center', gap: 16, padding: '0 16px', height: 53, marginBottom: 16 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setViewAtual('comunidades');
+                      navigate('/comunidades');
+                    }}
+                    aria-label="Voltar para comunidades"
+                    style={{ width: 36, height: 36, borderRadius: '50%', border: 0, background: 'none', color: 'var(--aue-fg, #fff)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                  </button>
+                  <div style={{ lineHeight: 1.2 }}>
+                    <div style={{ fontWeight: 700, fontSize: 18 }}>{comunidadeAtiva?.nome || `r/${comunidadeSlug}`}</div>
+                    <div style={{ color: 'var(--aue-muted)', fontSize: 13 }}>{formatarMilhar(comunidadeAtiva?.membrosTotal)} membros</div>
+                  </div>
+                </div>
+
                 <div className="community-hero" style={{ marginBottom: 16 }}>
                   <div
                     style={{
-                      height: 110,
-                      background: 'linear-gradient(135deg, #1f232b 0%, #16181d 100%)',
+                      height: 130,
+                      background: comunidadeAtiva?.capaUrl
+                        ? `url("${comunidadeAtiva.capaUrl}") center/cover no-repeat`
+                        : 'linear-gradient(135deg, #1f232b 0%, #16181d 100%)',
                       borderRadius: '12px 12px 0 0',
                       border: '1px solid var(--aue-line)',
                       borderBottom: 0,
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      padding: 16,
+                      position: 'relative',
                     }}
-                  />
+                  >
+                    <div
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: '50%',
+                        border: '3px solid var(--aue-surface)',
+                        background: comunidadeAtiva?.icone
+                          ? `url("${comunidadeAtiva.icone}") center/cover no-repeat`
+                          : 'var(--aue-surface-2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                        marginBottom: -32,
+                        zIndex: 2,
+                      }}
+                    >
+                      {!comunidadeAtiva?.icone && (
+                        <span style={{ fontFamily: 'var(--font-display, Anton)', fontSize: 32, lineHeight: 1, color: 'var(--aue-accent, #c6ff00)' }}>
+                          {comunidadeAtiva?.nome ? comunidadeAtiva.nome.slice(0, 1).toUpperCase() : comunidadeSlug.slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                   <div
                     style={{
-                      padding: '16px 20px',
+                      padding: '38px 20px 16px',
                       background: 'var(--aue-surface)',
                       border: '1px solid var(--aue-line)',
                       borderRadius: '0 0 12px 12px',
                     }}
                   >
-                    <h1>r/{comunidadeSlug}</h1>
-                    <span style={{ color: 'var(--aue-accent)', fontSize: 13, fontWeight: 800 }}>
-                      ◎ {formatarMilhar(comunidadeAtiva?.membrosTotal)} na roda
-                    </span>
-                    <p style={{ color: 'var(--aue-muted)', margin: '6px 0 14px', fontSize: 14 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                      <div>
+                        <h1 style={{ margin: 0, fontSize: 24 }}>r/{comunidadeSlug}</h1>
+                        <span style={{ color: 'var(--aue-accent)', fontSize: 13, fontWeight: 800 }}>
+                          ◎ {formatarMilhar(comunidadeAtiva?.membrosTotal)} na roda
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <button
+                          id="joinCommunity"
+                          type="button"
+                          className="join"
+                          style={{ padding: '8px 18px', fontSize: 13 }}
+                          onClick={() => alternarEntrarComunidade(comunidadeSlug)}
+                        >
+                          {comunidadesEntradas[comunidadeSlug] ? 'Entrou' : 'Entrar'}
+                        </button>
+                        <button
+                          id="manageCommunity"
+                          type="button"
+                          className="tab"
+                          style={{ border: '1px solid var(--aue-line)' }}
+                          onClick={() => setModalGerirComunidadeAberto(true)}
+                        >
+                          Administrar comunidade
+                        </button>
+                        <button
+                          type="button"
+                          className="tab"
+                          style={{ border: '1px solid var(--aue-line)' }}
+                          onClick={() => setModalCompositorAberto(true)}
+                        >
+                          + Soltar arroto na roda
+                        </button>
+                      </div>
+                    </div>
+                    <p style={{ color: 'var(--aue-muted)', margin: '10px 0 0', fontSize: 14 }}>
                       {comunidadeAtiva?.descricao ||
                         DETALHES_PADRAO[comunidadeSlug]?.description ||
                         'O ponto de encontro para quem coleciona sons, histórias e coragem desnecessária.'}
                     </p>
-                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                      <button
-                        id="joinCommunity"
-                        type="button"
-                        className="join"
-                        style={{ padding: '8px 18px', fontSize: 13 }}
-                        onClick={() => alternarEntrarComunidade(comunidadeSlug)}
-                      >
-                        {comunidadesEntradas[comunidadeSlug] ? 'Entrou' : 'Entrar'}
-                      </button>
-                      <button
-                        id="manageCommunity"
-                        type="button"
-                        className="tab"
-                        style={{ border: '1px solid var(--aue-line)' }}
-                        onClick={() => setModalGerirComunidadeAberto(true)}
-                      >
-                        Administrar comunidade
-                      </button>
-                      <button
-                        type="button"
-                        className="tab"
-                        style={{ border: '1px solid var(--aue-line)' }}
-                        onClick={() => setModalCompositorAberto(true)}
-                      >
-                        + Soltar arroto na roda
-                      </button>
-                    </div>
                   </div>
                 </div>
 
-                <div className="panel" style={{ background: 'var(--aue-surface-2)', marginBottom: 16 }}>
-                  <strong style={{ fontSize: 13 }}>Antes de soltar: leia as regras da comunidade.</strong>
+                <div className="tabs" style={{ marginBottom: 16, borderBottom: '1px solid var(--aue-line)' }}>
+                  <button
+                    type="button"
+                    className={`tab ${secaoComunidade === 'causos' ? 'active' : ''}`}
+                    onClick={() => setSecaoComunidade('causos')}
+                  >
+                    Posts
+                  </button>
+                  <button
+                    type="button"
+                    className={`tab ${secaoComunidade === 'sobre' ? 'active' : ''}`}
+                    onClick={() => setSecaoComunidade('sobre')}
+                  >
+                    Sobre
+                  </button>
                 </div>
 
-                <div className="community-feed">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <h2 style={{ fontSize: 18, margin: 0 }}>Feed da comunidade</h2>
-                    <div className="tabs">
-                      <button
-                        type="button"
-                        className={`tab ${abaComunidade === 'Quentes' ? 'active' : ''}`}
-                        onClick={() => setAbaComunidade('Quentes')}
-                      >
-                        Quentes
-                      </button>
-                      <button
-                        type="button"
-                        className={`tab ${abaComunidade === 'Novos' ? 'active' : ''}`}
-                        onClick={() => setAbaComunidade('Novos')}
-                      >
-                        Novos
-                      </button>
+                {secaoComunidade === 'causos' && (
+                  <>
+                    <div className="panel" style={{ background: 'var(--aue-surface-2)', marginBottom: 16 }}>
+                      <strong style={{ fontSize: 13 }}>Antes de soltar: leia as regras da comunidade.</strong>
+                    </div>
+
+                    <div className="community-feed">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <h2 style={{ fontSize: 18, margin: 0 }}>Feed da comunidade</h2>
+                        <div className="tabs">
+                          <button
+                            type="button"
+                            className={`tab ${abaComunidade === 'Quentes' ? 'active' : ''}`}
+                            onClick={() => setAbaComunidade('Quentes')}
+                          >
+                            Quentes
+                          </button>
+                          <button
+                            type="button"
+                            className={`tab ${abaComunidade === 'Novos' ? 'active' : ''}`}
+                            onClick={() => setAbaComunidade('Novos')}
+                          >
+                            Novos
+                          </button>
+                        </div>
+                      </div>
+                      {topicosDaComunidade.map((post) => (
+                        <CardDoPost
+                          key={post.id}
+                          post={post}
+                          {...acoesDeReacao(post)}
+                          salvo={Boolean(salvosUsuario[post.id])}
+                          audioTocando={audioTocandoId === post.id}
+                          tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
+                          duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
+                          aoAlternarSalvar={() => alternarSalvo(post.id)}
+                          aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
+                          aoAbrirComentarios={() => void abrirComentarios(post)}
+                          {...propsDeComentariosDoPost(post)}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {secaoComunidade === 'sobre' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div className="panel" style={{ padding: 20 }}>
+                      <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Regras rápidas</h2>
+                      <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14, color: 'var(--aue-fg)' }}>
+                        {regrasDaComunidade.map((regra, i) => (
+                          <li key={i}>{regra}</li>
+                        ))}
+                      </ol>
+                    </div>
+                    <div className="panel" style={{ padding: 20 }}>
+                      <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Moderadores</h2>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {moderadoresDaComunidade.map(([mod, papel], i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14 }}>
+                            <strong>{mod}</strong>
+                            <span style={{ color: 'var(--aue-muted)', fontSize: 13 }}>{papel}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  {topicosDaComunidade.map((post) => (
-                    <CardDoPost
-                      key={post.id}
-                      post={post}
-                      {...acoesDeReacao(post)}
-                      salvo={Boolean(salvosUsuario[post.id])}
-                      audioTocando={audioTocandoId === post.id}
-                      tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
-                      duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                      aoAlternarSalvar={() => alternarSalvo(post.id)}
-                      aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
-                      aoAbrirComentarios={() => void abrirComentarios(post)}
-                      {...propsDeComentariosDoPost(post)}
-                    />
-                  ))}
-                </div>
+                )}
               </>
             )}
           </section>
@@ -1794,7 +1970,7 @@ export function InicioOpenDesign({
                     </div>
 
                     <dl className="od-profile__metrics">
-                      <div><dt>Causos</dt><dd>{perfilExibido.totalCausos}</dd></div>
+                      <div><dt>Posts</dt><dd>{perfilExibido.totalCausos}</dd></div>
                       <div><dt>Seguidores</dt><dd>{perfilExibido.totalSeguidores}</dd></div>
                       <div><dt>Seguindo</dt><dd>{perfilExibido.totalSeguindo}</dd></div>
                       {perfilExibido.melhorNota !== undefined && <div><dt>Melhor nota</dt><dd>{perfilExibido.melhorNota}</dd></div>}
@@ -1809,41 +1985,87 @@ export function InicioOpenDesign({
                   </div>
                 </article>
 
-                <section className="od-profile__activity" aria-labelledby="profileActivity">
-                  <div className="od-profile__activity-head"><h2 id="profileActivity">Causos</h2><span>{perfilExibido.totalCausos}</span></div>
-                  {estadoCausosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando causos…</p>}
-                  {estadoCausosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os causos agora.</p>}
-                  {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.length === 0 && (
-                    <div className="od-profile__empty"><h3>Nenhum causo publicado ainda.</h3><p>{donoDoPerfil ? 'Quando soltar um, ele aparece aqui.' : 'Quando esta pessoa publicar, aparece aqui.'}</p></div>
-                  )}
-                  {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.map((c) => (
-                    <Link key={c.id} to={`/historia/${c.id}`} className="od-profile__post">
-                      <span>r/{c.comunidadeSlug}</span><h3>{c.conteudo}</h3><small>{c.totalComentarios} comentários · {c.curtidas} curtidas</small>
-                    </Link>
-                  ))}
-                </section>
+                <div className="od-profile__tabs-nav" role="tablist" aria-label="Abas do perfil">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={abaPerfil === 'posts'}
+                    className={`od-profile__tab-btn ${abaPerfil === 'posts' ? 'active' : ''}`}
+                    onClick={() => setAbaPerfil('posts')}
+                  >
+                    Posts <span>{perfilExibido.totalCausos}</span>
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={abaPerfil === 'arrotos'}
+                    className={`od-profile__tab-btn ${abaPerfil === 'arrotos' ? 'active' : ''}`}
+                    onClick={() => setAbaPerfil('arrotos')}
+                  >
+                    Arrotos <span>{arrotosDoPerfil.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={abaPerfil === 'salvos'}
+                    className={`od-profile__tab-btn ${abaPerfil === 'salvos' ? 'active' : ''}`}
+                    onClick={() => setAbaPerfil('salvos')}
+                  >
+                    Salvos
+                  </button>
+                </div>
 
-                <section className="od-profile__activity" aria-labelledby="profileArrotos">
-                  <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2><span>{arrotosDoPerfil.length}</span></div>
-                  {estadoArrotosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
-                  {estadoArrotosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
-                  {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.length === 0 && (
-                    <div className="od-profile__empty"><h3>Nenhum arroto aqui ainda.</h3><p>{donoDoPerfil ? 'Grave um para começar sua coleção.' : 'Quando alguém mandar um arroto para este perfil, ele aparece aqui.'}</p></div>
-                  )}
-                  {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.map((arroto) => (
-                    <article key={arroto.id} className="od-profile__post">
-                      <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
-                      <h3>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
-                      <PlayerDoArroto
-                        tocando={audioTocandoId === arroto.id}
-                        tempoAtualSegundos={audioSelecionadoId === arroto.id ? tempoAtualDoAudio : 0}
-                        duracaoSegundos={audioSelecionadoId === arroto.id ? duracaoDoAudio : arroto.duracaoSegundos}
-                        aoAlternar={() => void alternarAudio(arroto.enderecoDoAudio, arroto.id)}
-                      />
-                      {arroto.possoOcultar && <button type="button" className="tab" onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); })}>Ocultar</button>}
-                    </article>
-                  ))}
-                </section>
+                {abaPerfil === 'posts' && (
+                  <section className="od-profile__activity" aria-labelledby="profileActivity">
+                    <div className="od-profile__activity-head"><h2 id="profileActivity">Posts</h2><span>{perfilExibido.totalCausos}</span></div>
+                    {estadoCausosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando posts…</p>}
+                    {estadoCausosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os posts agora.</p>}
+                    {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.length === 0 && (
+                      <div className="od-profile__empty"><h3>Nenhum post publicado ainda.</h3><p>{donoDoPerfil ? 'Quando soltar um, ele aparece aqui.' : 'Quando esta pessoa publicar, aparece aqui.'}</p></div>
+                    )}
+                    {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.map((c) => (
+                      <Link key={c.id} to={`/historia/${c.id}`} className="od-profile__post">
+                        <span>r/{c.comunidadeSlug}</span>
+                        <p className="od-profile__post-corpo">{c.conteudo}</p>
+                        <small>{c.totalComentarios} comentários · {c.curtidas} curtidas</small>
+                      </Link>
+                    ))}
+                  </section>
+                )}
+
+                {abaPerfil === 'arrotos' && (
+                  <section className="od-profile__activity" aria-labelledby="profileArrotos">
+                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2><span>{arrotosDoPerfil.length}</span></div>
+                    {estadoArrotosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
+                    {estadoArrotosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
+                    {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.length === 0 && (
+                      <div className="od-profile__empty"><h3>Nenhum arroto aqui ainda.</h3><p>{donoDoPerfil ? 'Grave um para começar sua coleção.' : 'Quando alguém mandar um arroto para este perfil, ele aparece aqui.'}</p></div>
+                    )}
+                    {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.map((arroto) => (
+                      <article key={arroto.id} className="od-profile__post">
+                        <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
+                        <h3 style={{ margin: '7px 0', fontSize: 16 }}>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
+                        <PlayerDoArroto
+                          tocando={audioTocandoId === arroto.id}
+                          tempoAtualSegundos={audioSelecionadoId === arroto.id ? tempoAtualDoAudio : 0}
+                          duracaoSegundos={audioSelecionadoId === arroto.id ? duracaoDoAudio : arroto.duracaoSegundos}
+                          aoAlternar={() => void alternarAudio(arroto.enderecoDoAudio, arroto.id)}
+                        />
+                        {arroto.possoOcultar && <button type="button" className="tab" style={{ marginTop: 8 }} onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); })}>Ocultar</button>}
+                      </article>
+                    ))}
+                  </section>
+                )}
+
+                {abaPerfil === 'salvos' && (
+                  <section className="od-profile__activity" aria-labelledby="profileSalvos">
+                    <div className="od-profile__activity-head"><h2 id="profileSalvos">Salvos</h2></div>
+                    <div className="od-profile__empty">
+                      <h3>Nenhum post salvo ainda.</h3>
+                      <p>Salve posts com a bandeirinha no feed para ler novamente por aqui.</p>
+                    </div>
+                  </section>
+                )}
               </>
             )}
           </section>
@@ -2129,10 +2351,19 @@ export function InicioOpenDesign({
         aberto={modalGerirComunidadeAberto}
         regrasIniciais={regrasDaComunidade}
         moderadoresIniciais={moderadoresDaComunidade}
+        fotoUrlInicial={comunidadeAtiva?.icone}
+        capaUrlInicial={comunidadeAtiva?.capaUrl}
         aoFechar={() => setModalGerirComunidadeAberto(false)}
         aoSalvar={(dados) => {
           setRegrasDaComunidade(dados.regras);
           setModeradoresDaComunidade(dados.moderadores);
+          if (comunidadeAtiva) {
+            setComunidadeAtiva({
+              ...comunidadeAtiva,
+              icone: dados.fotoUrl !== undefined ? dados.fotoUrl : comunidadeAtiva.icone,
+              capaUrl: dados.capaUrl !== undefined ? dados.capaUrl : comunidadeAtiva.capaUrl,
+            });
+          }
           exibirToast('Gestão da comunidade salva.');
         }}
       />

@@ -1,3 +1,11 @@
+/**
+ * CANÔNICO ATIVO — Visualização de Conversa / Thread de Comentários
+ * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
+ * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
+ * 
+ * Exibe o post principal destacado no topo, stream de respostas fluidas,
+ * compositor integrado e encadeamento limpo sem aninhamento dentro do card.
+ */
 import { memo, useRef, useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { ItemComentario, ItemDoFeed } from './tipos';

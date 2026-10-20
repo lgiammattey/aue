@@ -182,7 +182,7 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
     expect(screen.getByRole('button', { name: 'Trocar capa' })).toBeTruthy();
 
     // Métricas públicas reais, sem karma ou estatística inventada.
-    expect(screen.getAllByText('Causos').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Posts|Causos/).length).toBeGreaterThan(0);
     expect(screen.getAllByText('Seguidores').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Seguindo').length).toBeGreaterThan(0);
     expect(screen.queryByText('karma de arroto')).toBeNull();

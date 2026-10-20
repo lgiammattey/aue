@@ -109,6 +109,7 @@ export interface AutorDoForum {
 export interface ComunidadeDoForum extends ReferenciaDeComunidade {
   readonly descricao: string;
   readonly icone: string | null;
+  readonly capaUrl?: string | null;
   /** O que o servidor contou. Nunca somado nem arredondado no cliente. */
   readonly membrosTotal: number;
   readonly topicosTotal: number;

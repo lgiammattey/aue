@@ -20,7 +20,7 @@ export function TelaComunidadeOpenDesign({
   portaConta,
   abrirCompositor,
 }: Props) {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, id } = useParams<{ slug: string; id?: string }>();
   return (
     <InicioOpenDesign
       portaForum={portaForum}
@@ -29,6 +29,7 @@ export function TelaComunidadeOpenDesign({
       portaConta={portaConta}
       viewInicial="comunidade"
       slugInicial={slug}
+      topicoIdInicial={id}
       abrirCompositor={abrirCompositor}
     />
   );

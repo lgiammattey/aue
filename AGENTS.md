@@ -44,6 +44,7 @@ Não duplique regra. Leia a fonte certa.
 | Quais são os estados da Arena? | [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md) |
 | Como o jogo se comporta e pontua? | [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md) |
 | **Com o que a interface se parece?** | Protótipos canônicos em [`docs/design/prototipo/`](docs/design/prototipo/): [`Bonde do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html), [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html), [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html), [`Login.dc.html`](docs/design/prototipo/Login.dc.html), [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html), [`Páginas Públicas.dc.html`](docs/design/prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html), [`Versões Webapp.dc.html`](docs/design/prototipo/Vers%C3%B5es%20Webapp.dc.html) |
+| **Qual componente implementa qual tela/rota e o que editar?** | [`docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md`](docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md) — mapa oficial de rotas, componentes canônicos e anti-confusão |
 | De onde vêm cor, tipo, espaço e movimento? | [`docs/design/design-system/system/DESIGN.md`](docs/design/design-system/system/DESIGN.md) e [`docs/design/prototipo/Design System.dc.html`](docs/design/prototipo/Design%20System.dc.html) |
 | **O que estamos construindo agora?** | [`docs/escopo/ESCOPO_ATUAL.md`](docs/escopo/ESCOPO_ATUAL.md) |
 | O que vem depois? | [`docs/escopo/BACKLOG.md`](docs/escopo/BACKLOG.md) |
@@ -143,6 +144,7 @@ A regra que mais aparece no dia a dia:
 - **Testa a hipótese antes de construir a igreja.** Experimento pequeno primeiro, infraestrutura pesada depois.
 - **A Arena é uma superfície de estado, não uma pilha de rotas desconexas.**
 - **Protótipo em `docs/design/prototipo/` é a referência visual e comportamental viva.**
+- **Mapa de telas obrigatório:** Antes de alterar qualquer componente visual ou fluxo, consulte [`docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md`](docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md). É proibido mexer em componentes legados/zumbis (ex: `CardDeCauso`, `ComposerCauso`) quando existe componente canônico ativo no OpenDesign (`CardDoPost`, `ModalCompositor`, `ThreadDeComentarios`).
 - **Nenhuma implementação sem Cartão de Missão do Tiago.** Sem desenho, arquitetura, prioridade e requisitos de aceite, não abre branch.
 - **Lacuna de produto não se preenche sozinha.** O Tiago pergunta ao Luiz e espera. Decisão técnica, essa a squad toma.
 - **Nada escrito pode cheirar a IA.** Copy, issue, PR, commit e conversa passam pela [`filtro-anti-ia`](.agents/skills/filtro-anti-ia/SKILL.md).

@@ -25,7 +25,7 @@ export const BarraSuperior = memo(function BarraSuperior({
       <input
         type="search"
         className="search"
-        placeholder="Buscar causos, arrotos ou comunidades…"
+        placeholder="Buscar posts, arrotos ou comunidades…"
         value={busca}
         onChange={(e) => aoBuscar(e.target.value)}
         aria-label="Campo de busca"

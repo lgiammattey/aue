@@ -95,28 +95,13 @@ falha ao compartilhar, link expirado e ausência de rede/configuração.
 Safari iOS e Chrome Android são alvo de validação, não "quando der". Isso inclui
 safe areas, `svh`, barra que recolhe e permissão de microfone pedida uma vez só.
 
-### 2.13 O mesmo jogo empacotado como app
+### 2.13 Exclusivamente online via desktop e webapp mobile
 
-A Arena fechou o loop em produção, então empacotar deixou de ser preparação e
-virou trabalho — decidido no
-[ADR 0002](../technical/adr/0002-o-aue-nas-lojas.md).
+Conforme decidido formalmente na Missão 0010 e consolidado no `AGENTS.md`:
 
-O que pertence ao escopo:
-
-- a casca de Android e a de iPhone rodando **o mesmo build** do site, com
-  adaptador nativo só atrás de porta que já existe;
-- o loop inteiro validado em Android e iPhone **de verdade**, dentro do app;
-- o juiz dentro do pacote, sem espera na primeira gravação;
-- vibração na revelação da nota;
-- o link do desafio abrindo o app **no Android**;
-- publicação na **trilha interna** da Play.
-
-O que **não** pertence, e continua exigindo decisão nova: produção aberta na
-Play, qualquer coisa na App Store, e toda a lista do
-[§1 do ADR 0002](../technical/adr/0002-o-aue-nas-lojas.md#1-o-que-passa-a-ser-permitido).
-
-**Nenhuma tela, regra ou feature nasce do lado nativo.** A web continua sendo o
-produto: quem abre o link sem instalar joga igual.
+- o Auê vive **100% na web moderna**, responsivo para desktop e otimizado como webapp para mobile (PWA);
+- lojas nativas (Google Play / App Store) estão **fora de escopo** e o ADR 0002 foi superado;
+- quem abre o link no navegador joga, ouve causos, responde duelos e participa das comunidades diretamente sem precisar instalar nada de loja.
 
 ### 2.14 Privacidade mínima
 

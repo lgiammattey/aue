@@ -15,7 +15,10 @@ import { TelaTopico } from './TelaTopico';
  * novo aqui: duas rotas idênticas deixam a escolha visual dependente da
  * prioridade interna do React Router e podem trazer a casca antiga de volta.
  */
-export function rotasDoForum({ incluirRaizesDaComunidade = true }: { readonly incluirRaizesDaComunidade?: boolean } = {}) {
+export function rotasDoForum({
+  incluirRaizesDaComunidade = true,
+  incluirTopico = true,
+}: { readonly incluirRaizesDaComunidade?: boolean; readonly incluirTopico?: boolean } = {}) {
   return (
     <Route element={<LayoutDoForum />}>
       {incluirRaizesDaComunidade && <Route path="/comunidades" element={<TelaDiretorio />} />}
@@ -26,7 +29,7 @@ export function rotasDoForum({ incluirRaizesDaComunidade = true }: { readonly in
           <Route path="novo" element={<TelaNovoTopico />} />
         </Route>
       )}
-      <Route path="/c/:slug/t/:id" element={<TelaTopico />} />
+      {incluirTopico && <Route path="/c/:slug/t/:id" element={<TelaTopico />} />}
     </Route>
   );
 }

@@ -6,37 +6,37 @@ visual alvo. Este documento continua descrevendo a arquitetura implementada:
 nenhum detalhe de produto ou de arte aqui cria backend, rota ou estado por si só.
 
 **Status:** descrição da arquitetura implementada  
-**Revisado em:** 2026-08-09 (reposicionamento para jogo)
+**Revisado em:** 2026-10-20 (Auê 3.0 — Rede Social Jogável: Bonde do Arroto, Comunidades e Arena)
 
 > Este arquivo explica a arquitetura **como ela é hoje**. Ele não amplia escopo:
-> o que pertence ao jogo está em
-> [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md).
+> o que pertence ao produto está em
+> [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md) e o mapeamento de telas está em
+> [`../design/MAPA_DE_PAGINAS_E_FLUXOS.md`](../design/MAPA_DE_PAGINAS_E_FLUXOS.md).
 >
 > E quando este documento discordar do código ou das migrações, o código e as
 > migrações ganham. Documento não executa query.
 
 > **Aqui é descrição, não decisão.** A arquitetura decidida — stack, camadas,
-> fronteira com o aparelho, backend, caminho até as lojas e o que exige revisão
-> formal — está em
-> [`adr/0001-arquitetura-oficial-do-aue.md`](adr/0001-arquitetura-oficial-do-aue.md).
-> Quando os dois discordarem, o ADR manda no rumo e este arquivo é que está
-> desatualizado.
+> fronteira com o aparelho, backend e o que exige revisão formal — está em
+> [`adr/0001-arquitetura-oficial-do-aue.md`](adr/0001-arquitetura-oficial-do-aue.md),
+> [`adr/0004-arquitetura-aue-3-comunidades-e-feed.md`](adr/0004-arquitetura-aue-3-comunidades-e-feed.md) e
+> [`adr/0010-comunidades-topicos-e-respostas.md`](adr/0010-comunidades-topicos-e-respostas.md).
 
 ---
 
-## 0. Onde a arquitetura está indo
+## 0. Como a arquitetura do Auê está organizada hoje
 
-O Auê é um **jogo mobile casual, web-first**, e a experiência principal deve
-acontecer em **uma Arena que muda de estado** — ver
-[`../jogo/ARENA.md`](../jogo/ARENA.md) e o protótipo
-[`../design/prototipo-arena/arena.html`](../design/prototipo-arena/arena.html).
+O Auê é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**:
+combina a adrenalina da **Arena** (máquina de captura, julgamento acústico YAMNet e Auê Score) à dinâmica do **Bonde do Arroto** (timeline estilo Twitter/X) e **comunidades temáticas** (estilo Orkut/Reddit).
 
-**Hoje o código não é isso.** O mesmo loop existe como uma sequência de telas
-React (`TelaDeConvite`, `TelaDeGravacao`, `EscolhaDeOrigem`, `TelaDeJulgamento`,
-`ResultadoScreen`, `BattleView`, `DisputaLocalScreen`), com rotas `/b/:code` e
-`/d/:id`. O comportamento funciona; o que falta é a superfície única.
+A arquitetura do frontend é dividida em módulos com responsabilidades bem definidas:
 
-Duas consequências para qualquer mudança:
+1. **`src/arena/` (A Arena):** Superfície única contínua de 10 estados (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`). Não são rotas separadas, mas transições reativas com captura Web Audio e animação da bolha.
+2. **`src/features/novo-aue/` (OpenDesign Canônico do Bonde e Comunidades):** Implementação ativa da rede social 1:1 com os protótipos (`InicioOpenDesign`, `CardDoPost`, `ThreadDeComentarios`, `ModalCompositor`, `TelaComunidadeOpenDesign`, `TelaPerfilOpenDesign`). Responsável pelo layout de 3 colunas no desktop e webapp mobile fluido.
+3. **`src/features/publico/` e `src/features/legal/`:** Páginas institucionais, SEO e legais com tema claro fixo (`ComoJogar`, `ComoArrotar`, `TiposDeArroto`, `RankingDeArrotos`, `TermosDeUso`, `PoliticaDePrivacidade`).
+4. **`src/features/comunidade/` (Camada Legada / Compatibilidade):** Casca anterior mantida temporariamente para compatibilidade de rotas secundárias (`/feed`, `/desafios`) e testes legados. Novas funcionalidades de feed e postagens são desenvolvidas exclusivamente em `novo-aue` (ver [`MAPA_DE_PAGINAS_E_FLUXOS.md`](../design/MAPA_DE_PAGINAS_E_FLUXOS.md)).
+5. **`src/nucleo/` (Lógica Pura):** Regras de negócio, cálculo de Auê Score, limites e formatação em TypeScript puro, sem acoplamento com React ou DOM.
+6. **`src/plataforma/web/` e `src/portas/`:** Fronteira obrigatória com o navegador (`AudioContext`, `MediaRecorder`, `localStorage`) e cliente Supabase. Todo acesso externo passa pelas portas.
 
 1. **Comportamento novo é quase sempre um estado ou uma transição**, não uma
    rota nova. Não acrescente tela ao caminho antigo se der para preparar o
@@ -439,28 +439,21 @@ Métrica não precisa virar infraestrutura de Big Data antes de existir tráfego
 
 ---
 
-## 17. O que existe em código mas saiu da visão
+## 17. O que permanece FORA de escopo no produto
 
-- login social visível;
-- feed público;
-- ranking global;
-- XP e níveis;
-- conquistas;
-- perfil social;
-- grupos e comunidades;
-- ligas/campeonatos online;
-- push;
-- assinatura;
-- integração direta de postagem em redes sociais.
+No Auê 3.0, o Bonde do Arroto (feed), as comunidades temáticas, a Arena e o X1 estão **ativos no escopo oficial**.
 
-Tudo isso está desligado por `src/shared/flags.ts`, com padrão desligado, e é
-**dívida esperando remoção** — issue
-[#109](https://github.com/gmmattey/aue/issues/109). **Não é roadmap.** Ninguém
-deve expandir esse código, e ligar uma dessas flags exigiria decisão de produto
-que hoje não existe.
+Permanecem rigorosamente **fora do produto** nesta fase (ver [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md)):
 
-Continuam sendo futuro possível, sem autorização: IndexedDB/offline-first
-completo e app nativo Android/iOS. **Nenhum dos dois deve ser começado agora.**
+- algoritmos opacos de recomendação viciante;
+- seguidores obrigatórios para navegar;
+- campeonatos e ligas formais de e-sports;
+- temporadas com expiração de progresso;
+- paywalls, assinaturas ou monetização predatória;
+- XP, barras de nível e conquistas genéricas de gamificação;
+- mensagens privadas fechadas (chat 1:1);
+- login social obrigatório apenas para arrotar ou olhar o feed;
+- empacotamento em lojas nativas (Google Play / App Store) — o Auê é exclusivamente online via desktop e webapp mobile.
 
 ---
 

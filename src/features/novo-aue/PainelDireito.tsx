@@ -58,7 +58,7 @@ export const PainelDireito = memo(function PainelDireito({
         <div className="panel">
           <h2>Sobre esta ficha</h2>
           {perfil ? (
-            <p>{perfil.souEu ? 'Esta é sua ficha pública no Auê.' : `Acompanhe os causos publicados por @${perfil.handle}.`}</p>
+            <p>{perfil.souEu ? 'Esta é sua ficha pública no Auê.' : `Acompanhe os posts publicados por @${perfil.handle}.`}</p>
           ) : <p>Os dados desta ficha aparecem aqui quando ela carregar.</p>}
         </div>
       )}
@@ -67,7 +67,7 @@ export const PainelDireito = memo(function PainelDireito({
         <div className="panel">
           <h2>Sobre o Auê!</h2>
           <p>
-            A rede social dos arrotadores. Grave na Arena, receba sua nota, conte seus causos e
+            A rede social dos arrotadores. Grave na Arena, receba sua nota, compartilhe seus posts e
             conquiste seu lugar nas rodas.
           </p>
         </div>

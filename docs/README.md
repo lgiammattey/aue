@@ -16,10 +16,11 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 4. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
 5. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da máquina da Arena.
 6. [`design/README.md`](design/README.md) e [`design/prototipo/`](design/prototipo/) — **os protótipos interativos canônicos**.
-7. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
-8. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
-9. [`technical/adr/README.md`](technical/adr/README.md) — índice dos ADRs aceitos.
-10. [`jogo/VOZ.md`](jogo/VOZ.md) — o tom de voz autêntico, zoeiro e direto.
+7. [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) — **o mapa de páginas, rotas e componentes canônicos** (guia anti-confusão).
+8. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
+9. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
+10. [`technical/adr/README.md`](technical/adr/README.md) — índice dos ADRs aceitos.
+11. [`jogo/VOZ.md`](jogo/VOZ.md) — o tom de voz autêntico, zoeiro e direto.
 
 ---
 
@@ -33,6 +34,7 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 | Que estados a Arena tem? | [`jogo/ARENA.md`](jogo/ARENA.md) |
 | Como o jogo pontua e o que não vale? | [`jogo/REGRAS.md`](jogo/REGRAS.md) |
 | Com o que a interface se parece? | Protótipos canônicos em [`design/prototipo/`](design/prototipo/) |
+| Qual componente implementa cada tela/rota? | [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) |
 | De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e [`design/prototipo/Design System.dc.html`](design/prototipo/Design%20System.dc.html) |
 | Qual é a direção artística que une tudo? | [`design/AUÊ!.md`](design/AUÊ!.md) |
 | Isso pertence ao produto agora? | [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) |

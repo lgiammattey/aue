@@ -1,3 +1,11 @@
+/**
+ * CANÔNICO ATIVO — Compositor de Novos Causos e Posts
+ * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
+ * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
+ * 
+ * Permite digitação com limite de 180 caracteres, gravação de áudio em 1 clique
+ * e anexo de imagens/links de vídeo. Não utilize o ComposerCauso legado.
+ */
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ComunidadeDoForum, GravacaoLivreDoForum } from '../../portas/forum';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
@@ -166,7 +174,7 @@ export function ModalCompositor({
         <header className="comments-sheet-header">
           <div className="comments-sheet-title-wrap">
             <h2 id="dialogComposerTitle" className="comments-sheet-title">
-              Soltar causo na roda
+              Novo post na roda
             </h2>
           </div>
           <button

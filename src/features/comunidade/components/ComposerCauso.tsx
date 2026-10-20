@@ -1,3 +1,10 @@
+/**
+ * LEGADO — ComposerCauso
+ * 
+ * ATENÇÃO: NÃO EDITAR PARA NOVAS FEATURES DO COMPOSITOR.
+ * O componente canônico e ativo de composição de posts é `src/features/novo-aue/ModalCompositor.tsx`.
+ * Consulte: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
+ */
 import { cabeNoLimite, caracteresRestantes, LIMITE_CAUSO } from '../../../nucleo/comunidade/limites';
 import React, { useState } from 'react';
 import type { PerfilUsuario } from '../../../nucleo/usuario/perfil';

@@ -317,56 +317,116 @@ def build_candidatas():
         print('  ', base, '→', ' '.join(str(t) for t in TAMANHOS_DE_COMPARACAO))
 
 
-# ── Conjunto oficial ─────────────────────────────────────────────────────────
+# ── Conjunto oficial (Brutalista A!) ─────────────────────────────────────────
+
+POLY_A_OUTER = [
+    (30, 0), (200, 1760), (797, 1760), (964, 0),
+    (631, 0), (606, 284), (394, 284), (372, 0)
+]
+POLY_A_INNER = [
+    (419, 565), (579, 565), (502, 1460), (486, 1460)
+]
+dx = 994
+POLY_EX_STEM = [
+    (dx+125, 479), (dx+55, 1760), (dx+413, 1760), (dx+343, 479)
+]
+POLY_EX_DOT = [
+    (dx+55, 1), (dx+55, 299), (dx+413, 299), (dx+413, 1)
+]
+
+FG_A = (0xF5, 0xF4, 0xEF)
+FG_EX = (0xC6, 0xFF, 0x00)
+
+def render_brutalist(width, height, coverage=0.88, bg=BG, fg_a=FG_A, fg_ex=FG_EX, transparent=False):
+    W, H = width * SS, height * SS
+    mode = 'RGBA' if transparent else 'RGB'
+    base = (0, 0, 0, 0) if transparent else bg
+    img = Image.new(mode, (W, H), base)
+    d = ImageDraw.Draw(img)
+
+    span = 1760.0
+    scale = (min(W, H) * coverage) / span
+    cx, cy = (30.0 + 1407.0) / 2.0, 1760.0 / 2.0
+    ox, oy = W / 2.0 - cx * scale, H / 2.0 + cy * scale
+
+    def T(p):
+        return (p[0] * scale + ox, oy - p[1] * scale)
+
+    fill_a = fg_a + (255,) if transparent else fg_a
+    fill_ex = fg_ex + (255,) if transparent else fg_ex
+    hole_a = (0, 0, 0, 0) if transparent else bg
+
+    d.polygon([T(p) for p in POLY_A_OUTER], fill=fill_a)
+    d.polygon([T(p) for p in POLY_A_INNER], fill=hole_a)
+    d.polygon([T(p) for p in POLY_EX_STEM], fill=fill_ex)
+    d.polygon([T(p) for p in POLY_EX_DOT], fill=fill_ex)
+
+    return img.resize((width, height), Image.LANCZOS)
+
+def emit_brutalist_svg(path, coverage=0.88, bg=None, fg_a='#f5f4ef', fg_ex='#c6ff00'):
+    lado = 512.0
+    span = 1760.0
+    s = coverage * lado / span
+    cx = (30.0 + 1407.0) / 2.0
+    cy = 1760.0 / 2.0
+    ox = lado / 2.0 - cx * s
+    oy = lado / 2.0 + cy * s
+
+    def T(p):
+        return (round(p[0] * s + ox, 1), round(oy - p[1] * s, 1))
+
+    pts_a_out = ' '.join(f'L{T(p)[0]} {T(p)[1]}' for p in POLY_A_OUTER[1:])
+    pts_a_in = ' '.join(f'L{T(p)[0]} {T(p)[1]}' for p in POLY_A_INNER[1:])
+    path_a = f'M{T(POLY_A_OUTER[0])[0]} {T(POLY_A_OUTER[0])[1]} {pts_a_out} Z M{T(POLY_A_INNER[0])[0]} {T(POLY_A_INNER[0])[1]} {pts_a_in} Z'
+
+    pts_ex_stem = ' '.join(f'L{T(p)[0]} {T(p)[1]}' for p in POLY_EX_STEM[1:])
+    pts_ex_dot = ' '.join(f'L{T(p)[0]} {T(p)[1]}' for p in POLY_EX_DOT[1:])
+    path_ex = f'M{T(POLY_EX_STEM[0])[0]} {T(POLY_EX_STEM[0])[1]} {pts_ex_stem} Z M{T(POLY_EX_DOT[0])[0]} {T(POLY_EX_DOT[0])[1]} {pts_ex_dot} Z'
+
+    rect = f'  <rect width="{int(lado)}" height="{int(lado)}" fill="{bg}"/>\n' if bg else ''
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {int(lado)} {int(lado)}" '
+        f'width="{int(lado)}" height="{int(lado)}" role="img" aria-label="Auê!">\n'
+        f'  <title>Auê!</title>\n'
+        f'{rect}'
+        f'  <path fill="{fg_a}" fill-rule="evenodd" d="{path_a}"/>\n'
+        f'  <path fill="{fg_ex}" d="{path_ex}"/>\n'
+        f'</svg>\n'
+    )
+    with open(path, 'w', encoding='utf-8', newline='\n') as fh:
+        fh.write(svg)
 
 def build_conjunto():
     os.makedirs(OUT, exist_ok=True)
-    simbolo = Simbolo(ler_d(MARCA_SVG))
     p = lambda n: os.path.join(OUT, n)
 
     # ── favicon ──────────────────────────────────────────────────────────────
-    # Quase sangrado: aos 16px o que importa é a silhueta chegar inteira.
-    #
-    # A haste ainda engrossa nos tamanhos pequenos — no símbolo ela mede pouco
-    # mais de 1px a 16px e sumiria. Isso é problema real de raster, não maquiagem
-    # de defeito. O que sumiu foi o `dot_dy`: o vão entre haste e pingo agora
-    # está aberto na própria marca.
-    fav16 = render(simbolo, 16, 0.98, width_k=1.45, dot_k=1.10)
-    fav32 = render(simbolo, 32, 0.96, width_k=1.25, dot_k=1.00)
-    fav48 = render(simbolo, 48, 0.94, width_k=1.15, dot_k=1.00)
+    fav16 = render_brutalist(16, 16, 0.94)
+    fav32 = render_brutalist(32, 32, 0.92)
+    fav48 = render_brutalist(48, 48, 0.90)
     fav16.save(p('favicon-16.png'), optimize=True)
     fav32.save(p('favicon-32.png'), optimize=True)
     fav48.save(p('favicon-48.png'), optimize=True)
     write_ico(p('favicon.ico'), [fav16, fav32, fav48])
 
     # ── iOS ──────────────────────────────────────────────────────────────────
-    # Sem alfa (o iOS pinta preto por baixo de transparência) e com respiro:
-    # a máscara squircle do sistema come os cantos.
-    render(simbolo, 180, 0.82).save(p('apple-touch-icon.png'), optimize=True)
+    render_brutalist(180, 180, 0.80).save(p('apple-touch-icon.png'), optimize=True)
 
     # ── Android / PWA ────────────────────────────────────────────────────────
-    render(simbolo, 192, 0.88).save(p('android-chrome-192.png'), optimize=True)
-    render(simbolo, 512, 0.88).save(p('android-chrome-512.png'), optimize=True)
+    render_brutalist(192, 192, 0.85).save(p('android-chrome-192.png'), optimize=True)
+    render_brutalist(512, 512, 0.85).save(p('android-chrome-512.png'), optimize=True)
     # maskable: conteúdo dentro do círculo de segurança de 80% do lado
-    render(simbolo, 192, 0.70).save(p('maskable-192.png'), optimize=True)
-    render(simbolo, 512, 0.70).save(p('maskable-512.png'), optimize=True)
+    render_brutalist(192, 192, 0.68).save(p('maskable-192.png'), optimize=True)
+    render_brutalist(512, 512, 0.68).save(p('maskable-512.png'), optimize=True)
 
     # ── prévia de link ───────────────────────────────────────────────────────
-    # Mesma composição de sempre: símbolo centrado sobre o carvão, 1200x630.
-    # Antes era feito à mão e envelhecia calado; agora sai daqui.
-    render(simbolo, 630, 0.63, largura=1200).save(p('og-image.png'), optimize=True)
+    render_brutalist(1200, 630, 0.60).save(p('og-image.png'), optimize=True)
 
     # ── vetoriais ────────────────────────────────────────────────────────────
-    # O favicon SVG é exibido na aba a ~16–20px, então carrega a mesma correção
-    # óptica dos rasters pequenos — não a forma de 512px.
-    emit_svg(simbolo, p('favicon.svg'), 0.94, width_k=1.25,
-             bg='#0a0a08', fg='#c6ff00', label='Auê!')
-    # Aba fixada do Safari: silhueta monocromática, fundo transparente.
-    # A cor vem do atributo color= do <link rel="mask-icon">.
-    emit_svg(simbolo, p('safari-pinned-tab.svg'), 0.94, width_k=1.25,
-             bg=None, fg='#000000', label='Auê!')
+    emit_brutalist_svg(p('favicon.svg'), coverage=0.88, bg='#0a0a08', fg_a='#f5f4ef', fg_ex='#c6ff00')
+    emit_brutalist_svg(p('safari-pinned-tab.svg'), coverage=0.88, bg=None, fg_a='#000000', fg_ex='#000000')
 
-    print('bbox do blob:', tuple(round(v, 1) for v in simbolo.bbox))
+    print('conjunto brutalista gerado com sucesso')
     for f in sorted(os.listdir(OUT)):
         print(' ', f, os.path.getsize(os.path.join(OUT, f)), 'bytes')
 

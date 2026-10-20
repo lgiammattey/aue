@@ -132,8 +132,11 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    // Marca Auê
-    expect(screen.getByLabelText('Auê, página inicial')).toBeTruthy();
+    // Marca Auê — wordmark brutalista (AUÊ! expandido, A! compacto)
+    const brand = screen.getByLabelText('Auê, página inicial');
+    expect(brand).toBeTruthy();
+    expect(brand.querySelector('.brand-full')?.textContent).toBe('AUÊ!');
+    expect(brand.querySelector('.brand-compact')?.textContent).toBe('A!');
 
     // Botão Soltar Arroto na sidebar
     expect(screen.getByRole('button', { name: '+ Soltar um arroto' })).toBeTruthy();

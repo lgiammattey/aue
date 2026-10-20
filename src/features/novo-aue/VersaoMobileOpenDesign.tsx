@@ -169,12 +169,7 @@ export function VersaoMobileOpenDesign({
               {/* Header */}
               <header className="app-header">
                 <Link className="wordmark" to="/" aria-label="Voltar para a versão web do Auê">
-                  <svg className="wordmark-mark" viewBox="0 0 32 32" aria-hidden="true">
-                    <path d="M7 22V10" />
-                    <path d="M16 25V7" />
-                    <path d="M25 20v-8" />
-                  </svg>
-                  AU<b>Ê</b>
+                  AUÊ!
                 </Link>
                 <div className="header-actions">
                   <button

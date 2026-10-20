@@ -101,6 +101,7 @@ describe('VersaoMobileOpenDesign (1:1 com mobile.html)', () => {
     expect(screen.getByRole('navigation', { name: 'Navegação principal' })).toBeTruthy();
     expect(screen.getByRole('button', { name: /Rodas/ })).toBeTruthy();
     expect(screen.getByRole('button', { name: /Soltar/ })).toBeTruthy();
+    expect(screen.getByLabelText('Voltar para a versão web do Auê').textContent?.trim()).toBe('AUÊ!');
   });
 
   it('permite alternar abas da barra inferior', async () => {

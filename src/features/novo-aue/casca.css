@@ -88,18 +88,23 @@
   padding: 4px 10px 24px;
 }
 
-.aue-mark {
-  width: 28px;
-  height: 28px;
-  flex: none;
-  color: var(--aue-accent);
+.brand .brand-full {
+  display: inline;
 }
 
-.aue-mark path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.8;
-  stroke-linecap: round;
+.brand .brand-compact {
+  display: none;
+}
+
+.wordmark {
+  font-family: var(--font-display, 'Anton', sans-serif);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--aue-text);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
 }
 
 .nav-label {
@@ -890,7 +895,9 @@ main {
     align-items: center;
   }
   .sidebar .brand { justify-content: center; padding: 4px 0 20px; }
-  .sidebar .brand span, .sidebar .nav-label, .sidebar .create-side, .sidebar-footer, .sidebar .nav-item:nth-of-type(n+5) {
+  .sidebar .brand .brand-full { display: none; }
+  .sidebar .brand .brand-compact { display: inline; font-size: 26px; }
+  .sidebar .nav-label, .sidebar .create-side, .sidebar-footer, .sidebar .nav-item:nth-of-type(n+5) {
     display: none;
   }
   .sidebar nav { width: 100%; align-items: center; overflow: visible; }

@@ -35,12 +35,8 @@ export const BarraLateral = memo(function BarraLateral({
         aria-label="Auê, página inicial"
         onClick={() => aoMudarView('feed')}
       >
-        <svg className="aue-mark" viewBox="0 0 32 32" aria-hidden="true">
-          <path d="M4 24 C10 10, 22 10, 28 24" />
-          <path d="M8 26 C13 18, 19 18, 24 26" />
-          <path d="M12 28 C14 24, 18 24, 20 28" />
-        </svg>
-        <span>Auê!</span>
+        <span className="brand-full">AUÊ!</span>
+        <span className="brand-compact" aria-hidden="true">A!</span>
       </Link>
 
       <nav>

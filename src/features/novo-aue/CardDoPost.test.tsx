@@ -124,4 +124,46 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     fireEvent.click(btnShare);
     expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('/r/arena-do-arroto'));
   });
+
+  describe('vídeo do YouTube/TikTok', () => {
+    const renderizar = (post: ItemDoFeed) =>
+      render(
+        <MemoryRouter>
+          <CardDoPost
+            post={post}
+            salvo={false}
+            audioTocando={false}
+            tempoAtualDoAudio={0}
+            duracaoDoAudio={null}
+            aoAlternarSalvar={vi.fn()}
+            aoTocarAudio={vi.fn()}
+          />
+        </MemoryRouter>,
+      );
+    const iframe = () => document.querySelector('iframe.post-video');
+
+    it('tópico espelhado do acervo (link no texto, sem anexo) ganha o player', () => {
+      renderizar({ ...postExemplo, corpo: 'Concurso de Rap em Arrotos.\nhttps://youtu.be/nXazacLACYw' });
+      expect(iframe()?.getAttribute('src')).toContain('youtube-nocookie.com/embed/nXazacLACYw');
+    });
+
+    it('anexo de vídeo continua mandando no que é embutido', () => {
+      renderizar({
+        ...postExemplo,
+        corpo: 'veja https://youtu.be/aaaaaaaaaaa',
+        anexo: { tipo: 'videoExterno', url: 'https://www.youtube.com/watch?v=bbbbbbbbbbb' },
+      });
+      expect(iframe()?.getAttribute('src')).toContain('/embed/bbbbbbbbbbb');
+    });
+
+    it('post com imagem ou áudio não vira player só porque o texto cita um link', () => {
+      renderizar({ ...postExemplo, corpo: 'https://youtu.be/nXazacLACYw', anexo: { tipo: 'imagem', url: 'https://cdn.test/a.jpg' } });
+      expect(iframe()).toBeNull();
+    });
+
+    it('sem link de vídeo, não há player', () => {
+      renderizar(postExemplo);
+      expect(iframe()).toBeNull();
+    });
+  });
 });

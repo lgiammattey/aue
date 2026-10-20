@@ -10,39 +10,46 @@ export interface VideoEmbedInfo {
   readonly id: string;
 }
 
+const ANTES = String.raw`(?<![A-Za-z0-9.@-])`;
+const ID_YOUTUBE = '([A-Za-z0-9_-]{11})';
+
+const YOUTUBE = new RegExp(
+  `${ANTES}(?:https?:\\/\\/)?(?:(?:www\\.|m\\.|music\\.)?youtube\\.com\\/(?:watch\\?(?:[^#\\s]*&)?v=|shorts\\/|live\\/|embed\\/)|youtu\\.be\\/)${ID_YOUTUBE}`,
+  'i',
+);
+const TIKTOK = new RegExp(
+  `${ANTES}(?:https?:\\/\\/)?(?:www\\.|m\\.)?tiktok\\.com\\/(@[A-Za-z0-9._-]{1,24})\\/video\\/(\\d{10,25})`,
+  'i',
+);
+
 /**
- * Extrai URL de vídeo do YouTube ou TikTok presente em um texto ou string direta.
+ * Extrai um vídeo do YouTube ou TikTok de um texto ou link.
+ *
+ * `urlOriginal` sai sempre na forma canônica (https, host com www), a mesma que
+ * a função SQL `aue_url_video_externo_canonica` devolve. É isso que viaja ao
+ * banco: qualquer ajuste aqui precisa ser espelhado lá (ver embeds.test.ts).
  */
 export function detectarLinkDeVideo(texto: string): VideoEmbedInfo | null {
   if (!texto) return null;
 
-  // YouTube matchers: watch?v=ID, youtu.be/ID, shorts/ID
-  const ytMatch = texto.match(
-    /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i,
-  );
-
-  if (ytMatch && ytMatch[1]) {
-    const id = ytMatch[1];
+  const yt = texto.match(YOUTUBE);
+  if (yt?.[1]) {
+    const id = yt[1];
     return {
       tipo: 'youtube',
-      urlOriginal: ytMatch[0],
+      urlOriginal: `https://www.youtube.com/watch?v=${id}`,
       embedUrl: `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1`,
       id,
     };
   }
 
-  // TikTok matcher: tiktok.com/@user/video/ID
-  const tiktokMatch = texto.match(
-    /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@[^/]+\/video\/(\d+)/i,
-  );
-
-  if (tiktokMatch && tiktokMatch[1]) {
-    const id = tiktokMatch[1];
+  const tt = texto.match(TIKTOK);
+  if (tt?.[1] && tt[2]) {
     return {
       tipo: 'tiktok',
-      urlOriginal: tiktokMatch[0],
-      embedUrl: `https://www.tiktok.com/embed/v2/${id}`,
-      id,
+      urlOriginal: `https://www.tiktok.com/${tt[1]}/video/${tt[2]}`,
+      embedUrl: `https://www.tiktok.com/embed/v2/${tt[2]}`,
+      id: tt[2],
     };
   }
 

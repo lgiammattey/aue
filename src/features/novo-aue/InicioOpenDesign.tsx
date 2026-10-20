@@ -202,7 +202,7 @@ export function InicioOpenDesign({
   const [abaOrdenacao, setAbaOrdenacao] = useState<'Quentes' | 'Novos' | 'Top'>('Quentes');
 
   // Interações
-  const [salvosUsuario, setSalvosUsuario] = useState<Record<string, boolean>>({});
+  const [salvosUsuario] = useState<Record<string, boolean>>({});
   const [comunidadesEntradas, setComunidadesEntradas] = useState<Record<string, boolean>>({});
 
   // Audio player
@@ -757,8 +757,8 @@ export function InicioOpenDesign({
     : {};
 
   const alternarSalvo = (id: string) => {
-    setSalvosUsuario((prev) => ({ ...prev, [id]: !prev[id] }));
-    exibirToast(salvosUsuario[id] ? 'Removido dos salvos.' : 'Salvo na sua conta.');
+    void id;
+    exibirToast('Salvar publicações ainda não está disponível nesta conta.');
   };
 
   const [seguindoPerfil, setSeguindoPerfil] = useState(false);
@@ -787,14 +787,25 @@ export function InicioOpenDesign({
     }
   };
 
-  const alternarEntrarComunidade = (slug: string) => {
+  const alternarEntrarComunidade = async (slug: string) => {
+    if (!estaAutenticado) {
+      exibirToast('Entre na sua conta para participar da roda.');
+      (aoEntrar ?? (() => setViewAtual('auth')))();
+      return;
+    }
     const jaEntrou = Boolean(comunidadesEntradas[slug]);
-    setComunidadesEntradas((prev) => ({ ...prev, [slug]: !jaEntrou }));
-    exibirToast(jaEntrou ? 'Você saiu da comunidade.' : 'Você entrou na comunidade.');
-    if (jaEntrou) {
-      comunidadePort.sairComunidade?.(slug).catch(() => {});
-    } else {
-      comunidadePort.entrarComunidade?.(slug).catch(() => {});
+    try {
+      const atualizado = jaEntrou
+        ? await comunidadePort.sairComunidade(slug)
+        : await comunidadePort.entrarComunidade(slug);
+      if (atualizado === false) {
+        exibirToast('Não deu para atualizar sua participação agora.');
+        return;
+      }
+      setComunidadesEntradas((prev) => ({ ...prev, [slug]: !jaEntrou }));
+      exibirToast(jaEntrou ? 'Você saiu da comunidade.' : 'Você entrou na comunidade.');
+    } catch {
+      exibirToast('Não deu para atualizar sua participação agora.');
     }
   };
 

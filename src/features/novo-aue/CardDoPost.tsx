@@ -16,7 +16,8 @@ import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 
 interface Props {
   readonly post: ItemDoFeed;
-  readonly salvo: boolean;
+  /** Só é exibido quando a rota fornece persistência real. */
+  readonly salvo?: boolean;
   readonly audioTocando: boolean;
   readonly tempoAtualDoAudio: number;
   readonly duracaoDoAudio: number | null;
@@ -69,7 +70,6 @@ export const CardDoPost = memo(function CardDoPost({
   aoAbrirComentarios,
 }: Props) {
   const [copiado, setCopiado] = useState(false);
-  const [curtidoLocal, setCurtidoLocal] = useState(false);
 
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
   const comunidadeIdentificador = `r/${post.comunidadeSlug}`;
@@ -94,7 +94,6 @@ export const CardDoPost = memo(function CardDoPost({
   };
 
   const aoDispararCurtir = () => {
-    setCurtidoLocal((ant) => !ant);
     aoCurtir?.();
   };
 
@@ -277,7 +276,7 @@ export const CardDoPost = memo(function CardDoPost({
           {/* Curtir */}
           <button
             type="button"
-            className={`action-btn action-btn--like ${curtidoLocal ? 'is-liked' : ''}`}
+            className="action-btn action-btn--like"
             onClick={aoDispararCurtir}
             aria-label="Curtir"
             title="Curtir causo"
@@ -286,8 +285,8 @@ export const CardDoPost = memo(function CardDoPost({
               width="18"
               height="18"
               viewBox="0 0 24 24"
-              fill={curtidoLocal ? '#ff3d5a' : 'none'}
-              stroke={curtidoLocal ? '#ff3d5a' : 'currentColor'}
+              fill="none"
+              stroke="currentColor"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"

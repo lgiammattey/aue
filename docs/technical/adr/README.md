@@ -25,6 +25,8 @@ nome de pasta dentro de uma camada, refactor. Isso é PR.
 | [0008](0008-paginas-publicas-dos-grupos.md) | Páginas públicas dos grupos externos no build | aceito |
 | [0009](0009-identidade-social-promovida.md) | Identidade social promovida | aceito |
 | [0010](0010-comunidades-topicos-e-respostas.md) | Comunidades, tópicos e respostas (sem feed solto) — pretende substituir partes do 0004 | proposto |
+| [0011](0011-internacionalizacao-e-seo.md) | Idiomas, tradução e descoberta internacional | proposto |
+| [0012](0012-vida-social-e-governanca-de-comunidades.md) | Vida social e governança de comunidades | aceito |
 
 ---
 

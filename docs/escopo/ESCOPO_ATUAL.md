@@ -187,6 +187,19 @@ Aprovado por decisão de produto pelo Luiz em 18/10/2026:
 
 Fora desta fase: chat dentro do Auê, validar se o convite ainda funciona, editar grupo depois de cadastrado, moderação manual além da denúncia e outras plataformas além das três.
 
+### 2.19 Vida social das comunidades (Open Design)
+
+Decisão do Luiz em 19/10/2026, Cartão de Missão 0026 e ADR 0012:
+
+- o Open Design é a casca única de comunidades, explorar, tópico, perfil e acesso;
+- pessoas são referenciadas por `@handle`, comunidades por `/slug` e tópicos por
+  `#id`; esses três identificadores são a convenção de URL, busca e interface;
+- votos, salvos, inbox, fundação de comunidade, papéis de moderação, regras,
+  presença agregada, karma derivado e conquistas objetivas pertencem ao produto;
+- cada ação nasce em RPC e porta própria, com RLS e rollback antes de qualquer
+  tela depender dela; não há dado do protótipo como substituto de backend;
+- a Arena e sua jornada não entram nesta entrega.
+
 ---
 
 ## 3. Fora do escopo
@@ -194,7 +207,7 @@ Fora desta fase: chat dentro do Auê, validar se o convite ainda funciona, edita
 Continuam fora do produto, e **não pertencem a esta fase**:
 
 algoritmo viciante de recomendação · seguidores obrigatórios · campeonatos e ligas
-formais · temporadas · assinatura e monetização · paywall · XP e níveis · conquistas ·
+formais · temporadas · assinatura e monetização · paywall · XP e níveis ·
 mensagens privadas (chat) · login social obrigatório para arrotar.
 
 Comunidades e feed voltaram como decisão explícita do Auê 3.0, respeitando o

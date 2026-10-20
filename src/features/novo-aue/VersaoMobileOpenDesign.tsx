@@ -7,6 +7,8 @@ import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarForumWeb } from '../../plataforma/web/forum';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
+import { CardDoPost } from './CardDoPost';
+import type { ItemDoFeed } from './tipos';
 import type { PortaDeConta } from '../../portas/conta';
 import type { ComunidadeDoForum, PortaDeForum } from '../../portas/forum';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
@@ -264,36 +266,36 @@ export function VersaoMobileOpenDesign({
                                 ? idx === 2
                                 : idx === causosFiltrados.length - 1;
 
+                            const itemDoFeed: ItemDoFeed = {
+                              id: c.id,
+                              tipo: 'causo',
+                              comunidadeSlug: c.comunidadeSlug || 'arena',
+                              titulo: c.conteudo,
+                              corpo: '',
+                              autorNome: c.autorNome,
+                              autorHandle: c.autorHandle,
+                              criadoEm: c.criadoEm,
+                              votos: c.curtidas ?? 0,
+                              respostasTotal: c.totalComentarios ?? 0,
+                              temAudio: c.temAudio,
+                              enderecoDoAudio: c.enderecoDoAudio,
+                              nota: c.nota,
+                            };
+
                             return (
                               <div key={c.id}>
-                                <article className="post" style={{ borderBottom: '1px solid var(--line)', padding: '14px 0' }}>
-                                  <div className="post-body">
-                                    <div className="post-meta">
-                                      <span className="badge">r/{c.comunidadeSlug || 'arena'}</span>
-                                      <span>{c.autorNome}</span>
-                                    </div>
-                                    <h3 style={{ margin: '6px 0', fontSize: '16px' }}>{c.conteudo}</h3>
-                                    <div className="post-actions" style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
-                                      <button
-                                        type="button"
-                                        className="text-button"
-                                        onClick={() => void interagirNoCauso(c.id, 'curtir')}
-                                      >
-                                        ♡ Curtir
-                                      </button>
-                                      <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'fogo')}>🔥</button>
-                                      <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'nojo')}>🤢</button>
-                                      <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'trofeu')}>🏆</button>
-                                      <button
-                                        type="button"
-                                        className="text-button"
-                                        onClick={() => exibirToast('Link do causo copiado.')}
-                                      >
-                                        ↗ compartilhar
-                                      </button>
-                                    </div>
-                                  </div>
-                                </article>
+                                <CardDoPost
+                                  post={itemDoFeed}
+                                  salvo={false}
+                                  audioTocando={false}
+                                  tempoAtualDoAudio={0}
+                                  duracaoDoAudio={null}
+                                  aoCurtir={() => void interagirNoCauso(c.id, 'curtir')}
+                                  aoReagir={(tipo) => void interagirNoCauso(c.id, tipo)}
+                                  aoAlternarSalvar={() => exibirToast('Causo salvo nos seus favoritos.')}
+                                  aoTocarAudio={() => exibirToast('Reproduzindo arroto…')}
+                                  aoAbrirComentarios={() => exibirToast('Resenha do causo.')}
+                                />
                                 {exibirBannerAqui && <AdsterraNativeBanner />}
                               </div>
                             );

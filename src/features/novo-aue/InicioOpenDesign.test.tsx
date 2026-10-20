@@ -151,7 +151,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getByText('u/ze_do_eco')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Abrir perfil de u/ze_do_eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
     expect(screen.queryByLabelText('Votar positivo')).toBeNull();
-    expect(screen.getByRole('button', { name: '♡ Curtir' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Curtir' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '🔥' })).toBeTruthy();
 
     // Comunidades reais na sidebar e rightbar

@@ -85,6 +85,15 @@ export function BlocoVersus({ desafio }: { desafio: DesafioAberto }) {
           faltando={faltando}
         />
       </div>
+      {primeira && segunda && (
+        <span className="sr-only">
+          {empatou
+            ? `Empate entre ${primeira.nome} com nota ${formatarNota(primeira.nota)} e ${segunda.nome} com nota ${formatarNota(segunda.nota)}.`
+            : vencedor
+            ? `${vencedor === primeira.resultadoId ? primeira.nome : segunda.nome} venceu o round.`
+            : `Duelo em andamento entre ${primeira.nome} e ${segunda.nome}.`}
+        </span>
+      )}
     </div>
   );
 }

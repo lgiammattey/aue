@@ -79,3 +79,6 @@ __pycache__/
 # gravada. E não precisa: o que entra no código é o RESULTADO da calibração (os
 # limites de normalização), nunca o áudio.
 banco-de-arroto/
+
+# Estado temporário gerado pelo Supabase CLI local
+supabase/.temp/

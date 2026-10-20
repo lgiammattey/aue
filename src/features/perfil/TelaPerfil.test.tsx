@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderizarSemRota, screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { dependencias, forumFalso } from '../forum/dublesParaTeste';
 import { TelaPerfil } from './TelaPerfil';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import type { PortaDeComunidade } from '../../portas/comunidade';
@@ -63,7 +66,15 @@ const compartilhamentoFalso = (resultado: 'ok' | 'indisponivel' = 'ok') =>
     copiar: vi.fn(async () => true),
   });
 
+const render = (ui: ReactElement) => renderizarSemRota(<MemoryRouter>{ui}</MemoryRouter>);
+
+const vazia = async () => ({ ok: true as const, valor: { itens: [], proximo: null } });
+const dependenciasDoForum = dependencias({
+  forum: forumFalso({ listarTopicosDoAutor: vi.fn(vazia), listarRespostasDoAutor: vi.fn(vazia) }),
+});
+
 const props = {
+  dependenciasDoForum,
   aoVoltar: vi.fn(),
   aoArrotar: vi.fn(),
   aoAbrirHistoria: vi.fn(),
@@ -90,6 +101,44 @@ describe('TelaPerfil', () => {
     const portaPerfil: PortaDePerfil = portaDePerfil({ obterPerfil: vi.fn(async () => null) });
     render(<TelaPerfil handle="fantasma" portaPerfil={portaPerfil} portaComunidade={comunidade} portaConta={conta()} {...props} />);
     expect(await screen.findByText('Esse arrotador não existe.')).toBeDefined();
+    // "Não achei" é do cabeçalho: sem abas e sem texto de "sem tópicos ainda".
+    expect(screen.queryByRole('tablist')).toBeNull();
+    expect(screen.queryByText(/ainda não abriu/)).toBeNull();
+  });
+
+  it('cinco abas juntas para o próprio perfil (Curtidos só nele), Resenhas aberta sem parâmetro', async () => {
+    render(<TelaPerfil portaPerfil={portaDePerfil()} portaComunidade={comunidade} portaConta={conta(false)} {...props} />);
+    const abas = await screen.findAllByRole('tab');
+    expect(abas.map((a) => a.textContent)).toEqual(['Resenhas', 'Com áudio', 'Curtidos', 'Tópicos', 'Respostas']);
+    expect(screen.getByRole('tab', { name: 'Resenhas' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByText(/resenhas/, { selector: 'span' })).toBeDefined();
+  });
+
+  it('perfil de outra pessoa: sem Curtidos; Tópicos pela URL lê pelo @ do servidor', async () => {
+    const forum = forumFalso({ listarTopicosDoAutor: vi.fn(vazia), listarRespostasDoAutor: vi.fn(vazia) });
+    const feed = { ...comunidade, listarFeed: vi.fn(async () => []) } as typeof comunidade;
+    renderizarSemRota(
+      <MemoryRouter initialEntries={['/u/betao?aba=topicos']}>
+        <TelaPerfil handle="BETAO" portaPerfil={portaDePerfil()} portaComunidade={feed} portaConta={conta(false)} {...props} dependenciasDoForum={dependencias({ forum })} />
+      </MemoryRouter>,
+    );
+    const abas = await screen.findAllByRole('tab');
+    expect(abas.map((a) => a.textContent)).toEqual(['Resenhas', 'Com áudio', 'Tópicos', 'Respostas']);
+    expect(screen.getByRole('tab', { name: 'Tópicos' }).getAttribute('aria-selected')).toBe('true');
+    expect(await screen.findByRole('heading', { name: '@betao ainda não abriu nenhum tópico.' })).toBeDefined();
+    expect(forum.listarTopicosDoAutor).toHaveBeenCalledWith('betao', { limite: 30, cursor: null });
+    // Aba do fórum aberta: o feed de resenhas nem é lido.
+    expect(feed.listarFeed).not.toHaveBeenCalled();
+  });
+
+  it('no próprio perfil o vazio de Tópicos fala com a pessoa', async () => {
+    renderizarSemRota(
+      <MemoryRouter initialEntries={['/perfil?aba=topicos']}>
+        <TelaPerfil portaPerfil={portaDePerfil()} portaComunidade={comunidade} portaConta={conta(false)} {...props} />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('heading', { name: 'Você ainda não abriu nenhum tópico.' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Ver comunidades' }).getAttribute('href')).toBe('/comunidades');
   });
 
   it('visitante não ganha perfil próprio: a tela pede promoção sem consultar ou editar perfil', async () => {

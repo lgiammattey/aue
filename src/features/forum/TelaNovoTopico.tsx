@@ -74,6 +74,7 @@ function NovoTopico({ contexto, contaId }: { readonly contexto: ContextoDaComuni
 
   const conferir = useCallback(() => {
     esquecerListasVistas(`c:${slug}|`);
+    esquecerListasVistas('perfil-');
     anunciar('Conferindo os tópicos da comunidade.');
     fechar();
     contexto.conferirLista();
@@ -95,6 +96,7 @@ function NovoTopico({ contexto, contaId }: { readonly contexto: ContextoDaComuni
         // A volta do navegador não pode mostrar a lista velha, sem este tópico.
         esquecerListasVistas(`c:${slug}|`);
         esquecerListasVistas('explorar|');
+        esquecerListasVistas('perfil-');
         toast('Tópico criado.');
         navegar(enderecoDoTopico(slug, criado.id), { replace: true });
       }}

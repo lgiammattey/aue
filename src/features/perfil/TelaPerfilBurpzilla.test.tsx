@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderizarSemRota, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { dependencias, forumFalso } from '../forum/dublesParaTeste';
 import { TelaPerfil } from './TelaPerfil';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
@@ -56,7 +59,15 @@ function portaDePerfil(sobrepor: Partial<PortaDePerfil> = {}): PortaDePerfil {
   };
 }
 
+const render = (ui: ReactElement) => renderizarSemRota(<MemoryRouter>{ui}</MemoryRouter>);
+
+const vazia = async () => ({ ok: true as const, valor: { itens: [], proximo: null } });
+const dependenciasDoForum = dependencias({
+  forum: forumFalso({ listarTopicosDoAutor: vi.fn(vazia), listarRespostasDoAutor: vi.fn(vazia) }),
+});
+
 const props = {
+  dependenciasDoForum,
   aoVoltar: vi.fn(),
   aoArrotar: vi.fn(),
   aoAbrirHistoria: vi.fn(),

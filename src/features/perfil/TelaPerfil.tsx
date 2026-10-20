@@ -10,6 +10,9 @@ import type { EstadoDaConta, PortaDeConta } from '../../portas/conta';
 import type { Compartilhamento } from '../../portas/compartilhamento';
 import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { SimboloBurpzilla } from './SimboloBurpzilla';
+import { AbasDoPerfil, type AbaExtraDoPerfil } from '../forum/AbasDoPerfil';
+import type { DependenciasDoForum } from '../forum/contexto';
+import { useSearchParams } from 'react-router-dom';
 import { CardDeCauso } from '../comunidade/components/CardDeCauso';
 import { BarraLateralNavegacao } from '../comunidade/components/BarraLateralNavegacao';
 import { BarraInferiorMobile } from '../comunidade/components/BarraInferiorMobile';
@@ -29,6 +32,8 @@ interface TelaPerfilProps {
   aoAbrirHistoria: (id: string) => void;
   aoAbrirPerfil: (handle: string) => void;
   aoEntrar: (modo: 'cadastro' | 'entrar') => void;
+  /** Portas do fórum para as abas Tópicos e Respostas. Só os testes passam; sem isso, as de verdade. */
+  dependenciasDoForum?: DependenciasDoForum;
 }
 
 type Aba = 'causos' | 'audios' | 'curtidos';
@@ -68,6 +73,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   aoAbrirHistoria,
   aoAbrirPerfil,
   aoEntrar,
+  dependenciasDoForum,
 }) => {
   const [larguraJanela, setLarguraJanela] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1200));
 
@@ -112,7 +118,10 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const [carregando, setCarregando] = useState(true);
   const [falhou, setFalhou] = useState(false);
   const [tentativa, setTentativa] = useState(0);
-  const [aba, setAba] = useState<Aba>('causos');
+  // A aba vem da URL (`?aba=`): o Voltar cai na mesma. Resenhas é a aberta sem parâmetro.
+  const [paramsDaUrl] = useSearchParams();
+  const pedida = paramsDaUrl.get('aba');
+  const aba: Aba | 'forum' = pedida === 'audios' || pedida === 'curtidos' ? pedida : pedida === 'topicos' || pedida === 'respostas' ? 'forum' : 'causos';
   const [causos, setCausos] = useState<readonly CausoPostado[]>([]);
   const [carregandoCausos, setCarregandoCausos] = useState(false);
   const [falhaNosCausos, setFalhaNosCausos] = useState(false);
@@ -219,7 +228,7 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   }, [handle, perfilPort, contaPort, tentativa, boasVindas]);
 
   useEffect(() => {
-    if (!perfil) return;
+    if (!perfil || aba === 'forum') return;
     let ativo = true;
     setCarregandoCausos(true);
     comunidade
@@ -537,6 +546,44 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   );
 
   const perfilParaBarra = meuPerfilLocal;
+
+  // O conteúdo das abas antigas é um só, filtrado pela aba aberta (o painel só é montado na aba ativa).
+  const painelAntigo = (
+    <>
+                {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
+                {!carregandoCausos && falhaNosCausos && (
+                  <p role="alert" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
+                    Não deu pra carregar as resenhas agora. Atualiza a página pra tentar de novo.
+                  </p>
+                )}
+                {!carregandoCausos && !falhaNosCausos && causos.length === 0 && (
+                  <p style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
+                    {aba === 'curtidos'
+                      ? 'Nada curtido ainda.'
+                      : souEu
+                        ? 'Você ainda não postou nenhuma resenha.'
+                        : 'Sem resenhas por aqui ainda.'}
+                  </p>
+                )}
+                {causos.map((c) => (
+                  <CardDeCauso
+                    key={c.id}
+                    causo={c}
+                    aoCurtir={curtir}
+                    aoRepostar={repostar}
+                    aoDuvidar={aoArrotar}
+                    aoCompartilhar={(item) => aoAbrirHistoria(item.id)}
+                    aoResponder={responder}
+                    aoAbrirConversa={abrirConversa}
+                    aoDenunciar={denunciar}
+                    aoApagar={apagar}
+                    aoAbrirPerfil={(h) => aoAbrirPerfil(h)}
+                    aoAbrirHistoria={aoAbrirHistoria}
+                  />
+                ))}
+    </>
+  );
+  const abasAntigas: readonly AbaExtraDoPerfil[] = abas.map((a) => ({ ...a, painel: painelAntigo }));
 
   return (
     <div
@@ -883,10 +930,10 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 </div>
 
                 <div>
-                  <div style={{ fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center' }}>
+                  <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center' }}>
                     <span>{perfil.apelido}</span>
                     {perfil.daCasa === true && <SimboloBurpzilla />}
-                  </div>
+                  </h1>
                   <div style={{ color: 'var(--muted)', fontSize: 15 }}>@{perfil.handle}</div>
                   {perfil.titulo && <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>{perfil.titulo}</div>}
                 </div>
@@ -994,82 +1041,12 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
                 )}
               </section>
 
-              {/* Abas com Indicador Ativo --ind */}
-              <nav role="tablist" style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
-                {abas.map((a) => {
-                  const ativo = aba === a.id;
-                  return (
-                    <button
-                      key={a.id}
-                      role="tab"
-                      aria-selected={ativo}
-                      type="button"
-                      onClick={() => setAba(a.id)}
-                      style={{
-                        flex: 1,
-                        minHeight: 48,
-                        border: 0,
-                        background: 'none',
-                        color: ativo ? 'var(--fg)' : 'var(--muted)',
-                        fontWeight: ativo ? 700 : 500,
-                        fontSize: 15,
-                        cursor: 'pointer',
-                        position: 'relative',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <span>{a.rotulo}</span>
-                      {ativo && (
-                        <span
-                          style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            width: '48px',
-                            height: '3px',
-                            borderRadius: '999px',
-                            background: 'var(--ind)',
-                          }}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </nav>
-
-              {carregandoCausos && <p style={{ padding: 24, color: 'var(--muted)' }}>Carregando…</p>}
-              {!carregandoCausos && falhaNosCausos && (
-                <p role="alert" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
-                  Não deu pra carregar as resenhas agora. Atualiza a página pra tentar de novo.
-                </p>
-              )}
-              {!carregandoCausos && !falhaNosCausos && causos.length === 0 && (
-                <p style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>
-                  {aba === 'curtidos'
-                    ? 'Nada curtido ainda.'
-                    : souEu
-                      ? 'Você ainda não postou nenhuma resenha.'
-                      : 'Sem resenhas por aqui ainda.'}
-                </p>
-              )}
-              {causos.map((c) => (
-                <CardDeCauso
-                  key={c.id}
-                  causo={c}
-                  aoCurtir={curtir}
-                  aoRepostar={repostar}
-                  aoDuvidar={aoArrotar}
-                  aoCompartilhar={(item) => aoAbrirHistoria(item.id)}
-                  aoResponder={responder}
-                  aoAbrirConversa={abrirConversa}
-                  aoDenunciar={denunciar}
-                  aoApagar={apagar}
-                  aoAbrirPerfil={(h) => aoAbrirPerfil(h)}
-                  aoAbrirHistoria={aoAbrirHistoria}
-                />
-              ))}
+              <AbasDoPerfil
+                handle={perfil.handle}
+                souEu={souEu}
+                dependencias={dependenciasDoForum}
+                extras={abasAntigas}
+              />
             </>
           )}
         </main>

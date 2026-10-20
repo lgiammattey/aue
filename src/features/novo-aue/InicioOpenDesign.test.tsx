@@ -158,6 +158,81 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getAllByText('r/arena-do-arroto').length).toBeGreaterThan(0);
   });
 
+  it('reidrata o anexo de áudio do tópico no Início depois da leitura do feed', async () => {
+    const forumComAudio: PortaDeForum = {
+      ...mockForum,
+      listarAnexosDoForum: vi.fn(async () => ({
+        ok: true as const,
+        valor: [{
+          alvo: 'topico' as const,
+          alvoId: 'topico-1',
+          tipo: 'audio' as const,
+          caminho: 'autor-1/forum/arroto.webm',
+          mime: 'audio/webm',
+          tamanhoBytes: 321,
+          duracaoMs: 7000,
+          urlVideo: null,
+        }],
+      })),
+      assinarAnexoDoForum: vi.fn(async () => ({ ok: true as const, valor: 'https://audio.exemplo/arroto.webm' })),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComAudio} portaComunidade={mockComunidade} autenticado={false} />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Ouvir áudio' })).toBeTruthy();
+    expect(forumComAudio.listarAnexosDoForum).toHaveBeenCalledWith({ topicoIds: ['topico-1'] });
+    expect(forumComAudio.assinarAnexoDoForum).toHaveBeenCalledWith('autor-1/forum/arroto.webm');
+  });
+
+  it('não anuncia publicação quando o upload de áudio é recusado por falta de conta', async () => {
+    const forumComUploadRecusado: PortaDeForum = {
+      ...mockForum,
+      criarGravacaoLivreDoForum: vi.fn(() => ({
+        iniciar: vi.fn(async () => ({
+          ok: true as const,
+          conclusao: Promise.resolve({
+            ok: true as const,
+            audio: {
+              dados: new Blob(['arroto'], { type: 'audio/webm' }),
+              formato: 'audio/webm',
+              mimeParaEnvio: 'audio/webm',
+              duracaoMs: 1200,
+            },
+            encerramento: 'manual' as const,
+          }),
+        })),
+        parar: vi.fn(),
+        cancelar: vi.fn(),
+        estaGravando: vi.fn(() => false),
+      })),
+      enviarAnexoDoForum: vi.fn(async () => ({ ok: false as const, motivo: 'precisaEntrar' as const })),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={forumComUploadRecusado}
+          portaComunidade={mockComunidade}
+          autenticado
+          abrirCompositor
+        />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
+    expect(await screen.findByText('🎙️ Áudio de 2s gravado')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+
+    expect((await screen.findByRole('status')).textContent).toContain('Entre na sua conta antes de anexar o áudio.');
+    expect(screen.queryByText('Publicado com sucesso.')).toBeNull();
+    expect(forumComUploadRecusado.criarTopico).not.toHaveBeenCalled();
+  });
+
   it('permite alternar abas de ordenação Quentes, Novos e Top', async () => {
     render(
       <MemoryRouter>

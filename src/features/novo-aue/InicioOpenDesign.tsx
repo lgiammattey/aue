@@ -86,6 +86,8 @@ const DETALHES_PADRAO: Record<string, DetalhesDaComunidade> = {
   },
 };
 
+class ErroDePublicacaoDoAnexo extends Error {}
+
 function formatarMilhar(total?: number): string {
   if (!total) return '1';
   if (total >= 1000) {
@@ -540,14 +542,29 @@ export function InicioOpenDesign({
       forum.explorarTopicos({ limite: 30 }),
       comunidadePort.listarFeed({ limite: 30 }).catch(() => [] as readonly CausoPostado[]),
     ])
-      .then(([resComunidades, resTopicos, causos]) => {
+      .then(async ([resComunidades, resTopicos, causos]) => {
         if (!ativo) return;
         const listaComunidades = resComunidades.ok ? resComunidades.valor : [];
         setComunidades(listaComunidades);
 
         const itens: ItemDoFeed[] = [];
         if (resTopicos.ok) {
+          const anexosPorTopico = new Map<string, AnexoDoForum>();
+          if (forum.listarAnexosDoForum) {
+            const leituraAnexos = await forum.listarAnexosDoForum({
+              topicoIds: resTopicos.valor.itens.map((topico) => topico.id),
+            });
+            if (leituraAnexos.ok) {
+              leituraAnexos.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
+            }
+          }
+          if (!ativo) return;
           for (const t of resTopicos.valor.itens) {
+            const anexo = anexosPorTopico.get(t.id);
+            const url = anexo?.caminho && forum.assinarAnexoDoForum
+              ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+              : anexo?.urlVideo ?? undefined;
+            if (!ativo) return;
             itens.push({
               id: `topico-${t.id}`,
               tipo: 'topico',
@@ -560,6 +577,7 @@ export function InicioOpenDesign({
               criadoEm: t.criadoEm,
               votos: Math.max(1, t.respostasTotal * 3),
               respostasTotal: t.respostasTotal,
+              anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
             });
           }
         }
@@ -955,7 +973,16 @@ export function InicioOpenDesign({
         ? { tipo: 'imagem', arquivo: rascunho.arquivo }
         : { tipo: 'audio', arquivo: rascunho.arquivo, duracaoMs: rascunho.duracaoMs },
     );
-    if (!enviado.ok) throw new Error('Falha ao enviar anexo');
+    if (!enviado.ok) {
+      const mensagem = enviado.motivo === 'precisaEntrar'
+        ? 'Entre na sua conta antes de anexar o áudio.'
+        : enviado.motivo === 'naoEMembro'
+          ? 'Entre nesta comunidade antes de anexar o áudio.'
+          : enviado.motivo === 'semConfirmacao'
+            ? 'Não deu para confirmar o envio do anexo. Confira a comunidade antes de tentar de novo.'
+            : 'O anexo foi recusado e não foi publicado.';
+      throw new ErroDePublicacaoDoAnexo(mensagem);
+    }
     return enviado.valor;
   };
 
@@ -1030,8 +1057,8 @@ export function InicioOpenDesign({
       setTopicosDaComunidade(incrementar);
       exibirToast('Comentário publicado na roda!');
       return true;
-    } catch {
-      exibirToast('Não foi possível enviar o comentário agora.');
+    } catch (erro) {
+      exibirToast(erro instanceof ErroDePublicacaoDoAnexo ? erro.message : 'Não foi possível enviar o comentário agora.');
       return false;
     } finally {
       setEnviandoComentario(false);
@@ -1064,8 +1091,8 @@ export function InicioOpenDesign({
         exibirToast('Não foi possível publicar agora. Entre na comunidade e tente de novo.');
         return false;
       }
-    } catch {
-      exibirToast('Não foi possível publicar agora.');
+    } catch (erro) {
+      exibirToast(erro instanceof ErroDePublicacaoDoAnexo ? erro.message : 'Não foi possível publicar agora.');
       return false;
     }
 

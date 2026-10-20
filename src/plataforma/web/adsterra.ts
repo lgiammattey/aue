@@ -33,7 +33,9 @@ export function carregarNativeBanner(): HTMLScriptElement | null {
 
   const selector = `script[data-aue-adsterra="native"]`;
   const existente = document.querySelector<HTMLScriptElement>(selector);
-  if (existente) return existente;
+  if (existente) {
+    existente.remove();
+  }
 
   const script = document.createElement('script');
   script.async = true;

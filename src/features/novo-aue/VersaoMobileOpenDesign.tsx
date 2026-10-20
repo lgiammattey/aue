@@ -259,6 +259,7 @@ export function VersaoMobileOpenDesign({
                         {causosFiltrados.length === 0 ? (
                           <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--muted)' }}>
                             <p>Sem posts por aqui ainda.</p>
+                            <AdsterraNativeBanner />
                           </div>
                         ) : (
                           causosFiltrados.map((c, idx) => {

@@ -332,13 +332,14 @@ export const CardDoPost = memo(function CardDoPost({
             <span className="sr-only">Troféu</span>
           </button>
 
-          {/* Salvar */}
-          <button
+          {/* Sem porta de salvos, o controle continua visível mas indisponível. */}
+          {salvo !== undefined && <button
             type="button"
             className={`action-btn action-btn--save ${salvo ? 'is-saved' : ''}`}
             onClick={aoAlternarSalvar}
+            disabled={!aoAlternarSalvar}
             aria-label={salvo ? 'Salvo' : 'Salvar'}
-            title={salvo ? 'Remover dos salvos' : 'Salvar causo'}
+            title={aoAlternarSalvar ? (salvo ? 'Remover dos salvos' : 'Salvar causo') : 'Salvar ainda não está disponível'}
           >
             <svg
               width="18"
@@ -355,6 +356,7 @@ export const CardDoPost = memo(function CardDoPost({
             </svg>
             <span className="sr-only">{salvo ? 'Salvo' : 'Salvar'}</span>
           </button>
+          }
 
           {/* Compartilhar */}
           <button

@@ -124,6 +124,15 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     denunciarCauso: vi.fn(),
   };
 
+  const contaAutenticada: PortaDeConta = {
+    estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: false, podeParticiparSocialmente: true })),
+    entrar: vi.fn(),
+    cadastrar: vi.fn(),
+    enviarLinkDeRedefinicao: vi.fn(),
+    redefinirSenha: vi.fn(),
+    sair: vi.fn(),
+  };
+
   it('renderiza os elementos principais da casca 1:1 e consome portas reais', async () => {
     render(
       <MemoryRouter>
@@ -609,5 +618,81 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     // Nova resposta renderizada na lista
     expect(await screen.findByText('Eu estava lá e confirmo o eco!')).toBeTruthy();
+  });
+
+  it('mantém a comunidade fora da roda quando a porta recusa a entrada', async () => {
+    const comunidadeQueRecusa: PortaDeComunidade = {
+      ...mockComunidade,
+      entrarComunidade: vi.fn(async () => false),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={comunidadeQueRecusa}
+          portaConta={contaAutenticada}
+          autenticado
+          viewInicial="comunidades"
+        />
+      </MemoryRouter>,
+    );
+
+    const entrar = await screen.findAllByRole('button', { name: 'Entrar' });
+    fireEvent.click(entrar[0]);
+
+    expect((await screen.findByRole('status')).textContent).toContain('Não deu para atualizar sua participação agora.');
+    expect(screen.getAllByRole('button', { name: 'Entrar' }).length).toBeGreaterThan(0);
+  });
+
+  it('mantém a comunidade fora da roda quando a porta falha', async () => {
+    const comunidadeIndisponivel: PortaDeComunidade = {
+      ...mockComunidade,
+      entrarComunidade: vi.fn(async () => { throw new Error('rede indisponível'); }),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={comunidadeIndisponivel}
+          portaConta={contaAutenticada}
+          autenticado
+          viewInicial="comunidades"
+        />
+      </MemoryRouter>,
+    );
+
+    const entrar = await screen.findAllByRole('button', { name: 'Entrar' });
+    fireEvent.click(entrar[0]);
+
+    expect((await screen.findByRole('status')).textContent).toContain('Não deu para atualizar sua participação agora.');
+    expect(screen.getAllByRole('button', { name: 'Entrar' }).length).toBeGreaterThan(0);
+  });
+
+  it('leva o visitante para entrar antes de tentar participar da comunidade', async () => {
+    const pedirEntrada = vi.fn();
+    const comunidadeDoVisitante: PortaDeComunidade = {
+      ...mockComunidade,
+      entrarComunidade: vi.fn(async () => true),
+    };
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={comunidadeDoVisitante}
+          autenticado={false}
+          aoEntrar={pedirEntrada}
+          viewInicial="comunidades"
+        />
+      </MemoryRouter>,
+    );
+
+    const entrar = await screen.findAllByRole('button', { name: 'Entrar' });
+    fireEvent.click(entrar[0]);
+
+    expect((await screen.findByRole('status')).textContent).toContain('Entre na sua conta para participar da roda.');
+    expect(pedirEntrada).toHaveBeenCalledOnce();
+    expect(comunidadeDoVisitante.entrarComunidade).not.toHaveBeenCalled();
   });
 });

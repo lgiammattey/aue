@@ -202,7 +202,6 @@ export function InicioOpenDesign({
   const [abaOrdenacao, setAbaOrdenacao] = useState<'Quentes' | 'Novos' | 'Top'>('Quentes');
 
   // Interações
-  const [salvosUsuario] = useState<Record<string, boolean>>({});
   const [comunidadesEntradas, setComunidadesEntradas] = useState<Record<string, boolean>>({});
 
   // Audio player
@@ -755,11 +754,6 @@ export function InicioOpenDesign({
         aoReagir: (tipo: 'fogo' | 'nojo' | 'trofeu') => void interagirNoPost(post.id, tipo),
       }
     : {};
-
-  const alternarSalvo = (id: string) => {
-    void id;
-    exibirToast('Salvar publicações ainda não está disponível nesta conta.');
-  };
 
   const [seguindoPerfil, setSeguindoPerfil] = useState(false);
   const [alternandoSeguir, setAlternandoSeguir] = useState(false);
@@ -1584,9 +1578,8 @@ export function InicioOpenDesign({
             }}
             aoEnviarComentario={enviarComentario}
             {...acoesDeReacao(postComentariosAtivo)}
-            aoAlternarSalvar={() => alternarSalvo(postComentariosAtivo.id)}
             aoTocarAudio={(fonte) => void alternarAudio(fonte, postComentariosAtivo.id)}
-            salvo={Boolean(salvosUsuario[postComentariosAtivo.id])}
+            salvo={false}
             audioTocando={audioTocandoId === postComentariosAtivo.id}
             tempoAtualDoAudio={audioSelecionadoId === postComentariosAtivo.id ? tempoAtualDoAudio : 0}
             duracaoDoAudio={audioSelecionadoId === postComentariosAtivo.id ? duracaoDoAudio : null}
@@ -1658,11 +1651,10 @@ export function InicioOpenDesign({
                     <CardDoPost
                       post={post}
                       {...acoesDeReacao(post)}
-                      salvo={Boolean(salvosUsuario[post.id])}
+                      salvo={false}
                       audioTocando={audioTocandoId === post.id}
                       tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                       duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                      aoAlternarSalvar={() => alternarSalvo(post.id)}
                       aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                       aoAbrirComentarios={() => void abrirComentarios(post)}
                       {...propsDeComentariosDoPost(post)}
@@ -1704,11 +1696,10 @@ export function InicioOpenDesign({
                     key={post.id}
                     post={post}
                     {...acoesDeReacao(post)}
-                    salvo={Boolean(salvosUsuario[post.id])}
+                    salvo={false}
                     audioTocando={audioTocandoId === post.id}
                     tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                     duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                    aoAlternarSalvar={() => alternarSalvo(post.id)}
                     aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                     aoAbrirComentarios={() => void abrirComentarios(post)}
                     {...propsDeComentariosDoPost(post)}
@@ -1732,7 +1723,7 @@ export function InicioOpenDesign({
             {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu bonde…</p>}
             {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu bonde.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Seu bonde ainda está quieto.</h2><p>Siga alguns perfis para ver os causos deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Explorar o Bonde</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={Boolean(salvosUsuario[post.id])} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoAlternarSalvar={() => alternarSalvo(post.id)} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={false} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
           </section>
         )}
 
@@ -1910,11 +1901,10 @@ export function InicioOpenDesign({
                           key={post.id}
                           post={post}
                           {...acoesDeReacao(post)}
-                          salvo={Boolean(salvosUsuario[post.id])}
+                          salvo={false}
                           audioTocando={audioTocandoId === post.id}
                           tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                           duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                          aoAlternarSalvar={() => alternarSalvo(post.id)}
                           aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                           aoAbrirComentarios={() => void abrirComentarios(post)}
                           {...propsDeComentariosDoPost(post)}

@@ -189,7 +189,7 @@ export function VersaoMobileOpenDesign({
                     className="icon-button od-touch"
                     type="button"
                     aria-label="Buscar"
-                    onClick={() => exibirToast('A busca filtra o catálogo da roda.')}
+                    onClick={() => navigate('/explorar')}
                   >
                     ⌕
                   </button>

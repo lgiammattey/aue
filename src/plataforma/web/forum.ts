@@ -12,7 +12,9 @@ import type {
   MotivoDeLeitura,
   OrdemDosTopicos,
   PaginaDoForum,
+  PaginaDeBusca,
   PortaDeForum,
+  ResultadoDeBusca,
   PreviaDeRespostaDoTopico,
   ReferenciaDeComunidade,
   ResultadoDaEscrita,
@@ -359,6 +361,22 @@ function inteiroPositivoOuNulo(l: Linha, c: string): number | null {
   return v;
 }
 
+function paraResultadoDeBusca(l: Linha): ResultadoDeBusca {
+  const tipo = texto(l, 'tipo');
+  if (tipo !== 'pessoa' && tipo !== 'comunidade' && tipo !== 'topico') malformada('tipo');
+  return {
+    tipo,
+    id: texto(l, 'id'),
+    comunidadeSlug: textoOuNulo(l, 'comunidade_slug'),
+    comunidadeNome: textoOuNulo(l, 'comunidade_nome'),
+    titulo: textoOuNulo(l, 'titulo'),
+    handle: textoOuNulo(l, 'handle'),
+    apelido: textoOuNulo(l, 'apelido'),
+    avatarUrl: textoOuNulo(l, 'url_do_avatar'),
+    criadoEm: textoOuNulo(l, 'criado_em'),
+  };
+}
+
 function paraAnexoDoForum(l: Linha): AnexoDoForum {
   const alvo = texto(l, 'alvo_tipo');
   if (alvo !== 'topico' && alvo !== 'resposta') malformada('alvo_tipo');
@@ -601,6 +619,19 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
         'listar_previa_respostas_dos_topicos',
         { p_topicos: ids, p_limite_por_topico: 2 },
         (linhas) => linhas.map(paraPreviaDeResposta),
+      );
+    },
+
+    buscarNoAue(op) {
+      const limite = limiteEfetivo(op.limite, 20, 50);
+      const deslocamento = Math.max(0, Math.trunc(op.deslocamento ?? 0));
+      return ler(
+        'buscar_no_aue',
+        { p_termo: op.termo, p_tipo: op.tipo, p_limite: limite + 1, p_deslocamento: deslocamento },
+        (linhas): PaginaDeBusca => ({
+          itens: linhas.slice(0, limite).map(paraResultadoDeBusca),
+          proximo: linhas.length > limite ? deslocamento + limite : null,
+        }),
       );
     },
 

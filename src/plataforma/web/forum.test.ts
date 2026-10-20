@@ -274,6 +274,24 @@ describe('cursor com microssegundo', () => {
     });
   });
 
+  it('buscarNoAue pede uma linha a mais para saber se há próxima página, sem tratar o termo', async () => {
+    const linha = (n: number) => ({ tipo: 'pessoa', id: `00000000-0000-4000-8000-00000000000${n}`, handle: `u${n}`, apelido: 'U', url_do_avatar: null, comunidade_slug: null, comunidade_nome: null, titulo: null, criado_em: null });
+    rpc.mockResolvedValue({ data: [linha(1), linha(2), linha(3)], error: null });
+    const r = await criarForumWeb().buscarNoAue!({ termo: '100% _x', tipo: 'pessoas', limite: 2, deslocamento: 4 });
+    expect(rpc).toHaveBeenCalledWith('buscar_no_aue', { p_termo: '100% _x', p_tipo: 'pessoas', p_limite: 3, p_deslocamento: 4 });
+    expect(r.ok && r.valor.itens.map((i) => i.handle)).toEqual(['u1', 'u2']);
+    expect(r.ok && r.valor.proximo).toBe(6);
+    rpc.mockResolvedValue({ data: [linha(1)], error: null });
+    const ultima = await criarForumWeb().buscarNoAue!({ termo: 'u', tipo: 'pessoas', limite: 2 });
+    expect(ultima.ok && ultima.valor.proximo).toBeNull();
+  });
+
+  it('buscarNoAue: resposta malformada é falha, não resultado vazio', async () => {
+    rpc.mockResolvedValue({ data: [{ tipo: 'outro', id: 'x' }], error: null });
+    const r = await criarForumWeb().buscarNoAue!({ termo: 'ab', tipo: 'pessoas' });
+    expect(r).toEqual({ ok: false, motivo: 'falhou' });
+  });
+
   it('listarRespostasDoAutor traduz a linha e pagina por criado_em sem conversão', async () => {
     rpc.mockResolvedValue({
       data: [

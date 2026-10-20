@@ -1,205 +1,48 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import type { GravacaoLivreDoForum } from '../../portas/forum';
+import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import type { ItemComentario, ItemDoFeed } from './tipos';
+import type { AnexoRascunho } from './ModalCompositor';
 
 interface Props {
-  readonly aberto: boolean;
-  readonly post: ItemDoFeed | null;
-  readonly comentarios: readonly ItemComentario[];
-  readonly carregando: boolean;
-  readonly enviando: boolean;
-  readonly aoFechar: () => void;
-  readonly aoEnviarComentario: (conteudo: string) => Promise<void>;
-  readonly aoIrParaConversaCompleta?: () => void;
+  readonly aberto: boolean; readonly post: ItemDoFeed | null; readonly comentarios: readonly ItemComentario[];
+  readonly carregando: boolean; readonly enviando: boolean; readonly aoFechar: () => void;
+  readonly criarGravacao?: () => GravacaoLivreDoForum;
+  readonly aoEnviarComentario: (dados: { conteudo: string; paiId: string | null; anexo: AnexoRascunho | null }) => Promise<boolean>;
 }
+const LIMITE = 180;
+function tempo(iso: string) { const segundos = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000)); return segundos < 60 ? 'agora' : segundos < 3600 ? `${Math.floor(segundos / 60)}m` : `${Math.floor(segundos / 3600)}h`; }
 
-function formatarTempo(iso: string): string {
-  try {
-    const agora = Date.now();
-    const data = new Date(iso).getTime();
-    const diff = Math.max(0, Math.floor((agora - data) / 1000));
-    if (diff < 60) return 'agora';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
-    return `${Math.floor(diff / 86400)}d atrás`;
-  } catch {
-    return 'recentemente';
-  }
-}
-
-export function ModalComentarios({
-  aberto,
-  post,
-  comentarios,
-  carregando,
-  enviando,
-  aoFechar,
-  aoEnviarComentario,
-  aoIrParaConversaCompleta,
-}: Props) {
-  const [texto, setTexto] = useState('');
-
+export function ModalComentarios({ aberto, post, comentarios, carregando, enviando, aoFechar, criarGravacao, aoEnviarComentario }: Props) {
+  const [texto, setTexto] = useState(''); const [paiId, setPaiId] = useState<string | null>(null); const [anexo, setAnexo] = useState<AnexoRascunho | null>(null);
+  const [link, setLink] = useState(''); const [erro, setErro] = useState<string | null>(null); const [gravando, setGravando] = useState(false);
+  const gravacao = useRef<GravacaoLivreDoForum | null>(null);
+  useEffect(() => () => gravacao.current?.cancelar(), []);
   if (!aberto || !post) return null;
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!texto.trim() || enviando) return;
-    await aoEnviarComentario(texto.trim());
-    setTexto('');
-  };
-
-  return (
-    <div
-      className="modal open"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modalComentariosTitulo"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) aoFechar();
-      }}
-    >
-      <div className="dialog" style={{ maxWidth: 600, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-        <div className="dialog-head" style={{ borderBottom: '1px solid var(--aue-line)', paddingBottom: 14 }}>
-          <div>
-            <span style={{ color: 'var(--aue-accent)', fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>
-              r/{post.comunidadeSlug}
-            </span>
-            <h2 id="modalComentariosTitulo" style={{ fontSize: 20, marginTop: 2 }}>
-              Resenha na roda
-            </h2>
-          </div>
-          <button type="button" className="close" onClick={aoFechar} aria-label="Fechar comentários">
-            ✕
-          </button>
-        </div>
-
-        {/* Post Resumido */}
-        <div
-          style={{
-            background: 'var(--aue-surface-2)',
-            border: '1px solid var(--aue-line)',
-            borderRadius: 8,
-            padding: 12,
-            marginBottom: 16,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--aue-muted)', marginBottom: 4 }}>
-            {post.autorHandle ? (
-              <Link className="author-profile-link" to={`/u/${post.autorHandle}`} onClick={aoFechar} aria-label={`Abrir perfil de ${post.autorNome}`}>
-                <strong>{post.autorNome}</strong> <span>@{post.autorHandle}</span>
-              </Link>
-            ) : <strong>{post.autorNome}</strong>}
-            <span>·</span>
-            <span>{formatarTempo(post.criadoEm)}</span>
-          </div>
-          <h3 style={{ fontSize: 15, margin: 0, fontWeight: 800, lineHeight: 1.3 }}>{post.titulo}</h3>
-          {post.corpo && post.corpo !== post.titulo && (
-            <p style={{ fontSize: 13, color: 'var(--aue-muted)', marginTop: 4, marginInline: 0, marginBottom: 0 }}>
-              {post.corpo}
-            </p>
-          )}
-        </div>
-
-        {/* Lista de Comentários */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            minHeight: 120,
-            maxHeight: 280,
-            paddingRight: 4,
-            marginBottom: 16,
-          }}
-          aria-label="Lista de comentários"
-        >
-          {carregando ? (
-            <p style={{ color: 'var(--aue-muted)', fontSize: 14, textAlign: 'center', padding: '24px 0' }}>
-              Ouvindo o que a roda comentou…
-            </p>
-          ) : comentarios.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '24px 16px', color: 'var(--aue-muted)' }}>
-              <p style={{ fontSize: 15, fontWeight: 700 }}>Nenhum comentário na roda ainda.</p>
-              <small>Solte o primeiro causo ou resposta para puxar o papo.</small>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {comentarios.map((c) => (
-                <div
-                  key={c.id}
-                  style={{
-                    background: 'var(--aue-surface)',
-                    border: '1px solid var(--aue-line)',
-                    borderRadius: 8,
-                    padding: 10,
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                      {c.autorHandle ? (
-                        <Link className="author-profile-link" to={`/u/${c.autorHandle}`} onClick={aoFechar} aria-label={`Abrir perfil de ${c.autorNome}`}>
-                          <strong style={{ fontSize: 13 }}>{c.autorNome}</strong>{' '}
-                          <span style={{ fontSize: 12, color: 'var(--aue-subtle)' }}>@{c.autorHandle}</span>
-                        </Link>
-                      ) : <strong style={{ fontSize: 13 }}>{c.autorNome}</strong>}
-                    </div>
-                    <span style={{ fontSize: 11, color: 'var(--aue-subtle)' }}>{formatarTempo(c.criadoEm)}</span>
-                  </div>
-                  <p style={{ fontSize: 14, margin: 0, color: 'var(--aue-text)', lineHeight: 1.4 }}>{c.conteudo}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Formulário de Nova Resposta */}
-        <form onSubmit={handleSubmit} style={{ borderTop: '1px solid var(--aue-line)', paddingTop: 14 }}>
-          <label htmlFor="comentarioInput" className="forum-sr" style={{ display: 'none' }}>
-            Escrever resposta
-          </label>
-          <textarea
-            id="comentarioInput"
-            placeholder="Responder para a roda…"
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            disabled={enviando}
-            required
-            rows={2}
-            style={{
-              width: '100%',
-              minHeight: 64,
-              resize: 'vertical',
-              padding: 10,
-              fontSize: 14,
-              background: 'var(--aue-surface-2)',
-              border: '1px solid var(--aue-line)',
-              borderRadius: 8,
-              color: 'var(--aue-text)',
-              marginBottom: 10,
-              boxSizing: 'border-box',
-            }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-            {aoIrParaConversaCompleta ? (
-              <button
-                type="button"
-                className="tab"
-                onClick={aoIrParaConversaCompleta}
-                style={{ fontSize: 12, padding: '6px 12px' }}
-              >
-                ↗ Ver página completa
-              </button>
-            ) : <span />}
-            <button
-              type="submit"
-              className="submit"
-              disabled={enviando || !texto.trim()}
-              style={{ padding: '8px 18px', fontSize: 14 }}
-            >
-              {enviando ? 'Enviando…' : 'Responder'}
-            </button>
-          </div>
-        </form>
-      </div>
+  const escolherImagem = (evento: ChangeEvent<HTMLInputElement>) => { const arquivo = evento.target.files?.[0]; if (!arquivo) return; if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(arquivo.type)) { setErro('Só imagem ou GIF entra aqui.'); return; } setAnexo({ tipo: 'imagem', arquivo }); setErro(null); };
+  const adicionarLink = () => { const video = detectarLinkDeVideo(link.trim()); if (!video) { setErro('Cole um link público do YouTube ou TikTok.'); return; } setAnexo({ tipo: 'videoExterno', url: video.urlOriginal }); setLink(''); setErro(null); };
+  const alternarGravacao = async () => { if (gravando) { gravacao.current?.parar(); return; } if (!criarGravacao) { setErro('Gravação de áudio indisponível agora.'); return; } const nova = criarGravacao(); gravacao.current = nova; const inicio = await nova.iniciar(); if (!inicio.ok) { setErro(inicio.motivo === 'negado' ? 'Libera o microfone para gravar áudio.' : 'Não deu para iniciar a gravação.'); return; } setGravando(true); const fim = await inicio.conclusao; setGravando(false); if (!fim.ok) { if (fim.motivo !== 'cancelado') setErro('A gravação não deu certo.'); return; } setAnexo({ tipo: 'audio', arquivo: fim.audio.dados, duracaoMs: fim.audio.duracaoMs }); setErro(null); };
+  const enviar = async (evento: FormEvent) => { evento.preventDefault(); if (enviando || (!texto.trim() && !anexo)) return; const ok = await aoEnviarComentario({ conteudo: texto.trim(), paiId, anexo }); if (ok) { setTexto(''); setPaiId(null); setAnexo(null); setLink(''); } };
+  return <div className="modal open" role="dialog" aria-modal="true" aria-labelledby="modalComentariosTitulo" onClick={(e) => e.target === e.currentTarget && aoFechar()}>
+    <div className="dialog" style={{ maxWidth: 600, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="dialog-head"><div><span className="od-composer__eyebrow">r/{post.comunidadeSlug}</span><h2 id="modalComentariosTitulo">Resenha na roda</h2></div><button type="button" className="close" onClick={aoFechar} aria-label="Fechar comentários">✕</button></div>
+      <div className="od-comments__original"><strong>{post.autorHandle ? <Link to={`/u/${post.autorHandle}`} onClick={aoFechar} aria-label={`Abrir perfil de ${post.autorNome}`}>{post.autorNome}</Link> : post.autorNome}</strong><p>{post.corpo || post.titulo}</p></div>
+      <div className="od-comments__list" aria-label="Lista de comentários">
+        {carregando ? <p className="od-muted">Ouvindo a roda…</p> : comentarios.length === 0 ? <p className="od-muted">Nenhum comentário ainda. Puxa o papo.</p> : comentarios.map((c) => <article className="od-comment" key={c.id} style={{ marginLeft: `${Math.min(c.nivel ?? 0, 2) * 18}px` }}>
+          <div><strong>{c.autorHandle ? <Link to={`/u/${c.autorHandle}`} onClick={aoFechar} aria-label={`Abrir perfil de ${c.autorNome}`}>{c.autorNome}</Link> : c.autorNome}</strong><span> · {tempo(c.criadoEm)}</span></div>
+          {c.conteudo && <p>{c.conteudo}</p>}
+          {c.anexo?.tipo === 'imagem' && c.anexo.url && <img src={c.anexo.url} alt="Imagem no comentário" className="post-media-image" />}
+          {c.anexo?.tipo === 'audio' && c.anexo.url && <audio controls src={c.anexo.url} />}
+          {c.anexo?.tipo === 'videoExterno' && c.anexo.url && detectarLinkDeVideo(c.anexo.url) && <iframe className="post-video" src={detectarLinkDeVideo(c.anexo.url)!.embedUrl} title="Vídeo no comentário" loading="lazy" allowFullScreen />}
+          <button type="button" className="tab" onClick={() => setPaiId(c.id)}>Responder a {c.autorNome}</button>
+        </article>)}</div>
+      <form onSubmit={enviar} className="od-comments__form"><textarea maxLength={LIMITE} value={texto} onChange={(e) => setTexto(e.target.value)} placeholder={paiId ? 'Responder nesta conversa…' : 'Responder para a roda…'} aria-label="Escrever resposta" rows={2} disabled={enviando} />
+        <div className="od-composer__meta"><span>{texto.length}/{LIMITE}</span>{paiId && <button type="button" className="tab" onClick={() => setPaiId(null)}>Cancelar resposta</button>}</div>
+        <div className="od-composer__tools"><label className="tab">▧ <span>Imagem</span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={escolherImagem} disabled={enviando || gravando || Boolean(anexo)} /></label><button type="button" className="tab" onClick={() => void alternarGravacao()} disabled={enviando || (!gravando && Boolean(anexo))}>{gravando ? '■ Parar' : '◉ Áudio'}</button><input className="od-composer__link" value={link} onChange={(e) => setLink(e.target.value)} placeholder="YouTube ou TikTok" disabled={enviando || gravando || Boolean(anexo)} /><button type="button" className="tab" onClick={adicionarLink} disabled={enviando || gravando || Boolean(anexo) || !link.trim()}>Adicionar</button></div>
+        {anexo && <div className="od-composer__attachment"><span>{anexo.tipo === 'imagem' ? 'Imagem/GIF selecionado' : anexo.tipo === 'audio' ? `Áudio de ${Math.ceil(anexo.duracaoMs / 1000)} s` : 'Vídeo externo selecionado'}</span><button type="button" className="tab" onClick={() => setAnexo(null)} disabled={enviando || gravando}>Remover</button></div>}
+        {erro && <p className="od-composer__error" role="alert">{erro}</p>}<div className="od-composer__actions"><button type="submit" className="submit" disabled={enviando || gravando || (!texto.trim() && !anexo)}>{enviando ? 'Enviando…' : 'Responder'}</button></div>
+      </form>
     </div>
-  );
+  </div>;
 }

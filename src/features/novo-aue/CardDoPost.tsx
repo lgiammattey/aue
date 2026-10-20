@@ -49,7 +49,11 @@ export const CardDoPost = memo(function CardDoPost({
 }: Props) {
   const autorIdentificador = post.autorHandle ? `u/${post.autorHandle}` : post.autorNome;
   const comunidadeIdentificador = `r/${post.comunidadeSlug}`;
-  const video = post.videoUrl ? detectarLinkDeVideo(post.videoUrl) : null;
+  const video = post.videoUrl
+    ? detectarLinkDeVideo(post.videoUrl)
+    : post.anexo?.tipo === 'videoExterno' && post.anexo.url
+      ? detectarLinkDeVideo(post.anexo.url)
+      : null;
 
   return (
     <article className="post" data-post-id={post.id}>
@@ -86,14 +90,19 @@ export const CardDoPost = memo(function CardDoPost({
         </h3>
 
         {post.corpo && <p>{post.corpo}</p>}
-        {video?.tipo === 'youtube' && <iframe className="post-video" src={video.embedUrl} title={`Vídeo: ${post.titulo}`} loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />}
+        {post.anexo?.tipo === 'imagem' && post.anexo.url && (
+          <img className="post-media-image" src={post.anexo.url} alt="Imagem publicada na comunidade" loading="lazy" />
+        )}
+        {video && (
+          <iframe className="post-video" src={video.embedUrl} title={`Vídeo: ${post.titulo}`} loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+        )}
 
-        {(post.temAudio || post.enderecoDoAudio) && (
+        {(post.temAudio || post.enderecoDoAudio || (post.anexo?.tipo === 'audio' && post.anexo.url)) && (
           <PlayerDoArroto
             tocando={audioTocando}
             tempoAtualSegundos={tempoAtualDoAudio}
             duracaoSegundos={duracaoDoAudio}
-            aoAlternar={() => aoTocarAudio(post.enderecoDoAudio)}
+            aoAlternar={() => aoTocarAudio(post.anexo?.tipo === 'audio' ? post.anexo.url : post.enderecoDoAudio)}
           />
         )}
 

@@ -196,6 +196,27 @@
 .profile-form__redes legend span { color: var(--aue-muted); font-weight: 500; }
 .profile-form__erro { margin: 2px 0; font-size: 13px; }
 
+.od-composer__meta { display: flex; justify-content: space-between; gap: 12px; margin: 6px 0 12px; color: var(--aue-muted); font-size: 12px; }
+.od-composer__tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.od-composer__tools label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.od-composer__tools input[type='file'] { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
+.od-composer__link { flex: 1 1 150px; min-height: 36px; margin: 0; }
+.od-composer__attachment { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; border: 1px solid var(--aue-line); border-radius: 8px; color: var(--aue-muted); font-size: 13px; }
+.od-composer__error { margin: 10px 0 0; color: var(--danger, #ff3d3f); font-size: 13px; }
+.od-composer__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.od-composer__eyebrow { color: var(--aue-accent); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.post-media-image { display: block; width: 100%; max-height: 480px; margin-top: 12px; object-fit: cover; border: 1px solid var(--aue-line); border-radius: 8px; }
+.od-comments__original { margin-bottom: 12px; padding: 12px; border: 1px solid var(--aue-line); border-radius: 8px; background: var(--aue-surface-2); }
+.od-comments__original p { margin: 4px 0 0; color: var(--aue-muted); }
+.od-comments__list { flex: 1; min-height: 120px; max-height: 290px; overflow-y: auto; margin-bottom: 14px; }
+.od-comment { margin-bottom: 8px; padding: 10px; border: 1px solid var(--aue-line); border-radius: 8px; background: var(--aue-surface); }
+.od-comment > div { color: var(--aue-muted); font-size: 12px; }
+.od-comment p { margin: 5px 0 9px; line-height: 1.45; }
+.od-comment audio { width: 100%; margin: 8px 0; }
+.od-comments__form { border-top: 1px solid var(--aue-line); padding-top: 12px; }
+.od-comments__form textarea { width: 100%; box-sizing: border-box; }
+.od-muted { padding: 20px 8px; color: var(--aue-muted); text-align: center; }
+
 @media (max-width: 699px) {
   .od-profile__cover { min-height: 128px; padding: 12px; }
   .od-profile__body { padding: 0 16px 18px; }

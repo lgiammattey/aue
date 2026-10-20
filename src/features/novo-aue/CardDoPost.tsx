@@ -93,7 +93,6 @@ export const CardDoPost = memo(function CardDoPost({
   }, []);
 
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
-  const autorIdentificador = post.autorHandle ? `u/${post.autorHandle}` : post.autorNome;
   const comunidadeIdentificador = `r/${post.comunidadeSlug}`;
 
   const video = post.videoUrl
@@ -271,7 +270,7 @@ export const CardDoPost = memo(function CardDoPost({
                 <Link
                   to={`/u/${post.autorHandle}`}
                   className="author-profile-link"
-                  aria-label={`Abrir perfil de ${autorIdentificador}`}
+                  aria-label={`Abrir perfil de ${post.autorNome}`}
                 >
                   {post.autorNome}
                 </Link>
@@ -283,7 +282,7 @@ export const CardDoPost = memo(function CardDoPost({
               <Link
                 to={`/u/${post.autorHandle}`}
                 className="post-meta-handle"
-                aria-label={`Perfil u/${post.autorHandle}`}
+                aria-label={`Abrir perfil de u/${post.autorHandle}`}
               >
                 u/{post.autorHandle}
               </Link>
@@ -361,8 +360,8 @@ export const CardDoPost = memo(function CardDoPost({
             type="button"
             className={`action-btn action-btn--reply ${threadAberta ? 'is-active' : ''}`}
             onClick={aoAbrirComentarios}
-            aria-label={`💬 ${post.respostasTotal} comentários`}
-            title={threadAberta ? 'Recolher respostas' : 'Ver respostas na roda'}
+            aria-label={`${post.respostasTotal} comentários`}
+            title={threadAberta ? 'Recolher respostas' : 'Ver respostas'}
           >
             <svg
               width="18"
@@ -377,9 +376,10 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M21 12a8 8 0 01-11.6 7.1L3 21l1.9-6.4A8 8 0 1121 12z" />
             </svg>
-            <span className="action-btn__count">
-              {post.respostasTotal > 0 ? `${post.respostasTotal} comentários` : '💬 Comentários'}
-            </span>
+            {post.respostasTotal > 0 && (
+              <span className="action-btn__count">{post.respostasTotal}</span>
+            )}
+            <span className="sr-only">comentários</span>
           </button>
 
           {/* Curtir */}
@@ -404,9 +404,8 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.8-8 11-8 11z" />
             </svg>
-            <span className="action-btn__count">
-              {post.votos > 0 ? post.votos : '♡ Curtir'}
-            </span>
+            {post.votos > 0 && <span className="action-btn__count">{post.votos}</span>}
+            <span className="sr-only">Curtir</span>
           </button>
 
           {/* Fogo */}
@@ -418,7 +417,7 @@ export const CardDoPost = memo(function CardDoPost({
             aria-label="🔥"
             title="Pegou fogo"
           >
-            <span aria-hidden="true">🔥</span>
+            <span>🔥</span>
           </button>
 
           {/* Nojo */}
@@ -430,7 +429,7 @@ export const CardDoPost = memo(function CardDoPost({
             aria-label="🤢"
             title="Nojento demais"
           >
-            <span aria-hidden="true">🤢</span>
+            <span>🤢</span>
           </button>
 
           {/* Troféu */}
@@ -442,20 +441,8 @@ export const CardDoPost = memo(function CardDoPost({
             aria-label="🏆"
             title="Respeito / Troféu"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3" />
-            </svg>
             <span aria-hidden="true">🏆</span>
+            <span className="sr-only">Troféu</span>
           </button>
 
           {/* Salvar */}
@@ -470,8 +457,8 @@ export const CardDoPost = memo(function CardDoPost({
               width="18"
               height="18"
               viewBox="0 0 24 24"
-              fill={salvo ? 'var(--aue-accent)' : 'none'}
-              stroke={salvo ? 'var(--aue-accent)' : 'currentColor'}
+              fill={salvo ? 'currentColor' : 'none'}
+              stroke="currentColor"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -479,7 +466,7 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
             </svg>
-            <span className="action-btn__text">{salvo ? '★ Salvo' : '☆ Salvar'}</span>
+            <span className="sr-only">{salvo ? 'Salvo' : 'Salvar'}</span>
           </button>
 
           {/* Compartilhar */}
@@ -503,9 +490,8 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M12 3v13M7 8l5-5 5 5M5 14v6h14v-6" />
             </svg>
-            <span className="action-btn__text">
-              {copiado ? 'Copiado!' : '↗ Compartilhar'}
-            </span>
+            {copiado && <span className="action-btn__feedback">Copiado!</span>}
+            <span className="sr-only">Compartilhar</span>
           </button>
         </div>
 
@@ -520,25 +506,8 @@ export const CardDoPost = memo(function CardDoPost({
                 onClick={aoAbrirComentarios}
                 aria-label="Fechar resenha"
               >
-                ✕
+                ✕ Recolher
               </button>
-            </div>
-
-            {/* Linha vertical conectando ao autor original */}
-            <div className="thread-inline-parent-echo">
-              <strong>
-                {post.autorHandle ? (
-                  <Link
-                    to={`/u/${post.autorHandle}`}
-                    aria-label={`Abrir perfil de ${post.autorNome}`}
-                  >
-                    {post.autorNome}
-                  </Link>
-                ) : (
-                  post.autorNome
-                )}
-              </strong>
-              <p>{post.corpo || post.titulo}</p>
             </div>
 
             {/* Lista de respostas com avatar de cada pessoa */}

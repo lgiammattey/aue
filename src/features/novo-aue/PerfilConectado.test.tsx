@@ -30,7 +30,7 @@ describe('PerfilConectado', () => {
     render(<BrowserRouter><PerfilConectado portaPerfil={perfilPort} portaComunidade={comunidadePort} portaConta={contaPort} aoEntrar={vi.fn()} /></BrowserRouter>);
 
     expect(await screen.findByRole('heading', { name: 'Betão' })).toBeTruthy();
-    expect(screen.getByText('@betao')).toBeTruthy();
+    expect(screen.getByText('@betao · Chegou em 2026')).toBeTruthy();
     expect(await screen.findByText('Foi alto.')).toBeTruthy();
     expect(comunidadePort.listarFeed).toHaveBeenCalledWith({ autorId: 'pessoa-1', limite: 50 });
     expect(perfilPort.obterMeuPerfil).toHaveBeenCalledOnce();

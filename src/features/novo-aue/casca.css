@@ -20,7 +20,7 @@
 }
 
 [data-theme='light'] {
-  --aue-bg: var(--bg, #ebe9de);
+  --aue-bg: var(--bg, #f5f3ea);
   --aue-surface: var(--surface, #ebe9de);
   --aue-surface-2: var(--surface-2, #dedcd0);
   --aue-line: var(--border, #d6d4c6);

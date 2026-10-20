@@ -9,9 +9,10 @@ import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
 import type { AudioCapturado, CapturaDeAudio } from '../../portas/captura';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
-import type { PortaDeConta } from '../../portas/conta';
+import { sugerirHandle, type PortaDeConta, type ResultadoDaConta } from '../../portas/conta';
 import type { AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, PortaDeForum } from '../../portas/forum';
-import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
+import type { DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
+import { AdsterraNativeBanner } from './AdsterraNativeBanner';
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
 import { CardDoPost } from './CardDoPost';
@@ -143,6 +144,10 @@ export function InicioOpenDesign({
   const [arrotosDoPerfil, setArrotosDoPerfil] = useState<readonly ArrotoDoPerfil[]>([]);
   const [estadoArrotosDoPerfil, setEstadoArrotosDoPerfil] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
   const [estadoPerfil, setEstadoPerfil] = useState<'carregando' | 'pronto' | 'pendente' | 'inexistente' | 'erro'>('carregando');
+  const [fichaSocialPendente, setFichaSocialPendente] = useState(false);
+  const [estadoDaFicha, setEstadoDaFicha] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro' | 'salvando'>('ocioso');
+  const [ficha, setFicha] = useState<Required<Pick<DadosDoPerfil, 'apelido' | 'handle'>> & DadosDoPerfil>({ apelido: '', handle: '', bio: '', cidade: '' });
+  const [erroDaFicha, setErroDaFicha] = useState('');
   const [estadoCausosDoPerfil, setEstadoCausosDoPerfil] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
   const [tentativaDoPerfil, setTentativaDoPerfil] = useState(0);
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
@@ -152,11 +157,14 @@ export function InicioOpenDesign({
   const inputDaCapa = useRef<HTMLInputElement | null>(null);
 
   // Auth
-  const [painelAuth, setPainelAuth] = useState<'login' | 'recover' | 'invite'>('login');
+  const [painelAuth, setPainelAuth] = useState<'login' | 'recover' | 'signup'>('login');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginSenha, setLoginSenha] = useState('');
   const [recoverEmail, setRecoverEmail] = useState('');
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [cadastroApelido, setCadastroApelido] = useState('');
+  const [cadastroHandle, setCadastroHandle] = useState('');
+  const [cadastroEmail, setCadastroEmail] = useState('');
+  const [cadastroSenha, setCadastroSenha] = useState('');
   const [authStatus, setAuthStatus] = useState('');
   const [authEnviando, setAuthEnviando] = useState(false);
 
@@ -213,9 +221,30 @@ export function InicioOpenDesign({
       .estado()
       .then(async (e) => {
         if (!ativo) return;
+        if (e.temSessao && !e.anonima && e.perfilSocialPendente) {
+          setEstaAutenticado(false);
+          setFichaSocialPendente(true);
+          setEstadoPerfil('pendente');
+          setEstadoDaFicha('carregando');
+          try {
+            const rascunho = await perfilPort.obterMeuPerfilParaEdicao();
+            if (!ativo) return;
+            setFicha({
+              apelido: rascunho?.apelido ?? '', handle: rascunho?.handle ?? '',
+              bio: rascunho?.bio ?? '', cidade: rascunho?.cidade ?? '',
+              instagram: rascunho?.instagram ?? '', tiktok: rascunho?.tiktok ?? '',
+              youtube: rascunho?.youtube ?? '', twitter: rascunho?.twitter ?? '',
+            });
+            setEstadoDaFicha('pronto');
+          } catch {
+            if (ativo) setEstadoDaFicha('erro');
+          }
+          return;
+        }
         const logado = e.temSessao && !e.anonima && !e.perfilSocialPendente;
         setEstaAutenticado(logado);
         if (!logado) {
+          setFichaSocialPendente(false);
           if (!handleParam) setEstadoPerfil('pendente');
           return;
         }
@@ -707,10 +736,74 @@ export function InicioOpenDesign({
     }
   };
 
-  const submeterConvite = (e: FormEvent) => {
+  const mensagemDaConta = (resultado: ResultadoDaConta): string => {
+    if (resultado.ok) return resultado.aviso === 'confirmeNoEmail'
+      ? 'Confirma seu e-mail para seguir para o perfil.'
+      : '';
+    const mensagens = {
+      emailInvalido: 'Confere esse e-mail e tenta de novo.',
+      senhaFraca: 'A senha precisa ter pelo menos 8 caracteres.',
+      emailEmUso: 'Esse e-mail já está na roda. Tenta entrar.',
+      handleEmUso: 'Esse @ já está em uso. Escolhe outro.',
+      handleInvalido: 'O @ usa 3 a 20 letras minúsculas, números ou _.',
+      credenciaisInvalidas: 'E-mail ou senha incorretos.',
+      semServidor: 'Não deu para falar com o Auê agora. Tenta mais tarde.',
+      falhou: 'Não deu para criar sua conta agora. Tenta de novo.',
+    } as const;
+    return mensagens[resultado.motivo];
+  };
+
+  const submeterCadastro = async (e: FormEvent) => {
     e.preventDefault();
-    if (!inviteEmail.trim()) return;
-    setAuthStatus('Pedido recebido. Você será avisado por e-mail.');
+    if (!cadastroApelido.trim() || !cadastroEmail.trim() || !cadastroSenha) return;
+    setAuthEnviando(true);
+    setAuthStatus('');
+    try {
+      const resultado = await contaPort.cadastrar({
+        apelido: cadastroApelido.trim(),
+        handle: cadastroHandle.trim().replace(/^@/, ''),
+        email: cadastroEmail.trim(),
+        senha: cadastroSenha,
+      });
+      if (!resultado.ok || resultado.aviso === 'confirmeNoEmail') {
+        setAuthStatus(mensagemDaConta(resultado));
+        return;
+      }
+      setEstaAutenticado(true);
+      navigate('/perfil?boas-vindas=1');
+    } catch {
+      setAuthStatus('Não deu para criar sua conta agora. Tenta de novo.');
+    } finally {
+      setAuthEnviando(false);
+    }
+  };
+
+  const concluirFichaSocial = async (e: FormEvent) => {
+    e.preventDefault();
+    setErroDaFicha('');
+    setEstadoDaFicha('salvando');
+    try {
+      const resultado = await perfilPort.concluirMeuPerfilSocial(ficha);
+      if (!resultado.ok) {
+        setErroDaFicha(
+          resultado.motivo === 'handleEmUso' ? 'Esse @ já está em uso. Escolhe outro.'
+            : resultado.motivo === 'invalido' ? resultado.detalhe
+              : resultado.motivo === 'semConta' ? 'Sua sessão acabou. Entre de novo para continuar.'
+                : 'Não deu para salvar sua ficha agora. Tenta de novo.',
+        );
+        setEstadoDaFicha('pronto');
+        return;
+      }
+      setFichaSocialPendente(false);
+      setEstaAutenticado(true);
+      setMeuPerfil(resultado.perfil);
+      setPerfilAtivo(resultado.perfil);
+      setEstadoPerfil('pronto');
+      navigate('/perfil');
+    } catch {
+      setErroDaFicha('Não deu para salvar sua ficha agora. Tenta de novo.');
+      setEstadoDaFicha('pronto');
+    }
   };
 
   const abrirComentarios = async (post: ItemDoFeed) => {
@@ -1206,8 +1299,8 @@ export function InicioOpenDesign({
     .join('') ?? '';
 
   return (
-    <div className="app">
-      <BarraLateral
+    <div className={`app${viewAtual === 'auth' ? ' app--auth' : ''}`}>
+      {viewAtual !== 'auth' && <BarraLateral
         viewAtual={viewAtual}
         comunidadeAtivaSlug={comunidadeSlug}
         comunidades={comunidades}
@@ -1225,16 +1318,16 @@ export function InicioOpenDesign({
           navigate('/');
         }}
         aoEntrar={aoEntrar ?? (() => setViewAtual('auth'))}
-      />
+      />}
 
-      <main>
-        <BarraSuperior
+      <main className={viewAtual === 'auth' ? 'auth-main' : undefined}>
+        {viewAtual !== 'auth' && <BarraSuperior
           busca={busca}
           estaAutenticado={estaAutenticado}
           meuPerfil={meuPerfil}
           aoBuscar={setBusca}
           aoEntrar={aoEntrar ?? (() => setViewAtual('auth'))}
-        />
+        />}
 
         {/* ==================== VIEW: FEED PRINCIPAL ==================== */}
         {viewAtual === 'feed' && (
@@ -1284,20 +1377,29 @@ export function InicioOpenDesign({
             </div>
 
             <div className="feed">
-              {postsFiltrados.map((post) => (
-                <CardDoPost
-                  key={post.id}
-                  post={post}
-                  {...acoesDeReacao(post)}
-                  salvo={Boolean(salvosUsuario[post.id])}
-                  audioTocando={audioTocandoId === post.id}
-                  tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
-                  duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                  aoAlternarSalvar={() => alternarSalvo(post.id)}
-                  aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
-                  aoAbrirComentarios={() => void abrirComentarios(post)}
-                />
-              ))}
+              {postsFiltrados.map((post, idx) => {
+                const exibirBannerAqui =
+                  postsFiltrados.length >= 3
+                    ? idx === 2
+                    : idx === postsFiltrados.length - 1;
+
+                return (
+                  <div key={post.id}>
+                    <CardDoPost
+                      post={post}
+                      {...acoesDeReacao(post)}
+                      salvo={Boolean(salvosUsuario[post.id])}
+                      audioTocando={audioTocandoId === post.id}
+                      tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
+                      duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
+                      aoAlternarSalvar={() => alternarSalvo(post.id)}
+                      aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
+                      aoAbrirComentarios={() => void abrirComentarios(post)}
+                    />
+                    {exibirBannerAqui && <AdsterraNativeBanner />}
+                  </div>
+                );
+              })}
             </div>
 
             <footer style={{ marginTop: 32, borderTop: '1px solid var(--aue-line)', paddingTop: 16 }}>
@@ -1550,11 +1652,37 @@ export function InicioOpenDesign({
             )}
 
             {estadoPerfil === 'pendente' && (
-              <section className="od-profile__state">
-                <h1>Sua ficha ainda não está pronta.</h1>
-                <p>Entre na conta e escolha seu nome e @ antes de participar das rodas.</p>
-                <Link className="join od-profile__button" to="/login">Entrar na conta</Link>
-              </section>
+              fichaSocialPendente ? (
+                <section className="od-profile__state od-profile__onboarding" aria-live="polite">
+                  <p className="od-profile__eyebrow">Primeira chegada</p>
+                  <h1>Termina sua ficha.</h1>
+                  <p>Seu apelido e @ liberam o Bonde. Bio, cidade e redes são opcionais.</p>
+                  {estadoDaFicha === 'carregando' && <p>Buscando o que você já preencheu…</p>}
+                  {estadoDaFicha === 'erro' && <><p>Não deu para carregar sua ficha agora.</p><button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button></>}
+                  {(estadoDaFicha === 'pronto' || estadoDaFicha === 'salvando') && (
+                    <form className="od-profile__form" onSubmit={concluirFichaSocial}>
+                      <label>Apelido<input value={ficha.apelido} onChange={(e) => setFicha({ ...ficha, apelido: e.target.value })} autoComplete="nickname" required /></label>
+                      <label>@<input value={ficha.handle} onChange={(e) => setFicha({ ...ficha, handle: e.target.value.toLowerCase().replace(/^@/, '') })} autoComplete="username" pattern="[a-z0-9_]{3,20}" minLength={3} maxLength={20} required /></label>
+                      <label>Bio <span>opcional</span><textarea value={ficha.bio ?? ''} onChange={(e) => setFicha({ ...ficha, bio: e.target.value })} /></label>
+                      <label>Cidade <span>opcional</span><input value={ficha.cidade ?? ''} onChange={(e) => setFicha({ ...ficha, cidade: e.target.value })} /></label>
+                      <fieldset className="od-profile__redes"><legend>Redes <span>opcional</span></legend>
+                        <label>Instagram<input value={ficha.instagram ?? ''} onChange={(e) => setFicha({ ...ficha, instagram: e.target.value })} /></label>
+                        <label>TikTok<input value={ficha.tiktok ?? ''} onChange={(e) => setFicha({ ...ficha, tiktok: e.target.value })} /></label>
+                        <label>YouTube<input value={ficha.youtube ?? ''} onChange={(e) => setFicha({ ...ficha, youtube: e.target.value })} /></label>
+                        <label>X<input value={ficha.twitter ?? ''} onChange={(e) => setFicha({ ...ficha, twitter: e.target.value })} /></label>
+                      </fieldset>
+                      {erroDaFicha && <p className="od-profile__form-error" role="alert">{erroDaFicha}</p>}
+                      <button type="submit" className="join od-profile__button" disabled={estadoDaFicha === 'salvando'}>{estadoDaFicha === 'salvando' ? 'Salvando…' : 'Entrar no Bonde'}</button>
+                    </form>
+                  )}
+                </section>
+              ) : (
+                <section className="od-profile__state">
+                  <h1>Sua ficha ainda não está pronta.</h1>
+                  <p>Entre na conta e escolha seu nome e @ antes de participar das rodas.</p>
+                  <Link className="join od-profile__button" to="/login">Entrar na conta</Link>
+                </section>
+              )
             )}
 
             {estadoPerfil === 'pronto' && perfilExibido && (
@@ -1676,6 +1804,9 @@ export function InicioOpenDesign({
         {/* ==================== VIEW: AUTH ==================== */}
         {viewAtual === 'auth' && (
           <section className="auth-shell" style={{ maxWidth: 440, margin: '40px auto' }}>
+            <header className="auth-header">
+              <Link to="/" className="auth-brand" aria-label="Auê, página inicial">AUÊ!</Link>
+            </header>
             {painelAuth === 'login' && (
               <form onSubmit={submeterLogin} className="dialog">
                 <h1>Entra na roda</h1>
@@ -1730,11 +1861,11 @@ export function InicioOpenDesign({
                     type="button"
                     className="tab"
                     onClick={() => {
-                      setPainelAuth('invite');
+                      setPainelAuth('signup');
                       setAuthStatus('');
                     }}
                   >
-                    Pedir convite
+                    Criar conta
                   </button>
                 </div>
               </form>
@@ -1778,27 +1909,73 @@ export function InicioOpenDesign({
               </form>
             )}
 
-            {painelAuth === 'invite' && (
-              <form onSubmit={submeterConvite} className="dialog">
-                <h1>Pedir convite</h1>
+            {painelAuth === 'signup' && (
+              <form onSubmit={submeterCadastro} className="dialog auth-signup">
+                <h1>Cria sua conta</h1>
                 <p style={{ color: 'var(--aue-muted)', marginBottom: 16 }}>
-                  Quer entrar no Auê? Deixe seu e-mail para avisarmos.
+                  Escolhe como a roda vai te chamar. Depois você completa seu perfil.
                 </p>
                 <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
-                  Seu e-mail
+                  Apelido
                   <input
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
+                    type="text"
+                    value={cadastroApelido}
+                    onChange={(e) => {
+                      const apelido = e.target.value;
+                      setCadastroApelido(apelido);
+                      if (!cadastroHandle || cadastroHandle === sugerirHandle(cadastroApelido)) {
+                        setCadastroHandle(sugerirHandle(apelido));
+                      }
+                    }}
+                    autoComplete="nickname"
                     required
-                    aria-label="Seu e-mail"
+                    aria-label="Apelido"
                   />
                 </label>
-                <button type="submit" className="submit" style={{ width: '100%', float: 'none' }}>
-                  Pedir convite
+                <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
+                  @
+                  <input
+                    type="text"
+                    value={cadastroHandle}
+                    onChange={(e) => setCadastroHandle(e.target.value.toLowerCase().replace(/^@/, ''))}
+                    autoComplete="username"
+                    required
+                    minLength={3}
+                    maxLength={20}
+                    pattern="[a-z0-9_]{3,20}"
+                    aria-label="@"
+                  />
+                  <small className="auth-hint">3 a 20 caracteres: letras minúsculas, números ou _.</small>
+                </label>
+                <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
+                  E-mail
+                  <input
+                    type="email"
+                    value={cadastroEmail}
+                    onChange={(e) => setCadastroEmail(e.target.value)}
+                    autoComplete="email"
+                    required
+                    aria-label="E-mail para cadastro"
+                  />
+                </label>
+                <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
+                  Senha
+                  <input
+                    type="password"
+                    value={cadastroSenha}
+                    onChange={(e) => setCadastroSenha(e.target.value)}
+                    autoComplete="new-password"
+                    minLength={8}
+                    required
+                    aria-label="Senha para cadastro"
+                  />
+                  <small className="auth-hint">Pelo menos 8 caracteres.</small>
+                </label>
+                <button type="submit" className="submit" style={{ width: '100%', float: 'none' }} disabled={authEnviando}>
+                  {authEnviando ? 'Criando…' : 'Criar conta'}
                 </button>
                 {authStatus && (
-                  <p style={{ color: 'var(--aue-accent)', fontSize: 13, marginTop: 10 }}>
+                  <p className="auth-status" role="status">
                     {authStatus}
                   </p>
                 )}
@@ -1811,7 +1988,7 @@ export function InicioOpenDesign({
                     setAuthStatus('');
                   }}
                 >
-                  Voltar para entrar
+                  Já tenho conta
                 </button>
               </form>
             )}
@@ -1819,7 +1996,7 @@ export function InicioOpenDesign({
         )}
       </main>
 
-      <PainelDireito
+      {viewAtual !== 'auth' && <PainelDireito
         comunidades={comunidades}
         comunidadesEntradas={comunidadesEntradas}
         viewAtual={viewAtual}
@@ -1831,7 +2008,7 @@ export function InicioOpenDesign({
           setViewAtual('comunidade');
         }}
         aoAlternarEntrar={alternarEntrarComunidade}
-      />
+      />}
 
       {/* ==================== MODAIS ==================== */}
       <ModalCompositor

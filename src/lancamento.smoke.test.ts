@@ -42,6 +42,7 @@ describe('corte de lançamento', () => {
         telefone de verdade.
       */
       disputaNaArena: false,
+      anunciosAdsterra: false,
       /*
         A Arena não é feature de fachada como as de cima — ela escolhe qual jogo
         a raiz serve, e a produção roda com ela LIGADA. Mas o padrão é o mesmo e

@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { ADSTERRA_CONFIG, anunciosAdsterraHabilitados } from '../../plataforma/web/adsterra';
+import { AdsterraNativeBanner } from './AdsterraNativeBanner';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarForumWeb } from '../../plataforma/web/forum';
@@ -256,36 +258,46 @@ export function VersaoMobileOpenDesign({
                             <p>Sem causos por aqui ainda.</p>
                           </div>
                         ) : (
-                          causosFiltrados.map((c) => (
-                              <article key={c.id} className="post" style={{ borderBottom: '1px solid var(--line)', padding: '14px 0' }}>
-                                <div className="post-body">
-                                  <div className="post-meta">
-                                    <span className="badge">r/{c.comunidadeSlug || 'arena'}</span>
-                                    <span>{c.autorNome}</span>
+                          causosFiltrados.map((c, idx) => {
+                            const exibirBannerAqui =
+                              causosFiltrados.length >= 3
+                                ? idx === 2
+                                : idx === causosFiltrados.length - 1;
+
+                            return (
+                              <div key={c.id}>
+                                <article className="post" style={{ borderBottom: '1px solid var(--line)', padding: '14px 0' }}>
+                                  <div className="post-body">
+                                    <div className="post-meta">
+                                      <span className="badge">r/{c.comunidadeSlug || 'arena'}</span>
+                                      <span>{c.autorNome}</span>
+                                    </div>
+                                    <h3 style={{ margin: '6px 0', fontSize: '16px' }}>{c.conteudo}</h3>
+                                    <div className="post-actions" style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+                                      <button
+                                        type="button"
+                                        className="text-button"
+                                        onClick={() => void interagirNoCauso(c.id, 'curtir')}
+                                      >
+                                        ♡ Curtir
+                                      </button>
+                                      <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'fogo')}>🔥</button>
+                                      <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'nojo')}>🤢</button>
+                                      <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'trofeu')}>🏆</button>
+                                      <button
+                                        type="button"
+                                        className="text-button"
+                                        onClick={() => exibirToast('Link do causo copiado.')}
+                                      >
+                                        ↗ compartilhar
+                                      </button>
+                                    </div>
                                   </div>
-                                  <h3 style={{ margin: '6px 0', fontSize: '16px' }}>{c.conteudo}</h3>
-                                  <div className="post-actions" style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
-                                    <button
-                                      type="button"
-                                      className="text-button"
-                                      onClick={() => void interagirNoCauso(c.id, 'curtir')}
-                                    >
-                                      ♡ Curtir
-                                    </button>
-                                    <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'fogo')}>🔥</button>
-                                    <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'nojo')}>🤢</button>
-                                    <button type="button" className="text-button" onClick={() => void interagirNoCauso(c.id, 'trofeu')}>🏆</button>
-                                    <button
-                                      type="button"
-                                      className="text-button"
-                                      onClick={() => exibirToast('Link do causo copiado.')}
-                                    >
-                                      ↗ compartilhar
-                                    </button>
-                                  </div>
-                                </div>
-                              </article>
-                          ))
+                                </article>
+                                {exibirBannerAqui && <AdsterraNativeBanner />}
+                              </div>
+                            );
+                          })
                         )}
                       </div>
                     </section>
@@ -322,6 +334,48 @@ export function VersaoMobileOpenDesign({
                           );
                         })}
                       </div>
+
+                      {anunciosAdsterraHabilitados && <div
+                        style={{
+                          marginTop: 20,
+                          padding: 14,
+                          borderRadius: 12,
+                          border: '1px solid var(--line)',
+                          background: 'var(--card-bg, rgba(255, 255, 255, 0.02))',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 11,
+                            textTransform: 'uppercase',
+                            color: 'var(--aue-accent, #c6ff00)',
+                            fontWeight: 700,
+                            letterSpacing: '0.05em',
+                          }}
+                        >
+                          Parceiro Oficial
+                        </span>
+                        <h3 style={{ margin: '6px 0 4px', fontSize: 15 }}>Combustível pro Bonde 🍺</h3>
+                        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 10px' }}>
+                          Ofertas parceiras pra manter a pressão em dia e apoiar o Auê!
+                        </p>
+                        <a
+                          href={ADSTERRA_CONFIG.smartlinkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="join-button"
+                          style={{
+                            display: 'block',
+                            textDecoration: 'none',
+                            textAlign: 'center',
+                            width: '100%',
+                            boxSizing: 'border-box',
+                            padding: '10px 0',
+                          }}
+                        >
+                          Conferir ofertas parceiras ↗
+                        </a>
+                      </div>}
                     </section>
                   )}
 

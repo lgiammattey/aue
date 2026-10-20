@@ -1,3 +1,9 @@
 # Mínimo para o Supabase CLI (link + db push) funcionar no CI e na sua máquina.
 # O banco do Auê é o projeto remoto; não se roda stack local daqui.
 project_id = "aue"
+
+[functions.painel-administrativo]
+enabled = true
+verify_jwt = true
+import_map = "./functions/painel-administrativo/deno.json"
+entrypoint = "./functions/painel-administrativo/index.ts"

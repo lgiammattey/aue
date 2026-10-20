@@ -315,6 +315,34 @@ export interface OpcoesDoExplorar {
   readonly cursor?: CursorDoForum | null;
 }
 
+export type TipoDeBusca = 'pessoas' | 'comunidades' | 'topicos';
+
+export interface ResultadoDeBusca {
+  readonly tipo: 'pessoa' | 'comunidade' | 'topico';
+  readonly id: string;
+  readonly comunidadeSlug: string | null;
+  readonly comunidadeNome: string | null;
+  /** Nome da comunidade ou título do tópico; `null` para pessoa. */
+  readonly titulo: string | null;
+  readonly handle: string | null;
+  readonly apelido: string | null;
+  readonly avatarUrl: string | null;
+  readonly criadoEm: string | null;
+}
+
+export interface OpcoesDeBusca {
+  readonly termo: string;
+  readonly tipo: TipoDeBusca;
+  readonly limite?: number;
+  readonly deslocamento?: number;
+}
+
+/** `proximo` é o deslocamento da página seguinte, ou `null` quando acabou. */
+export interface PaginaDeBusca {
+  readonly itens: readonly ResultadoDeBusca[];
+  readonly proximo: number | null;
+}
+
 export interface OpcoesDePaginaCronologica {
   /** Respostas do tópico: o servidor limita a 200. Listas do autor: 100. */
   readonly limite?: number;
@@ -416,6 +444,9 @@ export interface PortaDeForum {
   listarPreviaRespostasDosTopicos?(
     topicoIds: readonly string[],
   ): Promise<ResultadoDaLeitura<readonly PreviaDeRespostaDoTopico[]>>;
+
+  /** Busca no servidor por pessoas (nome/@), comunidades e tópicos. Termo com menos de 2 letras volta vazio. */
+  buscarNoAue?(opcoes: OpcoesDeBusca): Promise<ResultadoDaLeitura<PaginaDeBusca>>;
 
   /** Tópicos de todas as comunidades, cada um com a sua. */
   explorarTopicos(

@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { nomeDoAutor } from '../../nucleo/forum/apresentacao';
 import type { CursorDoForum } from '../../portas/forum';
+import { BuscaDoForum, TAMANHO_MINIMO_DA_BUSCA, tipoDaBuscaNaUrl } from './BuscaDoForum';
 import { AlternarOrdem, BotaoComoLink, EstadoVazio, type DadosDaLinhaDeTopico } from './componentes';
 import { useDependenciasDoForum } from './contexto';
 import { useListaPaginada, useOnline } from './hooks';
@@ -19,6 +21,10 @@ export function TelaExplorar() {
   const [params, setParams] = useSearchParams();
   const ordem = ordemDaUrl(params.get('ordem'));
   useTituloDoDocumento('Explorar');
+  const termo = (params.get('q') ?? '').trim();
+  const tipoDaBusca = tipoDaBuscaNaUrl(params.get('tipo'));
+  const buscando = termo.length >= TAMANHO_MINIMO_DA_BUSCA && Boolean(forum.buscarNoAue);
+  const [rascunho, setRascunho] = useState(params.get('q') ?? '');
 
   const lista = useListaPaginada<DadosDaLinhaDeTopico, CursorDoForum>({
     chave: `explorar|${ordem}`,
@@ -50,9 +56,40 @@ export function TelaExplorar() {
     },
   });
 
+  const buscar = (evento: React.FormEvent) => {
+    evento.preventDefault();
+    const novo = rascunho.trim();
+    setParams(novo ? { q: novo } : {}, { replace: false });
+  };
+
   return (
     <>
       <TopoDaTela titulo="Explorar" />
+      {forum.buscarNoAue && (
+        <form role="search" onSubmit={buscar} className="forum-busca">
+          <label className="sr-only" htmlFor="busca-do-explorar">Buscar pessoas, rodas e publicações</label>
+          <input
+            id="busca-do-explorar"
+            type="search"
+            value={rascunho}
+            maxLength={60}
+            placeholder="Buscar pessoas, rodas e publicações"
+            onChange={(e) => setRascunho(e.target.value)}
+          />
+          <button type="submit" className="forum-botao forum-botao--contorno">Buscar</button>
+          {termo !== '' && termo.length < TAMANHO_MINIMO_DA_BUSCA && (
+            <p role="status" className="forum-busca__nota">Digite pelo menos {TAMANHO_MINIMO_DA_BUSCA} letras.</p>
+          )}
+        </form>
+      )}
+      {buscando ? (
+        <BuscaDoForum
+          termo={termo}
+          tipo={tipoDaBusca}
+          aoMudarTipo={(tipo) => setParams({ q: termo, tipo }, { replace: true })}
+        />
+      ) : (
+        <>
       <p className="forum-apoio">
         Procurando uma turma? <Link to="/comunidades">Ver comunidades</Link>
       </p>
@@ -74,6 +111,8 @@ export function TelaExplorar() {
           />
         }
       />
+        </>
+      )}
     </>
   );
 }

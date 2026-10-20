@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { PerfilPublico } from '../../portas/perfil';
 
 interface Props {
@@ -17,6 +17,7 @@ export const BarraSuperior = memo(function BarraSuperior({
   aoBuscar,
   aoEntrar,
 }: Props) {
+  const navigate = useNavigate();
   const nomeExibicao = meuPerfil?.apelido ?? meuPerfil?.handle ?? 'Você';
   const iniciais = nomeExibicao.slice(0, 2).toUpperCase();
 
@@ -26,14 +27,26 @@ export const BarraSuperior = memo(function BarraSuperior({
         AUÊ!
       </Link>
 
-      <input
-        type="search"
-        className="search"
-        placeholder="Buscar posts, arrotos ou comunidades…"
-        value={busca}
-        onChange={(e) => aoBuscar(e.target.value)}
-        aria-label="Campo de busca"
-      />
+      <form
+        role="search"
+        style={{ display: 'contents' }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          const termo = busca.trim();
+          navigate(termo.length >= 2 ? `/explorar?q=${encodeURIComponent(termo)}` : '/explorar');
+        }}
+      >
+        <input
+          type="search"
+          className="search"
+          placeholder="Buscar pessoas, rodas e publicações…"
+          value={busca}
+          maxLength={60}
+          onChange={(e) => aoBuscar(e.target.value)}
+          aria-label="Campo de busca"
+        />
+        <button type="submit" className="icon-btn">Buscar</button>
+      </form>
 
       <div className="top-actions">
         {estaAutenticado ? (

@@ -263,6 +263,15 @@
 .od-profile__activity-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .od-profile__activity h2 { margin: 0; font-family: var(--font-display, 'Anton', sans-serif); font-size: 24px; }
 .od-profile__activity-head span { color: var(--aue-muted); font: 700 12px ui-monospace, 'SF Mono', monospace; }
+.od-profile__record-cta { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 0 20px; border-bottom: 1px solid var(--aue-line); text-align: center; }
+.od-profile__record-button { width: 72px; height: 72px; flex: 0 0 72px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--aue-accent, var(--accent, #c6ff00)); color: var(--aue-accent-on, var(--accent-on, #0a0a08)); cursor: pointer; transition: background-color .15s ease, transform .1s ease; }
+.od-profile__record-button:hover { background: var(--accent-strong, #a8d900); }
+.od-profile__record-button:active { transform: scale(.96); }
+.od-profile__record-button:focus-visible { outline: 2px solid var(--aue-text); outline-offset: 3px; }
+.od-profile__record-button svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.od-profile__record-button svg path:first-child { fill: currentColor; stroke: none; }
+.od-profile__record-eyebrow { margin: 0 0 5px; color: var(--aue-muted); font: 700 12px ui-monospace, 'SF Mono', monospace; letter-spacing: .08em; }
+.od-profile__record-cta h3 { margin: 0; font: 700 18px/1.2 var(--font-body, 'Archivo', sans-serif); }
 .od-profile__post { display: block; padding: 16px 0; border-top: 1px solid var(--aue-line); color: inherit; text-decoration: none; }
 .od-profile__post:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
 .od-profile__post > span { color: var(--aue-muted); font-size: 12px; font-weight: 800; }
@@ -1127,6 +1136,9 @@
   .od-profile__actions { max-width: 172px; }
   .od-profile__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 10px; }
   .od-profile__activity { padding: 16px; }
+  .od-profile__record-cta { gap: 8px; padding: 16px 0 18px; }
+  .od-profile__record-button { width: 64px; height: 64px; flex-basis: 64px; }
+  .od-profile__record-button svg { width: 24px; height: 24px; }
   .profile-form__redes { grid-template-columns: 1fr; }
 
   .modal-comentarios-overlay {

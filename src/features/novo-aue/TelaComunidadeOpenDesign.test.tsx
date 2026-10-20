@@ -26,6 +26,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
           topicosTotal: 120,
           ultimaAtividadeEm: '2026-10-19T10:00:00Z',
           souMembro: false,
+          possoGerirMidia: true,
         },
         {
           id: 'comm-2',
@@ -52,6 +53,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
         topicosTotal: 120,
         ultimaAtividadeEm: '2026-10-19T10:00:00Z',
         souMembro: false,
+        possoGerirMidia: true,
       },
     })),
     listarTopicos: vi.fn(async (slug: string) => ({

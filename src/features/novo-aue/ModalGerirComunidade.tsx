@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
+import type { TipoDeMidiaDaComunidade } from '../../portas/forum';
 
 interface Props {
   readonly aberto: boolean;
@@ -6,13 +7,15 @@ interface Props {
   readonly moderadoresIniciais: readonly (readonly [string, string])[];
   readonly fotoUrlInicial?: string | null;
   readonly capaUrlInicial?: string | null;
+  readonly podeGerirMidia: boolean;
+  readonly midiaEnviando?: TipoDeMidiaDaComunidade | null;
   readonly aoFechar: () => void;
   readonly aoSalvar: (dados: {
     regras: string[];
     moderadores: (readonly [string, string])[];
-    fotoUrl?: string | null;
-    capaUrl?: string | null;
   }) => void;
+  readonly aoEscolherMidia: (tipo: TipoDeMidiaDaComunidade, arquivo?: File) => void;
+  readonly aoRemoverMidia: (tipo: TipoDeMidiaDaComunidade) => void;
 }
 
 export function ModalGerirComunidade({
@@ -21,32 +24,21 @@ export function ModalGerirComunidade({
   moderadoresIniciais,
   fotoUrlInicial,
   capaUrlInicial,
+  podeGerirMidia,
+  midiaEnviando,
   aoFechar,
   aoSalvar,
+  aoEscolherMidia,
+  aoRemoverMidia,
 }: Props) {
   const [regrasTexto, setRegrasTexto] = useState(() => regrasIniciais.join('\n'));
   const [modsTexto, setModsTexto] = useState(() =>
     moderadoresIniciais.map(([handle, papel]) => `${handle}: ${papel}`).join('\n'),
   );
-  const [fotoUrl, setFotoUrl] = useState<string | null>(() => fotoUrlInicial ?? null);
-  const [capaUrl, setCapaUrl] = useState<string | null>(() => capaUrlInicial ?? null);
-
   const fileInputFoto = useRef<HTMLInputElement | null>(null);
   const fileInputCapa = useRef<HTMLInputElement | null>(null);
 
   if (!aberto) return null;
-
-  const handleFotoUpload = (file?: File) => {
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setFotoUrl(url);
-  };
-
-  const handleCapaUpload = (file?: File) => {
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setCapaUrl(url);
-  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -67,8 +59,6 @@ export function ModalGerirComunidade({
     aoSalvar({
       regras: novasRegras,
       moderadores: novosMods,
-      fotoUrl,
-      capaUrl,
     });
     aoFechar();
   };
@@ -100,8 +90,8 @@ export function ModalGerirComunidade({
                 height: 100,
                 borderRadius: 8,
                 border: '1px dashed var(--aue-line)',
-                background: capaUrl
-                  ? `url("${capaUrl}") center/cover no-repeat`
+                background: capaUrlInicial
+                  ? `url("${capaUrlInicial}") center/cover no-repeat`
                   : 'var(--aue-surface-2)',
                 display: 'flex',
                 alignItems: 'center',
@@ -115,15 +105,17 @@ export function ModalGerirComunidade({
                 className="tab"
                 style={{ fontSize: 12, padding: '6px 12px', background: 'rgba(0,0,0,0.6)' }}
                 onClick={() => fileInputCapa.current?.click()}
+                disabled={!podeGerirMidia || midiaEnviando === 'capa'}
               >
-                {capaUrl ? 'Trocar capa' : '+ Escolher thumbnail/capa'}
+                {midiaEnviando === 'capa' ? 'Salvando…' : capaUrlInicial ? 'Trocar capa' : '+ Escolher thumbnail/capa'}
               </button>
-              {capaUrl && (
+              {capaUrlInicial && (
                 <button
                   type="button"
                   className="tab"
                   style={{ fontSize: 12, padding: '6px 12px', background: 'rgba(0,0,0,0.6)', marginLeft: 8 }}
-                  onClick={() => setCapaUrl(null)}
+                  onClick={() => aoRemoverMidia('capa')}
+                  disabled={!podeGerirMidia || midiaEnviando === 'capa'}
                 >
                   Remover
                 </button>
@@ -132,10 +124,10 @@ export function ModalGerirComunidade({
             <input
               ref={fileInputCapa}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               aria-label="Capa da comunidade"
               style={{ display: 'none' }}
-              onChange={(e) => handleCapaUpload(e.target.files?.[0])}
+              onChange={(e) => aoEscolherMidia('capa', e.target.files?.[0])}
             />
           </div>
 
@@ -147,8 +139,8 @@ export function ModalGerirComunidade({
                 height: 60,
                 borderRadius: '50%',
                 border: '1px solid var(--aue-line)',
-                background: fotoUrl
-                  ? `url("${fotoUrl}") center/cover no-repeat`
+                background: fotoUrlInicial
+                  ? `url("${fotoUrlInicial}") center/cover no-repeat`
                   : 'var(--aue-surface-2)',
                 display: 'flex',
                 alignItems: 'center',
@@ -158,7 +150,7 @@ export function ModalGerirComunidade({
                 flexShrink: 0,
               }}
             >
-              {!fotoUrl && '📷'}
+              {!fotoUrlInicial && '📷'}
             </div>
             <div style={{ flex: 1 }}>
               <span style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 4 }}>
@@ -170,15 +162,17 @@ export function ModalGerirComunidade({
                   className="tab"
                   style={{ fontSize: 12, padding: '4px 10px' }}
                   onClick={() => fileInputFoto.current?.click()}
+                  disabled={!podeGerirMidia || midiaEnviando === 'avatar'}
                 >
-                  {fotoUrl ? 'Trocar foto' : '+ Escolher foto'}
+                  {midiaEnviando === 'avatar' ? 'Salvando…' : fotoUrlInicial ? 'Trocar foto' : '+ Escolher foto'}
                 </button>
-                {fotoUrl && (
+                {fotoUrlInicial && (
                   <button
                     type="button"
                     className="tab"
                     style={{ fontSize: 12, padding: '4px 10px' }}
-                    onClick={() => setFotoUrl(null)}
+                  onClick={() => aoRemoverMidia('avatar')}
+                  disabled={!podeGerirMidia || midiaEnviando === 'avatar'}
                   >
                     Remover
                   </button>
@@ -188,10 +182,10 @@ export function ModalGerirComunidade({
             <input
               ref={fileInputFoto}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               aria-label="Foto de perfil da comunidade"
               style={{ display: 'none' }}
-              onChange={(e) => handleFotoUpload(e.target.files?.[0])}
+              onChange={(e) => aoEscolherMidia('avatar', e.target.files?.[0])}
             />
           </div>
 

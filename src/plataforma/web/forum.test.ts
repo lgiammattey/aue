@@ -3,14 +3,21 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const rpc = vi.fn();
 const getSession = vi.fn();
 const upload = vi.fn();
+const remove = vi.fn();
 const createSignedUrl = vi.fn();
+const getPublicUrl = vi.fn();
 
 vi.mock('../../db/supabase', () => ({
   configuracaoAusente: false,
   supabase: {
     rpc: (...a: unknown[]) => rpc(...a),
     auth: { getSession: (...a: unknown[]) => getSession(...a) },
-    storage: { from: () => ({ upload: (...a: unknown[]) => upload(...a), createSignedUrl: (...a: unknown[]) => createSignedUrl(...a) }) },
+    storage: { from: () => ({
+      upload: (...a: unknown[]) => upload(...a),
+      remove: (...a: unknown[]) => remove(...a),
+      createSignedUrl: (...a: unknown[]) => createSignedUrl(...a),
+      getPublicUrl: (...a: unknown[]) => getPublicUrl(...a),
+    }) },
   },
 }));
 
@@ -25,6 +32,24 @@ const ID_C = '33333333-3333-4333-8333-333333333333';
 
 const COM = { comunidade_id: 'c1', comunidade_slug: 'bonde-geral', comunidade_nome: 'Bonde Geral' };
 const AUTOR = { autor_id: 'u1', apelido: 'Zeca', handle: 'zeca', url_do_avatar: null };
+
+const linhaDaComunidade = (o: Record<string, unknown> = {}) => ({
+  id: ID_A,
+  slug: 'bonde-geral',
+  nome: 'Bonde Geral',
+  descricao: null,
+  icone: null,
+  caminho_do_avatar: null,
+  revisao_do_avatar: 0,
+  caminho_da_capa: null,
+  revisao_da_capa: 0,
+  membros_total: 0,
+  topicos_total: 0,
+  ultima_atividade_em: null,
+  sou_membro: false,
+  posso_gerir_midia: true,
+  ...o,
+});
 
 const linhaDeTopico = (o: Record<string, unknown> = {}) => ({
   id: ID_A,
@@ -88,7 +113,10 @@ beforeEach(() => {
   rpc.mockReset();
   getSession.mockReset();
   upload.mockReset();
+  remove.mockReset();
   createSignedUrl.mockReset();
+  getPublicUrl.mockReset();
+  getPublicUrl.mockReturnValue({ data: { publicUrl: 'https://cdn.aue.test/midia.jpg' } });
   vi.spyOn(console, 'error').mockImplementation(() => {});
   comoMembro();
 });
@@ -381,7 +409,8 @@ describe('leituras: o que chega à tela', () => {
       data: [
         {
           id: ID_A, slug: 'bonde-geral', nome: 'Bonde Geral', descricao: null, icone: null,
-          membros_total: 0, topicos_total: 0, ultima_atividade_em: null, sou_membro: false,
+          caminho_do_avatar: null, revisao_do_avatar: 0, caminho_da_capa: null, revisao_da_capa: 0,
+          membros_total: 0, topicos_total: 0, ultima_atividade_em: null, sou_membro: false, posso_gerir_midia: false,
         },
       ],
       error: null,
@@ -392,7 +421,8 @@ describe('leituras: o que chega à tela', () => {
       valor: [
         {
           id: ID_A, slug: 'bonde-geral', nome: 'Bonde Geral', descricao: '', icone: null,
-          membrosTotal: 0, topicosTotal: 0, ultimaAtividadeEm: null, souMembro: false,
+          avatarUrl: null, capaUrl: null,
+          membrosTotal: 0, topicosTotal: 0, ultimaAtividadeEm: null, souMembro: false, possoGerirMidia: false,
         },
       ],
     });
@@ -685,5 +715,79 @@ describe('escritas: sucesso e o que vai ao servidor', () => {
     expect(await f.denunciarTopico(ID_A, 'golpe')).toEqual({ ok: true, valor: true });
     expect(await f.denunciarResposta(ID_A, 'golpe')).toEqual({ ok: true, valor: true });
     expect(rpc).toHaveBeenLastCalledWith('denunciar_resposta', { p_resposta_id: ID_A, p_motivo: 'golpe' });
+  });
+});
+
+describe('mídia persistente da comunidade', () => {
+  it('envia apenas JPEG para o caminho determinístico e publica pela RPC', async () => {
+    const arquivo = new Blob(['jpeg final'], { type: 'image/jpeg' });
+    rpc.mockResolvedValueOnce({ data: [linhaDaComunidade()], error: null });
+    upload.mockResolvedValueOnce({ error: null });
+    rpc.mockResolvedValueOnce({
+      data: [linhaDaComunidade({ caminho_do_avatar: `${ID_A}/avatar/${ID_B}.jpg`, revisao_do_avatar: 4 })],
+      error: null,
+    });
+
+    const r = await criarForumWeb().definirMidiaDaComunidade?.({
+      comunidadeSlug: 'bonde-geral', tipo: 'avatar', arquivo,
+    });
+
+    expect(upload).toHaveBeenCalledWith(
+      expect.stringMatching(new RegExp(`^${ID_A}/avatar/[0-9a-f-]+[.]jpg$`)),
+      arquivo,
+      { contentType: 'image/jpeg', upsert: false },
+    );
+    expect(rpc).toHaveBeenLastCalledWith('definir_midia_da_comunidade', {
+      p_slug: 'bonde-geral', p_tipo: 'avatar', p_caminho: expect.stringMatching(new RegExp(`^${ID_A}/avatar/[0-9a-f-]+[.]jpg$`)),
+    });
+    expect(r).toEqual(expect.objectContaining({
+      ok: true,
+      valor: expect.objectContaining({ avatarUrl: 'https://cdn.aue.test/midia.jpg?v=4', capaUrl: null }),
+    }));
+  });
+
+  it('não sobe arquivo que não é o JPEG final ou passa do limite da arte', async () => {
+    const png = new Blob(['png'], { type: 'image/png' });
+    const r = await criarForumWeb().definirMidiaDaComunidade?.({
+      comunidadeSlug: 'bonde-geral', tipo: 'avatar', arquivo: png,
+    });
+    expect(r).toEqual({ ok: false, motivo: 'falhou' });
+    expect(rpc).not.toHaveBeenCalled();
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it('a remoção passa só pela RPC segura e devolve a revisão atualizada', async () => {
+    rpc.mockResolvedValueOnce({
+      data: [linhaDaComunidade({ caminho_da_capa: null, revisao_da_capa: 7 })],
+      error: null,
+    });
+    const r = await criarForumWeb().removerMidiaDaComunidade?.('bonde-geral', 'capa');
+    expect(rpc).toHaveBeenCalledWith('remover_midia_da_comunidade', { p_slug: 'bonde-geral', p_tipo: 'capa' });
+    expect(r).toEqual(expect.objectContaining({ ok: true, valor: expect.objectContaining({ capaUrl: null }) }));
+  });
+
+  it('limpa só o rascunho versionado quando a RPC recusa antes de promover a imagem', async () => {
+    const arquivo = new Blob(['jpeg final'], { type: 'image/jpeg' });
+    rpc.mockResolvedValueOnce({ data: [linhaDaComunidade()], error: null });
+    upload.mockResolvedValueOnce({ error: null });
+    rpc.mockResolvedValueOnce(erroDoServidor('22023', 'midia_invalida'));
+    remove.mockResolvedValueOnce({ error: null });
+
+    const r = await criarForumWeb().definirMidiaDaComunidade?.({ comunidadeSlug: 'bonde-geral', tipo: 'capa', arquivo });
+
+    expect(r).toEqual({ ok: false, motivo: 'falhou' });
+    expect(remove).toHaveBeenCalledWith([expect.stringMatching(new RegExp(`^${ID_A}/capa/[0-9a-f-]+[.]jpg$`))]);
+  });
+
+  it('não remove rascunho quando a confirmação ficou ambígua', async () => {
+    const arquivo = new Blob(['jpeg final'], { type: 'image/jpeg' });
+    rpc.mockResolvedValueOnce({ data: [linhaDaComunidade()], error: null });
+    upload.mockResolvedValueOnce({ error: null });
+    rpc.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+    const r = await criarForumWeb().definirMidiaDaComunidade?.({ comunidadeSlug: 'bonde-geral', tipo: 'capa', arquivo });
+
+    expect(r).toEqual({ ok: false, motivo: 'semConfirmacao' });
+    expect(remove).not.toHaveBeenCalled();
   });
 });

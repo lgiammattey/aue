@@ -23,6 +23,7 @@ import type {
   RespostaEditada,
   StatusDaResposta,
   StatusDoTopico,
+  TipoDeMidiaDaComunidade,
   TopicoCriado,
   TopicoDoAutor,
   TopicoDoExplorar,
@@ -49,6 +50,9 @@ const LIMITE_PADRAO_DE_RESPOSTAS = 50;
 const LIMITE_MAXIMO_DE_RESPOSTAS = 200;
 const LIMITE_PADRAO_DO_AUTOR = 30;
 const LIMITE_MAXIMO_DO_AUTOR = 100;
+const LIMITE_AVATAR_DA_COMUNIDADE_BYTES = 2 * 1024 * 1024;
+const LIMITE_CAPA_DA_COMUNIDADE_BYTES = 3 * 1024 * 1024;
+const BUCKET_DE_MIDIAS_DA_COMUNIDADE = 'midias_de_comunidades';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -99,6 +103,8 @@ const HINTS_DE_ESCRITA: Readonly<Record<string, MotivoDeEscrita>> = {
   audio_sem_consentimento: 'audioSemConsentimento',
   nao_e_autor: 'naoEAutor',
   nada_para_editar: 'nadaParaEditar',
+  nao_pode_gerir_midia: 'naoEAutor',
+  midia_invalida: 'falhou',
 };
 
 // `Object.hasOwn` evita que um HINT como "constructor" ou "__proto__" case com o protótipo.
@@ -173,6 +179,14 @@ function inteiro(l: Linha, c: string): number {
   return v;
 }
 
+function urlPublicaDaMidiaDaComunidade(caminho: string | null, revisao: number): string | null {
+  if (caminho === null) return null;
+  const { data } = supabase.storage.from(BUCKET_DE_MIDIAS_DA_COMUNIDADE).getPublicUrl(caminho);
+  if (!data.publicUrl) malformada('url_publica_da_midia');
+  const separador = data.publicUrl.includes('?') ? '&' : '?';
+  return `${data.publicUrl}${separador}v=${revisao}`;
+}
+
 function numeroOuNulo(l: Linha, c: string): number | null {
   const v = l[c];
   if (v === null || v === undefined) return null;
@@ -222,17 +236,30 @@ function lista(dados: unknown): Linha[] {
   return dados.map(linhaDe);
 }
 
+function unicaLinha(dados: unknown): Linha {
+  const linhas = lista(dados);
+  if (linhas.length !== 1) malformada('retorno');
+  return linhas[0];
+}
+
 function paraComunidadeDoForum(l: Linha): ComunidadeDoForum {
+  const caminhoDoAvatar = textoOuNulo(l, 'caminho_do_avatar');
+  const revisaoDoAvatar = inteiro(l, 'revisao_do_avatar');
+  const caminhoDaCapa = textoOuNulo(l, 'caminho_da_capa');
+  const revisaoDaCapa = inteiro(l, 'revisao_da_capa');
   return {
     id: texto(l, 'id'),
     slug: texto(l, 'slug'),
     nome: texto(l, 'nome'),
     descricao: textoLivre(l, 'descricao'),
     icone: textoOuNulo(l, 'icone'),
+    avatarUrl: urlPublicaDaMidiaDaComunidade(caminhoDoAvatar, revisaoDoAvatar),
+    capaUrl: urlPublicaDaMidiaDaComunidade(caminhoDaCapa, revisaoDaCapa),
     membrosTotal: inteiro(l, 'membros_total'),
     topicosTotal: inteiro(l, 'topicos_total'),
     ultimaAtividadeEm: textoOuNulo(l, 'ultima_atividade_em'),
     souMembro: booleano(l, 'sou_membro'),
+    possoGerirMidia: booleano(l, 'posso_gerir_midia'),
   };
 }
 
@@ -697,6 +724,78 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
             criadoEm: texto(l, 'criado_em'),
           };
         },
+      );
+    },
+
+    async definirMidiaDaComunidade(pedido) {
+      if (!usaServidor()) return { ok: false, motivo: 'semServidor' };
+      const conta = await temConta();
+      if (conta === 'erro') return { ok: false, motivo: 'falhou' };
+      if (!conta) return { ok: false, motivo: 'precisaEntrar' };
+
+      const limite = pedido.tipo === 'avatar'
+        ? LIMITE_AVATAR_DA_COMUNIDADE_BYTES
+        : LIMITE_CAPA_DA_COMUNIDADE_BYTES;
+      if (pedido.arquivo.type !== 'image/jpeg' || pedido.arquivo.size < 1 || pedido.arquivo.size > limite) {
+        return { ok: false, motivo: 'falhou' };
+      }
+
+      const comunidade = await ler(
+        'obter_comunidade_do_forum',
+        { p_slug: pedido.comunidadeSlug },
+        (linhas) => linhas.length ? paraComunidadeDoForum(linhas[0]) : null,
+      );
+      if (!comunidade.ok) return { ok: false, motivo: 'falhou' };
+      if (comunidade.valor === null) return { ok: false, motivo: 'comunidadeInexistente' };
+      if (!comunidade.valor.possoGerirMidia) return { ok: false, motivo: 'naoEAutor' };
+
+      // Cada tentativa ganha um objeto imutável. A foto pública só muda quando a
+      // RPC referencia este caminho; upload que não confirmar nunca sobrescreve
+      // a mídia vigente.
+      const caminho = `${comunidade.valor.id}/${pedido.tipo}/${crypto.randomUUID()}.jpg`;
+      try {
+        const { error } = await comTempo(
+          supabase.storage.from(BUCKET_DE_MIDIAS_DA_COMUNIDADE).upload(
+            caminho,
+            pedido.arquivo,
+            { contentType: 'image/jpeg', upsert: false },
+          ),
+          TEMPO_DA_ESCRITA_MS,
+          'enviar_midia_da_comunidade',
+        );
+        if (error) {
+          console.error('Falha ao enviar mídia da comunidade', error);
+          return { ok: false, motivo: 'falhou' };
+        }
+      } catch (erro) {
+        console.error('Falha ao enviar mídia da comunidade', erro);
+        return { ok: false, motivo: 'semConfirmacao' };
+      }
+
+      const publicada = await escrever(
+        'definir_midia_da_comunidade',
+        { p_slug: pedido.comunidadeSlug, p_tipo: pedido.tipo, p_caminho: caminho },
+        (dados) => paraComunidadeDoForum(unicaLinha(dados)),
+      );
+      // Recusa conhecida significa que a transação não promoveu este rascunho.
+      // Em falha ambígua ele fica intacto: apagar poderia remover a foto que a
+      // RPC acabou de aceitar antes de a resposta se perder.
+      if (!publicada.ok && publicada.motivo !== 'semConfirmacao') {
+        try {
+          const { error } = await supabase.storage.from(BUCKET_DE_MIDIAS_DA_COMUNIDADE).remove([caminho]);
+          if (error) console.error('Falha ao limpar mídia de comunidade não publicada', error);
+        } catch (erro) {
+          console.error('Falha ao limpar mídia de comunidade não publicada', erro);
+        }
+      }
+      return publicada;
+    },
+
+    removerMidiaDaComunidade(comunidadeSlug, tipo: TipoDeMidiaDaComunidade) {
+      return escrever(
+        'remover_midia_da_comunidade',
+        { p_slug: comunidadeSlug, p_tipo: tipo },
+        (dados) => paraComunidadeDoForum(unicaLinha(dados)),
       );
     },
 

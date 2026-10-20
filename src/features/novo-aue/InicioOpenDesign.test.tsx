@@ -338,6 +338,102 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     });
   });
 
+  it('mostra o atalho de arroto só no perfil próprio e o trava nesse destino', async () => {
+    const meuPerfil = {
+      id: 'eu', handle: 'gio', apelido: 'Gio', fundador: false, daCasa: false,
+      criadoEm: '2026-10-20T12:00:00Z', totalCausos: 0, totalSeguidores: 0,
+      totalSeguindo: 0, euSigo: false, souEu: true,
+    };
+    const conta: PortaDeConta = {
+      estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: false })),
+      cadastrar: vi.fn(), entrar: vi.fn(), enviarLinkDeRedefinicao: vi.fn(), redefinirSenha: vi.fn(), sair: vi.fn(),
+    };
+    const perfil: PortaDePerfil = {
+      obterMeuPerfil: vi.fn(async () => meuPerfil),
+      obterPerfil: vi.fn(async () => meuPerfil),
+      obterMeuPerfilParaEdicao: vi.fn(), alternarSeguir: vi.fn(), concluirMeuPerfilSocial: vi.fn(), atualizarMeuPerfil: vi.fn(),
+      enviarFoto: vi.fn(), removerFoto: vi.fn(), enviarCapa: vi.fn(), removerCapa: vi.fn(), listarConexoes: vi.fn(),
+    };
+    const captura: CapturaDeAudio = {
+      pedir: vi.fn(async () => ({ ok: true as const })),
+      comecar: vi.fn(() => true),
+      parar: vi.fn(async () => ({
+        dados: new Blob(['arroto'], { type: 'audio/webm' }), formato: 'audio/webm', duracaoMs: 1200,
+        resumo: { rms: 0.2, pico: 0.4 },
+      })),
+      nivelAtual: vi.fn(() => 0), soltar: vi.fn(), estaVivo: vi.fn(() => false), estaGravando: vi.fn(() => false),
+    };
+    const arrotos: PortaDeArrotosDoPerfil = {
+      prepararArroto: vi.fn(async () => ({ ok: true as const, rascunho: {
+        id: 'arroto-1', caminhoDoAudio: 'eu/arroto-1', perfilDestinoId: 'eu', perfilDestinoHandle: 'gio', perfilDestinoApelido: 'Gio',
+      } })),
+      publicarArroto: vi.fn(async () => ({ ok: true as const, arroto: {
+        id: 'arroto-1', perfilId: 'eu', autorId: 'eu', autorHandle: 'gio', autorApelido: 'Gio',
+        duracaoSegundos: 1.2, criadoEm: '2026-10-20T12:00:00Z', meu: true, possoOcultar: true,
+        enderecoDoAudio: vi.fn(async () => 'https://audio.test/arroto-1'),
+      } })),
+      listarArrotos: vi.fn(async () => []), ocultarArroto: vi.fn(async () => true),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={mockComunidade}
+          portaConta={conta}
+          portaPerfil={perfil}
+          portaArrotosDoPerfil={arrotos}
+          capturaDireta={captura}
+          viewInicial="perfil"
+        />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
+    const atalho = await screen.findByRole('button', { name: 'Gravar um arroto no meu perfil' });
+    fireEvent.click(atalho);
+    fireEvent.click(screen.getByRole('button', { name: /Gravar agora/ }));
+    await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce());
+    fireEvent.click(screen.getByRole('button', { name: /Parar gravação/ }));
+
+    expect(await screen.findByText('Este áudio vai ficar no grupo Arrotos do seu perfil.')).toBeTruthy();
+    expect(screen.queryByRole('radio', { name: /Perfil de outra pessoa/i })).toBeNull();
+    expect(screen.queryByRole('radio', { name: /Feed de uma comunidade/i })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar arroto' }));
+    await waitFor(() => {
+      expect(arrotos.prepararArroto).toHaveBeenCalledWith();
+      expect(arrotos.publicarArroto).toHaveBeenCalledWith(
+        expect.objectContaining({ perfilDestinoId: 'eu', perfilDestinoHandle: 'gio' }), expect.any(Blob), 1.2,
+      );
+    });
+    expect(await screen.findByText('Arroto direto · 2s')).toBeTruthy();
+  });
+
+  it('não mostra o atalho de arroto ao visitar o perfil de outra pessoa', async () => {
+    const outraPessoa = {
+      id: 'bia', handle: 'bia', apelido: 'Bia', fundador: false, daCasa: false,
+      criadoEm: '2026-10-20T12:00:00Z', totalCausos: 0, totalSeguidores: 0,
+      totalSeguindo: 0, euSigo: false, souEu: false,
+    };
+    const conta: PortaDeConta = {
+      estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: false })),
+      cadastrar: vi.fn(), entrar: vi.fn(), enviarLinkDeRedefinicao: vi.fn(), redefinirSenha: vi.fn(), sair: vi.fn(),
+    };
+    const perfil = {
+      obterMeuPerfil: vi.fn(async () => ({ ...outraPessoa, id: 'eu', handle: 'gio', souEu: true })),
+      obterPerfil: vi.fn(async () => outraPessoa),
+    } as unknown as PortaDePerfil;
+
+    render(
+      <MemoryRouter initialEntries={['/u/bia']}>
+        <InicioOpenDesign portaForum={mockForum} portaComunidade={mockComunidade} portaConta={conta} portaPerfil={perfil} viewInicial="perfil" handleInicial="bia" />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
+    expect(screen.queryByRole('button', { name: 'Gravar um arroto no meu perfil' })).toBeNull();
+  });
+
   it('abre modal institucional ao clicar nos links do rodapé', async () => {
     render(
       <MemoryRouter>

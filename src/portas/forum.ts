@@ -109,6 +109,9 @@ export interface AutorDoForum {
 export interface ComunidadeDoForum extends ReferenciaDeComunidade {
   readonly descricao: string;
   readonly icone: string | null;
+  /** URL pública derivada do caminho persistido e da revisão; nunca vem pronta do banco. */
+  readonly avatarUrl?: string | null;
+  /** URL pública derivada do caminho persistido e da revisão; nunca vem pronta do banco. */
   readonly capaUrl?: string | null;
   /** O que o servidor contou. Nunca somado nem arredondado no cliente. */
   readonly membrosTotal: number;
@@ -117,6 +120,18 @@ export interface ComunidadeDoForum extends ReferenciaDeComunidade {
   readonly ultimaAtividadeEm: string | null;
   /** Falso para visitante. Não entra ninguém no Bonde Geral: quem decide é a tela com `listarMinhasComunidades`. */
   readonly souMembro: boolean;
+  /** Criador ou moderador (papel `admin`) reconhecido pelo servidor. */
+  readonly possoGerirMidia?: boolean;
+}
+
+/** Só a imagem já normalizada pelo editor segue para esta porta. */
+export type TipoDeMidiaDaComunidade = 'avatar' | 'capa';
+
+export interface PedidoDeMidiaDaComunidade {
+  readonly comunidadeSlug: string;
+  readonly tipo: TipoDeMidiaDaComunidade;
+  /** JPEG final do recorte. A plataforma confere MIME e limite antes do upload. */
+  readonly arquivo: Blob;
 }
 
 /** O que o servidor devolve sobre o áudio e a nota do tópico. Tudo `null` quando não há. */
@@ -437,6 +452,13 @@ export interface PortaDeForum {
 
   criarTopico(pedido: PedidoDeNovoTopico): Promise<ResultadoDaEscrita<TopicoCriado>>;
   responderTopico(pedido: PedidoDeResposta): Promise<ResultadoDaEscrita<RespostaCriada>>;
+  /** Envia o JPEG normalizado e só então o referencia pela RPC segura. */
+  definirMidiaDaComunidade?(pedido: PedidoDeMidiaDaComunidade): Promise<ResultadoDaEscrita<ComunidadeDoForum>>;
+  /** Remove a referência pública e incrementa a revisão de cache da mídia. */
+  removerMidiaDaComunidade?(
+    comunidadeSlug: string,
+    tipo: TipoDeMidiaDaComunidade,
+  ): Promise<ResultadoDaEscrita<ComunidadeDoForum>>;
   enviarAnexoDoForum?(pedido: PedidoDeEnvioDeAnexoDoForum): Promise<ResultadoDaEscrita<AnexoParaPublicar>>;
   editarTopico(pedido: PedidoDeEdicaoDeTopico): Promise<ResultadoDaEscrita<TopicoEditado>>;
   editarResposta(pedido: PedidoDeEdicaoDeResposta): Promise<ResultadoDaEscrita<RespostaEditada>>;

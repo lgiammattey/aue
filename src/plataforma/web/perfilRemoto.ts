@@ -1,6 +1,6 @@
 import { configuracaoAusente, supabase } from '../../db/supabase';
 import { garantirSessao } from '../../shared/auth/sessaoAnonima';
-import { reduzirParaAvatar } from './imagem';
+import { prepararImagemDePerfil } from './imagem';
 import type {
   Conexao,
   DadosDoPerfil,
@@ -63,45 +63,7 @@ export function traduzirPerfil(l: LinhaDePerfil, capaUrl?: string): PerfilPublic
   };
 }
 
-const TIPOS_DE_IMAGEM = ['image/jpeg', 'image/png', 'image/webp'];
-const LIMITE_DA_IMAGEM = 15 * 1024 * 1024;
 const BUCKET_DE_CAPAS = 'capas_de_perfil';
-
-/**
- * Recorta a capa na proporção 3:1 e não sobe o original. Vive aqui porque
- * canvas e createImageBitmap pertencem ao adaptador web, nunca à tela.
- */
-async function reduzirParaCapa(arquivo: Blob): Promise<Blob | null> {
-  try {
-    const bitmap = await createImageBitmap(arquivo);
-    const largura = bitmap.width;
-    const altura = bitmap.height;
-    const proporcao = 3;
-    let origemX = 0;
-    let origemY = 0;
-    let origemLargura = largura;
-    let origemAltura = altura;
-
-    if (largura / altura > proporcao) {
-      origemLargura = altura * proporcao;
-      origemX = (largura - origemLargura) / 2;
-    } else {
-      origemAltura = largura / proporcao;
-      origemY = (altura - origemAltura) / 2;
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 1500;
-    canvas.height = 500;
-    const contexto = canvas.getContext('2d');
-    if (!contexto) return null;
-    contexto.drawImage(bitmap, origemX, origemY, origemLargura, origemAltura, 0, 0, canvas.width, canvas.height);
-    bitmap.close?.();
-    return await new Promise<Blob | null>((resolver) => canvas.toBlob((imagem) => resolver(imagem), 'image/jpeg', 0.85));
-  } catch {
-    return null;
-  }
-}
 
 function urlPublicaDaCapa(caminho: string | null, revisao: number | null): string | undefined {
   if (!caminho || revisao === null || !Number.isFinite(revisao)) return undefined;
@@ -253,22 +215,23 @@ export function criarPerfilRemoto(): PortaDePerfil {
 
     async enviarFoto(imagem: Blob): Promise<ResultadoDaFoto> {
       if (configuracaoAusente) return { ok: false, motivo: 'falhou' };
-      if (!TIPOS_DE_IMAGEM.includes(imagem.type)) {
-        return { ok: false, motivo: 'formatoInvalido' };
+      const preparada = await prepararImagemDePerfil(imagem, 'avatar');
+      if (!preparada.ok) {
+        return preparada.motivo === 'formatoInvalido'
+          ? { ok: false, motivo: 'formatoInvalido' }
+          : preparada.motivo === 'grandeDemais'
+            ? { ok: false, motivo: 'grandeDemais' }
+            : { ok: false, motivo: 'falhou' };
       }
-      if (imagem.size > LIMITE_DA_IMAGEM) return { ok: false, motivo: 'grandeDemais' };
       try {
         const sessao = await garantirSessao();
         const uid = sessao?.user?.id;
         if (!uid) return { ok: false, motivo: 'semConta' };
 
-        const reduzida = await reduzirParaAvatar(imagem);
-        if (!reduzida) return { ok: false, motivo: 'falhou' };
-
         const caminho = `${uid}/avatar.jpg`;
         const { error: erroDoUpload } = await supabase.storage
           .from('avatars')
-          .upload(caminho, reduzida, { upsert: true, contentType: 'image/jpeg' });
+          .upload(caminho, preparada.imagem, { upsert: true, contentType: 'image/jpeg' });
         if (erroDoUpload) throw erroDoUpload;
 
         // O nome é fixo; o `?v=` quebra o cache do navegador e da CDN.
@@ -306,19 +269,22 @@ export function criarPerfilRemoto(): PortaDePerfil {
 
     async enviarCapa(imagem: Blob): Promise<ResultadoDaCapa> {
       if (configuracaoAusente) return { ok: false, motivo: 'falhou' };
-      if (!TIPOS_DE_IMAGEM.includes(imagem.type)) return { ok: false, motivo: 'formatoInvalido' };
-      if (imagem.size > LIMITE_DA_IMAGEM) return { ok: false, motivo: 'grandeDemais' };
+      const preparada = await prepararImagemDePerfil(imagem, 'capa');
+      if (!preparada.ok) {
+        return preparada.motivo === 'formatoInvalido'
+          ? { ok: false, motivo: 'formatoInvalido' }
+          : preparada.motivo === 'grandeDemais'
+            ? { ok: false, motivo: 'grandeDemais' }
+            : { ok: false, motivo: 'falhou' };
+      }
       try {
         const sessao = await garantirSessao();
         const uid = sessao?.user?.id;
         if (!uid) return { ok: false, motivo: 'semConta' };
-        const reduzida = await reduzirParaCapa(imagem);
-        if (!reduzida) return { ok: false, motivo: 'falhou' };
-
         const caminho = `${uid}/capa.jpg`;
         const { error: erroDoUpload } = await supabase.storage
           .from(BUCKET_DE_CAPAS)
-          .upload(caminho, reduzida, { upsert: true, contentType: 'image/jpeg' });
+          .upload(caminho, preparada.imagem, { upsert: true, contentType: 'image/jpeg' });
         if (erroDoUpload) throw erroDoUpload;
 
         const { error } = await supabase.rpc('definir_minha_capa', { p_caminho_da_capa: caminho });

@@ -13,12 +13,13 @@ import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarCapturaWeb } from '../../plataforma/web/captura';
 import { criarForumWeb } from '../../plataforma/web/forum';
 import { criarArrotosDoPerfilRemoto } from '../../plataforma/web/arrotosDoPerfil';
+import { criarUrlDePreviewDeImagem, prepararImagemDePerfil, revokeUrlDePreviewDeImagem } from '../../plataforma/web/imagem';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
 import type { AudioCapturado, CapturaDeAudio } from '../../portas/captura';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import { sugerirHandle, type PortaDeConta, type ResultadoDaConta } from '../../portas/conta';
-import type { AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, PortaDeForum } from '../../portas/forum';
+import type { AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, PortaDeForum, TipoDeMidiaDaComunidade } from '../../portas/forum';
 import type { DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { AdsterraNativeBanner } from './AdsterraNativeBanner';
 import { BarraLateral } from './BarraLateral';
@@ -28,6 +29,7 @@ import { ThreadDeComentarios } from './ThreadDeComentarios';
 import { ModalCompositor, type AnexoRascunho } from './ModalCompositor';
 import { ModalComentarios } from './ModalComentarios';
 import { ModalEditarPerfil } from './ModalEditarPerfil';
+import { ModalAjustarImagem, type RecorteVisual, type TipoDeImagemAjustavel } from './ModalAjustarImagem';
 import { ModalFundarComunidade } from './ModalFundarComunidade';
 import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDireta } from './ModalGravarArroto';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
@@ -170,6 +172,10 @@ export function InicioOpenDesign({
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
   const [fotoEnviando, setFotoEnviando] = useState(false);
   const [capaEnviando, setCapaEnviando] = useState(false);
+  const [ajusteDeImagem, setAjusteDeImagem] = useState<{ arquivo: File; tipo: TipoDeImagemAjustavel; alvo: 'perfil' | 'comunidade'; previewUrl: string } | null>(null);
+  const [estadoDoAjusteDeImagem, setEstadoDoAjusteDeImagem] = useState<'preparando' | 'pronto' | 'erro' | 'enviando'>('pronto');
+  const [erroDoAjusteDeImagem, setErroDoAjusteDeImagem] = useState<string | null>(null);
+  const [recorteDaImagem, setRecorteDaImagem] = useState<RecorteVisual>({ centroX: 0.5, centroY: 0.5, zoom: 1 });
   const inputDaFoto = useRef<HTMLInputElement | null>(null);
   const inputDaCapa = useRef<HTMLInputElement | null>(null);
 
@@ -214,6 +220,7 @@ export function InicioOpenDesign({
   const [audioDireto, setAudioDireto] = useState<AudioCapturado | null>(null);
   const [erroDaGravacaoDireta, setErroDaGravacaoDireta] = useState<string | null>(null);
   const [enviandoArrotoDireto, setEnviandoArrotoDireto] = useState(false);
+  const [destinoFixoDaGravacao, setDestinoFixoDaGravacao] = useState<'perfil-proprio' | null>(null);
   const [modalComentariosAberto, setModalComentariosAberto] = useState(false);
   const [postComentariosAtivo, setPostComentariosAtivo] = useState<ItemDoFeed | null>(null);
   const [listaComentarios, setListaComentarios] = useState<readonly ItemComentario[]>([]);
@@ -221,6 +228,7 @@ export function InicioOpenDesign({
   const [enviandoComentario, setEnviandoComentario] = useState(false);
   const [modalFundarAberto, setModalFundarAberto] = useState(false);
   const [modalGerirComunidadeAberto, setModalGerirComunidadeAberto] = useState(false);
+  const [midiaDaComunidadeEnviando, setMidiaDaComunidadeEnviando] = useState<TipoDeMidiaDaComunidade | null>(null);
   const [modalInstitucionalAberto, setModalInstitucionalAberto] = useState(false);
   const [toastMensagem, setToastMensagem] = useState<string | null>(null);
   const toastTimeoutRef = useRef<number | null>(null);
@@ -1173,8 +1181,49 @@ export function InicioOpenDesign({
     exibirToast('Perfil atualizado.');
   };
 
-  const trocarFotoDoPerfil = async (arquivo?: File) => {
-    if (!arquivo || fotoEnviando) return;
+  const mensagemDoErroDeImagem = (motivo: string, tipo: TipoDeImagemAjustavel) => {
+    if (motivo === 'formatoInvalido') return 'Use JPG, PNG ou WebP.';
+    if (motivo === 'grandeDemais') return 'Essa imagem passa do limite de 10 MB.';
+    if (motivo === 'dimensoesInsuficientes') return tipo === 'capa'
+      ? 'A capa precisa ter pelo menos 1200 × 400 pixels.'
+      : 'A foto precisa ter pelo menos 320 × 320 pixels.';
+    if (motivo === 'dimensoesExcedidas') return 'Essa imagem passa do limite de 24 megapixels.';
+    return 'Não consegui abrir essa imagem. Tenta outro arquivo.';
+  };
+
+  const abrirAjusteDeImagem = async (
+    arquivo: File | undefined,
+    tipo: TipoDeImagemAjustavel,
+    alvo: 'perfil' | 'comunidade' = 'perfil',
+  ) => {
+    if (!arquivo || fotoEnviando || capaEnviando) return;
+    const antigo = ajusteDeImagem;
+    setAjusteDeImagem({ arquivo, tipo, alvo, previewUrl: criarUrlDePreviewDeImagem(arquivo) });
+    if (antigo) revokeUrlDePreviewDeImagem(antigo.previewUrl);
+    setEstadoDoAjusteDeImagem('preparando');
+    setErroDoAjusteDeImagem(null);
+    setRecorteDaImagem({ centroX: 0.5, centroY: 0.5, zoom: 1 });
+
+    const preparada = await prepararImagemDePerfil(arquivo, tipo === 'capa' ? 'capa' : 'avatar');
+    if (!preparada.ok) {
+      setEstadoDoAjusteDeImagem('erro');
+      setErroDoAjusteDeImagem(mensagemDoErroDeImagem(preparada.motivo, tipo));
+      return;
+    }
+    setEstadoDoAjusteDeImagem('pronto');
+  };
+
+  const fecharAjusteDeImagem = () => {
+    if (estadoDoAjusteDeImagem === 'enviando') return;
+    if (ajusteDeImagem) revokeUrlDePreviewDeImagem(ajusteDeImagem.previewUrl);
+    setAjusteDeImagem(null);
+    setErroDoAjusteDeImagem(null);
+    if (inputDaFoto.current) inputDaFoto.current.value = '';
+    if (inputDaCapa.current) inputDaCapa.current.value = '';
+  };
+
+  const trocarFotoDoPerfil = async (arquivo: Blob) => {
+    if (fotoEnviando) return;
     setFotoEnviando(true);
     try {
       const resultado = await perfilPort.enviarFoto(arquivo);
@@ -1182,19 +1231,20 @@ export function InicioOpenDesign({
         const mensagem = resultado.motivo === 'formatoInvalido'
           ? 'Use JPG, PNG ou WebP para a foto.'
           : resultado.motivo === 'grandeDemais'
-            ? 'A foto passa do limite de 15 MB.'
+            ? 'A foto não coube no limite de envio.'
             : 'Não foi possível trocar a foto agora.';
         exibirToast(mensagem);
-        return;
+        return false;
       }
       setMeuPerfil(resultado.perfil);
       setPerfilAtivo(resultado.perfil);
       exibirToast('Foto atualizada.');
+      return true;
     } catch {
       exibirToast('Não foi possível trocar a foto agora.');
+      return false;
     } finally {
       setFotoEnviando(false);
-      if (inputDaFoto.current) inputDaFoto.current.value = '';
     }
   };
 
@@ -1217,8 +1267,8 @@ export function InicioOpenDesign({
     }
   };
 
-  const trocarCapaDoPerfil = async (arquivo?: File) => {
-    if (!arquivo || capaEnviando) return;
+  const trocarCapaDoPerfil = async (arquivo: Blob) => {
+    if (capaEnviando) return;
     setCapaEnviando(true);
     try {
       const resultado = await perfilPort.enviarCapa(arquivo);
@@ -1226,20 +1276,70 @@ export function InicioOpenDesign({
         const mensagem = resultado.motivo === 'formatoInvalido'
           ? 'Use JPG, PNG ou WebP para a capa.'
           : resultado.motivo === 'grandeDemais'
-            ? 'A capa passa do limite de 15 MB.'
+            ? 'A capa não coube no limite de envio.'
             : 'Não foi possível trocar a capa agora.';
         exibirToast(mensagem);
-        return;
+        return false;
       }
       setMeuPerfil(resultado.perfil);
       setPerfilAtivo(resultado.perfil);
       exibirToast('Capa atualizada.');
+      return true;
     } catch {
       exibirToast('Não foi possível trocar a capa agora.');
+      return false;
     } finally {
       setCapaEnviando(false);
-      if (inputDaCapa.current) inputDaCapa.current.value = '';
     }
+  };
+
+  const salvarAjusteDeImagem = async () => {
+    if (!ajusteDeImagem || estadoDoAjusteDeImagem !== 'pronto') return;
+    const destino = ajusteDeImagem.tipo === 'capa' ? 'capa' : 'avatar';
+    setEstadoDoAjusteDeImagem('enviando');
+    setErroDoAjusteDeImagem(null);
+    const preparada = await prepararImagemDePerfil(ajusteDeImagem.arquivo, destino, {
+      ...recorteDaImagem,
+    });
+    if (!preparada.ok) {
+      setEstadoDoAjusteDeImagem('erro');
+      setErroDoAjusteDeImagem(mensagemDoErroDeImagem(preparada.motivo, ajusteDeImagem.tipo));
+      return;
+    }
+    if (ajusteDeImagem.alvo === 'comunidade') {
+      const comunidade = comunidadeAtiva;
+      const definirMidia = forum.definirMidiaDaComunidade;
+      if (!comunidade || !definirMidia) {
+        setEstadoDoAjusteDeImagem('erro');
+        setErroDoAjusteDeImagem('Não consegui salvar essa imagem na comunidade agora.');
+        return;
+      }
+      const tipoDaMidia: TipoDeMidiaDaComunidade = ajusteDeImagem.tipo === 'capa' ? 'capa' : 'avatar';
+      setMidiaDaComunidadeEnviando(tipoDaMidia);
+      try {
+        const resultado = await definirMidia({ comunidadeSlug: comunidade.slug, tipo: tipoDaMidia, arquivo: preparada.imagem });
+        if (!resultado.ok) {
+          setEstadoDoAjusteDeImagem('erro');
+          setErroDoAjusteDeImagem(resultado.motivo === 'naoEAutor'
+            ? 'Só a administração pode trocar a imagem da comunidade.'
+            : 'Não consegui salvar essa imagem na comunidade agora.');
+          return;
+        }
+        setComunidadeAtiva(resultado.valor);
+        fecharAjusteDeImagem();
+        exibirToast(ajusteDeImagem.tipo === 'capa' ? 'Capa da comunidade atualizada.' : 'Foto da comunidade atualizada.');
+      } catch {
+        setEstadoDoAjusteDeImagem('erro');
+        setErroDoAjusteDeImagem('Não consegui salvar essa imagem na comunidade agora.');
+      } finally {
+        setMidiaDaComunidadeEnviando(null);
+      }
+      return;
+    }
+
+    const atualizado = await (ajusteDeImagem.tipo === 'capa' ? trocarCapaDoPerfil(preparada.imagem) : trocarFotoDoPerfil(preparada.imagem));
+    if (atualizado) fecharAjusteDeImagem();
+    else setEstadoDoAjusteDeImagem('pronto');
   };
 
   const removerCapaDoPerfil = async () => {
@@ -1274,7 +1374,7 @@ export function InicioOpenDesign({
     }
   };
 
-  const abrirGravacaoDireta = () => {
+  const abrirGravacaoDireta = (opcoes?: { readonly destinoFixo?: 'perfil-proprio' }) => {
     if (!estaAutenticado) {
       (aoEntrar ?? (() => setViewAtual('auth')))();
       return;
@@ -1282,6 +1382,7 @@ export function InicioOpenDesign({
     setAudioDireto(null);
     setErroDaGravacaoDireta(null);
     setEstadoGravacaoDireta('ocioso');
+    setDestinoFixoDaGravacao(opcoes?.destinoFixo ?? null);
     setModalGravarArrotoAberto(true);
   };
 
@@ -1291,6 +1392,7 @@ export function InicioOpenDesign({
     setEstadoGravacaoDireta('ocioso');
     setAudioDireto(null);
     setErroDaGravacaoDireta(null);
+    setDestinoFixoDaGravacao(null);
   };
 
   const iniciarGravacaoDireta = async () => {
@@ -1336,9 +1438,9 @@ export function InicioOpenDesign({
     }
     setEnviandoArrotoDireto(true);
     try {
-      const preparo = await arrotosPort.prepararArroto(
-        destino.tipo === 'perfil-marcado' ? destino.handle : undefined,
-      );
+      const preparo = destino.tipo === 'perfil-marcado'
+        ? await arrotosPort.prepararArroto(destino.handle)
+        : await arrotosPort.prepararArroto();
       if (!preparo.ok) {
         throw new Error(
           preparo.motivo === 'destinoInexistente'
@@ -1671,8 +1773,8 @@ export function InicioOpenDesign({
                         height: 64,
                         borderRadius: '50%',
                         border: '3px solid var(--aue-surface)',
-                        background: comunidadeAtiva?.icone
-                          ? `url("${comunidadeAtiva.icone}") center/cover no-repeat`
+                        background: (comunidadeAtiva?.avatarUrl ?? comunidadeAtiva?.icone)
+                          ? `url("${comunidadeAtiva?.avatarUrl ?? comunidadeAtiva?.icone}") center/cover no-repeat`
                           : 'var(--aue-surface-2)',
                         display: 'flex',
                         alignItems: 'center',
@@ -1683,7 +1785,7 @@ export function InicioOpenDesign({
                         zIndex: 2,
                       }}
                     >
-                      {!comunidadeAtiva?.icone && (
+                      {!(comunidadeAtiva?.avatarUrl ?? comunidadeAtiva?.icone) && (
                         <span style={{ fontFamily: 'var(--font-display, Anton)', fontSize: 32, lineHeight: 1, color: 'var(--aue-accent, #c6ff00)' }}>
                           {comunidadeAtiva?.nome ? comunidadeAtiva.nome.slice(0, 1).toUpperCase() : comunidadeSlug.slice(0, 1).toUpperCase()}
                         </span>
@@ -1715,15 +1817,17 @@ export function InicioOpenDesign({
                         >
                           {comunidadesEntradas[comunidadeSlug] ? 'Entrou' : 'Entrar'}
                         </button>
-                        <button
-                          id="manageCommunity"
-                          type="button"
-                          className="tab"
-                          style={{ border: '1px solid var(--aue-line)' }}
-                          onClick={() => setModalGerirComunidadeAberto(true)}
-                        >
-                          Administrar comunidade
-                        </button>
+                        {comunidadeAtiva?.possoGerirMidia && (
+                          <button
+                            id="manageCommunity"
+                            type="button"
+                            className="tab"
+                            style={{ border: '1px solid var(--aue-line)' }}
+                            onClick={() => setModalGerirComunidadeAberto(true)}
+                          >
+                            Administrar comunidade
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="tab"
@@ -1957,7 +2061,7 @@ export function InicioOpenDesign({
                         {perfilExibido.capaUrl && <button type="button" className="od-profile__cover-action" onClick={() => void removerCapaDoPerfil()} disabled={capaEnviando}>Remover</button>}
                       </div>
                     )}
-                    <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void trocarCapaDoPerfil(e.target.files?.[0])} />
+                    <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'capa')} />
                   </div>
                   <div className="od-profile__body">
                     <div className="od-profile__topline">
@@ -1970,7 +2074,7 @@ export function InicioOpenDesign({
                             {fotoEnviando ? 'Enviando…' : 'Trocar foto'}
                           </button>
                         )}
-                        <input ref={inputDaFoto} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova foto de perfil" onChange={(e) => void trocarFotoDoPerfil(e.target.files?.[0])} />
+                        <input ref={inputDaFoto} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova foto de perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'foto')} />
                       </div>
                       <div className="od-profile__actions">
                         {donoDoPerfil ? (
@@ -2069,6 +2173,25 @@ export function InicioOpenDesign({
                 {abaPerfil === 'arrotos' && (
                   <section className="od-profile__activity" aria-labelledby="profileArrotos">
                     <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2><span>{arrotosDoPerfil.length}</span></div>
+                    {donoDoPerfil && (
+                      <div className="od-profile__record-cta">
+                        <button
+                          type="button"
+                          className="od-profile__record-button"
+                          aria-label="Gravar um arroto no meu perfil"
+                          onClick={() => abrirGravacaoDireta({ destinoFixo: 'perfil-proprio' })}
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 14.5a3 3 0 0 0 3-3v-5a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" />
+                            <path d="M18 11.5a6 6 0 0 1-12 0M12 17.5v3M8.5 20.5h7" />
+                          </svg>
+                        </button>
+                        <div>
+                          <p className="od-profile__record-eyebrow">ARROTO DIRETO</p>
+                          <h3>Grava um arroto pra deixar aqui.</h3>
+                        </div>
+                      </div>
+                    )}
                     {estadoArrotosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
                     {estadoArrotosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
                     {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.length === 0 && (
@@ -2331,6 +2454,7 @@ export function InicioOpenDesign({
         erro={erroDaGravacaoDireta}
         enviando={enviandoArrotoDireto}
         comunidades={comunidades.map((comunidade) => ({ slug: comunidade.slug, nome: comunidade.nome }))}
+        destinoFixo={destinoFixoDaGravacao ?? undefined}
         duracaoEmSegundos={audioDireto ? audioDireto.duracaoMs / 1000 : null}
         aoFechar={fecharGravacaoDireta}
         aoIniciarGravacao={iniciarGravacaoDireta}
@@ -2364,6 +2488,19 @@ export function InicioOpenDesign({
         aoCriar={fundarNovaComunidade}
       />
 
+      <ModalAjustarImagem
+        aberto={Boolean(ajusteDeImagem)}
+        tipo={ajusteDeImagem?.tipo ?? 'foto'}
+        previewUrl={ajusteDeImagem?.previewUrl ?? null}
+        estado={estadoDoAjusteDeImagem}
+        erro={erroDoAjusteDeImagem}
+        recorte={recorteDaImagem}
+        aoFechar={fecharAjusteDeImagem}
+        aoSalvar={() => void salvarAjusteDeImagem()}
+        aoTrocarArquivo={() => (ajusteDeImagem?.tipo === 'capa' ? inputDaCapa.current?.click() : inputDaFoto.current?.click())}
+        aoAlterarRecorte={setRecorteDaImagem}
+      />
+
       <ModalEditarPerfil
         aberto={modalPerfilAberto}
         nomeInicial={perfilExibido?.apelido ?? ''}
@@ -2384,8 +2521,10 @@ export function InicioOpenDesign({
         aberto={modalGerirComunidadeAberto}
         regrasIniciais={regrasDaComunidade}
         moderadoresIniciais={moderadoresDaComunidade}
-        fotoUrlInicial={comunidadeAtiva?.icone}
+        fotoUrlInicial={comunidadeAtiva?.avatarUrl}
         capaUrlInicial={comunidadeAtiva?.capaUrl}
+        podeGerirMidia={Boolean(comunidadeAtiva?.possoGerirMidia)}
+        midiaEnviando={midiaDaComunidadeEnviando}
         aoFechar={() => setModalGerirComunidadeAberto(false)}
         aoSalvar={(dados) => {
           setRegrasDaComunidade(dados.regras);
@@ -2393,11 +2532,27 @@ export function InicioOpenDesign({
           if (comunidadeAtiva) {
             setComunidadeAtiva({
               ...comunidadeAtiva,
-              icone: dados.fotoUrl !== undefined ? dados.fotoUrl : comunidadeAtiva.icone,
-              capaUrl: dados.capaUrl !== undefined ? dados.capaUrl : comunidadeAtiva.capaUrl,
+              icone: comunidadeAtiva.icone,
+              avatarUrl: comunidadeAtiva.avatarUrl,
+              capaUrl: comunidadeAtiva.capaUrl,
             });
           }
           exibirToast('Gestão da comunidade salva.');
+        }}
+        aoEscolherMidia={(tipo, arquivo) => void abrirAjusteDeImagem(arquivo, tipo === 'capa' ? 'capa' : 'foto', 'comunidade')}
+        aoRemoverMidia={(tipo) => {
+          if (!comunidadeAtiva || !forum.removerMidiaDaComunidade) return;
+          setMidiaDaComunidadeEnviando(tipo);
+          void forum.removerMidiaDaComunidade(comunidadeAtiva.slug, tipo).then((resultado) => {
+            if (!resultado.ok) {
+              exibirToast(resultado.motivo === 'naoEAutor'
+                ? 'Só a administração pode remover essa imagem.'
+                : 'Não consegui remover essa imagem agora.');
+              return;
+            }
+            setComunidadeAtiva(resultado.valor);
+            exibirToast(tipo === 'capa' ? 'Capa da comunidade removida.' : 'Foto da comunidade removida.');
+          }).catch(() => exibirToast('Não consegui remover essa imagem agora.')).finally(() => setMidiaDaComunidadeEnviando(null));
         }}
       />
 

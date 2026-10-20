@@ -19,6 +19,8 @@ interface Props {
   readonly enviando?: boolean;
   readonly comunidades?: readonly ComunidadeParaArroto[];
   readonly permitirComunidade?: boolean;
+  /** Entrada contextual do próprio perfil: o destino não pode ser trocado. */
+  readonly destinoFixo?: 'perfil-proprio';
   readonly duracaoEmSegundos?: number | null;
   readonly aoFechar: () => void;
   readonly aoIniciarGravacao: () => Promise<void> | void;
@@ -45,6 +47,7 @@ export function ModalGravarArroto({
   enviando = false,
   comunidades = [],
   permitirComunidade = false,
+  destinoFixo,
   duracaoEmSegundos,
   aoFechar,
   aoIniciarGravacao,
@@ -62,12 +65,12 @@ export function ModalGravarArroto({
 
   useEffect(() => {
     if (!aberto) return;
-    setDestino('perfil-proprio');
+    setDestino(destinoFixo ?? 'perfil-proprio');
     setHandle('');
     setComunidadeSlug(comunidades[0]?.slug ?? '');
     setErroLocal(null);
     botaoPrincipal.current?.focus();
-  }, [aberto, comunidades]);
+  }, [aberto, comunidades, destinoFixo]);
 
   useEffect(() => {
     if (!aberto) return;
@@ -195,7 +198,13 @@ export function ModalGravarArroto({
           )}
         </div>
 
-        {pronto && (
+        {pronto && destinoFixo === 'perfil-proprio' && (
+          <p className="destino-arroto__aviso">
+            Este áudio vai ficar no grupo Arrotos do seu perfil.
+          </p>
+        )}
+
+        {pronto && !destinoFixo && (
           <fieldset className="destino-arroto" disabled={enviando}>
             <legend>Onde esse arroto vai ficar?</legend>
             <label className="destino-arroto__opcao">

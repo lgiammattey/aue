@@ -10,12 +10,12 @@ import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arroto
 import type { AudioCapturado, CapturaDeAudio } from '../../portas/captura';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeConta } from '../../portas/conta';
-import type { ComunidadeDoForum, PortaDeForum } from '../../portas/forum';
+import type { AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, PortaDeForum } from '../../portas/forum';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
 import { CardDoPost } from './CardDoPost';
-import { ModalCompositor } from './ModalCompositor';
+import { ModalCompositor, type AnexoRascunho } from './ModalCompositor';
 import { ModalComentarios } from './ModalComentarios';
 import { ModalEditarPerfil } from './ModalEditarPerfil';
 import { ModalFundarComunidade } from './ModalFundarComunidade';
@@ -371,11 +371,20 @@ export function InicioOpenDesign({
       comunidadePort.listarFeed?.({ comunidadeSlug })?.catch?.(() => [] as readonly CausoPostado[]) ??
       Promise.resolve([] as readonly CausoPostado[]);
 
-    Promise.all([promessaTopicos, promessaCausos]).then(([resTopicos, causos]) => {
+    Promise.all([promessaTopicos, promessaCausos]).then(async ([resTopicos, causos]) => {
       if (!ativo) return;
       const itens: ItemDoFeed[] = [];
+      const anexosPorTopico = new Map<string, AnexoDoForum>();
+      if (resTopicos?.ok && forum.listarAnexosDoForum) {
+        const leitura = await forum.listarAnexosDoForum({ topicoIds: resTopicos.valor.itens.map((topico) => topico.id) });
+        if (leitura.ok) leitura.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
+      }
       if (resTopicos?.ok) {
         for (const t of resTopicos.valor.itens) {
+          const anexo = anexosPorTopico.get(t.id);
+          const url = anexo?.caminho && forum.assinarAnexoDoForum
+            ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+            : anexo?.urlVideo ?? undefined;
           itens.push({
             id: `topico-${t.id}`,
             tipo: 'topico',
@@ -388,6 +397,7 @@ export function InicioOpenDesign({
             votos: 1,
             respostasTotal: t.respostasTotal,
             temAudio: Boolean(t.audio?.resultadoId || t.audio?.caminhoDoAudio),
+            anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
           });
         }
       }
@@ -714,13 +724,26 @@ export function InicioOpenDesign({
         const topicoId = post.id.replace('topico-', '');
         const res = await forum.listarRespostasDoTopico?.(topicoId);
         if (res && res.ok) {
+          const anexos = forum.listarAnexosDoForum
+            ? await forum.listarAnexosDoForum({ respostaIds: res.valor.itens.map((resposta) => resposta.id) })
+            : null;
+          const anexosPorResposta = new Map((anexos?.ok ? anexos.valor : []).map((anexo) => [anexo.alvoId, anexo]));
           setListaComentarios(
-            res.valor.itens.map((r) => ({
-              id: r.id,
-              autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
-              autorHandle: r.autor?.handle ?? undefined,
-              conteudo: r.corpo ?? '',
-              criadoEm: r.criadoEm,
+            await Promise.all(res.valor.itens.map(async (r) => {
+              const anexo = anexosPorResposta.get(r.id);
+              const url = anexo?.caminho && forum.assinarAnexoDoForum
+                ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+                : anexo?.urlVideo ?? undefined;
+              return {
+                id: r.id,
+                autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
+                autorHandle: r.autor?.handle ?? undefined,
+                conteudo: r.corpo ?? '',
+                criadoEm: r.criadoEm,
+                paiId: r.paiId,
+                nivel: r.nivel,
+                anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
+              };
             })),
           );
         }
@@ -746,8 +769,21 @@ export function InicioOpenDesign({
     }
   };
 
-  const enviarComentario = async (conteudo: string) => {
-    if (!postComentariosAtivo || !conteudo.trim()) return;
+  const prepararAnexo = async (rascunho: AnexoRascunho | null): Promise<AnexoParaPublicar | null> => {
+    if (!rascunho) return null;
+    if (rascunho.tipo === 'videoExterno') return { tipo: 'videoExterno', url: rascunho.url };
+    if (!forum.enviarAnexoDoForum) throw new Error('Anexos indisponíveis');
+    const enviado = await forum.enviarAnexoDoForum(
+      rascunho.tipo === 'imagem'
+        ? { tipo: 'imagem', arquivo: rascunho.arquivo }
+        : { tipo: 'audio', arquivo: rascunho.arquivo, duracaoMs: rascunho.duracaoMs },
+    );
+    if (!enviado.ok) throw new Error('Falha ao enviar anexo');
+    return enviado.valor;
+  };
+
+  const enviarComentario = async (dados: { conteudo: string; paiId: string | null; anexo: AnexoRascunho | null }): Promise<boolean> => {
+    if (!postComentariosAtivo || (!dados.conteudo.trim() && !dados.anexo)) return false;
     setEnviandoComentario(true);
 
     try {
@@ -758,7 +794,9 @@ export function InicioOpenDesign({
         const topicoId = postComentariosAtivo.id.replace('topico-', '');
         const res = await forum.responderTopico?.({
           topicoId,
-          corpo: conteudo.trim(),
+          corpo: dados.conteudo.trim(),
+          paiId: dados.paiId,
+          anexo: await prepararAnexo(dados.anexo),
         });
         if (res && !res.ok && res.motivo === 'precisaEntrar') {
           exibirToast('Entre na sua conta para comentar.');
@@ -767,13 +805,17 @@ export function InicioOpenDesign({
           } else {
             setViewAtual('auth');
           }
-          return;
+          return false;
+        }
+        if (!res?.ok) {
+          exibirToast('Não foi possível publicar a resposta agora.');
+          return false;
         }
       } else {
         const causoId = postComentariosAtivo.id.replace('causo-', '');
         await comunidadePort.adicionarResposta?.(
           causoId,
-          conteudo.trim(),
+          dados.conteudo.trim(),
           meuNome,
           meuHandle,
         );
@@ -783,8 +825,19 @@ export function InicioOpenDesign({
         id: `comentario-${Date.now()}`,
         autorNome: meuNome,
         autorHandle: meuHandle,
-        conteudo: conteudo.trim(),
+        conteudo: dados.conteudo.trim(),
         criadoEm: new Date().toISOString(),
+        paiId: dados.paiId,
+        nivel: dados.paiId
+          ? Math.min((listaComentarios.find((comentario) => comentario.id === dados.paiId)?.nivel ?? 0) + 1, 2) as 0 | 1 | 2
+          : 0,
+        anexo: dados.anexo
+          ? {
+              tipo: dados.anexo.tipo,
+              url: dados.anexo.tipo === 'videoExterno' ? dados.anexo.url : URL.createObjectURL(dados.anexo.arquivo),
+              duracaoMs: dados.anexo.tipo === 'audio' ? dados.anexo.duracaoMs : undefined,
+            }
+          : undefined,
       };
 
       setListaComentarios((prev) => [...prev, novoComentario]);
@@ -799,19 +852,16 @@ export function InicioOpenDesign({
       setItensFeed(incrementar);
       setTopicosDaComunidade(incrementar);
       exibirToast('Comentário publicado na roda!');
+      return true;
     } catch {
       exibirToast('Não foi possível enviar o comentário agora.');
+      return false;
     } finally {
       setEnviandoComentario(false);
     }
   };
 
-  const publicarPost = async (dados: {
-    titulo: string;
-    corpo: string;
-    comunidadeSlug: string;
-    tipo: 'Texto' | 'Áudio' | 'Vídeo';
-  }) => {
+  const publicarPost = async (dados: { corpo: string; comunidadeSlug: string; anexo: AnexoRascunho | null }): Promise<boolean> => {
     const meuNome = meuPerfil?.apelido ?? 'Você';
     const meuHandle = meuPerfil?.handle;
     let postCriadoId = `topico-${Date.now()}`;
@@ -819,26 +869,18 @@ export function InicioOpenDesign({
     try {
       const resForum = await forum.criarTopico?.({
         comunidadeSlug: dados.comunidadeSlug,
-        titulo: dados.titulo,
         corpo: dados.corpo,
+        anexo: await prepararAnexo(dados.anexo),
       });
       if (resForum && resForum.ok) {
         postCriadoId = `topico-${resForum.valor.id}`;
+      } else {
+        exibirToast('Não foi possível publicar agora. Entre na comunidade e tente de novo.');
+        return false;
       }
     } catch {
-      // segue para causo
-    }
-
-    try {
-      await comunidadePort.postarCauso?.({
-        conteudo: dados.corpo ? `${dados.titulo}\n\n${dados.corpo}` : dados.titulo,
-        comunidadeSlug: dados.comunidadeSlug,
-        autorNome: meuNome,
-        autorHandle: meuHandle,
-        consentimentoAudioPublico: true,
-      });
-    } catch {
-      // fallback
+      exibirToast('Não foi possível publicar agora.');
+      return false;
     }
 
     exibirToast('Publicado com sucesso.');
@@ -847,13 +889,20 @@ export function InicioOpenDesign({
       id: postCriadoId,
       tipo: 'topico',
       comunidadeSlug: dados.comunidadeSlug,
-      titulo: dados.titulo,
+      titulo: dados.corpo || (dados.anexo?.tipo === 'imagem' ? 'Imagem na roda' : dados.anexo?.tipo === 'audio' ? 'Áudio na roda' : 'Vídeo na roda'),
       corpo: dados.corpo,
       autorNome: meuNome,
       autorHandle: meuHandle,
       criadoEm: new Date().toISOString(),
       votos: 1,
       respostasTotal: 0,
+      anexo: dados.anexo
+        ? {
+            tipo: dados.anexo.tipo,
+            url: dados.anexo.tipo === 'videoExterno' ? dados.anexo.url : URL.createObjectURL(dados.anexo.arquivo),
+            duracaoMs: dados.anexo.tipo === 'audio' ? dados.anexo.duracaoMs : undefined,
+          }
+        : undefined,
     };
 
     setItensFeed((prev) => [novoItem, ...prev]);
@@ -865,7 +914,7 @@ export function InicioOpenDesign({
         comunidadeSlug: dados.comunidadeSlug,
         autorNome: meuNome,
         autorHandle: meuHandle,
-        conteudo: dados.titulo,
+        conteudo: dados.corpo || 'Post na comunidade',
         criadoEm: new Date().toISOString(),
         reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
         curtidas: 0,
@@ -877,6 +926,7 @@ export function InicioOpenDesign({
       },
       ...prev,
     ]);
+    return true;
   };
 
   const fundarNovaComunidade = async (dados: { nome: string; slug: string; descricao: string }) => {
@@ -1789,6 +1839,7 @@ export function InicioOpenDesign({
         comunidades={comunidades}
         comunidadePadraoSlug={comunidadeSlug}
         aoFechar={() => setModalCompositorAberto(false)}
+        criarGravacao={forum.criarGravacaoLivreDoForum}
         aoPublicar={publicarPost}
       />
 
@@ -1817,25 +1868,12 @@ export function InicioOpenDesign({
         comentarios={listaComentarios}
         carregando={carregandoComentarios}
         enviando={enviandoComentario}
+        criarGravacao={forum.criarGravacaoLivreDoForum}
         aoFechar={() => {
           setModalComentariosAberto(false);
           setPostComentariosAtivo(null);
         }}
         aoEnviarComentario={enviarComentario}
-        aoIrParaConversaCompleta={
-          postComentariosAtivo
-            ? () => {
-                setModalComentariosAberto(false);
-                if (postComentariosAtivo.tipo === 'topico') {
-                  const topicoId = postComentariosAtivo.id.replace('topico-', '');
-                  navigate(`/c/${postComentariosAtivo.comunidadeSlug}/t/${topicoId}`);
-                } else {
-                  const causoId = postComentariosAtivo.id.replace('causo-', '');
-                  navigate(`/historia/${causoId}`);
-                }
-              }
-            : undefined
-        }
       />
 
       <ModalFundarComunidade

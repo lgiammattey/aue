@@ -13,6 +13,12 @@ export interface ItemDoFeed {
   readonly enderecoDoAudio?: string | (() => Promise<string | null>);
   readonly nota?: number;
   readonly videoUrl?: string;
+  /** Mídia livre da conversa. A URL de Storage só existe depois de assinada pela plataforma. */
+  readonly anexo?: {
+    readonly tipo: 'imagem' | 'audio' | 'videoExterno';
+    readonly url?: string;
+    readonly duracaoMs?: number | null;
+  };
 }
 
 export interface DetalhesDaComunidade {
@@ -29,4 +35,11 @@ export interface ItemComentario {
   readonly autorHandle?: string;
   readonly conteudo: string;
   readonly criadoEm: string;
+  readonly paiId?: string | null;
+  readonly nivel?: 0 | 1 | 2;
+  readonly anexo?: {
+    readonly tipo: 'imagem' | 'audio' | 'videoExterno';
+    readonly url?: string;
+    readonly duracaoMs?: number | null;
+  };
 }

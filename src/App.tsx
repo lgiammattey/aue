@@ -190,7 +190,7 @@ export function App() {
           <Route path="/c/:slug" element={<TelaComunidadeOpenDesign />} />
           <Route path="/c/:slug/novo" element={<TelaComunidadeOpenDesign abrirCompositor />} />
           {/* Sub-rotas do fórum como /c/:slug/t/:id e /explorar */}
-          {rotasDoForum()}
+          {rotasDoForum({ incluirRaizesDaComunidade: false })}
           <Route path="/comunidade/:slug" element={<AliasDeComunidade />} />
           <Route path="/comunidades/:slug" element={<AliasDeComunidade />} />
 

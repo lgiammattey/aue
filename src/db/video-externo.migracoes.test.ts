@@ -5,7 +5,7 @@ import { detectarLinkDeVideo } from '../nucleo/midia/embeds';
 
 const raiz = fileURLToPath(new URL('../..', import.meta.url));
 const sql = readFileSync(
-  `${raiz}/supabase/migrations/20261020200000_corrige_regex_do_video_externo.sql`,
+  `${raiz}/supabase/migrations/20261020231609_corrige_regex_do_video_externo.sql`,
   'utf8',
 )
   .split('\n')

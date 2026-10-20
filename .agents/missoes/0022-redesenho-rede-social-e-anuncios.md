@@ -46,21 +46,23 @@
 | Comentários sem modal pop-up quebrado, com thread fluida e resposta direta | Kayky / Marcelo | `ModalComentarios.test.tsx` e visual | APROVADO |
 | Compositor de áudio em 1 clique sem modais redundantes | Kayky / Marcelo | `ModalCompositor.tsx` | APROVADO |
 | Flag de anúncios Adsterra ativada em produção com paridade testada | Camillo / Marcelo | `vitest run` e workflow | APROVADO |
-| `npm run typecheck`, `npm test` e `npm run build` 100% verdes | Marcelo | CI / Terminal (162 arquivos, 1877 testes) | APROVADO |
-| Ajuste visual dos botões de ação e cabeçalho da thread inline (sem textos soltos/duplicados) | Kayky / Rian | Visual e `CardDoPost.tsx` | APROVADO |
+| `npm run typecheck`, `npm test` e `npm run build` 100% verdes | Marcelo | CI / Terminal (163 arquivos, 1877 testes) | APROVADO |
+| Thread de comentários fora do card de post, sem repetição do causo | Kayky / Rian | Visual e `ThreadDeComentarios.tsx` | APROVADO |
 
 ## 5. Encerramento e Parecer Final
 
 - **Arquivos/módulos alterados:**
   - `.env.example` (corte de produção com `VITE_FEATURE_ADSTERRA=1`)
   - `.github/workflows/publicar-firebase.yml` (`VITE_FEATURE_ADSTERRA: '1'`)
-  - `src/features/novo-aue/CardDoPost.tsx` (estilo Twitter com avatar, badge e SVG; ações limpas com contadores numéricos sem poluição de texto ou duplicidade)
+  - `src/features/novo-aue/CardDoPost.tsx` (estilo Twitter com avatar, badge e SVG; ações limpas com contadores numéricos sem poluição de texto; livre de comentários aninhados)
   - `src/features/novo-aue/CardDoPost.test.tsx` (testes unitários do card)
+  - `src/features/novo-aue/ThreadDeComentarios.tsx` (tela/visão de conversa estilo Twitter status com post no topo, compositor com áudio 1 clique e stream de respostas fora do card)
+  - `src/features/novo-aue/ThreadDeComentarios.test.tsx` (testes unitários da thread e compositor fora do card)
   - `src/features/novo-aue/ModalComentarios.tsx` (thread de respostas fluida e áudio em 1 clique)
   - `src/features/novo-aue/ModalComentarios.test.tsx` (testes unitários da thread)
   - `src/features/novo-aue/ModalCompositor.tsx` (compositor enxuto com áudio sem burocracia)
   - `src/features/novo-aue/VersaoMobileOpenDesign.tsx` (unificação do feed com CardDoPost)
-  - `src/features/novo-aue/InicioOpenDesign.css` (estilos Twitter, suavização do cabeçalho da thread inline e alinhamento das ações)
-- **Parecer do Marcelo:** `SEM ACHADOS MATERIAIS` (1877 testes passando em 162 arquivos, 0 erros no typecheck, build de produção gerado com sucesso).
-- **Veredito Final do Tiago:** `APROVADO` (experiência do feed, respostas e compositor alinhada à dinâmica do Twitter/OpenDesign; anúncios habilitados em paridade total; poluição visual de ações e títulos pesados corrigida).
+  - `src/features/novo-aue/InicioOpenDesign.css` (estilos da visualização de thread Twitter, botão voltar, stream de comentários fora do card)
+- **Parecer do Marcelo:** `SEM ACHADOS MATERIAIS` (1877 testes passando em 163 arquivos, 0 erros no typecheck, build de produção gerado com sucesso).
+- **Veredito Final do Tiago:** `APROVADO` (experiência do feed, respostas e compositor alinhada à dinâmica do Twitter/OpenDesign; comentários desacoplados para fora do card, eliminando repetição e caixas aninhadas).
 - **Pendências ou decisão necessária do Luiz:** nenhuma. Entrega concluída na branch `feat/redesenho-rede-social-e-anuncios`.

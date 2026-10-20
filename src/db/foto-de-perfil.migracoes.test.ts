@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const raiz = fileURLToPath(new URL('../..', import.meta.url));
-const sql = readFileSync(`${raiz}/supabase/migrations/20261020201000_foto_de_perfil_so_conta_promovida.sql`, 'utf8')
+const sql = readFileSync(`${raiz}/supabase/migrations/20261020231919_foto_de_perfil_so_conta_promovida.sql`, 'utf8')
   .split('\n').filter((l) => !l.trimStart().startsWith('--')).join('\n').replace(/\s+/g, ' ');
 
 describe('foto de perfil (migration 20261020201000)', () => {

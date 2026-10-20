@@ -42,7 +42,7 @@ function EntradaPorLink() {
 
 function EntradaInicial() {
   const navigate = useNavigate();
-  const [destino, setDestino] = useState<'landing' | 'comunidades' | 'perfil' | null>(null);
+  const [destino, setDestino] = useState<'inicio' | 'perfil' | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -51,11 +51,11 @@ function EntradaInicial() {
       .estado()
       .then((e) => {
         if (ativo) {
-          setDestino(e.perfilSocialPendente ? 'perfil' : e.temSessao && !e.anonima ? 'comunidades' : 'landing');
+          setDestino(e.perfilSocialPendente ? 'perfil' : 'inicio');
         }
       })
       .catch(() => {
-        if (ativo) setDestino('landing');
+        if (ativo) setDestino('inicio');
       });
     return () => {
       ativo = false;
@@ -68,10 +68,6 @@ function EntradaInicial() {
 
   if (destino === 'perfil') {
     return <Navigate to="/perfil?boas-vindas=1" replace />;
-  }
-
-  if (destino === 'comunidades') {
-    return <Navigate to="/comunidades" replace />;
   }
 
   return (

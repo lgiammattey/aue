@@ -5,6 +5,7 @@
 - **Dor / Problema da pessoa:** a comunidade está repartida entre cascas e telas de fases diferentes; quem entra não vê uma experiência única nem o desenho vigente.
 - **Comportamento esperado na tela:** comunidade, diretório, explorar, tópico, perfil e acesso usam a mesma casca Open Design, mantêm links vivos e exibem somente dados e ações que o servidor confirma.
 - **Identidade e endereçamento:** pessoas usam `@handle`, comunidades usam `/slug` e tópicos usam `#id` em URL, busca e copy; o restante reproduz a geometria e os comportamentos do Open Design.
+- **Acesso:** toda pessoa entra pelo Início, autenticada ou não. Visitante lê comunidades e tópicos, mas não possui perfil e não interage; cada tentativa de ação o leva ao acesso preservando o retorno.
 - **Fora de escopo (Não vira):** trocar a máquina, as regras ou a visualização da Arena; copiar os perfis, votos, números, ranking, busca local e publicação simulados do snapshot.
 - **Pista (Lane):** Full flow sistêmica.
 - **Por que esta pista:** troca várias rotas e pode exigir leituras/escritas novas no Supabase, portas e adaptadores compartilhados.

@@ -194,6 +194,8 @@ Decisão do Luiz em 19/10/2026, Cartão de Missão 0026 e ADR 0012:
 - o Open Design é a casca única de comunidades, explorar, tópico, perfil e acesso;
 - pessoas são referenciadas por `@handle`, comunidades por `/slug` e tópicos por
   `#id`; esses três identificadores são a convenção de URL, busca e interface;
+- tanto visitante quanto pessoa autenticada entram pelo Início; visitante lê,
+  não tem perfil nem pode interagir com comunidades e tópicos;
 - votos, salvos, inbox, fundação de comunidade, papéis de moderação, regras,
   presença agregada, karma derivado e conquistas objetivas pertencem ao produto;
 - cada ação nasce em RPC e porta própria, com RLS e rollback antes de qualquer

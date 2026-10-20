@@ -32,12 +32,12 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.getByRole('link', { name: 'Só quero ouvir' })).toBeTruthy();
   });
 
-  it('abre Comunidades na raiz "/" para uma conta pronta', async () => {
+  it('abre o Início na raiz "/" também para uma conta pronta', async () => {
     estadoDaConta.valor = { temSessao: true, anonima: false, perfilSocialPendente: false };
     render(<App />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
-    expect(window.location.pathname).toBe('/comunidades');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' })).toBeTruthy();
+    expect(window.location.pathname).toBe('/');
   });
 
   it('mantém o visitante deslogado na Landing na raiz "/" sem forçar o feed', async () => {

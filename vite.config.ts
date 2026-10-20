@@ -69,6 +69,16 @@ export default defineConfig({
         */
         globIgnores: ['**/modelos/**'],
         /*
+          Sitemap e robots são arquivos técnicos, não rotas da SPA.
+
+          Se o navegador já tiver o service worker instalado, abrir
+          `/sitemap.xml` como navegação não pode cair no `index.html`: além de
+          mostrar a comunidade no lugar do XML, isso atrapalha a conferência
+          manual da entrega que o Google deve ler. Esses dois arquivos sempre
+          seguem para a rede.
+        */
+        navigateFallbackDenylist: [/^\/(?:sitemap\.xml|robots\.txt)$/],
+        /*
           ÁUDIO ASSINADO NUNCA É CACHEADO.
 
           Desde a 20260807000028 o bucket `audio_records` é privado e o áudio é

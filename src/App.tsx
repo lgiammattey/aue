@@ -18,6 +18,7 @@ const TelaDiretorioOpenDesign = lazy(() => import('./features/novo-aue/TelaDiret
 const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOpenDesign').then((m) => ({ default: m.TelaPerfilOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
+const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
@@ -207,6 +208,9 @@ export function App() {
           <Route path="/login" element={<InicioOpenDesign viewInicial="auth" />} />
           <Route path="/entrar" element={<Navigate to="/login" replace />} />
           <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />
+
+          {/* Administração: a autorização real fica na RPC; esta rota não entra na navegação pública. */}
+          <Route path="/admin" element={<TelaAdministracao />} />
 
           {/* Resenhas e Histórias */}
           <Route path="/resenha/:id" element={<EntradaHistoria />} />

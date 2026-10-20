@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
+import { ADSTERRA_CONFIG, anunciosAdsterraHabilitados } from '../../plataforma/web/adsterra';
 import type { ComunidadeDoForum } from '../../portas/forum';
 import type { PerfilPublico } from '../../portas/perfil';
 
@@ -103,6 +104,40 @@ export const PainelDireito = memo(function PainelDireito({
           })
         )}
       </div>
+
+      {anunciosAdsterraHabilitados && <div className="panel adsterra-smartlink-panel">
+        <span
+          style={{
+            fontSize: '11px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: 'var(--aue-accent, #c6ff00)',
+            fontWeight: 700,
+          }}
+        >
+          Parceiro do Bonde
+        </span>
+        <h2 style={{ marginTop: 4 }}>Combustível Oficial 🍺</h2>
+        <p style={{ fontSize: 13, color: 'var(--aue-muted)' }}>
+          Mantenha o gás e a pressão em dia. Acesse ofertas parceiras e apoie o Auê!
+        </p>
+        <a
+          href={ADSTERRA_CONFIG.smartlinkUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="join"
+          style={{
+            display: 'inline-block',
+            textAlign: 'center',
+            marginTop: 10,
+            textDecoration: 'none',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          Conferir ofertas parceiras ↗
+        </a>
+      </div>}
 
       {viewAtual !== 'comunidade' && (
         <div className="panel">

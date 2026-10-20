@@ -80,6 +80,12 @@ export interface Flags {
    */
   disputaNaArena: boolean;
 
+  /**
+   * Placements externos da Adsterra. Desligados até cada criativo ser revisado
+   * no navegador; nunca ligam por uma variável ausente.
+   */
+  anunciosAdsterra: boolean;
+
 
 }
 
@@ -87,6 +93,7 @@ export const FLAGS: Flags = {
   loginSocial: ligada(import.meta.env.VITE_FEATURE_LOGIN_SOCIAL),
   disputaLocal: ligada(import.meta.env.VITE_FEATURE_DISPUTA_LOCAL),
   disputaNaArena: ligada(import.meta.env.VITE_FEATURE_DISPUTA_NA_ARENA),
+  anunciosAdsterra: ligada(import.meta.env.VITE_FEATURE_ADSTERRA),
 };
 
 /** Exportado para teste; não use para decidir nada em tela. */

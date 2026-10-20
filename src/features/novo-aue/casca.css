@@ -45,6 +45,30 @@
   box-sizing: border-box;
 }
 
+.app--auth {
+  display: block;
+  max-width: none;
+  background: var(--aue-bg);
+}
+
+.auth-main {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.app--auth .auth-shell {
+  width: min(440px, 100%);
+  margin: 0 !important;
+}
+
+.app--auth .dialog {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: var(--radius-lg, 24px);
+}
+
 /* ==================== BARRA LATERAL ESQUERDA ==================== */
 .sidebar {
   border-right: 1px solid var(--aue-line);

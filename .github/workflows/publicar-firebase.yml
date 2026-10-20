@@ -148,6 +148,8 @@ jobs:
           VITE_CONTATO_PRIVACIDADE: ${{ secrets.VITE_CONTATO_PRIVACIDADE }}
           VITE_FEATURE_DISPUTA_LOCAL: '1'
           VITE_FEATURE_DISPUTA_NA_ARENA: '1'
+          # Placements recebidos exibiram conteúdo enganoso no teste; bloqueados.
+          VITE_FEATURE_ADSTERRA: '0'
           # No agendamento, publicar sem as páginas dos grupos apagaria do Google
           # o que já estava lá: se a leitura falhar, o build falha.
           EXIGIR_GRUPOS: ${{ github.event_name == 'schedule' && '1' || '0' }}

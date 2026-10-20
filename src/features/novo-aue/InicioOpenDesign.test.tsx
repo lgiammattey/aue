@@ -6,6 +6,8 @@ import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeForum } from '../../portas/forum';
 import type { PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
 import type { CapturaDeAudio } from '../../portas/captura';
+import type { PortaDeConta } from '../../portas/conta';
+import type { PortaDePerfil } from '../../portas/perfil';
 import { InicioOpenDesign } from './InicioOpenDesign';
 
 describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
@@ -282,7 +284,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
   it('renderiza a tela de login 1:1 e permite alternar entre os painéis de autenticação', async () => {
     const mockConta = {
       estado: vi.fn(async () => ({ temSessao: false, anonima: false, perfilSocialPendente: false, podeParticiparSocialmente: false })),
-      cadastrar: vi.fn(),
+      cadastrar: vi.fn(async () => ({ ok: true as const })),
       entrar: vi.fn(async () => ({ ok: true as const })),
       enviarLinkDeRedefinicao: vi.fn(async () => ({ ok: true as const })),
       redefinirSenha: vi.fn(),
@@ -302,6 +304,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     // Painel Login 1:1
     expect(screen.getByRole('heading', { level: 1, name: 'Entra na roda' })).toBeTruthy();
+    expect(screen.queryByLabelText('Navegação lateral')).toBeNull();
+    expect(screen.queryByLabelText('Painel complementar')).toBeNull();
     expect(screen.getByLabelText('E-mail')).toBeTruthy();
     expect(screen.getByLabelText('Senha')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Entrar no Auê' })).toBeTruthy();
@@ -311,12 +315,43 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     fireEvent.click(btnEsqueci);
     expect(screen.getByRole('heading', { level: 1, name: 'Recuperar senha' })).toBeTruthy();
 
-    // Alterna para Pedir convite (invite)
+    // Cadastro aberto: não há lista de convite.
     const btnVoltar = screen.getByRole('button', { name: 'Voltar para entrar' });
     fireEvent.click(btnVoltar);
-    const btnConvite = screen.getByRole('button', { name: 'Pedir convite' });
-    fireEvent.click(btnConvite);
-    expect(screen.getByRole('heading', { level: 1, name: 'Pedir convite' })).toBeTruthy();
+    const btnCriarConta = screen.getByRole('button', { name: 'Criar conta' });
+    fireEvent.click(btnCriarConta);
+    expect(screen.getByRole('heading', { level: 1, name: 'Cria sua conta' })).toBeTruthy();
+    expect(screen.getByLabelText('Apelido')).toBeTruthy();
+    expect(screen.getByLabelText('@')).toBeTruthy();
+    expect(screen.getByLabelText('E-mail para cadastro')).toBeTruthy();
+    expect(screen.getByLabelText('Senha para cadastro')).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Luiz' } });
+    fireEvent.change(screen.getByLabelText('@'), { target: { value: 'luiz_arrota' } });
+    fireEvent.change(screen.getByLabelText('E-mail para cadastro'), { target: { value: 'luiz@example.com' } });
+    fireEvent.change(screen.getByLabelText('Senha para cadastro'), { target: { value: 'senha-segura' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
+    await waitFor(() => expect(mockConta.cadastrar).toHaveBeenCalledWith({
+      apelido: 'Luiz', handle: 'luiz_arrota', email: 'luiz@example.com', senha: 'senha-segura',
+    }));
+  });
+
+  it('fecha a ficha social pendente antes de liberar o perfil', async () => {
+    const conta: PortaDeConta = {
+      estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: true, podeParticiparSocialmente: false })),
+      cadastrar: vi.fn(), entrar: vi.fn(), enviarLinkDeRedefinicao: vi.fn(), redefinirSenha: vi.fn(), sair: vi.fn(),
+    };
+    const perfil = {
+      obterMeuPerfilParaEdicao: vi.fn(async () => ({ apelido: 'Luiz', handle: 'luiz' })),
+      concluirMeuPerfilSocial: vi.fn(async () => ({ ok: true as const, perfil: {
+        id: 'eu', apelido: 'Luiz', handle: 'luiz', fundador: false, daCasa: false, criadoEm: '2026-10-20', totalCausos: 0, totalSeguidores: 0, totalSeguindo: 0, euSigo: false, souEu: true,
+      } })),
+    } as unknown as PortaDePerfil;
+    render(<MemoryRouter><InicioOpenDesign portaForum={mockForum} portaComunidade={mockComunidade} portaConta={conta} portaPerfil={perfil} viewInicial="perfil" /></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Termina sua ficha.' })).toBeTruthy();
+    expect(screen.getByDisplayValue('Luiz')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar no Bonde' }));
+    await waitFor(() => expect(perfil.concluirMeuPerfilSocial).toHaveBeenCalledWith(expect.objectContaining({ apelido: 'Luiz', handle: 'luiz' })));
   });
 
   it('permite abrir o modal de comentários, ler a conversa e responder na roda', async () => {

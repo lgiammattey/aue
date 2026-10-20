@@ -13,8 +13,6 @@ const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade')
 const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then((m) => ({ default: m.TelaLanding })));
 const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
 const InicioOpenDesign = lazy(() => import('./features/novo-aue/InicioOpenDesign').then((m) => ({ default: m.InicioOpenDesign })));
-const TelaComunidadeOpenDesign = lazy(() => import('./features/novo-aue/TelaComunidadeOpenDesign').then((m) => ({ default: m.TelaComunidadeOpenDesign })));
-const TelaDiretorioOpenDesign = lazy(() => import('./features/novo-aue/TelaDiretorioOpenDesign').then((m) => ({ default: m.TelaDiretorioOpenDesign })));
 const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOpenDesign').then((m) => ({ default: m.TelaPerfilOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
@@ -182,14 +180,11 @@ export function App() {
           {/* Arena de Arrotos */}
           <Route path="/arena" element={<EntradaArena />} />
 
-          {/* Comunidades (Open Design 1:1) */}
+          {/* Comunidades: o fórum é a superfície canônica de publicação e conversa. */}
           <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />
           <Route path="/bondes" element={<Navigate to="/comunidades" replace />} />
           <Route path="/comm" element={<Navigate to="/comunidades" replace />} />
-          <Route path="/comunidades" element={<TelaDiretorioOpenDesign />} />
-          <Route path="/c/:slug" element={<TelaComunidadeOpenDesign />} />
-          <Route path="/c/:slug/novo" element={<TelaComunidadeOpenDesign abrirCompositor />} />
-          {/* Sub-rotas do fórum como /c/:slug/t/:id e /explorar */}
+          {/* Diretório, comunidade, novo tópico, conversa e explorar. */}
           {rotasDoForum()}
           <Route path="/comunidade/:slug" element={<AliasDeComunidade />} />
           <Route path="/comunidades/:slug" element={<AliasDeComunidade />} />

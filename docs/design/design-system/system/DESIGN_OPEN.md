@@ -69,3 +69,10 @@ cards e gradientes de capa seguem o protótipo; sombra fica restrita a modal.
 
 Cada tela nova compara o layout aberto com a porta de dados. Se o desenho pede
 algo inexistente, mostra ausência honesta ou abre um Cartão novo.
+
+## Idiomas
+
+Toda página desta casca nasce pronta para uma chave de tradução, nunca com copy
+espalhada em JSX. O seletor aponta para a URL no idioma equivalente e preserva
+a rota. A decisão completa de URL, SEO, post original e tradução sob demanda
+está no [ADR 0011](../../../technical/adr/0011-internacionalizacao-e-seo.md).

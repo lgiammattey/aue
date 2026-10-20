@@ -149,6 +149,7 @@ A regra que mais aparece no dia a dia:
 - **Issue e PR são anotações de primos experientes**, diretos, claros e sem corporativismo.
 - **Nenhuma entrega sem aceite do Tiago.** Qualidade é do Marcelo; aceite contra os requisitos é do Tiago.
 - **Fidelidade ao Open Design:** comunidade, feed, perfil e acesso usam `DESIGN_OPEN.md`: fundo escuro `#101114`, superfícies grafite, roxo, coral e lima, cards de 12px e grade de três colunas. Conteúdo demonstrativo do snapshot não vira dado de produto. Arena preserva suas regras e só muda visual com decisão explícita.
+- **Idiomas e busca internacional:** páginas localizáveis nascem preparadas para chaves de tradução e URLs por idioma. Tradução de comunidade é sob demanda, preserva o original e não é indexada. A automação n8n prepara conteúdo fora do caminho crítico; URL, `hreflang`, canonical e sitemap obedecem o ADR 0011.
 - **Nenhum merge com `typecheck`, `lint`, `test` ou `build` falhando.**
 - **Nenhum desenvolvimento direto na `main`.**
 - **Commits e PRs em PT-BR.**

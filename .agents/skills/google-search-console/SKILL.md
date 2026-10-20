@@ -45,3 +45,8 @@ Procedimento do **Rodrigo (Especialista em Google Search Console & SEO Técnico)
 - **SEO não justifica texto de robô:** Nada de empilhar palavras-chave repetitivas que cheiram a IA. O conteúdo precisa ser autêntico, divertido e útil para o jogador real.
 - **Link do zap não é link indexável:** URLs de duelos privados (X1) pertencem aos duelistas e não devem ser indexadas no Google.
 - **`src/seo-publico.test.ts` é sagrado:** Nenhuma alteração de rota, sitemap ou tag canônica é feita sem atualizar e passar o teste de paridade do Marcelo.
+- **Idioma é URL, não cookie:** versão pública traduzida tem URL própria,
+  canonical próprio, `hreflang` recíproco e sitemap só depois de estar pronta.
+  Nunca redirecionar crawler por IP ou `Accept-Language`.
+- **Automação não é fazenda de SEO:** n8n pode preparar rascunho, mas não pode
+  despejar traduções automáticas indexáveis sem revisão e valor real.

@@ -13,6 +13,7 @@ import type { ComunidadeDoForum } from '../../portas/forum';
 import { enderecoDaComunidade, enderecoDoPerfil, enderecoDoTopico } from './enderecos';
 import { IconeFechado, IconeFixado } from './Icones';
 import { useAnunciar } from './encaixes';
+import { AnexoPublicadoDoForum } from './MidiaDoForum';
 
 
 // ---------------------------------------------------------------------------
@@ -209,6 +210,9 @@ export interface DadosDaLinhaDeTopico {
   readonly respostasTotal: number;
   readonly comunidade: { readonly slug: string; readonly nome: string };
   readonly autorNome: string;
+  readonly corpo?: string;
+  /** Entregue em lote pela tela quando a porta de prévias estiver disponível. */
+  readonly previasDeRespostas?: readonly { readonly id: string; readonly corpo: string | null }[];
 }
 
 /**
@@ -235,9 +239,15 @@ export function LinhaDeTopico({
     <li className={`forum-linha${comComunidade ? ' forum-linha--com-comunidade' : ''}`}>
       <h2 className="forum-linha__titulo">
         <Link ref={link} to={enderecoDoTopico(topico.comunidade.slug, topico.id)}>
-          {topico.titulo}
+          {topico.corpo?.trim() || topico.titulo || 'Post com anexo'}
         </Link>
       </h2>
+      <AnexoPublicadoDoForum alvo="topico" alvoId={topico.id} />
+      {topico.previasDeRespostas && topico.previasDeRespostas.length > 0 && (
+        <div className="forum-linha__previas" aria-label="Prévia de respostas">
+          {topico.previasDeRespostas.slice(0, 2).map((resposta) => <p key={resposta.id}>{resposta.corpo}</p>)}
+        </div>
+      )}
       <p className="forum-linha__meta">
         <Marcadores fixado={topico.fixado} fechado={topico.status === 'fechado'} />
         {(topico.fixado || topico.status === 'fechado') && ' · '}

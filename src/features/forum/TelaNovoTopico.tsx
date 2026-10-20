@@ -86,7 +86,9 @@ function NovoTopico({ contexto, contaId }: { readonly contexto: ContextoDaComuni
       inicial={inicial}
       aoMudarTexto={(texto: TextoDoTopico) => guardarRascunhoDeTopico(armazenamento, chave, texto)}
       aoDescartar={() => apagarRascunho(armazenamento, chave)}
-      enviar={(texto) => forum.criarTopico({ comunidadeSlug: slug, titulo: texto.titulo, corpo: texto.corpo })}
+      // Título pertence ao formato antigo do backend; no composer novo ele não
+      // é uma decisão da pessoa nem aparece no card. O corpo é o post raiz.
+      enviar={(texto, anexo) => forum.criarTopico({ comunidadeSlug: slug, corpo: texto.corpo, ...(anexo ? { anexo } : {}) })}
       aoSucesso={(valor) => {
         const criado = valor as TopicoCriado;
         apagarRascunho(armazenamento, chave);

@@ -83,7 +83,10 @@ export function itemDoExplorar(parcial: Partial<TopicoDoExplorar> & { id: string
     ultimaAtividadeEm: new Date(AGORA - 3 * 3_600_000).toISOString(),
     respostasTotal: 8,
     ...parcial,
-  };
+    // O contrato de explorar ainda não tipa `corpo`; a tela o trata como
+    // opcional enquanto o adaptador novo é integrado.
+    corpo: `Post ${parcial.id}`,
+  } as TopicoDoExplorar;
 }
 
 /** Porta do fórum que falha alto se a tela chamar o que o teste não previu. */

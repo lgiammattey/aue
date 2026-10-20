@@ -37,6 +37,7 @@ import { MenuDeAcoes, type ItemDoMenu } from './MenuDeAcoes';
 import { usePapel } from './papel';
 import { useToast } from './toast';
 import { useParticiparDaComunidade } from './useParticiparDaComunidade';
+import { AnexoPublicadoDoForum } from './MidiaDoForum';
 
 const TAMANHO_DA_PAGINA_DE_RESPOSTAS = 100;
 
@@ -102,7 +103,7 @@ function ComposerInline({ resposta, devolverFoco }: { readonly resposta: Respost
       operacao="resposta"
       texto={texto}
       aoMudarTexto={mudar}
-      enviar={(corpo) => forum.responderTopico({ topicoId: c.topicoId, corpo, paiId: resposta.id })}
+      enviar={(corpo, anexo) => forum.responderTopico({ topicoId: c.topicoId, corpo, paiId: resposta.id, ...(anexo ? { anexo } : {}) })}
       aoSucesso={c.depoisDeEnviar}
       aoCancelar={() => {
         c.fechar();
@@ -222,6 +223,7 @@ function ItemDeResposta({ no, agora }: { readonly no: NoDeResposta<RespostaDoFor
           ) : (
             <p className="forum-resposta__corpo">{normalizarQuebras(r.corpo ?? '')}</p>
           )}
+          {!editandoAqui && <AnexoPublicadoDoForum alvo="resposta" alvoId={r.id} />}
           {!editandoAqui && (podeResponderAqui || itens.length > 0) && (
             <div className="forum-resposta__acoes">
               {podeResponderAqui && (
@@ -530,7 +532,7 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
             operacao="resposta"
             texto={textoPrincipal}
             aoMudarTexto={mudarTextoPrincipal}
-            enviar={(corpoDaResposta) => forum.responderTopico({ topicoId: id, corpo: corpoDaResposta })}
+            enviar={(corpoDaResposta, anexo) => forum.responderTopico({ topicoId: id, corpo: corpoDaResposta, ...(anexo ? { anexo } : {}) })}
             aoSucesso={depoisDeEnviar}
             comunidade={comunidade}
             caminhoDeVolta={caminho}

@@ -29,12 +29,12 @@ function abrir(forum: PortaDeForum, entrada = ROTA, extra = {}) {
 }
 
 describe('/c/:slug/t/:id: a conversa', () => {
-  it('mostra título (H1), autoria, mensagem inicial inteira e a contagem de respostas do servidor', async () => {
+  it('mostra um H1 contextual, autoria, mensagem inicial inteira e a contagem de respostas do servidor', async () => {
     const longo = `${'a'.repeat(400)}\n\n\n\n${'b'.repeat(900)}`;
     const t = topico({ titulo: 'Título do tópico', corpo: longo, respostasTotal: 8, editadoEm: '2026-10-19T14:00:00Z' });
     abrir(forumDo(t, vi.fn(async () => paginaR([resposta({ id: 'r1' }), resposta({ id: 'r2' })]))));
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Título do tópico' })).toBeDefined();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Conversa em Na reunião da firma' })).toBeDefined();
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     const artigo = screen.getByRole('article');
     expect(within(artigo).getByText('Ana Souza')).toBeDefined();
@@ -47,11 +47,11 @@ describe('/c/:slug/t/:id: a conversa', () => {
     expect(screen.getByText('Mais antigas primeiro')).toBeDefined();
   });
 
-  it('título da aba "{Tópico} · {Comunidade} · Auê!" e o link do autor leva ao perfil', async () => {
+  it('título da aba contextual e o link do autor leva ao perfil', async () => {
     const ambiente = ambienteFalso();
     abrir(forumDo(topico({ titulo: 'Papo reto' })), ROTA, { ambiente });
-    await screen.findByRole('heading', { level: 1, name: 'Papo reto' });
-    expect(ambiente.titulo).toBe('Papo reto · Na reunião da firma · Auê!');
+    await screen.findByRole('heading', { level: 1, name: 'Conversa em Na reunião da firma' });
+    expect(ambiente.titulo).toBe('Conversa em Na reunião da firma · Auê!');
     expect(screen.getAllByRole('link', { name: 'Ana Souza' })[0].getAttribute('href')).toBe('/u/ana');
   });
 
@@ -84,7 +84,7 @@ describe('/c/:slug/t/:id: a conversa', () => {
     expect(alerta.textContent).toContain('Deu ruim pra carregar o tópico.');
     expect(screen.queryByText('Esse tópico não está disponível.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Voltou' })).toBeDefined();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Conversa em Na reunião da firma' })).toBeDefined();
   });
 
   it('sem internet, o erro de abrir o tópico diz "Sem internet."', async () => {
@@ -97,7 +97,7 @@ describe('/c/:slug/t/:id: a conversa', () => {
   it('slug da URL diferente do slug do tópico: corrige a URL (replace) e nunca mostra sob outra comunidade', async () => {
     const t = topico({ titulo: 'Do lugar certo' });
     abrir(forumDo(t), `/c/outra-comunidade/t/${ID}`);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Do lugar certo' })).toBeDefined();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Conversa em Na reunião da firma' })).toBeDefined();
     expect(sondas.caminho).toBe(ROTA);
   });
 
@@ -111,7 +111,7 @@ describe('/c/:slug/t/:id: a conversa', () => {
     const t = topico({ titulo: '<b>negrito</b>', corpo: '<img src=x onerror=alert(1)>' });
     abrir(forumDo(t, vi.fn(async () => paginaR([resposta({ id: 'r1', corpo: '<script>alert(1)</script>' })]))));
     await screen.findByText('<script>alert(1)</script>');
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('<b>negrito</b>');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Conversa em Na reunião da firma');
     expect(document.querySelector('main img, main script, main b')).toBeNull();
   });
 
@@ -229,7 +229,7 @@ describe('respostas encadeadas', () => {
     abrir(forumDo(topico({ titulo: 'Fica no ar', respostasTotal: 1 }), respostas));
     const alerta = await screen.findByRole('alert');
     expect(alerta.textContent).toContain('Deu ruim pra carregar as respostas.');
-    expect(screen.getByRole('heading', { level: 1, name: 'Fica no ar' })).toBeDefined();
+    expect(screen.getByRole('heading', { level: 1, name: 'Conversa em Na reunião da firma' })).toBeDefined();
     expect(screen.queryByText('Ninguém respondeu ainda.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
     expect(await screen.findByText('texto r1')).toBeDefined();

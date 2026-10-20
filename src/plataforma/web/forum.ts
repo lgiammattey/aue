@@ -1,6 +1,9 @@
 import { configuracaoAusente, supabase } from '../../db/supabase';
+import { criarGravacaoLivreDoForum } from './gravacaoLivreDoForum';
 import type {
+  AnexoDoForum,
   AnexoDeAudioDoTopico,
+  AnexoParaPublicar,
   AutorDoForum,
   ComunidadeDoForum,
   CursorDeTopicos,
@@ -10,6 +13,7 @@ import type {
   OrdemDosTopicos,
   PaginaDoForum,
   PortaDeForum,
+  PreviaDeRespostaDoTopico,
   ReferenciaDeComunidade,
   ResultadoDaEscrita,
   ResultadoDaLeitura,
@@ -321,6 +325,81 @@ function paraRespostaDoAutor(l: Linha): RespostaDoAutor {
   };
 }
 
+function inteiroPositivoOuNulo(l: Linha, c: string): number | null {
+  const v = l[c];
+  if (v === null || v === undefined) return null;
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < 1) malformada(c);
+  return v;
+}
+
+function paraAnexoDoForum(l: Linha): AnexoDoForum {
+  const alvo = texto(l, 'alvo_tipo');
+  if (alvo !== 'topico' && alvo !== 'resposta') malformada('alvo_tipo');
+  const tipo = texto(l, 'tipo');
+  const alvoId = texto(l, 'alvo_id');
+  if (tipo === 'video_externo') {
+    return {
+      alvo, alvoId, tipo: 'videoExterno', caminho: null, mime: null,
+      tamanhoBytes: null, duracaoMs: null, urlVideo: texto(l, 'url_video'),
+    };
+  }
+  if (tipo !== 'imagem' && tipo !== 'audio') malformada('tipo');
+  const duracaoMs = inteiroPositivoOuNulo(l, 'duracao_ms');
+  if ((tipo === 'audio') !== (duracaoMs !== null)) malformada('duracao_ms');
+  return {
+    alvo, alvoId, tipo, caminho: texto(l, 'caminho'), mime: texto(l, 'mime'),
+    tamanhoBytes: inteiroPositivoOuNulo(l, 'tamanho_bytes') ?? malformada('tamanho_bytes'),
+    duracaoMs, urlVideo: null,
+  };
+}
+
+function anexoDaPrevia(l: Linha, respostaId: string): AnexoDoForum | null {
+  const tipo = textoOuNulo(l, 'anexo_tipo');
+  if (tipo === null) return null;
+  return paraAnexoDoForum({
+    alvo_tipo: 'resposta', alvo_id: respostaId, tipo,
+    caminho: l.anexo_caminho, mime: l.anexo_mime,
+    tamanho_bytes: l.anexo_tamanho_bytes, duracao_ms: l.anexo_duracao_ms,
+    url_video: l.video_externo_url,
+  });
+}
+
+function paraPreviaDeResposta(l: Linha): PreviaDeRespostaDoTopico {
+  const resposta = paraResposta(l);
+  return { topicoId: resposta.topicoId, resposta, anexo: anexoDaPrevia(l, resposta.id) };
+}
+
+function parametrosDoAnexo(anexo: AnexoParaPublicar | null | undefined): Record<string, unknown> {
+  if (!anexo) {
+    return {
+      p_anexo_tipo: null, p_anexo_caminho: null, p_anexo_mime: null,
+      p_anexo_tamanho_bytes: null, p_anexo_duracao_ms: null, p_url_video: null,
+    };
+  }
+  if (anexo.tipo === 'videoExterno') {
+    return {
+      p_anexo_tipo: 'video_externo', p_anexo_caminho: null, p_anexo_mime: null,
+      p_anexo_tamanho_bytes: null, p_anexo_duracao_ms: null, p_url_video: anexo.url,
+    };
+  }
+  return {
+    p_anexo_tipo: anexo.tipo, p_anexo_caminho: anexo.caminho, p_anexo_mime: anexo.mime,
+    p_anexo_tamanho_bytes: anexo.tamanhoBytes,
+    p_anexo_duracao_ms: anexo.tipo === 'audio' ? anexo.duracaoMs ?? null : null,
+    p_url_video: null,
+  };
+}
+
+const EXTENSAO_POR_MIME: Readonly<Record<string, string>> = {
+  'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
+  'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3',
+};
+
+/** `MediaRecorder` costuma acrescentar codecs; o bucket aceita apenas a base. */
+export function normalizarMimeParaAnexo(mime: string): string {
+  return mime.trim().toLowerCase().split(';', 1)[0] ?? '';
+}
+
 // ---------------------------------------------------------------------------
 // Paginação
 // ---------------------------------------------------------------------------
@@ -484,6 +563,20 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       );
     },
 
+    listarPreviaRespostasDosTopicos(topicoIds) {
+      const ids = [...new Set(topicoIds)].filter((id) => UUID.test(id)).slice(0, 100);
+      if (ids.length === 0) {
+        return usaServidor()
+          ? Promise.resolve({ ok: true as const, valor: [] as readonly PreviaDeRespostaDoTopico[] })
+          : Promise.resolve({ ok: false as const, motivo: 'semServidor' as const });
+      }
+      return ler(
+        'listar_previa_respostas_dos_topicos',
+        { p_topicos: ids, p_limite_por_topico: 2 },
+        (linhas) => linhas.map(paraPreviaDeResposta),
+      );
+    },
+
     explorarTopicos(op = {}) {
       const ordem = ordemOuPadrao(op.ordem);
       const limite = limiteEfetivo(op.limite, LIMITE_PADRAO_DE_TOPICOS, LIMITE_MAXIMO_DE_TOPICOS);
@@ -533,10 +626,51 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       );
     },
 
+    listarAnexosDoForum(ids) {
+      const topicos = [...new Set(ids.topicoIds ?? [])].filter((id) => UUID.test(id));
+      const respostas = [...new Set(ids.respostaIds ?? [])].filter((id) => UUID.test(id));
+      if (topicos.length === 0 && respostas.length === 0) {
+        return usaServidor()
+          ? Promise.resolve({ ok: true as const, valor: [] as readonly AnexoDoForum[] })
+          : Promise.resolve({ ok: false as const, motivo: 'semServidor' as const });
+      }
+      return ler(
+        'listar_anexos_do_forum',
+        { p_topicos: topicos, p_respostas: respostas },
+        (linhas) => linhas.map(paraAnexoDoForum),
+      );
+    },
+
+    async assinarAnexoDoForum(caminho) {
+      if (!usaServidor()) return { ok: false, motivo: 'semServidor' };
+      try {
+        const { data, error } = await comTempo(
+          supabase.storage.from('anexos_do_forum').createSignedUrl(caminho, 300),
+          TEMPO_DA_LEITURA_MS,
+          'assinar_anexo_do_forum',
+        );
+        if (error || !data?.signedUrl) {
+          if (error) console.error('Falha ao assinar anexo do fórum', error);
+          return { ok: false, motivo: 'falhou' };
+        }
+        return { ok: true, valor: data.signedUrl };
+      } catch (erro) {
+        console.error('Falha ao assinar anexo do fórum', erro);
+        return { ok: false, motivo: 'falhou' };
+      }
+    },
+
+    criarGravacaoLivreDoForum,
+
     criarTopico(pedido) {
       return escrever(
-        'criar_topico',
-        { p_slug: pedido.comunidadeSlug, p_titulo: pedido.titulo, p_corpo: pedido.corpo },
+        'criar_topico_com_anexo',
+        {
+          p_slug: pedido.comunidadeSlug,
+          p_titulo: pedido.titulo ?? '',
+          p_corpo: pedido.corpo,
+          ...parametrosDoAnexo(pedido.anexo),
+        },
         (dados): TopicoCriado => {
           const l = linhaDe(dados);
           return { id: texto(l, 'id'), criadoEm: texto(l, 'criado_em') };
@@ -546,8 +680,13 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
 
     responderTopico(pedido) {
       return escrever(
-        'responder_topico',
-        { p_topico_id: pedido.topicoId, p_corpo: pedido.corpo, p_pai_id: pedido.paiId ?? null },
+        'responder_topico_com_anexo',
+        {
+          p_topico_id: pedido.topicoId,
+          p_corpo: pedido.corpo,
+          p_pai_id: pedido.paiId ?? null,
+          ...parametrosDoAnexo(pedido.anexo),
+        },
         (dados): RespostaCriada => {
           const l = linhaDe(dados);
           return {
@@ -559,6 +698,46 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
           };
         },
       );
+    },
+
+    async enviarAnexoDoForum(pedido) {
+      if (!usaServidor()) return { ok: false, motivo: 'semServidor' };
+      const conta = await temConta();
+      if (conta === 'erro') return { ok: false, motivo: 'falhou' };
+      if (!conta) return { ok: false, motivo: 'precisaEntrar' };
+      const mime = normalizarMimeParaAnexo(pedido.arquivo.type);
+      const extensao = EXTENSAO_POR_MIME[mime];
+      const limite = pedido.tipo === 'imagem' ? 8 * 1024 * 1024 : 10 * 1024 * 1024;
+      const duracao = pedido.duracaoMs;
+      if (!extensao || pedido.arquivo.size < 1 || pedido.arquivo.size > limite
+        || (pedido.tipo === 'imagem' && !mime.startsWith('image/'))
+        || (pedido.tipo === 'audio' && (!mime.startsWith('audio/') || !Number.isInteger(duracao) || duracao! < 1 || duracao! > 60_000))) {
+        return { ok: false, motivo: 'falhou' };
+      }
+      try {
+        const sessao = await supabase.auth.getSession();
+        const uid = sessao.data.session?.user.id;
+        if (!uid || sessao.data.session?.user.is_anonymous) return { ok: false, motivo: 'precisaEntrar' };
+        const caminho = `${uid}/forum/${crypto.randomUUID()}.${extensao}`;
+        const { error } = await comTempo(
+          supabase.storage.from('anexos_do_forum').upload(caminho, pedido.arquivo, { contentType: mime, upsert: false }),
+          TEMPO_DA_ESCRITA_MS,
+          'enviar_anexo_do_forum',
+        );
+        if (error) {
+          console.error('Falha ao enviar anexo do fórum', error);
+          return { ok: false, motivo: 'falhou' };
+        }
+        return {
+          ok: true,
+          valor: pedido.tipo === 'audio'
+            ? { tipo: 'audio', caminho, mime, tamanhoBytes: pedido.arquivo.size, duracaoMs: duracao! }
+            : { tipo: 'imagem', caminho, mime, tamanhoBytes: pedido.arquivo.size },
+        };
+      } catch (erro) {
+        console.error('Falha ao enviar anexo do fórum', erro);
+        return { ok: false, motivo: 'semConfirmacao' };
+      }
     },
 
     editarTopico(pedido) {

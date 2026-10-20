@@ -2,12 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const rpc = vi.fn();
 const getSession = vi.fn();
+const upload = vi.fn();
+const createSignedUrl = vi.fn();
 
 vi.mock('../../db/supabase', () => ({
   configuracaoAusente: false,
   supabase: {
     rpc: (...a: unknown[]) => rpc(...a),
     auth: { getSession: (...a: unknown[]) => getSession(...a) },
+    storage: { from: () => ({ upload: (...a: unknown[]) => upload(...a), createSignedUrl: (...a: unknown[]) => createSignedUrl(...a) }) },
   },
 }));
 
@@ -84,6 +87,8 @@ function comoMembro() {
 beforeEach(() => {
   rpc.mockReset();
   getSession.mockReset();
+  upload.mockReset();
+  createSignedUrl.mockReset();
   vi.spyOn(console, 'error').mockImplementation(() => {});
   comoMembro();
 });
@@ -100,6 +105,15 @@ describe('sem servidor', () => {
     });
     expect(rpc).not.toHaveBeenCalled();
     expect(getSession).not.toHaveBeenCalled();
+  });
+});
+
+describe('dependência de gravação livre', () => {
+  it('a expõe pela PortaDeForum; tela não precisa importar a plataforma', () => {
+    const gravador = criarForumWeb().criarGravacaoLivreDoForum?.();
+    expect(gravador).toMatchObject({
+      iniciar: expect.any(Function), parar: expect.any(Function), cancelar: expect.any(Function),
+    });
   });
 });
 
@@ -151,6 +165,23 @@ describe('cursor com microssegundo', () => {
       p_cursor_criado_em: '2026-10-19T12:00:00.000002+00:00',
       p_cursor_id: ID_C,
     });
+  });
+
+  it('prévia em lote pede uma RPC para a página toda, limita a duas por tópico e traz anexo junto', async () => {
+    rpc.mockResolvedValue({
+      data: [
+        { ...linhaDeResposta({ id: ID_A, topico_id: ID_B }), anexo_tipo: null, anexo_caminho: null, anexo_mime: null, anexo_tamanho_bytes: null, anexo_duracao_ms: null, video_externo_url: null },
+        { ...linhaDeResposta({ id: ID_C, topico_id: ID_B, criado_em: '2026-10-19T12:00:01.000001+00:00' }), anexo_tipo: 'audio', anexo_caminho: 'u/forum/a.webm', anexo_mime: 'audio/webm', anexo_tamanho_bytes: 12, anexo_duracao_ms: 1000, video_externo_url: null },
+      ], error: null,
+    });
+    const r = await criarForumWeb().listarPreviaRespostasDosTopicos?.([ID_B, ID_B, 'fora-do-formato']);
+    expect(r?.ok).toBe(true);
+    expect(r?.ok && r.valor).toMatchObject([
+      { topicoId: ID_B, resposta: { id: ID_A }, anexo: null },
+      { topicoId: ID_B, resposta: { id: ID_C }, anexo: { tipo: 'audio', caminho: 'u/forum/a.webm', duracaoMs: 1000 } },
+    ]);
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith('listar_previa_respostas_dos_topicos', { p_topicos: [ID_B], p_limite_por_topico: 2 });
   });
 
   it('explorarTopicos: cursor segue a coluna da ordem escolhida', async () => {
@@ -561,11 +592,15 @@ describe('escritas: rede e resposta estranha são ambíguas', () => {
 });
 
 describe('escritas: sucesso e o que vai ao servidor', () => {
-  it('criarTopico manda só slug, título e corpo, sem autor, nota, áudio nem contagem', async () => {
+  it('criarTopico manda texto e anexo nulo explícito; autor e contagem nunca saem da tela', async () => {
     rpc.mockResolvedValue({ data: { id: ID_A, criado_em: '2026-10-19T12:00:00.123456+00:00', autor_id: 'x' }, error: null });
     const r = await criarForumWeb().criarTopico({ comunidadeSlug: 'bonde-geral', titulo: 'Oi', corpo: 'Texto' });
     expect(r).toEqual({ ok: true, valor: { id: ID_A, criadoEm: '2026-10-19T12:00:00.123456+00:00' } });
-    expect(rpc).toHaveBeenCalledWith('criar_topico', { p_slug: 'bonde-geral', p_titulo: 'Oi', p_corpo: 'Texto' });
+    expect(rpc).toHaveBeenCalledWith('criar_topico_com_anexo', {
+      p_slug: 'bonde-geral', p_titulo: 'Oi', p_corpo: 'Texto',
+      p_anexo_tipo: null, p_anexo_caminho: null, p_anexo_mime: null,
+      p_anexo_tamanho_bytes: null, p_anexo_duracao_ms: null, p_url_video: null,
+    });
   });
 
   it('responderTopico manda o pai quando há e null quando não há', async () => {
@@ -579,9 +614,52 @@ describe('escritas: sucesso e o que vai ao servidor', () => {
       ok: true,
       valor: { id: ID_C, topicoId: ID_A, paiId: ID_B, nivel: 1, criadoEm: '2026-10-19T12:00:00.5+00:00' },
     });
-    expect(rpc).toHaveBeenLastCalledWith('responder_topico', { p_topico_id: ID_A, p_corpo: 'c', p_pai_id: ID_B });
+    expect(rpc).toHaveBeenLastCalledWith('responder_topico_com_anexo', {
+      p_topico_id: ID_A, p_corpo: 'c', p_pai_id: ID_B,
+      p_anexo_tipo: null, p_anexo_caminho: null, p_anexo_mime: null,
+      p_anexo_tamanho_bytes: null, p_anexo_duracao_ms: null, p_url_video: null,
+    });
     await f.responderTopico({ topicoId: ID_A, corpo: 'c' });
-    expect(rpc).toHaveBeenLastCalledWith('responder_topico', { p_topico_id: ID_A, p_corpo: 'c', p_pai_id: null });
+    expect(rpc).toHaveBeenLastCalledWith('responder_topico_com_anexo', expect.objectContaining({
+      p_topico_id: ID_A, p_corpo: 'c', p_pai_id: null,
+    }));
+  });
+
+  it('converte vídeo externo no payload e não tenta subir arquivo', async () => {
+    rpc.mockResolvedValue({ data: { id: ID_A, criado_em: '2026-10-19T12:00:00.123456+00:00' }, error: null });
+    await criarForumWeb().criarTopico({
+      comunidadeSlug: 'bonde-geral', corpo: 'Olha esse estrondo',
+      anexo: { tipo: 'videoExterno', url: 'https://youtu.be/abcDEF12345' },
+    });
+    expect(rpc).toHaveBeenCalledWith('criar_topico_com_anexo', expect.objectContaining({
+      p_titulo: '', p_anexo_tipo: 'video_externo', p_url_video: 'https://youtu.be/abcDEF12345',
+      p_anexo_caminho: null, p_anexo_mime: null,
+    }));
+  });
+
+  it('normaliza codecs do MediaRecorder antes do upload e preserva áudio válido para a RPC', async () => {
+    upload.mockResolvedValue({ error: null });
+    const audio = new Blob(['voz'], { type: 'audio/webm;codecs=opus' });
+    const r = await criarForumWeb().enviarAnexoDoForum?.({ tipo: 'audio', arquivo: audio, duracaoMs: 1_000 });
+    expect(r?.ok).toBe(true);
+    expect(upload).toHaveBeenCalledWith(expect.stringMatching(/\/forum\/[0-9a-f-]+\.webm$/), audio, {
+      contentType: 'audio/webm', upsert: false,
+    });
+    expect(r).toMatchObject({ ok: true, valor: { tipo: 'audio', mime: 'audio/webm', duracaoMs: 1_000 } });
+  });
+
+  it('lê mídia publicada por ids sem confundir vídeo externo com arquivo privado', async () => {
+    rpc.mockResolvedValue({
+      data: [
+        { alvo_tipo: 'topico', alvo_id: ID_A, tipo: 'audio', caminho: 'u/forum/a.webm', mime: 'audio/webm', tamanho_bytes: 120, duracao_ms: 60000, url_video: null },
+        { alvo_tipo: 'resposta', alvo_id: ID_B, tipo: 'video_externo', caminho: null, mime: null, tamanho_bytes: null, duracao_ms: null, url_video: 'https://www.youtube.com/watch?v=abcDEF12345' },
+      ], error: null,
+    });
+    const r = await criarForumWeb().listarAnexosDoForum?.({ topicoIds: [ID_A], respostaIds: [ID_B] });
+    expect(r).toEqual({ ok: true, valor: [
+      expect.objectContaining({ alvo: 'topico', tipo: 'audio', duracaoMs: 60000 }),
+      expect.objectContaining({ alvo: 'resposta', tipo: 'videoExterno', caminho: null }),
+    ] });
   });
 
   it('editarTopico manda null no campo que não mudou', async () => {

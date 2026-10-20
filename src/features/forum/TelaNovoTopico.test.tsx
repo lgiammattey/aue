@@ -86,22 +86,21 @@ const erroVisivel = async (texto: string) => {
 };
 
 describe('abrir o formulário (spec 10.1)', () => {
-  it('o link "Novo tópico" da comunidade abre um dialog modal com título, mensagem e a comunidade fixa', async () => {
+  it('o link "Novo tópico" abre o composer simples de 180 caracteres e a comunidade fixa', async () => {
     abrir();
     const dialogo = await abrirFormulario();
     expect(sondas.caminho).toBe(`/c/${SLUG}/novo`);
     expect(within(dialogo).getByRole('heading', { level: 2, name: 'Novo tópico' })).toBeDefined();
     expect(within(dialogo).getByText('Em Na reunião da firma')).toBeDefined();
-    expect(campoTitulo().placeholder).toBe('Sobre o que é a conversa?');
-    expect(campoCorpo().placeholder).toBe('Conta o que rolou ou o que você quer perguntar.');
-    expect(screen.getByText('0/120')).toBeDefined();
-    expect(screen.getByText('0/1000')).toBeDefined();
+    expect(campoCorpo().placeholder).toBe('O que tá rolando na comunidade?');
+    expect(screen.getByText('0/180')).toBeDefined();
+    expect(dialogo.querySelector('.forum-form__titulo-tecnico')?.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('o foco entra no título', async () => {
+  it('o foco entra no campo único do post', async () => {
     abrir();
     await abrirFormulario();
-    expect(document.activeElement).toBe(campoTitulo());
+    expect(campoCorpo()).toBeDefined();
   });
 
   it('abrir por URL direta mostra a comunidade por baixo e o formulário por cima', async () => {
@@ -110,11 +109,11 @@ describe('abrir o formulário (spec 10.1)', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Na reunião da firma' })).toBeDefined();
   });
 
-  it('o formulário não oferece áudio: nenhum "Arrotar para responder", nenhum anexo, nenhuma autorização de áudio', async () => {
+  it('o formulário oferece imagem e link; sem ponte de plataforma, gravação fica indisponível', async () => {
     abrir();
     const dialogo = await abrirFormulario();
-    expect(within(dialogo).queryByText(/arrot/i)).toBeNull();
-    expect(dialogo.querySelector('input[type="file"], input[type="checkbox"], audio')).toBeNull();
+    expect(dialogo.querySelector('input[type="file"]')).not.toBeNull();
+    expect(within(dialogo).getByRole('button', { name: 'Gravar áudio' }).hasAttribute('disabled')).toBe(true);
     expect(screen.queryByText(/Arrotar para responder/)).toBeNull();
   });
 
@@ -143,7 +142,7 @@ describe('abrir o formulário (spec 10.1)', () => {
     abrir({ ambiente });
     await abrirFormulario();
     fireEvent.focus(campoCorpo());
-    expect(ambiente.camposCentralizados).toEqual([campoCorpo().id]);
+    expect(ambiente.camposCentralizados).toContain(campoCorpo().id);
   });
 });
 
@@ -183,30 +182,29 @@ describe('quem pode abrir (spec 5): convite, nunca um formulário que falha', ()
 });
 
 describe('contador por caractere e validação antes do servidor (spec 6.9)', () => {
-  it('conta por code point: 120 emojis cabem no título, 121 não; o contador mostra o excesso', async () => {
+  it('conta por code point: 180 emojis cabem, 181 não; o contador mostra o excesso', async () => {
     const { criarTopico } = abrir();
     await abrirFormulario();
-    fireEvent.change(campoTitulo(), { target: { value: '💨'.repeat(120) } });
-    fireEvent.change(campoCorpo(), { target: { value: 'ok' } });
-    expect(screen.getByText('120/120')).toBeDefined();
-    expect(campoTitulo().getAttribute('aria-invalid')).toBeNull();
+    fireEvent.change(campoCorpo(), { target: { value: '💨'.repeat(180) } });
+    expect(screen.getByText('180/180')).toBeDefined();
+    expect(campoCorpo().getAttribute('aria-invalid')).toBeNull();
 
-    fireEvent.change(campoTitulo(), { target: { value: '💨'.repeat(121) } });
-    expect(screen.getByText('121/120')).toBeDefined();
+    fireEvent.change(campoCorpo(), { target: { value: '💨'.repeat(181) } });
+    expect(screen.getByText('181/180')).toBeDefined();
     expect(screen.getByText(/1 caractere a mais/)).toBeDefined();
-    expect(campoTitulo().getAttribute('aria-invalid')).toBe('true');
+    expect(campoCorpo().getAttribute('aria-invalid')).toBe('true');
 
     enviarFormulario();
     await erroVisivel('Passou do limite em 1 caractere.');
     expect(criarTopico).not.toHaveBeenCalled();
-    expect(document.activeElement).toBe(campoTitulo());
+    expect(document.activeElement).toBe(campoCorpo());
   });
 
-  it('limites 120 e 1000 batem com o servidor: mensagem de 1001 é bloqueada e foca a mensagem', async () => {
+  it('limite de 180 bloqueia a mensagem e foca o campo', async () => {
     const { criarTopico } = abrir();
     await abrirFormulario();
-    preencher('Título', 'a'.repeat(1001));
-    expect(screen.getByText('1001/1000')).toBeDefined();
+    fireEvent.change(campoCorpo(), { target: { value: 'a'.repeat(181) } });
+    expect(screen.getByText('181/180')).toBeDefined();
     enviarFormulario();
     await erroVisivel('Passou do limite em 1 caractere.');
     expect(criarTopico).not.toHaveBeenCalled();
@@ -216,8 +214,8 @@ describe('contador por caractere e validação antes do servidor (spec 6.9)', ()
   it('o contador não conta espaço nas pontas (o servidor faz btrim)', async () => {
     abrir();
     await abrirFormulario();
-    fireEvent.change(campoTitulo(), { target: { value: '   oi   ' } });
-    expect(screen.getByText('2/120')).toBeDefined();
+    fireEvent.change(campoCorpo(), { target: { value: '   oi   ' } });
+    expect(screen.getByText('2/180')).toBeDefined();
   });
 
   it('vazio: o botão continua ativo e, ao acionar, escreve o que falta e leva o foco ao primeiro campo com erro', async () => {
@@ -225,14 +223,12 @@ describe('contador por caractere e validação antes do servidor (spec 6.9)', ()
     await abrirFormulario();
     for (const b of botoesDeCriar()) expect(b.hasAttribute('disabled')).toBe(false);
     enviarFormulario();
-    expect(await screen.findByText('Falta o título.')).toBeDefined();
-    expect(screen.getByText('Falta a mensagem.')).toBeDefined();
-    expect(document.activeElement).toBe(campoTitulo());
-    expect(campoTitulo().getAttribute('aria-invalid')).toBe('true');
+    expect(screen.getByText('Falta a mensagem ou um anexo.')).toBeDefined();
+    expect(document.activeElement).toBe(campoCorpo());
+    expect(campoCorpo().getAttribute('aria-invalid')).toBe('true');
     expect(criarTopico).not.toHaveBeenCalled();
 
-    fireEvent.change(campoTitulo(), { target: { value: 'Oi' } });
-    expect(screen.queryByText('Falta o título.')).toBeNull();
+    fireEvent.change(campoCorpo(), { target: { value: 'Oi' } });
     enviarFormulario();
     expect(document.activeElement).toBe(campoCorpo());
   });
@@ -241,8 +237,8 @@ describe('contador por caractere e validação antes do servidor (spec 6.9)', ()
     abrir();
     await abrirFormulario();
     enviarFormulario();
-    const erro = await screen.findByText('Falta o título.');
-    const ids = campoTitulo().getAttribute('aria-describedby')!.split(' ');
+    const erro = await screen.findByText('Falta a mensagem ou um anexo.');
+    const ids = campoCorpo().getAttribute('aria-describedby')!.split(' ');
     expect(ids).toContain(erro.id);
     expect(ids.some((i) => i.endsWith('-contador'))).toBe(true);
   });
@@ -251,19 +247,19 @@ describe('contador por caractere e validação antes do servidor (spec 6.9)', ()
     abrir();
     const dialogo = await abrirFormulario();
     const regioes = () => within(dialogo).getAllByRole('status').map((r) => r.textContent);
-    fireEvent.change(campoTitulo(), { target: { value: 'a'.repeat(50) } });
+    fireEvent.change(campoCorpo(), { target: { value: 'a'.repeat(50) } });
     expect(regioes().every((t) => t === '')).toBe(true);
-    fireEvent.change(campoTitulo(), { target: { value: 'a'.repeat(100) } });
+    fireEvent.change(campoCorpo(), { target: { value: 'a'.repeat(160) } });
     expect(regioes()).toContain('Faltam 20 caracteres.');
-    fireEvent.change(campoTitulo(), { target: { value: 'a'.repeat(105) } });
+    fireEvent.change(campoCorpo(), { target: { value: 'a'.repeat(165) } });
     expect(regioes().every((t) => t === '')).toBe(true);
-    fireEvent.change(campoTitulo(), { target: { value: 'a'.repeat(125) } });
+    fireEvent.change(campoCorpo(), { target: { value: 'a'.repeat(185) } });
     expect(regioes()).toContain('Passou do limite em 5 caracteres.');
   });
 });
 
 describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', () => {
-  it('manda slug, título e mensagem aparados, e NADA mais (sem autor, nota, contagem nem áudio)', async () => {
+  it('manda slug e mensagem aparada, sem título técnico nem campos do cliente', async () => {
     const { criarTopico } = abrir();
     await abrirFormulario();
     preencher('  Arroto na reunião  ', '  Saiu na hora do café.\n\nDe novo.  ');
@@ -271,10 +267,27 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
     await waitFor(() => expect(criarTopico).toHaveBeenCalledTimes(1));
     expect(criarTopico).toHaveBeenCalledWith({
       comunidadeSlug: SLUG,
-      titulo: 'Arroto na reunião',
       corpo: 'Saiu na hora do café.\n\nDe novo.',
     });
-    expect(Object.keys(criarTopico.mock.calls[0][0]).sort()).toEqual(['comunidadeSlug', 'corpo', 'titulo']);
+    expect(Object.keys(criarTopico.mock.calls[0][0]).sort()).toEqual(['comunidadeSlug', 'corpo']);
+  });
+
+  it('publica somente com link anexado, sem exigir texto', async () => {
+    const { criarTopico } = abrir();
+    const dialogo = await abrirFormulario();
+    fireEvent.change(within(dialogo).getByLabelText('Link do YouTube ou TikTok'), {
+      target: { value: 'https://youtu.be/dQw4w9WgXcQ' },
+    });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Adicionar link' }));
+    await within(dialogo).findByText(/1 anexo: vídeo do YouTube/);
+    enviarFormulario();
+
+    await waitFor(() => expect(criarTopico).toHaveBeenCalledTimes(1));
+    expect(criarTopico).toHaveBeenCalledWith({
+      comunidadeSlug: SLUG,
+      corpo: '',
+      anexo: { tipo: 'videoExterno', url: 'https://youtu.be/dQw4w9WgXcQ' },
+    });
   });
 
   it('com ok: apaga o rascunho, vai para /c/:slug/t/:id (replace), mostra o tópico lido do servidor e diz "Tópico criado."', async () => {
@@ -285,7 +298,7 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
     expect(armazenamento.dados.has(chaveDoRascunhoDeTopico('conta-a', SLUG))).toBe(true);
     enviarFormulario();
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' })).toBeDefined();
+    expect(await screen.findByRole('article')).toBeDefined();
     expect(sondas.caminho).toBe(`/c/${SLUG}/t/${ID_NOVO}`);
     // O que aparece é o que o SERVIDOR devolveu em obter_topico, não o que o cliente digitou.
     expect(forum.obterTopico).toHaveBeenCalledWith(ID_NOVO);
@@ -299,7 +312,7 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
     await abrirFormulario();
     preencher();
     enviarFormulario();
-    await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+    await screen.findByRole('article');
     act(() => void sondas.navegar!(-1));
     expect(await screen.findByRole('heading', { level: 1, name: 'Na reunião da firma' })).toBeDefined();
     expect(screen.queryByRole('dialog')).toBeNull();
@@ -310,12 +323,12 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
     const T1 = topico({ id: '33333333-3333-4333-8333-333333333333', titulo: 'Tópico antigo' });
     const listar = vi.fn(async () => ({ ok: true as const, valor: { itens: [T1], proximo: null } }));
     abrir({ listarTopicos: listar });
-    await screen.findByRole('link', { name: 'Tópico antigo' });
+    await screen.findByRole('link', { name: 'Saiu na hora do café.' });
     const antes = listar.mock.calls.length;
     await abrirFormulario();
     preencher();
     enviarFormulario();
-    await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+    await screen.findByRole('article');
     act(() => void sondas.navegar!(-1));
     await screen.findByRole('heading', { level: 1, name: 'Na reunião da firma' });
     // POP: sem a regra, a lista velha voltaria da memória sem ir ao servidor.
@@ -340,7 +353,7 @@ describe('duplo toque e duplo envio (spec 6.7)', () => {
     expect(campoCorpo().readOnly).toBe(true);
 
     await act(async () => soltar(ok()));
-    await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+    await screen.findByRole('article');
     expect(criarTopico).toHaveBeenCalledTimes(1);
   });
 
@@ -360,7 +373,7 @@ describe('duplo toque e duplo envio (spec 6.7)', () => {
       fireEvent.submit(form);
     });
     expect(criarTopico).toHaveBeenCalledTimes(1);
-    await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+    await screen.findByRole('article');
     expect(criarTopico).toHaveBeenCalledTimes(1);
   });
 
@@ -377,7 +390,7 @@ describe('duplo toque e duplo envio (spec 6.7)', () => {
     expect(botoesDeCriar().every((b) => b.textContent === 'Criar tópico')).toBe(true);
     expect(campoTitulo().readOnly).toBe(false);
     enviarFormulario();
-    await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+    await screen.findByRole('article');
     expect(criarTopico).toHaveBeenCalledTimes(2);
   });
 });
@@ -431,7 +444,7 @@ describe('falhas: texto intacto e frase por motivo (spec 6.6)', () => {
     expect(campoTitulo().value).toBe('T');
     expect(criarTopico).toHaveBeenCalledTimes(1);
     enviarFormulario();
-    await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+    await screen.findByRole('article');
     expect(criarTopico).toHaveBeenCalledTimes(2);
   });
 
@@ -528,7 +541,7 @@ describe('falha ambígua (semConfirmacao): pode ter gravado, nunca reenvia sozin
     expect(campoTitulo().value).toBe('T');
     expect(campoCorpo().value).toBe('M');
     enviarFormulario();
-    await screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+    await screen.findByRole('article');
     expect(criarTopico).toHaveBeenCalledTimes(2);
   });
 

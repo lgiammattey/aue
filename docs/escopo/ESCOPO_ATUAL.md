@@ -155,6 +155,15 @@ A decisão de arquitetura está em [ADR 0010](../technical/adr/0010-comunidades-
 ponta a ponta, o feed e o causo avulso descritos abaixo seguem sendo o que o
 produto faz — e a documentação não deve prometer o contrário.
 
+**Complemento decidido pelo Luiz em 20/10/2026 — também ainda não implementado.**
+Na jornada nova, o post raiz é o tópico: não existe uma segunda ação de “postar
+direto no feed”. Tópico e resposta usam o mesmo composer, com até 180 caracteres
+e um bloco de mídia opcional: áudio livre/voz de até 60 segundos, imagem/GIF ou
+embed controlado de YouTube/TikTok dentro do Auê. O vídeo continua hospedado e
+transmitido pelo fornecedor externo, portanto pode falhar sem que a interface
+invente sucesso. Não há documento, arquivo genérico nem upload de vídeo. O
+detalhe do contrato, das falhas e da reversibilidade está no ADR 0010.
+
 Contrato de funcionamento (auditoria de 18/10/2026):
 
 - a nota e o áudio de um causo vêm do resultado guardado no servidor; o cliente nunca afirma nota;

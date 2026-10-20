@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import type { CursorDeTopicos, PortaDeForum, TopicoDoForum } from '../../portas/forum';
+import type { CursorDeTopicos, PortaDeForum, PreviaDeRespostaDoTopico, TopicoDoForum } from '../../portas/forum';
 import { limparListasVistas } from './hooks';
 import {
   Rotas,
@@ -10,6 +10,7 @@ import {
   comunidadeFalsa,
   contaFalsa,
   forumFalso,
+  resposta,
   sondas,
   topico,
 } from './dublesParaTeste';
@@ -18,7 +19,7 @@ beforeEach(limparListasVistas);
 afterEach(cleanup);
 
 const T = (n: number, extra: Partial<TopicoDoForum> = {}) =>
-  topico({ id: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`, titulo: `Tópico ${n}`, ...extra });
+  topico({ id: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`, titulo: `Tópico ${n}`, corpo: `Post ${n}`, ...extra });
 
 function forumDa(comunidadeDoServidor: ReturnType<typeof comunidade> | null, listar: PortaDeForum['listarTopicos']) {
   return forumFalso({
@@ -44,13 +45,13 @@ describe('/c/:slug: comunidade e lista de tópicos', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Na reunião da firma' })).toBeDefined();
     expect(screen.getByText('A culpa jogada no ar condicionado.')).toBeDefined();
     expect(screen.getByText('12 tópicos · 34 membros')).toBeDefined();
-    expect(await screen.findByRole('link', { name: 'Tópico 1' })).toBeDefined();
+    expect(await screen.findByRole('link', { name: 'Post 1' })).toBeDefined();
     expect(listar).toHaveBeenCalledWith('reuniao-da-firma', expect.objectContaining({ ordem: 'atividade', limite: 30, cursor: null }));
 
-    const linha1 = screen.getByRole('link', { name: 'Tópico 1' });
+    const linha1 = screen.getByRole('link', { name: 'Post 1' });
     expect(linha1.getAttribute('href')).toBe('/c/reuniao-da-firma/t/00000000-0000-4000-8000-000000000001');
     expect(linha1.closest('li')!.textContent).toContain('Ana Souza · 8 respostas · atividade há 3 h');
-    const linha2 = screen.getByRole('link', { name: 'Tópico 2' }).closest('li')!;
+    const linha2 = screen.getByRole('link', { name: 'Post 2' }).closest('li')!;
     expect(linha2.textContent).toContain('Fixado');
     expect(linha2.textContent).toContain('Fechado');
     expect(linha2.textContent).toContain('Sem respostas · há 3 d');
@@ -72,7 +73,7 @@ describe('/c/:slug: comunidade e lista de tópicos', () => {
     expect(screen.getByRole('link', { name: 'Ver comunidades' }).getAttribute('href')).toBe('/comunidades');
     expect(listar).not.toHaveBeenCalled();
     expect(screen.queryByText('Nenhum tópico ainda.')).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Tópico 1' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Post 1' })).toBeNull();
   });
 
   it('o slug da URL é o que vai ao servidor, sem cair em outra comunidade', async () => {
@@ -92,7 +93,7 @@ describe('/c/:slug: comunidade e lista de tópicos', () => {
     expect(alerta.textContent).toContain('Deu ruim pra carregar a comunidade.');
     expect(screen.queryByText('Essa comunidade não existe.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
-    expect(await screen.findByRole('link', { name: 'Tópico 1' })).toBeDefined();
+    expect(await screen.findByRole('link', { name: 'Post 1' })).toBeDefined();
   });
 
   it('comunidade sem tópico: estado vazio, sem botão de escrita, sem erro', async () => {
@@ -113,7 +114,7 @@ describe('/c/:slug: comunidade e lista de tópicos', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Na reunião da firma' })).toBeDefined();
     expect(screen.queryByText('Nenhum tópico ainda.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
-    expect(await screen.findByRole('link', { name: 'Tópico 1' })).toBeDefined();
+    expect(await screen.findByRole('link', { name: 'Post 1' })).toBeDefined();
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
@@ -135,17 +136,60 @@ describe('/c/:slug: comunidade e lista de tópicos', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('Sem internet.');
   });
 
-  it('o corpo do tópico não entra na linha da lista', async () => {
+  it('o corpo do tópico é o conteúdo raiz da linha da lista', async () => {
     abrir(forumDa(comunidade(), vi.fn(async () => pagina([T(1, { corpo: 'SEGREDO DO CORPO' })]))));
-    await screen.findByRole('link', { name: 'Tópico 1' });
-    expect(screen.queryByText(/SEGREDO DO CORPO/)).toBeNull();
+    expect(await screen.findByRole('link', { name: 'SEGREDO DO CORPO' })).toBeDefined();
+    expect(screen.queryByRole('link', { name: 'Tópico 1' })).toBeNull();
   });
 
   it('texto do usuário é texto, nunca HTML', async () => {
-    abrir(forumDa(comunidade(), vi.fn(async () => pagina([T(1, { titulo: '<img src=x onerror=alert(1)> oi' })]))));
+    abrir(forumDa(comunidade(), vi.fn(async () => pagina([T(1, { titulo: 'técnico', corpo: '<img src=x onerror=alert(1)> oi' })]))));
     const link = await screen.findByRole('link', { name: /oi/ });
     expect(link.textContent).toBe('<img src=x onerror=alert(1)> oi');
     expect(document.querySelector('main img')).toBeNull();
+  });
+
+  it('busca até duas prévias numa única chamada para a página e as entrega ao card certo', async () => {
+    const primeiro = T(1);
+    const segundo = T(2);
+    const listarPrevias = vi.fn(async (_ids: readonly string[]) => ({
+      ok: true as const,
+      valor: [
+        { topicoId: primeiro.id, resposta: resposta({ id: 'r-1', topicoId: primeiro.id, corpo: 'Primeira resposta' }), anexo: null },
+        { topicoId: primeiro.id, resposta: resposta({ id: 'r-2', topicoId: primeiro.id, corpo: 'Segunda resposta' }), anexo: null },
+        { topicoId: primeiro.id, resposta: resposta({ id: 'r-3', topicoId: primeiro.id, corpo: 'Terceira resposta não entra' }), anexo: null },
+        { topicoId: segundo.id, resposta: resposta({ id: 'r-4', topicoId: segundo.id, corpo: 'Resposta do segundo' }), anexo: null },
+      ] satisfies readonly PreviaDeRespostaDoTopico[],
+    }));
+    abrir(forumFalso({
+      obterComunidadeDoForum: vi.fn(async () => ({ ok: true as const, valor: comunidade() })),
+      listarTopicos: vi.fn(async () => pagina([primeiro, segundo])),
+      listarPreviaRespostasDosTopicos: listarPrevias,
+    }));
+
+    await screen.findByText('Primeira resposta');
+    expect(listarPrevias).toHaveBeenCalledTimes(1);
+    expect(listarPrevias).toHaveBeenCalledWith([primeiro.id, segundo.id]);
+    expect(screen.getByText('Segunda resposta')).toBeDefined();
+    expect(screen.queryByText('Terceira resposta não entra')).toBeNull();
+    expect(screen.getByRole('link', { name: 'Post 2' }).closest('li')!.textContent).toContain('Resposta do segundo');
+  });
+
+  it('falha ao ler prévias é erro da lista, nunca um feed sem elas', async () => {
+    abrir(forumFalso({
+      obterComunidadeDoForum: vi.fn(async () => ({ ok: true as const, valor: comunidade() })),
+      listarTopicos: vi.fn(async () => pagina([T(1)])),
+      listarPreviaRespostasDosTopicos: vi.fn(async () => ({ ok: false as const, motivo: 'falhou' as const })),
+    }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain('Deu ruim pra carregar os tópicos.');
+    expect(screen.queryByRole('link', { name: 'Post 1' })).toBeNull();
+  });
+
+  it('sem a porta de prévias, mantém o feed sem inventar resposta', async () => {
+    abrir(forumDa(comunidade(), vi.fn(async () => pagina([T(1)]))));
+    expect(await screen.findByRole('link', { name: 'Post 1' })).toBeDefined();
+    expect(screen.queryByLabelText('Prévia de respostas')).toBeNull();
   });
 
   it('membro vê "Você participa" (e nunca um botão); o bonde-geral conta como dela para conta promovida', async () => {
@@ -153,20 +197,20 @@ describe('/c/:slug: comunidade e lista de tópicos', () => {
       conta: contaFalsa({ temSessao: true, anonima: false }),
       comunidade: comunidadeFalsa(['bonde-geral']),
     });
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     await screen.findByText('Você participa');
     expect(screen.queryByRole('button', { name: /participar|entrar|sair/i })).toBeNull();
   });
 
   it('visitante e não-membro não veem "Você participa"', async () => {
     abrir(forumDa(comunidade(), vi.fn(async () => pagina([T(1)]))));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     expect(screen.queryByText('Você participa')).toBeNull();
   });
 
   it('regras da casa existem no miolo e no aside, rotuladas como da casa', async () => {
     abrir(forumDa(comunidade(), vi.fn(async () => pagina([T(1)]))));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     expect(screen.getAllByText('A piada é com o arroto, nunca com a pessoa.').length).toBe(2);
     expect(screen.getAllByText(/Regras da casa/).length).toBeGreaterThanOrEqual(2);
   });
@@ -176,7 +220,7 @@ describe('ordenação pela URL', () => {
   it('padrão é atividade recente; ?ordem=novos vai ao servidor como recentes e marca o botão', async () => {
     const listar = vi.fn(async () => pagina([T(1)]));
     abrir(forumDa(comunidade(), listar), '/c/reuniao-da-firma?ordem=novos');
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     expect(listar).toHaveBeenCalledWith('reuniao-da-firma', expect.objectContaining({ ordem: 'recentes' }));
     expect(screen.getByRole('button', { name: 'Novos' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: 'Atividade recente' }).getAttribute('aria-pressed')).toBe('false');
@@ -185,7 +229,7 @@ describe('ordenação pela URL', () => {
   it('valor estranho na URL cai em atividade', async () => {
     const listar = vi.fn(async () => pagina([T(1)]));
     abrir(forumDa(comunidade(), listar), '/c/reuniao-da-firma?ordem=qualquer');
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     expect(listar).toHaveBeenCalledWith('reuniao-da-firma', expect.objectContaining({ ordem: 'atividade' }));
   });
 
@@ -194,14 +238,14 @@ describe('ordenação pela URL', () => {
       pagina(op?.ordem === 'recentes' ? [T(9)] : [T(1)]),
     );
     abrir(forumDa(comunidade(), listar as PortaDeForum['listarTopicos']));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     fireEvent.click(screen.getByRole('button', { name: 'Novos' }));
-    const novo = await screen.findByRole('link', { name: 'Tópico 9' });
-    expect(screen.queryByRole('link', { name: 'Tópico 1' })).toBeNull();
+    const novo = await screen.findByRole('link', { name: 'Post 9' });
+    expect(screen.queryByRole('link', { name: 'Post 1' })).toBeNull();
     expect(sondas.caminho).toBe('/c/reuniao-da-firma?ordem=novos');
     await waitFor(() => expect(document.activeElement).toBe(novo));
     fireEvent.click(screen.getByRole('button', { name: 'Atividade recente' }));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     expect(sondas.caminho).toBe('/c/reuniao-da-firma');
   });
 });
@@ -216,17 +260,17 @@ describe('"Ver mais tópicos" por cursor', () => {
       // o servidor repete o 2 (alguém abriu tópico novo no meio da leitura) e traz o 3
       .mockResolvedValueOnce(pagina([T(2), T(3)], null));
     abrir(forumDa(comunidade(), listar));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais tópicos' }));
-    await screen.findByRole('link', { name: 'Tópico 3' });
+    await screen.findByRole('link', { name: 'Post 3' });
 
     expect(listar).toHaveBeenNthCalledWith(2, 'reuniao-da-firma', expect.objectContaining({ cursor: CURSOR }));
     expect(listar.mock.calls[1][1].cursor).toBe(CURSOR);
     expect(listar.mock.calls[1][1].cursor.valor).toBe('2026-10-19T14:32:10.123456+00:00');
 
-    const titulos = screen.getAllByRole('link', { name: /^Tópico \d$/ }).map((l) => l.textContent);
-    expect(titulos).toEqual(['Tópico 1', 'Tópico 2', 'Tópico 3']);
+    const titulos = screen.getAllByRole('link', { name: /^Post \d$/ }).map((l) => l.textContent);
+    expect(titulos).toEqual(['Post 1', 'Post 2', 'Post 3']);
     expect(screen.queryByRole('button', { name: /ver mais/i })).toBeNull();
     await waitFor(() => expect(within(screen.getByRole('status')).getByText('Mais 1 tópicos carregados')).toBeDefined());
   });
@@ -237,9 +281,9 @@ describe('"Ver mais tópicos" por cursor', () => {
       .mockResolvedValueOnce(pagina([T(1)], CURSOR))
       .mockResolvedValueOnce(pagina([T(2), T(3)], null));
     abrir(forumDa(comunidade(), listar));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais tópicos' }));
-    const novo = await screen.findByRole('link', { name: 'Tópico 2' });
+    const novo = await screen.findByRole('link', { name: 'Post 2' });
     await waitFor(() => expect(document.activeElement).toBe(novo));
   });
 
@@ -250,7 +294,7 @@ describe('"Ver mais tópicos" por cursor', () => {
       .mockResolvedValueOnce(pagina([T(1)], CURSOR))
       .mockImplementationOnce(() => new Promise((r) => (resolver = r)));
     abrir(forumDa(comunidade(), listar as PortaDeForum['listarTopicos']));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     const botao = screen.getByRole('button', { name: 'Ver mais tópicos' });
     fireEvent.click(botao);
     fireEvent.click(botao);
@@ -259,7 +303,7 @@ describe('"Ver mais tópicos" por cursor', () => {
     expect(ocupado.getAttribute('aria-busy')).toBe('true');
     expect(listar).toHaveBeenCalledTimes(2);
     await act(async () => resolver(pagina([T(2)], null)));
-    expect(await screen.findByRole('link', { name: 'Tópico 2' })).toBeDefined();
+    expect(await screen.findByRole('link', { name: 'Post 2' })).toBeDefined();
   });
 
   it('falha no "Ver mais" mantém os itens e oferece tentar de novo no próprio botão', async () => {
@@ -269,19 +313,19 @@ describe('"Ver mais tópicos" por cursor', () => {
       .mockResolvedValueOnce({ ok: false, motivo: 'falhou' })
       .mockResolvedValueOnce(pagina([T(2)], null));
     abrir(forumDa(comunidade(), listar));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais tópicos' }));
     const falhou = await screen.findByRole('button', { name: 'Não deu pra carregar mais. Tentar de novo' });
-    expect(screen.getByRole('link', { name: 'Tópico 1' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Post 1' })).toBeDefined();
     expect(screen.queryByRole('alert')).toBeNull();
     fireEvent.click(falhou);
-    expect(await screen.findByRole('link', { name: 'Tópico 2' })).toBeDefined();
+    expect(await screen.findByRole('link', { name: 'Post 2' })).toBeDefined();
     expect(listar.mock.calls[2][1].cursor).toBe(CURSOR);
   });
 
   it('página menor que o limite (proximo nulo) não mostra botão nem frase de fim', async () => {
     abrir(forumDa(comunidade(), vi.fn(async () => pagina([T(1)], null))));
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     expect(screen.queryByRole('button', { name: /ver mais/i })).toBeNull();
   });
 });
@@ -295,9 +339,9 @@ describe('voltar da conversa para a lista (#234)', () => {
       .mockResolvedValueOnce(pagina([T(2)], null));
     const ambiente = ambienteFalso();
     abrir(forumDa(comunidade(), listar), '/c/reuniao-da-firma?ordem=novos', { ambiente });
-    await screen.findByRole('link', { name: 'Tópico 1' });
+    await screen.findByRole('link', { name: 'Post 1' });
     fireEvent.click(screen.getByRole('button', { name: 'Ver mais tópicos' }));
-    await screen.findByRole('link', { name: 'Tópico 2' });
+    await screen.findByRole('link', { name: 'Post 2' });
     ambiente.rolarAte(640);
     // Na saída o documento encolhe e a posição do navegador cai para 0 sem evento:
     // ler a rolagem só no cleanup guardaria 0 em vez dos 640 que o evento já viu.
@@ -308,13 +352,13 @@ describe('voltar da conversa para a lista (#234)', () => {
     await act(async () => {
       sondas.navegar!('/c/reuniao-da-firma/t/00000000-0000-4000-8000-000000000002');
     });
-    expect(screen.queryByRole('link', { name: 'Tópico 1' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Post 1' })).toBeNull();
     ambiente.rolagens.length = 0;
     await act(async () => {
       sondas.navegar!(-1);
     });
-    expect(await screen.findByRole('link', { name: 'Tópico 1' })).toBeDefined();
-    expect(screen.getByRole('link', { name: 'Tópico 2' })).toBeDefined();
+    expect(await screen.findByRole('link', { name: 'Post 1' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Post 2' })).toBeDefined();
     expect(sondas.caminho).toBe('/c/reuniao-da-firma?ordem=novos');
     expect(screen.getByRole('button', { name: 'Novos' }).getAttribute('aria-pressed')).toBe('true');
     expect(listar).toHaveBeenCalledTimes(2);
@@ -329,7 +373,7 @@ describe('deep link e URL que manda', () => {
         ok: true as const,
         valor: comunidade({ slug, nome: slug === 'a' ? 'Turma A' : 'Turma B' }),
       })),
-      listarTopicos: vi.fn(async (slug: string) => pagina([T(slug === 'a' ? 1 : 2, { titulo: `Só da ${slug}` })])),
+      listarTopicos: vi.fn(async (slug: string) => pagina([T(slug === 'a' ? 1 : 2, { titulo: `Só da ${slug}`, corpo: `Só da ${slug}` })])),
     });
     abrir(forum, '/c/a');
     expect(await screen.findByRole('link', { name: 'Só da a' })).toBeDefined();

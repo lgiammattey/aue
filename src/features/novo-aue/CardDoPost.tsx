@@ -74,11 +74,15 @@ export const CardDoPost = memo(function CardDoPost({
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
   const comunidadeIdentificador = `r/${post.comunidadeSlug}`;
 
+  // Vídeos antigos (ex.: r/arrotos-youtube) foram espelhados como tópico com o link
+  // dentro do texto e sem anexo; sem este último recurso ficariam só como texto.
   const video = post.videoUrl
     ? detectarLinkDeVideo(post.videoUrl)
     : post.anexo?.tipo === 'videoExterno' && post.anexo.url
       ? detectarLinkDeVideo(post.anexo.url)
-      : null;
+      : post.anexo
+        ? null
+        : detectarLinkDeVideo(post.corpo) ?? detectarLinkDeVideo(post.titulo);
 
   const aoCompartilhar = () => {
     try {

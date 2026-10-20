@@ -81,6 +81,23 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(aoCurtir).toHaveBeenCalledOnce();
   });
 
+  it('deixa salvar indisponível sem uma porta de persistência', () => {
+    render(
+      <MemoryRouter>
+        <CardDoPost
+          post={postExemplo}
+          salvo={false}
+          audioTocando={false}
+          tempoAtualDoAudio={0}
+          duracaoDoAudio={null}
+          aoTocarAudio={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Salvar' }).hasAttribute('disabled')).toBe(true);
+  });
+
   it('copia link para o clipboard ao clicar em compartilhar', () => {
     const writeTextMock = vi.fn();
     Object.assign(navigator, {

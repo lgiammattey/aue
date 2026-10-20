@@ -1159,5 +1159,38 @@
   .post--twitter-style {
     padding: 12px;
   }
+
+  .post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2px;
+    padding-top: 8px;
+  }
+
+  .action-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 8px;
+    justify-content: center;
+  }
+
+  .action-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .burp-player {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 12px 6px 6px;
+  }
+
+  .burp-player .play {
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
+  }
 }
 

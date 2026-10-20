@@ -202,7 +202,6 @@ export function InicioOpenDesign({
   const [abaOrdenacao, setAbaOrdenacao] = useState<'Quentes' | 'Novos' | 'Top'>('Quentes');
 
   // Interações
-  const [salvosUsuario, setSalvosUsuario] = useState<Record<string, boolean>>({});
   const [comunidadesEntradas, setComunidadesEntradas] = useState<Record<string, boolean>>({});
 
   // Audio player
@@ -756,11 +755,6 @@ export function InicioOpenDesign({
       }
     : {};
 
-  const alternarSalvo = (id: string) => {
-    setSalvosUsuario((prev) => ({ ...prev, [id]: !prev[id] }));
-    exibirToast(salvosUsuario[id] ? 'Removido dos salvos.' : 'Salvo na sua conta.');
-  };
-
   const [seguindoPerfil, setSeguindoPerfil] = useState(false);
   const [alternandoSeguir, setAlternandoSeguir] = useState(false);
 
@@ -787,14 +781,25 @@ export function InicioOpenDesign({
     }
   };
 
-  const alternarEntrarComunidade = (slug: string) => {
+  const alternarEntrarComunidade = async (slug: string) => {
+    if (!estaAutenticado) {
+      exibirToast('Entre na sua conta para participar da roda.');
+      (aoEntrar ?? (() => setViewAtual('auth')))();
+      return;
+    }
     const jaEntrou = Boolean(comunidadesEntradas[slug]);
-    setComunidadesEntradas((prev) => ({ ...prev, [slug]: !jaEntrou }));
-    exibirToast(jaEntrou ? 'Você saiu da comunidade.' : 'Você entrou na comunidade.');
-    if (jaEntrou) {
-      comunidadePort.sairComunidade?.(slug).catch(() => {});
-    } else {
-      comunidadePort.entrarComunidade?.(slug).catch(() => {});
+    try {
+      const atualizado = jaEntrou
+        ? await comunidadePort.sairComunidade(slug)
+        : await comunidadePort.entrarComunidade(slug);
+      if (atualizado === false) {
+        exibirToast('Não deu para atualizar sua participação agora.');
+        return;
+      }
+      setComunidadesEntradas((prev) => ({ ...prev, [slug]: !jaEntrou }));
+      exibirToast(jaEntrou ? 'Você saiu da comunidade.' : 'Você entrou na comunidade.');
+    } catch {
+      exibirToast('Não deu para atualizar sua participação agora.');
     }
   };
 
@@ -1222,8 +1227,8 @@ export function InicioOpenDesign({
     if (inputDaCapa.current) inputDaCapa.current.value = '';
   };
 
-  const trocarFotoDoPerfil = async (arquivo: Blob) => {
-    if (fotoEnviando) return;
+  const trocarFotoDoPerfil = async (arquivo: Blob): Promise<{ readonly ok: boolean; readonly mensagem?: string }> => {
+    if (fotoEnviando) return { ok: false, mensagem: 'A foto já está sendo enviada.' };
     setFotoEnviando(true);
     try {
       const resultado = await perfilPort.enviarFoto(arquivo);
@@ -1234,15 +1239,16 @@ export function InicioOpenDesign({
             ? 'A foto não coube no limite de envio.'
             : 'Não foi possível trocar a foto agora.';
         exibirToast(mensagem);
-        return false;
+        return { ok: false, mensagem };
       }
       setMeuPerfil(resultado.perfil);
       setPerfilAtivo(resultado.perfil);
       exibirToast('Foto atualizada.');
-      return true;
+      return { ok: true };
     } catch {
-      exibirToast('Não foi possível trocar a foto agora.');
-      return false;
+      const mensagem = 'O servidor recusou o envio da foto. Não foi possível trocar a foto agora.';
+      exibirToast(mensagem);
+      return { ok: false, mensagem };
     } finally {
       setFotoEnviando(false);
     }
@@ -1267,8 +1273,8 @@ export function InicioOpenDesign({
     }
   };
 
-  const trocarCapaDoPerfil = async (arquivo: Blob) => {
-    if (capaEnviando) return;
+  const trocarCapaDoPerfil = async (arquivo: Blob): Promise<{ readonly ok: boolean; readonly mensagem?: string }> => {
+    if (capaEnviando) return { ok: false, mensagem: 'A capa já está sendo enviada.' };
     setCapaEnviando(true);
     try {
       const resultado = await perfilPort.enviarCapa(arquivo);
@@ -1279,15 +1285,16 @@ export function InicioOpenDesign({
             ? 'A capa não coube no limite de envio.'
             : 'Não foi possível trocar a capa agora.';
         exibirToast(mensagem);
-        return false;
+        return { ok: false, mensagem };
       }
       setMeuPerfil(resultado.perfil);
       setPerfilAtivo(resultado.perfil);
       exibirToast('Capa atualizada.');
-      return true;
+      return { ok: true };
     } catch {
-      exibirToast('Não foi possível trocar a capa agora.');
-      return false;
+      const mensagem = 'O servidor recusou o envio da capa. Não foi possível trocar a capa agora.';
+      exibirToast(mensagem);
+      return { ok: false, mensagem };
     } finally {
       setCapaEnviando(false);
     }
@@ -1338,8 +1345,11 @@ export function InicioOpenDesign({
     }
 
     const atualizado = await (ajusteDeImagem.tipo === 'capa' ? trocarCapaDoPerfil(preparada.imagem) : trocarFotoDoPerfil(preparada.imagem));
-    if (atualizado) fecharAjusteDeImagem();
-    else setEstadoDoAjusteDeImagem('pronto');
+    if (atualizado.ok) fecharAjusteDeImagem();
+    else {
+      setEstadoDoAjusteDeImagem('erro');
+      setErroDoAjusteDeImagem(atualizado.mensagem ?? 'Não foi possível salvar essa imagem agora.');
+    }
   };
 
   const removerCapaDoPerfil = async () => {
@@ -1568,9 +1578,8 @@ export function InicioOpenDesign({
             }}
             aoEnviarComentario={enviarComentario}
             {...acoesDeReacao(postComentariosAtivo)}
-            aoAlternarSalvar={() => alternarSalvo(postComentariosAtivo.id)}
             aoTocarAudio={(fonte) => void alternarAudio(fonte, postComentariosAtivo.id)}
-            salvo={Boolean(salvosUsuario[postComentariosAtivo.id])}
+            salvo={false}
             audioTocando={audioTocandoId === postComentariosAtivo.id}
             tempoAtualDoAudio={audioSelecionadoId === postComentariosAtivo.id ? tempoAtualDoAudio : 0}
             duracaoDoAudio={audioSelecionadoId === postComentariosAtivo.id ? duracaoDoAudio : null}
@@ -1642,11 +1651,10 @@ export function InicioOpenDesign({
                     <CardDoPost
                       post={post}
                       {...acoesDeReacao(post)}
-                      salvo={Boolean(salvosUsuario[post.id])}
+                      salvo={false}
                       audioTocando={audioTocandoId === post.id}
                       tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                       duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                      aoAlternarSalvar={() => alternarSalvo(post.id)}
                       aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                       aoAbrirComentarios={() => void abrirComentarios(post)}
                       {...propsDeComentariosDoPost(post)}
@@ -1688,11 +1696,10 @@ export function InicioOpenDesign({
                     key={post.id}
                     post={post}
                     {...acoesDeReacao(post)}
-                    salvo={Boolean(salvosUsuario[post.id])}
+                    salvo={false}
                     audioTocando={audioTocandoId === post.id}
                     tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                     duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                    aoAlternarSalvar={() => alternarSalvo(post.id)}
                     aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                     aoAbrirComentarios={() => void abrirComentarios(post)}
                     {...propsDeComentariosDoPost(post)}
@@ -1716,7 +1723,7 @@ export function InicioOpenDesign({
             {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu bonde…</p>}
             {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu bonde.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Seu bonde ainda está quieto.</h2><p>Siga alguns perfis para ver os causos deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Explorar o Bonde</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={Boolean(salvosUsuario[post.id])} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoAlternarSalvar={() => alternarSalvo(post.id)} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={false} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
           </section>
         )}
 
@@ -1894,11 +1901,10 @@ export function InicioOpenDesign({
                           key={post.id}
                           post={post}
                           {...acoesDeReacao(post)}
-                          salvo={Boolean(salvosUsuario[post.id])}
+                          salvo={false}
                           audioTocando={audioTocandoId === post.id}
                           tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                           duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                          aoAlternarSalvar={() => alternarSalvo(post.id)}
                           aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
                           aoAbrirComentarios={() => void abrirComentarios(post)}
                           {...propsDeComentariosDoPost(post)}

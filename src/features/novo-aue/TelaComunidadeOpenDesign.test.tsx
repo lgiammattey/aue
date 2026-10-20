@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PortaDeComunidade } from '../../portas/comunidade';
@@ -121,6 +121,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
               <TelaComunidadeOpenDesign
                 portaForum={mockForum}
                 portaComunidade={mockComunidade}
+                portaConta={{ estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: false })) } as any}
               />
             }
           />
@@ -154,6 +155,9 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
   });
 
   it('permite alternar entre Entrar e Entrou chamando a porta com feedback na tela', async () => {
+    const contaAutenticada = {
+      estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: false })),
+    } as any;
     const { container } = render(
       <MemoryRouter initialEntries={['/c/arena-do-arroto']}>
         <Routes>
@@ -163,6 +167,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
               <TelaComunidadeOpenDesign
                 portaForum={mockForum}
                 portaComunidade={mockComunidade}
+                portaConta={contaAutenticada}
               />
             }
           />
@@ -175,8 +180,8 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     expect(btnEntrar).toBeTruthy();
     fireEvent.click(btnEntrar);
 
-    // Vira "Entrou" e exibe o toast de feedback
-    expect(btnEntrar.textContent).toBe('Entrou');
+    // Só confirma a entrada depois da porta responder.
+    await waitFor(() => expect(btnEntrar.textContent).toBe('Entrou'));
     expect(screen.getByText('Você entrou na comunidade.')).toBeTruthy();
   });
 

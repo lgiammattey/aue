@@ -25,8 +25,8 @@ Regra simples:
 
 > ideia de produto não vira tabela automaticamente.
 
-Se a feature está fora do MVP1, o fato de o schema já ter alguma estrutura
-antiga para ela não é convite para completar o sistema.
+Se a feature está fora do escopo atual, o fato de o schema já ter alguma
+estrutura antiga para ela não é convite para completar o sistema.
 
 ---
 
@@ -38,11 +38,11 @@ Identidade persistida associada ao Supabase Auth.
 
 Chamava-se `profiles` e era a exceção histórica ao padrão de tabela em
 português. A `20260807000036` desfez a exceção junto com a tradução das colunas
-do MVP1 — o "código já existente" que justificava a compatibilidade era o
+da primeira versão do produto — o "código já existente" que justificava a compatibilidade era o
 próprio app, e ele mudou na mesma PR.
 
-No MVP1 a pessoa não vê tela obrigatória de perfil: a sessão pode ser anônima,
-mas o backend ainda possui uma identidade técnica.
+A sessão pode ser anônima, mas o backend ainda possui uma identidade técnica.
+Perfil social e participação exigem as regras próprias de conta e RLS.
 
 ### `resultados`
 
@@ -80,7 +80,7 @@ pública independentemente do que o bundle renderiza.
 
 ---
 
-## 3. Batalha do MVP1
+## 3. Batalha por link
 
 ### `batalhas`
 
@@ -102,8 +102,8 @@ conveniência.
 O acesso do app passa pelas RPCs previstas para a batalha e pelo código
 imprevisível da sessão.
 
-A expiração pública é de até 7 dias. A retenção do **arquivo de áudio** depois
-disso continua sendo decisão pendente de produto/privacidade.
+A expiração pública é de até 7 dias. O acesso pelo link expira, mas o arquivo
+é mantido sem expurgo automático, conforme [`../jogo/REGRAS.md`](../jogo/REGRAS.md).
 
 ---
 
@@ -129,10 +129,11 @@ Ressalva honesta: `desafios` nunca teve `expira_em` e continua sem. O prazo de
 
 ---
 
-## 5. Social e gamificação — implementado/parcial, fora do MVP1
+## 5. Social e gamificação
 
-O repositório possui estruturas criadas durante a fase em que o Auê estava
-crescendo para virar uma rede social antes de validar o jogo.
+O produto publicado já usa parte das estruturas sociais. Isso não autoriza,
+porém, ressuscitar gamificação, ranking ou qualquer módulo que o escopo atual
+deixa de fora.
 
 Entre elas estão:
 
@@ -151,8 +152,8 @@ Entre elas estão:
 - `push_subscriptions`;
 - a view `global_ranking`.
 
-Essas estruturas podem continuar no banco e no código, mas **não fazem parte do
-corte atual só porque existem**.
+Cada estrutura precisa ser confrontada com o escopo e as migrações antes de
+entrar numa tela ou RPC nova.
 
 A view `global_ranking` está **desativada** desde `20260807000034`. Ela roda com
 `security_invoker = on` e lia `resultados` com as policies de quem chamava; sem
@@ -176,7 +177,7 @@ Esse detalhe já causou regressão no passado. Portanto:
 
 - não ressuscitar `eventos_xp` copiando especificação antiga;
 - não redefinir função de XP em migração sem revisar as versões anteriores;
-- XP está fora do MVP1 e não deve bloquear o lançamento.
+- XP está fora do escopo atual e não deve bloquear o produto.
 
 ---
 

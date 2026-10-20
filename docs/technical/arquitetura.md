@@ -5,8 +5,8 @@ O GDD [`../jogo/AUÊ!-2.md`](../jogo/AUÊ!-2.md) e o Art Bible
 visual alvo. Este documento continua descrevendo a arquitetura implementada:
 nenhum detalhe de produto ou de arte aqui cria backend, rota ou estado por si só.
 
-**Status:** descrição da arquitetura implementada  
-**Revisado em:** 2026-10-20 (Auê 3.0 — Rede Social Jogável: Bonde do Arroto, Comunidades e Arena)
+**Status:** descrição da arquitetura implementada e publicada
+**Revisado em:** 2026-10-20 (produção conferida em `aue.web.app`)
 
 > Este arquivo explica a arquitetura **como ela é hoje**. Ele não amplia escopo:
 > o que pertence ao produto está em
@@ -21,6 +21,7 @@ nenhum detalhe de produto ou de arte aqui cria backend, rota ou estado por si s�
 > [`adr/0001-arquitetura-oficial-do-aue.md`](adr/0001-arquitetura-oficial-do-aue.md),
 > [`adr/0004-arquitetura-aue-3-comunidades-e-feed.md`](adr/0004-arquitetura-aue-3-comunidades-e-feed.md) e
 > [`adr/0010-comunidades-topicos-e-respostas.md`](adr/0010-comunidades-topicos-e-respostas.md).
+> Hospedagem no Firebase é decidida pelo [ADR 0006](adr/0006-hospedagem-somente-firebase.md).
 
 ---
 
@@ -32,7 +33,7 @@ combina a adrenalina da **Arena** (máquina de captura, julgamento acústico YAM
 A arquitetura do frontend é dividida em módulos com responsabilidades bem definidas:
 
 1. **`src/arena/` (A Arena):** Superfície única contínua de 10 estados (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`). Não são rotas separadas, mas transições reativas com captura Web Audio e animação da bolha.
-2. **`src/features/novo-aue/` (OpenDesign Canônico do Bonde e Comunidades):** Implementação ativa da rede social 1:1 com os protótipos (`InicioOpenDesign`, `CardDoPost`, `ThreadDeComentarios`, `ModalCompositor`, `TelaComunidadeOpenDesign`, `TelaPerfilOpenDesign`). Responsável pelo layout de 3 colunas no desktop e webapp mobile fluido.
+2. **`src/features/novo-aue/` (OpenDesign Canônico do Bonde e Comunidades):** Implementação ativa da rede social (`InicioOpenDesign`, `CardDoPost`, `ThreadDeComentarios`, `ModalCompositor`, `TelaComunidadeOpenDesign`, `TelaPerfilOpenDesign`). A home publicada mostra o Bonde; a migração para tópico e resposta é uma decisão aceita, ainda não uma declaração de entrega.
 3. **`src/features/publico/` e `src/features/legal/`:** Páginas institucionais, SEO e legais com tema claro fixo (`ComoJogar`, `ComoArrotar`, `TiposDeArroto`, `RankingDeArrotos`, `TermosDeUso`, `PoliticaDePrivacidade`).
 4. **`src/features/comunidade/` (Camada Legada / Compatibilidade):** Casca anterior mantida temporariamente para compatibilidade de rotas secundárias (`/feed`, `/desafios`) e testes legados. Novas funcionalidades de feed e postagens são desenvolvidas exclusivamente em `novo-aue` (ver [`MAPA_DE_PAGINAS_E_FLUXOS.md`](../design/MAPA_DE_PAGINAS_E_FLUXOS.md)).
 5. **`src/nucleo/` (Lógica Pura):** Regras de negócio, cálculo de Auê Score, limites e formatação em TypeScript puro, sem acoplamento com React ou DOM.
@@ -43,8 +44,7 @@ A arquitetura do frontend é dividida em módulos com responsabilidades bem defi
    estado.
 2. **Motor separado da tela.** Áudio (`features/audio/engine.ts`,
    `features/audio/juiz/`) e score (`features/audio/rules.ts`) não podem
-   depender de componente. É o que torna a migração possível — e o que mantém a
-   porta aberta para Android/iOS depois.
+   depender de componente. É o que mantém a Arena testável e a web responsiva.
 
 A migração está fatiada no [backlog](../escopo/BACKLOG.md) e **não deve
 reescrever motor de áudio, score nem backend**.
@@ -129,7 +129,8 @@ aparece por osmose em documentação.
 
 ## 4. Entrada e sessão
 
-O MVP1 não mostra cadastro.
+Quem chega pode navegar sem conta; participação e identidade social seguem as
+regras do fluxo publicado.
 
 No boot, o cliente tenta criar/recuperar uma **sessão anônima do Supabase**.
 Isso dá identidade técnica sem transformar a entrada em formulário.
@@ -277,9 +278,9 @@ Consequências:
 
 O acesso público da batalha expira em até 7 dias.
 
-O destino do arquivo de áudio depois disso é uma **decisão pendente de produto
-e privacidade**, registrada no contrato do MVP1. Não assumir retenção eterna só
-porque o upload aconteceu.
+O acesso pelo link expira em até 7 dias. O arquivo é mantido, sem expurgo
+automático, conforme [`../jogo/REGRAS.md`](../jogo/REGRAS.md) §8; nenhuma tela
+deve sugerir o contrário.
 
 ---
 
@@ -411,11 +412,9 @@ A prioridade é:
 
 ### Desktop
 
-No MVP1, desktop funciona principalmente como landing pública/indexável e
-ponte para o celular.
-
-Não é objetivo forçar paridade de gameplay desktop antes do fluxo mobile estar
-estável.
+Desktop e webapp mobile são superfícies do produto. A home publicada tem layout
+social de desktop; a Arena e qualquer caminho sensível continuam exigindo prova
+no navegador-alvo antes de serem chamados de validados.
 
 ---
 

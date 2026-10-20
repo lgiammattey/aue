@@ -18,7 +18,7 @@ ARROTAR NA ARENA → RECEBER NOTA → PUBLICAR NO BONDE / DESAFIAR X1 → DEBATE
 
 ### 1. Descoberta & Entrada Rápida
 - **Landing (`Landing.dc.html`):** Headline provocativa *"Tá rolando agora / Entra no bonde hoje"*. Login social em 1 clique (Google/Apple) ou criação direta com apelido.
-- **Arrotar sem conta:** Permite jogar na Arena imediatamente antes de criar conta. A conta só é pedida para postar no Bonde e salvar o histórico.
+- **Arrotar sem conta:** Permite jogar na Arena imediatamente antes de criar conta. A conta só é pedida para participar e salvar o histórico.
 
 ### 2. Arrotar na Arena
 - **IDLE:** Bolha viva aguardando a iniciativa do jogador.
@@ -26,8 +26,8 @@ ARROTAR NA ARENA → RECEBER NOTA → PUBLICAR NO BONDE / DESAFIAR X1 → DEBATE
 - **VALIDATING & JUDGING:** YAMNet analisa se o som é arroto genuíno; juiz faz o suspense cômico (*"Tô julgando essa porra."*).
 - **RESULT_REVEAL & RESULT:** Revelação brutal do Auê Score (0 a 100), fala do juiz, métricas acústicas (Força, Fôlego, Grave) e player para ouvir a própria gravação.
 
-### 3. Publicar Causo ou Chamar pro X1
-- **Postar no Bonde:** Escolhe a comunidade temática e envia o causo com o áudio e a nota anexados.
+### 3. Publicar Resenha ou Chamar pro X1
+- **Publicar na comunidade:** Exige consentimento explícito. A integração direta da Arena ainda precisa de prova de ponta a ponta antes de ser prometida como entrega.
 - **Chamar pro X1:** Gera link exclusivo do desafio (ex: `aue.gg/x1/9f2a`) para humilhar o oponente pelo WhatsApp ou rede.
 - **Compartilhar Card (9:12):** Exporta card gráfico estilizado com a nota, fala do juiz e link do confronto.
 

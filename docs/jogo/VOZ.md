@@ -11,7 +11,7 @@ Derivado de [`HISTORIA.md`](./HISTORIA.md).
 Escopo não mora aqui. Para saber o que pertence ao jogo agora, leia
 [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md).
 
-O protótipo [`../design/prototipo-arena/arena.html`](../design/prototipo-arena/arena.html)
+O protótipo [`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html)
 mostra esta voz funcionando: os pools de fala por estado e por faixa de nota, e a
 regra de que rótulo de botão nunca varia.
 
@@ -386,5 +386,5 @@ Se parece campanha de agência tentando ser descolada, faz de novo.
 - **O que pertence ao jogo agora:** [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md)
 - **Origem dos três primos:** [`HISTORIA.md`](./HISTORIA.md)
 - **Os estados da Arena:** [`ARENA.md`](./ARENA.md)
-- **Referência visual:** [`../design/prototipo-arena/arena.html`](../design/prototipo-arena/arena.html)
-- **Skill de copy:** [`../../.agents/skills/aplicarTomOgro/SKILL.md`](../../.agents/skills/aplicarTomOgro/SKILL.md)
+- **Referência visual:** [`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html)
+- **Filtro de copy:** [`../../.agents/skills/filtro-anti-ia/SKILL.md`](../../.agents/skills/filtro-anti-ia/SKILL.md)

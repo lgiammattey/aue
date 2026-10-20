@@ -40,20 +40,18 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 **Objetivo:** Ver o que está rolando na comunidade e escolher a próxima ação.
 
 1. **Feed Central (`Bonde do Arroto.dc.html`):**
-   - Posts de texto (causos engraçados de arroto) e posts com áudio e nota anexada.
-   - Abas de filtro: **Todos** e **Seguindo**.
-   - Composer rápido: *"O que tá rolando no bonde?"*, com botões para Arrotar, Desafiar ou Postar.
-   - Ações em cada post: Responder (threads), Repostar, Curtir (coração com preenchimento), Desafiar autor e Compartilhar.
+   - A produção mostra resenhas em texto, áudio ou mídia, sempre identificadas pela comunidade de origem.
+   - Filtros observados: **Quentes**, **Novos** e **Top**.
+   - Ações visíveis: comentário, reações, salvar e compartilhar. Participação pede entrada.
 2. **Decisão de Ação:**
-   - Postar causo de arroto no feed;
+   - Publicar uma resenha na comunidade, quando a participação estiver disponível;
    - Explorar comunidades temáticas;
    - Visualizar e aceitar desafios X1;
    - Acessar o perfil com histórico;
    - Ir diretamente para a **Arena** arrotar.
 3. **Comunidades (`Comunidades.dc.html`):**
-   - Praça central: **Bonde do Arroto** (comunidade oficial com mais de 48k membros).
-   - Categorias: Cerveja Gelada, Refri & Cia, Histórias de Arroto, etc.
-   - Ações: Entrar / Sair com 1 clique, feeds dedicados por comunidade, regras e moderação visíveis.
+   - A comunidade de origem aparece em cada resenha publicada.
+   - Contagens, entrada/saída, moderação e páginas específicas precisam de prova própria antes de serem prometidas.
 4. **Perfil do Jogador:**
    - Melhores marcas históricas (maior Auê Score).
    - Cartel de X1 (ex: *7V · 3D no X1*).
@@ -109,17 +107,16 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 ---
 
 ## Fase 5: Depois da Nota
-**Objetivo:** Transformar o resultado em causo social, duelo ou nova tentativa.
+**Objetivo:** Transformar o resultado em resenha social, duelo ou nova tentativa.
 
 1. **Decisão:**
-   - Postar no Bonde;
+   - Publicar na comunidade;
    - Chamar alguém pro X1;
    - Compartilhar card;
    - Arrotar de novo (*"Mandar outro"*).
-2. **Postar no Bonde:**
-   - Escolhe a comunidade alvo.
-   - A nota e a gravação de áudio acompanham automaticamente o causo.
-   - Cai direto no feed de causos do Auê!.
+2. **Publicar na comunidade:**
+   - Exige escolha consciente e consentimento explícito.
+   - A integração da Arena com uma resenha publicada só pode ser chamada de pronta depois de prova de ponta a ponta.
 3. **Compartilhar Card (PNG 9:12):**
    - Geração de cartão vertical padronizado: marca `AUÊ!`, nota gigante, fala do juiz e link `aue.app/x1/[code]`.
    - Compatível com WhatsApp, Instagram Stories e downloads de imagem.

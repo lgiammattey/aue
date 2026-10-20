@@ -13,7 +13,7 @@ Quem abre issue normalmente é o **Giam** (é ele quem planeja e prioriza). PR e
 commit são do **Guinho**. A voz é a mesma pros três.
 
 Tudo aqui passa obrigatoriamente pela
-[`matarCheiroDeIA`](../matarCheiroDeIA/SKILL.md).
+[`filtro-anti-ia`](../filtro-anti-ia/SKILL.md).
 
 A fonte da voz é [`docs/jogo/VOZ.md`](../../../docs/jogo/VOZ.md) — inclusive a
 seção "Como escrever uma issue com a voz certa", que esta skill executa.
@@ -131,13 +131,12 @@ também não é lugar de enfeite.
 - [ ] o título é frase de gente?
 - [ ] tem "Não viaja" escrito?
 - [ ] o "Tá pronto quando" é conferível linha por linha?
-- [ ] passou na [`matarCheiroDeIA`](../matarCheiroDeIA/SKILL.md)?
+- [ ] passou na [`filtro-anti-ia`](../filtro-anti-ia/SKILL.md)?
 - [ ] passou no **Teste de Guinho**
       ([`docs/jogo/VOZ.md`](../../../docs/jogo/VOZ.md))?
 
 ## Relacionados
 
 - **A voz:** [`docs/jogo/VOZ.md`](../../../docs/jogo/VOZ.md)
-- **Sem cheiro de IA:** [`matarCheiroDeIA`](../matarCheiroDeIA/SKILL.md)
-- **O plano que vira issue:** [`arquitetarModulo`](../arquitetarModulo/SKILL.md)
-- **Falar com o primo:** [`conversarComOPrimo`](../conversarComOPrimo/SKILL.md)
+- **Sem cheiro de IA:** [`filtro-anti-ia`](../filtro-anti-ia/SKILL.md)
+- **Produto e escopo:** [`visao-do-produto`](../visao-do-produto/SKILL.md)

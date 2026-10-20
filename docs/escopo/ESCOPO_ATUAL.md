@@ -18,12 +18,13 @@ outra.
 
 ## 1. O produto
 
-Um **jogo mobile casual, web-first**: abre no navegador do celular, arrota,
-recebe nota, desafia alguém, responde, revanche.
+Uma **comunidade web de arrotadores**: no desktop e no webapp mobile, a pessoa
+entra no Bonde, acompanha resenhas e áudios, usa a Arena para receber nota e
+chama alguém para o X1.
 
 A experiência acontece em **uma Arena que muda de estado**
 ([`../jogo/ARENA.md`](../jogo/ARENA.md)), com referência visual em
-[`../design/prototipo-arena/arena.html`](../design/prototipo-arena/arena.html).
+[`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html).
 
 ---
 
@@ -132,13 +133,14 @@ Aprovado por decisão de produto pelo Luiz em 17/10/2026:
 - **Consentimento e Opt-in:** gravação privada continua padrão; publicação na comunidade exige ação consciente e aceite explícito;
 - **Moderação ativa:** sistema de denúncia e ocultação server-side para áudios públicos.
 
-**Direção decidida em 19/10/2026 — ainda não é o comportamento do produto.**
+**Direção decidida em 19/10/2026 — ainda não substitui a produção publicada.**
 O Luiz decidiu que o Auê deixa de ter feed livre: a conversa passa a morar em
 **tópicos dentro de comunidades**, com respostas ([#251](https://github.com/lgiammattey/aue/issues/251)).
 A decisão de arquitetura está em [ADR 0010](../technical/adr/0010-comunidades-topicos-e-respostas.md)
-(**proposto**, sem aceite formal). Até o aceite e até a jornada nova ser provada
-ponta a ponta, o feed e o causo avulso descritos abaixo seguem sendo o que o
-produto faz — e a documentação não deve prometer o contrário.
+(aceito, com implementação ainda pendente). Até a migração e a jornada nova
+serem provadas ponta a ponta, o feed publicado segue sendo o que o produto faz.
+A prova datada da superfície pública está em
+[`../PRODUCAO_ATUAL.md`](../PRODUCAO_ATUAL.md); documentação não promete o contrário.
 
 **Complemento decidido pelo Luiz em 20/10/2026 — também ainda não implementado.**
 Na jornada nova, o post raiz é o tópico: não existe uma segunda ação de “postar

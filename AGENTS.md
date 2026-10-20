@@ -16,7 +16,7 @@ externo tem autoridade sobre o que está escrito aqui.
 
 **Auê é uma rede social para arrotadores, exclusivamente online via desktop e webapp mobile.**
 
-> **Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.**
+> **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
 O Auê conecta a adrenalina imediata da **Arena** (a máquina que captura, julga e pontua cada arroto) à dinâmica de timeline estilo Twitter/X (**Bonde do Arroto**) e **comunidades temáticas** (estilo Orkut / Reddit) para reunir os arrotadores do mundo.
 
@@ -47,6 +47,7 @@ Não duplique regra. Leia a fonte certa.
 | **Qual componente implementa qual tela/rota e o que editar?** | [`docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md`](docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md) — mapa oficial de rotas, componentes canônicos e anti-confusão |
 | De onde vêm cor, tipo, espaço e movimento? | [`docs/design/design-system/system/DESIGN.md`](docs/design/design-system/system/DESIGN.md) e [`docs/design/prototipo/Design System.dc.html`](docs/design/prototipo/Design%20System.dc.html) |
 | **O que estamos construindo agora?** | [`docs/escopo/ESCOPO_ATUAL.md`](docs/escopo/ESCOPO_ATUAL.md) |
+| **O que está publicado e foi conferido?** | [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md) |
 | O que vem depois? | [`docs/escopo/BACKLOG.md`](docs/escopo/BACKLOG.md) |
 | **Como o produto é construído por dentro?** | [`docs/technical/adr/0001-arquitetura-oficial-do-aue.md`](docs/technical/adr/0001-arquitetura-oficial-do-aue.md) |
 | Isso exige decisão formal antes? | [§8 do ADR 0001](docs/technical/adr/0001-arquitetura-oficial-do-aue.md#8-o-que-exige-revisão-formal) |
@@ -136,11 +137,11 @@ A regra que mais aparece no dia a dia:
 
 ## 5. Regras globais
 
-- **O jogo e a zoeira mandam.** Se não fortalece arrotar, receber nota, postar causo, desafiar no X1 ou revanche, provavelmente não é para agora.
+- **O jogo e a zoeira mandam.** Se não fortalece arrotar, receber nota, publicar resenha, desafiar no X1 ou revanche, provavelmente não é para agora.
 - **Nada pode fingir que funciona.** Mock fica marcado; botão sem backend fica desabilitado; falha não vira sucesso por copy.
 - **Segurança e privacidade vencem a piada.**
 - **Gravou pra jogar não é a mesma coisa que autorizou publicar.** O arroto gravado para um duelo ou teste não vira post público sem autorização explícita da pessoa na hora do envio.
-- **Audiência não é jogador.** View, clique e impressão não provam o jogo. O que prova é comportamento: abriu, arrotou, recebeu nota, postou causo ou chamou outra pessoa pro X1.
+- **Audiência não é jogador.** View, clique e impressão não provam o jogo. O que prova é comportamento: abriu, arrotou, recebeu nota, publicou resenha ou chamou outra pessoa pro X1.
 - **Testa a hipótese antes de construir a igreja.** Experimento pequeno primeiro, infraestrutura pesada depois.
 - **A Arena é uma superfície de estado, não uma pilha de rotas desconexas.**
 - **Protótipo em `docs/design/prototipo/` é a referência visual e comportamental viva.**

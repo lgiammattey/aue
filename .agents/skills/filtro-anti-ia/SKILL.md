@@ -94,8 +94,7 @@ Além de tudo acima, copy que vai pra tela obedece
 - **a piada é com o arroto, não com a pessoa**;
 - **voz não cria capacidade** — não escreve copy de coisa que não existe.
 
-E aplica a [`aplicarTomOgro`](../aplicarTomOgro/SKILL.md), que é o procedimento
-de escrever com essa voz.
+Use [`tom-de-voz`](../tom-de-voz/SKILL.md) para a direção de escrita do produto.
 
 ## 5. O teste
 
@@ -121,6 +120,5 @@ alguém precisava dela.
 ## Relacionados
 
 - **A voz:** [`docs/jogo/VOZ.md`](../../../docs/jogo/VOZ.md)
-- **Escrever copy:** [`aplicarTomOgro`](../aplicarTomOgro/SKILL.md)
-- **Falar com o primo:** [`conversarComOPrimo`](../conversarComOPrimo/SKILL.md)
-- **Issue, PR e commit:** [`registrarIssue`](../registrarIssue/SKILL.md)
+- **Escrever copy:** [`tom-de-voz`](../tom-de-voz/SKILL.md)
+- **Issue, PR e commit:** [`padrao-git-e-issues`](../padrao-git-e-issues/SKILL.md)

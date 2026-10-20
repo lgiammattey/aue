@@ -5,7 +5,7 @@
 **Data:** 27 de agosto de 2026  
 **Status:** Direção de arte canônica  
 **Produto:** Auê!  
-**Categoria:** Jogo mobile casual competitivo  
+**Categoria:** Direção visual da Arena e do jogo dentro da comunidade
 **Direção:** 2D · flat · dark · expressivo · áudio-reativo
 
 Este Art Bible consolida a direção artística do Auê. A máquina de estados segue
@@ -34,12 +34,13 @@ Ele existe para responder:
 
 Este documento **não substitui** as fontes canônicas existentes.
 
-Para implementação:
+Para implementação da Arena:
 
-- `docs/design/prototipo-arena/arena.html` determina geometria e comportamento visual;
+- [`prototipo/Arena.dc.html`](prototipo/Arena.dc.html) determina geometria e comportamento visual;
 - `docs/design/design-system/system/DESIGN.md` determina tokens, componentes e regras;
 - `docs/jogo/ARENA.md` determina os estados;
-- este Art Bible determina **a direção artística que une tudo isso**.
+- este Art Bible determina **a direção artística da Arena**. A comunidade e o
+  feed publicados seguem seus protótipos e o Design System.
 
 Quando houver conflito técnico, os documentos canônicos acima vencem.
 

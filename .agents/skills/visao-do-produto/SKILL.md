@@ -7,7 +7,7 @@ description: Critérios de produto e engajamento da rede social jogável do Auê
 
 O filtro do **Tiago**: isto fortalece o Bonde do Arroto, a comunidade e a diversão do jogo?
 
-O Auê! é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**. O jogo da Arena é o motor central que captura e pontua o arroto, enquanto o **Bonde do Arroto** (feed estilo Twitter/X) e as **comunidades temáticas** (estilo Orkut) sustentam a resenha diária e as revanches.
+O Auê! é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**. A Arena captura e pontua o arroto; o Bonde publicado sustenta a resenha diária com posts por comunidade, comentários, reações, salvar e compartilhar. A direção de tópicos é aceita, mas não deve ser tratada como entregue sem prova.
 
 O loop completo em 6 fases:
 
@@ -19,14 +19,13 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 
 ---
 
-## 1. O Causo com Áudio é a Unidade Atômica
+## 1. A Resenha é a Unidade Atual
 
-No Twitter/X, a unidade é o tweet. No Auê!, é o **Causo de Arroto**:
-- Áudio reproduzível na hora com waveform interativo;
-- Auê Score oficial (0 a 100) destacado em pill `--accent`;
-- Causo curto de até 280 caracteres (*"Terminei a long neck de uma vez e a vizinha bateu na parede. Nota 94"*);
-- Autor, handle e comunidade associada;
-- Ações sociais rápidas: Curtir, Repostar, Responder (threads), Desafiar pro X1 e Compartilhar card 9:12.
+Na produção, a unidade é a **resenha**:
+- texto, áudio ou mídia externa quando o post tem esse conteúdo;
+- autor e comunidade de origem;
+- comentários, reações, salvar e compartilhar;
+- leitura aberta a visitante; participação condicionada à entrada.
 
 Se uma proposta de tela esconde o áudio, burocratiza a reprodução ou dilui a nota, o Tiago corta na hora.
 
@@ -34,17 +33,16 @@ Se uma proposta de tela esconde o áudio, burocratiza a reprodução ou dilui a 
 
 ## 2. A Praça Central e as Comunidades Temáticas
 
-- **Bonde do Arroto:** A praça central oficial do Auê! (mais de 48k membros) onde todo mundo se encontra.
-- **Comunidades de Nicho:** *Cerveja Gelada*, *Refri & Cia*, *Histórias de Arroto*.
-- Cada comunidade tem suas regras, moderadores e ranking de maiores notas.
-- Entrar e sair é instantâneo, sem formulários.
+- **Bonde do Arroto:** a home social do Auê, com filtros Quentes, Novos e Top.
+- **Comunidades:** identificam a origem de cada resenha.
+- Não inventar total de membros, ranking, regra ou forma de participação que não tenha prova no produto.
 
 ---
 
 ## 3. O Loop de Revanche Nunca Termina em "Pronto"
 
 - Todo resultado de partida na Arena e todo duelo no X1 termina com um convite à ação:
-  - *Postar no Bonde*, *Chamar pro X1*, *Compartilhar card* ou *Mandar outro*.
+  - *Publicar na comunidade*, *Chamar pro X1*, *Compartilhar card* ou *Mandar outro*.
 - No X1, o placar versus com as duas notas preserva o perdedor sem usar cor vermelha (vermelho é exclusivo para falha técnica).
 - O botão **Revanche** faz a contagem `3, 2, 1` e joga os dois arrotadores direto de volta para a Arena `IDLE` com o mesmo oponente.
 

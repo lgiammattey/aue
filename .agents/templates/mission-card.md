@@ -23,7 +23,7 @@
 
 ## 3. Comportamento, Plataformas e Risco
 
-- **Plataformas afetadas:** Web Mobile (Safari iOS / Chrome Android) | Casca Nativa (Capacitor)
+- **Plataformas afetadas:** Web Mobile (Safari iOS / Chrome Android) | Desktop | documentação
 - **Estados obrigatórios da Arena:** inicial, gravando, analisando áudio, resultado, erro, microfone negado
 - **Maior risco de quebra ou mentira visual:**
 - **Limite da promessa (o que o motor de áudio/API não mede):**

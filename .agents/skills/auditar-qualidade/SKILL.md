@@ -28,7 +28,7 @@ Qualquer falha bloqueia a entrega imediatamente (`BLOQUEIA`).
 
 ## 2. Auditoria da Jornada e Resiliência
 
-Verificação contra as 6 fases de [`JORNADA.md`](../../docs/jogo/JORNADA.md):
+Verificação contra as 6 fases de [`JORNADA.md`](../../../docs/jogo/JORNADA.md):
 1. **Descoberta:** Landing rápida ("Tá rolando agora"), atalho "Arrotar sem conta" leva direto à Arena, login sem fricção.
 2. **Bonde do Arroto:** Feed de causos com áudios reproduzíveis, waveform e badges de score. Um áudio tocando pausa qualquer outro.
 3. **Arena:** Ciclo `IDLE → RECORDING → VALIDATING → JUDGING → RESULT`. Bolha reage ao microfone sem travamentos.

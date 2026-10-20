@@ -2,7 +2,7 @@
 
 **A rede social para arrotadores, exclusivamente online via desktop e webapp mobile.**
 
-> ## Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.
+> ## Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.
 
 ```text
 DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
@@ -10,7 +10,9 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
     └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
 ```
 
-O Auê conecta a adrenalina imediata da **Arena** (a máquina que captura, julga e pontua cada arroto) à dinâmica de timeline estilo Twitter/X (**Bonde do Arroto**) e **comunidades temáticas** (estilo Orkut / Reddit) para reunir os arrotadores do mundo.
+O Auê junta a Arena, onde o arroto ganha nota, à comunidade de resenhas e
+áudios organizados por comunidade. A home publicada hoje é um feed social;
+o retrato datado dela está em [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md).
 
 Feito por quem já fazia essa zoeira antes de existir qualquer linha de código.
 
@@ -20,12 +22,12 @@ Feito por quem já fazia essa zoeira antes de existir qualquer linha de código.
 
 A plataforma roda 100% na web moderna, adaptada tanto para telas grandes no **desktop** (layout de 3 colunas: navegação, feed/arena e lateral de tendências/ranking) quanto na palma da mão como **webapp mobile** (com barra inferior, safe area e alvos tocáveis >= 44px).
 
-1. **Bonde do Arroto (Feed):** Linha do tempo de causos em texto e áudio com ondas sonoras interativas, notas anexadas e reações.
+1. **Bonde do Arroto (Feed):** Resenhas em texto, áudio e mídia, ligadas a uma comunidade, com comentários, reações, salvar e compartilhar.
 2. **Arena:** Máquina de estados contínua (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`) onde o áudio é gravado, validado pelo YAMNet e pontuado de 0 a 100 (Auê Score).
-3. **Comunidades Temáticas:** Hubs organizados por assunto (Bonde Geral, Clássicos de Boteco, Madrugada, etc.) com rankings dedicados e moderação.
+3. **Comunidades Temáticas:** Hubs organizados por assunto, onde as resenhas e conversas acontecem.
 4. **Desafios X1:** Duelos diretos entre amigos via link no zap com comparativo visual e revanche imediata.
 5. **Diretório de Grupos:** Diretório aberto de grupos externos no WhatsApp, Telegram e TikTok.
-6. **Perfis de Jogador:** Identidade de arrotador com apelido, handle `@`, histórico de causos e troféus.
+6. **Perfis de Jogador:** Identidade de arrotador com apelido, handle `@` e histórico social.
 
 ---
 
@@ -51,7 +53,7 @@ Abra direto no navegador — roda de forma autônoma sem build. Ver [`docs/desig
 O Auê vive **100% na web** (`https://aue.web.app`), hospedado no Firebase Hosting.
 
 - **Sem download de loja:** Abre no navegador, joga em três segundos e compartilha no WhatsApp.
-- **PWA instalável:** Pode ser adicionado à tela inicial no Android e no iOS com suporte offline e cache do modelo YAMNet.
+- **PWA instalável:** Pode ser adicionado à tela inicial no Android e no iOS. Cache de assets não prova que jogo, gravação ou social funcionem sem rede.
 - **Zero cascas nativas:** Lojas nativas (Google Play / App Store) estão fora de escopo.
 
 ---
@@ -60,7 +62,7 @@ O Auê vive **100% na web** (`https://aue.web.app`), hospedado no Firebase Hosti
 
 - **Entrada instantânea:** Quem chega sem conta recebe uma sessão anônima do Supabase (`signInAnonymously`). Pode jogar na Arena, ouvir áudios e interagir imediatamente.
 - **Conta permanente e perfil:** A qualquer momento a pessoa pode vincular e-mail/senha ou Google, escolhendo seu apelido e handle `@` público.
-- Gravação para duelo ou teste não vira causo público sem autorização explícita na hora da postagem.
+- Gravação para duelo ou teste não vira resenha pública sem autorização explícita na hora da postagem.
 
 ---
 

@@ -3,7 +3,7 @@
 > **Documento Canônico de Orientação de Telas e Componentes**  
 > Autoridade: [`../../AGENTS.md`](../../AGENTS.md) | Design System: [`design-system/system/DESIGN.md`](design-system/system/DESIGN.md)
 
-Este documento é a bússola oficial para evitar que qualquer desenvolvedor ou agente mexa em **páginas erradas**, **componentes legados** ou **fluxos descontinuados**.
+Este documento é a bússola oficial para evitar que qualquer desenvolvedor ou agente mexa em **páginas erradas**, **componentes legados** ou **fluxos descontinuados**. Ele descreve o código e suas rotas; o que está efetivamente publicado é registrado, com data e limite de prova, em [`../PRODUCAO_ATUAL.md`](../PRODUCAO_ATUAL.md).
 
 ---
 
@@ -35,10 +35,10 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 | `/seguindo` | `InicioOpenDesign` (`view="seguindo"`) | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Feed exclusivo das pessoas seguidas por quem está conectado. |
 | `/arena` | `EntradaArena` (`Arena`) | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Máquina de 10 estados da Arena (gravação, julgamento de áudio, nota e duelo). |
 | `/comunidades` | `TelaDiretorioOpenDesign` | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Diretório completo de comunidades temáticas do Auê. |
-| `/c/:slug` | `TelaComunidadeOpenDesign` | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Página da comunidade específica (ex: `/c/eu-arroto-e-dai`), causos fixados e tópicos. |
-| `/c/:slug/novo` | `TelaComunidadeOpenDesign` | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Abre a comunidade com o modal de novo causo/tópico aberto diretamente. |
-| `/c/:slug/t/:id` | `rotasDoForum` (`TelaTopico`) | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Tópico específico da comunidade com lista de respostas e áudio embutido. |
-| `/explorar` | `rotasDoForum` (`TelaExplorar`) | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Descoberta e exploração de temas e conversas ativas. |
+| `/c/:slug` | `TelaComunidadeOpenDesign` | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Comunidade específica. Não declarar a tela de tópicos como publicada sem evidência própria. |
+| `/c/:slug/novo` | `TelaComunidadeOpenDesign` | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Entrada de criação associada à comunidade; depende do corte de tópicos do ADR 0010. |
+| `/c/:slug/t/:id` | `rotasDoForum` (`TelaTopico`) | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Rota da conversa por tópico prevista no ADR 0010; não é prova de publicação. |
+| `/explorar` | `rotasDoForum` (`TelaExplorar`) | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Descoberta de comunidades e tópicos prevista no ADR 0010; requer prova de produção antes de virar canônica. |
 | `/desafios` | `EntradaDesafios` | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Central de desafios e duelos de quem está jogando. |
 | `/x1/:code` | `EntradaPorLink` (`Arena`) | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Desafio X1 direto por código curto. Abre a Arena pronta para ouvir e responder. |
 | `/b/:code` | `EntradaPorLink` (`Arena`) | **ALIAS** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Atalho alternativo para desafio X1. |
@@ -74,13 +74,12 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 - **Comportamento:** O visitante pode navegar pelo feed e ouvir arrotos sem conta obrigatória. Ao tentar postar, desafiar ou curtir, abre-se o fluxo de identificação ágil.
 - **Visual:** No desktop, 3 colunas (menu, feed central e painel direito). No mobile, cabeçalho limpo com wordmark `AUÊ!` e navegação inferior.
 
-### Fase 2: Bonde do Arroto (Feed & Comunidades)
+### Fase 2: Bonde do Arroto (Feed & Comunidades publicados)
 - **Componentes:** `InicioOpenDesign.tsx`, `CardDoPost.tsx`, `ThreadDeComentarios.tsx`, `ModalCompositor.tsx`
 - **Comportamento:**
-  - Posts exibem avatar (44px), autor, badge da nota (se houver arroto anexado), texto do causo e player de áudio dedicado (`PlayerDoArroto`).
-  - Barra de ações vetorial com ícones SVG modernos: 💬 Respostas, 🔁 Repost, ❤️ Curtir, 🔗 Compartilhar e 🔖 Salvar.
-  - Clicar nas respostas abre a thread fluida de comentários **fora do card**, sem modais pesados de 90vh nem aninhamentos infinitos.
-  - Gravação de áudio no compositor funciona com **1 clique** no microfone.
+  - A produção mostra resenhas por comunidade, autor, comentários, reações, salvar e compartilhar; pode haver áudio ou mídia externa conforme o post.
+  - Visitante lê o feed; as ações de participação pedem entrada.
+  - A direção de conversa por tópico está aceita no ADR 0010, mas continua marcada como migração até ganhar evidência de publicação.
 
 ### Fase 3: Arena de Arroto
 - **Componentes:** `src/arena/Arena.tsx`, faixas em `src/arena/faixas/`

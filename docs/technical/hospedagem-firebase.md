@@ -1,45 +1,30 @@
-# Hospedagem no Firebase, e os dois endereços convivendo
+# Hospedagem no Firebase
 
-> **Atualização de 18/10/2026 — decisão do Luiz: hospedagem somente Firebase.**
-> O `vercel.json` saiu do repositório e `https://aue.web.app` é o único endereço
-> publicado por este projeto. As seções abaixo contam a convivência dos dois
-> endereços e ficam como histórico. **Falta fora do repositório** (painel da
-> Vercel): desligar a integração com o GitHub e, quando o redirecionamento de
-> `aue.vercel.app` para `aue.web.app` estiver de pé (§5), pausar o projeto. Até
-> lá o endereço antigo continua respondendo aos links que já circularam.
+> **Atualização de 20/10/2026:** `https://aue.web.app` é a produção verificada e
+> o Firebase Hosting é a única publicação deste repositório. A convivência com
+> Vercel foi contexto de migração; não é procedimento vigente.
 
 Escopo: `firebase.json`, `.firebaserc` e o procedimento de publicar. Não cobre
 banco, autenticação nem variáveis de aplicação (essas estão no `.env.example`).
 
 Issue: [#137](https://github.com/gmmattey/aue/issues/137).
 
-## 1. A decisão: os dois no ar ao mesmo tempo
+## 1. A decisão vigente
 
-O Auê passa a responder em **`https://aue.web.app`** (Firebase Hosting, projeto
-`aue-game`, site `aue`) **sem desligar `https://aue.vercel.app`**.
+O Auê é publicado em **`https://aue.web.app`** pelo Firebase Hosting, projeto
+`aue-game`, site `aue`. Este é o endereço de produção a usar em testes e
+documentação. A decisão está no [ADR 0006](adr/0006-hospedagem-somente-firebase.md).
 
-Decisão do Luiz em 10/08: mantém os dois, e só depois que o Firebase estabilizar
-o Vercel sai. O motivo é simples — endereço que alguém já mandou no zap não é
-nosso pra matar de um dia pro outro.
+## 2. Endereço canônico
 
-Os dois servem **o mesmo build, o mesmo Supabase, o mesmo jogo**. Não existe
-"versão do Firebase" e "versão do Vercel". Se um dia existir, alguém errou.
-
-## 2. Por que o endereço canônico NÃO mudou junto
-
-`ORIGEM_CANONICA` (`src/shared/enderecoPublico.ts`) continua sendo
-`https://aue.vercel.app` nesta fatia. De propósito.
+`ORIGEM_CANONICA` (`src/shared/enderecoPublico.ts`) é
+`https://aue.web.app`.
 
 Endereço canônico é o que o site declara ao buscador como "o de verdade", e ele
 aparece em cinco lugares travados por `src/seo-publico.test.ts`. Apontar o
 canônico para um endereço antes de ele estar validado é o pior caso possível de
 SEO: manda o buscador desindexar a URL que está de pé e indexar uma que talvez
 não responda.
-
-Enquanto os dois convivem, o de produção é o Vercel — então ele é o canônico.
-
-**A virada do canônico é a fatia 2**, junto com a desativação do Vercel. O que
-ela envolve está no §5.
 
 Isso não atrapalha ninguém jogando: `origemDoJogo()`
 (`src/plataforma/web/enderecoDoJogo.ts`) monta o link de desafio a partir da
@@ -54,7 +39,7 @@ não acha e devolve **404** — e o link de desafio, que é o mecanismo de
 distribuição do produto, morre antes do React montar. O 404 aparece do outro
 lado, no telefone de outra pessoa, onde ninguém está olhando.
 
-As regras espelham o `vercel.json` e nada além:
+As regras de reescrita do Firebase são:
 
 - `/privacidade`, `/termos` e `/como-jogar` servem os HTML estáticos que o
   `vite.config.ts` gera como entradas próprias;
@@ -104,23 +89,8 @@ juntos: `src/corte-de-producao.paridade.test.ts` compara o que o
 **A fonte continua sendo o workflow.** O `.env.example` carrega uma cópia
 declarada, não uma segunda verdade — e é por isso que a trava existe.
 
-**`VITE_FEATURE_DISPUTA_LOCAL=1`**. Foi lido do bundle servido pelo
-`aue.vercel.app`, não de documento.
-
-Isso já mordeu: a primeira publicação manual no Firebase saiu sem as duas, e o
-`aue.web.app` passou a servir o fluxo de telas antigo enquanto o
-`aue.vercel.app` servia a Arena. **Dois jogos diferentes no mesmo produto, sem
-erro em lugar nenhum.**
-
-A prova de paridade é barata e vale rodar sempre que publicar à mão:
-
-```bash
-diff <(curl -s https://aue.vercel.app/ | grep -oE '/assets/[^"]+\.js' | sort -u) \
-     <(curl -s https://aue.web.app/  | grep -oE '/assets/[^"]+\.js' | sort -u)
-```
-
-Nome de arquivo idêntico nos dois lados = mesmo build. Divergiu, alguma flag
-divergiu.
+Leia as flags no workflow de publicação e confira a página publicada depois do
+deploy. Não há segundo host para usar como prova de paridade.
 
 ### Publicação automática
 
@@ -128,7 +98,7 @@ O `.github/workflows/publicar-firebase.yml` publica a cada merge na `main`. Os
 segredos que ele exige estão no cabeçalho do próprio arquivo.
 
 As flags ficam **escritas no workflow**, à vista, em vez de escondidas num
-painel — pelo motivo do parágrafo acima. Mexeu na Vercel, mexe lá também.
+painel.
 
 ### Publicação à mão
 
@@ -142,25 +112,7 @@ firebase deploy --only hosting --project aue-game
 O deploy publica o conteúdo de `dist/` no site `aue`, e o endereço é
 `https://aue.web.app`.
 
-Publicar no Firebase **não mexe** no Vercel. Os dois continuam de pé.
-
-## 5. O que falta pra desligar o Vercel (fatia 2)
-
-Não faça nada disso antes do `aue.web.app` estar validado em celular real e com
-link recebido de verdade no WhatsApp.
-
-1. Trocar `ORIGEM_CANONICA` para `https://aue.web.app`. As cinco cópias
-   (`index.html`, `privacidade.html`, `termos.html`, `public/robots.txt`,
-   `public/sitemap.xml`) estão travadas por `src/seo-publico.test.ts` — o teste
-   cai se alguém trocar em um lugar e esquecer os outros. É o comportamento
-   desejado.
-2. Corrigir o comentário em `supabase/migrations/20260807000030_batalhas_em_sessao.sql:236`,
-   que cita o endereço antigo como exemplo de link. É comentário, não quebra
-   nada — mas é documentação mentindo.
-3. Redirecionar `aue.vercel.app` para `aue.web.app` em vez de simplesmente
-   desligar. Link que já circulou continua funcionando.
-
-## 6. Duas coisas que não têm conserta bonito
+## 5. Duas coisas que não têm conserta bonito
 
 **Quem já instalou o Auê pelo `aue.vercel.app` fica lá.** App instalado se prende
 à origem de onde foi instalado: outro service worker, outro armazenamento local.

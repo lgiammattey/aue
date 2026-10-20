@@ -2,7 +2,7 @@
 
 O Auê é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**:
 
-> **Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.**
+> **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
 A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arquivo serve como mapa para localizar cada decisão, protótipo e especificação.
 
@@ -11,7 +11,8 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 ## Comece por aqui
 
 1. [`../AGENTS.md`](../AGENTS.md) — **a autoridade única**: squad, governança, precedência, escopo e regras.
-2. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: o Bonde do Arroto, comunidades, Arena e X1.
+2. [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md) — o que foi conferido no `aue.web.app`, com data e limite da prova.
+3. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: o Bonde do Arroto, comunidades, Arena e X1.
 3. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop em 6 fases da experiência.
 4. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
 5. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da máquina da Arena.
@@ -33,7 +34,8 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 | Qual é a jornada do jogador? | [`jogo/JORNADA.md`](jogo/JORNADA.md) e [`design/prototipo/Jornada.dc.html`](design/prototipo/Jornada.dc.html) |
 | Que estados a Arena tem? | [`jogo/ARENA.md`](jogo/ARENA.md) |
 | Como o jogo pontua e o que não vale? | [`jogo/REGRAS.md`](jogo/REGRAS.md) |
-| Com o que a interface se parece? | Protótipos canônicos em [`design/prototipo/`](design/prototipo/) |
+| O que está no ar agora? | [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md), conferido no navegador e datado |
+| Com o que a interface se parece? | Protótipos canônicos em [`design/prototipo/`](design/prototipo/) — referência de desenho, não prova de publicação |
 | Qual componente implementa cada tela/rota? | [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) |
 | De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e [`design/prototipo/Design System.dc.html`](design/prototipo/Design%20System.dc.html) |
 | Qual é a direção artística que une tudo? | [`design/AUÊ!.md`](design/AUÊ!.md) |

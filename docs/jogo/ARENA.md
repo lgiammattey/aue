@@ -21,7 +21,7 @@ estado da partida.
 > O que o material de design decide é o resto — e é bastante: como cada estado
 > **se parece, se move e mede**. Geometria, token, tipografia, componente,
 > motion e acessibilidade saem de
-> [`../design/prototipo-arena/arena.html`](../design/prototipo-arena/arena.html)
+> [`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html)
 > e de
 > [`../design/design-system/system/DESIGN.md`](../design/design-system/system/DESIGN.md).
 > Nesse terreno, quando este documento e o protótipo divergirem, **o protótipo

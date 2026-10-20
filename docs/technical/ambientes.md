@@ -9,7 +9,7 @@ Ambos ficam na mesma organização do Supabase, ambos em `sa-east-1`.
 
 | Ambiente | Projeto | Ref | Para quê |
 |---|---|---|---|
-| Produção | `Auê` | `enjykrpprjfmeqxunzcs` | o app no ar em `aue.vercel.app` |
+| Produção | `Auê` | `enjykrpprjfmeqxunzcs` | o app no ar em `aue.web.app` |
 | Staging | `aue-staging` | `rrkkmzamjntplgxktkyc` | **provar migração antes de encostar na produção** |
 
 O staging não aparecia em lugar nenhum do repositório até esta página. Ele foi o
@@ -27,7 +27,7 @@ ele consegue e o que não consegue provar:
 
 O segundo item é o que falha em silêncio. Toda migração que toca RLS de
 `resultados` ou policy do bucket precisa, depois da produção, de um teste
-manual: abrir uma batalha em `aue.vercel.app` e apertar o play.
+manual: abrir uma batalha em `aue.web.app` e apertar o play.
 
 ## Como uma migração chega ao banco
 
@@ -100,9 +100,9 @@ janela entre eles é tempo de produto quebrado.
 > `.github/workflows/publicar-firebase.yml`, em `https://aue.web.app`. As partes
 > abaixo que falam da Vercel descrevem o desenho anterior.
 
-## Variáveis da Vercel são lidas em tempo de build
+## Variáveis do build são lidas em tempo de build
 
-Projeto `aue`, time `buildea-projects`, domínio `aue.vercel.app`.
+O build publicado pelo Firebase Hosting recebe as variáveis antes da compilação.
 
 Toda variável `VITE_*` entra no bundle **no build**. Configurar no painel depois
 do deploy não muda nada até um rebuild. Já derrubou o app uma vez, em silêncio,
@@ -128,23 +128,19 @@ São duas coisas separadas, e confundir as duas gera deploy duplicado.
 
 | O quê | Quem faz | Quando |
 |---|---|---|
-| **Publicar** | a Vercel, pela integração com o GitHub | todo push vira prévia; todo merge na `main` vira produção |
+| **Publicar** | [`.github/workflows/publicar-firebase.yml`](../../.github/workflows/publicar-firebase.yml) | merge na `main` publica no Firebase Hosting |
 | **Validar** | [`.github/workflows/validacao.yml`](../../.github/workflows/validacao.yml) | toda PR para a `main`, e todo push na `main` |
 
-**A Vercel publica sozinha desde antes de existir workflow aqui.** Os deploys
-aparecem no GitHub criados por `vercel[bot]`. Não existe, e não deve existir, um
-workflow que também publique: seriam duas publicações por push, disputando qual
-chega por último em produção.
+O Firebase é a única publicação deste repositório. A regra de hospedagem está no
+[ADR 0006](adr/0006-hospedagem-somente-firebase.md); referência à Vercel abaixo
+de `docs/_arquivo/` é histórico, não instrução operacional.
 
 ### O workflow de validação não tem segredo nenhum
 
 Nenhum token, chave ou variável precisa estar no *Settings → Secrets* do GitHub
-para ele funcionar. `typecheck`, `lint`, `test` e `build` rodam sem
-`.env.local` — nenhum depende de banco, rede ou chave. As chaves do app vivem na
-Vercel e são injetadas por ela no build.
-
-Se um dia a publicação migrar para o GitHub, aí sim seria preciso um
-`VERCEL_TOKEN` — e a integração da Vercel teria que ser desligada no mesmo ato.
+para a validação funcionar. `typecheck`, `lint`, `test` e `build` rodam sem
+`.env.local` — nenhum depende de banco, rede ou chave. As variáveis do app são
+injetadas no ambiente de publicação antes do build.
 
 ### O que ainda não está travado
 

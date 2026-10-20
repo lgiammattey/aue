@@ -43,7 +43,7 @@ colors:
 
 # Auê! Design System
 
-> **Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.**
+> **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
 O Auê! é uma **rede social para arrotadores**, exclusivamente online via **Desktop e Webapp Mobile**. A experiência conecta a adrenalina imediata da **Arena** (a máquina de captura e pontuação de arrotos) à dinâmica de feed contínuo estilo Twitter/X (**Bonde do Arroto**) e **comunidades temáticas** estilo Orkut / Reddit.
 
@@ -57,14 +57,14 @@ Os arquivos em `docs/design/prototipo/` e este Design System são as referência
 
 | Artefato | Arquivo | Responsabilidade |
 |---|---|---|
-| **Design System** | [`docs/design/prototipo/Design System.dc.html`](../prototipo/Design%20System.dc.html) | Demonstração viva de cores, tipos, raios, botões e componentes |
-| **Bonde do Arroto** | [`docs/design/prototipo/Bonde do Arroto.dc.html`](../prototipo/Bonde%20do%20Arroto.dc.html) | Feed de causos, posts com áudio, abas, composer, desafios X1 e perfil |
-| **Arena** | [`docs/design/prototipo/Arena.dc.html`](../prototipo/Arena.dc.html) | Máquina de estados do arroto (IDLE, RECORDING, VALIDATING, JUDGING, RESULT, X1) |
-| **Comunidades** | [`docs/design/prototipo/Comunidades.dc.html`](../prototipo/Comunidades.dc.html) | Praça central, descoberta de categorias, rankings e moderação |
-| **Landing** | [`docs/design/prototipo/Landing.dc.html`](../prototipo/Landing.dc.html) | Recepção estilo Twitter ("Tá rolando agora"), login social e atalho para arrotar |
-| **Login** | [`docs/design/prototipo/Login.dc.html`](../prototipo/Login.dc.html) | Autenticação simples (Google, Apple, E-mail/Senha/Apelido) ou Convidado |
-| **Jornada** | [`docs/design/prototipo/Jornada.dc.html`](../prototipo/Jornada.dc.html) | O fluxo completo em 6 fases de decisão e resiliência |
-| **Versões Webapp** | [`docs/design/prototipo/Versões Webapp.dc.html`](../prototipo/Vers%C3%B5es%20Webapp.dc.html) | Responsividade em 3 larguras: Desktop (1280px), Tablet (820px) e Celular (390px) |
+| **Design System** | [`docs/design/prototipo/Design System.dc.html`](../../prototipo/Design%20System.dc.html) | Demonstração viva de cores, tipos, raios, botões e componentes |
+| **Bonde do Arroto** | [`docs/design/prototipo/Bonde do Arroto.dc.html`](../../prototipo/Bonde%20do%20Arroto.dc.html) | Feed de resenhas, posts com áudio, abas, composer, desafios X1 e perfil |
+| **Arena** | [`docs/design/prototipo/Arena.dc.html`](../../prototipo/Arena.dc.html) | Máquina de estados do arroto (IDLE, RECORDING, VALIDATING, JUDGING, RESULT, X1) |
+| **Comunidades** | [`docs/design/prototipo/Comunidades.dc.html`](../../prototipo/Comunidades.dc.html) | Praça central, descoberta de categorias, rankings e moderação |
+| **Landing** | [`docs/design/prototipo/Landing.dc.html`](../../prototipo/Landing.dc.html) | Recepção estilo Twitter ("Tá rolando agora"), login social e atalho para arrotar |
+| **Login** | [`docs/design/prototipo/Login.dc.html`](../../prototipo/Login.dc.html) | Autenticação simples (Google, Apple, E-mail/Senha/Apelido) ou Convidado |
+| **Jornada** | [`docs/design/prototipo/Jornada.dc.html`](../../prototipo/Jornada.dc.html) | O fluxo completo em 6 fases de decisão e resiliência |
+| **Versões Webapp** | [`docs/design/prototipo/Versões Webapp.dc.html`](../../prototipo/Vers%C3%B5es%20Webapp.dc.html) | Responsividade em 3 larguras: Desktop (1280px), Tablet (820px) e Celular (390px) |
 
 ---
 
@@ -119,7 +119,7 @@ A hierarquia tipográfica une brutalismo esportivo e legibilidade social:
 1. **Display:** `Anton` (`sans-serif`, peso único, condensada e pesada).
    - Uso: Wordmark `AUÊ!`, Auê Score (número de 0 a 100), títulos da Arena, falas secas do juiz ("Caralho. Veio forte.", "Tá maluco.", "Foi isso?"), contagem da revanche e kickers.
 2. **Interface e Leitura:** `Archivo` (com fallbacks `Google Sans Flex`, `Inter`, `system-ui`).
-   - Uso: Textos do feed, causos, botões, navegação, descrições e formulários.
+   - Uso: Textos do feed, resenhas, botões, navegação, descrições e formulários.
 3. **Monospaçada:** `ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace`.
    - Uso restrito: Eyebrows técnicos, timestamps (`2min`, `1h`), duração de áudio (`0:07`), links curtos (`aue.gg/x1/9f2a`), posições numéricas de ranking.
 
@@ -162,7 +162,7 @@ O elemento orgânico e sonoro do jogo:
 - **Modos:** `idle` (pulso leve de repouso), `recording` (áudio-reativa expandindo com volume), `checking` / `validating` (contração rápida), `judging` (vibração de suspense), `holding` (tensão pré-duelo), `waiting` (halo calmo esperando oponente).
 - Sem rosto, sem dentes, sem gradiente.
 
-### 5.3 Player de Causo com Áudio
+### 5.3 Player de Resenha com Áudio
 - Botão circular play/pause (`36px` a `40px`).
 - Waveform com barras verticais indicando dinâmica do arroto.
 - Duração em mono (`0:07`).
@@ -196,7 +196,7 @@ O Auê roda exclusivamente no navegador com excelência em 3 cenários:
 
 1. **Desktop (>= 1060px — recomendado 1280px):**
    - **Coluna Esquerda (275px):** Navegação vertical fixa (Logo `AUÊ!`, Início, Auê Arena, Comunidades, Desafios, Perfil, Trocar Tema e Botão de Postar/Arrotar).
-   - **Coluna Central (600px):** Feed de causos ou Arena de jogo centralizada com bordas laterais de 1px `--border`.
+   - **Coluna Central (600px):** Feed de resenhas ou Arena de jogo centralizada com bordas laterais de 1px `--border`.
    - **Coluna Direita (320px):** Sticky lateral com campo de busca, tendências "Em alta no Bonde", "Ranking de hoje" e "X1 abertos".
 2. **Tablet (700px a 1059px):**
    - Coluna esquerda compacta em ícones (76px de largura).

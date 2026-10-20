@@ -108,7 +108,7 @@ elas fecham. Vale a regra anti-cemitério.
 ## Anotado na entrega, sem issue ainda
 
 **O erro fala sempre a mesma frase.** O protótipo tem 2-3 variantes por caso
-(`docs/design/prototipo-arena/arena.html:938-971`) e o `erros.ts` tem uma só. Ficou
+(`docs/design/prototipo/Arena.dc.html`) e o `erros.ts` tem uma só. Ficou
 de fora da [#102](https://github.com/gmmattey/aue/issues/102) de propósito: o
 `ARENA.md` pede que cada caso fale na lata, não que fale diferente toda vez, e o
 erro é o último lugar onde variar importa. Se um dia entrar, entra junto com o
@@ -170,10 +170,8 @@ errado. Isso morre quando a Arena assumir a raiz de vez — a
 [#109](https://github.com/gmmattey/aue/issues/109) tirou o que estava pendurado
 no shell velho, não o shell.
 
-**O `hospedagem-firebase.md` §2 ainda diz que o canônico é a Vercel.** O
-`src/shared/enderecoPublico.ts` já aponta `https://aue.web.app` desde o `56470b1`
-— é a fatia 2 da [#137](https://github.com/gmmattey/aue/issues/137) que aconteceu
-e não voltou no documento. Mentira diferente da #142, não entrou junto.
+**Hospedagem e endereço canônico foram corrigidos.** `aue.web.app` é a produção
+e `docs/technical/hospedagem-firebase.md` registra o procedimento vigente.
 
 **A vitrine ainda diz nome de criatura.**
 `docs/design/design-system/aue-design-system-showcase.html`. Não vai pra tela de

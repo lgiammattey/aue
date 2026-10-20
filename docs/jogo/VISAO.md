@@ -8,11 +8,11 @@ O desenho completo de produto está em [`AUÊ!-2.md`](AUÊ!-2.md) e a jornada de
 
 **Auê é uma rede social para arrotadores, exclusivamente online via desktop e webapp mobile.**
 
-> **Arrote. Receba a nota. Publique seu causo. Humilhe seus amigos e domine as comunidades.**
+> **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
 O Auê conecta três pilares inseparáveis:
-1. **O Bonde do Arroto (Feed estilo Twitter/X):** Uma timeline dinâmica onde a galera posta causos em texto ou áudios gravados com a nota cravada. As pessoas respondem em threads, curtem, repostam e desafiam direto do feed com abas *Todos* e *Seguindo*.
-2. **As Comunidades Temáticas (Estilo Orkut / Reddit):** Espaços como a praça central oficial *Bonde do Arroto* (48k membros), *Cerveja Gelada*, *Refri & Cia* e *Histórias de Arroto*, com rankings próprios, regras e moderação visível.
+1. **O Bonde do Arroto:** A home publicada reúne resenhas por comunidade, com comentários, reações, salvar e compartilhar. Os filtros observados são *Quentes*, *Novos* e *Top*.
+2. **As Comunidades Temáticas:** Espaços de resenha e conteúdo, identificados em cada publicação. A migração para conversa organizada em tópicos é direção aceita, ainda pendente de prova de entrega.
 3. **A Arena de Arroto (O Núcleo Jogável):** A máquina acústica que captura o som pelo navegador, valida via YAMNet se foi arroto de verdade, aciona a expectativa do julgamento e entrega o **Auê Score (0 a 100)** com as métricas de Força, Fôlego e Grave, abrindo o duelo X1 e a revanche sem fim.
 
 ---
@@ -28,7 +28,7 @@ O Auê conecta três pilares inseparáveis:
 ## As Quatro Leis Inegociáveis
 
 1. **O Som é Sagrado e o Juiz é Justo:** Medição real via microfone com inteligência acústica. Arroto fake, sopro ou ruído não viram nota.
-2. **A Humilhação e a Revanche são o Produto:** Nota isolada perde a graça em 1 minuto. O valor nasce ao provocar o oponente no X1 e no feed, com o loop infinito da revanche.
+2. **A Resenha e a Revanche são o Produto:** Nota isolada perde a graça em 1 minuto. O valor nasce ao provocar o oponente no X1 e na comunidade, com o loop infinito da revanche.
 3. **Fluidez em 3 Larguras (Desktop e Webapp):** Desktop em 3 colunas produtivas (navegação, feed/arena e barra lateral de tendências/ranking), tablet adaptado e webapp mobile com barra inferior e alvos de toque de no mínimo 44px.
 4. **Fundo Chapado e Identidade Marcante:** Estética sem gradientes baratos, sem sombras fofas, com verde ácido elétrico (`#c6ff00`) usado com parcimônia (máximo 2 por estado), e suporte completo a tema escuro e claro.
 

@@ -22,6 +22,10 @@ export const BarraSuperior = memo(function BarraSuperior({
 
   return (
     <header className="topbar">
+      <Link to="/" className="topbar-brand-mobile" aria-label="Auê mobile">
+        AUÊ!
+      </Link>
+
       <input
         type="search"
         className="search"

@@ -1222,8 +1222,8 @@ export function InicioOpenDesign({
     if (inputDaCapa.current) inputDaCapa.current.value = '';
   };
 
-  const trocarFotoDoPerfil = async (arquivo: Blob) => {
-    if (fotoEnviando) return;
+  const trocarFotoDoPerfil = async (arquivo: Blob): Promise<{ readonly ok: boolean; readonly mensagem?: string }> => {
+    if (fotoEnviando) return { ok: false, mensagem: 'A foto já está sendo enviada.' };
     setFotoEnviando(true);
     try {
       const resultado = await perfilPort.enviarFoto(arquivo);
@@ -1234,15 +1234,16 @@ export function InicioOpenDesign({
             ? 'A foto não coube no limite de envio.'
             : 'Não foi possível trocar a foto agora.';
         exibirToast(mensagem);
-        return false;
+        return { ok: false, mensagem };
       }
       setMeuPerfil(resultado.perfil);
       setPerfilAtivo(resultado.perfil);
       exibirToast('Foto atualizada.');
-      return true;
+      return { ok: true };
     } catch {
-      exibirToast('Não foi possível trocar a foto agora.');
-      return false;
+      const mensagem = 'O servidor recusou o envio da foto. Não foi possível trocar a foto agora.';
+      exibirToast(mensagem);
+      return { ok: false, mensagem };
     } finally {
       setFotoEnviando(false);
     }
@@ -1267,8 +1268,8 @@ export function InicioOpenDesign({
     }
   };
 
-  const trocarCapaDoPerfil = async (arquivo: Blob) => {
-    if (capaEnviando) return;
+  const trocarCapaDoPerfil = async (arquivo: Blob): Promise<{ readonly ok: boolean; readonly mensagem?: string }> => {
+    if (capaEnviando) return { ok: false, mensagem: 'A capa já está sendo enviada.' };
     setCapaEnviando(true);
     try {
       const resultado = await perfilPort.enviarCapa(arquivo);
@@ -1279,15 +1280,16 @@ export function InicioOpenDesign({
             ? 'A capa não coube no limite de envio.'
             : 'Não foi possível trocar a capa agora.';
         exibirToast(mensagem);
-        return false;
+        return { ok: false, mensagem };
       }
       setMeuPerfil(resultado.perfil);
       setPerfilAtivo(resultado.perfil);
       exibirToast('Capa atualizada.');
-      return true;
+      return { ok: true };
     } catch {
-      exibirToast('Não foi possível trocar a capa agora.');
-      return false;
+      const mensagem = 'O servidor recusou o envio da capa. Não foi possível trocar a capa agora.';
+      exibirToast(mensagem);
+      return { ok: false, mensagem };
     } finally {
       setCapaEnviando(false);
     }
@@ -1338,8 +1340,11 @@ export function InicioOpenDesign({
     }
 
     const atualizado = await (ajusteDeImagem.tipo === 'capa' ? trocarCapaDoPerfil(preparada.imagem) : trocarFotoDoPerfil(preparada.imagem));
-    if (atualizado) fecharAjusteDeImagem();
-    else setEstadoDoAjusteDeImagem('pronto');
+    if (atualizado.ok) fecharAjusteDeImagem();
+    else {
+      setEstadoDoAjusteDeImagem('erro');
+      setErroDoAjusteDeImagem(atualizado.mensagem ?? 'Não foi possível salvar essa imagem agora.');
+    }
   };
 
   const removerCapaDoPerfil = async () => {

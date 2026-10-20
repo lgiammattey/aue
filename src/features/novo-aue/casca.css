@@ -32,6 +32,30 @@
   --aue-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
 }
 
+html, body {
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.mobile-bottom-nav {
+  display: none !important;
+}
+
+.topbar-brand-mobile {
+  display: none;
+  font-family: var(--font-display, 'Anton', sans-serif);
+  font-size: 26px;
+  letter-spacing: 0.04em;
+  color: var(--aue-text);
+  text-decoration: none;
+  line-height: 1;
+}
+
 .app {
   min-height: 100dvh;
   display: grid;
@@ -515,6 +539,52 @@ main {
 
 .post-video { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 8px; margin-top: 12px; background: #000; }
 
+/* ==================== ANÚNCIO NATIVO NO FEED (ADSTERRA) ==================== */
+.adsterra-native-card {
+  margin: 12px 0;
+  padding: 8px 12px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--aue-line);
+  background: var(--aue-surface);
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.adsterra-native-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.adsterra-native-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--aue-subtle);
+  font-weight: 700;
+}
+
+.adsterra-native-container {
+  width: 100%;
+  max-height: 110px;
+  min-height: 50px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.adsterra-native-container iframe,
+.adsterra-native-container img,
+.adsterra-native-container > div {
+  max-width: 100% !important;
+  max-height: 100px !important;
+  object-fit: contain !important;
+}
+
 /* ==================== TOCADOR DE ARROTO ==================== */
 .burp-player {
   display: inline-flex;
@@ -954,47 +1024,124 @@ main {
 
   .sidebar {
     position: fixed;
-    z-index: 40;
+    z-index: 50;
     width: 100%;
-    height: auto;
+    left: 0;
+    right: 0;
     bottom: 0;
     top: auto;
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    height: auto;
+    padding: 4px 6px calc(6px + env(safe-area-inset-bottom));
     border-right: 0;
     border-top: 1px solid var(--aue-line);
     background: var(--aue-surface);
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    overflow: hidden;
+    flex-direction: column;
+    justify-content: center;
+    overflow: visible;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.28);
   }
 
+  .sidebar-desktop-nav,
   .sidebar-footer,
   .brand,
   .nav-label,
-  .create-side,
-  .sidebar .nav-item:nth-of-type(n+5) {
-    display: none;
+  .create-side {
+    display: none !important;
   }
 
-  .sidebar nav {
-    flex-direction: row;
+  .mobile-bottom-nav {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr);
     width: 100%;
-    justify-content: space-around;
+    height: 52px;
+    align-items: center;
+    justify-items: center;
   }
 
-  .sidebar .nav-item {
-    width: auto;
+  .mobile-nav-item {
+    display: flex;
     flex-direction: column;
-    gap: 3px;
-    padding: 6px 12px;
-    font-size: 11px;
-    min-height: 48px;
+    align-items: center;
     justify-content: center;
+    gap: 3px;
+    height: 48px;
+    width: 100%;
+    background: none;
+    border: 0;
+    color: var(--aue-muted);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0;
   }
 
-  .nav-item .ico {
-    font-size: 18px;
+  .mobile-nav-item svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    transition: stroke 0.15s ease, transform 0.15s ease;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--aue-text);
+    font-weight: 700;
+  }
+
+  .mobile-nav-item.active svg {
+    stroke: var(--aue-accent);
+  }
+
+  .mobile-nav-item:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-nav-item--arrotar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    position: relative;
+    top: -14px;
+    background: var(--aue-accent);
+    color: var(--aue-accent-on);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 4px solid var(--aue-surface);
+    box-shadow: 0 4px 16px rgba(198, 255, 0, 0.4);
+    font-weight: 800;
+    font-size: 9px;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .mobile-nav-item--arrotar svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--aue-accent-on);
+    stroke: none;
+  }
+
+  .mobile-nav-item--arrotar .arrotar-label {
+    font-family: var(--font-display, 'Anton', sans-serif);
+    letter-spacing: 0.04em;
+    font-size: 9px;
+    line-height: 1;
+    color: var(--aue-accent-on);
+  }
+
+  .mobile-nav-item--arrotar:active {
+    transform: scale(0.92);
+    box-shadow: 0 2px 8px rgba(198, 255, 0, 0.3);
   }
 
   main {
@@ -1002,7 +1149,16 @@ main {
   }
 
   .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 16px;
+  }
+
+  .topbar-brand-mobile {
+    display: inline-block;
+    margin-right: 4px;
+    flex-shrink: 0;
   }
 
   .hero {
@@ -1034,6 +1190,32 @@ main {
     border: 0;
     border-radius: 0;
     padding: calc(20px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+
+  .adsterra-native-card {
+    margin: 8px 0;
+    padding: 6px 10px 8px;
+    border-radius: 10px;
+  }
+
+  .adsterra-native-header {
+    margin-bottom: 4px;
+  }
+
+  .adsterra-native-label {
+    font-size: 9px;
+  }
+
+  .adsterra-native-container {
+    max-height: 72px;
+    min-height: 44px;
+  }
+
+  .adsterra-native-container iframe,
+  .adsterra-native-container img,
+  .adsterra-native-container > div {
+    max-height: 65px !important;
+    max-width: 100% !important;
   }
 }
 

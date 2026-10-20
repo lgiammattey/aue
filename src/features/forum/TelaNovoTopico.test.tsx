@@ -286,7 +286,7 @@ describe('criar: só o que o cliente pode mandar, e só atualiza depois do ok', 
     expect(criarTopico).toHaveBeenCalledWith({
       comunidadeSlug: SLUG,
       corpo: '',
-      anexo: { tipo: 'videoExterno', url: 'https://youtu.be/dQw4w9WgXcQ' },
+      anexo: { tipo: 'videoExterno', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
     });
   });
 

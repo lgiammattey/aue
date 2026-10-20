@@ -1,5 +1,6 @@
 /* oxlint-disable react/only-export-components -- contrato visual e componentes ficam juntos para a integração da porta de mídia. */
 import { useEffect, useId, useState, type ChangeEvent } from 'react';
+import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import type { AnexoDoForum } from '../../portas/forum';
 import { useDependenciasDoForum } from './contexto';
 
@@ -16,30 +17,14 @@ export type MidiaDoForum =
  * O iframe nunca recebe uma URL arbitrária digitada por alguém.
  */
 export function videoDoForum(url: string): Extract<MidiaDoForum, { tipo: 'video-externo' }> | null {
-  try {
-    const endereco = new URL(url.trim());
-    const host = endereco.hostname.toLowerCase().replace(/^www\./, '');
-    let id: string | null = null;
-    if (host === 'youtu.be') id = endereco.pathname.slice(1);
-    if (host === 'youtube.com' || host === 'm.youtube.com') id = endereco.searchParams.get('v') ?? (endereco.pathname.startsWith('/shorts/') ? endereco.pathname.split('/')[2] ?? null : null);
-    if (id && /^[A-Za-z0-9_-]{6,20}$/.test(id)) {
-      return { tipo: 'video-externo', origem: 'youtube', urlOriginal: endereco.href, urlDeEmbed: `https://www.youtube-nocookie.com/embed/${id}` };
-    }
-    if (host === 'tiktok.com' || host.endsWith('.tiktok.com')) {
-      const correspondencia = endereco.pathname.match(/\/video\/(\d{8,})/);
-      if (correspondencia) {
-        return {
-          tipo: 'video-externo',
-          origem: 'tiktok',
-          urlOriginal: endereco.href,
-          urlDeEmbed: `https://www.tiktok.com/embed/v2/${correspondencia[1]}`,
-        };
-      }
-    }
-  } catch {
-    // Campo livre: URL inválida é tratada pela interface, não vira iframe.
-  }
-  return null;
+  const canonico = detectarLinkDeVideo(url.trim());
+  if (!canonico) return null;
+  return {
+    tipo: 'video-externo',
+    origem: canonico.tipo,
+    urlOriginal: canonico.urlOriginal,
+    urlDeEmbed: canonico.embedUrl,
+  };
 }
 
 export function CartaoDeMidia({ midia }: { readonly midia: MidiaDoForum }) {

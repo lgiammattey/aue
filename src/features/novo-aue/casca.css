@@ -37,10 +37,12 @@
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr) 300px;
   max-width: 1540px;
+  width: 100%;
   margin: 0 auto;
   background-color: var(--aue-bg);
   color: var(--aue-text);
   font-family: var(--font-body, 'Archivo', sans-serif);
+  box-sizing: border-box;
 }
 
 /* ==================== BARRA LATERAL ESQUERDA ==================== */
@@ -185,6 +187,8 @@
 /* ==================== MIOLO PRINCIPAL ==================== */
 main {
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   padding: 24px clamp(16px, 3vw, 36px) 80px;
 }
 

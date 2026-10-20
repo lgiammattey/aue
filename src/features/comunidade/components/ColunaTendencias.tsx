@@ -32,7 +32,7 @@ export const ColunaTendencias: React.FC<ColunaTendenciasProps> = ({
   return (
     <aside
       style={{
-        width: '320px',
+        width: '300px',
         flex: 'none',
         position: 'sticky',
         top: 0,

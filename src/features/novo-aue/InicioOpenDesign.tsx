@@ -749,65 +749,38 @@ export function InicioOpenDesign({
                   <strong style={{ fontSize: 13 }}>Antes de soltar: leia as regras da comunidade.</strong>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 260px', gap: 16 }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <h2 style={{ fontSize: 18, margin: 0 }}>Feed da comunidade</h2>
-                      <div className="tabs">
-                        <button
-                          type="button"
-                          className={`tab ${abaComunidade === 'Quentes' ? 'active' : ''}`}
-                          onClick={() => setAbaComunidade('Quentes')}
-                        >
-                          Quentes
-                        </button>
-                        <button
-                          type="button"
-                          className={`tab ${abaComunidade === 'Novos' ? 'active' : ''}`}
-                          onClick={() => setAbaComunidade('Novos')}
-                        >
-                          Novos
-                        </button>
-                      </div>
-                    </div>
-                    {topicosDaComunidade.map((post) => (
-                      <CardDoPost
-                        key={post.id}
-                        post={post}
-                        voto={votosUsuario[post.id]}
-                        salvo={Boolean(salvosUsuario[post.id])}
-                        audioTocando={audioTocandoId === post.enderecoDoAudio}
-                        aoVotar={(delta) => alternarVoto(post.id, delta)}
-                        aoAlternarSalvar={() => alternarSalvo(post.id)}
-                        aoTocarAudio={alternarAudio}
-                      />
-                    ))}
-                  </div>
-
-                  <div>
-                    <div className="panel">
-                      <h2>Moderadores</h2>
-                      {moderadoresDaComunidade.map(([handle, papel]) => (
-                        <div key={handle} style={{ fontSize: 13, padding: '4px 0' }}>
-                          <strong>{handle}</strong>
-                          <span style={{ color: 'var(--aue-subtle)', display: 'block', fontSize: 11 }}>
-                            {papel}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="panel">
-                      <h2>Regras rápidas</h2>
-                      <ol style={{ paddingLeft: 18, margin: 0, fontSize: 13, color: 'var(--aue-muted)' }}>
-                        {regrasDaComunidade.map((r, i) => (
-                          <li key={i} style={{ marginBottom: 6 }}>
-                            {r}
-                          </li>
-                        ))}
-                      </ol>
+                <div className="community-feed">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h2 style={{ fontSize: 18, margin: 0 }}>Feed da comunidade</h2>
+                    <div className="tabs">
+                      <button
+                        type="button"
+                        className={`tab ${abaComunidade === 'Quentes' ? 'active' : ''}`}
+                        onClick={() => setAbaComunidade('Quentes')}
+                      >
+                        Quentes
+                      </button>
+                      <button
+                        type="button"
+                        className={`tab ${abaComunidade === 'Novos' ? 'active' : ''}`}
+                        onClick={() => setAbaComunidade('Novos')}
+                      >
+                        Novos
+                      </button>
                     </div>
                   </div>
+                  {topicosDaComunidade.map((post) => (
+                    <CardDoPost
+                      key={post.id}
+                      post={post}
+                      voto={votosUsuario[post.id]}
+                      salvo={Boolean(salvosUsuario[post.id])}
+                      audioTocando={audioTocandoId === post.enderecoDoAudio}
+                      aoVotar={(delta) => alternarVoto(post.id, delta)}
+                      aoAlternarSalvar={() => alternarSalvo(post.id)}
+                      aoTocarAudio={alternarAudio}
+                    />
+                  ))}
                 </div>
               </>
             )}
@@ -953,34 +926,20 @@ export function InicioOpenDesign({
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 260px', gap: 16 }}>
-              <div>
-                <h2 style={{ fontSize: 18, marginBottom: 12 }}>Atividade</h2>
-                {causosDoPerfil.length === 0 ? (
-                  <p style={{ color: 'var(--aue-muted)' }}>Nenhum causo publicado ainda.</p>
-                ) : (
-                  causosDoPerfil.map((c) => (
-                    <article key={c.id} className="post" style={{ padding: 16 }}>
-                      <h3>{c.conteudo}</h3>
-                      <small style={{ color: 'var(--aue-subtle)' }}>
-                        r/{c.comunidadeSlug || 'arena-do-arroto'}
-                      </small>
-                    </article>
-                  ))
-                )}
-              </div>
-
-              <div>
-                <div className="panel">
-                  <h2>Conquistas</h2>
-                  <p style={{ fontSize: 13 }}>🏆 Primeira erupção</p>
-                  <p style={{ fontSize: 13 }}>⚡ Veterano do bonde</p>
-                </div>
-                <div className="panel">
-                  <h2>Comunidades favoritas</h2>
-                  <p style={{ fontSize: 13 }}>r/arena-do-arroto</p>
-                </div>
-              </div>
+            <div className="profile-activity">
+              <h2 style={{ fontSize: 18, marginBottom: 12 }}>Atividade</h2>
+              {causosDoPerfil.length === 0 ? (
+                <p style={{ color: 'var(--aue-muted)' }}>Nenhum causo publicado ainda.</p>
+              ) : (
+                causosDoPerfil.map((c) => (
+                  <article key={c.id} className="post" style={{ padding: 16 }}>
+                    <h3>{c.conteudo}</h3>
+                    <small style={{ color: 'var(--aue-subtle)' }}>
+                      r/{c.comunidadeSlug || 'arena-do-arroto'}
+                    </small>
+                  </article>
+                ))
+              )}
             </div>
           </section>
         )}
@@ -1134,6 +1093,9 @@ export function InicioOpenDesign({
       <PainelDireito
         comunidades={comunidades}
         comunidadesEntradas={comunidadesEntradas}
+        viewAtual={viewAtual}
+        moderadoresDaComunidade={moderadoresDaComunidade}
+        regrasDaComunidade={regrasDaComunidade}
         aoAbrirComunidade={(slug) => {
           setComunidadeSlug(slug);
           setViewAtual('comunidade');

@@ -208,10 +208,11 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
     --recuo: 24px;
     --h1: 1.75rem;
     display: grid;
-    grid-template-columns: var(--largura-lateral) minmax(0, 680px);
+    grid-template-columns: var(--largura-lateral) minmax(0, 1fr);
     justify-content: center;
     column-gap: 0;
-    max-width: 1280px;
+    max-width: 1540px;
+    width: 100%;
     margin: 0 auto;
   }
   .forum-lateral {
@@ -278,10 +279,10 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   }
 }
 
-/* Desktop compacto: lateral 76 + coluna 640 + aside 320. */
+/* Desktop compacto: lateral 76 + coluna fluid + aside 300. */
 @media (min-width: 1000px) {
   .forum-shell {
-    grid-template-columns: var(--largura-lateral) minmax(0, 640px) 320px;
+    grid-template-columns: var(--largura-lateral) minmax(0, 1fr) 300px;
   }
   .forum-aside {
     display: block;
@@ -299,10 +300,10 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   }
 }
 
-/* Desktop: lateral larga de 275px. */
+/* Desktop: lateral de 250px unificada. */
 @media (min-width: 1200px) {
   .forum-shell {
-    --largura-lateral: 275px;
+    --largura-lateral: 250px;
   }
   .forum-lateral {
     padding: 12px 16px;

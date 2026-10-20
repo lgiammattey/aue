@@ -13,7 +13,8 @@
  *   como veio; ninguém converte para `Date`.
  * - O erro se decide pelo HINT do servidor. HINT desconhecido é `falhou`.
  * - Nenhuma escrita recebe autor, nota, contagem ou permissão do cliente.
- * - Nenhuma escrita anexa áudio (o contrato de áudio de tópico ainda não fechou).
+ * - Um item pode ter no máximo uma mídia: imagem/GIF, áudio livre de até 60 s ou
+ *   vídeo YouTube/TikTok. Documento e vídeo enviado não entram no contrato.
  */
 
 // ---------------------------------------------------------------------------
@@ -127,6 +128,76 @@ export interface AnexoDeAudioDoTopico {
   readonly caminhoDoAudioDaCasa: string | null;
 }
 
+/** Mídia livre de uma conversa. `caminho` não é URL: a plataforma o assina. */
+export type AnexoDoForum =
+  | {
+      readonly alvo: 'topico' | 'resposta';
+      readonly alvoId: string;
+      readonly tipo: 'imagem' | 'audio';
+      readonly caminho: string;
+      readonly mime: string;
+      readonly tamanhoBytes: number;
+      /** Só áudio; o banco nunca aceita mais que 60.000 ms. */
+      readonly duracaoMs: number | null;
+      readonly urlVideo: null;
+    }
+  | {
+      readonly alvo: 'topico' | 'resposta';
+      readonly alvoId: string;
+      readonly tipo: 'videoExterno';
+      readonly caminho: null;
+      readonly mime: null;
+      readonly tamanhoBytes: null;
+      readonly duracaoMs: null;
+      /** URL canônica, limitada a YouTube ou TikTok no servidor. */
+      readonly urlVideo: string;
+    };
+
+/** O arquivo ainda é rascunho, pertencente à pessoa, até a RPC publicá-lo. */
+export interface PedidoDeEnvioDeAnexoDoForum {
+  readonly tipo: 'imagem' | 'audio';
+  readonly arquivo: Blob;
+  /** Obrigatória para áudio; vem da gravação, não é estimada pela tela. */
+  readonly duracaoMs?: number;
+}
+
+/** Gravação de voz livre: não passa pela Arena nem recebe nota. */
+export interface AudioLivreDoForum {
+  readonly dados: Blob;
+  /** MIME efetivamente produzido pelo navegador, inclusive parâmetros/codecs. */
+  readonly formato: string;
+  /** Base MIME usada para Storage/RPC (`audio/webm;codecs=opus` -> `audio/webm`). */
+  readonly mimeParaEnvio: string;
+  /** Medida entre o start e o stop real do MediaRecorder. Nunca estimada pela UI. */
+  readonly duracaoMs: number;
+}
+
+export type ResultadoDaGravacaoLivreDoForum =
+  | { readonly ok: true; readonly audio: AudioLivreDoForum; readonly encerramento: 'manual' | 'limite' }
+  | { readonly ok: false; readonly motivo: 'negado' | 'indisponivel' | 'falhou' | 'naoGravando' | 'cancelado'; readonly detalhe?: string };
+
+export type InicioDaGravacaoLivreDoForum =
+  | { readonly ok: true; readonly conclusao: Promise<ResultadoDaGravacaoLivreDoForum> }
+  | Exclude<ResultadoDaGravacaoLivreDoForum, { readonly ok: true }>;
+
+/** Implementada apenas pela plataforma web: ela é dona do stream até concluir. */
+export interface GravacaoLivreDoForum {
+  iniciar(): Promise<InicioDaGravacaoLivreDoForum>;
+  parar(): void;
+  cancelar(): void;
+  estaGravando(): boolean;
+}
+
+export type AnexoParaPublicar =
+  | {
+      readonly tipo: 'imagem' | 'audio';
+      readonly caminho: string;
+      readonly mime: string;
+      readonly tamanhoBytes: number;
+      readonly duracaoMs?: number;
+    }
+  | { readonly tipo: 'videoExterno'; readonly url: string };
+
 export type StatusDoTopico = 'aberto' | 'fechado';
 
 export interface TopicoDoForum {
@@ -161,6 +232,14 @@ export interface RespostaDoForum {
   readonly criadoEm: string;
   readonly editadoEm: string | null;
   readonly souAutor: boolean;
+}
+
+/** Até duas respostas visíveis por tópico, buscadas para uma página inteira. */
+export interface PreviaDeRespostaDoTopico {
+  readonly topicoId: string;
+  readonly resposta: RespostaDoForum;
+  /** Vem nesta mesma leitura; URLs privadas ainda precisam ser assinadas. */
+  readonly anexo: AnexoDoForum | null;
 }
 
 /** Linha do Explorar: sem corpo, sem áudio, sem nota. */
@@ -229,8 +308,10 @@ export interface OpcoesDePaginaCronologica {
 /** Autor, nota, contagem e áudio não entram: o servidor decide. */
 export interface PedidoDeNovoTopico {
   readonly comunidadeSlug: string;
-  readonly titulo: string;
+  /** Legado/explorar. Composer atual pode omitir: o servidor deriva do texto. */
+  readonly titulo?: string;
   readonly corpo: string;
+  readonly anexo?: AnexoParaPublicar | null;
 }
 
 export interface PedidoDeResposta {
@@ -238,6 +319,7 @@ export interface PedidoDeResposta {
   readonly corpo: string;
   /** Responde outra resposta. Sem ele, responde o tópico. */
   readonly paiId?: string | null;
+  readonly anexo?: AnexoParaPublicar | null;
 }
 
 export interface PedidoDeEdicaoDeTopico {
@@ -314,6 +396,11 @@ export interface PortaDeForum {
     opcoes?: OpcoesDePaginaCronologica,
   ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, RespostaDoForum>>>;
 
+  /** Leitura em lote para cards: máximo de 2 respostas visíveis por tópico. */
+  listarPreviaRespostasDosTopicos?(
+    topicoIds: readonly string[],
+  ): Promise<ResultadoDaLeitura<readonly PreviaDeRespostaDoTopico[]>>;
+
   /** Tópicos de todas as comunidades, cada um com a sua. */
   explorarTopicos(
     opcoes?: OpcoesDoExplorar,
@@ -333,10 +420,23 @@ export interface PortaDeForum {
     opcoes?: OpcoesDePaginaCronologica,
   ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, RespostaDoAutor>>>;
 
+  /** Busca a mídia dos cards já retornados por uma página; não vaza anexo oculto. */
+  listarAnexosDoForum?(ids: {
+    readonly topicoIds?: readonly string[];
+    readonly respostaIds?: readonly string[];
+  }): Promise<ResultadoDaLeitura<readonly AnexoDoForum[]>>;
+
+  /** Gera URL curta para mídia do bucket privado. Link externo não passa aqui. */
+  assinarAnexoDoForum?(caminho: string): Promise<ResultadoDaLeitura<string>>;
+
+  /** Fábrica injetada pela plataforma; tela não conhece MediaRecorder nem navigator. */
+  criarGravacaoLivreDoForum?(): GravacaoLivreDoForum;
+
   // Escritas (conta promovida e membro; visitante recebe `precisaEntrar`)
 
   criarTopico(pedido: PedidoDeNovoTopico): Promise<ResultadoDaEscrita<TopicoCriado>>;
   responderTopico(pedido: PedidoDeResposta): Promise<ResultadoDaEscrita<RespostaCriada>>;
+  enviarAnexoDoForum?(pedido: PedidoDeEnvioDeAnexoDoForum): Promise<ResultadoDaEscrita<AnexoParaPublicar>>;
   editarTopico(pedido: PedidoDeEdicaoDeTopico): Promise<ResultadoDaEscrita<TopicoEditado>>;
   editarResposta(pedido: PedidoDeEdicaoDeResposta): Promise<ResultadoDaEscrita<RespostaEditada>>;
   apagarTopico(topicoId: string): Promise<ResultadoDaEscrita<true>>;

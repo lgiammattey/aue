@@ -83,7 +83,7 @@ function abrir(c: Cenario = {}) {
 const campo = (nome: string | RegExp = 'Sua resposta') => screen.getByLabelText(nome) as HTMLTextAreaElement;
 const digitar = (texto: string, nome?: string | RegExp) => fireEvent.change(campo(nome), { target: { value: texto } });
 const enviar = (nome?: string | RegExp) => fireEvent.submit(campo(nome).closest('form')!);
-const esperarConversa = () => screen.findByRole('heading', { level: 1, name: 'Arroto na reunião de segunda' });
+const esperarConversa = () => screen.findByRole('heading', { level: 1, name: 'Conversa em Na reunião da firma' });
 const statusDaCasca = () => document.querySelector('.forum-shell > [role="status"]')!.textContent;
 const toastVisivel = () => document.querySelector('.forum-toast')?.textContent;
 const menuDoTopico = () => screen.getByRole('button', { name: 'Ações do tópico' });
@@ -93,11 +93,11 @@ const escolher = (botao: HTMLElement, item: string) => {
 };
 
 describe('o que cada papel vê no fim da conversa (spec 5 e 9.5)', () => {
-  it('membro com tópico aberto: composer com contador 0/500, "Enviar" verde e a frase de abertura', async () => {
+  it('membro com tópico aberto: composer com contador 0/180, "Enviar" verde e a frase de abertura', async () => {
     abrir();
     await esperarConversa();
     expect(campo().placeholder).toBe('Escreve sua resposta');
-    expect(screen.getByText('0/500')).toBeDefined();
+    expect(screen.getByText('0/180')).toBeDefined();
     expect(screen.getByRole('button', { name: 'Enviar' })).toBeDefined();
     expect(await screen.findByText('Ninguém respondeu ainda. Manda a primeira.')).toBeDefined();
     expect(campo().getAttribute('maxlength')).toBeNull();
@@ -149,11 +149,12 @@ describe('o que cada papel vê no fim da conversa (spec 5 e 9.5)', () => {
     expect(screen.queryByRole('button', { name: 'Responder' })).toBeNull();
   });
 
-  it('nunca oferece áudio: sem "Arrotar para responder", sem anexo', async () => {
+  it('oferece imagem e link; sem ponte de plataforma, gravação fica indisponível', async () => {
     abrir();
     await esperarConversa();
     expect(screen.queryByText(/Arrotar para responder/)).toBeNull();
-    expect(document.querySelector('input[type="file"], audio')).toBeNull();
+    expect(document.querySelector('input[type="file"]')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Gravar áudio' }).hasAttribute('disabled')).toBe(true);
   });
 
   it('um verde só no composer: "Enviar" é o único botão de acento (sem nota no tópico)', async () => {
@@ -231,14 +232,14 @@ describe('responder o tópico', () => {
     expect(responder).toHaveBeenCalledTimes(1);
   });
 
-  it('contador por code point: 500 emojis cabem, 501 bloqueiam com "Passou do limite" e nada vai ao servidor', async () => {
+  it('contador por code point: 180 emojis cabem, 181 bloqueiam com "Passou do limite" e nada vai ao servidor', async () => {
     const responder = vi.fn(async () => ok(criada()));
     abrir({ forum: { responderTopico: responder } });
     await esperarConversa();
-    digitar('💨'.repeat(500));
-    expect(screen.getByText('500/500')).toBeDefined();
-    digitar('💨'.repeat(501));
-    expect(screen.getByText('501/500')).toBeDefined();
+    digitar('💨'.repeat(180));
+    expect(screen.getByText('180/180')).toBeDefined();
+    digitar('💨'.repeat(181));
+    expect(screen.getByText('181/180')).toBeDefined();
     enviar();
     const erro = (await screen.findAllByText('Passou do limite em 1 caractere.')).find((e) => e.closest('[role="alert"]'));
     expect(erro).toBeDefined();
@@ -246,12 +247,12 @@ describe('responder o tópico', () => {
     expect(document.activeElement).toBe(campo());
   });
 
-  it('vazio: "Falta a resposta." e o foco no campo, sem ir ao servidor', async () => {
+  it('vazio: pede resposta ou anexo e mantém o foco no campo, sem ir ao servidor', async () => {
     const responder = vi.fn(async () => ok(criada()));
     abrir({ forum: { responderTopico: responder } });
     await esperarConversa();
     enviar();
-    expect(await screen.findByText('Falta a resposta.')).toBeDefined();
+    expect(await screen.findByText('Falta a resposta ou um anexo.')).toBeDefined();
     expect(responder).not.toHaveBeenCalled();
   });
 
@@ -747,7 +748,7 @@ describe('editar e apagar o próprio tópico', () => {
     fireEvent.change(within(d).getByLabelText('Título'), { target: { value: 'Título novo' } });
     estado.topico = { ...estado.topico, titulo: 'Título novo', editadoEm: '2026-10-19T15:00:00Z' };
     fireEvent.submit(d.querySelector('form')!);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Título novo' })).toBeDefined();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Conversa em Na reunião da firma' })).toBeDefined();
     expect(editar).toHaveBeenCalledWith({ topicoId: ID, titulo: 'Título novo' });
     expect(screen.queryByRole('dialog')).toBeNull();
     await waitFor(() => expect(document.activeElement).toBe(menuDoTopico()));

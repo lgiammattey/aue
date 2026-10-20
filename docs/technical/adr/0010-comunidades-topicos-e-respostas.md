@@ -1,15 +1,17 @@
 # ADR 0010 — Comunidades, tópicos e respostas (sem feed solto)
 
-**Status:** proposto — Gate Arquitetural do Camillo: **aprovado com condições** (cumpridas na PR da migração, 19/10/2026). Falta o aceite formal do Lucas e do Luiz.
-**Data:** 2026-10-19
-**Decisão de produto:** Luiz, em 19/10/2026 ([#251](https://github.com/lgiammattey/aue/issues/251))
+**Status:** aceito — Gate Arquitetural do Camillo aprovado; implementação do composer e das mídias ainda pendente de PR, testes e aceite de qualidade.
+**Data:** 2026-10-19 (atualizado em 2026-10-20)
+**Decisão de produto:** Luiz, em 19/10/2026 ([#251](https://github.com/lgiammattey/aue/issues/251)), com mídia e composer definidos em 20/10/2026
 **Pretende substituir:** ADR 0004 §1 (camada de Feed), §3 (modelo de dados) e §5 (UI do feed)
 **Mantém:** ADR 0001, ADR 0004 §2 (fronteira do áudio e consentimento), ADR 0005, ADR 0009
 **Vale para:** navegação, rotas, banco, permissões e conteúdo de comunidades
 
-> Enquanto este ADR estiver **proposto**, o 0004 continua valendo e o código
-> continua sendo o feed. Este documento descreve para onde vamos e como chegar
-> sem derrubar o que já funciona. Nada aqui é comportamento atual.
+> Este ADR é uma decisão aceita de destino. Ele **não** prova que o comportamento
+> já exista em produção: até a entrega passar por migração, implementação,
+> testes e aceite, o código em operação continua sendo a referência do que o
+> produto faz. A substituição do feed legado segue a migração incremental deste
+> documento, sem derrubar o que já funciona.
 
 ---
 
@@ -26,20 +28,27 @@ conversa e não criaria fórum.
 
 ## A decisão
 
-**Comunidade → Tópico → Resposta é a única hierarquia de conversa. Não existe
-publicação sem comunidade e tópico. A Arena continua independente e só publica
-com consentimento explícito.**
+**Comunidade → Tópico → Resposta é a única hierarquia de conversa. Um post
+raiz no feed da comunidade é um tópico; não há um segundo tipo de publicação
+"direto no feed". A Arena continua independente e só publica com consentimento
+explícito.**
 
 ## O que muda na prática
 
 ### Entidades
 
 - **Comunidade** — já existe (`grupos` + `membros_grupo`). Ganha slug estável como identidade pública.
-- **Tópico** — nova. ID estável, `comunidade_id`, `autor_id`, título, corpo, status
-  (aberto, fechado, oculto, removido), datas de criação, edição e última atividade,
-  vínculo opcional com resultado + áudio (opt-in).
-- **Resposta** — reaproveita `comentarios`, com `topico_id` obrigatório e pai
-  opcional **do mesmo tópico**.
+- **Tópico** — publicação raiz do composer. ID estável, `comunidade_id`,
+  `autor_id`, corpo de até 180 caracteres, status (aberto, fechado, oculto,
+  removido), datas de criação, edição e última atividade e, no máximo, um bloco
+  de mídia. Não exige título separado.
+- **Resposta** — publicação do mesmo composer dentro de um tópico, com pai
+  opcional **do mesmo tópico**, o mesmo limite de 180 caracteres e, no máximo,
+  um bloco de mídia.
+- **Bloco de mídia** — união tipada e exclusiva: áudio livre, imagem/GIF ou
+  embed de YouTube/TikTok. Documento, arquivo arbitrário e upload de vídeo não
+  são tipos válidos. O card escolhe sua apresentação pelo tipo persistido, nunca
+  por inspeção livre de URL na UI.
 
 ### Rotas
 
@@ -62,9 +71,19 @@ algo útil. Nenhum link compartilhado quebra.
 - Visitante lê comunidades, tópicos e áudios públicos. Escrever exige conta promovida (ADR 0009) e participação na comunidade.
 - O servidor recusa: comunidade errada, tópico ausente, oculto, fechado ou de outra comunidade; resposta cujo pai é de outro tópico.
 - Autor é sempre `auth.uid()`. Título, nota, contagens e permissões nunca vêm do cliente.
-- Limites de título e texto validados na RPC, com códigos de erro que a UI sabe traduzir.
+- Texto de tópico e resposta tem de 1 a 180 caracteres, contado por
+  `char_length` no servidor. Não há título obrigatório. As RPCs também validam
+  tipo, cardinalidade e metadados do bloco de mídia, com códigos de erro que a UI
+  sabe traduzir.
 - Contagens e ordenação por atividade têm fonte real; paginação por cursor estável.
-- Áudio privado continua privado. Gravar para jogar não autoriza publicar (ADR 0004 §2 segue valendo).
+- Áudio publicado é uma gravação livre/voz, de até 60 segundos, tanto em tópico
+  quanto em resposta. Não recebe nota nem passa pelo juiz da Arena. Áudio privado
+  da Arena continua privado: gravar para jogar não autoriza publicar (ADR 0004
+  §2 segue valendo).
+- Um vídeo de YouTube ou TikTok é exibido no Auê por embed controlado, mas a
+  mídia continua hospedada e transmitida pelo fornecedor externo. Bloqueio do
+  fornecedor, rede, remoção do vídeo, política de embed ou timeout são falhas
+  reais: o card mostra indisponibilidade e preserva o post, sem fingir playback.
 
 ### Contrato da porta
 
@@ -72,6 +91,38 @@ algo útil. Nenhum link compartilhado quebra.
 `criarTopico`, `listarRespostas(topico, cursor)`, `responderTopico`, editar e
 apagar o próprio, `denunciar`, `entrar`, `sair`. A UI não consulta o Supabase
 direto; o adaptador fica em `src/plataforma/web/`.
+
+O composer conversa apenas com portas de gravação, upload de mídia e resolução
+de embed. `MediaRecorder`, permissões, URLs de objeto, `window`, iframe e o
+cliente Supabase permanecem em `src/plataforma/web/`; Núcleo, Portas e UI usam
+tipos e resultados explícitos. Cancelamento, falha, duração excedida ou upload
+incompleto não criam publicação, nem retornam sucesso inventado.
+
+### Limites arquiteturais do composer e das mídias
+
+- **Uma publicação, um bloco de mídia.** Texto é opcional quando há mídia;
+  sem mídia, o texto é obrigatório. Não há álbum, anexo múltiplo, documento ou
+  vídeo enviado pelo usuário nesta decisão.
+- **Áudio livre é separado do áudio da Arena.** A captura, prévia, validação de
+  duração e envio vivem atrás de portas próprias. O resultado não tem `nota`,
+  `score` ou vínculo implícito com uma batalha.
+- **Embed não é HTML do usuário.** O servidor normaliza somente URL/ID de
+  YouTube ou TikTok permitidos e persiste um descritor tipado; a plataforma
+  constrói o embed com origem allowlisted e sandbox/restrições compatíveis. URL
+  desconhecida, redirecionada para origem não permitida ou sem identificador
+  válido é rejeitada pela RPC.
+- **Thread sem recuo infinito.** Uma resposta pode apontar a qualquer ancestral
+  do mesmo tópico. A persistência guarda `resposta_pai_id`; a UI limita o recuo
+  visual a três níveis e, depois disso, mantém o contexto por “respondendo a”.
+  Isso preserva a conversa sem esmagar a leitura no webapp mobile.
+- **Leitura e playback são tolerantes à falha.** O feed pagina primeiro texto e
+  descritores leves; bytes de áudio e embeds carregam sob demanda. Falha de
+  áudio/embed não impede ler, denunciar, responder ou navegar, e não deve ser
+  convertida em card falso ou contagem fictícia.
+- **Reversibilidade.** Os novos campos/tabelas/RPCs de mídia são aditivos e
+  têm rollback somente dos objetos novos. Uma futura troca de fornecedor ou
+  remoção de um tipo cria novo adaptador/migração; não coloca SDK de terceiro na
+  UI nem muda o contrato de post legado em produção.
 
 ## Como migrar sem quebrar (o ponto mais perigoso)
 
@@ -82,7 +133,7 @@ Por isso:
 
 1. **Duas PRs, nesta ordem.** Primeiro só a migração aditiva; confirmar que foi aplicada; só então o código que a usa.
 2. **Só aditivo.** `CREATE TABLE IF NOT EXISTS`, colunas novas `NULL`áveis ou com default, RPCs novas. Nada de `DROP`, rename ou mudança de tipo de retorno em RPC existente — a RPC atual precisa continuar atendendo o frontend que ainda está no ar.
-3. **Conteúdo existente não se perde.** Cada post vira um tópico, cada comentário vira resposta. O backfill é idempotente (coluna `legado_post_id` única, `ON CONFLICT DO NOTHING`), não ressuscita apagado nem oculto, manda post sem comunidade para uma comunidade "acervo" e **confere contagens antes e depois, abortando se divergirem**. Essa mesma coluna é o mapa para `/historia/:id`.
+3. **Conteúdo existente não se perde.** Cada post vira um tópico, cada comentário vira resposta. O backfill é idempotente (coluna `legado_post_id` única, `ON CONFLICT DO NOTHING`), não ressuscita apagado nem oculto, manda post sem comunidade para uma comunidade "acervo" e **confere contagens antes e depois, abortando se divergirem**. Essa mesma coluna é o mapa para `/historia/:id`. Limites novos do composer não truncam conteúdo legado; ele permanece legível como legado.
 4. **Post criado entre a migração e o deploy novo** não pode ficar fora: trigger espelho que nunca falha o `INSERT` antigo, ou um segundo backfill.
 5. **Rollback** em `supabase/rollback/*.down.sql`, só dos objetos novos.
 6. **O feed antigo só sai** depois que a jornada nova estiver provada ponta a ponta: banco, acervo convertido, lista de tópicos, criar tópico, conversa com respostas, diretório e E2E ([#248](https://github.com/lgiammattey/aue/issues/248)). Remover RPC ou coluna antiga é PR posterior, com revisão de Camillo e Lucas.
@@ -94,6 +145,9 @@ Por isso:
 - **Manter o feed e colocar "tópicos" como filtro.** É a timeline com outro nome: a conversa continuaria sem endereço nem dono.
 - **Migração destrutiva em um passo.** O deploy do frontend e a migração disparam juntos; qualquer janela entre eles quebra a produção.
 - **Chat, DM, recomendação e ranking inventado.** Fora do núcleo, como já decidido no épico.
+- **Iframe/URL arbitrário e upload de vídeo.** Permitiriam conteúdo sem contrato,
+  elevariam o risco de segurança e tornam o custo de streaming imprevisível. O
+  primeiro é bloqueado por allowlist e o segundo fica explicitamente fora desta fase.
 
 ## O que custa
 
@@ -132,6 +186,29 @@ Arquitetural. Onde divergem do texto acima, **vale esta seção**.
   que a UI exige (membros reais e contagem de tópicos por comunidade, tópicos e respostas por
   autor, leitura global para o Explorar) e uma função que **repare** (não só acuse) o espelho de
   esconder e apagar. Isso é a "PR 1b".
+
+## Complemento de produto e arquitetura: composer e mídias (20/10/2026)
+
+O Luiz aprovou o composer simples de comunidades. Esta seção substitui os
+limites de criação novos descritos anteriormente, mas não reescreve nem
+descaracteriza conteúdo legado já migrado.
+
+- Tópico raiz e resposta usam o mesmo composer: até 180 caracteres e um único
+  bloco de mídia opcional.
+- Áudio livre/voz é aceito em ambos, limitado a 60 segundos. É conteúdo social,
+  não uma partida da Arena e não recebe score.
+- Imagem e GIF são aceitos como mídia enviada. YouTube e TikTok são aceitos
+  somente como embed controlado exibido dentro do Auê; o fornecedor continua
+  responsável por hospedar e transmitir o vídeo.
+- Comentários podem responder tópicos ou comentários. A árvore é persistida;
+  a limitação é somente de apresentação, nunca de autoria ou de pertencimento ao
+  tópico.
+- Documento, arquivo genérico e upload de vídeo não são suportados.
+
+**Aceite de implementação:** pendente. A decisão está aceita, mas não há nesta
+atualização evidência de migração aplicada, código implementado, mídia enviada,
+embed reproduzido ou jornada validada em navegador. Cada uma dessas provas será
+exigida antes de declarar o comportamento entregue.
 
 ## O que ainda não está decidido
 

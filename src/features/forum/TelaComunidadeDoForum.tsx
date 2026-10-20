@@ -98,6 +98,24 @@ function TopicosDaComunidade({
     carregarPagina: async (cursor) => {
       const r = await forum.listarTopicos(slug, { ordem, limite: TAMANHO_DA_PAGINA, cursor });
       if (!r.ok) return r;
+      const listarPrevias = forum.listarPreviaRespostasDosTopicos;
+      // A prévia pertence à página, não ao card: uma chamada em lote evita N+1.
+      // Adaptadores anteriores à porta continuam mostrando o feed, só sem prévias.
+      const previasPorTopico = new Map<string, readonly { readonly id: string; readonly corpo: string | null }[]>();
+      if (listarPrevias && r.valor.itens.length > 0) {
+        const ids = [...new Set(r.valor.itens.map((topico) => topico.id))];
+        const previas = await listarPrevias(ids);
+        if (!previas.ok) return previas;
+        for (const topicoId of ids) {
+          previasPorTopico.set(
+            topicoId,
+            previas.valor
+              .filter((previa) => previa.topicoId === topicoId)
+              .slice(0, 2)
+              .map(({ resposta }) => ({ id: resposta.id, corpo: resposta.corpo })),
+          );
+        }
+      }
       return {
         ok: true,
         valor: {
@@ -106,6 +124,8 @@ function TopicosDaComunidade({
             (t): DadosDaLinhaDeTopico => ({
               id: t.id,
               titulo: t.titulo,
+              corpo: t.corpo,
+              ...(previasPorTopico.has(t.id) ? { previasDeRespostas: previasPorTopico.get(t.id) } : {}),
               fixado: t.fixado,
               status: t.status,
               criadoEm: t.criadoEm,

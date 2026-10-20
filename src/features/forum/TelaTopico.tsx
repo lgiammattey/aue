@@ -28,6 +28,7 @@ import { AsideSobreAComunidade } from './RegrasDaCasa';
 import { NoAside, TopoDaTela } from './ShellDoForum';
 import { useToast } from './toast';
 import { useParticiparDaComunidade } from './useParticiparDaComunidade';
+import { AnexoPublicadoDoForum } from './MidiaDoForum';
 
 function formatarDuracao(segundos: number): string {
   const total = Math.max(0, Math.round(segundos));
@@ -98,7 +99,7 @@ function CabecalhoDoTopico({
         <span>Tópico</span>
       </nav>
       <h1 id="forum-h1" className="forum-h1 forum-h1--topico" ref={h1} tabIndex={-1}>
-        {topico.titulo}
+        Conversa em {topico.comunidade.nome}
       </h1>
       <p className="forum-autoria">
         <Avatar nome={nomeDoAutor(topico.autor)} url={topico.autor.avatarUrl} />
@@ -114,6 +115,7 @@ function CabecalhoDoTopico({
       )}
       {corpo.trim() !== '' && <p className="forum-corpo">{corpo}</p>}
       <BlocoDeAudio topico={topico} />
+      <AnexoPublicadoDoForum alvo="topico" alvoId={topico.id} />
       {aoResponder && (
         <button type="button" className="forum-botao forum-botao--contorno forum-topico__responder" onClick={aoResponder}>
           Responder
@@ -308,7 +310,7 @@ export function TelaTopico() {
   const { estado, recarregar, atualizar } = useLeitura(() => forum.obterTopico(id), `topico:${id}`);
 
   const topico = estado.fase === 'pronto' ? estado.valor : null;
-  useTituloDoDocumento(topico ? `${topico.titulo} · ${topico.comunidade.nome}` : 'Conversa');
+  useTituloDoDocumento(topico ? `Conversa em ${topico.comunidade.nome}` : 'Conversa');
 
   const voltarParaSlug = { para: enderecoDaComunidade(slug), rotulo: 'a comunidade' };
 

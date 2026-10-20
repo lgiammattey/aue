@@ -9,7 +9,7 @@ import {
   type ErroDeEnvio,
   type OperacaoDeEscrita,
 } from '../../nucleo/forum/escrita';
-import type { ResultadoDaEscrita } from '../../portas/forum';
+import type { AnexoParaPublicar, ResultadoDaEscrita } from '../../portas/forum';
 import { BotaoParticipar } from './AcoesDaComunidade';
 import { CampoComContador } from './CampoComContador';
 import { useDependenciasDoForum } from './contexto';
@@ -17,6 +17,8 @@ import { useAnunciar } from './encaixes';
 import { useOnline } from './hooks';
 import { useEnvio } from './useEnvio';
 import { useParticiparDaComunidade } from './useParticiparDaComunidade';
+import { AcessoriosDoComposer, type MidiaDoForum } from './MidiaDoForum';
+import { LIMITE_DE_TEXTO_DA_PUBLICACAO } from './MidiaDoForum';
 
 export type ResultadoDaConferencia = 'jaEsta' | 'naoEsta' | 'falhou';
 
@@ -30,7 +32,7 @@ interface Props {
   readonly aoMudarTexto: (novo: string) => void;
   /** Texto original (edição): igual a ele é "Você não mudou nada.", sem ir ao servidor. */
   readonly textoOriginal?: string;
-  readonly enviar: (corpo: string) => Promise<ResultadoDaEscrita<unknown>>;
+  readonly enviar: (corpo: string, anexo: AnexoParaPublicar | null) => Promise<ResultadoDaEscrita<unknown>>;
   /** Só roda depois do `ok`. Devolve uma promessa quando ainda há o que ler do servidor: a trava só solta no fim. */
   readonly aoSucesso: (valor: unknown) => void | Promise<void>;
   /** Cancelar e Esc (só composer inline). Sem isso, não há "Cancelar". */
@@ -53,6 +55,10 @@ interface Props {
   /** `pai_invalido`: move o texto para o composer principal. */
   readonly aoResponderNoTopico?: () => void;
   readonly aoMudarParticipacao?: () => void;
+  /** Edição não troca mídia: a RPC atual só altera o texto. */
+  readonly aceitarAnexos?: boolean;
+  /** Ponte opcional para o gravador da plataforma; a UI nunca toca em MediaRecorder. */
+  readonly aoGravarAudio?: () => Promise<{ readonly arquivo: Blob; readonly duracaoMs: number } | null>;
 }
 
 /**
@@ -81,8 +87,10 @@ export function CompositorDeResposta({
   aoDescartar,
   aoResponderNoTopico,
   aoMudarParticipacao,
+  aceitarAnexos = operacao === 'resposta',
+  aoGravarAudio,
 }: Props) {
-  const { ambiente } = useDependenciasDoForum();
+  const { ambiente, forum } = useDependenciasDoForum();
   const anunciar = useAnunciar();
   const online = useOnline(ambiente);
   const { enviando, enviar, liberar } = useEnvio();
@@ -95,6 +103,11 @@ export function CompositorDeResposta({
   // Depois de "Conferir": a resposta já está lá (não reenviar) ou não achamos (a pessoa decide).
   const [conferencia, setConferencia] = useState<'jaEsta' | 'naoEsta' | null>(null);
   const [conferindo, setConferindo] = useState(false);
+  const [midia, setMidia] = useState<MidiaDoForum | null>(null);
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [audio, setAudio] = useState<{ readonly arquivo: Blob; readonly duracaoMs: number } | null>(null);
+  const gravacao = useRef<ReturnType<NonNullable<typeof forum.criarGravacaoLivreDoForum>> | null>(null);
+  const [gravando, setGravando] = useState(false);
 
   useEffect(() => {
     if (!focarAoMontar) return;
@@ -105,7 +118,10 @@ export function CompositorDeResposta({
   async function aoEnviar(e: { preventDefault: () => void }) {
     e.preventDefault();
     if (enviando) return;
-    const erroLocal = erroDoCampo(texto, LIMITE_RESPOSTA, 'Falta a resposta.');
+    const limiteDoComposer = operacao === 'resposta' ? LIMITE_DE_TEXTO_DA_PUBLICACAO : LIMITE_RESPOSTA;
+    const erroLocal = texto.trim() === ''
+      ? (midia ? null : 'Falta a resposta ou um anexo.')
+      : erroDoCampo(texto, limiteDoComposer, 'Falta a resposta.');
     setErroDoCampo(erroLocal);
     if (erroLocal) return void campo.current?.focus();
     if (textoOriginal !== undefined && texto.trim() === textoOriginal.trim()) {
@@ -118,11 +134,29 @@ export function CompositorDeResposta({
     }
     setErroDoServidor(null);
 
-    const r = await enviar(() => enviarCorpo(texto.trim()), { travarSeOk: true });
+    let anexo: AnexoParaPublicar | null = null;
+    if (aceitarAnexos && (arquivo || audio)) {
+      if (!forum.enviarAnexoDoForum) {
+        setErroDoServidor({ texto: 'Anexo indisponível agora. Seu texto continua aqui.', onde: 'geral', acao: null, ambiguo: false });
+        return;
+      }
+      const enviado = await forum.enviarAnexoDoForum(arquivo ? { tipo: 'imagem', arquivo } : { tipo: 'audio', arquivo: audio!.arquivo, duracaoMs: audio!.duracaoMs });
+      if (!enviado.ok) {
+        setErroDoServidor({ texto: 'Não deu pra enviar a imagem. Tenta de novo.', onde: 'geral', acao: null, ambiguo: enviado.motivo === 'semConfirmacao' });
+        return;
+      }
+      anexo = enviado.valor;
+    } else if (aceitarAnexos && midia?.tipo === 'video-externo') {
+      anexo = { tipo: 'videoExterno', url: midia.urlOriginal };
+    }
+    const r = await enviar(() => enviarCorpo(texto.trim(), anexo), { travarSeOk: true });
     if (r === null) return;
     if (r.ok) {
       // O `ok` é do servidor: só agora o texto sai do campo.
       aoMudarTexto('');
+      setMidia(null);
+      setArquivo(null);
+      setAudio(null);
       try {
         await aoSucesso(r.valor);
       } finally {
@@ -157,6 +191,40 @@ export function CompositorDeResposta({
   }
 
   const rotuloAtual = enviando ? 'Enviando…' : rotuloDoEnvio;
+  const gravarAudio = async () => {
+    if (gravando) {
+      gravacao.current?.parar();
+      return;
+    }
+    const executar = aoGravarAudio ?? (async () => {
+      if (!forum.criarGravacaoLivreDoForum) {
+        setErroDoServidor({ texto: 'Gravação indisponível agora.', onde: 'geral', acao: null, ambiguo: false });
+        return null;
+      }
+      const nova = forum.criarGravacaoLivreDoForum();
+      gravacao.current = nova;
+      const inicio = await nova.iniciar();
+      if (!inicio.ok) {
+        const mensagem = inicio.motivo === 'negado' ? 'Libera o microfone para gravar áudio.' : inicio.motivo === 'indisponivel' ? 'Não achei um microfone disponível.' : 'Não deu pra iniciar a gravação.';
+        setErroDoServidor({ texto: mensagem, onde: 'geral', acao: null, ambiguo: false });
+        return null;
+      }
+      setGravando(true);
+      const fim = await inicio.conclusao;
+      setGravando(false);
+      if (!fim.ok) {
+        if (fim.motivo !== 'cancelado') setErroDoServidor({ texto: 'A gravação não deu certo. Tenta de novo.', onde: 'geral', acao: null, ambiguo: false });
+        return null;
+      }
+      return { arquivo: fim.audio.dados, duracaoMs: fim.audio.duracaoMs };
+    });
+    const gravado = await executar();
+    if (!gravado) return;
+    setArquivo(null); setAudio(gravado);
+    setMidia({ tipo: 'audio', url: '', duracaoEmSegundos: Math.round(gravado.duracaoMs / 1000) });
+  };
+
+  useEffect(() => () => gravacao.current?.cancelar(), []);
 
   return (
     <form className="forum-compositor" onSubmit={aoEnviar} onKeyDown={aoTeclar} noValidate>
@@ -232,13 +300,30 @@ export function CompositorDeResposta({
           if (erroLocalDoCampo) setErroDoCampo(null);
           if (erroDoServidor && erroDoServidor.acao !== 'participar') setErroDoServidor(null);
         }}
-        limite={LIMITE_RESPOSTA}
+        limite={operacao === 'resposta' ? LIMITE_DE_TEXTO_DA_PUBLICACAO : LIMITE_RESPOSTA}
         placeholder="Escreve sua resposta"
         erro={erroNoCampo}
         somenteLeitura={enviando}
         campoRef={campo}
         aoFocar={() => ambiente.centralizarCampo(`${id}-campo`)}
       />
+      {aceitarAnexos && <AcessoriosDoComposer
+        anexo={midia}
+        bloqueado={enviando}
+        gravando={gravando}
+        aoMudarAnexo={(novo) => {
+          setMidia(novo);
+          setArquivo(null); setAudio(null);
+        }}
+        aoEscolherImagem={(novoArquivo) => {
+          setArquivo(novoArquivo); setAudio(null);
+          setMidia({ tipo: 'imagem', url: '', descricao: novoArquivo.name });
+        }}
+        aoPedirGravacao={forum.criarGravacaoLivreDoForum || aoGravarAudio ? () => { void gravarAudio(); } : undefined}
+      />}
+      {aceitarAnexos && arquivo && <p className="forum-compositor__aviso" role="status">Imagem pronta para enviar: {arquivo.name}</p>}
+      {aceitarAnexos && audio && <p className="forum-compositor__aviso" role="status">Áudio de até um minuto pronto para enviar.</p>}
+      {gravando && <p className="forum-compositor__aviso" role="status">Gravando áudio. Toque no microfone para parar.</p>}
       <div
         className="forum-compositor__acoes"
         // Tocar num botão não tira o foco do campo: sem blur, a barra inferior não volta por cima do botão antes do clique.

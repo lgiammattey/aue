@@ -136,11 +136,11 @@ describe('conta que ainda não participa: "Participar"', () => {
 
   it('a leitura de atualização não derruba a tela para "carregando" (a lista e o cabeçalho ficam)', async () => {
     abrir({ topicos: [topico({ id: '11111111-1111-4111-8111-111111111111', titulo: 'Fica na tela' })] });
-    await screen.findByRole('link', { name: 'Fica na tela' });
+    await screen.findByRole('link', { name: 'Saiu na hora do café.' });
     fireEvent.click(screen.getByRole('button', { name: 'Participar' }));
     await screen.findByRole('link', { name: 'Novo tópico' });
     expect(screen.queryByText('Carregando comunidade')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Fica na tela' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Saiu na hora do café.' })).toBeDefined();
   });
 
   it('falha ao entrar: frase honesta, continua "Participar", nada de membro', async () => {

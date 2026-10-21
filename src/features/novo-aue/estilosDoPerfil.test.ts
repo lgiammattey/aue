@@ -53,6 +53,21 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     expect(ler('../../index.css')).toMatch(/\.icon-btn\s*\{[^}]*width:\s*44px/);
   });
 
+  it('cabeçalho do card (opção B): linha de 32px, toque de 44px na própria caixa do link, r/roda acima do player', () => {
+    const css = ler('./CardDoPost.css').replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css.match(/--cab-linha:\s*32px/g)).toHaveLength(1);
+    expect(css).toMatch(/\.card-do-post\s*\{[^}]*--cab-linha:\s*32px/);
+    const alturaDoToque = /height:\s*calc\(var\(--cab-linha\) \+ 12px\)/;
+    expect(css).toMatch(new RegExp(`\\.card-do-post \\.author-profile-link,\\s*\\.card-do-post \\.post-meta-handle\\s*\\{[^}]*${alturaDoToque.source}[^}]*margin:\\s*-12px 0 0[^}]*padding:\\s*12px 3px 0`));
+    expect(css).toMatch(new RegExp(`\\.card-do-post \\.badge-comunidade\\s*\\{[^}]*z-index:\\s*1;[^}]*${alturaDoToque.source}[^}]*margin:\\s*0 0 -12px -3px`));
+    expect(css).toMatch(/\.card-do-post \.post-meta-ident\s*\{[^}]*height:\s*var\(--cab-linha\)/);
+    expect(css).toMatch(/\.card-do-post \.post-meta-badges\s*\{[^}]*align-items:\s*flex-start[^}]*height:\s*var\(--cab-linha\)/);
+    expect(css).toMatch(/\.card-do-post \.menu-do-post\s*\{[^}]*margin:\s*calc\(-12px \+ \(var\(--cab-linha\) - 20px\) \/ 2\) -12px -12px 0/);
+    expect(css).toMatch(/\.card-do-post \.badge-nota\s*\{[^}]*align-self:\s*center/);
+    expect(css).not.toMatch(/min-height:\s*44px;\s*margin:\s*-12px 0/);
+    expect(css).not.toContain('!important');
+  });
+
   it('título do estado de erro do perfil não usa mais Anton com linha 1', () => {
     const css = ler('./InicioOpenDesign.css');
     expect(css).toMatch(/\.od-profile__state h1\s*\{[^}]*font:\s*800 22px\/28px/);

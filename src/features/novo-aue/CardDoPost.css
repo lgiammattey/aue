@@ -14,6 +14,7 @@
 
 .card-do-post {
   --card-recuo: 52px; /* coluna do avatar (40) + vão (12) */
+  --cab-linha: 32px; /* altura de cada linha do cabeçalho: nome e r/roda ganham 44px de toque sem se sobrepor (opção B, 21/10/2026) */
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
@@ -97,7 +98,13 @@
   min-width: 0;
 }
 
-/* Linha 1: quem, @handle · tempo, ⋯ no canto. */
+/*
+  Linha 1: quem, @handle · tempo, ⋯ no canto. Linha 2: r/comunidade.
+  Cada linha tem --cab-linha de altura (fixa, não depende de dado: sem pulo).
+  Nome, @handle e r/roda têm a PRÓPRIA caixa de link com 44px de toque
+  (--cab-linha + 12px de padding/margem negativa), sem pseudo-elemento: o
+  overflow:hidden do link, que faz a reticência, cortaria um ::after.
+*/
 .card-do-post .post-meta-header {
   display: flex;
   align-items: flex-start;
@@ -109,21 +116,21 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  height: 20px;
+  height: var(--cab-linha);
   font: 400 13px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
   color: var(--aue-muted);
   white-space: nowrap;
 }
 
-/* Nome e @ são links; a caixa chega a 44px de altura sem empurrar a linha. */
+/* Nome e @ são links: caixa de 44px (12px de padding em cima), texto na linha de cima. */
 .card-do-post .author-profile-link,
 .card-do-post .post-meta-handle {
-  display: flex;
-  align-items: center;
+  align-self: flex-start;
   box-sizing: border-box;
   min-width: 44px;
-  min-height: 44px;
-  margin: -12px 0;
+  height: calc(var(--cab-linha) + 12px);
+  margin: -12px 0 0;
+  padding: 12px 3px 0;
   text-decoration: none;
 }
 
@@ -131,23 +138,26 @@
 .card-do-post .author-name {
   flex: none;
   max-width: 45%;
-  margin-right: 0;
-  padding-right: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--aue-text);
-  font: 800 13px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
+  font: 800 13px/var(--cab-linha) var(--font-body, 'Archivo', system-ui, sans-serif);
   letter-spacing: -0.02em;
+}
+
+.card-do-post .author-profile-link {
+  margin-left: -3px; /* o texto não anda: o padding de 3px fica fora dele */
 }
 
 .card-do-post .author-name {
   margin-block: 0;
+  padding-right: 6px;
 }
 
 .card-do-post .post-meta-handle {
   min-width: 0;
   display: block;
-  line-height: 44px;
+  line-height: var(--cab-linha);
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--aue-muted);
@@ -157,19 +167,21 @@
 .card-do-post .post-meta-dot {
   flex: none;
   margin: 0 4px;
+  line-height: var(--cab-linha);
   color: var(--aue-muted);
 }
 
 .card-do-post .post-meta-time {
   flex: none;
+  line-height: var(--cab-linha);
   color: var(--aue-muted);
   font-size: 13px;
 }
 
-/* ⋯: caixa de 44px, margem negativa para não aumentar a linha. */
+/* ⋯: caixa de 44px, centrada na linha de cima (--cab-linha), sem aumentar o cabeçalho. */
 .card-do-post .menu-do-post {
   flex: none;
-  margin: -12px -12px -12px 0;
+  margin: calc(-12px + (var(--cab-linha) - 20px) / 2) -12px -12px 0;
 }
 
 .card-do-post .menu-do-post__botao {
@@ -190,13 +202,13 @@
   outline-offset: -4px;
 }
 
-/* Linha 2: r/comunidade, e a nota no feed. */
+/* Linha 2: r/comunidade, e a nota no feed. A linha tem --cab-linha; o link sobe ao topo dela. */
 .card-do-post .post-meta-badges {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   min-width: 0;
-  height: 20px;
+  height: var(--cab-linha);
 }
 
 .card-do-post .badge-comunidade {
@@ -207,12 +219,13 @@
   flex: 0 1 auto;
   min-width: 0;
   max-width: calc(100% - 44px);
-  height: 44px;
-  margin: -12px 0;
+  height: calc(var(--cab-linha) + 12px);
+  margin: 0 0 -12px -3px; /* os 12px de baixo entram na linha seguinte; o z-index acima garante o toque sobre o player e as ações */
+  padding-inline: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 700 14px/44px var(--font-body, 'Archivo', system-ui, sans-serif);
+  font: 700 14px/var(--cab-linha) var(--font-body, 'Archivo', system-ui, sans-serif);
   color: var(--aue-muted);
   text-decoration: none;
 }
@@ -220,6 +233,7 @@
 /* A nota (só no feed) fica na linha da roda, sem inchar a linha. */
 .card-do-post .badge-nota {
   flex: none;
+  align-self: center;
   display: inline-flex;
   align-items: baseline;
   gap: 4px;

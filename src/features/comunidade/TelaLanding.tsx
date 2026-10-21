@@ -11,8 +11,8 @@ import type { PortaDeConta } from '../../portas/conta';
  *
  * O Auê está fechado pra quem não tem conta, e é isso que a tela diz:
  * - só entra quem já tem conta (e-mail e senha, a mesma entrada do `/login`);
- * - "Tenho convite" e "Pedir convite" aparecem desabilitados, porque o convite
- *   ainda não existe no backend. Botão sem backend não finge que funciona;
+ * - não há "Tenho convite" nem "Pedir convite": o convite não existe no backend e
+ *   botão sem backend não aparece, nem desabilitado;
  * - não há "Criar conta" nem "Continuar com Google";
  * - quem só quer ouvir vai direto pras comunidades, sem conta.
  *
@@ -123,26 +123,6 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
               <button type="button" role="tab" className="landing-aba" aria-selected="true">
                 Entrar
               </button>
-              <button
-                type="button"
-                role="tab"
-                className="landing-aba"
-                aria-selected="false"
-                disabled
-                title="Em breve"
-              >
-                Tenho convite
-              </button>
-              <button
-                type="button"
-                role="tab"
-                className="landing-aba"
-                aria-selected="false"
-                disabled
-                title="Em breve"
-              >
-                Pedir convite
-              </button>
             </div>
 
             <div>
@@ -150,7 +130,7 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
               <p className="publico-aviso" style={{ marginTop: 4 }}>
                 {esqueci
                   ? 'Mandamos um link pro seu e-mail.'
-                  : 'Para quem já tem conta. Convites e novos cadastros chegam em breve.'}
+                  : 'Para quem já tem conta.'}
               </p>
             </div>
 

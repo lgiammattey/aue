@@ -50,6 +50,18 @@ describe('/explorar', () => {
     expect(within(screen.getByRole('navigation', { name: 'Principal' })).getByRole('link', { name: 'Explorar' }).getAttribute('aria-current')).toBe('page');
   });
 
+  it('ao sair do Explorar o título da aba volta ao padrão (não fica preso em outra tela)', async () => {
+    const ambiente = ambienteFalso();
+    const { unmount } = (() => {
+      const forum = forumFalso({ explorarTopicos: vi.fn(async () => pagina([itemDoExplorar({ id: '1' })])) });
+      return render(<Rotas entrada="/explorar" m={{ forum, ambiente }} />);
+    })();
+    await screen.findByRole('link', { name: 'Tópico 1' });
+    expect(ambiente.titulo).toBe('Explorar · Auê!');
+    unmount();
+    expect(ambiente.titulo).toBe('Auê! — A comunidade de quem gosta de arrotar');
+  });
+
   it('tópico fechado mostra o marcador; fixado não aparece no Explorar', async () => {
     abrir(vi.fn(async () => pagina([itemDoExplorar({ id: '1', status: 'fechado', fixado: true })])));
     const linha = (await screen.findByRole('link', { name: 'Tópico 1' })).closest('li')!;

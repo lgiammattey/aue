@@ -144,21 +144,13 @@ export const TelaLogin: React.FC<TelaLoginProps> = ({ portaConta }) => {
 
           {passo === 'email' && (
             <p className="login-convidado">
-              Ainda sem conta? O cadastro vai abrir por convite. Enquanto isso,{' '}
+              Ainda sem conta? Por enquanto,{' '}
               <Link to="/comunidade">ouça as comunidades</Link> ou{' '}
               <Link to="/arena">arrote como convidado</Link>.
             </p>
           )}
 
           <div className="login-acoes">
-            <button
-              type="button"
-              className="publico-pilula login-secundaria"
-              disabled
-              title="Em breve"
-            >
-              Pedir convite
-            </button>
             <button
               type="button"
               className="publico-pilula publico-pilula-escura"

@@ -51,8 +51,9 @@ describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
 
     expect(screen.queryByText(/Criar conta/)).toBeNull();
     expect(screen.queryByText(/Google/)).toBeNull();
-    expect((screen.getByRole('tab', { name: 'Tenho convite' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('tab', { name: 'Pedir convite' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByRole('tab', { name: /convite/i })).toBeNull();
+    expect(screen.queryByText(/em breve/i)).toBeNull();
+    expect(screen.queryAllByRole('tab').filter((t) => (t as HTMLButtonElement).disabled)).toHaveLength(0);
     expect(screen.getByRole('tab', { name: 'Entrar' }).getAttribute('aria-selected')).toBe('true');
   });
 

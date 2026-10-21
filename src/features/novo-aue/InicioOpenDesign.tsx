@@ -20,7 +20,7 @@ import type { AudioCapturado, CapturaDeAudio } from '../../portas/captura';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import { sugerirHandle, type PortaDeConta, type ResultadoDaConta } from '../../portas/conta';
 import type { AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, PortaDeForum, TipoDeMidiaDaComunidade } from '../../portas/forum';
-import type { DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
+import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import { AdsterraNativeBanner } from './AdsterraNativeBanner';
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
@@ -32,6 +32,8 @@ import { ModalEditarPerfil } from './ModalEditarPerfil';
 import { ModalAjustarImagem, type RecorteVisual, type TipoDeImagemAjustavel } from './ModalAjustarImagem';
 import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDireta } from './ModalGravarArroto';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
+import { linkDaRede } from '../../nucleo/perfil/redesSociais';
+import { ModalConexoes, type EstadoDasConexoes } from './ModalConexoes';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
@@ -1327,13 +1329,29 @@ export function InicioOpenDesign({
     }
   };
 
+  const [conexoesAbertas, setConexoesAbertas] = useState<{ tipo: 'seguidores' | 'seguindo'; estado: EstadoDasConexoes; lista: readonly Conexao[] } | null>(null);
+  const abrirConexoes = async (tipo: 'seguidores' | 'seguindo') => {
+    const handle = (perfilAtivo ?? meuPerfil)?.handle;
+    if (!handle) return;
+    setConexoesAbertas({ tipo, estado: 'carregando', lista: [] });
+    try {
+      const lista = await perfilPort.listarConexoes(handle, tipo);
+      setConexoesAbertas((atual) => (atual?.tipo === tipo ? { tipo, estado: 'pronto', lista } : atual));
+    } catch {
+      setConexoesAbertas((atual) => (atual?.tipo === tipo ? { tipo, estado: 'erro', lista: [] } : atual));
+    }
+  };
+
   const compartilharPerfil = async () => {
     if (!navigator.clipboard?.writeText) {
       exibirToast('Seu navegador não liberou a cópia do link.');
       return;
     }
+    // O link é o público (/u/:handle). `/perfil` é "meu perfil": quem recebesse veria o próprio.
+    const handle = (perfilAtivo ?? meuPerfil)?.handle;
+    const link = handle ? `${window.location.origin}/u/${encodeURIComponent(handle)}` : window.location.href;
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(link);
       exibirToast('Link copiado.');
     } catch {
       exibirToast('Não foi possível copiar o link agora.');
@@ -2056,20 +2074,20 @@ export function InicioOpenDesign({
                         {perfilExibido.cidade && <span>⌖ {perfilExibido.cidade}</span>}
                         <span>na roda desde {new Date(perfilExibido.criadoEm).getFullYear()}</span>
                       </div>
-                      {(perfilExibido.instagram || perfilExibido.tiktok || perfilExibido.youtube || perfilExibido.twitter) && (
+                      {(['instagram', 'tiktok', 'youtube', 'twitter'] as const).some((r) => linkDaRede(r, perfilExibido[r])) && (
                         <div className="od-profile__social" aria-label="Redes sociais">
-                          {perfilExibido.instagram && <a href={`https://instagram.com/${perfilExibido.instagram}`} target="_blank" rel="noreferrer">Instagram</a>}
-                          {perfilExibido.tiktok && <a href={`https://tiktok.com/@${perfilExibido.tiktok}`} target="_blank" rel="noreferrer">TikTok</a>}
-                          {perfilExibido.youtube && <a href={`https://youtube.com/@${perfilExibido.youtube}`} target="_blank" rel="noreferrer">YouTube</a>}
-                          {perfilExibido.twitter && <a href={`https://x.com/${perfilExibido.twitter}`} target="_blank" rel="noreferrer">X</a>}
+                          {([['instagram', 'Instagram'], ['tiktok', 'TikTok'], ['youtube', 'YouTube'], ['twitter', 'X']] as const).map(([rede, nome]) => {
+                            const href = linkDaRede(rede, perfilExibido[rede]);
+                            return href ? <a key={rede} href={href} target="_blank" rel="noreferrer">{nome}</a> : null;
+                          })}
                         </div>
                       )}
                     </div>
 
                     <dl className="od-profile__metrics">
                       <div><dt>Posts</dt><dd>{perfilExibido.totalCausos}</dd></div>
-                      <div><dt>Seguidores</dt><dd>{perfilExibido.totalSeguidores}</dd></div>
-                      <div><dt>Seguindo</dt><dd>{perfilExibido.totalSeguindo}</dd></div>
+                      <div><dt>Seguidores</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem segue (${perfilExibido.totalSeguidores})`} onClick={() => void abrirConexoes('seguidores')}>{perfilExibido.totalSeguidores}</button></dd></div>
+                      <div><dt>Seguindo</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem é seguido (${perfilExibido.totalSeguindo})`} onClick={() => void abrirConexoes('seguindo')}>{perfilExibido.totalSeguindo}</button></dd></div>
                       {perfilExibido.melhorNota !== undefined && <div><dt>Melhor nota</dt><dd>{perfilExibido.melhorNota}</dd></div>}
                     </dl>
 
@@ -2420,6 +2438,16 @@ export function InicioOpenDesign({
           setEstadoGravacaoDireta('ocioso');
         }}
         aoEnviar={enviarArrotoDireto}
+      />
+
+      <ModalConexoes
+        aberto={conexoesAbertas !== null}
+        titulo={conexoesAbertas?.tipo === 'seguindo' ? 'Seguindo' : 'Seguidores'}
+        estado={conexoesAbertas?.estado ?? 'carregando'}
+        conexoes={conexoesAbertas?.lista ?? []}
+        limite={100}
+        aoFechar={() => setConexoesAbertas(null)}
+        aoTentarDeNovo={() => conexoesAbertas && void abrirConexoes(conexoesAbertas.tipo)}
       />
 
       <ModalComentarios

@@ -1,5 +1,6 @@
 import { configuracaoAusente, supabase } from '../../db/supabase';
 import { garantirSessao } from '../../shared/auth/sessaoAnonima';
+import { normalizarRede, type RedeSocial } from '../../nucleo/perfil/redesSociais';
 import { prepararImagemDePerfil } from './imagem';
 import type {
   Conexao,
@@ -68,6 +69,24 @@ function recusadoPorPermissao(erro: unknown): boolean {
   const e = erro as { code?: string; statusCode?: string | number; status?: number; message?: string };
   return e.code === '42501' || String(e.statusCode ?? e.status) === '403'
     || /row-level security|Ação social exige/i.test(e.message ?? '');
+}
+
+/**
+ * Todas as telas que salvam perfil passam por aqui: o @ das redes é normalizado (aceita o link)
+ * ou recusado antes de ir ao servidor. `undefined` fica como está; '' apaga.
+ */
+function redesNormalizadas(dados: DadosDoPerfil):
+  | { readonly ok: true; readonly valores: Readonly<Record<RedeSocial, string | null>> }
+  | { readonly ok: false; readonly detalhe: string } {
+  const valores: Record<RedeSocial, string | null> = { instagram: null, tiktok: null, youtube: null, twitter: null };
+  for (const rede of ['instagram', 'tiktok', 'youtube', 'twitter'] as const) {
+    const entrada = dados[rede];
+    if (entrada === undefined) continue;
+    const r = normalizarRede(rede, entrada);
+    if (!r.ok) return { ok: false, detalhe: r.mensagem };
+    valores[rede] = r.valor ?? '';
+  }
+  return { ok: true, valores };
 }
 
 const BUCKET_DE_CAPAS = 'capas_de_perfil';
@@ -168,6 +187,8 @@ export function criarPerfilRemoto(): PortaDePerfil {
       if (!apelido || !handle) {
         return { ok: false, motivo: 'invalido', detalhe: 'Apelido e @ são obrigatórios.' };
       }
+      const redes = redesNormalizadas(dados);
+      if (!redes.ok) return { ok: false, motivo: 'invalido', detalhe: redes.detalhe };
       try {
         const sessao = await garantirSessao();
         if (!sessao?.user?.id) return { ok: false, motivo: 'semConta' };
@@ -176,10 +197,10 @@ export function criarPerfilRemoto(): PortaDePerfil {
           p_handle: handle,
           p_bio: dados.bio ?? null,
           p_cidade: dados.cidade ?? null,
-          p_instagram: dados.instagram ?? null,
-          p_tiktok: dados.tiktok ?? null,
-          p_youtube: dados.youtube ?? null,
-          p_twitter: dados.twitter ?? null,
+          p_instagram: redes.valores.instagram,
+          p_tiktok: redes.valores.tiktok,
+          p_youtube: redes.valores.youtube,
+          p_twitter: redes.valores.twitter,
         });
         if (error) {
           if ((error as { code?: string }).code === '23505') return { ok: false, motivo: 'handleEmUso' };
@@ -195,6 +216,8 @@ export function criarPerfilRemoto(): PortaDePerfil {
 
     async atualizarMeuPerfil(dados: DadosDoPerfil): Promise<ResultadoDaEdicao> {
       if (configuracaoAusente) return { ok: false, motivo: 'semRede' };
+      const redes = redesNormalizadas(dados);
+      if (!redes.ok) return { ok: false, motivo: 'invalido', detalhe: redes.detalhe };
       try {
         const sessao = await garantirSessao();
         if (!sessao?.user?.id) return { ok: false, motivo: 'semConta' };
@@ -203,10 +226,10 @@ export function criarPerfilRemoto(): PortaDePerfil {
           p_handle: dados.handle ?? null,
           p_bio: dados.bio ?? null,
           p_cidade: dados.cidade ?? null,
-          p_instagram: dados.instagram ?? null,
-          p_tiktok: dados.tiktok ?? null,
-          p_youtube: dados.youtube ?? null,
-          p_twitter: dados.twitter ?? null,
+          p_instagram: redes.valores.instagram,
+          p_tiktok: redes.valores.tiktok,
+          p_youtube: redes.valores.youtube,
+          p_twitter: redes.valores.twitter,
         });
         if (error) {
           if ((error as { code?: string }).code === '23505') return { ok: false, motivo: 'handleEmUso' };
@@ -329,8 +352,9 @@ export function criarPerfilRemoto(): PortaDePerfil {
       }
     },
 
+    /** Lança quando não consegue ler: lista vazia só quando o servidor disse que não há ninguém. */
     async listarConexoes(handle: string, tipo: 'seguidores' | 'seguindo'): Promise<readonly Conexao[]> {
-      if (configuracaoAusente) return [];
+      if (configuracaoAusente) throw new Error('Sem servidor configurado.');
       try {
         await garantirSessao();
         const { data, error } = await supabase.rpc('listar_conexoes_do_perfil', {
@@ -354,7 +378,7 @@ export function criarPerfilRemoto(): PortaDePerfil {
         }));
       } catch (erro) {
         console.error('Falha ao listar conexões', erro);
-        return [];
+        throw erro;
       }
     },
   };

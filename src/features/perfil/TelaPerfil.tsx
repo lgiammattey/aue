@@ -367,8 +367,13 @@ export const TelaPerfil: React.FC<TelaPerfilProps> = ({
   const abrirConexoes = async (tipo: 'seguidores' | 'seguindo') => {
     if (!perfil) return;
     setConexoes({ tipo, lista: [] });
-    const lista = await perfilPort.listarConexoes(perfil.handle, tipo);
-    setConexoes({ tipo, lista });
+    try {
+      const lista = await perfilPort.listarConexoes(perfil.handle, tipo);
+      setConexoes({ tipo, lista });
+    } catch {
+      setConexoes(null);
+      avisar('Não deu para carregar a lista agora.');
+    }
   };
 
   const compartilharPerfil = async () => {

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { normalizarRede, type RedeSocial } from '../../nucleo/perfil/redesSociais';
 
 interface Props {
   readonly aberto: boolean;
@@ -68,6 +69,15 @@ export function ModalEditarPerfil({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!apelido.trim() || !handle.trim()) return;
+    const redes: Record<RedeSocial, string> = { instagram: '', tiktok: '', youtube: '', twitter: '' };
+    for (const [rede, valor] of [['instagram', instagram], ['tiktok', tiktok], ['youtube', youtube], ['twitter', twitter]] as const) {
+      const r = normalizarRede(rede, valor);
+      if (!r.ok) {
+        setErro(r.mensagem);
+        return;
+      }
+      redes[rede] = r.valor ?? '';
+    }
     setSalvando(true);
     setErro(null);
     try {
@@ -76,10 +86,7 @@ export function ModalEditarPerfil({
         handle: handle.trim().replace(/^@/, '').toLowerCase(),
         bio: bio.trim(),
         cidade: cidade.trim(),
-        instagram: instagram.trim().replace(/^@/, ''),
-        tiktok: tiktok.trim().replace(/^@/, ''),
-        youtube: youtube.trim().replace(/^@/, ''),
-        twitter: twitter.trim().replace(/^@/, ''),
+        ...redes,
       });
       aoFechar();
     } catch (causa) {
@@ -157,7 +164,7 @@ export function ModalEditarPerfil({
             <legend>Onde te achar <span>(opcional)</span></legend>
             <label>
               Instagram
-              <input value={instagram} onChange={(e) => setInstagram(e.target.value)} aria-label="Instagram" autoCapitalize="none" />
+              <input placeholder="@seu_perfil ou o link" value={instagram} onChange={(e) => setInstagram(e.target.value)} aria-label="Instagram" autoCapitalize="none" />
             </label>
             <label>
               TikTok

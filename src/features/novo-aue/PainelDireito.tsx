@@ -9,10 +9,12 @@ interface Props {
   readonly aoAbrirComunidade: (slug: string) => void;
   readonly aoAlternarEntrar?: (slug: string) => void;
   readonly comunidadesEntradas?: Record<string, boolean>;
-  readonly viewAtual?: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewAtual?: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar';
   readonly moderadoresDaComunidade?: readonly (readonly [string, string])[];
   readonly regrasDaComunidade?: readonly string[];
   readonly perfil?: PerfilPublico | null;
+  readonly estadoDasComunidades?: 'carregando' | 'pronto' | 'erro';
+  readonly aoTentarComunidades?: () => void;
 }
 
 export const PainelDireito = memo(function PainelDireito({
@@ -24,6 +26,8 @@ export const PainelDireito = memo(function PainelDireito({
   moderadoresDaComunidade = [],
   regrasDaComunidade = [],
   perfil,
+  estadoDasComunidades = 'pronto',
+  aoTentarComunidades,
 }: Props) {
   return (
     <aside className="rightbar" aria-label="Painel complementar">
@@ -63,7 +67,7 @@ export const PainelDireito = memo(function PainelDireito({
         </div>
       )}
 
-      {viewAtual !== 'comunidade' && viewAtual !== 'perfil' && (
+      {viewAtual !== 'comunidade' && viewAtual !== 'perfil' && viewAtual !== 'explorar' && (
         <div className="panel">
           <h2>Sobre o Auê!</h2>
           <p>
@@ -75,8 +79,12 @@ export const PainelDireito = memo(function PainelDireito({
 
       <div className="panel">
         <h2>Rodas para explorar</h2>
-        {comunidades.length === 0 ? (
+        {estadoDasComunidades === 'carregando' ? (
           <p>Carregando rodas…</p>
+        ) : estadoDasComunidades === 'erro' ? (
+          <><p>Não deu pra carregar as rodas agora.</p>{aoTentarComunidades && <button type="button" className="join" onClick={aoTentarComunidades}>Tentar de novo</button>}</>
+        ) : comunidades.length === 0 ? (
+          <p>Nenhuma roda disponível agora.</p>
         ) : (
           comunidades.slice(0, 5).map((c) => {
             const jaEntrou = Boolean(comunidadesEntradas[c.slug]);
@@ -142,7 +150,7 @@ export const PainelDireito = memo(function PainelDireito({
         </a>
       </div>}
 
-      {viewAtual !== 'comunidade' && (
+      {viewAtual !== 'comunidade' && viewAtual !== 'explorar' && (
         <div className="panel">
           <h2>Regras da casa</h2>
           <p style={{ marginBottom: 8 }}>1. Respeite quem está na roda.</p>

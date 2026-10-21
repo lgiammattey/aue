@@ -17,6 +17,7 @@ const InicioOpenDesign = lazy(() => import('./features/novo-aue/InicioOpenDesign
 const TelaComunidadeOpenDesign = lazy(() => import('./features/novo-aue/TelaComunidadeOpenDesign').then((m) => ({ default: m.TelaComunidadeOpenDesign })));
 const TelaDiretorioOpenDesign = lazy(() => import('./features/novo-aue/TelaDiretorioOpenDesign').then((m) => ({ default: m.TelaDiretorioOpenDesign })));
 const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOpenDesign').then((m) => ({ default: m.TelaPerfilOpenDesign })));
+const TelaExplorarOpenDesign = lazy(() => import('./features/novo-aue/TelaExplorarOpenDesign').then((m) => ({ default: m.TelaExplorarOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
@@ -185,10 +186,11 @@ export function App() {
           <Route path="/bondes" element={<Navigate to="/comunidades" replace />} />
           <Route path="/comm" element={<Navigate to="/comunidades" replace />} />
           <Route path="/comunidades" element={<TelaDiretorioOpenDesign />} />
+          <Route path="/explorar" element={<TelaExplorarOpenDesign />} />
           <Route path="/c/:slug" element={<TelaComunidadeOpenDesign />} />
           <Route path="/c/:slug/novo" element={<TelaComunidadeOpenDesign abrirCompositor />} />
           <Route path="/c/:slug/t/:id" element={<TelaComunidadeOpenDesign />} />
-          {/* Sub-rotas do fórum como /explorar */}
+          {/* Sub-rotas legadas do fórum que ainda não ganharam a casca OpenDesign. */}
           {rotasDoForum({ incluirRaizesDaComunidade: false, incluirTopico: false })}
           <Route path="/comunidade/:slug" element={<AliasDeComunidade />} />
           <Route path="/comunidades/:slug" element={<AliasDeComunidade />} />

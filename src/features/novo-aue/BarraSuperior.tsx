@@ -8,6 +8,8 @@ interface Props {
   readonly meuPerfil: PerfilPublico | null;
   readonly aoBuscar: (termo: string) => void;
   readonly aoEntrar?: () => void;
+  /** Explorar já tem a busca no conteúdo; evita dois campos para a mesma ação. */
+  readonly mostrarBusca?: boolean;
 }
 
 export const BarraSuperior = memo(function BarraSuperior({
@@ -16,6 +18,7 @@ export const BarraSuperior = memo(function BarraSuperior({
   meuPerfil,
   aoBuscar,
   aoEntrar,
+  mostrarBusca = true,
 }: Props) {
   const navigate = useNavigate();
   const nomeExibicao = meuPerfil?.apelido ?? meuPerfil?.handle ?? 'Você';
@@ -27,7 +30,7 @@ export const BarraSuperior = memo(function BarraSuperior({
         AUÊ!
       </Link>
 
-      <form
+      {mostrarBusca && <form
         role="search"
         style={{ display: 'contents' }}
         onSubmit={(e) => {
@@ -46,7 +49,7 @@ export const BarraSuperior = memo(function BarraSuperior({
           aria-label="Campo de busca"
         />
         <button type="submit" className="icon-btn">Buscar</button>
-      </form>
+      </form>}
 
       <div className="top-actions">
         {estaAutenticado ? (

@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { ComunidadeDoForum } from '../../portas/forum';
 
 interface Props {
-  readonly viewAtual: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewAtual: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar';
   readonly comunidadeAtivaSlug?: string;
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly estaAutenticado: boolean;
-  readonly aoMudarView: (view: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades', slug?: string) => void;
+  readonly aoMudarView: (view: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar', slug?: string) => void;
   readonly aoAbrirCompositor: () => void;
   readonly aoSair: () => void;
   readonly aoEntrar?: () => void;
@@ -56,9 +56,10 @@ export const BarraLateral = memo(function BarraLateral({
           <span className="ico">⌂</span>Início
         </button>
         <button
-          className="nav-item"
+          className={`nav-item ${viewAtual === 'explorar' ? 'active' : ''}`}
           type="button"
           onClick={() => {
+            aoMudarView('explorar');
             navigate('/explorar');
           }}
         >

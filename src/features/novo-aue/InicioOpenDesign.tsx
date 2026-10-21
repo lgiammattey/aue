@@ -33,9 +33,11 @@ import { ModalAjustarImagem, type RecorteVisual, type TipoDeImagemAjustavel } fr
 import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDireta } from './ModalGravarArroto';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
 import { linkDaRede } from '../../nucleo/perfil/redesSociais';
+import { DialogoDoPost } from './DialogoDoPost';
 import { ModalConexoes, type EstadoDasConexoes } from './ModalConexoes';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
+import { erroDeEnvio } from '../../nucleo/forum/escrita';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
 import { semEspelhosDeCausos } from './semEspelhos';
 import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
@@ -1365,6 +1367,75 @@ export function InicioOpenDesign({
     }
   };
 
+  // ---- Denunciar e apagar post ------------------------------------------------
+  const [acaoDoPost, setAcaoDoPost] = useState<{ tipo: 'denunciar' | 'apagar'; post: ItemDoFeed } | null>(null);
+  const [acaoEnviando, setAcaoEnviando] = useState(false);
+  const [erroDaAcao, setErroDaAcao] = useState<string | null>(null);
+
+  const souAutorDe = (post: ItemDoFeed) =>
+    Boolean(meuPerfil?.handle && post.autorHandle && meuPerfil.handle.toLowerCase() === post.autorHandle.toLowerCase());
+
+  /** Só oferece o que a pessoa pode fazer: apagar o próprio, denunciar o dos outros. Visitante é levado a entrar. */
+  const propsDeModeracao = (post: ItemDoFeed) =>
+    souAutorDe(post)
+      ? { aoApagar: () => { setErroDaAcao(null); setAcaoDoPost({ tipo: 'apagar', post }); } }
+      : {
+          aoDenunciar: () => {
+            if (!estaAutenticado) {
+              exibirToast('Entre na sua conta para denunciar.');
+              (aoEntrar ?? (() => setViewAtual('auth')))();
+              return;
+            }
+            setErroDaAcao(null);
+            setAcaoDoPost({ tipo: 'denunciar', post });
+          },
+        };
+
+  const retirarPostDaTela = (post: ItemDoFeed) => {
+    const sai = (p: ItemDoFeed) => p.id !== post.id;
+    setItensFeed((prev) => prev.filter(sai));
+    setItensSeguindo((prev) => prev.filter(sai));
+    setTopicosDaComunidade((prev) => prev.filter(sai));
+    setCausosDoPerfil((prev) => prev.filter((c) => `causo-${c.id}` !== post.id));
+    if (postComentariosAtivo?.id === post.id) {
+      setPostComentariosAtivo(null);
+      setListaComentarios([]);
+      if (topicoIdParam) navigate(`/c/${post.comunidadeSlug}`);
+    }
+  };
+
+  const confirmarAcaoDoPost = async (dados: { motivo: string; apagarAudio: boolean }) => {
+    if (!acaoDoPost || acaoEnviando) return;
+    const { tipo, post } = acaoDoPost;
+    const id = post.id.replace(/^(topico|causo)-/, '');
+    setAcaoEnviando(true);
+    setErroDaAcao(null);
+    try {
+      let ok = false;
+      let mensagem = tipo === 'denunciar' ? 'Não deu para enviar a denúncia agora. Tenta de novo.' : 'Não deu para apagar agora. Nada foi apagado.';
+      if (post.tipo === 'topico') {
+        const r = tipo === 'denunciar' ? await forum.denunciarTopico(id, dados.motivo) : await forum.apagarTopico(id);
+        ok = r.ok;
+        if (!r.ok) mensagem = erroDeEnvio(r.motivo, tipo === 'denunciar' ? 'denuncia' : 'apagar').texto;
+      } else {
+        ok = tipo === 'denunciar'
+          ? await comunidadePort.denunciarCauso(id, dados.motivo)
+          : await comunidadePort.apagarCauso(id, { apagarAudio: dados.apagarAudio });
+      }
+      if (!ok) {
+        setErroDaAcao(mensagem);
+        return;
+      }
+      setAcaoDoPost(null);
+      if (tipo === 'apagar') retirarPostDaTela(post);
+      exibirToast(tipo === 'denunciar' ? 'Denúncia enviada. Obrigado por avisar.' : 'Post apagado.');
+    } catch {
+      setErroDaAcao(tipo === 'denunciar' ? 'Não deu para enviar a denúncia agora. Tenta de novo.' : 'Não deu para apagar agora. Nada foi apagado.');
+    } finally {
+      setAcaoEnviando(false);
+    }
+  };
+
   const [conexoesAbertas, setConexoesAbertas] = useState<{ tipo: 'seguidores' | 'seguindo'; estado: EstadoDasConexoes; lista: readonly Conexao[] } | null>(null);
   const abrirConexoes = async (tipo: 'seguidores' | 'seguindo') => {
     const handle = (perfilAtivo ?? meuPerfil)?.handle;
@@ -1586,7 +1657,7 @@ export function InicioOpenDesign({
               }
             }}
             aoEnviarComentario={enviarComentario}
-            {...propsDeEngajamento(postComentariosAtivo)}
+            {...propsDeEngajamento(postComentariosAtivo)} {...propsDeModeracao(postComentariosAtivo)}
             aoTocarAudio={(fonte) => void alternarAudio(fonte, postComentariosAtivo.id)}
             audioTocando={audioTocandoId === postComentariosAtivo.id}
             tempoAtualDoAudio={audioSelecionadoId === postComentariosAtivo.id ? tempoAtualDoAudio : 0}
@@ -1658,7 +1729,7 @@ export function InicioOpenDesign({
                   <div key={post.id}>
                     <CardDoPost
                       post={post}
-                      {...propsDeEngajamento(post)}
+                      {...propsDeEngajamento(post)} {...propsDeModeracao(post)}
                       audioTocando={audioTocandoId === post.id}
                       tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                       duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
@@ -1702,7 +1773,7 @@ export function InicioOpenDesign({
                   <CardDoPost
                     key={post.id}
                     post={post}
-                    {...propsDeEngajamento(post)}
+                    {...propsDeEngajamento(post)} {...propsDeModeracao(post)}
                     audioTocando={audioTocandoId === post.id}
                     tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                     duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
@@ -1729,7 +1800,7 @@ export function InicioOpenDesign({
             {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu bonde…</p>}
             {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu bonde.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Seu bonde ainda está quieto.</h2><p>Siga alguns perfis para ver os causos deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Explorar o Bonde</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...propsDeEngajamento(post)} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...propsDeEngajamento(post)} {...propsDeModeracao(post)} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
           </section>
         )}
 
@@ -1911,7 +1982,7 @@ export function InicioOpenDesign({
                         <CardDoPost
                           key={post.id}
                           post={post}
-                          {...propsDeEngajamento(post)}
+                          {...propsDeEngajamento(post)} {...propsDeModeracao(post)}
                           audioTocando={audioTocandoId === post.id}
                           tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                           duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
@@ -2477,6 +2548,18 @@ export function InicioOpenDesign({
         }}
         aoEnviar={enviarArrotoDireto}
       />
+
+      {acaoDoPost && (
+        <DialogoDoPost
+          tipo={acaoDoPost.tipo}
+          titulo={acaoDoPost.post.titulo || acaoDoPost.post.corpo}
+          temAudio={Boolean(acaoDoPost.post.temAudio) && acaoDoPost.post.tipo === 'causo'}
+          enviando={acaoEnviando}
+          erro={erroDaAcao}
+          aoConfirmar={(d) => void confirmarAcaoDoPost(d)}
+          aoCancelar={() => { if (!acaoEnviando) setAcaoDoPost(null); }}
+        />
+      )}
 
       <ModalConexoes
         aberto={conexoesAbertas !== null}

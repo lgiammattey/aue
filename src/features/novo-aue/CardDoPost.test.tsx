@@ -183,6 +183,17 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(aoAlternarSalvar).toHaveBeenCalledOnce();
   });
 
+  it('mostra "Mais ações" só quando há o que fazer (apagar o próprio ou denunciar o dos outros)', () => {
+    mostrar({});
+    expect(screen.queryByRole('button', { name: 'Mais ações' })).toBeNull();
+    cleanup();
+    const aoDenunciar = vi.fn();
+    mostrar({ aoDenunciar });
+    fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Denunciar' }));
+    expect(aoDenunciar).toHaveBeenCalledOnce();
+  });
+
   describe('vídeo do YouTube/TikTok', () => {
     const renderizar = (post: ItemDoFeed) =>
       render(

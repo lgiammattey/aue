@@ -136,7 +136,9 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     // Botão de Entrar
     const btnEntrar = container.querySelector('#joinCommunity');
     expect(btnEntrar).toBeTruthy();
-    expect(btnEntrar?.textContent).toBe('Entrar');
+    // O mock é de quem modera: o botão diz isso e não deixa sair.
+    expect(btnEntrar?.textContent).toBe('Moderador');
+    expect((btnEntrar as HTMLButtonElement).disabled).toBe(true);
 
     // Botão Administrar comunidade
     const btnAdmin = container.querySelector('#manageCommunity');
@@ -154,37 +156,85 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     expect(await screen.findByText('O áudio mais curto da semana conseguiu ser o mais comentado.')).toBeTruthy();
   });
 
-  it('permite alternar entre Entrar e Entrou chamando a porta com feedback na tela', async () => {
+  const comoMembroComum = (): PortaDeForum => ({
+    ...mockForum,
+    obterComunidadeDoForum: vi.fn(async (slug: string) => ({
+      ok: true as const,
+      valor: {
+        id: `comm-${slug}`, slug, nome: 'Arena do Arroto', descricao: 'Descrição', icone: null,
+        membrosTotal: 10, topicosTotal: 1, ultimaAtividadeEm: '2026-10-19T10:00:00Z', souMembro: false, possoGerirMidia: false,
+      },
+    })),
+    listarComunidadesDoForum: vi.fn(async () => ({
+      ok: true as const,
+      valor: [{
+        id: 'comm-1', slug: 'arena-do-arroto', nome: 'Arena do Arroto', descricao: 'Descrição', icone: null,
+        membrosTotal: 10, topicosTotal: 1, ultimaAtividadeEm: '2026-10-19T10:00:00Z', souMembro: false, possoGerirMidia: false,
+      }],
+    })),
+  });
+
+  const abrirComunidade = (forum: PortaDeForum, comunidade: PortaDeComunidade = mockComunidade) => {
     const contaAutenticada = {
       estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: false })),
     } as any;
-    const { container } = render(
+    return render(
       <MemoryRouter initialEntries={['/c/arena-do-arroto']}>
         <Routes>
           <Route
             path="/c/:slug"
-            element={
-              <TelaComunidadeOpenDesign
-                portaForum={mockForum}
-                portaComunidade={mockComunidade}
-                portaConta={contaAutenticada}
-              />
-            }
+            element={<TelaComunidadeOpenDesign portaForum={forum} portaComunidade={comunidade} portaConta={contaAutenticada} />}
           />
         </Routes>
       </MemoryRouter>,
     );
+  };
+
+  it('entrar e sair: o botão diz "Participando" (toque para sair), a contagem de membros acompanha e a porta é chamada', async () => {
+    const comunidade = { ...mockComunidade, entrarComunidade: vi.fn(async () => true), sairComunidade: vi.fn(async () => true) };
+    const { container } = abrirComunidade(comoMembroComum(), comunidade);
 
     await screen.findByRole('heading', { level: 1, name: 'r/arena-do-arroto' });
-    const btnEntrar = container.querySelector('#joinCommunity') as HTMLButtonElement;
-    expect(btnEntrar).toBeTruthy();
-    fireEvent.click(btnEntrar);
+    const botao = container.querySelector('#joinCommunity') as HTMLButtonElement;
+    expect(botao.textContent).toBe('Entrar');
+    expect(screen.getAllByText(/10 membros|10 na roda/).length).toBeGreaterThan(0);
 
-    // Só confirma a entrada depois da porta responder.
-    await waitFor(() => expect(btnEntrar.textContent).toBe('Entrou'));
+    fireEvent.click(botao);
+    await waitFor(() => expect(botao.textContent).toBe('Participando'));
+    expect(comunidade.entrarComunidade).toHaveBeenCalledWith('arena-do-arroto');
     expect(screen.getByText('Você entrou na comunidade.')).toBeTruthy();
+    expect(screen.getAllByText(/11 membros|11 na roda/).length).toBeGreaterThan(0);
+    expect(botao.getAttribute('aria-label')).toBe('Participando de r/arena-do-arroto. Tocar para sair.');
+
+    fireEvent.click(botao);
+    await waitFor(() => expect(botao.textContent).toBe('Entrar'));
+    expect(comunidade.sairComunidade).toHaveBeenCalledWith('arena-do-arroto');
+    expect(screen.getByText('Você saiu da comunidade.')).toBeTruthy();
+    expect(screen.getAllByText(/10 membros|10 na roda/).length).toBeGreaterThan(0);
   });
 
+  it('se a porta recusar, não muda o botão nem a contagem e avisa', async () => {
+    const comunidade = { ...mockComunidade, entrarComunidade: vi.fn(async () => false) };
+    const { container } = abrirComunidade(comoMembroComum(), comunidade);
+    await screen.findByRole('heading', { level: 1, name: 'r/arena-do-arroto' });
+    const botao = container.querySelector('#joinCommunity') as HTMLButtonElement;
+    fireEvent.click(botao);
+    expect(await screen.findByText('Não deu para atualizar sua participação agora.')).toBeTruthy();
+    expect(botao.textContent).toBe('Entrar');
+    expect(screen.getAllByText(/10 membros|10 na roda/).length).toBeGreaterThan(0);
+  });
+
+  it('moderador não sai: o botão diz "Moderador", fica desabilitado e a porta nunca é chamada', async () => {
+    const comunidade = { ...mockComunidade, sairComunidade: vi.fn(async () => true) };
+    const { container } = abrirComunidade(mockForum, comunidade);
+    await screen.findByRole('heading', { level: 1, name: 'r/arena-do-arroto' });
+    const botao = container.querySelector('#joinCommunity') as HTMLButtonElement;
+    expect(botao.textContent).toBe('Moderador');
+    expect(botao.disabled).toBe(true);
+    expect(botao.getAttribute('title')).toMatch(/administração do Auê/);
+    fireEvent.click(botao);
+    expect(comunidade.sairComunidade).not.toHaveBeenCalled();
+  });
   const forumComDetalhes = (extra: Partial<PortaDeForum> = {}): PortaDeForum => ({
     ...mockForum,
     obterDetalhesDaComunidade: vi.fn(async () => ({

@@ -744,6 +744,21 @@ export function InicioOpenDesign({
     }
   };
 
+  const ehModerador = (slug: string) =>
+    Boolean(comunidades.find((c) => c.slug === slug)?.possoGerirMidia)
+    || (comunidadeAtiva?.slug === slug && Boolean(comunidadeAtiva.possoGerirMidia));
+
+  /** Texto do botão de participação: "Entrar", "Participando" (toque para sair) ou "Moderador" (não sai). */
+  const rotuloDaParticipacao = (slug: string) => (ehModerador(slug) ? 'Moderador' : comunidadesEntradas[slug] ? 'Participando' : 'Entrar');
+  const propsDaParticipacao = (slug: string) => {
+    if (ehModerador(slug)) {
+      return { disabled: true, title: 'Você modera essa comunidade. Para deixar a moderação, fale com a administração do Auê.', 'aria-label': `Você modera r/${slug}` };
+    }
+    return comunidadesEntradas[slug]
+      ? { title: 'Sair da comunidade', 'aria-label': `Participando de r/${slug}. Tocar para sair.` }
+      : { 'aria-label': `Entrar em r/${slug}` };
+  };
+
   const alternarEntrarComunidade = async (slug: string) => {
     if (!estaAutenticado) {
       exibirToast('Entre na sua conta para participar da roda.');
@@ -751,6 +766,10 @@ export function InicioOpenDesign({
       return;
     }
     const jaEntrou = Boolean(comunidadesEntradas[slug]);
+    if (jaEntrou && ehModerador(slug)) {
+      exibirToast('Você modera essa comunidade, então não dá para sair. Fale com a administração do Auê.');
+      return;
+    }
     try {
       const atualizado = jaEntrou
         ? await comunidadePort.sairComunidade(slug)
@@ -760,6 +779,11 @@ export function InicioOpenDesign({
         return;
       }
       setComunidadesEntradas((prev) => ({ ...prev, [slug]: !jaEntrou }));
+      const delta = jaEntrou ? -1 : 1;
+      const ajustar = <T extends { slug: string; membrosTotal: number; souMembro: boolean }>(c: T): T =>
+        c.slug === slug ? { ...c, membrosTotal: Math.max(0, c.membrosTotal + delta), souMembro: !jaEntrou } : c;
+      setComunidadeAtiva((prev) => (prev ? ajustar(prev) : prev));
+      setComunidades((prev) => prev.map(ajustar));
       exibirToast(jaEntrou ? 'Você saiu da comunidade.' : 'Você entrou na comunidade.');
     } catch {
       exibirToast('Não deu para atualizar sua participação agora.');
@@ -1064,7 +1088,18 @@ export function InicioOpenDesign({
       if (resForum && resForum.ok) {
         postCriadoId = `topico-${resForum.valor.id}`;
       } else {
-        exibirToast('Não foi possível publicar agora. Entre na comunidade e tente de novo.');
+        const motivo = resForum && !resForum.ok ? resForum.motivo : null;
+        exibirToast(
+          motivo === 'naoEMembro'
+            ? `Entre em r/${dados.comunidadeSlug} antes de publicar.`
+            : motivo === 'precisaEntrar'
+              ? 'Entre com sua conta para publicar.'
+              : motivo === 'limiteDeFrequencia'
+                ? 'Muita coisa de uma vez. Tenta daqui a pouco.'
+                : motivo === 'topicoFechado' || motivo === 'comunidadeInexistente'
+                  ? 'Essa comunidade não está aceitando posts agora.'
+                  : 'Não foi possível publicar agora. Tenta de novo.',
+        );
         return false;
       }
     } catch (erro) {
@@ -1797,8 +1832,9 @@ export function InicioOpenDesign({
                           className="join"
                           style={{ padding: '8px 18px', fontSize: 13 }}
                           onClick={() => alternarEntrarComunidade(comunidadeSlug)}
+                          {...propsDaParticipacao(comunidadeSlug)}
                         >
-                          {comunidadesEntradas[comunidadeSlug] ? 'Entrou' : 'Entrar'}
+                          {rotuloDaParticipacao(comunidadeSlug)}
                         </button>
                         {comunidadeAtiva?.possoGerirMidia && (
                           <button
@@ -1956,8 +1992,9 @@ export function InicioOpenDesign({
                     className="join"
                     style={{ padding: '8px 16px', fontSize: 13 }}
                     onClick={() => alternarEntrarComunidade(c.slug)}
+                    {...propsDaParticipacao(c.slug)}
                   >
-                    {comunidadesEntradas[c.slug] ? 'Entrou' : 'Entrar'}
+                    {rotuloDaParticipacao(c.slug)}
                   </button>
                 </div>
               ))}

@@ -638,11 +638,11 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const entrar = await screen.findAllByRole('button', { name: 'Entrar' });
+    const entrar = await screen.findAllByRole('button', { name: /^Entrar em r\// });
     fireEvent.click(entrar[0]);
 
     expect((await screen.findByRole('status')).textContent).toContain('Não deu para atualizar sua participação agora.');
-    expect(screen.getAllByRole('button', { name: 'Entrar' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /^Entrar em r\// }).length).toBeGreaterThan(0);
   });
 
   it('mantém a comunidade fora da roda quando a porta falha', async () => {
@@ -663,11 +663,11 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const entrar = await screen.findAllByRole('button', { name: 'Entrar' });
+    const entrar = await screen.findAllByRole('button', { name: /^Entrar em r\// });
     fireEvent.click(entrar[0]);
 
     expect((await screen.findByRole('status')).textContent).toContain('Não deu para atualizar sua participação agora.');
-    expect(screen.getAllByRole('button', { name: 'Entrar' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /^Entrar em r\// }).length).toBeGreaterThan(0);
   });
 
   it('leva o visitante para entrar antes de tentar participar da comunidade', async () => {
@@ -688,7 +688,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const entrar = await screen.findAllByRole('button', { name: 'Entrar' });
+    const entrar = await screen.findAllByRole('button', { name: /^Entrar em r\// });
     fireEvent.click(entrar[0]);
 
     expect((await screen.findByRole('status')).textContent).toContain('Entre na sua conta para participar da roda.');

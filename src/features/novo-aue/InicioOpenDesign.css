@@ -1204,3 +1204,5 @@
   cursor: pointer;
 }
 .od-profile__metric-btn:hover { text-decoration: underline; }
+
+.profile-form__ajuda { margin: -4px 0 12px; font-size: 12px; opacity: 0.7; }

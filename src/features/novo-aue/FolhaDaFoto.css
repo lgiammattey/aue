@@ -108,8 +108,9 @@ html:has(.folha-da-foto) {
   }
 }
 
+/* `.modal.folha-da-foto`: o `.modal` do casca.css (centro, padding 20px) vem depois e empata com `.folha-da-foto`. */
 @media (max-width: 699px) {
-  .folha-da-foto {
+  .modal.folha-da-foto {
     align-items: flex-end;
     padding: 0;
   }

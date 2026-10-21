@@ -58,6 +58,27 @@
   text-decoration: none;
 }
 
+/*
+  O link do avatar chega a 44px de área de toque por um pseudo-elemento (2px de
+  cada lado, dentro do vão de 12px até o texto, sem tocar nos vizinhos). O
+  recorte redondo fica no que está dentro do link.
+*/
+.card-do-post .post-avatar-link {
+  overflow: visible;
+  background: none;
+}
+
+.card-do-post .post-avatar-link::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+}
+
+.card-do-post .post-avatar-link .post-avatar-img,
+.card-do-post .post-avatar-link .post-avatar-fallback {
+  border-radius: 50%;
+}
+
 /* O link do avatar é o mesmo destino do nome: sem moldura dupla dentro do link. */
 .card-do-post .post-avatar-link .post-avatar-fallback {
   width: 100%;
@@ -99,6 +120,8 @@
 .card-do-post .post-meta-handle {
   display: flex;
   align-items: center;
+  box-sizing: border-box;
+  min-width: 44px;
   min-height: 44px;
   margin: -12px 0;
   text-decoration: none;
@@ -108,7 +131,8 @@
 .card-do-post .author-name {
   flex: none;
   max-width: 45%;
-  margin-right: 6px;
+  margin-right: 0;
+  padding-right: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--aue-text);
@@ -164,12 +188,6 @@
 .card-do-post .menu-do-post__botao:focus-visible {
   outline: 2px solid var(--aue-text);
   outline-offset: -4px;
-}
-
-/* Menu aberto perto da barra de cima ou de baixo: a rolagem para dentro respeita as duas. */
-.card-do-post .menu-do-post__lista {
-  scroll-margin-top: 72px;
-  scroll-margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Linha 2: r/comunidade, e a nota no feed. */

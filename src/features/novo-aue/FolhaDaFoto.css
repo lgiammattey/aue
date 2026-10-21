@@ -72,6 +72,30 @@
   outline-offset: 2px;
 }
 
+/*
+  Com a folha aberta o fundo não rola (roda do mouse, dedo ou teclado). Só vale
+  enquanto a folha existe no DOM; os outros modais não mudam. A calha da barra
+  de rolagem fica reservada para a página não dar um pulo de largura.
+*/
+html:has(.folha-da-foto),
+body:has(.folha-da-foto) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html:has(.folha-da-foto) {
+  scrollbar-gutter: stable;
+}
+
+.folha-da-foto {
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
+.folha-da-foto .folha-da-foto__corpo {
+  touch-action: pan-y;
+}
+
 @keyframes folhaDaFotoSobe {
   from {
     opacity: 0;

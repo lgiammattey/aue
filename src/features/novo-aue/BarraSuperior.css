@@ -44,7 +44,7 @@
   .topbar-search__lupa {
     position: absolute;
     top: 50%;
-    left: 12px;
+    left: 10px;
     display: block;
     color: var(--aue-muted);
     pointer-events: none;
@@ -56,11 +56,18 @@
     width: 100%;
     min-width: 0;
     height: 36px;
-    padding: 0 12px 0 38px;
+    padding: 0 8px 0 34px;
+    text-overflow: ellipsis;
     border-radius: 12px;
     font-size: 16px; /* 16px evita o zoom automático do Safari ao focar */
     -webkit-appearance: none;
     appearance: none;
+  }
+
+  /* O texto do campo segue em 16px (Safari não dá zoom); só o placeholder é menor, para caber inteiro em 320 e 360. */
+  .topbar .search::placeholder {
+    font-size: 14px;
+    text-overflow: ellipsis;
   }
 
   .topbar button.icon-btn[type='submit'],
@@ -70,5 +77,17 @@
 
   .topbar .top-actions {
     flex: none;
+  }
+}
+
+@media (max-width: 359px) {
+  header.topbar {
+    gap: 8px;
+    padding-right: max(10px, env(safe-area-inset-right, 0px));
+    padding-left: max(10px, env(safe-area-inset-left, 0px));
+  }
+
+  .topbar .search::placeholder {
+    font-size: 12px;
   }
 }

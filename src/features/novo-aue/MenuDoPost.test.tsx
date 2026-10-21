@@ -44,3 +44,31 @@ describe('MenuDoPost', () => {
     expect(screen.queryByRole('menu')).toBeNull();
   });
 });
+
+describe('MenuDoPost: de que lado abre', () => {
+  const abrir = async (espaco: { acima: number; abaixo: number }) => {
+    vi.resetModules();
+    vi.doMock('../../plataforma/web/espacoDoElemento', () => ({ espacoEmVolta: () => espaco }));
+    const { MenuDoPost: Menu } = await import('./MenuDoPost');
+    render(<Menu aoDenunciar={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
+    return screen.getByRole('menu');
+  };
+
+  it('com espaço embaixo abre para baixo', async () => {
+    const menu = await abrir({ acima: 200, abaixo: 600 });
+    expect(menu.getAttribute('data-lado')).toBe('baixo');
+    expect(menu.style.top).toBe('100%');
+  });
+
+  it('perto da barra inferior (botão em y=700 numa tela de 800) abre para cima', async () => {
+    const menu = await abrir({ acima: 700, abaixo: 56 });
+    expect(menu.getAttribute('data-lado')).toBe('cima');
+    expect(menu.style.bottom).toBe('100%');
+  });
+
+  it('sem espaço em nenhum lado, mantém para baixo', async () => {
+    const menu = await abrir({ acima: 80, abaixo: 120 });
+    expect(menu.getAttribute('data-lado')).toBe('baixo');
+  });
+});

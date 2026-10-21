@@ -21,6 +21,8 @@ export interface ItemDoFeed {
   readonly temAudio?: boolean;
   readonly enderecoDoAudio?: string | (() => Promise<string | null>);
   readonly nota?: number;
+  /** Duração real do áudio, quando a porta informa; o player nunca inventa uma. */
+  readonly duracaoSegundos?: number;
   readonly videoUrl?: string;
   /** Só causos trazem isso junto; tópico é preenchido por `contarReacoesDosTopicos`. */
   readonly engajamento?: EngajamentoDoPost;

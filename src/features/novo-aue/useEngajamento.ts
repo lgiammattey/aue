@@ -31,6 +31,7 @@ export function causoParaItemDoFeed(causo: CausoPostado): ItemDoFeed {
     temAudio: causo.temAudio,
     enderecoDoAudio: causo.enderecoDoAudio,
     nota: causo.nota,
+    duracaoSegundos: causo.duracaoSegundos,
     videoUrl: causo.videoUrl,
     engajamento: engajamentoDoCauso(causo),
   };

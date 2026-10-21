@@ -159,8 +159,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     // Feed com tópico real carregado da porta
     expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
-    expect(screen.getByText('u/ze_do_eco')).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Abrir perfil de u/ze_do_eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
+    expect(screen.getByText('@ze_do_eco')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Abrir perfil de @ze_do_eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
     expect(screen.queryByLabelText('Votar positivo')).toBeNull();
     expect(screen.getByRole('button', { name: 'Curtir' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '🔥' })).toBeTruthy();

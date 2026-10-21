@@ -1,0 +1,357 @@
+/*
+  Card do post — um card só para feed, Seguindo, comunidade, thread e perfil.
+  Medidas do protótipo `Bonde do Arroto.dc.html` (.pf-post). Mobile primeiro.
+
+  Todo seletor começa em `.card-do-post` (0,2,0 ou mais), então ganha do bloco
+  legado `.post-body` e do `.badge-nota` do casca.css sem depender da ordem de
+  import e sem `!important`. O `.post-body` global NÃO é editado: o CardDeCauso
+  legado ainda o usa.
+
+  Variante `perfil` (`.card-do-post--perfil`): sem verde. O verde do perfil é
+  da aba ativa e do ARROTAR (opção A, 21/10/2026). A nota e as reações emoji
+  nem entram no DOM dessa variante; aqui só ficam as cores neutras do que sobra.
+*/
+
+.card-do-post {
+  --card-recuo: 52px; /* coluna do avatar (40) + vão (12) */
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: 12px;
+  margin: 0 0 8px;
+  padding: 12px 12px 0;
+  border: 1px solid color-mix(in srgb, var(--aue-line) 60%, transparent);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--aue-text);
+  font-family: var(--font-body, 'Archivo', system-ui, sans-serif);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card-do-post button,
+.card-do-post a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ---------- avatar ---------- */
+.card-do-post .post-avatar-col {
+  min-width: 0;
+}
+
+.card-do-post .post-avatar-link,
+.card-do-post .post-avatar-static,
+.card-do-post .post-avatar-fallback {
+  position: relative;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--aue-surface-2);
+  color: var(--aue-text);
+  font-family: var(--font-display, 'Anton', sans-serif);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* O link do avatar é o mesmo destino do nome: sem moldura dupla dentro do link. */
+.card-do-post .post-avatar-link .post-avatar-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.card-do-post .post-avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- coluna do conteúdo ---------- */
+.card-do-post .post-main-content {
+  min-width: 0;
+}
+
+/* Linha 1: quem, @handle · tempo, ⋯ no canto. */
+.card-do-post .post-meta-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.card-do-post .post-meta-ident {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 20px;
+  font: 400 13px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+  white-space: nowrap;
+}
+
+/* Nome e @ são links; a caixa chega a 44px de altura sem empurrar a linha. */
+.card-do-post .author-profile-link,
+.card-do-post .post-meta-handle {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -12px 0;
+  text-decoration: none;
+}
+
+.card-do-post .author-profile-link,
+.card-do-post .author-name {
+  flex: none;
+  max-width: 45%;
+  margin-right: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--aue-text);
+  font: 800 13px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
+  letter-spacing: -0.02em;
+}
+
+.card-do-post .author-name {
+  margin-block: 0;
+}
+
+.card-do-post .post-meta-handle {
+  min-width: 0;
+  display: block;
+  line-height: 44px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--aue-muted);
+  font-size: 13px;
+}
+
+.card-do-post .post-meta-dot {
+  flex: none;
+  margin: 0 4px;
+  color: var(--aue-muted);
+}
+
+.card-do-post .post-meta-time {
+  flex: none;
+  color: var(--aue-muted);
+  font-size: 13px;
+}
+
+/* ⋯: caixa de 44px, margem negativa para não aumentar a linha. */
+.card-do-post .menu-do-post {
+  flex: none;
+  margin: -12px -12px -12px 0;
+}
+
+.card-do-post .menu-do-post__botao {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--aue-muted);
+  cursor: pointer;
+}
+
+.card-do-post .menu-do-post__botao:focus-visible {
+  outline: 2px solid var(--aue-text);
+  outline-offset: -4px;
+}
+
+/* Menu aberto perto da barra de cima ou de baixo: a rolagem para dentro respeita as duas. */
+.card-do-post .menu-do-post__lista {
+  scroll-margin-top: 72px;
+  scroll-margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Linha 2: r/comunidade, e a nota no feed. */
+.card-do-post .post-meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 20px;
+}
+
+.card-do-post .badge-comunidade {
+  position: relative;
+  z-index: 1;
+  display: block;
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 44px);
+  height: 44px;
+  margin: -12px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 700 14px/44px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+  text-decoration: none;
+}
+
+/* A nota (só no feed) fica na linha da roda, sem inchar a linha. */
+.card-do-post .badge-nota {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+/* ---------- texto, tag, mídia ---------- */
+.card-do-post .post-body {
+  margin: 0 0 6px;
+  padding: 0;
+  font: 400 15px/21px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-text);
+  overflow-wrap: anywhere;
+}
+
+.card-do-post .post-topic-tag {
+  margin: 2px 0 4px;
+  max-width: 100%;
+}
+
+.card-do-post .post-topic-tag__label {
+  overflow-wrap: anywhere;
+}
+
+.card-do-post .post-audio-wrapper {
+  margin: 0;
+  display: block;
+}
+
+.card-do-post .post-media-image {
+  margin: 4px 0 8px;
+}
+
+.card-do-post .post-media-video {
+  margin: 0 0 8px;
+}
+
+.card-do-post .post-video {
+  margin-top: 4px;
+}
+
+/* ---------- barra de ações ---------- */
+.card-do-post .post-actions--twitter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 20px;
+  max-width: none;
+  margin: -4px 0 -4px;
+  padding: 0;
+  border: 0;
+}
+
+.card-do-post .action-btn {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  justify-content: flex-start;
+  gap: 6px;
+  border-radius: 0;
+  background: none;
+  color: var(--aue-muted);
+  font: 500 14px/1 var(--font-body, 'Archivo', system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+  touch-action: manipulation;
+}
+
+.card-do-post .action-btn svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* Número com largura reservada: não pula quando a contagem do servidor chega. */
+.card-do-post .action-btn__count {
+  min-width: 1ch;
+  font: inherit;
+}
+
+.card-do-post .action-btn:focus-visible {
+  outline: 2px solid var(--aue-text);
+  outline-offset: -4px;
+}
+
+/* Feedback de "Copiado!" flutua: não alarga o botão nem empurra a linha. */
+.card-do-post .action-btn__feedback {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% - 8px);
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--aue-surface-2);
+  color: var(--aue-text);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Feed: as reações emoji e o salvar ficam, então a barra ocupa a largura toda do card. */
+.card-do-post:not(.card-do-post--perfil) .post-actions--twitter {
+  width: calc(100% + var(--card-recuo));
+  max-width: 440px;
+  margin-left: calc(-1 * var(--card-recuo));
+  gap: 0;
+  justify-content: space-between;
+}
+
+.card-do-post:not(.card-do-post--perfil) .action-btn {
+  padding: 0 4px;
+}
+
+/* ---------- hover só onde existe ponteiro de verdade ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .card-do-post .author-profile-link:hover,
+  .card-do-post .badge-comunidade:hover,
+  .card-do-post .post-meta-handle:hover {
+    color: var(--aue-text);
+    text-decoration: underline;
+  }
+
+  .card-do-post .action-btn:hover:not(:disabled),
+  .card-do-post .menu-do-post__botao:hover {
+    background: none;
+    color: var(--aue-text);
+  }
+}
+
+/* ---------- variante perfil: nenhum verde ---------- */
+.card-do-post--perfil .post-topic-tag__label {
+  color: var(--aue-text);
+  background: transparent;
+  border-color: var(--border-strong, var(--aue-line));
+}
+
+.card-do-post--perfil .action-btn.is-active,
+.card-do-post--perfil .action-btn--save.is-saved,
+.card-do-post--perfil .action-btn--save:hover,
+.card-do-post--perfil .action-btn__feedback {
+  color: var(--aue-text);
+}
+
+/* ---------- movimento reduzido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .card-do-post,
+  .card-do-post * {
+    transition: none;
+    animation: none;
+  }
+}

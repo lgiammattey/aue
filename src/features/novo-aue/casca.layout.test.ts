@@ -10,4 +10,18 @@ describe('layout desktop de 3 colunas', () => {
     expect(bloco).toContain('grid-template-columns: 275px minmax(0, 600px) 320px');
     expect(bloco).toContain('justify-content: center');
   });
+
+  it('barra inferior do celular: item ativo segue --fg (traço herda currentColor), sem verde', () => {
+    expect(css).not.toMatch(/\.mobile-nav-item\.active\s+svg\s*\{[^}]*accent/);
+    expect(css).toMatch(/\.mobile-nav-item\.active\s*\{[^}]*color:\s*var\(--aue-text\)/);
+    expect(css).toMatch(/\.mobile-nav-item svg\s*\{[^}]*stroke:\s*currentColor/);
+  });
+
+  it('o ARROTAR do centro continua sendo o verde da barra', () => {
+    expect(css).toMatch(/\.mobile-nav-item--arrotar\s*\{[^}]*background:\s*var\(--aue-accent\)/);
+  });
+
+  it('o menu lateral do desktop não muda: .nav-item.active segue em --aue-text', () => {
+    expect(css).toMatch(/\.nav-item\.active,[^{]*\{[^}]*color:\s*var\(--aue-text\)/);
+  });
 });

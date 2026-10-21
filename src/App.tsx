@@ -157,10 +157,6 @@ function EntradaSeguindo() {
   return <InicioOpenDesign viewInicial="seguindo" />;
 }
 
-function EntradaEmAlta() {
-  return <InicioOpenDesign viewInicial="emAlta" />;
-}
-
 /** Mantém links antigos de comunidades vivos, levando-os ao endereço novo equivalente. */
 function AliasDeComunidade() {
   const { slug } = useParams<{ slug: string }>();
@@ -178,7 +174,7 @@ export function App() {
           {/* Feed e Entrada Inteligente */}
           <Route path="/" element={<EntradaInicial />} />
           <Route path="/feed" element={<EntradaPrincipal />} />
-          <Route path="/em-alta" element={<EntradaEmAlta />} />
+          <Route path="/em-alta" element={<Navigate to="/explorar" replace />} />
           <Route path="/seguindo" element={<EntradaSeguindo />} />
 
           {/* Arena de Arrotos */}

@@ -1,4 +1,4 @@
-# Bonde do Arroto · Jornada do Jogador
+# Tropa do Arroto · Jornada do Jogador
 
 > **Fluxo de referência canônico para produto, design e engenharia.**  
 > Cada caixa representa uma tela ou estado; as ramificações mostram as decisões do usuário.  
@@ -11,7 +11,7 @@ Fonte visual viva: [`docs/design/prototipo/Jornada.dc.html`](../design/prototipo
 ## O Loop Contínuo
 
 ```text
-DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
+DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
     ▲                                                                   │
     └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
 ```
@@ -22,7 +22,7 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 **Objetivo:** Chegar e entender o jogo em segundos.
 
 1. **Landing Desktop (`Landing.dc.html`):**
-   - Headline: *"Tá rolando agora / Entra no bonde hoje"*.
+   - Headline: *"Tá rolando agora / Entra na Tropa hoje"*.
    - Explica o jogo em segundos e manda para o celular ou webapp. Nunca tenta ser a Arena no desktop de forma capenga.
    - Opções de login social (Google, Apple) e criação de conta.
    - Botão direto: *"Arrotar sem conta"* (vai direto para `Arena.dc.html`).
@@ -36,12 +36,12 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 
 ---
 
-## Fase 2: Bonde (Feed & Comunidades)
+## Fase 2: Tropa (Pessoas, Feed & Comunidades)
 **Objetivo:** Ver o que está rolando na comunidade e escolher a próxima ação.
 
-1. **Feed Central (`Bonde do Arroto.dc.html`):**
-   - A produção mostra resenhas em texto, áudio ou mídia, sempre identificadas pela comunidade de origem.
-   - Filtros observados: **Quentes**, **Novos** e **Top**.
+1. **Feed Central (`Tropa do Arroto.dc.html`):**
+   - A Tropa reúne resenhas em texto, áudio ou mídia das pessoas seguidas, sempre identificadas pela comunidade de origem.
+   - A descoberta continua nas comunidades e na busca; Tropa não cria uma publicação paralela.
    - Ações visíveis: comentário, reações, salvar e compartilhar. Participação pede entrada.
 2. **Decisão de Ação:**
    - Publicar uma resenha na comunidade, quando a participação estiver disponível;

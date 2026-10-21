@@ -144,8 +144,8 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     const btnAdmin = container.querySelector('#manageCommunity');
     expect(btnAdmin).toBeTruthy();
 
-    // Colunas da comunidade: Feed, Moderadores e Regras rápidas
-    expect(screen.getByText('Feed da comunidade')).toBeTruthy();
+    // Colunas da comunidade: conversas, moderadores e regras rápidas
+    expect(screen.getByText('Conversas da roda')).toBeTruthy();
     expect(screen.getByRole('heading', { level: 2, name: 'Moderadores' })).toBeTruthy();
     expect(screen.getAllByRole('heading', { level: 2, name: 'Regras rápidas' }).length).toBeGreaterThan(0);
 
@@ -154,6 +154,10 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
 
     // Tópico real carregado
     expect(await screen.findByText('O áudio mais curto da semana conseguiu ser o mais comentado.')).toBeTruthy();
+    expect(mockForum.listarTopicos).toHaveBeenCalledWith('arena-do-arroto', { ordem: 'atividade' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Recentes' }));
+    await waitFor(() => expect(mockForum.listarTopicos).toHaveBeenLastCalledWith('arena-do-arroto', { ordem: 'recentes' }));
   });
 
   const comoMembroComum = (): PortaDeForum => ({
@@ -354,7 +358,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     );
 
     // Inicialmente na aba Causos
-    expect(await screen.findByRole('heading', { level: 2, name: 'Feed da comunidade' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 2, name: 'Conversas da roda' })).toBeTruthy();
 
     // Clica na aba Sobre
     const btnSobre = screen.getByRole('button', { name: 'Sobre' });
@@ -367,7 +371,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     // Volta para a aba Posts
     const btnPosts = screen.getByRole('button', { name: /Posts|Causos/ });
     fireEvent.click(btnPosts);
-    expect(screen.getByRole('heading', { level: 2, name: 'Feed da comunidade' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Conversas da roda' })).toBeTruthy();
   });
 
   it('exibe erro caso a rota direta de tópico /c/:slug/t/:id não encontre o tópico', async () => {

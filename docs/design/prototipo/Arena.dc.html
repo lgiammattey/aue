@@ -69,7 +69,7 @@
 <sc-if value="{{ isResult }}">
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
 <x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="primario" tamanho="compacto" onClick="{{ x1 }}" hint-size="100%,52px">Chamar pro X1</x-import>
-<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" tamanho="compacto" onClick="{{ postar }}" hint-size="100%,52px">Postar no bonde</x-import>
+<x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="contorno" tamanho="compacto" onClick="{{ postar }}" hint-size="100%,52px">Publicar na roda</x-import>
 </div>
 <x-import component-from-global-scope="AuDesignSystem_226135.Botao" variante="fantasma" onClick="{{ rec }}" hint-size="100%,52px">Mandar outro</x-import>
 </sc-if>
@@ -147,7 +147,7 @@ class Component extends DCLogic {
     const n = s.nota, rv = n - 13;
     const fala = n >= 85 ? 'Tá maluco.' : n >= 60 ? 'Caralho, veio forte.' : 'Foi isso?';
     const titles = { IDLE: 'Bora?', JUDGING: 'Tô julgando essa porra.', RESULT_REVEAL: fala, RESULT: fala, DRAW: 'Ninguém ganhou.' };
-    const subs = { IDLE: 'Solta o primeiro e vê quanto dá.', VALIDATING: 'Conferindo…', RESULT: 'Manda isso no bonde e vê se alguém peita.', CHALLENGE_CREATED: 'Link pronto. Manda pro infeliz.', WAITING_OPPONENT: 'Ninguém aceitou ainda.' };
+    const subs = { IDLE: 'Solta o primeiro e vê quanto dá.', VALIDATING: 'Conferindo…', RESULT: 'Joga isso numa roda e vê se alguém peita.', CHALLENGE_CREATED: 'Link pronto. Manda pro infeliz.', WAITING_OPPONENT: 'Ninguém aceitou ainda.' };
     const rank = [['Dani Gás', 94], ['Você', s.best], ['Rafa Fôlego', 81], ['Mari Grave', 68], ['Tio Beto', 61]].sort((a, b) => b[1] - a[1]).slice(0, 5);
     const stageH = { IDLE: 'clamp(200px,30vh,264px)', RESULT: 'clamp(170px,24vh,200px)', SCOREBOARD: 'clamp(150px,23vh,196px)', DRAW: 'clamp(150px,23vh,196px)', CHALLENGE_CREATED: 'clamp(160px,25vh,200px)', WAITING_OPPONENT: 'clamp(160px,25vh,200px)' }[e] || 'clamp(230px,38vh,308px)';
     return {

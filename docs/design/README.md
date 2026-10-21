@@ -9,7 +9,7 @@ Este diretório contém a documentação visual, protótipos interativos e token
 Todos os protótipos vivos do Auê! residem em [`docs/design/prototipo/`](./prototipo/):
 
 - [`Design System.dc.html`](./prototipo/Design%20System.dc.html) — Mostruário completo de cores, tipografia, espaçamentos, raios e componentes vivos nos temas escuro e claro.
-- [`Bonde do Arroto.dc.html`](./prototipo/Bonde%20do%20Arroto.dc.html) — Feed social no estilo Twitter/X: causos com texto e áudio, notas anexadas, abas Todos/Seguindo, desafios X1 e perfil de jogador.
+- [`Tropa do Arroto.dc.html`](./prototipo/Bonde%20do%20Arroto.dc.html) — Camada social no estilo Twitter/X: pessoas seguidas, causos com texto e áudio, notas anexadas, desafios X1 e perfil de jogador.
 - [`Arena.dc.html`](./prototipo/Arena.dc.html) — Máquina oficial de captura e pontuação de arroto: estados IDLE, RECORDING, VALIDATING, JUDGING, RESULT, placar de duelo e revanche.
 - [`Landing.dc.html`](./prototipo/Landing.dc.html) — Página de chegada estilo Twitter ("Tá rolando agora"), com login social e rota rápida para arrotar sem conta.
 - [`Login.dc.html`](./prototipo/Login.dc.html) — Fluxo ágil de autenticação (Google, Apple, E-mail/Senha/Apelido) ou convidado.

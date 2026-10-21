@@ -28,12 +28,12 @@ nenhum detalhe de produto ou de arte aqui cria backend, rota ou estado por si s�
 ## 0. Como a arquitetura do Auê está organizada hoje
 
 O Auê é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**:
-combina a adrenalina da **Arena** (máquina de captura, julgamento acústico YAMNet e Auê Score) à dinâmica do **Bonde do Arroto** (timeline estilo Twitter/X) e **comunidades temáticas** (estilo Orkut/Reddit).
+combina a adrenalina da **Arena** (máquina de captura, julgamento acústico YAMNet e Auê Score) à dinâmica da **Tropa** (pessoas que se acompanham) e **comunidades temáticas** (estilo Orkut/Reddit).
 
 A arquitetura do frontend é dividida em módulos com responsabilidades bem definidas:
 
 1. **`src/arena/` (A Arena):** Superfície única contínua de 10 estados (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`). Não são rotas separadas, mas transições reativas com captura Web Audio e animação da bolha.
-2. **`src/features/novo-aue/` (OpenDesign Canônico do Bonde e Comunidades):** Implementação ativa da rede social (`InicioOpenDesign`, `CardDoPost`, `ThreadDeComentarios`, `ModalCompositor`, `TelaComunidadeOpenDesign`, `TelaPerfilOpenDesign`). A home publicada mostra o Bonde; a migração para tópico e resposta é uma decisão aceita, ainda não uma declaração de entrega.
+2. **`src/features/novo-aue/` (OpenDesign Canônico da Tropa e Comunidades):** Implementação ativa da rede social (`InicioOpenDesign`, `CardDoPost`, `ThreadDeComentarios`, `ModalCompositor`, `TelaComunidadeOpenDesign`, `TelaPerfilOpenDesign`). A home publicada mostra conversas de comunidades e a Tropa reúne as contribuições das pessoas seguidas; a migração para tópico e resposta é uma decisão aceita, ainda não uma declaração de entrega.
 3. **`src/features/publico/` e `src/features/legal/`:** Páginas institucionais, SEO e legais com tema claro fixo (`ComoJogar`, `ComoArrotar`, `TiposDeArroto`, `RankingDeArrotos`, `TermosDeUso`, `PoliticaDePrivacidade`).
 4. **`src/features/comunidade/` (Camada Legada / Compatibilidade):** Casca anterior mantida temporariamente para compatibilidade de rotas secundárias (`/feed`, `/desafios`) e testes legados. Novas funcionalidades de feed e postagens são desenvolvidas exclusivamente em `novo-aue` (ver [`MAPA_DE_PAGINAS_E_FLUXOS.md`](../design/MAPA_DE_PAGINAS_E_FLUXOS.md)).
 5. **`src/nucleo/` (Lógica Pura):** Regras de negócio, cálculo de Auê Score, limites e formatação em TypeScript puro, sem acoplamento com React ou DOM.
@@ -440,7 +440,7 @@ Métrica não precisa virar infraestrutura de Big Data antes de existir tráfego
 
 ## 17. O que permanece FORA de escopo no produto
 
-No Auê 3.0, o Bonde do Arroto (feed), as comunidades temáticas, a Arena e o X1 estão **ativos no escopo oficial**.
+No Auê 3.0, a Tropa (pessoas e feed seguido), as comunidades temáticas, a Arena e o X1 estão **ativos no escopo oficial**.
 
 Permanecem rigorosamente **fora do produto** nesta fase (ver [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md)):
 

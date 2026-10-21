@@ -15,7 +15,7 @@ export function TelaNaoEncontrada() {
           <h1>Página não encontrada.</h1>
           <p>Esse endereço não existe no Auê, ou o conteúdo foi removido.</p>
           <p>
-            <Link to="/">Voltar para o Bonde</Link> · <Link to="/comunidades">Ver comunidades</Link>
+            <Link to="/">Voltar ao início</Link> · <Link to="/comunidades">Ver comunidades</Link>
           </p>
         </section>
       </main>

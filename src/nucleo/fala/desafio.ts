@@ -9,8 +9,8 @@
 /** O botão que abre a briga. Vira a ação principal do resultado. */
 export const CHAMAR_PRO_X1 = 'Chamar pro X1';
 
-/** O botão para publicar o causo na comunidade do Bonde. */
-export const POSTAR_NO_BONDE = 'Postar no bonde';
+/** O botão para publicar o causo em uma roda. O nome mantém o contrato legado. */
+export const POSTAR_NO_BONDE = 'Publicar na roda';
 
 /** A sobreposição que cobra o nome — só aqui, no ato de humilhar. */
 export const NOME_TITULO = 'Como é que te chamam?';

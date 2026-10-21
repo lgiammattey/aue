@@ -188,11 +188,11 @@ interface PropsDaArena {
   sorteio?: () => number;
   /** Injetável para o teste controlar o cronômetro. */
   agora?: () => number;
-  /** Callback opcional quando o arrotador toca em POSTAR_NO_BONDE */
+  /** Callback opcional quando o arrotador escolhe publicar na roda. */
   onPostarNoBonde?: (resultado: {
     nota: number;
     duracao?: number;
-    /** O arroto inteiro, para o Bonde pedir o aceite e só então guardar e publicar. */
+    /** O arroto inteiro, para a roda pedir o aceite e só então guardar e publicar. */
     arroto?: { nota: Nota; origem: TipoDeOrigem; audio: AudioCapturado };
   }) => void;
 }

@@ -169,6 +169,22 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getAllByText('r/arena-do-arroto').length).toBeGreaterThan(0);
   });
 
+  it('chama a área das pessoas seguidas de Sua Tropa', async () => {
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={mockComunidade}
+          autenticado={false}
+          viewInicial="seguindo"
+        />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Sua Tropa' })).toBeTruthy();
+    expect(screen.getByText('Entre para ver sua Tropa.')).toBeTruthy();
+  });
+
   it('reidrata o anexo de áudio do tópico no Início depois da leitura do feed', async () => {
     const forumComAudio: PortaDeForum = {
       ...mockForum,
@@ -244,7 +260,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(forumComUploadRecusado.criarTopico).not.toHaveBeenCalled();
   });
 
-  it('permite alternar abas de ordenação Quentes, Novos e Top', async () => {
+  it('carrega só tópicos por atividade recente, sem ordenar a tela por um placar local', async () => {
     render(
       <MemoryRouter>
         <InicioOpenDesign
@@ -255,13 +271,27 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const abaNovos = screen.getByRole('button', { name: 'Novos' });
-    fireEvent.click(abaNovos);
-    expect(screen.getByText('Comunidade · Novos')).toBeTruthy();
+    await waitFor(() => expect(mockForum.explorarTopicos).toHaveBeenCalledWith({ limite: 30, ordem: 'atividade' }));
+    expect(mockComunidade.listarFeed).not.toHaveBeenCalled();
+    expect(screen.getByText('Conversas ativas')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Quentes' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Top' })).toBeNull();
+  });
 
-    const abaTop = screen.getByRole('button', { name: 'Top' });
-    fireEvent.click(abaTop);
-    expect(screen.getByText('Comunidade · Top')).toBeTruthy();
+  it('separa falha de carregamento de uma roda sem conversa', async () => {
+    const forumComFalha: PortaDeForum = {
+      ...mockForum,
+      explorarTopicos: vi.fn(async () => ({ ok: false as const, motivo: 'falhou' as const })),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComFalha} portaComunidade={mockComunidade} autenticado={true} />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Não deu para carregar as conversas agora.')).toBeTruthy();
+    expect(screen.queryByText('Não tem conversa por aqui ainda. Puxa a primeira da roda.')).toBeNull();
   });
 
   it('abre o diálogo de gravação direta ao clicar em Soltar um arroto', async () => {
@@ -570,7 +600,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     render(<MemoryRouter><InicioOpenDesign portaForum={mockForum} portaComunidade={mockComunidade} portaConta={conta} portaPerfil={perfil} viewInicial="perfil" /></MemoryRouter>);
     expect(await screen.findByRole('heading', { name: 'Termina sua ficha.' })).toBeTruthy();
     expect(screen.getByDisplayValue('Luiz')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar no Bonde' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar na Tropa' }));
     await waitFor(() => expect(perfil.concluirMeuPerfilSocial).toHaveBeenCalledWith(expect.objectContaining({ apelido: 'Luiz', handle: 'luiz' })));
   });
 

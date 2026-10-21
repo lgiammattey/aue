@@ -310,7 +310,7 @@
 .od-comments__form textarea { width: 100%; box-sizing: border-box; }
 .od-muted { padding: 20px 8px; color: var(--aue-muted); text-align: center; }
 
-/* ==================== ESTILO TWITTER: CARDS DO BONDE ==================== */
+/* ==================== ESTILO TWITTER: CARDS DA TROPA ==================== */
 .post--twitter-style {
   display: flex;
   gap: 12px;

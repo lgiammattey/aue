@@ -20,7 +20,6 @@ describe('ThreadDeComentarios (Padrão Twitter / Fora do Card)', () => {
     autorHandle: 'mestre_eco',
     autorAvatarUrl: 'https://cdn.test/avatar-mestre.jpg',
     criadoEm: '2026-10-20T12:00:00Z',
-    votos: 42,
     respostasTotal: 7,
     nota: 88,
   };

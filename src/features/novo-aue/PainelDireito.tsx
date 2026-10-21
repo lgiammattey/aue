@@ -9,7 +9,7 @@ interface Props {
   readonly aoAbrirComunidade: (slug: string) => void;
   readonly aoAlternarEntrar?: (slug: string) => void;
   readonly comunidadesEntradas?: Record<string, boolean>;
-  readonly viewAtual?: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewAtual?: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
   readonly moderadoresDaComunidade?: readonly (readonly [string, string])[];
   readonly regrasDaComunidade?: readonly string[];
   readonly perfil?: PerfilPublico | null;
@@ -74,7 +74,7 @@ export const PainelDireito = memo(function PainelDireito({
       )}
 
       <div className="panel">
-        <h2>Rodas em alta</h2>
+        <h2>Rodas para explorar</h2>
         {comunidades.length === 0 ? (
           <p>Carregando rodas…</p>
         ) : (
@@ -118,7 +118,7 @@ export const PainelDireito = memo(function PainelDireito({
             fontWeight: 700,
           }}
         >
-          Parceiro do Bonde
+          Parceiro da Tropa
         </span>
         <h2 style={{ marginTop: 4 }}>Combustível Oficial 🍺</h2>
         <p style={{ fontSize: 13, color: 'var(--aue-muted)' }}>

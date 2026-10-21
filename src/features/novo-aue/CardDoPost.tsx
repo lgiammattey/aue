@@ -1,5 +1,5 @@
 /**
- * CANÔNICO ATIVO — Card de Post do Bonde do Arroto (OpenDesign)
+ * CANÔNICO ATIVO — Card de Post da Tropa do Arroto (OpenDesign)
  * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
  * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
  * 
@@ -319,7 +319,7 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.8-8 11-8 11z" />
             </svg>
-            {(reacoes?.like ?? post.votos) > 0 && <span className="action-btn__count">{reacoes?.like ?? post.votos}</span>}
+            {reacoes && reacoes.like > 0 && <span className="action-btn__count">{reacoes.like}</span>}
             <span className="sr-only">Curtir</span>
           </button>
 

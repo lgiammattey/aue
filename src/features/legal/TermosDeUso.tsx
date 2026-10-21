@@ -56,7 +56,7 @@ export const TermosDeUso: React.FC = () => (
         <li>Não mandar conteúdo sexual, discurso de ódio, ameaça, assédio ou crime.</li>
         <li>Não usar o Auê para expor, humilhar ou perseguir alguém.</li>
         <li>Não se passar por outra pessoa no apelido, no @ ou no perfil.</li>
-        <li>Só publicar no Bonde o que você tem direito de publicar. O que você posta ali é público.</li>
+        <li>Só publicar numa Roda o que você tem direito de publicar. O que você posta ali é público.</li>
         <li>Não tentar quebrar, sobrecarregar ou automatizar o serviço.</li>
       </ul>
       <p>
@@ -69,7 +69,7 @@ export const TermosDeUso: React.FC = () => (
       <p>
         O áudio é seu. O que você dá ao Auê é permissão para guardá-lo e tocá-lo
         dentro do app para quem abrir a batalha em que você gravou — que é o
-        mínimo para o produto funcionar. Para o arroto aparecer no Bonde, você
+        mínimo para o produto funcionar. Para o arroto aparecer numa Roda, você
         precisa publicar e marcar a autorização na hora; ao fazer isso, você
         permite que qualquer pessoa o ouça e comente.
       </p>

@@ -11,7 +11,7 @@ afterEach(cleanup);
 const ID = '11111111-1111-4111-8111-111111111111';
 const topico: ItemDoFeed = {
   id: `topico-${ID}`, tipo: 'topico', comunidadeSlug: 'eu-arroto-e-dai', titulo: 'T', corpo: '',
-  autorNome: 'Ana', criadoEm: '2026-10-20T10:00:00Z', votos: 1, respostasTotal: 0,
+  autorNome: 'Ana', criadoEm: '2026-10-20T10:00:00Z', respostasTotal: 0,
 };
 const causoItem: ItemDoFeed = { ...topico, id: `causo-${ID}`, tipo: 'causo' };
 

@@ -2,10 +2,10 @@
 name: "Auê! Design System"
 category: Brands
 surface: Rede social para arrotadores (Desktop e Webapp Mobile)
-status: "Design System canônico — v5 (Bonde do Arroto & Arena)"
+status: "Design System canônico — v5 (Tropa & Arena)"
 canonical_refs:
   - "docs/design/prototipo/Design System.dc.html"
-  - "docs/design/prototipo/Bonde do Arroto.dc.html"
+  - "docs/design/prototipo/Bonde do Arroto.dc.html" # arquivo legado; superfície exibida como Tropa
   - "docs/design/prototipo/Arena.dc.html"
   - "docs/design/prototipo/Landing.dc.html"
   - "docs/design/prototipo/Login.dc.html"
@@ -45,7 +45,7 @@ colors:
 
 > **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
-O Auê! é uma **rede social para arrotadores**, exclusivamente online via **Desktop e Webapp Mobile**. A experiência conecta a adrenalina imediata da **Arena** (a máquina de captura e pontuação de arrotos) à dinâmica de feed contínuo estilo Twitter/X (**Bonde do Arroto**) e **comunidades temáticas** estilo Orkut / Reddit.
+O Auê! é uma **rede social para arrotadores**, exclusivamente online via **Desktop e Webapp Mobile**. A experiência conecta a adrenalina imediata da **Arena** (a máquina de captura e pontuação de arrotos) à **Tropa** (pessoas que se acompanham) e **comunidades temáticas** estilo Orkut / Reddit.
 
 Fundo chapado, sem cards flutuantes genéricos, sem gradiente decorativo. Verde ácido (`--accent: #c6ff00`) elétrico usado com critério: no máximo 2 aparições simultâneas por estado.
 
@@ -58,7 +58,7 @@ Os arquivos em `docs/design/prototipo/` e este Design System são as referência
 | Artefato | Arquivo | Responsabilidade |
 |---|---|---|
 | **Design System** | [`docs/design/prototipo/Design System.dc.html`](../../prototipo/Design%20System.dc.html) | Demonstração viva de cores, tipos, raios, botões e componentes |
-| **Bonde do Arroto** | [`docs/design/prototipo/Bonde do Arroto.dc.html`](../../prototipo/Bonde%20do%20Arroto.dc.html) | Feed de resenhas, posts com áudio, abas, composer, desafios X1 e perfil |
+| **Tropa do Arroto** | [`docs/design/prototipo/Tropa do Arroto.dc.html`](../../prototipo/Bonde%20do%20Arroto.dc.html) | Pessoas seguidas, feed de resenhas, posts com áudio, composer, desafios X1 e perfil |
 | **Arena** | [`docs/design/prototipo/Arena.dc.html`](../../prototipo/Arena.dc.html) | Máquina de estados do arroto (IDLE, RECORDING, VALIDATING, JUDGING, RESULT, X1) |
 | **Comunidades** | [`docs/design/prototipo/Comunidades.dc.html`](../../prototipo/Comunidades.dc.html) | Praça central, descoberta de categorias, rankings e moderação |
 | **Landing** | [`docs/design/prototipo/Landing.dc.html`](../../prototipo/Landing.dc.html) | Recepção estilo Twitter ("Tá rolando agora"), login social e atalho para arrotar |
@@ -197,7 +197,7 @@ O Auê roda exclusivamente no navegador com excelência em 3 cenários:
 1. **Desktop (>= 1060px — recomendado 1280px):**
    - **Coluna Esquerda (275px):** Navegação vertical fixa (Logo `AUÊ!`, Início, Auê Arena, Comunidades, Desafios, Perfil, Trocar Tema e Botão de Postar/Arrotar).
    - **Coluna Central (600px):** Feed de resenhas ou Arena de jogo centralizada com bordas laterais de 1px `--border`.
-   - **Coluna Direita (320px):** Sticky lateral com campo de busca, tendências "Em alta no Bonde", "Ranking de hoje" e "X1 abertos".
+   - **Coluna Direita (320px):** Sticky lateral com campo de busca, Rodas para explorar, ranking e X1 abertos.
 2. **Tablet (700px a 1059px):**
    - Coluna esquerda compacta em ícones (76px de largura).
    - Feed/Arena central ocupa o espaço útil.

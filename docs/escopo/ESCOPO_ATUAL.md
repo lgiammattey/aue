@@ -19,7 +19,7 @@ outra.
 ## 1. O produto
 
 Uma **comunidade web de arrotadores**: no desktop e no webapp mobile, a pessoa
-entra no Bonde, acompanha resenhas e áudios, usa a Arena para receber nota e
+entra na Tropa, acompanha resenhas e áudios, usa a Arena para receber nota e
 chama alguém para o X1.
 
 A experiência acontece em **uma Arena que muda de estado**
@@ -162,7 +162,7 @@ Contrato de funcionamento (auditoria de 18/10/2026):
 
 Elenco da casa (decisões do Luiz em 18/10/2026, Cartão `docs/historias/burpzilla/cartao-de-missao-seed.md`):
 
-- **Conteúdo da casa:** o Bonde e a comunidade "Eu arroto, e daí?" recebem posts dos personagens Giam e Lima (história Burpzilla), com comentários de contas da casa. É carga retroativa (backfill), de 28/08 a 15/10/2026, horário de Brasília, com a data de cada post como no cronograma. Não é agendamento;
+- **Conteúdo da casa:** a Tropa e a comunidade "Eu arroto, e daí?" reúnem posts dos personagens Giam e Lima (história Burpzilla), com comentários de contas da casa. É carga retroativa (backfill), de 28/08 a 15/10/2026, horário de Brasília, com a data de cada post como no cronograma. Não é agendamento;
 - **Perfil:** igual ao de usuário comum. A conta da casa leva um símbolo Burpzilla (usuário da casa) só na tela de perfil. Não há selo no feed, nada na página Sobre, e o símbolo não indica posição, nota nem ranking. Não é conquista;
 - **Áudio sem nota:** os áudios do Solo Eructos! sobem sem passar pelo jogo, logo sem nota. Nota nunca é inventada e o card não desenha pontuação quando ela não existe. Por ora esse caminho é só da casa (servidor). Postar áudio sem jogo como usuário comum não existe e pede outro Cartão;
 - **Comentários da casa:** só texto. Os agentes da squad que comentam são sorteados (semente registrada e revisada antes de aplicar), nunca com o nome "Lucas";

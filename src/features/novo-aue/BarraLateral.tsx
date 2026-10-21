@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { ComunidadeDoForum } from '../../portas/forum';
 
 interface Props {
-  readonly viewAtual: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewAtual: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
   readonly comunidadeAtivaSlug?: string;
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly estaAutenticado: boolean;
-  readonly aoMudarView: (view: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades', slug?: string) => void;
+  readonly aoMudarView: (view: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades', slug?: string) => void;
   readonly aoAbrirCompositor: () => void;
   readonly aoSair: () => void;
   readonly aoEntrar?: () => void;
@@ -25,7 +25,7 @@ export const BarraLateral = memo(function BarraLateral({
 }: Props) {
   const navigate = useNavigate();
 
-  const isFeedAtivo = viewAtual === 'feed' || viewAtual === 'emAlta' || viewAtual === 'seguindo';
+  const isFeedAtivo = viewAtual === 'feed' || viewAtual === 'seguindo';
   const isComunidadesAtivo = viewAtual === 'comunidades' || viewAtual === 'comunidade';
   const isPerfilAtivo = viewAtual === 'perfil';
 
@@ -56,14 +56,13 @@ export const BarraLateral = memo(function BarraLateral({
           <span className="ico">⌂</span>Início
         </button>
         <button
-          className={`nav-item ${viewAtual === 'emAlta' ? 'active' : ''}`}
+          className="nav-item"
           type="button"
           onClick={() => {
-            aoMudarView('emAlta');
-            navigate('/em-alta');
+            navigate('/explorar');
           }}
         >
-          <span className="ico">↗</span>Em alta
+          <span className="ico">⌕</span>Explorar
         </button>
         <button
           className={`nav-item ${viewAtual === 'seguindo' ? 'active' : ''}`}
@@ -77,7 +76,7 @@ export const BarraLateral = memo(function BarraLateral({
             }
           }}
         >
-          <span className="ico">◎</span>Seguindo
+          <span className="ico">◎</span>Tropa
         </button>
         <button
           className={`nav-item ${viewAtual === 'perfil' ? 'active' : ''}`}

@@ -3,7 +3,7 @@ import { semEspelhosDeCausos } from './semEspelhos';
 import type { ItemDoFeed } from './tipos';
 
 const item = (id: string, tipo: 'topico' | 'causo', autorHandle: string | undefined, criadoEm: string): ItemDoFeed => ({
-  id, tipo, comunidadeSlug: 'eu-arroto-e-dai', titulo: id, corpo: '', autorNome: 'A', autorHandle, criadoEm, votos: 0, respostasTotal: 0,
+  id, tipo, comunidadeSlug: 'eu-arroto-e-dai', titulo: id, corpo: '', autorNome: 'A', autorHandle, criadoEm, respostasTotal: 0,
 });
 
 describe('semEspelhosDeCausos', () => {

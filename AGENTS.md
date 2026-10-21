@@ -18,12 +18,12 @@ externo tem autoridade sobre o que está escrito aqui.
 
 > **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
-O Auê conecta a adrenalina imediata da **Arena** (a máquina que captura, julga e pontua cada arroto) à dinâmica de timeline estilo Twitter/X (**Bonde do Arroto**) e **comunidades temáticas** (estilo Orkut / Reddit) para reunir os arrotadores do mundo.
+O Auê conecta a adrenalina imediata da **Arena** (a máquina que captura, julga e pontua cada arroto) à dinâmica social da **Tropa** (pessoas que se acompanham) e **comunidades temáticas** (estilo Orkut / Reddit) para reunir os arrotadores do mundo.
 
 O loop completo em 6 fases é:
 
 ```text
-DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
+DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
     ▲                                                                   │
     └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
 ```
@@ -43,7 +43,7 @@ Não duplique regra. Leia a fonte certa.
 | **Qual é a jornada completa do jogador?** | [`docs/jogo/JORNADA.md`](docs/jogo/JORNADA.md) e [`docs/design/prototipo/Jornada.dc.html`](docs/design/prototipo/Jornada.dc.html) |
 | Quais são os estados da Arena? | [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md) |
 | Como o jogo se comporta e pontua? | [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md) |
-| **Com o que a interface se parece?** | Protótipos canônicos em [`docs/design/prototipo/`](docs/design/prototipo/): [`Bonde do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html), [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html), [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html), [`Login.dc.html`](docs/design/prototipo/Login.dc.html), [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html), [`Páginas Públicas.dc.html`](docs/design/prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html), [`Versões Webapp.dc.html`](docs/design/prototipo/Vers%C3%B5es%20Webapp.dc.html) |
+| **Com o que a interface se parece?** | Protótipos canônicos em [`docs/design/prototipo/`](docs/design/prototipo/): [`Tropa do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html), [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html), [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html), [`Login.dc.html`](docs/design/prototipo/Login.dc.html), [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html), [`Páginas Públicas.dc.html`](docs/design/prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html), [`Versões Webapp.dc.html`](docs/design/prototipo/Vers%C3%B5es%20Webapp.dc.html) |
 | **Qual componente implementa qual tela/rota e o que editar?** | [`docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md`](docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md) — mapa oficial de rotas, componentes canônicos e anti-confusão |
 | De onde vêm cor, tipo, espaço e movimento? | [`docs/design/design-system/system/DESIGN.md`](docs/design/design-system/system/DESIGN.md) e [`docs/design/prototipo/Design System.dc.html`](docs/design/prototipo/Design%20System.dc.html) |
 | **O que estamos construindo agora?** | [`docs/escopo/ESCOPO_ATUAL.md`](docs/escopo/ESCOPO_ATUAL.md) |
@@ -85,7 +85,7 @@ Ao iniciar uma sessão ou demanda neste repositório, **Tiago** atua como braço
 
 | Agente | Papel e Responsabilidade | Permissão de Escrita | A Trava de Ouro |
 |---|---|---|---|
-| **Tiago** (`tiago`) | **Braço Direito do Luiz & Product Owner:** entende a necessidade, abre o Cartão de Missão, define a pista, alinha o loop do Bonde do Arroto, repassa ao Iury e dá o aceite final pelas 7 perguntas (`APROVADO`, `APROVADO COM RESSALVAS`, `REPROVADO`, `NÃO VALIDADO`) | Somente leitura por padrão | Ideia mole não desce pra oficina; entrega sem prova real do Marcelo não sobe pro Luiz |
+| **Tiago** (`tiago`) | **Braço Direito do Luiz & Product Owner:** entende a necessidade, abre o Cartão de Missão, define a pista, alinha o loop da Tropa, repassa ao Iury e dá o aceite final pelas 7 perguntas (`APROVADO`, `APROVADO COM RESSALVAS`, `REPROVADO`, `NÃO VALIDADO`) | Somente leitura por padrão | Ideia mole não desce pra oficina; entrega sem prova real do Marcelo não sobe pro Luiz |
 | **Iury** (`iury`) | **Capitão da Oficina & Orquestrador:** recebe o Cartão de Missão do Tiago, organiza prioridades, aciona especialistas, protege WIP (1 entrega por vez) e mantém a mesa limpa | No escopo de coordenação/integração | Proibido ser fominha (fazer tudo sozinho no improviso) ou acumular frentes abertas |
 | **Rian** (`rian`) | **Diretor de Experiência, UX/UI & Guardião do Protótipo:** jornadas em 6 fases, Design System v5, visual 1:1, temas escuro/claro, estética da Bolha, timeline estilo Twitter e hubs de comunidade | Somente leitura por padrão | Ninguém inventa tela/estado no código; não existe fidelidade visual sem ver a tela aberta |
 | **Kayky** (`kayky`) | **Engenheiro de Telas, Arena & Frontend:** constrói interfaces, feeds de causos, hubs de comunidades e componentes da Arena 1:1 com o desenho do Rian em React 19 (Desktop 3 colunas e Webapp Mobile) | Somente quando delegado na UI/Arena | Sem Cartão de Missão do Tiago, desenho do Rian e contrato pronto, não abre código |

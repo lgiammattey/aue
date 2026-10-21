@@ -81,9 +81,9 @@ export const PoliticaDePrivacidade: React.FC = () => {
         </p>
       </Secao>
 
-      <Secao titulo="O que é público no Bonde">
+      <Secao titulo="O que é público nas Rodas">
         <p>
-          Tudo o que você coloca no Bonde pode ser visto por qualquer pessoa, sem
+          Tudo o que você publica em uma Roda pode ser visto por qualquer pessoa, sem
           conta:
         </p>
         <ul style={{ margin: 0, paddingLeft: '1.2em', display: 'grid', gap: 6 }}>
@@ -93,7 +93,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
         </ul>
         <p>
           <strong>Gravar para jogar não é autorizar a publicação.</strong> Um
-          arroto gravado para um duelo ou para testar a nota não vai para o Bonde.
+          arroto gravado para um duelo ou para testar a nota não vai para uma Roda.
           Ele só vira público quando você toca em publicar e marca o aceite.
           Notas de jogos que você não publicou não aparecem no seu perfil.
         </p>
@@ -180,7 +180,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
           <strong>O arquivo continua guardado.</strong> Ele não é apagado no
           sétimo dia nem depois: não existe prazo de exclusão automática, e
           inventar um aqui seria mentira. O áudio de um arroto só aparece
-          no Bonde se você publicar com o aceite. Mudar isso, como usar gravações
+          em uma Roda se você publicar com o aceite. Mudar isso, como usar gravações
           para outra finalidade, só acontece com aviso aqui antes. Nenhuma
           gravação é usada para treinar modelo.
         </p>

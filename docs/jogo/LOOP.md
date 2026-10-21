@@ -7,7 +7,7 @@ A jornada completa e suas decisões estão em [`JORNADA.md`](JORNADA.md). Este d
 ## O Ciclo Viral e Social
 
 ```text
-ARROTAR NA ARENA → RECEBER NOTA → PUBLICAR NO BONDE / DESAFIAR X1 → DEBATER NO FEED → COMUNIDADE
+ARROTAR NA ARENA → RECEBER NOTA → PUBLICAR NUMA RODA / DESAFIAR X1 → DEBATER NA TROPA → COMUNIDADE
         ▲                                                                                │
         └────────────────────────── REVANCHE OU NOVO DUELO ──────────────────────────────┘
 ```
@@ -17,7 +17,7 @@ ARROTAR NA ARENA → RECEBER NOTA → PUBLICAR NO BONDE / DESAFIAR X1 → DEBATE
 ## Os Momentos do Loop
 
 ### 1. Descoberta & Entrada Rápida
-- **Landing (`Landing.dc.html`):** Headline provocativa *"Tá rolando agora / Entra no bonde hoje"*. Login social em 1 clique (Google/Apple) ou criação direta com apelido.
+- **Landing (`Landing.dc.html`):** Headline provocativa *"Tá rolando agora / Entra na Tropa hoje"*. Login social em 1 clique (Google/Apple) ou criação direta com apelido.
 - **Arrotar sem conta:** Permite jogar na Arena imediatamente antes de criar conta. A conta só é pedida para participar e salvar o histórico.
 
 ### 2. Arrotar na Arena

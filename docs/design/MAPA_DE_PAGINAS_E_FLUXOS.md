@@ -13,11 +13,11 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 
 | Frente de Trabalho | ONDE EDITAR (Canônico Ativo) | ONDE NÃO EDITAR (Legado / Confinado) | Protótipo de Referência |
 |---|---|---|---|
-| **Feed do Bonde & Cards de Post** | [`src/features/novo-aue/CardDoPost.tsx`](../../src/features/novo-aue/CardDoPost.tsx)<br>[`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx) | `src/features/comunidade/components/CardDeCauso.tsx`<br>`src/features/comunidade/components/HeaderSocial.tsx` | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
-| **Comentários & Thread de Conversa** | [`src/features/novo-aue/ThreadDeComentarios.tsx`](../../src/features/novo-aue/ThreadDeComentarios.tsx)<br>[`src/features/novo-aue/ModalComentarios.tsx`](../../src/features/novo-aue/ModalComentarios.tsx) | Não embutir árvore de comentários dentro de `CardDoPost` | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
-| **Compositor de Post / Gravação Rápida** | [`src/features/novo-aue/ModalCompositor.tsx`](../../src/features/novo-aue/ModalCompositor.tsx)<br>[`src/features/novo-aue/ModalGravarArroto.tsx`](../../src/features/novo-aue/ModalGravarArroto.tsx) | `src/features/comunidade/components/ComposerCauso.tsx`<br>`src/features/comunidade/ModalNovoCauso.tsx` | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
+| **Tropa & Cards de Post** | [`src/features/novo-aue/CardDoPost.tsx`](../../src/features/novo-aue/CardDoPost.tsx)<br>[`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx) | `src/features/comunidade/components/CardDeCauso.tsx`<br>`src/features/comunidade/components/HeaderSocial.tsx` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
+| **Comentários & Thread de Conversa** | [`src/features/novo-aue/ThreadDeComentarios.tsx`](../../src/features/novo-aue/ThreadDeComentarios.tsx)<br>[`src/features/novo-aue/ModalComentarios.tsx`](../../src/features/novo-aue/ModalComentarios.tsx) | Não embutir árvore de comentários dentro de `CardDoPost` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
+| **Compositor de Post / Gravação Rápida** | [`src/features/novo-aue/ModalCompositor.tsx`](../../src/features/novo-aue/ModalCompositor.tsx)<br>[`src/features/novo-aue/ModalGravarArroto.tsx`](../../src/features/novo-aue/ModalGravarArroto.tsx) | `src/features/comunidade/components/ComposerCauso.tsx`<br>`src/features/comunidade/ModalNovoCauso.tsx` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
 | **Hub de Comunidades** | [`src/features/novo-aue/TelaComunidadeOpenDesign.tsx`](../../src/features/novo-aue/TelaComunidadeOpenDesign.tsx)<br>[`src/features/novo-aue/TelaDiretorioOpenDesign.tsx`](../../src/features/novo-aue/TelaDiretorioOpenDesign.tsx) | `src/features/comunidade/components/AbaComunidades.tsx`<br>`src/features/comunidade/TelaComunidade.tsx` | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) |
-| **Perfil de Jogador** | [`src/features/novo-aue/TelaPerfilOpenDesign.tsx`](../../src/features/novo-aue/TelaPerfilOpenDesign.tsx)<br>[`src/features/novo-aue/PerfilConectado.tsx`](../../src/features/novo-aue/PerfilConectado.tsx) | Não criar telas desconexas em `/perfil` | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
+| **Perfil de Jogador** | [`src/features/novo-aue/TelaPerfilOpenDesign.tsx`](../../src/features/novo-aue/TelaPerfilOpenDesign.tsx)<br>[`src/features/novo-aue/PerfilConectado.tsx`](../../src/features/novo-aue/PerfilConectado.tsx) | Não criar telas desconexas em `/perfil` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
 | **Arena de Arroto (10 Estados)** | [`src/arena/Arena.tsx`](../../src/arena/Arena.tsx)<br>Faixas em [`src/arena/faixas/`](../../src/arena/faixas/)<br>Bolha em [`src/arena/bolha/`](../../src/arena/bolha/) | Telas avulsas de fluxo antigo em `src/features/audio/fluxo/` | [`Arena.dc.html`](prototipo/Arena.dc.html) |
 | **Páginas Públicas Institucionais & SEO** | [`src/features/publico/ComoJogar.tsx`](../../src/features/publico/ComoJogar.tsx)<br>[`src/features/publico/ComoArrotar.tsx`](../../src/features/publico/ComoArrotar.tsx)<br>[`src/features/publico/TiposDeArroto.tsx`](../../src/features/publico/TiposDeArroto.tsx)<br>[`src/features/publico/RankingDeArrotos.tsx`](../../src/features/publico/RankingDeArrotos.tsx)<br>[`src/features/grupos/TelaGrupos.tsx`](../../src/features/grupos/TelaGrupos.tsx) | Nunca aplicar tema escuro nas públicas (seguem tema claro fixo) | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
 | **Páginas Legais (Termos & Privacidade)** | [`src/features/legal/TermosDeUso.tsx`](../../src/features/legal/TermosDeUso.tsx)<br>[`src/features/legal/PoliticaDePrivacidade.tsx`](../../src/features/legal/PoliticaDePrivacidade.tsx) | - | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
@@ -29,22 +29,22 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 
 | Rota URL | Componente Renderizado | Status / Papel | Protótipo Canônico | Descrição e Comportamento |
 |---|---|---|---|---|
-| `/` | `InicioOpenDesign` | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Entrada da rede social (3 colunas desktop, webapp mobile). Mostra feed "Para Você", "Em Alta", "Seguindo", busca e tendências. |
-| `/feed` | `EntradaPrincipal` (`TelaComunidade`) | **COMPATIBILIDADE** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Rota mantida para testes e acessos diretos. Para nova experiência de feed, consulte `/`. |
-| `/em-alta` | `InicioOpenDesign` (`view="emAlta"`) | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Feed ordenado pelos causos e arrotos com maior repercussão. |
-| `/seguindo` | `InicioOpenDesign` (`view="seguindo"`) | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Feed exclusivo das pessoas seguidas por quem está conectado. |
+| `/` | `InicioOpenDesign` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Entrada da rede social (3 colunas desktop, webapp mobile). Mostra conversas em comunidades, busca e Rodas para explorar. |
+| `/feed` | `EntradaPrincipal` (`TelaComunidade`) | **COMPATIBILIDADE** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Rota mantida para testes e acessos diretos. Para nova experiência de feed, consulte `/`. |
+| `/em-alta` | redireciona para `/explorar` | **ALIAS** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Atalho mantido para descoberta de comunidades e tópicos. |
+| `/seguindo` | `InicioOpenDesign` (`view="seguindo"`) | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Sua Tropa: feed exclusivo das pessoas seguidas por quem está conectado. |
 | `/arena` | `EntradaArena` (`Arena`) | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Máquina de 10 estados da Arena (gravação, julgamento de áudio, nota e duelo). |
 | `/comunidades` | `TelaDiretorioOpenDesign` | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Diretório completo de comunidades temáticas do Auê. |
 | `/c/:slug` | `TelaComunidadeOpenDesign` | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Comunidade específica. Não declarar a tela de tópicos como publicada sem evidência própria. |
 | `/c/:slug/novo` | `TelaComunidadeOpenDesign` | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Entrada de criação associada à comunidade; depende do corte de tópicos do ADR 0010. |
 | `/c/:slug/t/:id` | `rotasDoForum` (`TelaTopico`) | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Rota da conversa por tópico prevista no ADR 0010; não é prova de publicação. |
 | `/explorar` | `rotasDoForum` (`TelaExplorar`) | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Descoberta de comunidades e tópicos prevista no ADR 0010; requer prova de produção antes de virar canônica. |
-| `/desafios` | `EntradaDesafios` | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Central de desafios e duelos de quem está jogando. |
+| `/desafios` | `EntradaDesafios` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Central de desafios e duelos de quem está jogando. |
 | `/x1/:code` | `EntradaPorLink` (`Arena`) | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Desafio X1 direto por código curto. Abre a Arena pronta para ouvir e responder. |
 | `/b/:code` | `EntradaPorLink` (`Arena`) | **ALIAS** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Atalho alternativo para desafio X1. |
 | `/d/:id` | `ChallengeView` | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Visualização legada/direta de desafio por UUID longo. |
-| `/perfil` | `TelaPerfilOpenDesign` | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Perfil próprio da pessoa conectada (arrotos postados, nota média, vitórias no X1). |
-| `/u/:handle` | `TelaPerfilOpenDesign` | **CANÔNICO ATIVO** | [`Bonde do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Perfil público de qualquer participante pelo `@handle`. |
+| `/perfil` | `TelaPerfilOpenDesign` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Perfil próprio da pessoa conectada (arrotos postados, nota média, vitórias no X1). |
+| `/u/:handle` | `TelaPerfilOpenDesign` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Perfil público de qualquer participante pelo `@handle`. |
 | `/login` | `InicioOpenDesign` (`view="auth"`) | **CANÔNICO ATIVO** | [`Login.dc.html`](prototipo/Login.dc.html) | Tela ágil de autenticação / criação de apelido social. |
 | `/como-jogar` | `ComoJogar` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Tutorial público indexável explicando a mecânica do jogo e nota. |
 | `/como-arrotar` | `ComoArrotar` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Guia bem-humorado com dicas de postura, respiração e gaseificação. |
@@ -64,7 +64,7 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 A jornada do Auê se organiza em 6 fases contínuas (ver [`docs/jogo/LOOP.md`](../jogo/LOOP.md) e [`docs/jogo/JORNADA.md`](../jogo/JORNADA.md)):
 
 ```text
-DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
+DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
     ▲                                                                   │
     └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
 ```
@@ -74,7 +74,7 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 - **Comportamento:** O visitante pode navegar pelo feed e ouvir arrotos sem conta obrigatória. Ao tentar postar, desafiar ou curtir, abre-se o fluxo de identificação ágil.
 - **Visual:** No desktop, 3 colunas (menu, feed central e painel direito). No mobile, cabeçalho limpo com wordmark `AUÊ!` e navegação inferior.
 
-### Fase 2: Bonde do Arroto (Feed & Comunidades publicados)
+### Fase 2: Tropa (Pessoas, Feed & Comunidades publicadas)
 - **Componentes:** `InicioOpenDesign.tsx`, `CardDoPost.tsx`, `ThreadDeComentarios.tsx`, `ModalCompositor.tsx`
 - **Comportamento:**
   - A produção mostra resenhas por comunidade, autor, comentários, reações, salvar e compartilhar; pode haver áudio ou mídia externa conforme o post.
@@ -99,7 +99,7 @@ DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1
 - **Comportamento:**
   - Auê Score revelado de 0 a 100 com teatralidade controlada.
   - Card de compartilhamento em formato 9:12.
-  - **Consentimento explícito:** O arroto gravado para duelo ou teste NUNCA vai para o feed público sem que a pessoa clique deliberadamente em "Postar no Bonde" ou selecione uma comunidade.
+  - **Consentimento explícito:** O arroto gravado para duelo ou teste NUNCA vai para o feed público sem que a pessoa clique deliberadamente em "Publicar na roda" e selecione uma comunidade.
 
 ### Fase 6: X1 (Duelo) e Revanche
 - **Componentes:** `src/arena/faixas/LinkDoDesafio.tsx`, `src/arena/faixas/PlacarDoX1.tsx`, `/x1/:code`

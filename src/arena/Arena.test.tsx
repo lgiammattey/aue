@@ -44,7 +44,7 @@ import {
 } from '../nucleo/julgamento/tempo';
 import { ATRASOS_DA_REVELACAO_MS } from '../nucleo/arena/revelacao';
 import { DURACAO_DO_TICK_MS, PAUSA_FINAL_MS } from '../nucleo/arena/contagemDaRevanche';
-import { CHAMAR_PRO_X1 } from '../nucleo/fala/desafio';
+import { CHAMAR_PRO_X1, POSTAR_NO_BONDE } from '../nucleo/fala/desafio';
 import { JULGANDO, JULGANDO_DEMORANDO } from '../nucleo/fala/julgamento';
 import { Arena } from './Arena';
 import type { AdaptadoresDaArena } from './adaptadores';
@@ -988,6 +988,14 @@ describe('a nota', () => {
     // Só a marca de "já jogou" pode existir. Áudio e nota, nunca.
     expect(Object.keys(dubles.guardado)).toEqual([CHAVES.jaJogou]);
     expect(JSON.stringify(dubles.guardado)).not.toContain('91');
+  });
+
+  it('oferece publicar na roda sem renomear o contrato interno', async () => {
+    const dubles = montarDubles({ aoParar: ARROTO });
+    await ateANota(dubles);
+
+    expect(POSTAR_NO_BONDE).toBe('Publicar na roda');
+    expect(screen.getByRole('link', { name: POSTAR_NO_BONDE }).getAttribute('href')).toBe('/feed');
   });
 });
 

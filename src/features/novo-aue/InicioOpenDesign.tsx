@@ -1,10 +1,10 @@
 /**
- * CANÔNICO ATIVO — Experiência Principal do Bonde do Arroto (OpenDesign)
+ * CANÔNICO ATIVO — Experiência Principal da Tropa do Arroto (OpenDesign)
  * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
  * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
  * 
  * Orquestra o layout de 3 colunas (desktop) e webapp mobile (o mesmo componente, responsivo).
- * Gerencia as views centrais: 'feed', 'emAlta', 'seguindo', 'comunidade', 'comunidades', 'perfil' e 'auth'.
+ * Gerencia as views centrais: 'feed', 'seguindo', 'comunidade', 'comunidades', 'perfil' e 'auth'.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -39,7 +39,6 @@ import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
 import { erroDeEnvio } from '../../nucleo/forum/escrita';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
-import { semEspelhosDeCausos } from './semEspelhos';
 import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
@@ -53,7 +52,7 @@ interface Props {
   readonly portaArrotosDoPerfil?: PortaDeArrotosDoPerfil;
   readonly capturaDireta?: CapturaDeAudio;
   readonly autenticado?: boolean;
-  readonly viewInicial?: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
+  readonly viewInicial?: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades';
   readonly slugInicial?: string;
   readonly handleInicial?: string;
   readonly topicoIdInicial?: string;
@@ -64,7 +63,7 @@ interface Props {
 class ErroDePublicacaoDoAnexo extends Error {}
 
 function formatarMilhar(total?: number): string {
-  if (!total) return '1';
+  if (typeof total !== 'number') return '—';
   if (total >= 1000) {
     const inteiro = Math.floor(total / 1000);
     const decimal = Math.floor((total % 1000) / 100);
@@ -101,8 +100,8 @@ export function InicioOpenDesign({
   const [arrotosPort] = useState(() => portaArrotosDoPerfil ?? criarArrotosDoPerfilRemoto());
   const [capturaDoArroto] = useState(() => capturaDireta ?? criarCapturaWeb());
 
-  const [viewAtual, setViewAtual] = useState<'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades'>(() => {
-    if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades' || viewInicial === 'emAlta' || viewInicial === 'seguindo') return viewInicial;
+  const [viewAtual, setViewAtual] = useState<'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades'>(() => {
+    if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades' || viewInicial === 'seguindo') return viewInicial;
     if (handleParam) return 'perfil';
     if (slugParam || topicoIdParam || viewInicial === 'comunidade') return 'comunidade';
     return 'feed';
@@ -116,8 +115,9 @@ export function InicioOpenDesign({
   const [comunidadeInexistente, setComunidadeInexistente] = useState(false);
   const [falhaTopico, setFalhaTopico] = useState(false);
   const [secaoComunidade, setSecaoComunidade] = useState<'causos' | 'sobre'>('causos');
-  const [abaComunidade, setAbaComunidade] = useState<'Quentes' | 'Novos'>('Quentes');
+  const [abaComunidade, setAbaComunidade] = useState<'Ativos' | 'Recentes'>('Ativos');
   const [topicosDaComunidade, setTopicosDaComunidade] = useState<readonly ItemDoFeed[]>([]);
+  const [estadoTopicosDaComunidade, setEstadoTopicosDaComunidade] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
 
   // Perfil
   const [abaPerfil, setAbaPerfil] = useState<'posts' | 'arrotos' | 'salvos'>('posts');
@@ -159,10 +159,11 @@ export function InicioOpenDesign({
 
   const [comunidades, setComunidades] = useState<readonly ComunidadeDoForum[]>([]);
   const [itensFeed, setItensFeed] = useState<readonly ItemDoFeed[]>([]);
+  const [estadoFeed, setEstadoFeed] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
+  const [tentativaFeed, setTentativaFeed] = useState(0);
   const [itensSeguindo, setItensSeguindo] = useState<readonly ItemDoFeed[]>([]);
   const [estadoSeguindo, setEstadoSeguindo] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro' | 'semConta'>('ocioso');
   const [busca, setBusca] = useState('');
-  const [abaOrdenacao, setAbaOrdenacao] = useState<'Quentes' | 'Novos' | 'Top'>('Quentes');
 
   // Interações
   const [comunidadesEntradas, setComunidadesEntradas] = useState<Record<string, boolean>>({});
@@ -385,74 +386,57 @@ export function InicioOpenDesign({
         });
     }
 
+    setEstadoTopicosDaComunidade('carregando');
     const promessaTopicos = forum.listarTopicos?.(comunidadeSlug, {
-      ordem: abaComunidade === 'Novos' ? 'recentes' : 'atividade',
+      ordem: abaComunidade === 'Recentes' ? 'recentes' : 'atividade',
     }) ?? Promise.resolve({ ok: false as const, motivo: 'falhou' as const });
 
-    const promessaCausos =
-      comunidadePort.listarFeed?.({ comunidadeSlug })?.catch?.(() => [] as readonly CausoPostado[]) ??
-      Promise.resolve([] as readonly CausoPostado[]);
-
-    Promise.all([promessaTopicos, promessaCausos]).then(async ([resTopicos, causos]) => {
+    promessaTopicos.then(async (resTopicos) => {
       if (!ativo) return;
+      if (!resTopicos.ok) {
+        setTopicosDaComunidade([]);
+        setEstadoTopicosDaComunidade('erro');
+        return;
+      }
       const itens: ItemDoFeed[] = [];
       const anexosPorTopico = new Map<string, AnexoDoForum>();
-      if (resTopicos?.ok && forum.listarAnexosDoForum) {
+      if (forum.listarAnexosDoForum) {
         const leitura = await forum.listarAnexosDoForum({ topicoIds: resTopicos.valor.itens.map((topico) => topico.id) });
         if (leitura.ok) leitura.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
       }
-      if (resTopicos?.ok) {
-        for (const t of resTopicos.valor.itens) {
-          const anexo = anexosPorTopico.get(t.id);
-          const url = anexo?.caminho && forum.assinarAnexoDoForum
-            ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
-            : anexo?.urlVideo ?? undefined;
-          itens.push({
-            id: `topico-${t.id}`,
-            tipo: 'topico',
-            comunidadeSlug: t.comunidade.slug,
-            titulo: t.titulo,
-            corpo: t.corpo,
-            autorNome: t.autor.apelido ?? (t.autor.handle ? `@${t.autor.handle}` : 'Anônimo'),
-            autorHandle: t.autor.handle ?? undefined,
-            autorAvatarUrl: t.autor.avatarUrl ?? undefined,
-            criadoEm: t.criadoEm,
-            votos: 1,
-            respostasTotal: t.respostasTotal,
-            temAudio: Boolean(t.audio?.resultadoId || t.audio?.caminhoDoAudio),
-            anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
-          });
-        }
+      for (const t of resTopicos.valor.itens) {
+        const anexo = anexosPorTopico.get(t.id);
+        const url = anexo?.caminho && forum.assinarAnexoDoForum
+          ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+          : anexo?.urlVideo ?? undefined;
+        if (!ativo) return;
+        itens.push({
+          id: `topico-${t.id}`,
+          tipo: 'topico',
+          comunidadeSlug: t.comunidade.slug,
+          titulo: t.titulo,
+          corpo: t.corpo,
+          autorNome: t.autor.apelido ?? (t.autor.handle ? `@${t.autor.handle}` : 'Anônimo'),
+          autorHandle: t.autor.handle ?? undefined,
+          autorAvatarUrl: t.autor.avatarUrl ?? undefined,
+          criadoEm: t.criadoEm,
+          respostasTotal: t.respostasTotal,
+          temAudio: Boolean(t.audio?.resultadoId || t.audio?.caminhoDoAudio),
+          anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
+        });
       }
-      for (const c of causos) {
-        if (!itens.some((it) => it.id === `causo-${c.id}`)) {
-          itens.push({
-            id: `causo-${c.id}`,
-            tipo: 'causo',
-            comunidadeSlug: c.comunidadeSlug,
-            titulo: c.conteudo.slice(0, 72) + (c.conteudo.length > 72 ? '…' : ''),
-            corpo: c.conteudo,
-            autorNome: c.autorNome,
-            autorHandle: c.autorHandle,
-            autorAvatarUrl: c.autorAvatarUrl ?? undefined,
-            criadoEm: c.criadoEm,
-            votos: c.curtidas,
-            respostasTotal: c.totalComentarios,
-            temAudio: c.temAudio,
-            enderecoDoAudio: c.enderecoDoAudio,
-            nota: c.nota,
-            videoUrl: c.videoUrl,
-            engajamento: engajamentoDoCauso(c),
-          });
-        }
-      }
-      setTopicosDaComunidade(semEspelhosDeCausos(itens));
+      setTopicosDaComunidade(itens);
+      setEstadoTopicosDaComunidade('pronto');
+    }).catch(() => {
+      if (!ativo) return;
+      setTopicosDaComunidade([]);
+      setEstadoTopicosDaComunidade('erro');
     });
 
     return () => {
       ativo = false;
     };
-  }, [comunidadeSlug, forum, comunidadePort, abaComunidade]);
+  }, [comunidadeSlug, forum, abaComunidade]);
 
   // Carregar tópico específico via URL direta (/c/:slug/t/:id)
   useEffect(() => {
@@ -491,7 +475,6 @@ export function InicioOpenDesign({
             autorHandle: t.autor.handle ?? undefined,
             autorAvatarUrl: t.autor.avatarUrl ?? undefined,
             criadoEm: t.criadoEm,
-            votos: 1,
             respostasTotal: t.respostasTotal,
             temAudio: Boolean(t.audio?.resultadoId || t.audio?.caminhoDoAudio),
             anexo: anexoItem,
@@ -514,78 +497,66 @@ export function InicioOpenDesign({
   // Carregar feed geral e lista de comunidades
   useEffect(() => {
     let ativo = true;
+    setEstadoFeed('carregando');
     Promise.all([
       forum.listarComunidadesDoForum(),
-      forum.explorarTopicos({ limite: 30 }),
-      comunidadePort.listarFeed({ limite: 30 }).catch(() => [] as readonly CausoPostado[]),
+      forum.explorarTopicos({ limite: 30, ordem: 'atividade' }),
     ])
-      .then(async ([resComunidades, resTopicos, causos]) => {
+      .then(async ([resComunidades, resTopicos]) => {
         if (!ativo) return;
-        const listaComunidades = resComunidades.ok ? resComunidades.valor : [];
-        setComunidades(listaComunidades);
+        if (resComunidades.ok) {
+          setComunidades(resComunidades.valor);
+        }
+        if (!resTopicos.ok) {
+          setItensFeed([]);
+          setEstadoFeed('erro');
+          return;
+        }
 
         const itens: ItemDoFeed[] = [];
-        if (resTopicos.ok) {
-          const anexosPorTopico = new Map<string, AnexoDoForum>();
-          if (forum.listarAnexosDoForum) {
-            const leituraAnexos = await forum.listarAnexosDoForum({
-              topicoIds: resTopicos.valor.itens.map((topico) => topico.id),
-            });
-            if (leituraAnexos.ok) {
-              leituraAnexos.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
-            }
-          }
-          if (!ativo) return;
-          for (const t of resTopicos.valor.itens) {
-            const anexo = anexosPorTopico.get(t.id);
-            const url = anexo?.caminho && forum.assinarAnexoDoForum
-              ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
-              : anexo?.urlVideo ?? undefined;
-            if (!ativo) return;
-            itens.push({
-              id: `topico-${t.id}`,
-              tipo: 'topico',
-              comunidadeSlug: t.comunidade.slug,
-              titulo: t.titulo,
-              corpo: '',
-              autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo',
-              autorHandle: t.autor.handle ?? undefined,
-              autorAvatarUrl: t.autor.avatarUrl ?? undefined,
-              criadoEm: t.criadoEm,
-              votos: Math.max(1, t.respostasTotal * 3),
-              respostasTotal: t.respostasTotal,
-              anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
-            });
+        const anexosPorTopico = new Map<string, AnexoDoForum>();
+        if (forum.listarAnexosDoForum) {
+          const leituraAnexos = await forum.listarAnexosDoForum({
+            topicoIds: resTopicos.valor.itens.map((topico) => topico.id),
+          });
+          if (leituraAnexos.ok) {
+            leituraAnexos.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
           }
         }
-        for (const c of causos) {
+        if (!ativo) return;
+        for (const t of resTopicos.valor.itens) {
+          const anexo = anexosPorTopico.get(t.id);
+          const url = anexo?.caminho && forum.assinarAnexoDoForum
+            ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+            : anexo?.urlVideo ?? undefined;
+          if (!ativo) return;
           itens.push({
-            id: `causo-${c.id}`,
-            tipo: 'causo',
-            comunidadeSlug: c.comunidadeSlug || 'eu-arroto-e-dai',
-            titulo: c.conteudo.slice(0, 65) + (c.conteudo.length > 65 ? '…' : ''),
-            corpo: c.conteudo,
-            autorNome: c.autorNome,
-            autorHandle: c.autorHandle,
-            autorAvatarUrl: c.autorAvatarUrl ?? undefined,
-            criadoEm: c.criadoEm || new Date().toISOString(),
-            votos: c.nota ? Math.round(c.nota) : 1,
-            respostasTotal: c.totalComentarios || 0,
-            temAudio: c.temAudio,
-            enderecoDoAudio: c.enderecoDoAudio,
-            nota: c.nota,
-            videoUrl: c.videoUrl,
-            engajamento: engajamentoDoCauso(c),
+            id: `topico-${t.id}`,
+            tipo: 'topico',
+            comunidadeSlug: t.comunidade.slug,
+            titulo: t.titulo,
+            corpo: '',
+            autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo',
+            autorHandle: t.autor.handle ?? undefined,
+            autorAvatarUrl: t.autor.avatarUrl ?? undefined,
+            criadoEm: t.criadoEm,
+            respostasTotal: t.respostasTotal,
+            anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
           });
         }
-        setItensFeed(semEspelhosDeCausos(itens));
+        setItensFeed(itens);
+        setEstadoFeed('pronto');
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!ativo) return;
+        setItensFeed([]);
+        setEstadoFeed('erro');
+      });
 
     return () => {
       ativo = false;
     };
-  }, [forum, comunidadePort]);
+  }, [forum, tentativaFeed]);
 
   useEffect(() => {
     if (viewAtual !== 'seguindo') return;
@@ -607,7 +578,6 @@ export function InicioOpenDesign({
           autorNome: causo.autorNome,
           autorHandle: causo.autorHandle,
           criadoEm: causo.criadoEm || new Date().toISOString(),
-          votos: causo.nota ? Math.round(causo.nota) : 1,
           respostasTotal: causo.totalComentarios || 0,
           temAudio: causo.temAudio,
           enderecoDoAudio: causo.enderecoDoAudio,
@@ -1121,7 +1091,6 @@ export function InicioOpenDesign({
       autorNome: meuNome,
       autorHandle: meuHandle,
       criadoEm: new Date().toISOString(),
-      votos: 1,
       respostasTotal: 0,
       anexo: dados.anexo
         ? {
@@ -1573,19 +1542,6 @@ export function InicioOpenDesign({
     }
   };
 
-  // Filtragem de posts
-  const postsFiltrados = itensFeed
-    .filter((p) => {
-      if (!busca.trim()) return true;
-      const t = busca.toLowerCase();
-      return p.titulo.toLowerCase().includes(t) || p.comunidadeSlug.toLowerCase().includes(t);
-    })
-    .sort((a, b) => {
-      if (abaOrdenacao === 'Novos') return new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime();
-      if (abaOrdenacao === 'Top') return b.votos - a.votos;
-      return b.votos - a.votos;
-    });
-
   const postsSeguindo = itensSeguindo
     .filter((p) => {
       if (!busca.trim()) return true;
@@ -1593,14 +1549,6 @@ export function InicioOpenDesign({
       return p.titulo.toLowerCase().includes(termo) || p.comunidadeSlug.toLowerCase().includes(termo);
     })
     .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
-
-  const postsEmAlta = itensFeed
-    .filter((p) => {
-      if (!busca.trim()) return true;
-      const termo = busca.toLowerCase();
-      return p.titulo.toLowerCase().includes(termo) || p.comunidadeSlug.toLowerCase().includes(termo);
-    })
-    .sort((a, b) => b.votos - a.votos);
 
   const perfilExibido = perfilAtivo ?? meuPerfil;
   const donoDoPerfil = Boolean(perfilExibido?.souEu);
@@ -1685,26 +1633,13 @@ export function InicioOpenDesign({
             </div>
 
             <div className="feed-head">
-              <h2>Em destaque</h2>
-              <div className="tabs" role="tablist" aria-label="Abas do feed">
-                {(['Quentes', 'Novos', 'Top'] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    className={`tab ${abaOrdenacao === tab ? 'active' : ''}`}
-                    onClick={() => setAbaOrdenacao(tab)}
-                  >
-                    {tab}
-                  </button>
-                ))}
+              <div>
+                <h2>Conversas ativas</h2>
+                <p style={{ color: 'var(--aue-muted)', fontSize: 13, margin: '4px 0 0' }}>
+                  Conversas com atividade recente nas rodas.
+                </p>
               </div>
             </div>
-
-            {abaOrdenacao !== 'Quentes' && (
-              <div style={{ color: 'var(--aue-muted)', fontSize: 13, marginBottom: 12, fontWeight: 700 }}>
-                Comunidade · {abaOrdenacao}
-              </div>
-            )}
 
             <div className="composer">
               <button type="button" onClick={() => setModalCompositorAberto(true)}>
@@ -1713,17 +1648,30 @@ export function InicioOpenDesign({
             </div>
 
             <div className="feed">
-              {postsFiltrados.length === 0 && (
+              {estadoFeed === 'carregando' && (
                 <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--aue-muted)' }}>
-                  <p>Sem posts por aqui ainda. Seja o primeiro a soltar um!</p>
+                  <p>Carregando conversas…</p>
+                </div>
+              )}
+              {estadoFeed === 'erro' && (
+                <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--aue-muted)' }}>
+                  <p>Não deu para carregar as conversas agora.</p>
+                  <button type="button" className="tab" onClick={() => setTentativaFeed((tentativa) => tentativa + 1)}>
+                    Tentar de novo
+                  </button>
+                </div>
+              )}
+              {estadoFeed === 'pronto' && itensFeed.length === 0 && (
+                <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--aue-muted)' }}>
+                  <p>Não tem conversa por aqui ainda. Puxa a primeira da roda.</p>
                   <AdsterraNativeBanner />
                 </div>
               )}
-              {postsFiltrados.map((post, idx) => {
+              {itensFeed.map((post, idx) => {
                 const exibirBannerAqui =
-                  postsFiltrados.length >= 3
+                  itensFeed.length >= 3
                     ? idx === 2
-                    : idx === postsFiltrados.length - 1;
+                    : idx === itensFeed.length - 1;
 
                 return (
                   <div key={post.id}>
@@ -1755,51 +1703,19 @@ export function InicioOpenDesign({
           </section>
         )}
 
-        {viewAtual === 'emAlta' && (
-          <section aria-label="Causos em alta">
-            <div className="hero">
-              <span className="eyebrow">O que está fervendo</span>
-              <h1>Em alta</h1>
-              <p>Os causos e tópicos que mais estão movimentando as rodas.</p>
-            </div>
-            {postsEmAlta.length === 0 ? (
-              <section className="od-profile__state">
-                <h2>A roda está quieta agora.</h2>
-                <p>Quando alguém movimentar o Bonde, o que estiver em alta aparece aqui.</p>
-              </section>
-            ) : (
-              <div className="feed">
-                {postsEmAlta.map((post) => (
-                  <CardDoPost
-                    key={post.id}
-                    post={post}
-                    {...propsDeEngajamento(post)} {...propsDeModeracao(post)}
-                    audioTocando={audioTocandoId === post.id}
-                    tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
-                    duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
-                    aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
-                    aoAbrirComentarios={() => void abrirComentarios(post)}
-                    {...propsDeComentariosDoPost(post)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
         {viewAtual === 'seguindo' && (
           <section aria-label="Feed de quem você segue">
             <div className="hero">
-              <span className="eyebrow">Seu bonde</span>
-              <h1>Seguindo</h1>
-              <p>Os causos de quem você escolheu acompanhar.</p>
+              <span className="eyebrow">Pessoas que você acompanha</span>
+              <h1>Sua Tropa</h1>
+              <p>Posts das pessoas que você escolheu acompanhar.</p>
             </div>
             {estadoSeguindo === 'semConta' && (
-              <section className="od-profile__state"><h2>Entre para ver seu bonde.</h2><p>Você precisa de uma conta para acompanhar outros arrotadores.</p><button className="tab" type="button" onClick={aoEntrar ?? (() => setViewAtual('auth'))}>Entrar</button></section>
+              <section className="od-profile__state"><h2>Entre para ver sua Tropa.</h2><p>Você precisa de uma conta para acompanhar outros arrotadores.</p><button className="tab" type="button" onClick={aoEntrar ?? (() => setViewAtual('auth'))}>Entrar</button></section>
             )}
-            {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu bonde…</p>}
-            {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu bonde.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Seu bonde ainda está quieto.</h2><p>Siga alguns perfis para ver os causos deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Explorar o Bonde</button></section>}
+            {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando sua Tropa…</p>}
+            {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir sua Tropa.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Sua Tropa ainda está quieta.</h2><p>Siga alguns perfis para ver os posts deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/explorar'); }}>Explorar pessoas</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...propsDeEngajamento(post)} {...propsDeModeracao(post)} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
           </section>
         )}
@@ -1960,24 +1876,33 @@ export function InicioOpenDesign({
 
                     <div className="community-feed">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <h2 style={{ fontSize: 18, margin: 0 }}>Feed da comunidade</h2>
+                        <h2 style={{ fontSize: 18, margin: 0 }}>Conversas da roda</h2>
                         <div className="tabs">
                           <button
                             type="button"
-                            className={`tab ${abaComunidade === 'Quentes' ? 'active' : ''}`}
-                            onClick={() => setAbaComunidade('Quentes')}
+                            className={`tab ${abaComunidade === 'Ativos' ? 'active' : ''}`}
+                            onClick={() => setAbaComunidade('Ativos')}
                           >
-                            Quentes
+                            Ativos
                           </button>
                           <button
                             type="button"
-                            className={`tab ${abaComunidade === 'Novos' ? 'active' : ''}`}
-                            onClick={() => setAbaComunidade('Novos')}
+                            className={`tab ${abaComunidade === 'Recentes' ? 'active' : ''}`}
+                            onClick={() => setAbaComunidade('Recentes')}
                           >
-                            Novos
+                            Recentes
                           </button>
                         </div>
                       </div>
+                      {estadoTopicosDaComunidade === 'carregando' && (
+                        <p style={{ color: 'var(--aue-muted)' }}>Carregando conversas…</p>
+                      )}
+                      {estadoTopicosDaComunidade === 'erro' && (
+                        <p style={{ color: 'var(--aue-muted)' }}>Não deu para carregar as conversas desta roda.</p>
+                      )}
+                      {estadoTopicosDaComunidade === 'pronto' && topicosDaComunidade.length === 0 && (
+                        <p style={{ color: 'var(--aue-muted)' }}>Ainda não tem conversa nesta roda.</p>
+                      )}
                       {topicosDaComunidade.map((post) => (
                         <CardDoPost
                           key={post.id}
@@ -2095,7 +2020,7 @@ export function InicioOpenDesign({
               <section className="od-profile__state">
                 <h1>Esse @ não está na roda.</h1>
                 <p>O perfil pode ter mudado de nome ou não existir.</p>
-                <Link className="tab od-profile__button" to="/">Voltar para o Bonde</Link>
+                <Link className="tab od-profile__button" to="/">Voltar ao início</Link>
               </section>
             )}
 
@@ -2104,7 +2029,7 @@ export function InicioOpenDesign({
                 <section className="od-profile__state od-profile__onboarding" aria-live="polite">
                   <p className="od-profile__eyebrow">Primeira chegada</p>
                   <h1>Termina sua ficha.</h1>
-                  <p>Seu apelido e @ liberam o Bonde. Bio, cidade e redes são opcionais.</p>
+                  <p>Seu apelido e @ liberam a Tropa. Bio, cidade e redes são opcionais.</p>
                   {estadoDaFicha === 'carregando' && <p>Buscando o que você já preencheu…</p>}
                   {estadoDaFicha === 'erro' && <><p>Não deu para carregar sua ficha agora.</p><button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button></>}
                   {(estadoDaFicha === 'pronto' || estadoDaFicha === 'salvando') && (
@@ -2120,7 +2045,7 @@ export function InicioOpenDesign({
                         <label>X<input value={ficha.twitter ?? ''} onChange={(e) => setFicha({ ...ficha, twitter: e.target.value })} /></label>
                       </fieldset>
                       {erroDaFicha && <p className="od-profile__form-error" role="alert">{erroDaFicha}</p>}
-                      <button type="submit" className="join od-profile__button" disabled={estadoDaFicha === 'salvando'}>{estadoDaFicha === 'salvando' ? 'Salvando…' : 'Entrar no Bonde'}</button>
+                      <button type="submit" className="join od-profile__button" disabled={estadoDaFicha === 'salvando'}>{estadoDaFicha === 'salvando' ? 'Salvando…' : 'Entrar na Tropa'}</button>
                     </form>
                   )}
                 </section>

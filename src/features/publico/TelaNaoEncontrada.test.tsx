@@ -10,7 +10,7 @@ describe('TelaNaoEncontrada', () => {
   it('diz que a página não existe e oferece o caminho de volta', () => {
     render(<MemoryRouter><TelaNaoEncontrada /></MemoryRouter>);
     expect(screen.getByRole('heading', { level: 1, name: 'Página não encontrada.' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Voltar para o Bonde' }).getAttribute('href')).toBe('/');
+    expect(screen.getByRole('link', { name: 'Voltar ao início' }).getAttribute('href')).toBe('/');
     expect(screen.getByRole('link', { name: 'Ver comunidades' }).getAttribute('href')).toBe('/comunidades');
   });
 

@@ -8,7 +8,7 @@ const faixasDeNota = [
   { pontos: '20–39', veredito: 'Tá fraco, hein.', descricao: 'Saiu com som de porta rangendo. Dá pra melhorar sem muito esforço.' },
   { pontos: '40–59', veredito: 'Dá pro gasto.', descricao: 'Arroto mediano de almoço de família. Não passa vergonha, mas não ganha X1.' },
   { pontos: '60–74', veredito: 'Aí sim, porra.', descricao: 'Arroto de respeito. Vibrou a garganta e impôs respeito na sala.' },
-  { pontos: '75–84', veredito: 'Caralho, veio forte.', descricao: 'Potência acima da média. Entra fácil no ranking do Bonde do Arroto.' },
+  { pontos: '75–84', veredito: 'Caralho, veio forte.', descricao: 'Potência acima da média. Entra fácil no ranking do AUÊ.' },
   { pontos: '85–94', veredito: 'Tá maluco.', descricao: 'Estrondo de tremer janela. Oponente no X1 já começa a tremer na base.' },
   { pontos: '95–99', veredito: 'Esse bagulho tá apelão.', descricao: 'Nível quase sobre-humano. Duração longa e potência de show de rock.' },
   { pontos: '100', veredito: 'Tá roubado. Não é possível.', descricao: 'A lenda. Alinhamento planetário do estômago com a acústica perfeita.' },

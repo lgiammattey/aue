@@ -17,7 +17,6 @@ export interface ItemDoFeed {
   readonly autorHandle?: string;
   readonly autorAvatarUrl?: string;
   readonly criadoEm: string;
-  readonly votos: number;
   readonly respostasTotal: number;
   readonly temAudio?: boolean;
   readonly enderecoDoAudio?: string | (() => Promise<string | null>);

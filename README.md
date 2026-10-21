@@ -5,7 +5,7 @@
 > ## Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.
 
 ```text
-DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
+DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
     ▲                                                                   │
     └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
 ```
@@ -22,7 +22,7 @@ Feito por quem já fazia essa zoeira antes de existir qualquer linha de código.
 
 A plataforma roda 100% na web moderna, adaptada tanto para telas grandes no **desktop** (layout de 3 colunas: navegação, feed/arena e lateral de tendências/ranking) quanto na palma da mão como **webapp mobile** (com barra inferior, safe area e alvos tocáveis >= 44px).
 
-1. **Bonde do Arroto (Feed):** Resenhas em texto, áudio e mídia, ligadas a uma comunidade, com comentários, reações, salvar e compartilhar.
+1. **Tropa (Pessoas):** Acompanha as resenhas em texto, áudio e mídia das pessoas seguidas. Cada publicação continua ligada a uma comunidade, com comentários, reações, salvar e compartilhar.
 2. **Arena:** Máquina de estados contínua (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`) onde o áudio é gravado, validado pelo YAMNet e pontuado de 0 a 100 (Auê Score).
 3. **Comunidades Temáticas:** Hubs organizados por assunto, onde as resenhas e conversas acontecem.
 4. **Desafios X1:** Duelos diretos entre amigos via link no zap com comparativo visual e revanche imediata.
@@ -35,7 +35,7 @@ A plataforma roda 100% na web moderna, adaptada tanto para telas grandes no **de
 
 **A referência visual viva do produto reside em [`docs/design/prototipo/`](docs/design/prototipo/):**
 
-- [`Bonde do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html) — O feed social estilo Twitter/X
+- [`Tropa do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html) — A camada social de pessoas e o feed compartilhado
 - [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html) — A máquina da Arena e estados de captura
 - [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html) — Hub de comunidades e rankings
 - [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html) — Página de chegada e acesso rápido

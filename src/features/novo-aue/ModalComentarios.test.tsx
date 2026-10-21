@@ -19,7 +19,6 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
     autorNome: 'Cervejeiro Raiz',
     autorHandle: 'cervejeiro',
     criadoEm: '2026-10-20T10:00:00Z',
-    votos: 15,
     respostasTotal: 1,
   };
 

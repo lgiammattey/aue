@@ -11,7 +11,7 @@ O desenho completo de produto está em [`AUÊ!-2.md`](AUÊ!-2.md) e a jornada de
 > **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
 O Auê conecta três pilares inseparáveis:
-1. **O Bonde do Arroto:** A home publicada reúne resenhas por comunidade, com comentários, reações, salvar e compartilhar. Os filtros observados são *Quentes*, *Novos* e *Top*.
+1. **A Tropa:** A camada de pessoas reúne as contribuições de quem você segue. Cada resenha continua vinculada à comunidade de origem, com comentários, reações, salvar e compartilhar.
 2. **As Comunidades Temáticas:** Espaços de resenha e conteúdo, identificados em cada publicação. A migração para conversa organizada em tópicos é direção aceita, ainda pendente de prova de entrega.
 3. **A Arena de Arroto (O Núcleo Jogável):** A máquina acústica que captura o som pelo navegador, valida via YAMNet se foi arroto de verdade, aciona a expectativa do julgamento e entrega o **Auê Score (0 a 100)** com as métricas de Força, Fôlego e Grave, abrindo o duelo X1 e a revanche sem fim.
 

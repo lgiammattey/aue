@@ -12,7 +12,7 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 
 1. [`../AGENTS.md`](../AGENTS.md) — **a autoridade única**: squad, governança, precedência, escopo e regras.
 2. [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md) — o que foi conferido no `aue.web.app`, com data e limite da prova.
-3. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: o Bonde do Arroto, comunidades, Arena e X1.
+3. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: a Tropa, comunidades, Arena e X1.
 3. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop em 6 fases da experiência.
 4. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
 5. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da máquina da Arena.

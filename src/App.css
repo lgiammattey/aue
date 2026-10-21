@@ -183,7 +183,7 @@
   }
 }
 
-/* Atalho da /arena de volta para o Bonde. */
+/* Atalho da /arena de volta para a Tropa. */
 .voltar-pro-feed {
   position: fixed;
   top: max(16px, env(safe-area-inset-top));

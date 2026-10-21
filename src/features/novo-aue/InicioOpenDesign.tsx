@@ -100,7 +100,7 @@ export function InicioOpenDesign({
   const [arrotosPort] = useState(() => portaArrotosDoPerfil ?? criarArrotosDoPerfilRemoto());
   const [capturaDoArroto] = useState(() => capturaDireta ?? criarCapturaWeb());
 
-  const [viewAtual, setViewAtual] = useState<'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades'>(() => {
+  const [viewAtual, setViewAtual] = useState<'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar'>(() => {
     if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades' || viewInicial === 'seguindo') return viewInicial;
     if (handleParam) return 'perfil';
     if (slugParam || topicoIdParam || viewInicial === 'comunidade') return 'comunidade';

@@ -2,7 +2,6 @@ import { Route } from 'react-router-dom';
 import { LayoutDoForum } from './ShellDoForum';
 import { TelaComunidadeDoForum } from './TelaComunidadeDoForum';
 import { TelaDiretorio } from './TelaDiretorio';
-import { TelaExplorar } from './TelaExplorar';
 import { TelaNovoTopico } from './TelaNovoTopico';
 import { TelaTopico } from './TelaTopico';
 
@@ -22,7 +21,6 @@ export function rotasDoForum({
   return (
     <Route element={<LayoutDoForum />}>
       {incluirRaizesDaComunidade && <Route path="/comunidades" element={<TelaDiretorio />} />}
-      <Route path="/explorar" element={<TelaExplorar />} />
       {incluirRaizesDaComunidade && (
         <Route path="/c/:slug" element={<TelaComunidadeDoForum />}>
           {/* Formulário de novo tópico: por cima da lista da comunidade (cartão 0017, pedaço 2c). */}

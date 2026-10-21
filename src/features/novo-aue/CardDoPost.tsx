@@ -16,6 +16,7 @@ import { PlayerDoArroto } from './PlayerDoArroto';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import './TokensDoCard.css';
 import './CardDoPost.css';
+import { formatarTempoRelativo } from './tempoRelativo';
 
 interface Props {
   readonly post: ItemDoFeed;
@@ -52,27 +53,6 @@ interface Props {
   readonly aoApagar?: () => void;
   readonly aoTocarAudio?: (urlOuResolver?: string | (() => Promise<string | null>)) => void;
   readonly aoAbrirComentarios?: () => void;
-}
-
-/** `null` quando não há data válida: o card omite o tempo em vez de dizer "agora". */
-function formatarTempoRelativo(isoOuData: string): string | null {
-  if (!isoOuData) return null;
-  try {
-    const data = new Date(isoOuData);
-    if (Number.isNaN(data.getTime())) return null;
-    const segundos = Math.max(0, Math.floor((Date.now() - data.getTime()) / 1000));
-    if (segundos < 60) return 'agora';
-    const minutos = Math.floor(segundos / 60);
-    if (minutos < 60) return `${minutos}m`;
-    const horas = Math.floor(minutos / 60);
-    if (horas < 24) return `${horas}h`;
-    const dias = Math.floor(horas / 24);
-    if (dias === 1) return 'ontem';
-    if (dias < 7) return `${dias}d`;
-    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(data);
-  } catch {
-    return null;
-  }
 }
 
 export const CardDoPost = memo(function CardDoPost({

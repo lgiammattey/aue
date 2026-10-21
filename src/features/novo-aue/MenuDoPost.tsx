@@ -83,7 +83,7 @@ export function MenuDoPost({ aoDenunciar, aoApagar }: Props) {
           className="menu-do-post__lista"
           data-lado={paraCima ? 'cima' : 'baixo'}
           style={{
-            position: 'absolute', right: 0, ...(paraCima ? { bottom: '100%' } : { top: '100%' }), zIndex: 20, minWidth: 160, padding: 4,
+            position: 'absolute', right: 0, ...(paraCima ? { bottom: '100%' } : { top: '100%' }), zIndex: 20, minWidth: 128, padding: 4,
             background: 'var(--aue-surface, #14151a)', border: '1px solid var(--aue-line, #333)', borderRadius: 10,
             boxShadow: 'var(--aue-shadow, 0 8px 24px rgba(0,0,0,.4))',
           }}

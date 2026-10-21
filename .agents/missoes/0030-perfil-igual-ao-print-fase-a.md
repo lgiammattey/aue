@@ -328,3 +328,9 @@ Registro do Kayky depois das auditorias do Camillo (APROVADO COM CONDIÇÕES) e 
 1. Bug real: o menu ⋯ abria atrás da barra inferior (botão entre y 660 e 745 numa tela de 800).
 2. A folha de foto não travava a rolagem do fundo; havia alvos abaixo de 44px, placeholder cortado em 320, data inventada ("agora") e player sem progresso.
 3. O teste intermitente da Arena (`Arena.test.tsx`, contagem 3-2-1) falha na `main` também e não é deste PR.
+
+## Aceite visual do Rian no PR #330: ajustes e backlog (21/10/2026)
+
+Feitos nesta rodada: folha de foto ancorada embaixo no celular (o `.modal` do `casca.css` vencia no mesmo peso), título e botão do estado de erro do perfil, "Entrar" escondido no celular com sessão ativa, barra superior do celular com 44px mais topo seguro, logo em Anton 32px/36px e busca de 36px (sem linha de baixo só no perfil), tempo do post em semanas ("1sem") até 29 dias e data absoluta só depois, menu ⋯ com largura mínima de 128px. O "ontem" para 1 dia foi mantido.
+
+**Backlog (fora do escopo, não feito):** a barra inferior mede 67px contra 56px do protótipo e o ícone ativo não tem `stroke-width` 2.4. Precisa de ajuste em `casca.css` com `casca.layout.test.ts` rodado antes e depois; abre outro cartão.

@@ -8,7 +8,7 @@
  */
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { ItemComentario, ItemDoFeed } from './tipos';
+import type { EngajamentoDoPost, ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { PlayerDoArroto } from './PlayerDoArroto';
@@ -18,6 +18,8 @@ interface Props {
   readonly post: ItemDoFeed;
   /** Só é exibido quando a rota fornece persistência real. */
   readonly salvo?: boolean;
+  readonly reacoes?: Pick<EngajamentoDoPost, 'like' | 'fogo' | 'nojo' | 'trofeu'>;
+  readonly minhas?: readonly string[];
   readonly audioTocando: boolean;
   readonly tempoAtualDoAudio: number;
   readonly duracaoDoAudio: number | null;
@@ -59,6 +61,8 @@ function formatarTempoRelativo(isoOuData: string): string {
 export const CardDoPost = memo(function CardDoPost({
   post,
   salvo,
+  reacoes,
+  minhas = [],
   audioTocando,
   tempoAtualDoAudio,
   duracaoDoAudio,
@@ -84,16 +88,24 @@ export const CardDoPost = memo(function CardDoPost({
         ? null
         : detectarLinkDeVideo(post.corpo) ?? detectarLinkDeVideo(post.titulo);
 
-  const aoCompartilhar = () => {
+  const aoCompartilhar = async () => {
+    const id = post.id.replace(/^(topico|causo)-/, '');
+    const caminho = post.tipo === 'topico'
+      ? `/c/${encodeURIComponent(post.comunidadeSlug)}/t/${encodeURIComponent(id)}`
+      : `/historia/${encodeURIComponent(id)}`;
+    const url = `${window.location.origin}${caminho}`;
     try {
-      const url = `${window.location.origin}/r/${post.comunidadeSlug}`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(url);
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: post.titulo, url });
+        return;
       }
+      await navigator.clipboard.writeText(url);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
-    } catch {
-      // Ignora falha de clipboard
+    } catch (erro) {
+      if ((erro as { name?: string }).name === 'AbortError') return;
+      // Sem permissão de área de transferência: entrega o link para a pessoa copiar na mão.
+      window.prompt('Copie o link:', url);
     }
   };
 
@@ -280,16 +292,18 @@ export const CardDoPost = memo(function CardDoPost({
           {/* Curtir */}
           <button
             type="button"
-            className="action-btn action-btn--like"
+            className={`action-btn action-btn--like ${minhas.includes('like') ? 'is-active' : ''}`}
             onClick={aoDispararCurtir}
+            disabled={!aoCurtir}
+            aria-pressed={minhas.includes('like')}
             aria-label="Curtir"
-            title="Curtir causo"
+            title={aoCurtir ? (minhas.includes('like') ? 'Tirar a curtida' : 'Curtir') : 'Curtir não está disponível aqui'}
           >
             <svg
               width="18"
               height="18"
               viewBox="0 0 24 24"
-              fill="none"
+              fill={minhas.includes('like') ? 'currentColor' : 'none'}
               stroke="currentColor"
               strokeWidth="1.8"
               strokeLinecap="round"
@@ -298,43 +312,30 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.8-8 11-8 11z" />
             </svg>
-            {post.votos > 0 && <span className="action-btn__count">{post.votos}</span>}
+            {(reacoes?.like ?? post.votos) > 0 && <span className="action-btn__count">{reacoes?.like ?? post.votos}</span>}
             <span className="sr-only">Curtir</span>
           </button>
 
-          {/* Fogo */}
-          <button
-            type="button"
-            className="action-btn action-btn--emoji"
-            onClick={() => aoReagir?.('fogo')}
-            aria-label="🔥"
-            title="Pegou fogo"
-          >
-            <span>🔥</span>
-          </button>
-
-          {/* Nojo */}
-          <button
-            type="button"
-            className="action-btn action-btn--emoji"
-            onClick={() => aoReagir?.('nojo')}
-            aria-label="🤢"
-            title="Nojento demais"
-          >
-            <span>🤢</span>
-          </button>
-
-          {/* Troféu */}
-          <button
-            type="button"
-            className="action-btn action-btn--emoji"
-            onClick={() => aoReagir?.('trofeu')}
-            aria-label="🏆"
-            title="Respeito / Troféu"
-          >
-            <span aria-hidden="true">🏆</span>
-            <span className="sr-only">Troféu</span>
-          </button>
+          {([
+            ['fogo', '🔥', 'Pegou fogo', 'fogo'],
+            ['nojo', '🤢', 'Nojento demais', 'nojo'],
+            ['trofeu', '🏆', 'Respeito / Troféu', 'Troféu'],
+          ] as const).map(([tipo, emoji, titulo, nome]) => (
+            <button
+              key={tipo}
+              type="button"
+              className={`action-btn action-btn--emoji ${minhas.includes(tipo) ? 'is-active' : ''}`}
+              onClick={() => aoReagir?.(tipo)}
+              disabled={!aoReagir}
+              aria-pressed={minhas.includes(tipo)}
+              aria-label={emoji}
+              title={aoReagir ? titulo : 'Reagir não está disponível aqui'}
+            >
+              <span aria-hidden="true">{emoji}</span>
+              {(reacoes?.[tipo] ?? 0) > 0 && <span className="action-btn__count">{reacoes?.[tipo]}</span>}
+              <span className="sr-only">{nome}</span>
+            </button>
+          ))}
 
           {/* Sem porta de salvos, o controle continua visível mas indisponível. */}
           {salvo !== undefined && <button
@@ -342,8 +343,9 @@ export const CardDoPost = memo(function CardDoPost({
             className={`action-btn action-btn--save ${salvo ? 'is-saved' : ''}`}
             onClick={aoAlternarSalvar}
             disabled={!aoAlternarSalvar}
+            aria-pressed={Boolean(salvo)}
             aria-label={salvo ? 'Salvo' : 'Salvar'}
-            title={aoAlternarSalvar ? (salvo ? 'Remover dos salvos' : 'Salvar causo') : 'Salvar ainda não está disponível'}
+            title={aoAlternarSalvar ? (salvo ? 'Remover dos salvos' : 'Salvar') : 'Salvar não está disponível aqui'}
           >
             <svg
               width="18"
@@ -366,9 +368,9 @@ export const CardDoPost = memo(function CardDoPost({
           <button
             type="button"
             className="action-btn action-btn--share"
-            onClick={aoCompartilhar}
+            onClick={() => void aoCompartilhar()}
             aria-label="Compartilhar"
-            title="Copiar link do causo"
+            title="Compartilhar o link"
           >
             <svg
               width="18"

@@ -6,7 +6,7 @@
  * Orquestra o layout de 3 colunas (desktop) e webapp mobile (via VersaoMobileOpenDesign).
  * Gerencia as views centrais: 'feed', 'emAlta', 'seguindo', 'comunidade', 'comunidades', 'perfil' e 'auth'.
  */
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
@@ -35,6 +35,8 @@ import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDir
 import { ModalGerirComunidade } from './ModalGerirComunidade';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
+import { SalvosDoPerfil } from './SalvosDoPerfil';
+import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
 import type { DetalhesDaComunidade, ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
 import './InicioOpenDesign.css';
@@ -473,6 +475,7 @@ export function InicioOpenDesign({
             enderecoDoAudio: c.enderecoDoAudio,
             nota: c.nota,
             videoUrl: c.videoUrl,
+            engajamento: engajamentoDoCauso(c),
           });
         }
       }
@@ -605,6 +608,7 @@ export function InicioOpenDesign({
             enderecoDoAudio: c.enderecoDoAudio,
             nota: c.nota,
             videoUrl: c.videoUrl,
+            engajamento: engajamentoDoCauso(c),
           });
         }
         setItensFeed(itens);
@@ -642,6 +646,7 @@ export function InicioOpenDesign({
           enderecoDoAudio: causo.enderecoDoAudio,
           nota: causo.nota,
           videoUrl: causo.videoUrl,
+          engajamento: engajamentoDoCauso(causo),
         })));
         setEstadoSeguindo('pronto');
       },
@@ -730,30 +735,24 @@ export function InicioOpenDesign({
     }
   };
 
-  const interagirNoPost = async (id: string, tipo: 'curtir' | 'fogo' | 'nojo' | 'trofeu') => {
-    if (!estaAutenticado) {
-      exibirToast('Entre na sua conta para reagir.');
-      (aoEntrar ?? (() => setViewAtual('auth')))();
-      return;
-    }
-    if (!id.startsWith('causo-')) return;
-    const causoId = id.replace('causo-', '');
-    const resultado = tipo === 'curtir'
-      ? await comunidadePort.alternarCurtida(causoId)
-      : await comunidadePort.alternarReacao(causoId, tipo);
-    if (!resultado.ok) {
-      exibirToast('Não deu para registrar sua reação agora.');
-      return;
-    }
-    exibirToast(tipo === 'curtir' ? 'Curtida atualizada.' : 'Reação enviada.');
-  };
-
-  const acoesDeReacao = (post: ItemDoFeed) => post.tipo === 'causo'
-    ? {
-        aoCurtir: () => void interagirNoPost(post.id, 'curtir'),
-        aoReagir: (tipo: 'fogo' | 'nojo' | 'trofeu') => void interagirNoPost(post.id, tipo),
-      }
-    : {};
+  const pedirEntrada = useCallback((mensagem: string) => {
+    exibirToast(mensagem);
+    (aoEntrar ?? (() => setViewAtual('auth')))();
+  // exibirToast e aoEntrar só mudam de identidade a cada render; o pedido não depende deles.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aoEntrar]);
+  const itensVisiveis = useMemo(
+    () => [...itensFeed, ...itensSeguindo, ...topicosDaComunidade, ...(postComentariosAtivo ? [postComentariosAtivo] : [])],
+    [itensFeed, itensSeguindo, topicosDaComunidade, postComentariosAtivo],
+  );
+  const { propsDeEngajamento } = useEngajamento({
+    forum,
+    comunidadePort,
+    estaAutenticado,
+    aoPedirEntrada: pedirEntrada,
+    exibirToast,
+    itens: itensVisiveis,
+  });
 
   const [seguindoPerfil, setSeguindoPerfil] = useState(false);
   const [alternandoSeguir, setAlternandoSeguir] = useState(false);
@@ -1579,9 +1578,8 @@ export function InicioOpenDesign({
               }
             }}
             aoEnviarComentario={enviarComentario}
-            {...acoesDeReacao(postComentariosAtivo)}
+            {...propsDeEngajamento(postComentariosAtivo)}
             aoTocarAudio={(fonte) => void alternarAudio(fonte, postComentariosAtivo.id)}
-            salvo={false}
             audioTocando={audioTocandoId === postComentariosAtivo.id}
             tempoAtualDoAudio={audioSelecionadoId === postComentariosAtivo.id ? tempoAtualDoAudio : 0}
             duracaoDoAudio={audioSelecionadoId === postComentariosAtivo.id ? duracaoDoAudio : null}
@@ -1652,8 +1650,7 @@ export function InicioOpenDesign({
                   <div key={post.id}>
                     <CardDoPost
                       post={post}
-                      {...acoesDeReacao(post)}
-                      salvo={false}
+                      {...propsDeEngajamento(post)}
                       audioTocando={audioTocandoId === post.id}
                       tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                       duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
@@ -1697,8 +1694,7 @@ export function InicioOpenDesign({
                   <CardDoPost
                     key={post.id}
                     post={post}
-                    {...acoesDeReacao(post)}
-                    salvo={false}
+                    {...propsDeEngajamento(post)}
                     audioTocando={audioTocandoId === post.id}
                     tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                     duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
@@ -1725,7 +1721,7 @@ export function InicioOpenDesign({
             {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu bonde…</p>}
             {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu bonde.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Seu bonde ainda está quieto.</h2><p>Siga alguns perfis para ver os causos deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Explorar o Bonde</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...acoesDeReacao(post)} salvo={false} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post) => <CardDoPost key={post.id} post={post} {...propsDeEngajamento(post)} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} />)}</div>}
           </section>
         )}
 
@@ -1902,8 +1898,7 @@ export function InicioOpenDesign({
                         <CardDoPost
                           key={post.id}
                           post={post}
-                          {...acoesDeReacao(post)}
-                          salvo={false}
+                          {...propsDeEngajamento(post)}
                           audioTocando={audioTocandoId === post.id}
                           tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
                           duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
@@ -2149,15 +2144,17 @@ export function InicioOpenDesign({
                   >
                     Arrotos <span>{arrotosDoPerfil.length}</span>
                   </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={abaPerfil === 'salvos'}
-                    className={`od-profile__tab-btn ${abaPerfil === 'salvos' ? 'active' : ''}`}
-                    onClick={() => setAbaPerfil('salvos')}
-                  >
-                    Salvos
-                  </button>
+                  {donoDoPerfil && (
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={abaPerfil === 'salvos'}
+                      className={`od-profile__tab-btn ${abaPerfil === 'salvos' ? 'active' : ''}`}
+                      onClick={() => setAbaPerfil('salvos')}
+                    >
+                      Salvos
+                    </button>
+                  )}
                 </div>
 
                 {abaPerfil === 'posts' && (
@@ -2221,15 +2218,7 @@ export function InicioOpenDesign({
                   </section>
                 )}
 
-                {abaPerfil === 'salvos' && (
-                  <section className="od-profile__activity" aria-labelledby="profileSalvos">
-                    <div className="od-profile__activity-head"><h2 id="profileSalvos">Salvos</h2></div>
-                    <div className="od-profile__empty">
-                      <h3>Nenhum post salvo ainda.</h3>
-                      <p>Salve posts com a bandeirinha no feed para ler novamente por aqui.</p>
-                    </div>
-                  </section>
-                )}
+                {abaPerfil === 'salvos' && donoDoPerfil && <SalvosDoPerfil forum={forum} />}
               </>
             )}
           </section>

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CardDoPost } from './CardDoPost';
@@ -98,31 +98,89 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(screen.getByRole('button', { name: 'Salvar' }).hasAttribute('disabled')).toBe(true);
   });
 
-  it('copia link para o clipboard ao clicar em compartilhar', () => {
-    const writeTextMock = vi.fn();
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: writeTextMock,
-      },
-    });
-
+  const mostrar = (extra: Partial<React.ComponentProps<typeof CardDoPost>> = {}, post: ItemDoFeed = postExemplo) =>
     render(
       <MemoryRouter>
         <CardDoPost
-          post={postExemplo}
-          salvo={false}
+          post={post}
           audioTocando={false}
           tempoAtualDoAudio={0}
           duracaoDoAudio={null}
-          aoAlternarSalvar={vi.fn()}
           aoTocarAudio={vi.fn()}
+          {...extra}
         />
       </MemoryRouter>,
     );
 
-    const btnShare = screen.getByRole('button', { name: /Compartilhar/i });
-    fireEvent.click(btnShare);
-    expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('/r/arena-do-arroto'));
+  it('compartilhar copia o link real do tópico (/c/:slug/t/:id), não uma rota que não existe', async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.assign(navigator, { clipboard: { writeText }, share: undefined });
+    mostrar();
+    fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/c/arena-do-arroto/t/1`));
+    expect(await screen.findByText('Copiado!')).toBeTruthy();
+  });
+
+  it('causo compartilha /historia/:id', async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.assign(navigator, { clipboard: { writeText }, share: undefined });
+    mostrar({}, { ...postExemplo, id: 'causo-abc', tipo: 'causo' });
+    fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/historia/abc`));
+  });
+
+  it('sem permissão de área de transferência não diz "Copiado!": entrega o link para copiar', async () => {
+    Object.assign(navigator, { clipboard: { writeText: vi.fn(async () => { throw new Error('negado'); }) }, share: undefined });
+    const prompt = vi.spyOn(window, 'prompt').mockReturnValue(null);
+    mostrar();
+    fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
+    await waitFor(() => expect(prompt).toHaveBeenCalledWith('Copie o link:', `${window.location.origin}/c/arena-do-arroto/t/1`));
+    expect(screen.queryByText('Copiado!')).toBeNull();
+    prompt.mockRestore();
+  });
+
+  it('usa o compartilhamento nativo quando existe', async () => {
+    const share = vi.fn(async () => undefined);
+    Object.assign(navigator, { share });
+    mostrar();
+    fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
+    await waitFor(() => expect(share).toHaveBeenCalledWith({ title: postExemplo.titulo, url: `${window.location.origin}/c/arena-do-arroto/t/1` }));
+    Object.assign(navigator, { share: undefined });
+  });
+
+  it('botão sem ação fica desabilitado e explica, em vez de não fazer nada', () => {
+    mostrar({ aoCurtir: undefined, aoReagir: undefined, aoAlternarSalvar: undefined, salvo: false });
+    for (const nome of ['Curtir', '🔥', '🤢', '🏆', 'Salvar']) {
+      const botao = screen.getByRole('button', { name: nome });
+      expect(botao.hasAttribute('disabled'), nome).toBe(true);
+      expect(botao.getAttribute('title'), nome).toMatch(/não está disponível/);
+    }
+  });
+
+  it('mostra contagens e marca o que a conta já fez; os cliques chegam aos handlers', () => {
+    const aoCurtir = vi.fn();
+    const aoReagir = vi.fn();
+    const aoAlternarSalvar = vi.fn();
+    mostrar({
+      reacoes: { like: 3, fogo: 2, nojo: 0, trofeu: 1 },
+      minhas: ['like', 'fogo'],
+      salvo: true,
+      aoCurtir,
+      aoReagir,
+      aoAlternarSalvar,
+    });
+    expect(screen.getByRole('button', { name: 'Curtir' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: '🔥' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: '🤢' }).getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: '🔥' }).textContent).toContain('2');
+    expect(screen.getByRole('button', { name: '🏆' }).textContent).toContain('1');
+    expect(screen.getByRole('button', { name: 'Salvo' }).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: 'Curtir' }));
+    fireEvent.click(screen.getByRole('button', { name: '🤢' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salvo' }));
+    expect(aoCurtir).toHaveBeenCalledOnce();
+    expect(aoReagir).toHaveBeenCalledWith('nojo');
+    expect(aoAlternarSalvar).toHaveBeenCalledOnce();
   });
 
   describe('vídeo do YouTube/TikTok', () => {

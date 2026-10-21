@@ -12,7 +12,10 @@ import type {
   MotivoDeLeitura,
   OrdemDosTopicos,
   PaginaDoForum,
+  ItemSalvo,
   PaginaDeBusca,
+  ReacaoDoTopico,
+  ReacoesDoTopico,
   PortaDeForum,
   ResultadoDeBusca,
   PreviaDeRespostaDoTopico,
@@ -633,6 +636,75 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
           proximo: linhas.length > limite ? deslocamento + limite : null,
         }),
       );
+    },
+
+    contarReacoesDosTopicos(topicoIds) {
+      const ids = [...new Set(topicoIds)].filter((id) => UUID.test(id)).slice(0, 100);
+      if (ids.length === 0) {
+        return Promise.resolve(usaServidor()
+          ? { ok: true as const, valor: {} as Record<string, ReacoesDoTopico> }
+          : { ok: false as const, motivo: 'semServidor' as const });
+      }
+      return ler('contar_reacoes_dos_topicos', { p_topicos: ids }, (linhas) => {
+        const mapa: Record<string, { total: Record<ReacaoDoTopico, number>; minhas: ReacaoDoTopico[] }> = {};
+        for (const l of linhas) {
+          const tipo = texto(l, 'tipo');
+          if (tipo !== 'like' && tipo !== 'fogo' && tipo !== 'nojo' && tipo !== 'trofeu') malformada('tipo');
+          const total = Number(l.total);
+          if (!Number.isInteger(total) || total < 0) malformada('total');
+          const id = texto(l, 'topico_id');
+          const item = (mapa[id] ??= { total: { like: 0, fogo: 0, nojo: 0, trofeu: 0 }, minhas: [] });
+          item.total[tipo] = total;
+          if (l.minha === true) item.minhas.push(tipo);
+        }
+        return mapa as Record<string, ReacoesDoTopico>;
+      });
+    },
+
+    alternarReacaoDoTopico(topicoId, tipo) {
+      return escrever('alternar_reacao_do_topico', { p_topico_id: topicoId, p_tipo: tipo }, (dados) => {
+        if (typeof dados !== 'boolean') malformada('retorno');
+        return dados;
+      });
+    },
+
+    alternarSalvo(tipo, itemId) {
+      return escrever('alternar_salvo', { p_tipo: tipo, p_item_id: itemId }, (dados) => {
+        if (typeof dados !== 'boolean') malformada('retorno');
+        return dados;
+      });
+    },
+
+    listarIdsSalvos() {
+      return ler('listar_ids_salvos', {}, (linhas) =>
+        linhas.map((l) => {
+          const tipo = texto(l, 'tipo');
+          if (tipo !== 'topico' && tipo !== 'causo') malformada('tipo');
+          return { tipo, id: texto(l, 'item_id') } as const;
+        }),
+      );
+    },
+
+    listarMeusSalvos(op = {}) {
+      const limite = limiteEfetivo(op.limite, 20, 50);
+      const deslocamento = Math.max(0, Math.trunc(op.deslocamento ?? 0));
+      return ler('listar_meus_salvos', { p_limite: limite + 1, p_deslocamento: deslocamento }, (linhas) => ({
+        itens: linhas.slice(0, limite).map((l): ItemSalvo => {
+          const tipo = texto(l, 'tipo');
+          if (tipo !== 'topico' && tipo !== 'causo') malformada('tipo');
+          return {
+            tipo,
+            id: texto(l, 'id'),
+            titulo: textoLivre(l, 'titulo'),
+            comunidadeSlug: texto(l, 'comunidade_slug'),
+            comunidadeNome: texto(l, 'comunidade_nome'),
+            autorHandle: textoOuNulo(l, 'autor_handle'),
+            autorApelido: textoOuNulo(l, 'autor_apelido'),
+            criadoEm: texto(l, 'criado_em'),
+          };
+        }),
+        proximo: linhas.length > limite ? deslocamento + limite : null,
+      }));
     },
 
     explorarTopicos(op = {}) {

@@ -173,3 +173,109 @@ Todo o resto (qual seletor, qual técnica de área de toque, como prender o foco
 - **Issue das variáveis `--border-strong`.** `casca.css` e `Comunidade.css` declaram o token com hex diferentes do `DESIGN.md`. Issue futura, anotada pelo Camillo no 0030.
 - **Barra inferior de 67px para 56px e `stroke-width` 2.4 no ícone ativo.** Backlog do 0030 mantido; cartão separado, salvo a condição do item 4 da decisão do Tiago acima.
 - **Harness e CSS morto** (`e2e/harness.tsx` fora de sincronia com o card; regras `.burp-player/.play/.wave` órfãs em `casca.css`). Já registrados no 0030, continuam fora.
+
+## Gate Arquitetural do Camillo (21/10/2026)
+
+Leitura de código mais medida no Chromium do Playwright (build 1194, `deviceScaleFactor` 2, `--hide-scrollbars`). Harness: cópia do `.shots/main.tsx` do Kayky no scratchpad, só com `?visitante=1` para tirar a sessão (o original fixa `autenticado`). Nada em `src/` foi alterado. Os scripts de medida ficam em `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/` (`cam-*.mjs`, fora do git) para o Marcelo reaproveitar.
+
+**Veredito: APROVADO COM CONDIÇÕES.**
+
+- Item 1 (foco): aprovado. Corrige-se no helper, sem assinatura nova.
+- Item 3 (rolagem lateral): aprovado, mas a causa não é a do cartão. Não é a barra inferior, é o botão "Entrar" do topo do visitante. O arquivo a editar muda (`BarraSuperior.css`, não `casca.css`) e a asserção nova não vai no `casca.layout.test.ts`.
+- Item 2 (toque no card): parado. O conserto custa 12px ou 24px por post, acima do orçamento de 8px. O gatilho (d) disparou. Não sobe para sistêmica; é a consulta que o cartão já previa: Rian leva as duas capturas, Luiz escolhe.
+
+### A. Foco da folha (`focoNoDialogo.ts`)
+
+- **Assinatura:** `manterFocoNoDialogo(evento: KeyboardEvent, dialogo: HTMLElement | null): void` (`focoNoDialogo.ts:5`). Só reage a Tab. A lista de focáveis (linha 7) é botão e campo habilitados, `[href]` e `[tabindex]` diferente de -1, então o contêiner (`tabIndex={-1}`) fica fora dela. Só age quando `document.activeElement` é exatamente o primeiro (com Shift) ou o último (sem Shift), linhas 11-17.
+- **Quem usa** (grep em `src` e `e2e`, completo): `FolhaDaFoto.tsx:2,40`, `ModalConexoes.tsx:3,40`, `DialogoDoPost.tsx:2,48`, `ModalAjustarImagem.tsx:2,47`. Mais nenhum. Os quatro abrem com `.focus()` no contêiner (`FolhaDaFoto:24`, `ModalConexoes:24`, `DialogoDoPost:26`, `ModalAjustarImagem:26`), então os quatro têm o mesmo furo.
+- **Por que escapa:** com o foco no contêiner, nem `primeiro` nem `ultimo` batem, o helper não chama `preventDefault` e o navegador anda para trás no documento. Reproduzido: perfil do dono, 390x800, clica no avatar. Foco inicial `div[role=dialog]`. Shift+Tab leva o foco a `button "Compartilhar"`, fora do diálogo. Esc em seguida não fecha (`[role=dialog]` continua com contagem 1).
+- **Dá para estender sem mudar a assinatura:** sim. Menor diff, uns 8 linhas, só em `plataforma/web/`: `dentro = ativo !== dialogo && dialogo.contains(ativo)`. Shift+Tab com `!dentro || ativo === primeiro` vai ao último. Tab com `!dentro || ativo === ultimo` vai ao primeiro. Lista vazia: `preventDefault` e foco no contêiner. Testei essa versão num arquivo temporário (jsdom, 14 casos, atual e proposta lado a lado): com o foco no contêiner e Shift+Tab, a atual dá `defaultPrevented` falso e a proposta dá verdadeiro com o foco em "Remover". Borda, meio da lista e tecla que não é Tab ficam idênticos.
+- **Efeito nos outros três diálogos:** é a mesma correção, não regressão. Três mudanças reais: (1) Shift+Tab logo depois de abrir passa a ir ao último botão, em vez de sair do diálogo; (2) foco no `body` (clique em área sem foco) volta para dentro no próximo Tab; (3) lista vazia (por exemplo `DialogoDoPost` enquanto envia, com botões desabilitados) segura o foco em vez de soltar. Esc, fechar e devolução do foco a quem abriu não mudam, porque ficam nos componentes.
+- **Esc:** o foco preso resolve. O `onKeyDown` do contêiner recebe o Esc de qualquer filho e do próprio contêiner. Com o foco que não sai, o Esc sempre chega. Toque fora fecha pelo overlay (`FolhaDaFoto.tsx:30`). Segunda camada seria listener em `document`: não é preciso e não entra.
+- **O que os testes travam hoje:** nada de Tab. Não existe teste do helper (grep `focoNoDialogo|manterFoco` só acha os quatro componentes). Os testes dos diálogos só disparam Esc (`ModalConexoes.test:58`, `DialogoDoPost.test:53,60`, `ModalAjustarImagem.test:52`, `TelaPerfilOpenDesign.test:528`). Teste novo em `src/plataforma/web/focoNoDialogo.test.ts` com `// @vitest-environment jsdom` (padrão do `controleDeDialogo.test.ts`), com os casos do 1.5 mais "foco no `body`" e "lista vazia". jsdom não anda o Tab nativo: prova `defaultPrevented` e `activeElement`. O Tab de verdade é do Marcelo no Chromium (1.2).
+
+### B. Toque no nome do card (`CardDoPost.tsx` e `.css`)
+
+- **Onde estão:** dentro de `<header className="post-meta-header">` (`CardDoPost.tsx:166`) ficam o link do nome `.author-profile-link` (171), o `@handle` `.post-meta-handle` (183) e o `⋯` (`MenuDoPost`, 203). Logo abaixo, `.post-meta-badges` (206) com o `r/slug` em `.badge-comunidade` (209).
+- **Por que 20px:** nome e `@handle` têm caixa de 44px (`CardDoPost.css:119-128`, `min-height: 44px; margin: -12px 0`). O `r/roda` também (`:202`, `height: 44px; margin: -12px 0; z-index: 1`). As linhas de texto têm 20px e ficam coladas, então as duas caixas de 44px disputam os mesmos 24px e o `r/roda` ganha por `z-index`. Medido por `elementFromPoint`, card-relativo, 1º post:
+
+| alvo | caixa | área que responde | texto |
+|---|---|---|---|
+| nome e `@handle` | 1..45 (44) | 0,5..20,5 (**20**) | 16..30 |
+| `r/roda` | 21..65 (44) | 20,5..65 | 35..50 |
+| `⋯` | 1..45 | 44 | |
+| avatar (`::after`, x 25..69) | 10,5..55 | 44,5 | |
+
+  O centro do texto do nome (23) cai dentro do `r/roda`. Só 4,5px do texto abrem o perfil; o resto abre a comunidade. Igual em 320 e 390 e nas cinco telas, porque o CSS é um só.
+- **Pseudo-elemento e padding não resolvem:** o conflito é vertical, no mesmo espaço. Só espaço resolve. Não precisa mexer no TSX: injetei CSS na página aberta e medi.
+- **Duas opções, CSS só em `CardDoPost.css` sob `.card-do-post`, medidas iguais em 320 e 390 e em feed, perfil e thread:**
+
+| | crescimento por post | nome e `@handle` | `r/roda` | resto |
+|---|---|---|---|---|
+| **A** | **+12px** (feed 390: 117 para 129, +10%; perfil: 161 para 173, +7%) | 44, caixa 1..45 presa à borda do card | 44 onde nada vem embaixo; com corpo ou player logo abaixo cai a 20-22px (medi 20 no feed em 320, 22 na thread) | o texto do nome desce 12px (28..42, hoje 16..30) e deixa de alinhar com o topo do avatar; vão nome-roda segue em 5px |
+| **B** | **+24px** (feed 390: 117 para 141, +21%; perfil: 161 para 185, +15%) | 44, caixa 0,5..44,5 | 44 sempre, 44,5..89 | zero sobreposição e zero corte; nome no lugar de hoje; vão nome-roda de 5px para 29px |
+
+- **Orçamento de 8px estourado nas duas. Parei.** Crescimento zero não existe: a caixa do nome teria de subir uns 11px acima da borda do card, por cima do que vem antes (compositor, abas do perfil, card anterior). Não recomendo. Se o 44px do `r/roda` do protótipo (aceite do Rian) vale, é a B. Se o Luiz preferir o card mais baixo e aceitar `r/roda` com toque menor, é a A.
+- **Os 5 pontos onde o card é renderizado:** `InicioOpenDesign.tsx:1703` (feed), `:1744` (Seguindo), `:1932` (comunidade), `:2139` (perfil), `ThreadDeComentarios.tsx:269` (post-raiz da thread). Mais `e2e/harness.tsx`, já fora de sincronia, fica como está.
+- **Testes que travam o cabeçalho:** `CardDoPost.test.tsx` (texto e links), `InicioOpenDesign.test.tsx:163,632-633` (links "Abrir perfil de ..."), `DenunciarEApagar.test.tsx:67-68` (`⋯` dentro do `<article>`), `TelaPerfilOpenDesign.test.tsx:450`, `estilosDoPerfil.test.ts:21-25` (avatar `::after` com `inset: -2px`, sem `!important` no arquivo) e `verdeDoPerfil.test.ts`. Nenhum trava altura, margem nem tamanho de caixa. Nada quebra com A ou B, mas nada trava o conserto: a prova é o script do Marcelo (2.1 e 2.2) com `elementFromPoint`, não CSS lido.
+- **Seletor mais estreito:** os que já existem (`.post-meta-header`, `.post-meta-ident`, `.author-profile-link`, `.post-meta-handle`, `.post-meta-badges`, `.badge-comunidade`, `.menu-do-post`), todos sob `.card-do-post` (0,2,0). Sem `!important`, sem `.post-body`, sem `casca.css`. `⋯` e avatar não perdem área: estão em x diferentes do nome (avatar até 69, nome desde 79, `⋯` desde 261 em 320).
+
+### C. Os 3px em 320
+
+- **Medido** (`scrollWidth` contra `clientWidth`, 320x640 e 320x800; feed, Seguindo, comunidade, thread, perfil e perfil de outra pessoa):
+
+| | 320 | 330, 340, 359 | 360, 390, 430 |
+|---|---|---|---|
+| visitante | **323 contra 320 (+3)** | +3 | 0 |
+| logado | 320 | 0 | 0 |
+
+  A barra inferior não é a causa. Hipótese do cartão derrubada: com `.mobile-bottom-nav` escondida, 323; com `.sidebar` escondida, 323; com `repeat(5, minmax(0, 1fr))`, 323; com os rótulos escondidos, 323. As cinco colunas (55, 71, 56, 55, 55 mais quatro vãos de 4) somam 308 e cabem. A barra só parece culpada porque é `position: fixed; width: 100%` e herda o viewport já alargado: `.sidebar` 323 e nav 311 no visitante, 320 e 308 no logado.
+- **Elemento:** esconder elemento por elemento devolve 320 só com `header.topbar` e, dentro dele, o botão "Entrar" do visitante (`BarraSuperior.tsx:68-70`, `className="icon-btn"`). `src/index.css:220-227` define `.icon-btn { width: 44px; height: 44px }`, pensado para botão de ícone. O texto "Entrar" em Archivo 800 16px mede 50,1px: botão em 266..310, texto em 273..323,1. Em menos de 360px o padding lateral do topo é 10px (`BarraSuperior.css:97-103`), o texto passa 13px da caixa e sobra 3px de página. A partir de 360 o padding é 14 e ainda cabe, mas o texto sai da caixa do botão em todas as larguras (capturas `cam-topbar-320.png` e `cam-topbar-390.png` no scratchpad). Logado não tem o problema: `.top-actions` vira `display: none` (`BarraSuperior.css:44`).
+- **Mesma causa dos 67px contra 56px? Não.** 67 = `padding` do `.sidebar` (4px em cima e 6px embaixo, `casca.css:1036`) + `border-top` de 1px (`:1038`) + item de 56px (`:1070`). Medido `sbH` 67 e `navH` 56 em 320, 360, 390 e 430. É vertical e não depende da largura. Fica separado, como o Tiago decidiu.
+- **Menor diff:** uma regra em `BarraSuperior.css`, no bloco mobile, junto da `.topbar .top-actions` (linha 92). Não mexer no `.icon-btn` global do `index.css` (o fluxo de áudio reaproveita a classe, `EstilosDoFluxo.tsx:14`). Medido com CSS injetado, 320, visitante:
+
+| opção | botão | campo de busca | `scrollWidth` |
+|---|---|---|---|
+| hoje | 44, texto vaza | 179,7 | 323 |
+| C: `padding: 0; font-size: 13px` | 44 (texto 40,7 em 42 úteis; 1,3px de folga, apertado no Safari) | 179,7 | 320 |
+| D: `padding: 0; font-size: 12px` | 44 (4px de folga) | 179,7 | 320 |
+| B: `width: auto; padding: 0 8px; font-size: 13px` | 58,7 | 165 | 320 |
+| A: `width: auto; padding: 0 12px` | 76,1 | 147,5 | 320 |
+
+  Nota para o Rian: o visitante já vê o placeholder cortado ("Buscar pessoas, ro…" em 320, "rodas e …" em 390). O placeholder mede 162,7px a 12px e o campo útil do visitante tem 136. O logado, com 231, vê inteiro. B e A cortam mais. O teste "a busca do celular cabe em 320 e 360 sem cortar a copy" (`estilosDoPerfil.test.ts:14-19`) só lê CSS e só vale para o logado.
+- **`casca.layout.test.ts`:** quatro testes (`.app` com `275px minmax(0, 600px) 320px` e `justify-content: center`; item ativo da barra sem verde; ARROTAR verde; `.nav-item.active` em `--aue-text`). Rodei antes: 4 passando. Como `casca.css` não muda, ele segue verde e **nenhuma asserção nova entra nele**. A trava da correção entra em `estilosDoPerfil.test.ts`, que já lê `BarraSuperior.css`: a regra do `.icon-btn` dentro do topo no mobile, com `padding: 0` e `font-size` de 12 ou 13px (ou `width: auto`, conforme a opção do Rian), e o arquivo sem `overflow-x: hidden`. jsdom não mede largura; a prova é o `scrollWidth === clientWidth` do Marcelo (3.2), incluindo 330, 340 e 350, porque o estouro é da faixa inteira abaixo de 360.
+- **A medida de antes do 3.1 está registrada aqui.** O 3.3 vale com outra redação: a causa está na largura do botão do topo, não na grade nem no rótulo da barra.
+
+### D. Gatilhos
+
+- (a) Não disparou. Mesma assinatura do helper; `document.activeElement` já estava lá, em `plataforma/web/`.
+- (b) Não. As duas opções do card são CSS puro, sem prop nova. O `MenuDoPost` só perde a margem negativa.
+- (c) Não. A causa não está na grade, nas rotas, no FAB nem na barra inferior.
+- (d) **Disparou, pela medida:** +12px (A) ou +24px (B) contra 8px. Não vira sistêmica, porque é decisão visual sem porta nem contrato. O item 2 fica parado até o Rian levar as capturas e o Luiz escolher.
+- (e) do 0030 (casca, grade, FAB): não. A barra inferior nem entra.
+- (f) do 0030 (CSS do card): nada novo. O arquivo já tem 385 linhas e o conserto mexe em umas 10 a 15, sem token novo.
+
+### E. Fronteira do ADR 0001
+
+Nada novo fora de `src/plataforma/`. O helper segue em `plataforma/web/` e `document.activeElement` já é dele. Nenhuma linha nova de `window`, `navigator`, `document` ou `localStorage` em `features/`. A dívida que já existe (`window.prompt` e `navigator.share` em `CardDoPost.tsx:103-115`, `document.addEventListener` em `MenuDoPost.tsx:26-30`) não cresce neste cartão. Rodei antes: `arquitetura.fronteira.test.ts`, `casca.layout.test.ts`, `estilosDoPerfil.test.ts` e os testes de `ModalConexoes`, `DialogoDoPost`, `ModalAjustarImagem` e `BarraSuperior`: 31 passando.
+
+### F. Condições para o Kayky (todas obrigatórias)
+
+1. **Foco (commit 1):** só `src/plataforma/web/focoNoDialogo.ts` e o teste novo `focoNoDialogo.test.ts`. Assinatura intacta, `FolhaDaFoto.tsx` sem edição. Lógica da seção A. Rodar sem editar os testes de `ModalConexoes`, `DialogoDoPost`, `ModalAjustarImagem` e `TelaPerfilOpenDesign`.
+2. **"Entrar" do visitante (commit 2):** só `BarraSuperior.css` (regra única no bloco mobile) e a asserção em `estilosDoPerfil.test.ts`. Não editar `casca.css`, `casca.layout.test.ts` nem o `.icon-btn` de `index.css`. Sem `overflow-x: hidden` e sem `!important`. Opção escolhida pelo Rian.
+3. **Card (commit 3), só depois de o Rian e o Luiz escolherem A ou B.** Só `CardDoPost.css`, seletores existentes sob `.card-do-post`, sem TSX, sem `!important`, sem tocar `.post-body` nem `casca.css`. Medir o crescimento nas cinco telas e mostrar que bate com a opção.
+4. **Provas, no estilo do script do Marcelo:** `elementFromPoint` no topo, meio e base de nome, `@handle`, `r/roda`, `⋯` e avatar (item 2.3); `scrollWidth === clientWidth` em visitante e logado em 320, 330, 340, 350, 360, 390, 430 (3.2); capturas antes e depois das cinco telas do card e do topo do visitante em 320 e 390.
+5. **Fronteira:** nenhuma API de navegador nova em `features/`.
+6. **Pedido ao Tiago:** corrigir o texto do cartão. O item 3 do enquadramento, o item 4 do Gate leve, o 3.3 e o 3.5 apontam `casca.css` e `casca.layout.test.ts`; passam a apontar `BarraSuperior.css` e `estilosDoPerfil.test.ts`. O 3.1 está cumprido por esta nota.
+
+**Ordem segura:** foco, depois "Entrar" (os dois isolados e independentes da decisão do card), por último o card. Cada commit com `typecheck`, `lint`, `test` e `build`.
+
+### O que o Rian decide antes do Kayky abrir o commit 3
+
+1. **Card, A ou B**, com as duas capturas lado a lado em 390 e 320 (feed e perfil).
+2. **Desenho do "Entrar" do visitante em 320:** C ou D (botão de 44 com rótulo menor), B, A, ou ícone com `aria-label` "Fazer login" (já existe). Define só o commit 2.
+3. **Rótulo da barra inferior em 320:** nada a decidir. O rótulo mais largo ("Comunidades", 70,9px) cabe, a barra mede 308 sem corte e sem rolagem lateral. A pergunta do cartão sobre corte, reticências ou ícone sozinho cai. O 56px do protótipo segue em cartão separado.
+
+### Pergunta que chega ao Luiz (só o que ele vê)
+
+O toque certo no nome faz cada post ficar mais alto no feed, na comunidade, no perfil e na thread: **12px** (nome e `@` com toque de 44, `r/roda` com toque menor onde o corpo encosta) ou **24px** (tudo com 44, mais espaço entre nome e roda). O Rian leva as duas capturas. Fora isso, o botão "Entrar" do visitante vai mudar um pouco (hoje o texto sai da caixa), mas isso é do Rian, não é pergunta.

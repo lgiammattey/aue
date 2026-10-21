@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeConta } from '../../portas/conta';
@@ -410,6 +410,28 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
       abrir({ ...mockPerfilLogado, souEu: false }, '/perfil?aba=salvos');
       await screen.findByRole('heading', { level: 1, name: 'burpKing' });
       expect(screen.getByRole('tab', { name: 'Posts' }).getAttribute('aria-selected')).toBe('true');
+    });
+
+    it('voltar e avançar do navegador acompanham a aba (a URL manda)', async () => {
+      const Teste = () => {
+        const ir = useNavigate();
+        return <><button onClick={() => ir(-1)}>voltar-teste</button><button onClick={() => ir(1)}>avancar-teste</button></>;
+      };
+      render(
+        <MemoryRouter initialEntries={['/perfil']}>
+          <Teste />
+          <Routes>
+            <Route path="/perfil" element={<TelaPerfilOpenDesign portaPerfil={mockPerfilPort} portaConta={mockContaPort} portaComunidade={mockComunidadePort} />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+      await screen.findByRole('heading', { level: 1, name: 'burpKing' });
+      fireEvent.click(screen.getByRole('tab', { name: 'Arrotos' }));
+      expect(screen.getByRole('tab', { name: 'Arrotos' }).getAttribute('aria-selected')).toBe('true');
+      fireEvent.click(screen.getByText('voltar-teste'));
+      await waitFor(() => expect(screen.getByRole('tab', { name: 'Posts' }).getAttribute('aria-selected')).toBe('true'));
+      fireEvent.click(screen.getByText('avancar-teste'));
+      await waitFor(() => expect(screen.getByRole('tab', { name: 'Arrotos' }).getAttribute('aria-selected')).toBe('true'));
     });
 
     it('posts viram CardDoPost no perfil: @handle, r/roda em linha própria, curtida só da porta e sem nota nem emoji', async () => {

@@ -300,3 +300,31 @@ Rodar `typecheck`, `lint`, `test` e `build` em cada commit, não só no último.
 - Card único: o feed deste mesmo protótipo ainda mostra o card antigo (repost, desafiar, nota verde, duração mono). O print só prova o card do perfil. Antes do Kayky mexer no `CardDoPost` compartilhado, o Tiago ou o Luiz decidem o que o card único mantém do feed. Sem isso, o Rian não valida feed e comunidades.
 - Barra inferior nas outras telas: `Arena.dc.html` e `Comunidades.dc.html` já usam `--fg` no item ativo, então a cor está coerente. Divergem na estrutura: só ícones sem rótulo, sem FAB, ordem Início, Auê, Comunidades, Desafios, Perfil (a nova é Feed, Comunidades, ARROTAR, X1, Perfil), sem safe-area. `Versões Webapp.dc.html` só embute as duas e herda. Não reescrevi.
 - Heart do card só aparece no código real se `alternarCurtida` estiver ligado (item 5 da matriz).
+
+## Correções do PR #330 (21/10/2026)
+
+Registro do Kayky depois das auditorias do Camillo (APROVADO COM CONDIÇÕES) e do Marcelo (APROVADO COM RESSALVAS).
+
+**Decisões do Luiz nesta rodada**
+
+- (a) A barra superior sem o botão Buscar e sem o mini-perfil vale para todo o app no celular, não só para o perfil. Desktop e menu lateral não mudam.
+- Repostar e desafiar não entram: nunca existiram no `CardDoPost` e não há cartão para eles.
+
+**O que a implementação decidiu e fica registrado**
+
+- (b) A duração real do áudio aparece no card do feed e do Seguindo antes do play (`ItemDoFeed.duracaoSegundos` ou `anexo.duracaoMs`). Antes era "0:00" até tocar.
+- (c) A variante `perfil` esconde Salvar, como o protótipo e o print. O Camillo tinha deixado o botão; o desenho vence. Salvar segue no feed, na comunidade e na thread.
+- (d) As abas têm teclado (setas, Home, End) e `?aba=arrotos|salvos`. A aba agora é lida da URL a cada render, então voltar e avançar do navegador acompanham (cada troca de aba entra no histórico).
+- (f) O gatilho (f) do Gate disparou na letra: o CSS do card tem cerca de 350 linhas e o do perfil cerca de 680. O Camillo liberou os dois como bloco coeso, sem token novo fora do DESIGN.md.
+
+**Conferência do Camillo, em 3 linhas**
+
+1. Sem porta, RPC, migração nem contrato novo; `PlayerDoArroto` e `MenuDoPost` mantiveram a assinatura.
+2. Pediu tokens (`--border-strong`, `--ind`) com os valores do DESIGN.md em um lugar só, peso explícito no verde do feed e remoção do CSS morto de salvar.
+3. Apontou que `casca.css` e `Comunidade.css` declaram `--border-strong` com outros hex: issue futura, fora desta fase.
+
+**Auditoria do Marcelo, em 3 linhas**
+
+1. Bug real: o menu ⋯ abria atrás da barra inferior (botão entre y 660 e 745 numa tela de 800).
+2. A folha de foto não travava a rolagem do fundo; havia alvos abaixo de 44px, placeholder cortado em 320, data inventada ("agora") e player sem progresso.
+3. O teste intermitente da Arena (`Arena.test.tsx`, contagem 3-2-1) falha na `main` também e não é deste PR.

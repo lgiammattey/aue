@@ -124,10 +124,9 @@ export function InicioOpenDesign({
 
   // Perfil
   const [parametrosDaUrl, setParametrosDaUrl] = useSearchParams();
-  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'arrotos' | 'salvos'>(() => {
-    const aba = parametrosDaUrl.get('aba');
-    return aba === 'arrotos' || aba === 'salvos' ? aba : 'posts';
-  });
+  // A aba vem da URL (?aba=arrotos|salvos) a cada render: voltar e avançar do navegador acompanham.
+  const abaDaUrl = parametrosDaUrl.get('aba');
+  const abaPerfil: 'posts' | 'arrotos' | 'salvos' = abaDaUrl === 'arrotos' || abaDaUrl === 'salvos' ? abaDaUrl : 'posts';
   const [folhaDaFotoAberta, setFolhaDaFotoAberta] = useState(false);
   const botaoDoAvatar = useRef<HTMLButtonElement | null>(null);
   const [perfilAtivo, setPerfilAtivo] = useState<PerfilPublico | null>(null);
@@ -1577,13 +1576,12 @@ export function InicioOpenDesign({
   const abaAtiva = abaPerfil === 'salvos' && !donoDoPerfil ? 'posts' : abaPerfil;
   const mudarAbaDoPerfil = (id: string) => {
     if (id !== 'posts' && id !== 'arrotos' && id !== 'salvos') return;
-    setAbaPerfil(id);
     setParametrosDaUrl((atuais) => {
       const proximos = new URLSearchParams(atuais);
       if (id === 'posts') proximos.delete('aba');
       else proximos.set('aba', id);
       return proximos;
-    }, { replace: true });
+    });
   };
 
   return (

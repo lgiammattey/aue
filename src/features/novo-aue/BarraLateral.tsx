@@ -9,7 +9,6 @@ interface Props {
   readonly estaAutenticado: boolean;
   readonly aoMudarView: (view: 'feed' | 'emAlta' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades', slug?: string) => void;
   readonly aoAbrirCompositor: () => void;
-  readonly aoAbrirFundar: () => void;
   readonly aoSair: () => void;
   readonly aoEntrar?: () => void;
 }
@@ -21,7 +20,6 @@ export const BarraLateral = memo(function BarraLateral({
   estaAutenticado,
   aoMudarView,
   aoAbrirCompositor,
-  aoAbrirFundar,
   aoSair,
   aoEntrar,
 }: Props) {
@@ -105,14 +103,6 @@ export const BarraLateral = memo(function BarraLateral({
         </button>
 
         <div className="nav-label">Comunidades</div>
-        <button
-          className="nav-item"
-          id="openCommunityFounder"
-          type="button"
-          onClick={aoAbrirFundar}
-        >
-          <span className="ico">＋</span>Fundar comunidade
-        </button>
         <button
           className={`nav-item ${viewAtual === 'comunidades' ? 'active' : ''}`}
           type="button"

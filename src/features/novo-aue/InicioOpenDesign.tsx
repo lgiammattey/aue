@@ -3,7 +3,7 @@
  * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
  * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
  * 
- * Orquestra o layout de 3 colunas (desktop) e webapp mobile (via VersaoMobileOpenDesign).
+ * Orquestra o layout de 3 colunas (desktop) e webapp mobile (o mesmo componente, responsivo).
  * Gerencia as views centrais: 'feed', 'emAlta', 'seguindo', 'comunidade', 'comunidades', 'perfil' e 'auth'.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';

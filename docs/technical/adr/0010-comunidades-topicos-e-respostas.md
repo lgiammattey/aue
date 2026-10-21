@@ -1,7 +1,7 @@
 # ADR 0010 — Comunidades, tópicos e respostas (sem feed solto)
 
 **Status:** aceito — Gate Arquitetural do Camillo aprovado; implementação do composer e das mídias ainda pendente de PR, testes e aceite de qualidade.
-**Data:** 2026-10-19 (atualizado em 2026-10-20)
+**Data:** 2026-10-19 (atualizado em 2026-10-20 e 2026-10-21, emenda do perfil)
 **Decisão de produto:** Luiz, em 19/10/2026 ([#251](https://github.com/lgiammattey/aue/issues/251)), com mídia e composer definidos em 20/10/2026
 **Pretende substituir:** ADR 0004 §1 (camada de Feed), §3 (modelo de dados) e §5 (UI do feed)
 **Mantém:** ADR 0001, ADR 0004 §2 (fronteira do áudio e consentimento), ADR 0005, ADR 0009
@@ -58,7 +58,7 @@ explícito.**
 /c/:slug             descrição, regras, membros reais, lista de tópicos
 /c/:slug/t/:id       tópico + respostas encadeadas
 /arena               arrotar, receber nota, desafiar; publicar é opcional
-/u/:handle           perfil: tópicos iniciados e respostas
+/u/:handle           perfil: posts (tópicos), arrotos, salvos e curtidas (ver emenda de 21/10)
 /explorar            comunidades e tópicos, sempre identificados por comunidade
 /historia/:id        legado: redireciona para o tópico correspondente
 ```
@@ -209,6 +209,40 @@ descaracteriza conteúdo legado já migrado.
 atualização evidência de migração aplicada, código implementado, mídia enviada,
 embed reproduzido ou jornada validada em navegador. Cada uma dessas provas será
 exigida antes de declarar o comportamento entregue.
+
+## Emenda: perfil (21/10/2026)
+
+O Luiz enviou o desenho do perfil mobile (print de 21/10/2026) e decidiu que ele
+vale sobre o §12 da especificação do fórum (`docs/design/forum-comunidades.md`).
+Esta emenda só mexe no perfil. A hierarquia Comunidade → Tópico → Resposta e a
+regra de que não existe post avulso continuam valendo.
+
+- **Abas do perfil:** Posts, Arrotos, Salvos e Curtidas. Substitui "Tópicos e
+  respostas" na rota `/u/:handle`.
+- **Posts** lista os tópicos iniciados pela pessoa, em card, com a comunidade
+  (`r/slug`) sempre visível. Não vira um segundo tipo de publicação: cada item é
+  um tópico de uma comunidade, com o mesmo contrato da porta.
+- **Arrotos** mostra os arrotos da Arena que a pessoa publicou com autorização.
+  Gravar para jogar continua não sendo autorizar publicar (ADR 0004 §2).
+- **Salvos** e **Curtidas** são privados: só a própria pessoa vê a aba, em
+  qualquer perfil que não seja o dela a aba não aparece.
+- **Curtir volta como ação visível do card**, sobre a tabela
+  `reacoes_de_topicos` (tipo `like`), que a migração `20261021001030` já criou.
+  Reação de fogo, nojo e troféu seguem como estão.
+- **Curtidas ainda não é entregue.** A tabela é fechada (só RPC) e não existe
+  RPC que liste os tópicos curtidos por uma pessoa. A aba só entra com a PR que
+  traz essa RPC aditiva, a porta, o adaptador e o teste de paridade, passando
+  pelo Gate de Camillo e Lucas. Até lá a aba **não aparece**: nada de aba morta,
+  contador inventado ou lista vazia fingindo ser dado.
+- **Fora, por decisão:** botão de chat no cabeçalho (mensagens privadas seguem
+  fora do escopo) e indicador de online no avatar (não há dado de presença; só
+  entra com decisão própria de produto e privacidade).
+- **O §12 da especificação do fórum fica superado nesses pontos.** O Rian
+  atualiza o protótipo e o documento (#252, #253) antes de a validação 1:1
+  valer.
+
+**Aceite:** pendente. Esta emenda registra a decisão. Nada dela está provado em
+navegador nem em banco até a entrega passar por implementação, testes e aceite.
 
 ## O que ainda não está decidido
 

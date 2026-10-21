@@ -286,6 +286,43 @@ describe('cursor com microssegundo', () => {
     expect(ultima.ok && ultima.valor.proximo).toBeNull();
   });
 
+  it('contarReacoesDosTopicos agrupa por tópico, separa o que é meu e recusa tipo desconhecido', async () => {
+    rpc.mockResolvedValue({
+      data: [
+        { topico_id: ID_A, tipo: 'like', total: 3, minha: true },
+        { topico_id: ID_A, tipo: 'fogo', total: 1, minha: false },
+        { topico_id: ID_B, tipo: 'trofeu', total: 2, minha: false },
+      ],
+      error: null,
+    });
+    const r = await criarForumWeb().contarReacoesDosTopicos!([ID_A, ID_B, 'nao-uuid']);
+    expect(rpc).toHaveBeenCalledWith('contar_reacoes_dos_topicos', { p_topicos: [ID_A, ID_B] });
+    expect(r.ok && r.valor[ID_A]).toEqual({ total: { like: 3, fogo: 1, nojo: 0, trofeu: 0 }, minhas: ['like'] });
+    expect(r.ok && r.valor[ID_B]?.total.trofeu).toBe(2);
+    rpc.mockResolvedValue({ data: [{ topico_id: ID_A, tipo: 'repost', total: 1, minha: false }], error: null });
+    expect(await criarForumWeb().contarReacoesDosTopicos!([ID_A])).toEqual({ ok: false, motivo: 'falhou' });
+  });
+
+  it('alternarReacaoDoTopico e alternarSalvo só aceitam booleano do servidor', async () => {
+    const f = criarForumWeb();
+    rpc.mockResolvedValue({ data: 'sim', error: null });
+    expect((await f.alternarSalvo!('topico', ID_A)).ok).toBe(false);
+    rpc.mockResolvedValue({ data: true, error: null });
+    expect(await f.alternarSalvo!('topico', ID_A)).toEqual({ ok: true, valor: true });
+    expect(rpc).toHaveBeenLastCalledWith('alternar_salvo', { p_tipo: 'topico', p_item_id: ID_A });
+    expect(await f.alternarReacaoDoTopico!(ID_A, 'fogo')).toEqual({ ok: true, valor: true });
+    expect(rpc).toHaveBeenLastCalledWith('alternar_reacao_do_topico', { p_topico_id: ID_A, p_tipo: 'fogo' });
+  });
+
+  it('listarMeusSalvos pede uma linha a mais para saber se há próxima página', async () => {
+    const linha = (n: number) => ({ tipo: 'topico', id: `00000000-0000-4000-8000-00000000000${n}`, titulo: `T${n}`, comunidade_slug: 'c', comunidade_nome: 'C', autor_handle: 'a', autor_apelido: 'A', criado_em: '2026-10-20T10:00:00Z', salvo_em: '2026-10-20T11:00:00Z' });
+    rpc.mockResolvedValue({ data: [linha(1), linha(2), linha(3)], error: null });
+    const r = await criarForumWeb().listarMeusSalvos!({ limite: 2, deslocamento: 2 });
+    expect(rpc).toHaveBeenCalledWith('listar_meus_salvos', { p_limite: 3, p_deslocamento: 2 });
+    expect(r.ok && r.valor.itens.map((i) => i.titulo)).toEqual(['T1', 'T2']);
+    expect(r.ok && r.valor.proximo).toBe(4);
+  });
+
   it('obterDetalhesDaComunidade traduz regras e moderadores; slug inexistente vira null', async () => {
     rpc.mockResolvedValue({ data: [{ regras: ['Respeite.'], moderadores: [{ handle: 'giamzinn_aue', apelido: 'giamz' }] }], error: null });
     const r = await criarForumWeb().obterDetalhesDaComunidade!('eu-arroto-e-dai');

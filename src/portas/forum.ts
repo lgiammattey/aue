@@ -124,6 +124,32 @@ export interface ComunidadeDoForum extends ReferenciaDeComunidade {
   readonly possoGerirMidia?: boolean;
 }
 
+export type ReacaoDoTopico = 'like' | 'fogo' | 'nojo' | 'trofeu';
+
+/** Contagem pública e o que a conta atual já marcou. */
+export interface ReacoesDoTopico {
+  readonly total: Readonly<Record<ReacaoDoTopico, number>>;
+  readonly minhas: readonly ReacaoDoTopico[];
+}
+
+export type TipoDeItemSalvo = 'topico' | 'causo';
+
+export interface ItemSalvo {
+  readonly tipo: TipoDeItemSalvo;
+  readonly id: string;
+  readonly titulo: string;
+  readonly comunidadeSlug: string;
+  readonly comunidadeNome: string;
+  readonly autorHandle: string | null;
+  readonly autorApelido: string | null;
+  readonly criadoEm: string;
+}
+
+export interface PaginaDeSalvos {
+  readonly itens: readonly ItemSalvo[];
+  readonly proximo: number | null;
+}
+
 /** Regras e moderação reais, como o servidor guarda. Nada daqui vem fixo no cliente. */
 export interface DetalhesDaComunidadeDoForum {
   readonly regras: readonly string[];
@@ -455,6 +481,16 @@ export interface PortaDeForum {
 
   /** Busca no servidor por pessoas (nome/@), comunidades e tópicos. Termo com menos de 2 letras volta vazio. */
   buscarNoAue?(opcoes: OpcoesDeBusca): Promise<ResultadoDaLeitura<PaginaDeBusca>>;
+
+  /** Contagens públicas por tópico (até 100 por chamada). Tópico sem reação não aparece no mapa. */
+  contarReacoesDosTopicos?(topicoIds: readonly string[]): Promise<ResultadoDaLeitura<Readonly<Record<string, ReacoesDoTopico>>>>;
+  /** `valor: true` quando a reação ficou ligada, `false` quando foi desligada. */
+  alternarReacaoDoTopico?(topicoId: string, tipo: ReacaoDoTopico): Promise<ResultadoDaEscrita<boolean>>;
+  /** `valor: true` quando ficou salvo, `false` quando saiu dos salvos. */
+  alternarSalvo?(tipo: TipoDeItemSalvo, itemId: string): Promise<ResultadoDaEscrita<boolean>>;
+  /** Só o que a própria conta salvou. */
+  listarIdsSalvos?(): Promise<ResultadoDaLeitura<readonly { readonly tipo: TipoDeItemSalvo; readonly id: string }[]>>;
+  listarMeusSalvos?(opcoes?: { readonly limite?: number; readonly deslocamento?: number }): Promise<ResultadoDaLeitura<PaginaDeSalvos>>;
 
   /** Tópicos de todas as comunidades, cada um com a sua. */
   explorarTopicos(

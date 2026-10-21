@@ -157,6 +157,17 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     }
   });
 
+  it('mantém todas as ações do card na toolbar canônica', () => {
+    mostrar({ salvo: false, aoCurtir: vi.fn(), aoReagir: vi.fn(), aoAlternarSalvar: vi.fn() });
+    const toolbar = screen.getByRole('toolbar', { name: 'Ações do causo' });
+
+    for (const nome of [/7 comentários/i, 'Curtir', '🔥', '🤢', '🏆', 'Salvar', 'Compartilhar']) {
+      expect(screen.getByRole('button', { name: nome })).toBeTruthy();
+    }
+
+    expect(toolbar.querySelectorAll('button')).toHaveLength(7);
+  });
+
   it('mostra contagens e marca o que a conta já fez; os cliques chegam aos handlers', () => {
     const aoCurtir = vi.fn();
     const aoReagir = vi.fn();

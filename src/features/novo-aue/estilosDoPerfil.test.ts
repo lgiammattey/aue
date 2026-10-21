@@ -39,6 +39,20 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     expect(css).toMatch(/data-sessao='ativa'\]\s*\.top-actions\s*\{[^}]*display:\s*none/);
   });
 
+  it('"Entrar" do visitante: a caixa acompanha o texto no mobile, sem esconder o estouro', () => {
+    const css = ler('./BarraSuperior.css');
+    const sem = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const mobile = sem.slice(sem.indexOf('@media (max-width: 699px)'), sem.indexOf('@media (max-width: 359px)'));
+    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*width:\s*auto/);
+    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*padding:\s*0 10px/);
+    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*font-size:\s*14px/);
+    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*font-weight:\s*700/);
+    expect(mobile).not.toMatch(/\.icon-btn\s*\{[^}]*font:/);
+    expect(sem).not.toContain('overflow-x');
+    expect(sem).not.toContain('!important');
+    expect(ler('../../index.css')).toMatch(/\.icon-btn\s*\{[^}]*width:\s*44px/);
+  });
+
   it('título do estado de erro do perfil não usa mais Anton com linha 1', () => {
     const css = ler('./InicioOpenDesign.css');
     expect(css).toMatch(/\.od-profile__state h1\s*\{[^}]*font:\s*800 22px\/28px/);

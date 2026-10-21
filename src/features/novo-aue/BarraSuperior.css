@@ -92,6 +92,18 @@
   .topbar .top-actions {
     flex: none;
   }
+
+  /*
+    "Entrar" do visitante: o .icon-btn global tem 44px de largura, feito para
+    ícone. O texto (uns 50px) vazava da caixa e alargava a página em 3 a 4px
+    abaixo de 360px. Aqui a caixa acompanha o texto e a altura de 44px fica.
+  */
+  .topbar .top-actions .icon-btn {
+    width: auto;
+    padding: 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+  }
 }
 
 @media (max-width: 359px) {

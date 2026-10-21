@@ -68,6 +68,8 @@ Cursor: devolver ao servidor **a string que ele mandou**, sem passar por `Date` 
 
 ### 2.3 O que NÃO existe (e por isso não é desenhado)
 
+> Superado para o perfil pela exceção de 21/10/2026 ([ESCOPO_ATUAL](../escopo/ESCOPO_ATUAL.md)): no perfil existem curtida no card e a aba Curtidas (só do dono, Fase B). Vale só para o perfil; o resto desta seção segue.
+
 | Não existe | Consequência na tela |
 |---|---|
 | Curtida, reação, coração, contagem de curtidas | nada disso aparece |
@@ -783,6 +785,8 @@ Reusa `LinhaDeTopico` da Tela 2 com a variante "com comunidade em cima". Substit
 
 ### 12.1 Abas
 
+> Superado para o perfil pela exceção de 21/10/2026 ([ESCOPO_ATUAL](../escopo/ESCOPO_ATUAL.md)): no perfil existem curtida no card e a aba Curtidas (só do dono, Fase B). Vale só para o perfil; o resto desta seção segue.
+
 Hoje: "Resenhas", "Com áudio", "Curtidos" (só no próprio). **Passam a ser duas: "Tópicos" e "Respostas".** Curtidas não existem mais e "Com áudio" sai do perfil (confirmar com Luiz, item 6 da seção 20).
 
 - Semântica de abas (APG): `role="tablist"`, `role="tab"`, `role="tabpanel"`, foco rodando com setas, Home e End. Cada aba com altura 52px (alvo grande). Ativa: sublinhado de 3px `--fg` e peso 700. A aba ativa vai na URL (`?aba=respostas`).
@@ -881,6 +885,8 @@ O corte só acontece depois de #254 + #255 + #256 + #257 + #258 + #259 + #248 pr
 - Código legado só sai em PR posterior ao corte (ADR 0010, item 6 da migração).
 
 ### 14.3 O que NÃO viaja (do protótipo antigo e do código atual)
+
+> Superado para o perfil pela exceção de 21/10/2026 ([ESCOPO_ATUAL](../escopo/ESCOPO_ATUAL.md)): no perfil existem curtida no card e a aba Curtidas (só do dono, Fase B). Vale só para o perfil; o resto desta seção segue.
 
 - Feed, timeline, abas "Para você" / "Seguindo", filtro local de assunto (`includes('arroto')`).
 - Qualquer composer de post avulso, botão "Postar", botão flutuante `+`.

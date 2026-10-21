@@ -26,7 +26,7 @@ export const BarraSuperior = memo(function BarraSuperior({
   const iniciais = nomeExibicao.slice(0, 2).toUpperCase();
 
   return (
-    <header className="topbar">
+    <header className="topbar" data-sessao={estaAutenticado ? 'ativa' : undefined}>
       <Link to="/" className="topbar-brand-mobile" aria-label="Auê mobile">
         AUÊ!
       </Link>

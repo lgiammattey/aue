@@ -2046,7 +2046,7 @@ export function InicioOpenDesign({
               <section className="od-profile__state" role="alert">
                 <h1>Não deu para abrir este perfil.</h1>
                 <p>Pode ser uma falha de conexão. Tenta de novo.</p>
-                <button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button>
+                <button type="button" className="pf-btn" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button>
               </section>
             )}
 
@@ -2054,7 +2054,7 @@ export function InicioOpenDesign({
               <section className="od-profile__state">
                 <h1>Esse @ não está na roda.</h1>
                 <p>O perfil pode ter mudado de nome ou não existir.</p>
-                <Link className="tab od-profile__button" to="/">Voltar ao início</Link>
+                <Link className="pf-btn" to="/">Voltar ao início</Link>
               </section>
             )}
 
@@ -2065,7 +2065,7 @@ export function InicioOpenDesign({
                   <h1>Termina sua ficha.</h1>
                   <p>Seu apelido e @ liberam a Tropa. Bio, cidade e redes são opcionais.</p>
                   {estadoDaFicha === 'carregando' && <p>Buscando o que você já preencheu…</p>}
-                  {estadoDaFicha === 'erro' && <><p>Não deu para carregar sua ficha agora.</p><button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button></>}
+                  {estadoDaFicha === 'erro' && <><p>Não deu para carregar sua ficha agora.</p><button type="button" className="pf-btn" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button></>}
                   {(estadoDaFicha === 'pronto' || estadoDaFicha === 'salvando') && (
                     <form className="od-profile__form" onSubmit={concluirFichaSocial}>
                       <label>Apelido<input value={ficha.apelido} onChange={(e) => setFicha({ ...ficha, apelido: e.target.value })} autoComplete="nickname" required /></label>

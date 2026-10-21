@@ -23,4 +23,24 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     expect(css).toMatch(/\.post-avatar-link::after\s*\{[^}]*inset:\s*-2px/);
     expect(css.replace(/\/\*[\s\S]*?\*\//g, '')).not.toContain('!important');
   });
+
+  it('a folha de foto ancora embaixo no celular com peso maior que o .modal do casca.css', () => {
+    const css = ler('./FolhaDaFoto.css');
+    expect(css).toMatch(/max-width:\s*699px\)\s*\{\s*\.modal\.folha-da-foto\s*\{[^}]*align-items:\s*flex-end[^}]*padding:\s*0/);
+    expect(css).toMatch(/padding-bottom:\s*calc\(24px \+ env\(safe-area-inset-bottom/);
+  });
+
+  it('barra superior do celular: 44px + topo seguro, logo em 32px/36px, sem linha de baixo só no perfil', () => {
+    const css = ler('./BarraSuperior.css');
+    expect(css).toMatch(/header\.topbar\s*\{[^}]*min-height:\s*calc\(44px \+ env\(safe-area-inset-top/);
+    expect(css).toMatch(/header\.topbar \.topbar-brand-mobile\s*\{[^}]*font-size:\s*32px[^}]*line-height:\s*36px/);
+    expect(css).toMatch(/main:has\(\.od-profile\) header\.topbar\s*\{[^}]*border-bottom:\s*0/);
+    expect(css).toMatch(/\.topbar \.search\s*\{[^}]*height:\s*36px/);
+    expect(css).toMatch(/data-sessao='ativa'\]\s*\.top-actions\s*\{[^}]*display:\s*none/);
+  });
+
+  it('título do estado de erro do perfil não usa mais Anton com linha 1', () => {
+    const css = ler('./InicioOpenDesign.css');
+    expect(css).toMatch(/\.od-profile__state h1\s*\{[^}]*font:\s*800 22px\/28px/);
+  });
 });

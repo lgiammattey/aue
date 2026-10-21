@@ -18,19 +18,33 @@
 
 @media (max-width: 699px) {
   header.topbar {
-    min-height: calc(53px + env(safe-area-inset-top, 0px));
-    padding-top: calc(4px + env(safe-area-inset-top, 0px));
+    min-height: calc(44px + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: 0;
     padding-right: max(14px, env(safe-area-inset-right, 0px));
     padding-left: max(14px, env(safe-area-inset-left, 0px));
   }
 
-  .topbar-brand-mobile {
+  /* Logo em Anton 32px com 36px de linha; a caixa de toque é de 44px. */
+  header.topbar .topbar-brand-mobile {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+    font-size: 32px;
+    line-height: 36px;
   }
 
   /* O <label> inteiro (44px) é o alvo: tocar em qualquer ponto dele foca o campo. */
+  /* No perfil o topo não tem linha de baixo, como no print; nas outras telas ela fica. */
+  main:has(.od-profile) header.topbar {
+    border-bottom: 0;
+  }
+
+  /* Com sessão ativa o "Entrar" não faz sentido (e cortava a barra): o Perfil está na barra de baixo. */
+  header.topbar[data-sessao='ativa'] .top-actions {
+    display: none;
+  }
+
   .topbar-search {
     position: relative;
     display: block;

@@ -241,6 +241,46 @@
   white-space: nowrap;
 }
 
+/*
+  Anel de foco do nome, do @handle e do r/roda: só em volta da linha de texto
+  (24px de altura, centrada na linha de --cab-linha), não na caixa de 44px.
+  Fica dentro do link, então o overflow:hidden não corta. 2px em --aue-text,
+  nunca verde (a aba ativa e o ARROTAR já gastam os verdes do estado).
+*/
+.card-do-post .author-profile-link,
+.card-do-post .post-meta-handle {
+  position: relative;
+}
+
+.card-do-post .author-profile-link:focus-visible,
+.card-do-post .post-meta-handle:focus-visible,
+.card-do-post .badge-comunidade:focus-visible {
+  outline: 0;
+}
+
+.card-do-post .author-profile-link:focus-visible::before,
+.card-do-post .post-meta-handle:focus-visible::before,
+.card-do-post .badge-comunidade:focus-visible::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  height: 24px;
+  border: 2px solid var(--aue-text);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.card-do-post .author-profile-link:focus-visible::before,
+.card-do-post .post-meta-handle:focus-visible::before {
+  top: calc(12px + (var(--cab-linha) - 24px) / 2);
+}
+
+.card-do-post .badge-comunidade:focus-visible::before {
+  top: calc((var(--cab-linha) - 24px) / 2);
+}
+
 /* ---------- texto, tag, mídia ---------- */
 .card-do-post .post-body {
   margin: 0 0 6px;

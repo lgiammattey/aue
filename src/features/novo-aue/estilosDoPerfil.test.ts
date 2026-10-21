@@ -68,6 +68,16 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     expect(css).not.toContain('!important');
   });
 
+  it('anel de foco do card: ::before de 24px em volta do texto, --aue-text, parametrizado pela linha, nunca verde', () => {
+    const css = ler('./CardDoPost.css').replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css).toMatch(/\.card-do-post \.author-profile-link:focus-visible,[^{]*\.badge-comunidade:focus-visible\s*\{\s*outline:\s*0;/);
+    expect(css).toMatch(/:focus-visible::before\s*\{[^}]*height:\s*24px[^}]*border:\s*2px solid var\(--aue-text\)[^}]*border-radius:\s*8px[^}]*pointer-events:\s*none/);
+    expect(css).toMatch(/\.post-meta-handle:focus-visible::before\s*\{\s*top:\s*calc\(12px \+ \(var\(--cab-linha\) - 24px\) \/ 2\)/);
+    expect(css).toMatch(/\.badge-comunidade:focus-visible::before\s*\{\s*top:\s*calc\(\(var\(--cab-linha\) - 24px\) \/ 2\)/);
+    expect(css).not.toMatch(/focus-visible[^{]*\{[^}]*accent/);
+    expect(css).not.toMatch(/top:\s*(12px|0);/);
+  });
+
   it('título do estado de erro do perfil não usa mais Anton com linha 1', () => {
     const css = ler('./InicioOpenDesign.css');
     expect(css).toMatch(/\.od-profile__state h1\s*\{[^}]*font:\s*800 22px\/28px/);

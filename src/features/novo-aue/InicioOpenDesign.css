@@ -1168,6 +1168,16 @@
     padding-top: 8px;
   }
 
+  /* O card canônico tem mais ações que a versão legada. Em vez de cortar ou
+     encolher os alvos, a barra segue para a linha seguinte no espaço móvel. */
+  .post-actions--twitter {
+    width: 100%;
+    max-width: none;
+    flex-wrap: wrap;
+    column-gap: 4px;
+    row-gap: 4px;
+  }
+
   .action-btn {
     min-height: 44px;
     min-width: 44px;

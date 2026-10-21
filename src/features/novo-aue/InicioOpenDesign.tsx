@@ -7,7 +7,7 @@
  * Gerencia as views centrais: 'feed', 'seguindo', 'comunidade', 'comunidades', 'perfil' e 'auth'.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarCapturaWeb } from '../../plataforma/web/captura';
@@ -33,14 +33,15 @@ import { ModalEditarPerfil } from './ModalEditarPerfil';
 import { ModalAjustarImagem, type RecorteVisual, type TipoDeImagemAjustavel } from './ModalAjustarImagem';
 import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDireta } from './ModalGravarArroto';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
-import { linkDaRede } from '../../nucleo/perfil/redesSociais';
 import { DialogoDoPost } from './DialogoDoPost';
 import { ModalConexoes, type EstadoDasConexoes } from './ModalConexoes';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
+import { AbasDoPerfil, CabecalhoDoPerfil, type AbaDoPerfil } from './PerfilDoUsuario';
+import { FolhaDaFoto } from './FolhaDaFoto';
 import { erroDeEnvio } from '../../nucleo/forum/escrita';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
-import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
+import { causoParaItemDoFeed, useEngajamento } from './useEngajamento';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
 import './InicioOpenDesign.css';
@@ -122,7 +123,12 @@ export function InicioOpenDesign({
   const [estadoTopicosDaComunidade, setEstadoTopicosDaComunidade] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
 
   // Perfil
-  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'arrotos' | 'salvos'>('posts');
+  const [parametrosDaUrl, setParametrosDaUrl] = useSearchParams();
+  // A aba vem da URL (?aba=arrotos|salvos) a cada render, e trocar de aba substitui a entrada (como app nativo: voltar sai do perfil).
+  const abaDaUrl = parametrosDaUrl.get('aba');
+  const abaPerfil: 'posts' | 'arrotos' | 'salvos' = abaDaUrl === 'arrotos' || abaDaUrl === 'salvos' ? abaDaUrl : 'posts';
+  const [folhaDaFotoAberta, setFolhaDaFotoAberta] = useState(false);
+  const botaoDoAvatar = useRef<HTMLButtonElement | null>(null);
   const [perfilAtivo, setPerfilAtivo] = useState<PerfilPublico | null>(null);
   const [causosDoPerfil, setCausosDoPerfil] = useState<readonly CausoPostado[]>([]);
   const [arrotosDoPerfil, setArrotosDoPerfil] = useState<readonly ArrotoDoPerfil[]>([]);
@@ -134,6 +140,8 @@ export function InicioOpenDesign({
   const [erroDaFicha, setErroDaFicha] = useState('');
   const [estadoCausosDoPerfil, setEstadoCausosDoPerfil] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
   const [tentativaDoPerfil, setTentativaDoPerfil] = useState(0);
+  // "Tentar de novo" dos posts e dos arrotos: relê só as listas, sem refazer o cabeçalho.
+  const [tentativaDoConteudo, setTentativaDoConteudo] = useState(0);
   const [modalPerfilAberto, setModalPerfilAberto] = useState(false);
   const [fotoEnviando, setFotoEnviando] = useState(false);
   const [capaEnviando, setCapaEnviando] = useState(false);
@@ -312,7 +320,7 @@ export function InicioOpenDesign({
     return () => {
       ativo = false;
     };
-  }, [perfilAtivo, meuPerfil, comunidadePort]);
+  }, [perfilAtivo, meuPerfil, comunidadePort, tentativaDoConteudo]);
 
   useEffect(() => {
     let ativo = true;
@@ -334,7 +342,7 @@ export function InicioOpenDesign({
     return () => {
       ativo = false;
     };
-  }, [perfilAtivo, meuPerfil, arrotosPort]);
+  }, [perfilAtivo, meuPerfil, arrotosPort, tentativaDoConteudo]);
 
   useEffect(() => () => capturaDoArroto.soltar(), [capturaDoArroto]);
 
@@ -571,22 +579,7 @@ export function InicioOpenDesign({
     comunidadePort.listarFeed({ seguindo: true, limite: 30 }).then(
       (causos) => {
         if (!ativo) return;
-        setItensSeguindo(causos.map((causo) => ({
-          id: `causo-${causo.id}`,
-          tipo: 'causo',
-          comunidadeSlug: causo.comunidadeSlug || 'eu-arroto-e-dai',
-          titulo: causo.conteudo.slice(0, 65) + (causo.conteudo.length > 65 ? '…' : ''),
-          corpo: causo.conteudo,
-          autorNome: causo.autorNome,
-          autorHandle: causo.autorHandle,
-          criadoEm: causo.criadoEm || new Date().toISOString(),
-          respostasTotal: causo.totalComentarios || 0,
-          temAudio: causo.temAudio,
-          enderecoDoAudio: causo.enderecoDoAudio,
-          nota: causo.nota,
-          videoUrl: causo.videoUrl,
-          engajamento: engajamentoDoCauso(causo),
-        })));
+        setItensSeguindo(causos.map(causoParaItemDoFeed));
         setEstadoSeguindo('pronto');
       },
       () => { if (ativo) setEstadoSeguindo('erro'); },
@@ -1561,6 +1554,36 @@ export function InicioOpenDesign({
     .map((parte) => parte[0]?.toUpperCase())
     .join('') ?? '';
 
+  /**
+   * Posts do perfil no formato do card. Autor, @ e foto vêm do perfil aberto (o
+   * @ do servidor), nunca do que o causo trouxe. O título é o próprio texto: o
+   * card só mostra a etiqueta de tópico quando título e corpo diferem.
+   */
+  const itensDoPerfil = useMemo(
+    () => causosDoPerfil.map((causo): ItemDoFeed => ({
+      ...causoParaItemDoFeed(causo),
+      titulo: causo.conteudo,
+      autorNome: perfilExibido?.apelido ?? causo.autorNome,
+      autorHandle: perfilExibido?.handle ?? causo.autorHandle,
+      autorAvatarUrl: perfilExibido?.avatarUrl,
+    })),
+    [causosDoPerfil, perfilExibido?.apelido, perfilExibido?.handle, perfilExibido?.avatarUrl],
+  );
+  const abasDoPerfil: readonly AbaDoPerfil[] = donoDoPerfil
+    ? [{ id: 'posts', rotulo: 'Posts' }, { id: 'arrotos', rotulo: 'Arrotos' }, { id: 'salvos', rotulo: 'Salvos' }]
+    : [{ id: 'posts', rotulo: 'Posts' }, { id: 'arrotos', rotulo: 'Arrotos' }];
+  // Salvos é só do dono: link com ?aba=salvos aberto por outra pessoa cai em Posts.
+  const abaAtiva = abaPerfil === 'salvos' && !donoDoPerfil ? 'posts' : abaPerfil;
+  const mudarAbaDoPerfil = (id: string) => {
+    if (id !== 'posts' && id !== 'arrotos' && id !== 'salvos') return;
+    setParametrosDaUrl((atuais) => {
+      const proximos = new URLSearchParams(atuais);
+      if (id === 'posts') proximos.delete('aba');
+      else proximos.set('aba', id);
+      return proximos;
+    }, { replace: true });
+  };
+
   return (
     <div className={`app${viewAtual === 'auth' ? ' app--auth' : ''}`}>
       {viewAtual !== 'auth' && <BarraLateral
@@ -2005,16 +2028,25 @@ export function InicioOpenDesign({
         {viewAtual === 'perfil' && (
           <section className="od-profile" aria-label="Perfil do usuário">
             {estadoPerfil === 'carregando' && (
-              <section className="od-profile__state" aria-live="polite">
-                <h1>Abrindo perfil…</h1><p>Buscando a ficha desta pessoa na roda.</p>
-              </section>
+              <div className="pf-skel" aria-busy="true" aria-live="polite">
+                <h1 className="sr-only">Abrindo perfil…</h1>
+                <div className="pf-skel__cabeca">
+                  <div className="pf-sk pf-skel__avatar" />
+                  <div className="pf-skel__nome"><div className="pf-sk" /><div className="pf-sk" /></div>
+                  <div className="pf-sk pf-skel__botao" />
+                </div>
+                <div className="pf-skel__sobre"><div className="pf-sk" /><div className="pf-sk" /><div className="pf-sk" /></div>
+                <div className="pf-skel__numeros"><div className="pf-sk" /><div className="pf-sk" /><div className="pf-sk" /></div>
+                <div className="pf-sk pf-skel__abas" />
+                <div className="pf-list"><div className="pf-sk pf-skel__card" /><div className="pf-sk pf-skel__card" /></div>
+              </div>
             )}
 
             {estadoPerfil === 'erro' && (
               <section className="od-profile__state" role="alert">
                 <h1>Não deu para abrir este perfil.</h1>
                 <p>Pode ser uma falha de conexão. Tenta de novo.</p>
-                <button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button>
+                <button type="button" className="pf-btn" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button>
               </section>
             )}
 
@@ -2022,7 +2054,7 @@ export function InicioOpenDesign({
               <section className="od-profile__state">
                 <h1>Esse @ não está na roda.</h1>
                 <p>O perfil pode ter mudado de nome ou não existir.</p>
-                <Link className="tab od-profile__button" to="/">Voltar ao início</Link>
+                <Link className="pf-btn" to="/">Voltar ao início</Link>
               </section>
             )}
 
@@ -2033,7 +2065,7 @@ export function InicioOpenDesign({
                   <h1>Termina sua ficha.</h1>
                   <p>Seu apelido e @ liberam a Tropa. Bio, cidade e redes são opcionais.</p>
                   {estadoDaFicha === 'carregando' && <p>Buscando o que você já preencheu…</p>}
-                  {estadoDaFicha === 'erro' && <><p>Não deu para carregar sua ficha agora.</p><button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button></>}
+                  {estadoDaFicha === 'erro' && <><p>Não deu para carregar sua ficha agora.</p><button type="button" className="pf-btn" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button></>}
                   {(estadoDaFicha === 'pronto' || estadoDaFicha === 'salvando') && (
                     <form className="od-profile__form" onSubmit={concluirFichaSocial}>
                       <label>Apelido<input value={ficha.apelido} onChange={(e) => setFicha({ ...ficha, apelido: e.target.value })} autoComplete="nickname" required /></label>
@@ -2062,174 +2094,115 @@ export function InicioOpenDesign({
 
             {estadoPerfil === 'pronto' && perfilExibido && (
               <>
-                <article className="od-profile__hero">
-                  <div
-                    className={`od-profile__cover${perfilExibido.capaUrl ? ' od-profile__cover--photo' : ''}`}
-                    style={perfilExibido.capaUrl ? { backgroundImage: `url("${perfilExibido.capaUrl}")` } : undefined}
-                    aria-label={perfilExibido.capaUrl ? `Capa de ${perfilExibido.apelido}` : 'Capa neutra do perfil'}
-                  >
-                    {!perfilExibido.capaUrl && <span>AUÊ!</span>}
-                    {donoDoPerfil && (
-                      <div className="od-profile__cover-actions">
-                        <button type="button" className="od-profile__cover-action" onClick={() => inputDaCapa.current?.click()} disabled={capaEnviando}>{capaEnviando ? 'Enviando…' : 'Trocar capa'}</button>
-                        {perfilExibido.capaUrl && <button type="button" className="od-profile__cover-action" onClick={() => void removerCapaDoPerfil()} disabled={capaEnviando}>Remover</button>}
+                <CabecalhoDoPerfil
+                  perfil={perfilExibido}
+                  dono={donoDoPerfil}
+                  iniciais={iniciaisDoPerfil}
+                  seguindo={seguindoPerfil}
+                  alternandoSeguir={alternandoSeguir}
+                  fotoEnviando={fotoEnviando}
+                  capaEnviando={capaEnviando}
+                  refDoAvatar={botaoDoAvatar}
+                  aoEditar={() => setModalPerfilAberto(true)}
+                  aoSeguir={() => void alternarSeguirPerfil()}
+                  aoCompartilhar={() => void compartilharPerfil()}
+                  aoAbrirFoto={() => setFolhaDaFotoAberta(true)}
+                  aoTrocarCapa={() => inputDaCapa.current?.click()}
+                  aoRemoverCapa={() => void removerCapaDoPerfil()}
+                  aoAbrirConexoes={(tipo) => void abrirConexoes(tipo)}
+                />
+                <input ref={inputDaFoto} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova foto de perfil" tabIndex={-1} onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'foto')} />
+                <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" tabIndex={-1} onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'capa')} />
+
+                <AbasDoPerfil abas={abasDoPerfil} ativa={abaAtiva} aoMudar={mudarAbaDoPerfil} />
+
+                {abaAtiva === 'posts' && (
+                  <div className="pf-list" role="tabpanel" id="painel-perfil-posts" aria-labelledby="aba-perfil-posts" tabIndex={0}>
+                    {(estadoCausosDoPerfil === 'ocioso' || estadoCausosDoPerfil === 'carregando') && (
+                      <div aria-busy="true"><span className="sr-only">Carregando posts…</span><div className="pf-sk pf-skel__card" /><div className="pf-sk pf-skel__card" /></div>
+                    )}
+                    {estadoCausosDoPerfil === 'erro' && (
+                      <div className="pf-state" role="alert">
+                        <h2>Não deu para carregar os posts agora.</h2>
+                        <p>Nada foi perdido.</p>
+                        <button type="button" className="pf-btn" onClick={() => setTentativaDoConteudo((n) => n + 1)}>Tentar de novo</button>
                       </div>
                     )}
-                    <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'capa')} />
-                  </div>
-                  <div className="od-profile__body">
-                    <div className="od-profile__topline">
-                      <div className="od-profile__avatar-wrap">
-                        <div className="od-profile__avatar" aria-label={`Avatar de ${perfilExibido.apelido}`}>
-                          {perfilExibido.avatarUrl ? <img src={perfilExibido.avatarUrl} alt="" /> : iniciaisDoPerfil}
-                        </div>
-                        {donoDoPerfil && (
-                          <button type="button" className="od-profile__photo-action" onClick={() => inputDaFoto.current?.click()} disabled={fotoEnviando}>
-                            {fotoEnviando ? 'Enviando…' : 'Trocar foto'}
-                          </button>
-                        )}
-                        <input ref={inputDaFoto} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova foto de perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'foto')} />
-                      </div>
-                      <div className="od-profile__actions">
-                        {donoDoPerfil ? (
-                          <button type="button" className="tab od-profile__button" onClick={() => setModalPerfilAberto(true)}>Editar perfil</button>
-                        ) : (
-                          <button type="button" className="join od-profile__button" onClick={() => void alternarSeguirPerfil()} disabled={alternandoSeguir}>
-                            {alternandoSeguir ? 'Atualizando…' : seguindoPerfil ? 'Seguindo' : 'Seguir'}
-                          </button>
-                        )}
-                        <button type="button" className="tab od-profile__button" onClick={() => void compartilharPerfil()}>Compartilhar</button>
-                      </div>
-                    </div>
-
-                    <div className="od-profile__identity">
-                      <h1>{perfilExibido.apelido}</h1>
-                      <p className="od-profile__handle">@{perfilExibido.handle}</p>
-                      {perfilExibido.bio && <p id="profileBio" className="od-profile__bio">{perfilExibido.bio}</p>}
-                      <div className="od-profile__meta">
-                        {perfilExibido.cidade && <span>⌖ {perfilExibido.cidade}</span>}
-                        <span>na roda desde {new Date(perfilExibido.criadoEm).getFullYear()}</span>
-                      </div>
-                      {(['instagram', 'tiktok', 'youtube', 'twitter'] as const).some((r) => linkDaRede(r, perfilExibido[r])) && (
-                        <div className="od-profile__social" aria-label="Redes sociais">
-                          {([['instagram', 'Instagram'], ['tiktok', 'TikTok'], ['youtube', 'YouTube'], ['twitter', 'X']] as const).map(([rede, nome]) => {
-                            const href = linkDaRede(rede, perfilExibido[rede]);
-                            return href ? <a key={rede} href={href} target="_blank" rel="noreferrer">{nome}</a> : null;
-                          })}
-                        </div>
-                      )}
-                    </div>
-
-                    <dl className="od-profile__metrics">
-                      <div><dt>Posts</dt><dd>{perfilExibido.totalCausos}</dd></div>
-                      <div><dt>Seguidores</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem segue (${perfilExibido.totalSeguidores})`} onClick={() => void abrirConexoes('seguidores')}>{perfilExibido.totalSeguidores}</button></dd></div>
-                      <div><dt>Seguindo</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem é seguido (${perfilExibido.totalSeguindo})`} onClick={() => void abrirConexoes('seguindo')}>{perfilExibido.totalSeguindo}</button></dd></div>
-                      {perfilExibido.melhorNota !== undefined && <div><dt>Melhor nota</dt><dd>{perfilExibido.melhorNota}</dd></div>}
-                    </dl>
-
-                    {donoDoPerfil && (
-                      <div className="od-profile__owner-tools">
-                        {perfilExibido.avatarUrl && <button type="button" className="tab" onClick={() => void removerFotoDoPerfil()} disabled={fotoEnviando}>Remover foto</button>}
-                        <button type="button" className="tab od-profile__button" onClick={() => setModalCompositorAberto(true)}>+ Novo post</button>
+                    {estadoCausosDoPerfil === 'pronto' && itensDoPerfil.length === 0 && (
+                      <div className="pf-state">
+                        <h2>Nenhum post publicado ainda.</h2>
+                        <p>{donoDoPerfil ? 'Quando soltar um, ele aparece aqui.' : 'Quando esta pessoa publicar, aparece aqui.'}</p>
+                        {donoDoPerfil && <button type="button" className="pf-btn" onClick={() => setModalCompositorAberto(true)}>Novo post</button>}
                       </div>
                     )}
-                  </div>
-                </article>
-
-                <div className="od-profile__tabs-nav" role="tablist" aria-label="Abas do perfil">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={abaPerfil === 'posts'}
-                    className={`od-profile__tab-btn ${abaPerfil === 'posts' ? 'active' : ''}`}
-                    onClick={() => setAbaPerfil('posts')}
-                  >
-                    Posts <span>{perfilExibido.totalCausos}</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={abaPerfil === 'arrotos'}
-                    className={`od-profile__tab-btn ${abaPerfil === 'arrotos' ? 'active' : ''}`}
-                    onClick={() => setAbaPerfil('arrotos')}
-                  >
-                    Arrotos <span>{arrotosDoPerfil.length}</span>
-                  </button>
-                  {donoDoPerfil && (
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={abaPerfil === 'salvos'}
-                      className={`od-profile__tab-btn ${abaPerfil === 'salvos' ? 'active' : ''}`}
-                      onClick={() => setAbaPerfil('salvos')}
-                    >
-                      Salvos
-                    </button>
-                  )}
-                </div>
-
-                {abaPerfil === 'posts' && (
-                  <section className="od-profile__activity" aria-labelledby="profileActivity">
-                    <div className="od-profile__activity-head"><h2 id="profileActivity">Posts</h2><span>{perfilExibido.totalCausos}</span></div>
-                    {estadoCausosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando posts…</p>}
-                    {estadoCausosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os posts agora.</p>}
-                    {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.length === 0 && (
-                      <div className="od-profile__empty"><h3>Nenhum post publicado ainda.</h3><p>{donoDoPerfil ? 'Quando soltar um, ele aparece aqui.' : 'Quando esta pessoa publicar, aparece aqui.'}</p></div>
-                    )}
-                    {estadoCausosDoPerfil === 'pronto' && causosDoPerfil.map((c) => (
-                      <Link key={c.id} to={`/historia/${c.id}`} className="od-profile__post">
-                        <span>r/{c.comunidadeSlug}</span>
-                        <p className="od-profile__post-corpo">{c.conteudo}</p>
-                        <small>{c.totalComentarios} comentários · {c.curtidas} curtidas</small>
-                      </Link>
+                    {estadoCausosDoPerfil === 'pronto' && itensDoPerfil.map((post) => (
+                      <CardDoPost
+                        key={post.id}
+                        post={post}
+                        variante="perfil"
+                        {...propsDeEngajamento(post)} {...propsDeModeracao(post)}
+                        audioTocando={audioTocandoId === post.id}
+                        tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
+                        duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
+                        aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
+                        aoAbrirComentarios={() => void abrirComentarios(post)}
+                        {...propsDeComentariosDoPost(post)}
+                      />
                     ))}
-                  </section>
+                  </div>
                 )}
 
-                {abaPerfil === 'arrotos' && (
-                  <section className="od-profile__activity" aria-labelledby="profileArrotos">
-                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2><span>{arrotosDoPerfil.length}</span></div>
+                {abaAtiva === 'arrotos' && (
+                  <div className="pf-list" role="tabpanel" id="painel-perfil-arrotos" aria-labelledby="aba-perfil-arrotos" tabIndex={0}>
+                    {perfilExibido.melhorNota !== undefined && (
+                      <div className="pf-best"><span>Melhor nota</span><b>{perfilExibido.melhorNota}</b></div>
+                    )}
                     {donoDoPerfil && (
-                      <div className="od-profile__record-cta">
-                        <button
-                          type="button"
-                          className="od-profile__record-button"
-                          aria-label="Gravar um arroto no meu perfil"
-                          onClick={() => abrirGravacaoDireta({ destinoFixo: 'perfil-proprio' })}
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M12 14.5a3 3 0 0 0 3-3v-5a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" />
-                            <path d="M18 11.5a6 6 0 0 1-12 0M12 17.5v3M8.5 20.5h7" />
-                          </svg>
-                        </button>
-                        <div>
-                          <p className="od-profile__record-eyebrow">ARROTO DIRETO</p>
-                          <h3>Grava um arroto pra deixar aqui.</h3>
-                        </div>
+                      <button type="button" className="pf-rec" onClick={() => abrirGravacaoDireta({ destinoFixo: 'perfil-proprio' })}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                          <path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3" />
+                        </svg>
+                        Gravar um arroto aqui
+                      </button>
+                    )}
+                    {estadoArrotosDoPerfil === 'carregando' && (
+                      <div aria-busy="true"><span className="sr-only">Carregando arrotos…</span><div className="pf-sk pf-skel__arroto" /></div>
+                    )}
+                    {estadoArrotosDoPerfil === 'erro' && (
+                      <div className="pf-state" role="alert">
+                        <h2>Não deu para carregar os arrotos agora.</h2>
+                        <p>Nada foi perdido.</p>
+                        <button type="button" className="pf-btn" onClick={() => setTentativaDoConteudo((n) => n + 1)}>Tentar de novo</button>
                       </div>
                     )}
-                    {estadoArrotosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
-                    {estadoArrotosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
                     {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.length === 0 && (
-                      <div className="od-profile__empty"><h3>Nenhum arroto aqui ainda.</h3><p>{donoDoPerfil ? 'Grave um para começar sua coleção.' : 'Quando alguém mandar um arroto para este perfil, ele aparece aqui.'}</p></div>
+                      <div className="pf-state">
+                        <h2>Nenhum arroto aqui ainda.</h2>
+                        <p>{donoDoPerfil ? 'Grave um para começar sua coleção.' : 'Quando alguém mandar um arroto para este perfil, ele aparece aqui.'}</p>
+                      </div>
                     )}
                     {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.map((arroto) => (
-                      <article key={arroto.id} className="od-profile__post">
-                        <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
-                        <h3 style={{ margin: '7px 0', fontSize: 16 }}>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
+                      <article key={arroto.id} className="pf-arr">
                         <PlayerDoArroto
                           tocando={audioTocandoId === arroto.id}
                           tempoAtualSegundos={audioSelecionadoId === arroto.id ? tempoAtualDoAudio : 0}
                           duracaoSegundos={audioSelecionadoId === arroto.id ? duracaoDoAudio : arroto.duracaoSegundos}
                           aoAlternar={() => void alternarAudio(arroto.enderecoDoAudio, arroto.id)}
                         />
-                        {arroto.possoOcultar && <button type="button" className="tab" style={{ marginTop: 8 }} onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); })}>Ocultar</button>}
+                        <div className="pf-arr-foot">
+                          <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
+                          {arroto.possoOcultar && <button type="button" onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); })}>Ocultar</button>}
+                        </div>
                       </article>
                     ))}
-                  </section>
+                  </div>
                 )}
 
-                {abaPerfil === 'salvos' && donoDoPerfil && <SalvosDoPerfil forum={forum} />}
+                {abaAtiva === 'salvos' && donoDoPerfil && (
+                  <div className="pf-list pf-list--salvos" role="tabpanel" id="painel-perfil-salvos" aria-labelledby="aba-perfil-salvos" tabIndex={0}>
+                    <SalvosDoPerfil forum={forum} />
+                  </div>
+                )}
               </>
             )}
           </section>
@@ -2516,19 +2489,6 @@ export function InicioOpenDesign({
       />
 
 
-      <ModalAjustarImagem
-        aberto={Boolean(ajusteDeImagem)}
-        tipo={ajusteDeImagem?.tipo ?? 'foto'}
-        previewUrl={ajusteDeImagem?.previewUrl ?? null}
-        estado={estadoDoAjusteDeImagem}
-        erro={erroDoAjusteDeImagem}
-        recorte={recorteDaImagem}
-        aoFechar={fecharAjusteDeImagem}
-        aoSalvar={() => void salvarAjusteDeImagem()}
-        aoTrocarArquivo={() => (ajusteDeImagem?.tipo === 'capa' ? inputDaCapa.current?.click() : inputDaFoto.current?.click())}
-        aoAlterarRecorte={setRecorteDaImagem}
-      />
-
       <ModalEditarPerfil
         aberto={modalPerfilAberto}
         nomeInicial={perfilExibido?.apelido ?? ''}
@@ -2541,8 +2501,45 @@ export function InicioOpenDesign({
           youtube: perfilExibido?.youtube,
           twitter: perfilExibido?.twitter,
         }}
+        temCapa={Boolean(perfilExibido?.capaUrl)}
+        capaEnviando={capaEnviando}
+        aoTrocarCapa={donoDoPerfil ? () => inputDaCapa.current?.click() : undefined}
+        aoRemoverCapa={donoDoPerfil ? () => void removerCapaDoPerfil() : undefined}
         aoFechar={() => setModalPerfilAberto(false)}
         aoSalvar={salvarEdicaoPerfil}
+      />
+
+      <FolhaDaFoto
+        aberta={folhaDaFotoAberta && donoDoPerfil}
+        temFoto={Boolean(perfilExibido?.avatarUrl)}
+        aoTrocar={() => {
+          setFolhaDaFotoAberta(false);
+          inputDaFoto.current?.click();
+        }}
+        aoRemover={() => {
+          setFolhaDaFotoAberta(false);
+          void removerFotoDoPerfil();
+          botaoDoAvatar.current?.focus();
+        }}
+        aoFechar={() => {
+          setFolhaDaFotoAberta(false);
+          botaoDoAvatar.current?.focus();
+        }}
+      />
+
+
+
+      <ModalAjustarImagem
+        aberto={Boolean(ajusteDeImagem)}
+        tipo={ajusteDeImagem?.tipo ?? 'foto'}
+        previewUrl={ajusteDeImagem?.previewUrl ?? null}
+        estado={estadoDoAjusteDeImagem}
+        erro={erroDoAjusteDeImagem}
+        recorte={recorteDaImagem}
+        aoFechar={fecharAjusteDeImagem}
+        aoSalvar={() => void salvarAjusteDeImagem()}
+        aoTrocarArquivo={() => (ajusteDeImagem?.tipo === 'capa' ? inputDaCapa.current?.click() : inputDaFoto.current?.click())}
+        aoAlterarRecorte={setRecorteDaImagem}
       />
 
       <ModalGerirComunidade

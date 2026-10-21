@@ -14,9 +14,19 @@ import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { PlayerDoArroto } from './PlayerDoArroto';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
+import './TokensDoCard.css';
+import './CardDoPost.css';
+import { formatarTempoRelativo } from './tempoRelativo';
 
 interface Props {
   readonly post: ItemDoFeed;
+  /**
+   * `feed` (padrão): feed, Seguindo, comunidade e thread. Mantém a nota, as
+   * reações emoji e o salvar.
+   * `perfil`: o card do print do perfil. Sem nota, sem emoji, sem salvar, e o
+   * coração só aparece quando há ação ligada à porta real.
+   */
+  readonly variante?: 'feed' | 'perfil';
   /** Só é exibido quando a rota fornece persistência real. */
   readonly salvo?: boolean;
   readonly reacoes?: Pick<EngajamentoDoPost, 'like' | 'fogo' | 'nojo' | 'trofeu'>;
@@ -45,26 +55,9 @@ interface Props {
   readonly aoAbrirComentarios?: () => void;
 }
 
-function formatarTempoRelativo(isoOuData: string): string {
-  try {
-    const data = new Date(isoOuData);
-    const segundos = Math.max(0, Math.floor((Date.now() - data.getTime()) / 1000));
-    if (segundos < 60) return 'agora';
-    const minutos = Math.floor(segundos / 60);
-    if (minutos < 60) return `${minutos}m`;
-    const horas = Math.floor(minutos / 60);
-    if (horas < 24) return `${horas}h`;
-    const dias = Math.floor(horas / 24);
-    if (dias === 1) return 'ontem';
-    if (dias < 7) return `${dias}d`;
-    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(data);
-  } catch {
-    return 'agora';
-  }
-}
-
 export const CardDoPost = memo(function CardDoPost({
   post,
+  variante = 'feed',
   salvo,
   reacoes,
   minhas = [],
@@ -84,6 +77,12 @@ export const CardDoPost = memo(function CardDoPost({
 
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
   const comunidadeIdentificador = `r/${post.comunidadeSlug}`;
+  const noPerfil = variante === 'perfil';
+  const tempo = formatarTempoRelativo(post.criadoEm);
+  // Duração do áudio tocando agora, ou a que a porta já trouxe. Sem nenhuma das duas, o player mostra o tempo corrido.
+  const duracaoConhecida = duracaoDoAudio
+    ?? post.duracaoSegundos
+    ?? (post.anexo?.tipo === 'audio' && post.anexo.duracaoMs ? post.anexo.duracaoMs / 1000 : null);
 
   // Vídeos antigos (ex.: r/arrotos-youtube) foram espelhados como tópico com o link
   // dentro do texto e sem anexo; sem este último recurso ficariam só como texto.
@@ -122,7 +121,7 @@ export const CardDoPost = memo(function CardDoPost({
 
   return (
     <article
-      className="feed-post card-do-post"
+      className={`feed-post card-do-post${noPerfil ? ' card-do-post--perfil' : ''}`}
       id={`post-${post.id}`}
     >
       {/* Coluna do Avatar (Estilo Twitter) */}
@@ -163,7 +162,7 @@ export const CardDoPost = memo(function CardDoPost({
 
       {/* Conteúdo Principal do Post */}
       <div className="post-main-content">
-        {/* Cabeçalho de Metadados: Nome, @handle, tempo e badges */}
+        {/* Linha 1: nome, @handle · tempo e o ⋯ no canto. Linha 2: r/comunidade (e a nota, no feed). */}
         <header className="post-meta-header">
           <div className="post-meta-ident">
             {post.autorHandle ? (
@@ -182,38 +181,44 @@ export const CardDoPost = memo(function CardDoPost({
               <Link
                 to={`/u/${post.autorHandle}`}
                 className="post-meta-handle"
-                aria-label={`Abrir perfil de u/${post.autorHandle}`}
+                aria-label={`Abrir perfil de @${post.autorHandle}`}
               >
-                u/{post.autorHandle}
+                @{post.autorHandle}
               </Link>
             )}
 
-            <span className="post-meta-dot" aria-hidden="true">
-              ·
-            </span>
+            {tempo && (
+              <>
+                <span className="post-meta-dot" aria-hidden="true">
+                  ·
+                </span>
 
-            <time dateTime={post.criadoEm} className="post-meta-time">
-              {formatarTempoRelativo(post.criadoEm)}
-            </time>
-          </div>
-
-          <div className="post-meta-badges">
-            <Link
-              to={`/c/${post.comunidadeSlug}`}
-              className="badge-comunidade"
-              title={`Ir para ${post.comunidadeSlug}`}
-            >
-              {comunidadeIdentificador}
-            </Link>
-
-            {post.nota !== undefined && post.nota !== null && (
-              <span className="badge-nota" title={`Nota do arroto: ${post.nota}/100`}>
-                <span className="badge-nota__label">NOTA</span>
-                <span className="badge-nota__value">{post.nota}</span>
-              </span>
+                <time dateTime={post.criadoEm} className="post-meta-time">
+                  {tempo}
+                </time>
+              </>
             )}
           </div>
+
+          <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />
         </header>
+
+        <div className="post-meta-badges">
+          <Link
+            to={`/c/${post.comunidadeSlug}`}
+            className="badge-comunidade"
+            title={`Ir para ${post.comunidadeSlug}`}
+          >
+            {comunidadeIdentificador}
+          </Link>
+
+          {!noPerfil && post.nota !== undefined && post.nota !== null && (
+            <span className="badge-nota" title={`Nota do arroto: ${post.nota}/100`}>
+              <span className="badge-nota__label">NOTA</span>
+              <span className="badge-nota__value">{post.nota}</span>
+            </span>
+          )}
+        </div>
 
         {/* Tag de Tópico (só quando há título distinto do corpo do post) */}
         {post.corpo && post.titulo && post.titulo.trim() !== post.corpo.trim() && !post.corpo.startsWith(post.titulo) && (
@@ -233,7 +238,7 @@ export const CardDoPost = memo(function CardDoPost({
             <PlayerDoArroto
               tocando={audioTocando}
               tempoAtualSegundos={tempoAtualDoAudio}
-              duracaoSegundos={duracaoDoAudio}
+              duracaoSegundos={duracaoConhecida}
               aoAlternar={() =>
                 aoTocarAudio?.(post.anexo?.tipo === 'audio' ? post.anexo.url : post.enderecoDoAudio)
               }
@@ -290,14 +295,12 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M21 12a8 8 0 01-11.6 7.1L3 21l1.9-6.4A8 8 0 1121 12z" />
             </svg>
-            {post.respostasTotal > 0 && (
-              <span className="action-btn__count">{post.respostasTotal}</span>
-            )}
+            <span className="action-btn__count">{post.respostasTotal}</span>
             <span className="sr-only">comentários</span>
           </button>
 
-          {/* Curtir */}
-          <button
+          {/* Curtir. No perfil só existe se há ação real por trás; o número vem da porta. */}
+          {(!noPerfil || aoCurtir) && <button
             type="button"
             className={`action-btn action-btn--like ${minhas.includes('like') ? 'is-active' : ''}`}
             onClick={aoDispararCurtir}
@@ -319,11 +322,11 @@ export const CardDoPost = memo(function CardDoPost({
             >
               <path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.8-8 11-8 11z" />
             </svg>
-            {reacoes && reacoes.like > 0 && <span className="action-btn__count">{reacoes.like}</span>}
+            <span className="action-btn__count">{reacoes ? reacoes.like : null}</span>
             <span className="sr-only">Curtir</span>
-          </button>
+          </button>}
 
-          {([
+          {!noPerfil && ([
             ['fogo', '🔥', 'Pegou fogo', 'fogo'],
             ['nojo', '🤢', 'Nojento demais', 'nojo'],
             ['trofeu', '🏆', 'Respeito / Troféu', 'Troféu'],
@@ -345,7 +348,7 @@ export const CardDoPost = memo(function CardDoPost({
           ))}
 
           {/* Sem porta de salvos, o controle continua visível mas indisponível. */}
-          {salvo !== undefined && <button
+          {!noPerfil && salvo !== undefined && <button
             type="button"
             className={`action-btn action-btn--save ${salvo ? 'is-saved' : ''}`}
             onClick={aoAlternarSalvar}
@@ -395,8 +398,6 @@ export const CardDoPost = memo(function CardDoPost({
             {copiado && <span className="action-btn__feedback">Copiado!</span>}
             <span className="sr-only">Compartilhar</span>
           </button>
-
-          <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />
         </div>
       </div>
     </article>

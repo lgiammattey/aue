@@ -1095,10 +1095,6 @@ main {
     font-weight: 700;
   }
 
-  .mobile-nav-item.active svg {
-    stroke: var(--aue-accent);
-  }
-
   .mobile-nav-item:active {
     transform: scale(0.94);
   }

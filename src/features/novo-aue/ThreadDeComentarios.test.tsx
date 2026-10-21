@@ -84,4 +84,38 @@ describe('ThreadDeComentarios (Padrão Twitter / Fora do Card)', () => {
       anexo: null,
     });
   });
+
+  it('o post-raiz da thread traz o menu ⋯ e as contagens que recebeu, sem inventar número', () => {
+    const aoApagar = vi.fn();
+    const props = { post: postExemplo, comentarios: [], carregando: false, enviando: false, aoVoltar: vi.fn(), aoEnviarComentario: vi.fn(async () => true) };
+    const { rerender } = render(
+      <MemoryRouter>
+        <ThreadDeComentarios {...props} aoApagar={aoApagar} reacoes={{ like: 5, fogo: 0, nojo: 0, trofeu: 0 }} minhas={['like']} aoCurtir={vi.fn()} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Apagar' }));
+    expect(aoApagar).toHaveBeenCalledOnce();
+    expect(screen.getByRole('button', { name: 'Curtir' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByText('5')).toBeTruthy();
+
+    const aoDenunciar = vi.fn();
+    rerender(
+      <MemoryRouter>
+        <ThreadDeComentarios {...props} aoDenunciar={aoDenunciar} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Denunciar' }));
+    expect(aoDenunciar).toHaveBeenCalledOnce();
+  });
+
+  it('sem ação de moderação não aparece o menu ⋯', () => {
+    render(
+      <MemoryRouter>
+        <ThreadDeComentarios post={postExemplo} comentarios={[]} carregando={false} enviando={false} aoVoltar={vi.fn()} aoEnviarComentario={vi.fn(async () => true)} />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole('button', { name: 'Mais ações' })).toBeNull();
+  });
 });

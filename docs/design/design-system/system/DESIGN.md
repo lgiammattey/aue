@@ -121,7 +121,7 @@ A hierarquia tipográfica une brutalismo esportivo e legibilidade social:
 2. **Interface e Leitura:** `Archivo` (com fallbacks `Google Sans Flex`, `Inter`, `system-ui`).
    - Uso: Textos do feed, resenhas, botões, navegação, descrições e formulários.
 3. **Monospaçada:** `ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace`.
-   - Uso restrito: Eyebrows técnicos, timestamps (`2min`, `1h`), duração de áudio (`0:07`), links curtos (`aue.gg/x1/9f2a`), posições numéricas de ranking.
+   - Uso restrito: Eyebrows técnicos, timestamps (`2min`, `1h`), duração de áudio (`0:07`; no player do card e do perfil é sans, exceção do Luiz de 21/10/2026), links curtos (`aue.gg/x1/9f2a`), posições numéricas de ranking.
 
 ### Escala de Tamanhos
 - `Display 2xl`: `clamp(60px, 19vw, 92px)` — Score revelado
@@ -166,6 +166,7 @@ O elemento orgânico e sonoro do jogo:
 - Botão circular play/pause (`36px` a `40px`).
 - Waveform com barras verticais indicando dinâmica do arroto.
 - Duração em mono (`0:07`).
+  - **Exceção (decisão do Luiz, 21/10/2026):** no player do card e do perfil, a duração do áudio e o tempo (`2d`) são em sans (Archivo), com números tabulares, como no print do perfil. O mono do §3 e deste item segue valendo para o resto.
 - Badge da nota anexado: retângulo com fundo `--accent` e texto em `Anton` (`24px`).
 
 ### 5.4 Métricas (`Metrica` e `ListaDeMetricas`)

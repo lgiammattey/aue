@@ -154,6 +154,19 @@ Decididas pelo **Luiz**, registradas pelo Tiago em 21/10/2026:
 
 Já respondidas antes e fora de dúvida: print vence a decisão de 19/10; sem chat; sem bolinha online; bio, cidade, "na roda desde" e redes ficam; capa some no mobile.
 
+### Decisões do Luiz depois do Gate (21/10/2026, requisito, não se reabre)
+
+Dadas ao Kayky no momento de abrir o código. Valem acima do que o Gate do Camillo e o aceite do Rian escreveram sobre os mesmos pontos.
+
+| # | Pergunta | Decisão do Luiz |
+|---|---|---|
+| 8 | O que o card único mantém do feed? | O feed mantém repostar, desafiar e a nota verde no card. O `CardDoPost` ganha `variante?: 'feed' \| 'perfil'`, padrão `'feed'`. A `'feed'` segue com esses elementos e com as reações emoji. A `'perfil'` segue o print. Os itens comuns às duas variantes (`@handle`, `r/comunidade` em linha própria, `⋯` no topo) só valem para as duas se não tirarem repost, desafiar nem nota do feed. Se uma mudança do card comum tirar algo do feed, ela fica restrita à variante `'perfil'` e o Kayky registra no relatório. Na dúvida, o feed não muda de comportamento. |
+| 9 | Brilho verde atrás do ARROTAR | Fica como no print. É sombra decorativa e não conta no limite de 2 verdes. |
+| 10 | Barra inferior | O item ativo do celular vai a `--fg` (apagar `casca.css:1098-1100`, como o Camillo definiu). O menu lateral do desktop não muda. |
+| 11 | Foto, capa, abas e detalhes | Foto do avatar tocável abre a folha de troca de foto. Capa só no desktop; no mobile "Trocar capa" e "Remover" ficam no `ModalEditarPerfil`. A aba Curtidas não existe no DOM. Duração do áudio em sans. "Seguir" do visitante neutro. |
+
+O Luiz quer o perfil mobile perfeito e com cara de app nativo, sem quebrar e sem "sambar". Aparelhos: iPhone 17 (402x874, Safari) e Moto G67 (412x915, premissa). Teste de 320 a 430, depois 768 e 1280, claro e escuro.
+
 ### Ainda sem resposta do Luiz
 
 1. **"Melhor nota" e vitórias no X1.** O Luiz não respondeu. Segue a recomendação do Tiago: "Melhor nota" fica dentro da aba Arrotos, no topo da lista, em faixa neutra; "vitórias no X1" não entra, porque não há fonte de dado. Vira pergunta de novo só se o Luiz quiser outra coisa.
@@ -287,3 +300,37 @@ Rodar `typecheck`, `lint`, `test` e `build` em cada commit, não só no último.
 - Card único: o feed deste mesmo protótipo ainda mostra o card antigo (repost, desafiar, nota verde, duração mono). O print só prova o card do perfil. Antes do Kayky mexer no `CardDoPost` compartilhado, o Tiago ou o Luiz decidem o que o card único mantém do feed. Sem isso, o Rian não valida feed e comunidades.
 - Barra inferior nas outras telas: `Arena.dc.html` e `Comunidades.dc.html` já usam `--fg` no item ativo, então a cor está coerente. Divergem na estrutura: só ícones sem rótulo, sem FAB, ordem Início, Auê, Comunidades, Desafios, Perfil (a nova é Feed, Comunidades, ARROTAR, X1, Perfil), sem safe-area. `Versões Webapp.dc.html` só embute as duas e herda. Não reescrevi.
 - Heart do card só aparece no código real se `alternarCurtida` estiver ligado (item 5 da matriz).
+
+## Correções do PR #330 (21/10/2026)
+
+Registro do Kayky depois das auditorias do Camillo (APROVADO COM CONDIÇÕES) e do Marcelo (APROVADO COM RESSALVAS).
+
+**Decisões do Luiz nesta rodada**
+
+- (a) A barra superior sem o botão Buscar e sem o mini-perfil vale para todo o app no celular, não só para o perfil. Desktop e menu lateral não mudam.
+- Repostar e desafiar não entram: nunca existiram no `CardDoPost` e não há cartão para eles.
+
+**O que a implementação decidiu e fica registrado**
+
+- (b) A duração real do áudio aparece no card do feed e do Seguindo antes do play (`ItemDoFeed.duracaoSegundos` ou `anexo.duracaoMs`). Antes era "0:00" até tocar.
+- (c) A variante `perfil` esconde Salvar, como o protótipo e o print. O Camillo tinha deixado o botão; o desenho vence. Salvar segue no feed, na comunidade e na thread.
+- (d) As abas têm teclado (setas, Home, End) e `?aba=arrotos|salvos`. A aba é lida da URL a cada render e o `?aba=` é compartilhável (valor inválido, ou Salvos de outra pessoa, cai em Posts). Decisão do Luiz: trocar de aba não empilha histórico (`replace`), como em app nativo; voltar sai do perfil.
+- (f) O gatilho (f) do Gate disparou na letra: o CSS do card tem cerca de 350 linhas e o do perfil cerca de 680. O Camillo liberou os dois como bloco coeso, sem token novo fora do DESIGN.md.
+
+**Conferência do Camillo, em 3 linhas**
+
+1. Sem porta, RPC, migração nem contrato novo; `PlayerDoArroto` e `MenuDoPost` mantiveram a assinatura.
+2. Pediu tokens (`--border-strong`, `--ind`) com os valores do DESIGN.md em um lugar só, peso explícito no verde do feed e remoção do CSS morto de salvar.
+3. Apontou que `casca.css` e `Comunidade.css` declaram `--border-strong` com outros hex: issue futura, fora desta fase.
+
+**Auditoria do Marcelo, em 3 linhas**
+
+1. Bug real: o menu ⋯ abria atrás da barra inferior (botão entre y 660 e 745 numa tela de 800).
+2. A folha de foto não travava a rolagem do fundo; havia alvos abaixo de 44px, placeholder cortado em 320, data inventada ("agora") e player sem progresso.
+3. O teste intermitente da Arena (`Arena.test.tsx`, contagem 3-2-1) falha na `main` também e não é deste PR.
+
+## Aceite visual do Rian no PR #330: ajustes e backlog (21/10/2026)
+
+Feitos nesta rodada: folha de foto ancorada embaixo no celular (o `.modal` do `casca.css` vencia no mesmo peso), título e botão do estado de erro do perfil, "Entrar" escondido no celular com sessão ativa, barra superior do celular com 44px mais topo seguro, logo em Anton 32px/36px e busca de 36px (sem linha de baixo só no perfil), tempo do post em semanas ("1sem") até 29 dias e data absoluta só depois, menu ⋯ com largura mínima de 128px. O "ontem" para 1 dia foi mantido.
+
+**Backlog (fora do escopo, não feito):** a barra inferior mede 67px contra 56px do protótipo e o ícone ativo não tem `stroke-width` 2.4. Precisa de ajuste em `casca.css` com `casca.layout.test.ts` rodado antes e depois; abre outro cartão.

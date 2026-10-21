@@ -1,0 +1,24 @@
+/*
+  Tokens do DESIGN.md que o app só declara em outras rotas, declarados UMA vez
+  para tudo o que o card e o perfil desenham: perfil, card, player e folha de
+  foto. Assim a borda é a mesma no feed e no perfil.
+
+  Valores do DESIGN.md: --border-strong #74725f (escuro) e #85836f (claro);
+  --ind é o verde no escuro e o preto no claro.
+  Não mexe em casca.css nem em Comunidade.css.
+*/
+.od-profile,
+.card-do-post,
+.player-arroto,
+.folha-da-foto {
+  --border-strong: #74725f;
+  --ind: var(--aue-accent, #c6ff00);
+}
+
+[data-theme='light'] .od-profile,
+[data-theme='light'] .card-do-post,
+[data-theme='light'] .player-arroto,
+[data-theme='light'] .folha-da-foto {
+  --border-strong: #85836f;
+  --ind: #0a0a08;
+}

@@ -1,3 +1,4 @@
+import './TokensDoCard.css';
 import './PlayerDoArroto.css';
 
 interface Props {

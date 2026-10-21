@@ -8,6 +8,7 @@ function regrasCom(css: string, trecho: string): string[] {
   const limpo = css.replace(/\/\*[\s\S]*?\*\//g, '');
   return [...limpo.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .filter(([, seletor]) => seletor.includes(trecho))
+    .filter(([, seletor]) => trecho !== '.card-do-post--perfil' || !seletor.includes(':not(.card-do-post--perfil)'))
     .map(([, seletor, corpo]) => `${seletor.trim()} { ${corpo.trim()} }`);
 }
 
@@ -24,12 +25,15 @@ describe('verde do perfil (opção A do Luiz: só aba ativa e ARROTAR)', () => {
     const doPerfil = regrasCom(card, '.card-do-post--perfil');
     expect(doPerfil.length).toBeGreaterThan(0);
     for (const regra of doPerfil) expect(regra, regra).not.toMatch(/accent|#c6ff00/i);
-    expect(card).not.toMatch(/--aue-accent|--accent|#c6ff00/i);
+    // O único verde do arquivo é o da variante feed, escrito com :not(.card-do-post--perfil).
+    const comVerde = regrasCom(card, '').filter((r) => /accent|#c6ff00/i.test(r));
+    expect(comVerde.length).toBeGreaterThan(0);
+    for (const regra of comVerde) expect(regra, regra).toContain(':not(.card-do-post--perfil)');
   });
 
-  it('a variante perfil neutraliza os quatro pontos que seriam verdes no card', () => {
+  it('a variante perfil neutraliza os pontos que seriam verdes no card', () => {
     const doPerfil = regrasCom(card, '.card-do-post--perfil').join('\n');
-    for (const alvo of ['.post-topic-tag__label', '.action-btn.is-active', '.action-btn--save.is-saved', '.action-btn__feedback']) {
+    for (const alvo of ['.post-topic-tag__label', '.action-btn.is-active', '.action-btn__feedback']) {
       expect(doPerfil, alvo).toContain(alvo);
     }
   });
@@ -37,5 +41,22 @@ describe('verde do perfil (opção A do Luiz: só aba ativa e ARROTAR)', () => {
   it('o card não declara regra para o seletor legado .post-body global nem para .play e .wave', () => {
     for (const seletor of regrasCom(card, '.post-body')) expect(seletor).toMatch(/^\.card-do-post \.post-body/);
     expect(card).not.toMatch(/(^|[\s,])\.(play|wave)\b/m);
+  });
+
+  it('o verde do feed tem peso explícito (0,4,0), não depende da ordem de import', () => {
+    const regras = regrasCom(card, ':not(.card-do-post--perfil) .action-btn').join('\n');
+    for (const alvo of ['.action-btn.is-active', '.action-btn--save.is-saved', '.action-btn__feedback']) expect(regras, alvo).toContain(alvo);
+    expect(regras).toMatch(/color:\s*var\(--aue-accent\)/);
+    expect(card.replace(/\/\*[\s\S]*?\*\//g, '')).not.toContain('!important');
+  });
+
+  it('--border-strong e --ind são declarados uma vez, com os valores do DESIGN.md', () => {
+    const tokens = ler('./TokensDoCard.css');
+    expect(tokens).toContain('--border-strong: #74725f');
+    expect(tokens).toContain('--border-strong: #85836f');
+    expect(tokens).toMatch(/--ind:\s*#0a0a08/);
+    for (const css of [card, player, ler('./PerfilDoUsuario.css'), ler('./FolhaDaFoto.css')]) {
+      expect(css).not.toMatch(/--border-strong:\s*#|--ind:\s*#/);
+    }
   });
 });

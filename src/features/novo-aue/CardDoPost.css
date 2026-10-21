@@ -333,6 +333,18 @@
   }
 }
 
+/*
+  ---------- variante feed: o verde de ativo, salvo e feedback, com peso explícito ----------
+  O verde do feed vinha do InicioOpenDesign.css e só vencia pela ordem de
+  import (mesmo peso). Aqui o peso é 0,4,0 e a regra não depende de ordem.
+*/
+.card-do-post:not(.card-do-post--perfil) .action-btn.is-active,
+.card-do-post:not(.card-do-post--perfil) .action-btn--save.is-saved,
+.card-do-post:not(.card-do-post--perfil) .action-btn--save:hover:not(:disabled),
+.card-do-post:not(.card-do-post--perfil) .action-btn__feedback {
+  color: var(--aue-accent);
+}
+
 /* ---------- variante perfil: nenhum verde ---------- */
 .card-do-post--perfil .post-topic-tag__label {
   color: var(--aue-text);
@@ -341,8 +353,6 @@
 }
 
 .card-do-post--perfil .action-btn.is-active,
-.card-do-post--perfil .action-btn--save.is-saved,
-.card-do-post--perfil .action-btn--save:hover,
 .card-do-post--perfil .action-btn__feedback {
   color: var(--aue-text);
 }

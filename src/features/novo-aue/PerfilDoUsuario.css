@@ -9,17 +9,6 @@
   Alvos de toque: 44px reais (caixa), não só área invisível.
 */
 
-.od-profile {
-  /* Tokens do design system (DESIGN.md) que o app só declara em outras rotas. */
-  --border-strong: #3a3a3c;
-  --ind: #c6ff00;
-}
-
-[data-theme='light'] .od-profile {
-  --border-strong: #888888;
-  --ind: #000000;
-}
-
 .pf {
   font-family: var(--font-body, 'Archivo', system-ui, sans-serif);
   -webkit-text-size-adjust: 100%;

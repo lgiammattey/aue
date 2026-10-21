@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { manterFocoNoDialogo } from '../../plataforma/web/focoNoDialogo';
+import './TokensDoCard.css';
 import './FolhaDaFoto.css';
 
 interface Props {

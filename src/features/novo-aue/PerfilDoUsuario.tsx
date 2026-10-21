@@ -5,6 +5,7 @@
  */
 import { useRef, useState, type KeyboardEvent, type Ref } from 'react';
 import { linkDaRede } from '../../nucleo/perfil/redesSociais';
+import './TokensDoCard.css';
 import './PerfilDoUsuario.css';
 import type { PerfilPublico } from '../../portas/perfil';
 

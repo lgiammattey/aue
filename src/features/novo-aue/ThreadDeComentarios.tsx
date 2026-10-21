@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
+import { montarArvoreDeRespostas, type NoDeResposta } from '../../nucleo/forum/apresentacao';
 import { CardDoPost } from './CardDoPost';
 
 export interface ThreadDeComentariosProps {
@@ -36,6 +37,9 @@ export interface ThreadDeComentariosProps {
 }
 
 const LIMITE_RESPOSTA = 180;
+
+const RECUO_VISUAL_MAXIMO = 2;
+type ComentarioComPai = ItemComentario & { readonly paiId: string | null };
 
 function formatarTempoRelativo(isoOuData: string): string {
   try {
@@ -71,6 +75,88 @@ function detectarLinkDeVideo(url: string): { tipo: 'youtube' | 'tiktok'; embedUr
     };
   }
   return null;
+}
+
+interface RespostaDaArvoreProps {
+  readonly no: NoDeResposta<ComentarioComPai>;
+  readonly profundidade: number;
+  readonly aoResponder: (comentario: ItemComentario) => void;
+}
+
+function RespostaDaArvore({ no, profundidade, aoResponder }: RespostaDaArvoreProps) {
+  const comentario = no.resposta;
+  const nivelVisual = Math.min(profundidade, RECUO_VISUAL_MAXIMO);
+  const inicial = (comentario.autorNome || '?').charAt(0).toUpperCase();
+
+  return (
+    <li className="thread-tree__branch">
+      <article className="thread-reply-item" data-profundidade-visual={nivelVisual}>
+        <div className="thread-reply-avatar">
+          {comentario.autorAvatarUrl ? (
+            <img
+              src={comentario.autorAvatarUrl}
+              alt={comentario.autorNome}
+              className="post-avatar-img"
+              loading="lazy"
+            />
+          ) : (
+            <span>{inicial}</span>
+          )}
+        </div>
+
+        <div className="thread-reply-body">
+          <div className="thread-reply-meta">
+            <strong>
+              {comentario.autorHandle ? (
+                <Link to={`/u/${comentario.autorHandle}`} aria-label={`Abrir perfil de ${comentario.autorNome}`}>
+                  {comentario.autorNome}
+                </Link>
+              ) : (
+                comentario.autorNome
+              )}
+            </strong>
+            {comentario.autorHandle && <span>@{comentario.autorHandle}</span>}
+            <span>·</span>
+            <time>{formatarTempoRelativo(comentario.criadoEm)}</time>
+          </div>
+
+          {comentario.conteudo ? <p className="thread-reply-text">{comentario.conteudo}</p> : <p className="thread-reply-unavailable">Conteúdo indisponível.</p>}
+
+          {comentario.anexo?.tipo === 'imagem' && comentario.anexo.url && (
+            <img src={comentario.anexo.url} alt="Imagem na resposta" className="comment-media-img" loading="lazy" />
+          )}
+
+          {comentario.anexo?.tipo === 'audio' && comentario.anexo.url && (
+            <div className="comment-audio"><audio controls src={comentario.anexo.url} preload="metadata" /></div>
+          )}
+
+          {comentario.anexo?.tipo === 'videoExterno' && comentario.anexo.url && detectarLinkDeVideo(comentario.anexo.url) && (
+            <iframe
+              className="post-video"
+              src={detectarLinkDeVideo(comentario.anexo.url)!.embedUrl}
+              title="Vídeo na resposta"
+              loading="lazy"
+              allowFullScreen
+            />
+          )}
+
+          <div className="thread-reply-actions">
+            <button type="button" className="thread-reply-btn" onClick={() => aoResponder(comentario)}>
+              Responder a {comentario.autorNome}
+            </button>
+          </div>
+        </div>
+      </article>
+
+      {no.filhas.length > 0 && (
+        <ol className={`thread-tree thread-tree--nivel-${Math.min(profundidade + 1, RECUO_VISUAL_MAXIMO)}`}>
+          {no.filhas.map((filha) => (
+            <RespostaDaArvore key={filha.resposta.id} no={filha} profundidade={profundidade + 1} aoResponder={aoResponder} />
+          ))}
+        </ol>
+      )}
+    </li>
+  );
 }
 
 export const ThreadDeComentarios = memo(function ThreadDeComentarios({
@@ -221,8 +307,16 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
       setAutorRespostaNome(null);
       setAnexo(null);
       setMostrarCampoLink(false);
+    } else {
+      setErroComentario('Não deu para publicar sua resposta. Seu rascunho continua aqui.');
     }
   };
+
+  const comentariosComPai: readonly ComentarioComPai[] = comentarios.map((comentario) => ({
+    ...comentario,
+    paiId: comentario.paiId ?? null,
+  }));
+  const arvoreDeComentarios = montarArvoreDeRespostas(comentariosComPai);
 
   return (
     <section className="thread-view" aria-label="Resenha na roda">
@@ -472,7 +566,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
         </footer>
       </form>
 
-      {/* Lista de respostas fora do card */}
+      {/* A ordem visual segue a árvore canônica por paiId; o recuo satura no nível 2. */}
       <div className="thread-stream">
         {carregando ? (
           <div className="thread-inline-loading">
@@ -482,89 +576,11 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
         ) : comentarios.length === 0 ? (
           <p className="thread-inline-empty">Nenhum comentário ainda. Puxe o papo acima.</p>
         ) : (
-          comentarios.map((c) => {
-            const inicialResp = (c.autorNome || '?').charAt(0).toUpperCase();
-            return (
-              <article
-                key={c.id}
-                className="thread-reply-item"
-                style={{ marginLeft: `${Math.min(c.nivel ?? 0, 2) * 16}px` }}
-              >
-                {/* Avatar redondo da pessoa */}
-                <div className="thread-reply-avatar">
-                  {c.autorAvatarUrl ? (
-                    <img
-                      src={c.autorAvatarUrl}
-                      alt={c.autorNome}
-                      className="post-avatar-img"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span>{inicialResp}</span>
-                  )}
-                </div>
-
-                <div className="thread-reply-body">
-                  <div className="thread-reply-meta">
-                    <strong>
-                      {c.autorHandle ? (
-                        <Link
-                          to={`/u/${c.autorHandle}`}
-                          aria-label={`Abrir perfil de ${c.autorNome}`}
-                        >
-                          {c.autorNome}
-                        </Link>
-                      ) : (
-                        c.autorNome
-                      )}
-                    </strong>
-                    {c.autorHandle && <span>@{c.autorHandle}</span>}
-                    <span>·</span>
-                    <time>{formatarTempoRelativo(c.criadoEm)}</time>
-                  </div>
-
-                  {c.conteudo && <p className="thread-reply-text">{c.conteudo}</p>}
-
-                  {c.anexo?.tipo === 'imagem' && c.anexo.url && (
-                    <img
-                      src={c.anexo.url}
-                      alt="Imagem na resposta"
-                      className="comment-media-img"
-                      loading="lazy"
-                    />
-                  )}
-
-                  {c.anexo?.tipo === 'audio' && c.anexo.url && (
-                    <div className="comment-audio">
-                      <audio controls src={c.anexo.url} preload="metadata" />
-                    </div>
-                  )}
-
-                  {c.anexo?.tipo === 'videoExterno' &&
-                    c.anexo.url &&
-                    detectarLinkDeVideo(c.anexo.url) && (
-                      <iframe
-                        className="post-video"
-                        src={detectarLinkDeVideo(c.anexo.url)!.embedUrl}
-                        title="Vídeo na resposta"
-                        loading="lazy"
-                        allowFullScreen
-                      />
-                    )}
-
-                  <div className="thread-reply-actions">
-                    <button
-                      type="button"
-                      className="thread-reply-btn"
-                      onClick={() => responderPara(c)}
-                    >
-                      Responder a {c.autorNome}
-                    </button>
-                  </div>
-                </div>
-              </article>
-            );
-          })
+          <ol className="thread-tree thread-tree--nivel-0">
+            {arvoreDeComentarios.map((no) => (
+              <RespostaDaArvore key={no.resposta.id} no={no} profundidade={0} aoResponder={responderPara} />
+            ))}
+          </ol>
         )}
       </div>
     </section>

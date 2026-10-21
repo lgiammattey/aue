@@ -195,6 +195,19 @@ describe('cursor com microssegundo', () => {
     });
   });
 
+  it('obterContextoDaResposta pede uma leitura estreita, sem cursor nem paginação', async () => {
+    rpc.mockResolvedValue({
+      data: [
+        linhaDeResposta({ id: ID_A }),
+        linhaDeResposta({ id: ID_C, pai_id: ID_A, nivel: 1 }),
+      ],
+      error: null,
+    });
+    const contexto = await criarForumWeb().obterContextoDaResposta?.(ID_B, ID_C);
+    expect(contexto).toMatchObject({ ok: true, valor: [{ id: ID_A }, { id: ID_C, paiId: ID_A, nivel: 1 }] });
+    expect(rpc).toHaveBeenCalledWith('obter_contexto_da_resposta', { p_topico_id: ID_B, p_resposta_id: ID_C });
+  });
+
   it('prévia em lote pede uma RPC para a página toda, limita a duas por tópico e traz anexo junto', async () => {
     rpc.mockResolvedValue({
       data: [

@@ -873,6 +873,54 @@ export function InicioOpenDesign({
     }
   };
 
+  const carregarComentarios = async (post: ItemDoFeed): Promise<readonly ItemComentario[]> => {
+    if (post.tipo === 'topico') {
+      const topicoId = post.id.replace('topico-', '');
+      const res = await forum.listarRespostasDoTopico?.(topicoId);
+      if (!res?.ok) throw new Error('Não foi possível confirmar as respostas deste tópico.');
+
+      const anexos = forum.listarAnexosDoForum
+        ? await forum.listarAnexosDoForum({ respostaIds: res.valor.itens.map((resposta) => resposta.id) })
+        : null;
+      if (anexos && !anexos.ok) throw new Error('Não foi possível carregar os anexos das respostas.');
+      const anexosPorResposta = new Map((anexos?.ok ? anexos.valor : []).map((anexo) => [anexo.alvoId, anexo]));
+      const comentarios = await Promise.all(res.valor.itens.map(async (r) => {
+        const anexo = anexosPorResposta.get(r.id);
+        const url = anexo?.caminho && forum.assinarAnexoDoForum
+          ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+          : anexo?.urlVideo ?? undefined;
+        return {
+          id: r.id,
+          autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
+          autorHandle: r.autor?.handle ?? undefined,
+          autorAvatarUrl: r.autor?.avatarUrl ?? undefined,
+          conteudo: r.corpo ?? '',
+          criadoEm: r.criadoEm,
+          paiId: r.paiId,
+          nivel: r.nivel,
+          anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
+        };
+      }));
+      setListaComentarios(comentarios);
+      return comentarios;
+    }
+
+    const causoId = post.id.replace('causo-', '');
+    const res = await comunidadePort.listarRespostas?.(causoId);
+    if (!res) throw new Error('Não foi possível confirmar as respostas deste causo.');
+    const comentarios = res.map((r) => ({
+      id: r.id,
+      autorNome: r.autorNome,
+      autorHandle: r.autorHandle,
+      conteudo: r.conteudo,
+      criadoEm: r.criadoEm,
+      paiId: r.respostaAId ?? null,
+      nivel: r.nivel,
+    }));
+    setListaComentarios(comentarios);
+    return comentarios;
+  };
+
   const abrirComentarios = async (post: ItemDoFeed) => {
     // Se a thread deste post já estiver aberta, fecha (recolhe)
     if (postComentariosAtivo?.id === post.id) {
@@ -887,51 +935,9 @@ export function InicioOpenDesign({
     setListaComentarios([]);
 
     try {
-      if (post.tipo === 'topico') {
-        const topicoId = post.id.replace('topico-', '');
-        const res = await forum.listarRespostasDoTopico?.(topicoId);
-        if (res && res.ok) {
-          const anexos = forum.listarAnexosDoForum
-            ? await forum.listarAnexosDoForum({ respostaIds: res.valor.itens.map((resposta) => resposta.id) })
-            : null;
-          const anexosPorResposta = new Map((anexos?.ok ? anexos.valor : []).map((anexo) => [anexo.alvoId, anexo]));
-          setListaComentarios(
-            await Promise.all(res.valor.itens.map(async (r) => {
-              const anexo = anexosPorResposta.get(r.id);
-              const url = anexo?.caminho && forum.assinarAnexoDoForum
-                ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
-                : anexo?.urlVideo ?? undefined;
-              return {
-                id: r.id,
-                autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
-                autorHandle: r.autor?.handle ?? undefined,
-                autorAvatarUrl: r.autor?.avatarUrl ?? undefined,
-                conteudo: r.corpo ?? '',
-                criadoEm: r.criadoEm,
-                paiId: r.paiId,
-                nivel: r.nivel,
-                anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
-              };
-            })),
-          );
-        }
-      } else {
-        const causoId = post.id.replace('causo-', '');
-        const res = await comunidadePort.listarRespostas?.(causoId);
-        if (res) {
-          setListaComentarios(
-            res.map((r) => ({
-              id: r.id,
-              autorNome: r.autorNome,
-              autorHandle: r.autorHandle,
-              conteudo: r.conteudo,
-              criadoEm: r.criadoEm,
-            })),
-          );
-        }
-      }
+      await carregarComentarios(post);
     } catch {
-      // Mantém lista vazia sem interromper navegação
+      exibirToast('Não deu para carregar as respostas agora.');
     } finally {
       setCarregandoComentarios(false);
     }
@@ -964,9 +970,6 @@ export function InicioOpenDesign({
     setEnviandoComentario(true);
 
     try {
-      const meuNome = meuPerfil?.apelido ?? 'Você';
-      const meuHandle = meuPerfil?.handle ?? 'arrotador';
-
       if (postComentariosAtivo.tipo === 'topico') {
         const topicoId = postComentariosAtivo.id.replace('topico-', '');
         const res = await forum.responderTopico?.({
@@ -988,46 +991,50 @@ export function InicioOpenDesign({
           exibirToast('Não foi possível publicar a resposta agora.');
           return false;
         }
+
+        // A tela só usa o ramo que o servidor confirmou, e então recarrega a
+        // conversa para obter autor, texto, data e status canônicos.
+        if (res.valor.topicoId !== topicoId || res.valor.paiId !== dados.paiId) {
+          exibirToast('A resposta não voltou com o vínculo confirmado. Confira a conversa antes de tentar de novo.');
+          return false;
+        }
+        const confirmados = await carregarComentarios(postComentariosAtivo);
+        const confirmado = confirmados.some((comentario) =>
+          comentario.id === res.valor.id
+          && comentario.paiId === res.valor.paiId
+          && comentario.criadoEm === res.valor.criadoEm,
+        );
+        if (!confirmado) {
+          exibirToast('O servidor respondeu, mas a conversa ainda não confirmou o ramo. Confira antes de tentar de novo.');
+          return false;
+        }
       } else {
+        if (dados.anexo) {
+          exibirToast('Este causo legado ainda não aceita anexo em resposta.');
+          return false;
+        }
         const causoId = postComentariosAtivo.id.replace('causo-', '');
-        await comunidadePort.adicionarResposta?.(
+        const resposta = await comunidadePort.adicionarResposta?.(
           causoId,
           dados.conteudo.trim(),
-          meuNome,
-          meuHandle,
+          meuPerfil?.apelido ?? 'Você',
+          meuPerfil?.handle,
+          dados.paiId ?? undefined,
         );
+        if (!resposta) {
+          exibirToast('Não foi possível confirmar a resposta neste causo.');
+          return false;
+        }
+        const confirmados = await carregarComentarios(postComentariosAtivo);
+        const confirmado = confirmados.some((comentario) =>
+          comentario.id === resposta.id && comentario.paiId === (dados.paiId ?? null),
+        );
+        if (!confirmado) {
+          exibirToast('O causo não confirmou o vínculo da resposta. Confira antes de tentar de novo.');
+          return false;
+        }
       }
 
-      const novoComentario: ItemComentario = {
-        id: `comentario-${Date.now()}`,
-        autorNome: meuNome,
-        autorHandle: meuHandle,
-        conteudo: dados.conteudo.trim(),
-        criadoEm: new Date().toISOString(),
-        paiId: dados.paiId,
-        nivel: dados.paiId
-          ? Math.min((listaComentarios.find((comentario) => comentario.id === dados.paiId)?.nivel ?? 0) + 1, 2) as 0 | 1 | 2
-          : 0,
-        anexo: dados.anexo
-          ? {
-              tipo: dados.anexo.tipo,
-              url: dados.anexo.tipo === 'videoExterno' ? dados.anexo.url : URL.createObjectURL(dados.anexo.arquivo),
-              duracaoMs: dados.anexo.tipo === 'audio' ? dados.anexo.duracaoMs : undefined,
-            }
-          : undefined,
-      };
-
-      setListaComentarios((prev) => [...prev, novoComentario]);
-
-      const incrementar = (itens: readonly ItemDoFeed[]) =>
-        itens.map((it) =>
-          it.id === postComentariosAtivo.id
-            ? { ...it, respostasTotal: it.respostasTotal + 1 }
-            : it,
-        );
-
-      setItensFeed(incrementar);
-      setTopicosDaComunidade(incrementar);
       exibirToast('Comentário publicado na roda!');
       return true;
     } catch (erro) {

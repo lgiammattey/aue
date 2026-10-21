@@ -48,6 +48,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     obterComunidadeDoForum: vi.fn(),
     listarTopicos: vi.fn(),
     obterTopico: vi.fn(),
+    obterContextoDaResposta: vi.fn(),
     listarRespostasDoTopico: vi.fn(async () => ({
       ok: true as const,
       valor: {
@@ -605,10 +606,61 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
   });
 
   it('permite abrir o modal de comentários, ler a conversa e responder na roda', async () => {
+    const respostaConfirmada = {
+      id: 'resp-confirmada',
+      topicoId: 'topico-1',
+      paiId: null,
+      nivel: 0 as const,
+      autor: { id: 'autor-atual', handle: 'luiz', apelido: 'Luiz', avatarUrl: null },
+      corpo: 'Eu estava lá e confirmo o eco!',
+      status: 'visivel' as const,
+      criadoEm: '2026-10-20T02:00:00Z',
+      editadoEm: null,
+      souAutor: true,
+    };
+    const forumQueConfirma = {
+      ...mockForum,
+      responderTopico: vi.fn(async () => ({
+        ok: true as const,
+        valor: {
+          id: respostaConfirmada.id,
+          topicoId: respostaConfirmada.topicoId,
+          paiId: respostaConfirmada.paiId,
+          nivel: respostaConfirmada.nivel,
+          criadoEm: respostaConfirmada.criadoEm,
+        },
+      })),
+      listarRespostasDoTopico: vi.fn()
+        .mockResolvedValueOnce({
+          ok: true as const,
+          valor: {
+            itens: [{
+              id: 'resp-1', topicoId: 'topico-1', paiId: null, nivel: 0 as const,
+              autor: { id: 'autor-2', handle: 'pedro_som', apelido: 'Pedro Som', avatarUrl: null },
+              corpo: 'Esse som foi histórico na firma!', status: 'visivel' as const,
+              criadoEm: '2026-10-19T11:00:00Z', editadoEm: null, souAutor: false,
+            }],
+            proximo: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          ok: true as const,
+          valor: {
+            itens: [{
+              id: 'resp-1', topicoId: 'topico-1', paiId: null, nivel: 0 as const,
+              autor: { id: 'autor-2', handle: 'pedro_som', apelido: 'Pedro Som', avatarUrl: null },
+              corpo: 'Esse som foi histórico na firma!', status: 'visivel' as const,
+              criadoEm: '2026-10-19T11:00:00Z', editadoEm: null, souAutor: false,
+            }, respostaConfirmada],
+            proximo: null,
+          },
+        }),
+    } satisfies PortaDeForum;
+
     render(
       <MemoryRouter>
         <InicioOpenDesign
-          portaForum={mockForum}
+          portaForum={forumQueConfirma}
           portaComunidade={mockComunidade}
           autenticado={true}
         />
@@ -639,7 +691,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     fireEvent.click(btnEnviar);
 
     await waitFor(() => {
-      expect(mockForum.responderTopico).toHaveBeenCalledWith(
+      expect(forumQueConfirma.responderTopico).toHaveBeenCalledWith(
         expect.objectContaining({
           corpo: 'Eu estava lá e confirmo o eco!',
         }),
@@ -648,6 +700,86 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     // Nova resposta renderizada na lista
     expect(await screen.findByText('Eu estava lá e confirmo o eco!')).toBeTruthy();
+    expect(screen.getByText('Comentário publicado na roda!')).toBeTruthy();
+  });
+
+  it('mantém o rascunho e a contagem quando o servidor não confirma a resposta', async () => {
+    const forumQueRecusa = {
+      ...mockForum,
+      responderTopico: vi.fn(async () => ({ ok: false as const, motivo: 'falhou' as const })),
+    } satisfies PortaDeForum;
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumQueRecusa} portaComunidade={mockComunidade} autenticado />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /12 comentários/i }));
+    const input = await screen.findByPlaceholderText('Responder para a roda…');
+    fireEvent.change(input, { target: { value: 'Não some, rascunho.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+
+    await waitFor(() => expect(forumQueRecusa.responderTopico).toHaveBeenCalled());
+    expect((await screen.findByRole('alert')).textContent).toContain('Seu rascunho continua aqui.');
+    expect(screen.getByDisplayValue('Não some, rascunho.')).toBeTruthy();
+    expect(screen.getByText('Não foi possível publicar a resposta agora.')).toBeTruthy();
+    expect(screen.queryByText('Comentário publicado na roda!')).toBeNull();
+  });
+
+  it('preserva o pai do causo legado somente depois da releitura confirmada', async () => {
+    const respostaFilha = {
+      id: 'comentario-filho',
+      causoId: 'causo-1',
+      autorNome: 'Você',
+      autorHandle: 'voce',
+      conteudo: 'É resposta direta mesmo.',
+      criadoEm: '2026-10-20T02:10:00Z',
+      respostaAId: 'comentario-pai',
+      nivel: 1 as const,
+    };
+    const comunidadeComConfirmacao = {
+      ...mockComunidade,
+      listarFeed: vi.fn(async () => [{
+        id: 'causo-1', comunidadeId: '1', comunidadeSlug: 'arena-do-arroto',
+        autorNome: 'Pedro', autorHandle: 'pedro', conteudo: 'Causo que veio do acervo.',
+        reacoes: { fogo: 0, nojo: 0, trofeu: 0 }, curtidas: 0, reposts: 0,
+        totalComentarios: 1, criadoEm: '2026-10-20T01:00:00Z',
+      }]),
+      listarRespostas: vi.fn()
+        .mockResolvedValueOnce([{
+          id: 'comentario-pai', causoId: 'causo-1', autorNome: 'Ana', autorHandle: 'ana',
+          conteudo: 'Comentário pai.', criadoEm: '2026-10-20T01:05:00Z', nivel: 0 as const,
+        }])
+        .mockResolvedValueOnce([{
+          id: 'comentario-pai', causoId: 'causo-1', autorNome: 'Ana', autorHandle: 'ana',
+          conteudo: 'Comentário pai.', criadoEm: '2026-10-20T01:05:00Z', nivel: 0 as const,
+        }, respostaFilha]),
+      adicionarResposta: vi.fn(async () => respostaFilha),
+    } satisfies PortaDeComunidade;
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign
+          portaForum={mockForum}
+          portaComunidade={comunidadeComConfirmacao}
+          portaConta={contaAutenticada}
+          autenticado
+          viewInicial="seguindo"
+        />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /1 comentário/i }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Responder a Ana' }));
+    fireEvent.change(screen.getByLabelText('Escrever resposta'), { target: { value: respostaFilha.conteudo } });
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+
+    await waitFor(() => expect(comunidadeComConfirmacao.adicionarResposta).toHaveBeenCalledWith(
+      'causo-1', respostaFilha.conteudo, 'Você', undefined, 'comentario-pai',
+    ));
+    expect(await screen.findByText(respostaFilha.conteudo)).toBeTruthy();
+    expect(screen.getByText('Comentário publicado na roda!')).toBeTruthy();
   });
 
   it('mantém a comunidade fora da roda quando a porta recusa a entrada', async () => {

@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
+  juntarPorId,
   montarArvoreDeRespostas,
   nomeDoAutor,
   normalizarQuebras,
@@ -198,7 +199,12 @@ function ItemDeResposta({ no, agora }: { readonly no: NoDeResposta<RespostaDoFor
   const podeResponderAqui = c.podeResponder && !casca && !editandoAqui;
 
   return (
-    <li className="forum-resposta" data-nivel={r.nivel} ref={li} tabIndex={-1}>
+    <li
+      className={`forum-resposta${c.foco?.alvo === r.id ? ' forum-resposta--em-destaque' : ''}`}
+      data-nivel={r.nivel}
+      ref={li}
+      tabIndex={-1}
+    >
       {casca ? (
         <p className="forum-resposta__casca">
           {r.status === 'oculto' ? 'Resposta oculta.' : r.status === 'removido' ? 'Resposta removida.' : 'Resposta indisponível.'}
@@ -265,10 +271,12 @@ interface Props {
   readonly souMembro: boolean;
   /** Relê o tópico (contador de respostas, status) sem piscar. */
   readonly aoMudarConversa: () => void;
+  /** Resposta vinda de `?resposta=`: carrega só ela e seus ancestrais. */
+  readonly respostaEmLink?: string | null;
   readonly api?: Ref<ApiDasRespostas>;
 }
 
-export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConversa, api }: Props) {
+export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConversa, respostaEmLink = null, api }: Props) {
   const { forum, ambiente, armazenamento } = useDependenciasDoForum();
   const online = useOnline(ambiente);
   const anunciar = useAnunciar();
@@ -294,12 +302,58 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
   const [dialogo, setDialogo] = useState<Dialogo>(null);
   const [foco, setFoco] = useState<{ alvo: string; n: number } | null>(null);
   const [avisoDeAtualizacao, setAvisoDeAtualizacao] = useState<string | null>(null);
+  const [contextoDoLink, setContextoDoLink] = useState<readonly RespostaDoForum[]>([]);
+  const linkJaLido = useRef<string | null>(null);
   const nFoco = useRef(0);
   const pedirFoco = useCallback((alvo: string) => setFoco({ alvo, n: (nFoco.current += 1) }), []);
   const compositorRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const conviteRef = useRef<HTMLDivElement>(null);
   const tituloRef = useRef<HTMLHeadingElement>(null);
   const caminho = local.pathname + local.search;
+
+  // Trocar ou remover o parâmetro é uma navegação nova. O ramo e o foco do
+  // link anterior não podem sobreviver nela.
+  useEffect(() => {
+    linkJaLido.current = null;
+    setContextoDoLink([]);
+    setFoco(null);
+    setAvisoDeAtualizacao(null);
+  }, [respostaEmLink]);
+
+  // Um link para uma resposta não pode baixar milhares de falas para achar uma
+  // só. A porta devolve o alvo e seus pais; a lista normal segue paginada.
+  useEffect(() => {
+    if (!respostaEmLink || lista.fase !== 'pronto' || linkJaLido.current === respostaEmLink) return;
+    linkJaLido.current = respostaEmLink;
+    const obterContexto = forum.obterContextoDaResposta;
+    if (!obterContexto) {
+      setAvisoDeAtualizacao('Não deu pra abrir essa resposta. Tenta atualizar a conversa.');
+      return;
+    }
+    let ativo = true;
+    void obterContexto(id, respostaEmLink)
+      .then((resultado) => {
+        if (!ativo) return;
+        if (!resultado.ok) {
+          setAvisoDeAtualizacao('Não deu pra abrir essa resposta. Tenta atualizar a conversa.');
+          return;
+        }
+        if (!resultado.valor.some((r) => r.id === respostaEmLink)) {
+          setAvisoDeAtualizacao('Essa resposta não está disponível.');
+          return;
+        }
+        setContextoDoLink(resultado.valor);
+        setAvisoDeAtualizacao(null);
+        pedirFoco(respostaEmLink);
+        anunciar('Resposta aberta na conversa.');
+      })
+      .catch(() => {
+        if (ativo) setAvisoDeAtualizacao('Não deu pra abrir essa resposta. Tenta atualizar a conversa.');
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [respostaEmLink, lista.fase, forum, id, pedirFoco, anunciar]);
 
   // O rascunho é da conta: só se sabe a chave depois que o papel chega (e muda se a conta mudar).
   const contaId = papel.tipo === 'conta' ? papel.contaId : null;
@@ -435,7 +489,8 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
     }
   }, [focarCompositor, podeResponder, pedirFoco]);
 
-  const porId = new Map(lista.itens.map((r) => [r.id, r]));
+  const respostasVisiveis = juntarPorId(lista.itens, contextoDoLink).itens;
+  const porId = new Map(respostasVisiveis.map((r) => [r.id, r]));
   const contexto: ContextoDaConversa = {
     podeResponder,
     ehConta,
@@ -461,13 +516,13 @@ export function Respostas({ topico, agora, comunidade, souMembro, aoMudarConvers
     corpo = <Esqueleto forma="lista" anuncio="Carregando respostas" />;
   } else if (lista.fase === 'erro') {
     corpo = <EstadoDeErro titulo="Deu ruim pra carregar as respostas." offline={!online} aoTentar={lista.recarregar} />;
-  } else if (lista.itens.length === 0) {
+  } else if (respostasVisiveis.length === 0) {
     corpo = <p className="forum-aviso">{podeResponder ? 'Ninguém respondeu ainda. Manda a primeira.' : 'Ninguém respondeu ainda.'}</p>;
   } else {
     corpo = (
       <>
         <ul className="forum-respostas">
-          {montarArvoreDeRespostas(lista.itens).map((no) => (
+          {montarArvoreDeRespostas(respostasVisiveis).map((no) => (
             <ItemDeResposta key={no.resposta.id} no={no} agora={agora} />
           ))}
         </ul>

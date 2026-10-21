@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { Link } from 'react-router-dom';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
+import { montarArvoreDeRespostas, type NoDeResposta } from '../../nucleo/forum/apresentacao';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 
@@ -21,6 +22,8 @@ interface Props {
 }
 
 const LIMITE = 180;
+const RECUO_VISUAL_MAXIMO = 2;
+type ComentarioComPai = ItemComentario & { readonly paiId: string | null };
 
 function tempoRelativo(iso: string): string {
   try {
@@ -32,6 +35,66 @@ function tempoRelativo(iso: string): string {
   } catch {
     return 'agora';
   }
+}
+
+interface ComentarioDaArvoreProps {
+  readonly no: NoDeResposta<ComentarioComPai>;
+  readonly profundidade: number;
+  readonly aoResponder: (comentario: ItemComentario) => void;
+  readonly aoFechar: () => void;
+}
+
+function ComentarioDaArvore({ no, profundidade, aoResponder, aoFechar }: ComentarioDaArvoreProps) {
+  const comentario = no.resposta;
+  const inicial = (comentario.autorNome || '?').charAt(0).toUpperCase();
+
+  return (
+    <li className="comment-tree__branch">
+      <article className="comment-item" data-profundidade-visual={Math.min(profundidade, RECUO_VISUAL_MAXIMO)}>
+        <div className="comment-avatar">
+          {comentario.autorAvatarUrl ? <img src={comentario.autorAvatarUrl} alt={comentario.autorNome} className="post-avatar-img" loading="lazy" /> : <span>{inicial}</span>}
+        </div>
+        <div className="comment-body">
+          <div className="comment-meta">
+            <strong>
+              {comentario.autorHandle ? (
+                <Link to={`/u/${comentario.autorHandle}`} onClick={aoFechar} aria-label={`Abrir perfil de ${comentario.autorNome}`}>
+                  {comentario.autorNome}
+                </Link>
+              ) : (
+                comentario.autorNome
+              )}
+            </strong>
+            {comentario.autorHandle && <span>@{comentario.autorHandle}</span>}
+            <span>·</span>
+            <time>{tempoRelativo(comentario.criadoEm)}</time>
+          </div>
+
+          {comentario.conteudo ? <p className="comment-text">{comentario.conteudo}</p> : <p className="comment-unavailable">Conteúdo indisponível.</p>}
+
+          {comentario.anexo?.tipo === 'imagem' && comentario.anexo.url && <img src={comentario.anexo.url} alt="Imagem no comentário" className="comment-media-img" loading="lazy" />}
+          {comentario.anexo?.tipo === 'audio' && comentario.anexo.url && <div className="comment-audio"><audio controls src={comentario.anexo.url} preload="metadata" /></div>}
+          {comentario.anexo?.tipo === 'videoExterno' && comentario.anexo.url && detectarLinkDeVideo(comentario.anexo.url) && (
+            <iframe className="post-video" src={detectarLinkDeVideo(comentario.anexo.url)!.embedUrl} title="Vídeo no comentário" loading="lazy" allowFullScreen />
+          )}
+
+          <div className="comment-actions">
+            <button type="button" className="comment-reply-btn" onClick={() => aoResponder(comentario)}>
+              Responder a {comentario.autorNome}
+            </button>
+          </div>
+        </div>
+      </article>
+
+      {no.filhas.length > 0 && (
+        <ol className={`comment-tree comment-tree--nivel-${Math.min(profundidade + 1, RECUO_VISUAL_MAXIMO)}`}>
+          {no.filhas.map((filha) => (
+            <ComentarioDaArvore key={filha.resposta.id} no={filha} profundidade={profundidade + 1} aoResponder={aoResponder} aoFechar={aoFechar} />
+          ))}
+        </ol>
+      )}
+    </li>
+  );
 }
 
 export function ModalComentarios({
@@ -174,8 +237,16 @@ export function ModalComentarios({
       setAnexo(null);
       setLink('');
       setMostrarCampoLink(false);
+    } else {
+      setErro('Não deu para publicar sua resposta. Seu rascunho continua aqui.');
     }
   };
+
+  const comentariosComPai: readonly ComentarioComPai[] = comentarios.map((comentario) => ({
+    ...comentario,
+    paiId: comentario.paiId ?? null,
+  }));
+  const arvoreDeComentarios = montarArvoreDeRespostas(comentariosComPai);
 
   return (
     <div
@@ -248,81 +319,11 @@ export function ModalComentarios({
               <p>Nenhuma resposta ainda. Puxe o papo e mande ver.</p>
             </div>
           ) : (
-            comentarios.map((c) => {
-              const inicial = (c.autorNome || '?').charAt(0).toUpperCase();
-              return (
-                <article
-                  className="comment-item"
-                  key={c.id}
-                  style={{
-                    marginLeft: `${Math.min(c.nivel ?? 0, 2) * 16}px`,
-                  }}
-                >
-                  <div className="comment-avatar">
-                    <span>{inicial}</span>
-                  </div>
-                  <div className="comment-body">
-                    <div className="comment-meta">
-                      <strong>
-                        {c.autorHandle ? (
-                          <Link
-                            to={`/u/${c.autorHandle}`}
-                            onClick={aoFechar}
-                            aria-label={`Abrir perfil de ${c.autorNome}`}
-                          >
-                            {c.autorNome}
-                          </Link>
-                        ) : (
-                          c.autorNome
-                        )}
-                      </strong>
-                      {c.autorHandle && <span>@{c.autorHandle}</span>}
-                      <span>·</span>
-                      <time>{tempoRelativo(c.criadoEm)}</time>
-                    </div>
-
-                    {c.conteudo && <p className="comment-text">{c.conteudo}</p>}
-
-                    {c.anexo?.tipo === 'imagem' && c.anexo.url && (
-                      <img
-                        src={c.anexo.url}
-                        alt="Imagem no comentário"
-                        className="comment-media-img"
-                        loading="lazy"
-                      />
-                    )}
-
-                    {c.anexo?.tipo === 'audio' && c.anexo.url && (
-                      <div className="comment-audio">
-                        <audio controls src={c.anexo.url} preload="metadata" />
-                      </div>
-                    )}
-
-                    {c.anexo?.tipo === 'videoExterno' &&
-                      c.anexo.url &&
-                      detectarLinkDeVideo(c.anexo.url) && (
-                        <iframe
-                          className="post-video"
-                          src={detectarLinkDeVideo(c.anexo.url)!.embedUrl}
-                          title="Vídeo no comentário"
-                          loading="lazy"
-                          allowFullScreen
-                        />
-                      )}
-
-                    <div className="comment-actions">
-                      <button
-                        type="button"
-                        className="comment-reply-btn"
-                        onClick={() => iniciarRespostaPara(c)}
-                      >
-                        Responder a {c.autorNome}
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              );
-            })
+            <ol className="comment-tree comment-tree--nivel-0">
+              {arvoreDeComentarios.map((no) => (
+                <ComentarioDaArvore key={no.resposta.id} no={no} profundidade={0} aoResponder={iniciarRespostaPara} aoFechar={aoFechar} />
+              ))}
+            </ol>
           )}
         </div>
 

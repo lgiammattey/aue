@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ThreadDeComentarios } from './ThreadDeComentarios';
@@ -83,5 +83,48 @@ describe('ThreadDeComentarios (Padrão Twitter / Fora do Card)', () => {
       paiId: null,
       anexo: null,
     });
+  });
+
+  it('desenha a cadeia por paiId, conserva todos os ramos e satura o recuo no segundo nível', () => {
+    const comentarios: ItemComentario[] = [
+      { id: 'raiz', autorNome: 'Tiago', conteudo: 'Primeira fala.', criadoEm: '2026-10-20T12:05:00Z', paiId: null },
+      { id: 'outra-raiz', autorNome: 'Rafa', conteudo: 'Outro ramo.', criadoEm: '2026-10-20T12:06:00Z', paiId: null },
+      { id: 'filha', autorNome: 'Camillo', conteudo: 'Resposta da primeira.', criadoEm: '2026-10-20T12:07:00Z', paiId: 'raiz' },
+      { id: 'neta', autorNome: 'Tiago', conteudo: 'Terceira fala.', criadoEm: '2026-10-20T12:08:00Z', paiId: 'filha' },
+      { id: 'bisneta', autorNome: 'Camillo', conteudo: 'Quarta fala sem abrir mais recuo.', criadoEm: '2026-10-20T12:09:00Z', paiId: 'neta' },
+    ];
+
+    const { container } = render(
+      <MemoryRouter>
+        <ThreadDeComentarios post={postExemplo} comentarios={comentarios} carregando={false} enviando={false} aoVoltar={vi.fn()} aoEnviarComentario={vi.fn(async () => true)} />
+      </MemoryRouter>,
+    );
+
+    const respostas = Array.from(container.querySelectorAll('.thread-reply-text')).map((elemento) => elemento.textContent);
+    expect(respostas).toEqual([
+      'Primeira fala.',
+      'Resposta da primeira.',
+      'Terceira fala.',
+      'Quarta fala sem abrir mais recuo.',
+      'Outro ramo.',
+    ]);
+    expect(container.querySelector('[data-profundidade-visual="0"]')).toBeTruthy();
+    expect(container.querySelectorAll('[data-profundidade-visual="2"]')).toHaveLength(2);
+  });
+
+  it('mantém o rascunho e mostra erro quando o servidor não confirma a resposta', async () => {
+    const aoEnviar = vi.fn(async () => false);
+    render(
+      <MemoryRouter>
+        <ThreadDeComentarios post={postExemplo} comentarios={comentariosExemplo} carregando={false} enviando={false} aoVoltar={vi.fn()} aoEnviarComentario={aoEnviar} />
+      </MemoryRouter>,
+    );
+
+    const input = screen.getByPlaceholderText('Responder para a roda…');
+    fireEvent.change(input, { target: { value: 'Não pode sumir.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Seu rascunho continua aqui.'));
+    expect((input as HTMLTextAreaElement).value).toBe('Não pode sumir.');
   });
 });

@@ -1049,6 +1049,11 @@ html:has(.forum-shell[data-forum-tema='claro']) body {
   padding: 12px 0;
   outline-offset: 4px;
 }
+.forum-resposta--em-destaque {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 42%, transparent);
+}
 .forum-respostas--filhas {
   margin-top: 4px;
   margin-left: var(--recuo);

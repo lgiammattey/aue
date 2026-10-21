@@ -661,6 +661,38 @@
   border-bottom: 1px solid color-mix(in oklch, var(--aue-line) 40%, transparent);
 }
 
+.comment-tree,
+.thread-tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.comment-tree__branch,
+.thread-tree__branch {
+  min-width: 0;
+}
+
+/* A conversa segue inteira; só a geometria satura no segundo recuo. */
+.comment-tree--nivel-1,
+.thread-tree--nivel-1 {
+  margin: 6px 0 2px 16px;
+  padding-left: 12px;
+  border-left: 2px solid color-mix(in oklch, var(--aue-line) 78%, transparent);
+}
+
+.comment-tree--nivel-2,
+.thread-tree--nivel-2 {
+  margin: 6px 0 2px 16px;
+  padding-left: 12px;
+  border-left: 2px solid color-mix(in oklch, var(--aue-line) 78%, transparent);
+}
+
+.comment-tree--nivel-2 .comment-tree--nivel-2,
+.thread-tree--nivel-2 .thread-tree--nivel-2 {
+  margin-left: 0;
+}
+
 .comment-avatar {
   width: 32px;
   height: 32px;
@@ -722,7 +754,8 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  padding: 2px 0;
+  min-height: var(--hit-target-min, 44px);
+  padding: 2px 8px;
 }
 
 .comment-reply-btn:hover {
@@ -1102,7 +1135,8 @@
 .thread-reply-btn {
   background: transparent;
   border: 0;
-  padding: 0;
+  min-height: var(--hit-target-min, 44px);
+  padding: 0 8px;
   color: var(--aue-muted);
   font-size: 12px;
   cursor: pointer;
@@ -1119,6 +1153,14 @@
   color: var(--aue-muted);
   font-size: 13px;
   text-align: center;
+}
+
+.comment-unavailable,
+.thread-reply-unavailable {
+  margin: 4px 0 6px;
+  color: var(--aue-muted);
+  font-size: 14px;
+  font-style: italic;
 }
 
 .action-btn.is-active {

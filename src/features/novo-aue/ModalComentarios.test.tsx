@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ModalComentarios } from './ModalComentarios';
@@ -106,5 +106,33 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
       paiId: null,
       anexo: null,
     });
+  });
+
+  it('mostra os ramos na ordem do pai e preserva o rascunho se o envio não for confirmado', async () => {
+    const aoEnviar = vi.fn(async () => false);
+    const cadeia: ItemComentario[] = [
+      { id: 'raiz', autorNome: 'Tiago', conteudo: 'Raiz.', criadoEm: '2026-10-20T10:15:00Z', paiId: null },
+      { id: 'irma', autorNome: 'Rafa', conteudo: 'Outro ramo.', criadoEm: '2026-10-20T10:16:00Z', paiId: null },
+      { id: 'filha', autorNome: 'Camillo', conteudo: 'Filha da raiz.', criadoEm: '2026-10-20T10:17:00Z', paiId: 'raiz' },
+      { id: 'neta', autorNome: 'Tiago', conteudo: 'Neta da raiz.', criadoEm: '2026-10-20T10:18:00Z', paiId: 'filha' },
+      { id: 'bisneta', autorNome: 'Camillo', conteudo: 'Quarto nível.', criadoEm: '2026-10-20T10:19:00Z', paiId: 'neta' },
+    ];
+    const { container } = render(
+      <MemoryRouter>
+        <ModalComentarios aberto post={postExemplo} comentarios={cadeia} carregando={false} enviando={false} aoFechar={vi.fn()} aoEnviarComentario={aoEnviar} />
+      </MemoryRouter>,
+    );
+
+    expect(Array.from(container.querySelectorAll('.comment-text')).map((elemento) => elemento.textContent)).toEqual([
+      'Raiz.', 'Filha da raiz.', 'Neta da raiz.', 'Quarto nível.', 'Outro ramo.',
+    ]);
+    expect(container.querySelectorAll('[data-profundidade-visual="2"]')).toHaveLength(2);
+
+    const input = screen.getByPlaceholderText('Responder para a roda…');
+    fireEvent.change(input, { target: { value: 'Não some.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Seu rascunho continua aqui.'));
+    expect((input as HTMLTextAreaElement).value).toBe('Não some.');
   });
 });

@@ -9,7 +9,7 @@
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=Google+Sans+Flex:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&family=Google+Sans+Flex:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="./ds-base.js"></script>
 <style>@keyframes bdaFade{from{opacity:0}to{opacity:1}}@keyframes bdaPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}@keyframes bdaHeart{0%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.92)}100%{transform:scale(1)}}@keyframes bdaUp{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}@keyframes bdaIn{from{opacity:0;transform:translateY(-8px);background:var(--fg-soft)}to{opacity:1;transform:none}}button,a{transition:background-color .15s ease,color .15s ease,border-color .15s ease,opacity .15s ease,transform .1s ease}button:active:not([disabled]){transform:scale(.96)}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}body{margin:0}a{color:var(--fg)}a:hover{color:var(--muted)}button{font-family:inherit}input::placeholder,textarea::placeholder{color:var(--muted)}</style>
 <style>
@@ -27,12 +27,14 @@
 /* cabeçalho */
 .pf-cover{display:none}
 .pf-head{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:11px 16px 0}
-.pf-av{width:64px;height:64px;flex:none;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--surface-2) center/cover no-repeat;color:var(--fg);font-family:var(--font-display);font-size:22px}
+.pf-av{position:relative;width:64px;height:64px;flex:none;border:0;padding:0;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--surface-2) center/cover no-repeat;color:var(--fg);font-family:var(--font-display);font-size:22px}
+button.pf-av{cursor:pointer}
+/* foto do dono: o avatar é o botão (toque abre a folha de foto); sem selo nem lápis, igual ao print */
 .pf-id{flex:1 1 0;min-width:0}
-.pf-name{margin:0;font:800 20px/26px Archivo,system-ui,sans-serif;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf-name{margin:0;font:800 19px/26px Archivo,system-ui,sans-serif;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pf-handle{margin:0;font:400 14px/20px Archivo,system-ui,sans-serif;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pf-acts{display:flex;gap:8px;flex:none}
-.pf-btn{position:relative;height:36px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border-strong);border-radius:12px;background:transparent;color:var(--fg);font:600 14px Archivo,system-ui,sans-serif;white-space:nowrap;cursor:pointer}
+.pf-btn{position:relative;height:36px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border-strong);border-radius:12px;background:transparent;color:var(--fg);font:700 13px Archivo,system-ui,sans-serif;white-space:nowrap;cursor:pointer}
 .pf-btn::after{content:"";position:absolute;inset:-4px}
 .pf-btn--icon{width:36px;padding:0}
 .pf-btn--solid{background:var(--fg);color:var(--bg);border-color:var(--fg)}
@@ -58,7 +60,7 @@ button.pf-stat{cursor:pointer}
 .pf-tab{flex:1;height:52px;border:0;background:none;padding:0;display:flex;align-items:stretch;justify-content:center;color:var(--muted);font:600 15px Archivo,system-ui,sans-serif;cursor:pointer}
 .pf-tab>span{display:flex;align-items:center;padding:0 22px;border-bottom:3px solid transparent}
 .pf-tab[aria-selected="true"]{color:var(--fg);font-weight:700}
-.pf-tab[aria-selected="true"]>span{border-bottom-color:var(--ind)}
+.pf-tab[aria-selected="true"]>span{border-bottom-color:var(--ind);border-radius:0 0 2px 2px}
 /* lista e card do post */
 .pf-list{padding:12px 12px 0}
 .pf-post{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px;margin:0 0 8px;padding:12px 12px 0;border:1px solid color-mix(in srgb,var(--border) 60%,transparent);border-radius:12px}
@@ -66,12 +68,12 @@ button.pf-stat{cursor:pointer}
 .pf-pmain{min-width:0}
 .pf-ptop{display:flex;align-items:flex-start;gap:4px}
 .pf-pwho{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;font:400 13px/20px Archivo,system-ui,sans-serif;color:var(--muted);white-space:nowrap}
-.pf-pwho>b{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;color:var(--fg);font:800 14px/20px Archivo,system-ui,sans-serif;letter-spacing:-.02em}
+.pf-pwho>b{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;color:var(--fg);font:800 13px/20px Archivo,system-ui,sans-serif;letter-spacing:-.02em}
 .pf-pwho>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .pf-more-btn{flex:none;width:44px;height:44px;margin:-12px -12px -12px 0;display:grid;place-items:center;border:0;background:none;color:var(--muted);cursor:pointer}
 .pf-room{position:relative;display:inline-block;max-width:calc(100% - 44px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:0;font:700 14px/20px Archivo,system-ui,sans-serif;color:var(--muted);text-decoration:none;vertical-align:top}
-.pf-room::after{content:"";position:absolute;inset:-2px}
-.pf-text{margin:0 0 8px;font:400 15px/21px Archivo,system-ui,sans-serif;overflow-wrap:anywhere}
+.pf-room::after{content:"";position:absolute;inset:-12px 0}
+.pf-text{margin:0 0 6px;font:400 15px/21px Archivo,system-ui,sans-serif;overflow-wrap:anywhere}
 .pf-player{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px 0 6px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface)}
 .pf-play{position:relative;flex:none;width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:50%;background:var(--fg);color:var(--bg);cursor:pointer}
 .pf-play::after{content:"";position:absolute;inset:-6px}
@@ -104,15 +106,12 @@ button.pf-stat{cursor:pointer}
 .pf-ni[aria-current="page"]{color:var(--fg)}
 .pf-fab{position:relative;justify-self:center;align-self:start;margin-top:-8px;width:52px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0;border-radius:50%;background:var(--accent);color:var(--accent-on);box-shadow:0 0 0 4px var(--bg),0 0 18px rgba(198,255,0,.3);cursor:pointer}
 .pf-fab>span{font:400 8px/9px var(--font-display);letter-spacing:.04em}
-/* opção B (verde do print): só aparece com #verde-print */
-.v-print .pf-play{background:var(--accent);color:var(--accent-on)}
-.v-print .pf-glyph{color:var(--accent)}
-.v-print .pf-ni[aria-current="page"]{color:var(--accent)}
 /* desktop: coluna de 600px, capa fina de volta, medidas um degrau acima */
 @media (min-width:700px){
 .pf-top{display:none}
 .pf-cover{display:flex;align-items:center;justify-content:center;position:relative;height:132px;background:var(--surface-2) center/cover no-repeat;color:var(--muted);font-family:var(--font-display);font-size:24px}
-.pf-cover button{position:absolute;right:12px;bottom:12px;height:36px;padding:0 12px;border:1px solid var(--border-strong);border-radius:12px;background:var(--bg);color:var(--fg);font:600 13px Archivo,system-ui,sans-serif;cursor:pointer}
+.pf-cover-acts{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
+.pf-cover-btn,.pf-cover-acts button{height:36px;padding:0 12px;display:inline-flex;align-items:center;box-sizing:border-box;border:1px solid var(--border-strong);border-radius:12px;background:var(--bg);color:var(--fg);font:700 13px Archivo,system-ui,sans-serif;cursor:pointer}
 .pf-head{padding-top:16px;gap:16px}
 .pf-av{width:80px;height:80px;font-size:28px}
 .pf-name{font-size:24px;line-height:30px}
@@ -229,10 +228,11 @@ button.pf-stat{cursor:pointer}
 
 <sc-if value="{{ isPerfil }}">
 <!-- Perfil do Cartão 0030 (Fase A). Valores de pessoas, posts, arrotos e contagens são AMOSTRA do protótipo; o app lê tudo do servidor.
-     Estados por hash: #visitante #claro #escuro #verde-print #carregando #vazio #erro #inexistente (combináveis com &). -->
+     Estados por hash: #visitante #claro #escuro #print #sem-redes #carregando #vazio #erro #inexistente (combináveis com &). -->
 <section class="pf" aria-label="Perfil">
 <sc-if value="{{ pfLoading }}"><div class="pf-skel" aria-busy="true" aria-live="polite"><span class="sr-only" style="position:absolute;left:-9999px">Abrindo perfil…</span>
-<div style="display:flex;align-items:center;gap:12px;padding:16px 16px 0"><div class="pf-sk" style="width:64px;height:64px;border-radius:50%"></div><div style="flex:1"><div class="pf-sk" style="height:22px;width:96px"></div><div class="pf-sk" style="height:14px;width:140px;margin-top:6px"></div></div><div class="pf-sk" style="width:149px;height:36px;border-radius:12px"></div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:16px 16px 0"><div class="pf-sk" style="width:64px;height:64px;border-radius:50%"></div><div style="flex:1"><div class="pf-sk" style="height:22px;width:96px"></div><div class="pf-sk" style="height:14px;width:140px;margin-top:6px"></div></div><div class="pf-sk" style="width:118px;height:36px;border-radius:12px"></div></div>
+<div style="padding:12px 16px 0"><div class="pf-sk" style="height:15px;width:92%"></div><div class="pf-sk" style="height:15px;width:60%;margin-top:5px"></div><div class="pf-sk" style="height:13px;width:46%;margin-top:11px"></div></div>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);margin:20px 12px 0;justify-items:center"><div class="pf-sk" style="width:48px;height:38px"></div><div class="pf-sk" style="width:64px;height:38px"></div><div class="pf-sk" style="width:56px;height:38px"></div></div>
 <div class="pf-sk" style="height:52px;margin:4px 0 0;border-radius:0"></div>
 <div class="pf-list"><div class="pf-sk" style="height:161px;border-radius:12px;margin-bottom:8px"></div><div class="pf-sk" style="height:161px;border-radius:12px"></div></div></div></sc-if>
@@ -241,9 +241,9 @@ button.pf-stat{cursor:pointer}
 <sc-if value="{{ pfFail }}"><div class="pf-state" role="alert"><h2>Não deu para abrir este perfil.</h2><p>Pode ser uma falha de conexão. Tenta de novo.</p><button class="pf-btn" onClick="{{ pfRetry }}">Tentar de novo</button></div></sc-if>
 
 <sc-if value="{{ pfReady }}">
-<div class="pf-cover" aria-label="Capa de {{ pfName }}"><span>AUÊ!</span><sc-if value="{{ pfOwner }}"><button onClick="{{ pfCover }}">Trocar capa</button></sc-if></div>
+<div class="pf-cover" style="{{ pfCoverStyle }}" aria-label="Capa de {{ pfName }}"><sc-if value="{{ pfNoCover }}"><span>AUÊ!</span></sc-if><sc-if value="{{ pfOwner }}"><div class="pf-cover-acts"><label class="pf-cover-btn">Trocar capa<input type="file" accept="image/*" onChange="{{ pickBanner }}" style="display:none"></input></label><sc-if value="{{ hasBanner }}"><button onClick="{{ clearBanner }}">Remover capa</button></sc-if></div></sc-if></div>
 <div class="pf-head">
-<div class="pf-av" style="{{ pfAvStyle }}" aria-hidden="true">{{ pfIni }}</div>
+<sc-if value="{{ pfOwner }}"><button class="pf-av" style="{{ pfAvStyle }}" aria-label="Trocar foto do perfil" onClick="{{ openPhoto }}">{{ pfIni }}</button></sc-if><sc-if value="{{ pfVisitor }}"><div class="pf-av" style="{{ pfAvStyle }}" aria-hidden="true">{{ pfIni }}</div></sc-if>
 <div class="pf-id"><h1 class="pf-name" title="{{ pfName }}">{{ pfName }}</h1><p class="pf-handle">@{{ pfHandle }}</p></div>
 <div class="pf-acts">
 <sc-if value="{{ pfOwner }}"><button class="pf-btn" onClick="{{ editProfile }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>Editar perfil</button></sc-if>
@@ -370,12 +370,19 @@ button.pf-stat{cursor:pointer}
 <sc-if value="{{ editing }}">
 <div style="{{ scrimStyle }}"><div style="{{ sheetStyle }}">
 <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-display);font-size:22px">EDITAR PERFIL</span><button onClick="{{ closeAll }}" style="background:none;border:0;color:var(--muted);font-size:14px;cursor:pointer">Fechar</button></div>
-<div style="display:flex;gap:8px;align-items:center"><label style="{{ upBtn }}">Trocar foto<input type="file" accept="image/*" onChange="{{ pickAvatar }}" style="display:none"></input></label><label style="{{ upBtn }}">Trocar capa<input type="file" accept="image/*" onChange="{{ pickBanner }}" style="display:none"></input></label><sc-if value="{{ hasAnyImg }}"><button onClick="{{ clearImgs }}" style="height:36px;padding:0 14px;border:0;background:none;color:var(--muted);font-size:14px;cursor:pointer">Remover</button></sc-if></div>
+<sc-if value="{{ mobile }}"><div style="display:flex;gap:8px;align-items:center"><label style="{{ upBtn }}">Trocar capa<input type="file" accept="image/*" onChange="{{ pickBanner }}" style="display:none"></input></label><sc-if value="{{ hasBanner }}"><button onClick="{{ clearBanner }}" style="height:44px;padding:0 14px;border:0;background:none;color:var(--muted);font-size:14px;cursor:pointer">Remover capa</button></sc-if></div></sc-if>
 <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">Nome<input value="{{ ed.name }}" onInput="{{ edName }}" maxlength="30" style="{{ fieldStyle }}"></input></label>
 <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">@usuário<input value="{{ ed.handle }}" onInput="{{ edHandle }}" maxlength="20" style="{{ fieldStyle }}"></input></label>
 <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">Cidade<input value="{{ ed.city }}" onInput="{{ edCity }}" maxlength="30" style="{{ fieldStyle }}"></input></label>
-<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">Bio<textarea value="{{ ed.bio }}" onInput="{{ edBio }}" maxlength="120" rows="3" style="{{ fieldStyle }};height:auto;padding:12px 14px;resize:none"></textarea></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)">Bio<textarea value="{{ ed.bio }}" onInput="{{ edBio }}" maxlength="120" rows="3" style="{{ areaStyle }}"></textarea></label>
 <button onClick="{{ saveProfile }}" style="height:48px;border:0;border-radius:18px;background:var(--accent);color:var(--accent-on);font-weight:700;font-size:16px;cursor:pointer" style-hover="background:var(--accent-strong)" style-active="transform:translateY(2px) scale(.985)">Salvar</button>
+</div></div>
+</sc-if>
+<sc-if value="{{ photo }}">
+<div style="{{ scrimStyle }}" role="dialog" aria-modal="true" aria-label="Foto do perfil"><div style="{{ photoSheet }}">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--font-display);font-size:22px">FOTO DO PERFIL</span><button onClick="{{ closeAll }}" style="min-height:44px;padding:0 4px;background:none;border:0;color:var(--muted);font:600 14px Archivo,system-ui,sans-serif;cursor:pointer">Fechar</button></div>
+<label style="{{ photoRow }}">Trocar foto<input type="file" accept="image/*" onChange="{{ pickAvatar }}" style="display:none"></input></label>
+<sc-if value="{{ hasAv }}"><button onClick="{{ clearAvatar }}" style="{{ photoRowDanger }}">Remover foto</button></sc-if>
 </div></div>
 </sc-if>
 <sc-if value="{{ sharing }}">
@@ -400,7 +407,7 @@ button.pf-stat{cursor:pointer}
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { ptab: 'posts', bioOpen: false, pfFollowing: false, hs: '', pfRetryN: 0, hidden: [],
+  state = { photo: false, ptab: 'posts', bioOpen: false, pfFollowing: false, hs: '', pfRetryN: 0, hidden: [],
     theme: 'dark', w: 1200, tab: 'feed', filter: 'all', composing: false, ctype: 'texto', text: '', qtext: '', opp: '', commSel: 'Bonde do Arroto',
     rec: false, secs: 0, recorded: 0, playing: null, sharing: null, gen: -1, toast: '',
     joined: ['Bonde do Arroto', 'Cerveja Gelada'], following: [], openReply: null, replyText: '', editing: false,
@@ -464,8 +471,7 @@ class Component extends DCLogic {
       pfRetry: () => this.say('Tentando de novo…'),
       pfOwner: owner, pfVisitor: !owner, pfName: who.name, pfHandle: who.handle, pfIni: owner && p.avatar ? '' : this.ini(who.name),
       pfAvStyle: owner && p.avatar ? 'background-image:url(' + p.avatar + ')' : '',
-      pfCover: () => this.say('Trocar capa chega no app (no celular fica em Editar perfil).'),
-      pfFollow: () => this.setState(x => ({ pfFollowing: !x.pfFollowing })), pfFollowLabel: s.pfFollowing ? 'Seguindo' : 'Seguir',
+            pfFollow: () => this.setState(x => ({ pfFollowing: !x.pfFollowing })), pfFollowLabel: s.pfFollowing ? 'Seguindo' : 'Seguir',
       pfShare: () => this.say('Link do perfil copiado.'), pfList: () => this.say('Abre a lista de conexões.'),
       pfBio: bio, pfBioClass: s.bioOpen ? 'is-open' : '', pfBioMore: long, pfBioMoreLabel: s.bioOpen ? 'ver menos' : 'ver mais', pfToggleBio: () => this.setState(x => ({ bioOpen: !x.bioOpen })),
       pfMeta: meta, pfHasSocial: !tok['sem-redes'] && !tok.print, pfHasAbout: !!(bio || meta || (!tok['sem-redes'] && !tok.print)),
@@ -550,9 +556,9 @@ class Component extends DCLogic {
     const items = [['feed', 'Início', 'M3 11l9-8 9 8v10h-6v-6H9v6H3z'], ['comm', 'Comunidades', 'M16 11a4 4 0 100-8 4 4 0 000 8zM2 21v-1a6 6 0 0112 0v1M17 14a5 5 0 015 5v2'], ['desafios', 'Desafios', 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3'], ['perfil', 'Perfil', 'M12 12a5 5 0 100-10 5 5 0 000 10zM4 22a8 8 0 0116 0']];
     const titles = { feed: 'Início', comm: 'Comunidades', desafios: 'Desafios', perfil: 'Perfil' };
     const navB = { display: 'flex', alignItems: 'center', gap: 16, height: 52, padding: wide ? '0 20px 0 12px' : 0, width: wide ? 'auto' : 52, justifyContent: wide ? 'flex-start' : 'center', border: 0, borderRadius: 999, background: 'none', color: 'var(--fg)', cursor: 'pointer', fontSize: 20 };
+    const photoRowBase = { height: 48, width: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 12, border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--fg)', fontWeight: 700, fontSize: 15, fontFamily: 'Archivo, system-ui, sans-serif', cursor: 'pointer' };
     const cdone = s.recorded;
-    const pm = s.ptab === 'curtidas' ? s.posts.filter(p => p.liked) : s.posts.filter(p => p.mine && (s.ptab === 'posts' || p.audio));
-    const sug = [['Dani Gás', 'danigas', 'DG'], ['Mari Grave', 'marigrave', 'MG'], ['Rafa Fôlego', 'rafafolego', 'RF']];
+        const sug = [['Dani Gás', 'danigas', 'DG'], ['Mari Grave', 'marigrave', 'MG'], ['Rafa Fôlego', 'rafafolego', 'RF']];
     return {
       rootStyle, mobile, wide, showLeft: !mobile, showRight, brand: wide ? 'AUÊ!' : 'A!', navAlign: wide ? 'stretch' : 'center',
       leftStyle: { width: wide ? 275 : 76, flex: 'none', position: 'sticky', top: 0, height: '100vh', padding: wide ? '0 12px' : '0 8px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingBottom: 12 },
@@ -566,7 +572,7 @@ class Component extends DCLogic {
       meBtn: { display: 'flex', alignItems: 'center', gap: 12, padding: 8, border: 0, borderRadius: 999, background: 'none', color: 'var(--fg)', cursor: 'pointer' },
       goPerfil: () => this.setState({ tab: 'perfil' }),
       pageTitle: titles[s.tab], bottomPad: mobile ? 140 : 40,
-      rootClass: tok['verde-print'] ? 'v-print' : '',
+      rootClass: '',
       hdrStyle: 'position:sticky;top:0;z-index:5;background:var(--bg);' + (mobile && s.tab === 'perfil' ? '' : 'border-bottom:1px solid var(--border)'),
       ...this.perfilVals(s, tok, mobile),
       navFeed: () => this.setState({ tab: 'feed' }), navComm: () => { location.href = 'Comunidades.dc.html'; }, navX1: () => this.setState({ tab: 'desafios' }),
@@ -585,21 +591,26 @@ class Component extends DCLogic {
       editProfile: () => this.setState({ editing: true, ed: { ...s.profile } }),
       editing: s.editing, ed: s.ed, pf: s.profile, myIni: this.ini(s.profile.name), myIni30: this.ini(s.profile.name),
       hasAv: !!s.profile.avatar, avBg: s.profile.avatar ? 'url(' + s.profile.avatar + ')' : 'none', bannerBg: s.profile.banner ? 'url(' + s.profile.banner + ')' : 'none', hasBanner: !!s.profile.banner, banner: s.profile.banner, hasAnyImg: !!(s.profile.avatar || s.profile.banner),
-      pickAvatar: (e) => this.pick(e, 'avatar', 256, 256), pickBanner: (e) => this.pick(e, 'banner', 1200, 400),
-      clearImgs: () => this.setImgs({ avatar: '', banner: '' }),
-      upBtn: { height: 36, padding: '0 14px', borderRadius: 999, border: '1px solid var(--border-strong)', color: 'var(--fg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center' },
+      pickBanner: (e) => this.pick(e, 'banner', 1200, 400),
+      clearBanner: () => this.setImgs({ banner: '' }), clearAvatar: () => { this.setImgs({ avatar: '' }); this.setState({ photo: false }); },
+      openPhoto: () => this.setState({ photo: true }), photo: s.photo,
+      pickAvatar: (e) => { this.pick(e, 'avatar', 256, 256); this.setState({ photo: false }); },
+      pfCoverStyle: s.profile.banner ? 'background-image:url(' + s.profile.banner + ')' : '', pfNoCover: !s.profile.banner,
+      photoSheet: { ...sheet, fontFamily: 'Archivo, system-ui, sans-serif', gap: 8 },
+      photoRowDanger: { ...photoRowBase, color: 'var(--danger)' },
+      photoRow: photoRowBase,
+      upBtn: { height: 44, padding: '0 14px', borderRadius: 999, border: '1px solid var(--border-strong)', color: 'var(--fg)', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center' },
       edName: (e) => this.setState({ ed: { ...s.ed, name: e.target.value } }), edHandle: (e) => this.setState({ ed: { ...s.ed, handle: e.target.value.replace(/[^\w]/g, '') } }),
       edCity: (e) => this.setState({ ed: { ...s.ed, city: e.target.value } }), edBio: (e) => this.setState({ ed: { ...s.ed, bio: e.target.value } }),
+      areaStyle: { height: 'auto', minHeight: 88, padding: '12px 14px', resize: 'none', borderRadius: 12, border: '1px solid var(--border-strong)', background: 'var(--bg)', color: 'var(--fg)', fontSize: 15, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
       fieldStyle: { height: 44, borderRadius: 12, border: '1px solid var(--border-strong)', background: 'var(--bg)', color: 'var(--fg)', padding: '0 14px', fontSize: 15, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
       saveProfile: () => { const e = s.ed; if (!e.name.trim() || !e.handle) return this.say('Nome e @usuário são obrigatórios.'); const old = s.profile.handle; this.setState(st => ({ profile: e, editing: false, posts: st.posts.map(x => x.mine ? { ...x, name: e.name, handle: e.handle, ini: this.ini(e.name) } : x) })); try { localStorage.setItem('bda-profile', JSON.stringify(e)); } catch (x) {} this.say('Perfil salvo.'); },
       replyText: s.replyText, setReply: (e) => this.setState({ replyText: e.target.value }),
       best: Math.max(88, ...s.posts.filter(p => p.mine && p.audio).map(p => p.score)), joinedCount: s.joined.length,
-      mine: pm, noMine: !pm.length,
-      ptabs: [['posts', 'Posts'], ['audios', 'Áudios'], ['curtidas', 'Curtidas']].map(([k, l]) => ({ label: l, style: pill(s.ptab === k), inner: ul(s.ptab === k), go: () => this.setState({ ptab: k }) })),
       trends: [['Cerveja Gelada', '#LongNeckChallenge', '8,4 mil'], ['Em alta', '#X1DeDomingo', '5,1 mil'], ['Histórias de Arroto', '#VexameNoChurrasco', '3,7 mil'], ['Refri & Cia', '#GraveDeElevador', '1,9 mil']].map(([cat, tag, n]) => ({ cat, tag, n })),
       suggest: sug.map(([name, handle, ini]) => { const f = s.following.includes(handle); return { name, handle, ini, label: f ? 'Seguindo' : 'Seguir', style: { height: 32, padding: '0 16px', borderRadius: 999, cursor: 'pointer', fontWeight: 700, fontSize: 14, border: f ? '1px solid var(--border)' : '0', background: f ? 'transparent' : 'var(--fg)', color: f ? 'var(--fg)' : 'var(--bg)' }, go: () => this.setState(st => ({ following: f ? st.following.filter(x => x !== handle) : [...st.following, handle] })) }; }),
       composing: s.composing, openCompose: () => this.setState({ composing: true, ctype: 'texto' }),
-      closeAll: () => { clearInterval(this._r); clearInterval(this._g); this.setState({ composing: false, editing: false, sharing: null, rec: false, gen: -1 }); },
+      closeAll: () => { clearInterval(this._r); clearInterval(this._g); this.setState({ photo: false, composing: false, editing: false, sharing: null, rec: false, gen: -1 }); },
       scrimStyle: scrim(20), scrimStyle2: scrim(21), sheetStyle: sheet,
       composeTitle: { texto: 'Post', audio: 'Arroto', desafio: 'Desafio X1' }[s.ctype],
       ctypes: [['texto', 'Texto', 'M4 6h16M4 12h16M4 18h10'], ['audio', 'Áudio', 'M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3'], ['desafio', 'Desafio', 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3']].map(([k, l, d]) => ({ label: l, d, go: () => this.setState({ ctype: k }), style: { width: 36, height: 36, borderRadius: '50%', border: 0, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.ctype === k ? 'var(--ind)' : 'var(--muted)' } })),

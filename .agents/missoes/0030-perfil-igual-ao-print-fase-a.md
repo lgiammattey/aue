@@ -253,3 +253,37 @@ Esclarecimento do Luiz (coordenador, 21/10): o item ativo em `--fg` vale só par
 Rodar `typecheck`, `lint`, `test` e `build` em cada commit, não só no último. Mobile primeiro, `min-width` sobe para o desktop; `dvh/svh`, `env(safe-area-inset-*)`, `touch-action: manipulation` e `overscroll-behavior-y: contain` como na matriz (itens 10, 13, 14); o critério do Luiz é perfil mobile com cara de app, sem quebrar e sem "sambar".
 
 **Item 6 de "Ainda sem resposta do Luiz": resolvido.** O desktop não muda; a regra do menu lateral já estava em `--aue-text`.
+
+## Aceite visual do Rian (21/10/2026)
+
+**Veredito: APROVADO COM RESSALVAS.** Protótipo aberto no Chromium (Playwright) em 402x874 (iPhone 17) e 412x915 (Moto G67, premissa), claro e escuro, dono e visitante, carregando, vazio, erro e inexistente; também 320, 360, 430, 768 e 1280. Medido contra o print: avatar, abas, cards e player batem em geometria (±3px). Sem rolagem horizontal em nenhuma largura. Chromium não prova Safari nem Chrome Android; aparelho real segue `NÃO VALIDADO`.
+
+**Mudou no protótipo (`Bonde do Arroto.dc.html`):**
+- Verde opção A: só aba ativa e ARROTAR (contado por script: 2 no escuro, 1 no claro, 2 no desktop com o Postar). Variante `#verde-print` removida.
+- Avatar do dono é botão (`aria-label="Trocar foto do perfil"`) e abre a folha com "Trocar foto" e "Remover foto". Visitante não tem botão. Sem selo no avatar, igual ao print.
+- Capa: no mobile não existe e "Trocar capa" / "Remover capa" ficam no modal Editar perfil; no desktop ficam sobre a faixa. O modal não tem mais foto.
+- Curtidas: nenhuma aba nem texto no DOM; o código morto da aba saiu do script.
+- Calibração: nome 19px, "Editar perfil" 13px/700, nome do post 13px, card 2px mais baixo, área de toque do `r/roda` em 44px.
+- Fonte: o link do Google Fonts carregava Archivo só até 700, mas a tela usa 800. Agora carrega 800. O harness local mascarava isso.
+- Corrigido o campo Bio do modal (caía em monoespaçada) e o esqueleto de carregamento ganhou as linhas da bio.
+
+**Decisões do Rian:** busca ocupa a largura toda onde o print tem o botão de chat (sem chat, espaço vazio seria sobra). Sem bolinha online. Painel um tom mais claro sob o topo no print não entra (DESIGN.md manda fundo único). "Melhor nota" fica no topo da aba Arrotos.
+
+**Exceções ao design system, para registro:**
+1. Duração e `2d` em sans (decisão do Luiz). DESIGN.md §3 e §5.3 pedem mono; o DESIGN.md precisa da nota.
+2. Card do post sem selo de nota. §5.3 prevê o selo `--accent` em Anton; no perfil ele estouraria o orçamento de verde e o print não o mostra.
+3. Brilho verde ao redor do ARROTAR (como no print). É o mesmo elemento, não conta como segundo verde, mas é sombra decorativa: o Luiz decide se fica.
+4. Selo "ARROTAR" da barra em Anton 8px, abaixo da escala de §3. Igual ao print.
+5. Modais e feed do arquivo seguem em Google Sans Flex (legado, fora desta fase). Só a folha de foto nova e o perfil usam Archivo.
+
+**Ainda diverge do print (e por quê):**
+- Bloco bio/cidade/redes empurra stats e abas uns 90px para baixo; é decisão do Luiz. Abas continuam acima da dobra em 402x874.
+- Botão "Editar perfil" 122px contra 104px do print: o print usa outra família, mais estreita. Em 320px o botão quebra para linha própria.
+- Archivo é uns 8% mais larga que a fonte do print; compensei no tamanho do nome, não em todo texto.
+- Esqueleto de carregamento não evita deslocamento se a pessoa não tiver bio.
+- Sem aba Curtidas, sem chat, sem bolinha, sem foto no avatar de exemplo: intencionais.
+
+**Pendências que não são do perfil (precisam de dono):**
+- Card único: o feed deste mesmo protótipo ainda mostra o card antigo (repost, desafiar, nota verde, duração mono). O print só prova o card do perfil. Antes do Kayky mexer no `CardDoPost` compartilhado, o Tiago ou o Luiz decidem o que o card único mantém do feed. Sem isso, o Rian não valida feed e comunidades.
+- Barra inferior nas outras telas: `Arena.dc.html` e `Comunidades.dc.html` já usam `--fg` no item ativo, então a cor está coerente. Divergem na estrutura: só ícones sem rótulo, sem FAB, ordem Início, Auê, Comunidades, Desafios, Perfil (a nova é Feed, Comunidades, ARROTAR, X1, Perfil), sem safe-area. `Versões Webapp.dc.html` só embute as duas e herda. Não reescrevi.
+- Heart do card só aparece no código real se `alternarCurtida` estiver ligado (item 5 da matriz).

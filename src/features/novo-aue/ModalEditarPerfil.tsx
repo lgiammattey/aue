@@ -14,6 +14,14 @@ interface Props {
     readonly youtube?: string;
     readonly twitter?: string;
   };
+  /**
+   * Capa: no celular a capa não aparece no perfil, então trocar e remover ficam
+   * aqui. Do 700px para cima o bloco some e os botões ficam sobre a faixa.
+   */
+  readonly temCapa?: boolean;
+  readonly capaEnviando?: boolean;
+  readonly aoTrocarCapa?: () => void;
+  readonly aoRemoverCapa?: () => void;
   readonly aoFechar: () => void;
   readonly aoSalvar: (dados: {
     apelido: string;
@@ -34,6 +42,10 @@ export function ModalEditarPerfil({
   bioInicial,
   cidadeInicial,
   redesIniciais,
+  temCapa = false,
+  capaEnviando = false,
+  aoTrocarCapa,
+  aoRemoverCapa,
   aoFechar,
   aoSalvar,
 }: Props) {
@@ -121,6 +133,19 @@ export function ModalEditarPerfil({
         </div>
 
         <form onSubmit={handleSubmit} className="profile-form" noValidate>
+          {aoTrocarCapa && (
+            <div className="profile-form__capa">
+              <button type="button" className="tab" onClick={aoTrocarCapa} disabled={capaEnviando}>
+                {capaEnviando ? 'Enviando…' : 'Trocar capa'}
+              </button>
+              {temCapa && aoRemoverCapa && (
+                <button type="button" className="profile-form__capa-remover" onClick={aoRemoverCapa} disabled={capaEnviando}>
+                  Remover capa
+                </button>
+              )}
+            </div>
+          )}
+
           <label>
             Nome de exibição
             <input

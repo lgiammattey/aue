@@ -430,8 +430,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
-    const atalho = await screen.findByRole('button', { name: 'Gravar um arroto no meu perfil' });
+    fireEvent.click(await screen.findByRole('tab', { name: 'Arrotos' }));
+    const atalho = await screen.findByRole('button', { name: 'Gravar um arroto aqui' });
     fireEvent.click(atalho);
     fireEvent.click(screen.getByRole('button', { name: /Gravar agora/ }));
     await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce());
@@ -447,7 +447,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
         expect.objectContaining({ perfilDestinoId: 'eu', perfilDestinoHandle: 'gio' }), expect.any(Blob), 1.2,
       );
     });
-    expect(await screen.findByText('Arroto direto · 2s')).toBeTruthy();
+    expect(await screen.findByText('Gravado por esta pessoa')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Player do arroto' })).toBeTruthy();
   });
 
   it('não mostra o atalho de arroto ao visitar o perfil de outra pessoa', async () => {
@@ -471,8 +472,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
-    expect(screen.queryByRole('button', { name: 'Gravar um arroto no meu perfil' })).toBeNull();
+    fireEvent.click(await screen.findByRole('tab', { name: 'Arrotos' }));
+    expect(screen.queryByRole('button', { name: 'Gravar um arroto aqui' })).toBeNull();
   });
 
   it('mantém o ajuste aberto e explica a recusa quando salvar a foto falha', async () => {

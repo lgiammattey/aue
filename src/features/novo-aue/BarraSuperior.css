@@ -1,0 +1,74 @@
+/*
+  Barra superior. Do 700px para cima nada muda: o <label> some do desenho
+  (display: contents) e o campo segue como filho direto da barra.
+
+  Celular, como no print do perfil: logo e campo de busca ocupando o resto da
+  linha. Sem botão "Buscar" (o Enter do teclado envia) e sem o mini-perfil
+  (o Perfil está na barra de baixo). Antes, esses dois estouravam a largura e a
+  página ganhava rolagem horizontal em qualquer aparelho. Respeita o topo
+  seguro do iPhone quando o app roda em tela cheia.
+*/
+.topbar-search {
+  display: contents;
+}
+
+.topbar-search__lupa {
+  display: none;
+}
+
+@media (max-width: 699px) {
+  header.topbar {
+    min-height: calc(53px + env(safe-area-inset-top, 0px));
+    padding-top: calc(4px + env(safe-area-inset-top, 0px));
+    padding-right: max(14px, env(safe-area-inset-right, 0px));
+    padding-left: max(14px, env(safe-area-inset-left, 0px));
+  }
+
+  .topbar-brand-mobile {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* O <label> inteiro (44px) é o alvo: tocar em qualquer ponto dele foca o campo. */
+  .topbar-search {
+    position: relative;
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 4px 0;
+    box-sizing: border-box;
+  }
+
+  .topbar-search__lupa {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    display: block;
+    color: var(--aue-muted);
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+
+  .topbar .search {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding: 0 12px 0 38px;
+    border-radius: 12px;
+    font-size: 16px; /* 16px evita o zoom automático do Safari ao focar */
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .topbar button.icon-btn[type='submit'],
+  .topbar .profile-mini {
+    display: none;
+  }
+
+  .topbar .top-actions {
+    flex: none;
+  }
+}

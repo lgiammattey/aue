@@ -1,0 +1,677 @@
+/*
+  Perfil (`/perfil` e `/u/:handle`) — Cartão 0030, Fase A.
+  Medidas do protótipo `Bonde do Arroto.dc.html` (classes pf-*). Mobile primeiro;
+  de 700px para cima entram a capa fina e as medidas um degrau acima, o mesmo
+  corte da casca.
+
+  Verde, opção A do Luiz: só o sublinhado da aba ativa (e o ARROTAR da barra,
+  que não é daqui). Nada mais neste arquivo usa --aue-accent.
+  Alvos de toque: 44px reais (caixa), não só área invisível.
+*/
+
+.od-profile {
+  /* Tokens do design system (DESIGN.md) que o app só declara em outras rotas. */
+  --border-strong: #3a3a3c;
+  --ind: #c6ff00;
+}
+
+[data-theme='light'] .od-profile {
+  --border-strong: #888888;
+  --ind: #000000;
+}
+
+.pf {
+  font-family: var(--font-body, 'Archivo', system-ui, sans-serif);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.pf button,
+.pf a,
+.pf-tabs button,
+.pf-list button,
+.pf-list a,
+.pf-state button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* No celular o perfil ocupa a largura toda, como no print. */
+@media (max-width: 699px) {
+  .od-profile {
+    margin: -16px -14px 0;
+  }
+}
+
+/* ---------- cabeçalho ---------- */
+.pf-cover {
+  display: none;
+}
+
+.pf-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 11px 16px 0;
+}
+
+.pf-av {
+  position: relative;
+  box-sizing: border-box;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  background: var(--aue-surface-2) center / cover no-repeat;
+  color: var(--aue-text);
+  font-family: var(--font-display, 'Anton', sans-serif);
+  font-size: 22px;
+}
+
+.pf-av--botao {
+  cursor: pointer;
+}
+
+.pf-av--botao:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.pf-av--botao:focus-visible {
+  outline: 2px solid var(--aue-text);
+  outline-offset: 3px;
+}
+
+.pf-id {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pf-name {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 800 19px/26px var(--font-body, 'Archivo', system-ui, sans-serif);
+  letter-spacing: -0.03em;
+  color: var(--aue-text);
+}
+
+.pf-handle {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 14px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+}
+
+.pf-acts {
+  display: flex;
+  flex: none;
+  /* Caixas de 44px com desenho de 36px: o vão de 4px mais 4px de cada lado dá 8px visuais entre os botões. */
+  gap: 4px;
+  margin-right: -4px;
+}
+
+/* Botão de 44px de caixa; o desenho de 36px fica por dentro (::before). */
+.pf-btn {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--aue-text);
+  font: 700 13px var(--font-body, 'Archivo', system-ui, sans-serif);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.15s ease;
+}
+
+.pf-btn::before {
+  content: '';
+  position: absolute;
+  inset: 4px 0;
+  z-index: -1;
+  border: 1px solid var(--border-strong, var(--aue-line));
+  border-radius: 12px;
+  background: transparent;
+}
+
+.pf-btn--icon {
+  width: 44px;
+  padding: 0;
+}
+
+.pf-btn--icon::before {
+  inset: 4px;
+}
+
+.pf-btn--solid {
+  color: var(--aue-bg);
+}
+
+.pf-btn--solid::before {
+  border-color: var(--aue-text);
+  background: var(--aue-text);
+}
+
+.pf-btn:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.pf-btn:active:not(:disabled),
+.pf-stat:active:not(:disabled),
+.pf-tab:active {
+  transform: scale(0.97);
+}
+
+.pf-btn:focus-visible,
+.pf-stat:focus-visible,
+.pf-tab:focus-visible,
+.pf-more:focus-visible,
+.pf-rec:focus-visible,
+.pf-social a:focus-visible,
+.pf-arr-foot button:focus-visible {
+  outline: 2px solid var(--aue-text);
+  outline-offset: -2px;
+}
+
+/* Telas estreitas: os botões descem para a própria linha, sem apertar o nome. */
+@media (max-width: 373px) {
+  .pf-acts {
+    flex: 1 0 100%;
+  }
+
+  .pf-acts .pf-btn:not(.pf-btn--icon) {
+    flex: 1;
+  }
+}
+
+/* ---------- sobre: bio, cidade, desde, redes (campo vazio não existe) ---------- */
+.pf-about {
+  padding: 12px 16px 0;
+}
+
+.pf-bio {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font: 400 15px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-text);
+}
+
+.pf-bio.is-open {
+  display: block;
+}
+
+.pf-more {
+  position: relative;
+  min-height: 44px;
+  margin: -8px 0 -12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--aue-muted);
+  font: 600 14px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
+  cursor: pointer;
+}
+
+.pf-meta {
+  margin: 6px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 13px/18px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+}
+
+.pf-social {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 2px -10px -2px;
+}
+
+.pf-social a {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--aue-muted);
+}
+
+/* ---------- três números ---------- */
+.pf-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 20px 12px 0;
+  text-align: center;
+}
+
+.pf-stat {
+  min-height: 44px;
+  padding: 2px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 0;
+  background: none;
+  color: var(--aue-text);
+  font-family: inherit;
+  transition: transform 0.1s ease;
+}
+
+button.pf-stat {
+  cursor: pointer;
+}
+
+.pf-stat > b {
+  font: 800 15px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.pf-stat > span {
+  font: 400 13px/18px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+}
+
+/* ---------- abas: sublinhado verde só na ativa ---------- */
+.pf-tabs {
+  display: flex;
+  margin-top: 4px;
+  border-bottom: 1px solid var(--aue-line);
+}
+
+.pf-tab {
+  flex: 1;
+  height: 52px;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: var(--aue-muted);
+  font: 600 15px var(--font-body, 'Archivo', system-ui, sans-serif);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.pf-tab > span {
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  border-bottom: 3px solid transparent;
+}
+
+.pf-tab[aria-selected='true'] {
+  color: var(--aue-text);
+  font-weight: 700;
+}
+
+.pf-tab[aria-selected='true'] > span {
+  border-bottom-color: var(--ind);
+  border-radius: 0 0 2px 2px;
+}
+
+/* ---------- listas ---------- */
+.pf-list {
+  padding: 12px 12px 0;
+}
+
+.pf-list:focus-visible {
+  outline: none;
+}
+
+.pf-list--salvos {
+  padding-top: 0;
+}
+
+.pf-list--salvos .od-profile__activity {
+  margin-top: 0;
+  padding: 12px;
+  border: 0;
+  background: transparent;
+}
+
+.pf-state {
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.pf-state h2 {
+  margin: 0;
+  font: 800 22px/26px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-text);
+}
+
+.pf-state p {
+  margin: 8px 0 0;
+  font: 400 15px/21px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+}
+
+.pf-state .pf-btn {
+  display: flex;
+  width: fit-content;
+  margin: 16px auto 0;
+}
+
+.pf-best {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  padding: 12px;
+  border: 1px solid var(--aue-line);
+  border-radius: 12px;
+}
+
+.pf-best > span {
+  font: 400 13px/18px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+}
+
+.pf-best > b {
+  font: 400 28px/32px var(--font-display, 'Anton', sans-serif);
+  font-variant-numeric: tabular-nums;
+  color: var(--aue-text);
+}
+
+.pf-rec {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border-strong, var(--aue-line));
+  border-radius: 12px;
+  background: none;
+  color: var(--aue-text);
+  font: 600 15px var(--font-body, 'Archivo', system-ui, sans-serif);
+  cursor: pointer;
+}
+
+.pf-arr {
+  margin: 0 0 8px;
+  padding: 12px;
+  border: 1px solid var(--aue-line);
+  border-radius: 12px;
+}
+
+.pf-arr-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  font: 400 13px/18px var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted);
+}
+
+.pf-arr-foot button {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--aue-muted);
+  font: 600 13px var(--font-body, 'Archivo', system-ui, sans-serif);
+  cursor: pointer;
+}
+
+/* ---------- estados fora do perfil pronto ---------- */
+.od-profile__state:not(.od-profile__onboarding) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: center;
+}
+
+/* ---------- esqueleto: mesma geometria do perfil pronto, para não pular ---------- */
+.pf-skel {
+  min-height: calc(100svh - 160px);
+}
+
+.pf-sk {
+  border-radius: 8px;
+  background: var(--aue-surface-2);
+  animation: pfPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pfPulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.pf-skel__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px 0;
+}
+
+.pf-skel__avatar {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.pf-skel__nome {
+  flex: 1;
+  min-width: 0;
+}
+
+.pf-skel__nome > .pf-sk:first-child {
+  width: 96px;
+  height: 22px;
+}
+
+.pf-skel__nome > .pf-sk:last-child {
+  width: 140px;
+  max-width: 100%;
+  height: 14px;
+  margin-top: 6px;
+}
+
+.pf-skel__botao {
+  flex: none;
+  width: 118px;
+  height: 36px;
+  border-radius: 12px;
+}
+
+.pf-skel__sobre {
+  padding: 12px 16px 0;
+}
+
+.pf-skel__sobre > .pf-sk:nth-child(1) {
+  width: 92%;
+  height: 15px;
+}
+
+.pf-skel__sobre > .pf-sk:nth-child(2) {
+  width: 60%;
+  height: 15px;
+  margin-top: 5px;
+}
+
+.pf-skel__sobre > .pf-sk:nth-child(3) {
+  width: 46%;
+  height: 13px;
+  margin-top: 11px;
+}
+
+.pf-skel__numeros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  margin: 20px 12px 0;
+}
+
+.pf-skel__numeros > .pf-sk {
+  height: 38px;
+}
+
+.pf-skel__numeros > .pf-sk:nth-child(1) {
+  width: 48px;
+}
+
+.pf-skel__numeros > .pf-sk:nth-child(2) {
+  width: 64px;
+}
+
+.pf-skel__numeros > .pf-sk:nth-child(3) {
+  width: 56px;
+}
+
+.pf-skel__abas {
+  height: 52px;
+  margin-top: 4px;
+  border-radius: 0;
+}
+
+.pf-skel__card {
+  height: 161px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+}
+
+.pf-skel__arroto {
+  height: 70px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+}
+
+/* ---------- 700px para cima: capa fina de volta, medidas um degrau acima ---------- */
+@media (min-width: 700px) {
+  .pf-cover {
+    position: relative;
+    height: 132px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--aue-surface-2) center / cover no-repeat;
+    color: var(--aue-muted);
+    font-family: var(--font-display, 'Anton', sans-serif);
+    font-size: 24px;
+  }
+
+  .pf-cover-acts {
+    position: absolute;
+    right: 12px;
+    bottom: 4px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .pf-cover-acts button {
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 12px;
+    border: 0;
+    background: transparent;
+    color: var(--aue-text);
+    font: 700 13px var(--font-body, 'Archivo', system-ui, sans-serif);
+    cursor: pointer;
+  }
+
+  .pf-cover-acts button::before {
+    content: '';
+    position: absolute;
+    inset: 4px 0;
+    z-index: -1;
+    border: 1px solid var(--border-strong, var(--aue-line));
+    border-radius: 12px;
+    background: var(--aue-bg);
+  }
+
+  .pf-cover-acts button:disabled {
+    cursor: progress;
+    opacity: 0.7;
+  }
+
+  .pf-head {
+    padding-top: 16px;
+    gap: 16px;
+  }
+
+  .pf-av {
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
+  }
+
+  .pf-name {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .pf-handle {
+    font-size: 15px;
+  }
+
+  .pf-stat > b {
+    font-size: 17px;
+  }
+
+  .pf-stat > span {
+    font-size: 14px;
+  }
+
+  .pf-list {
+    padding: 16px 16px 0;
+  }
+
+  .pf-skel__cabeca {
+    padding-top: 16px;
+  }
+}
+
+/* ---------- movimento reduzido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .pf-sk {
+    animation: none;
+  }
+
+  .pf-btn,
+  .pf-stat,
+  .pf-tab {
+    transition: none;
+  }
+
+  .pf-btn:active:not(:disabled),
+  .pf-stat:active:not(:disabled),
+  .pf-tab:active {
+    transform: none;
+  }
+}

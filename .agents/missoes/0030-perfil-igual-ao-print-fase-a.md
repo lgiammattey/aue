@@ -162,3 +162,94 @@ Já respondidas antes e fora de dúvida: print vence a decisão de 19/10; sem ch
 4. **Modelo e tela do Motorola G67.** Confirmar que o aparelho real é 412x915. Sem isso, o Chrome Android fica `NÃO VALIDADO` nas medidas.
 5. **"Pode" do merge do PR #329.** O Luiz quer o merge antes do código e vai dizer quando. Ninguém mergeia sem esse "pode" nem com o CI vermelho.
 6. **Barra lateral do desktop.** A regra `.nav-item.active` é compartilhada com a barra lateral. Se o Camillo mostrar que o item ativo do desktop vai para `--fg` junto, entendo que é isso que o Luiz quis com "todas as telas". Se o Luiz quiser o desktop como está, ele avisa.
+
+## Gate Arquitetural do Camillo (21/10/2026)
+
+Leitura de código contra o plano `avalie-a-tela-de-vivid-shamir.md`, sem escrever código de produção. Não abri a tela no navegador: o que digo sobre "como renderiza hoje" vem do CSS e do JSX, e a captura de antes (condição 2) confirma ou derruba.
+
+**Veredito: APROVADO COM CONDIÇÕES.** Nenhum gatilho de escalada disparou. Não há porta, RPC, migração nem campo novo; o `PlayerDoArroto` e o `MenuDoPost` não mudam de assinatura; a barra inferior se resolve só em cor. Com as 12 condições abaixo, o Kayky pode abrir branch depois do "pode" do Luiz no PR #329.
+
+Esclarecimento do Luiz (coordenador, 21/10): o item ativo em `--fg` vale só para a barra inferior do celular; o menu lateral do desktop não muda. Dá para separar, ver item 6.
+
+### Achados, com evidência
+
+**1. Contrato de props do `CardDoPost` (`src/features/novo-aue/CardDoPost.tsx`)**
+- Props de hoje: linhas 18-46. Tudo que o plano pede cabe em **uma** prop opcional nova, `variante?: 'feed' | 'perfil'`, padrão `'feed'`. Ela liga só o que é do perfil: esconder as reações emoji (linhas 326-345), omitir o coração quando não há `aoCurtir` (hoje fica desabilitado, linhas 300-324) e trocar para neutro os pontos que ficariam verdes (item 3 abaixo). Com isso nenhum dos quatro chamadores precisa mudar para compilar.
+- O que **não** é variante, é o card novo para todo mundo (decisão do Luiz): `@handle` (linha 187, hoje `u/`), `r/comunidade` em linha própria (linhas 200-207, hoje no cabeçalho), `⋯` no topo direito (`MenuDoPost` hoje na linha 399, dentro da barra de ações), contadores sempre visíveis (linhas 293, 322, 342, hoje só se `> 0`), ícone de compartilhar e onda/duração do player.
+- Chamadores: `InicioOpenDesign.tsx:1680` (feed), `:1721` (Seguindo), `:1909` (comunidade) passam `{...propsDeEngajamento} {...propsDeModeracao}`, áudio, comentários. Todos continuam iguais. **`ThreadDeComentarios.tsx:258` entra na lista de mudança**: a thread não repassa `reacoes`, `minhas`, `aoDenunciar` nem `aoApagar` (Props em `ThreadDeComentarios.tsx:22-37`; `InicioOpenDesign.tsx:1610` espalha essas props, mas o componente as ignora, e o TypeScript não reclama de spread). Hoje a thread já mostra o card sem contagem, sem estado de curtido e **sem o menu `⋯`**. Com "contador sempre visível" ela mostraria "0" falso. Precisa repassar as quatro props opcionais.
+- Busca completa por `CardDoPost`: só `InicioOpenDesign.tsx`, `ThreadDeComentarios.tsx`, testes e `e2e/harness.tsx:17`. O harness já está fora de sincronia (passa `aoAlternarReacao` e `aoAlternarSalvo`, que o card não tem); fica como está. `CardDeCauso`/`TelaComunidade` só citam o card em comentário.
+- O perfil não passa por nenhum dos quatro: hoje `InicioOpenDesign.tsx:2179-2185` renderiza `CausoPostado` como `<Link>`. O card pede `ItemDoFeed`. Existe um mapeamento causo para item, inline, em `InicioOpenDesign.tsx:572-588` (Seguindo), com `engajamentoDoCauso` (`useEngajamento.ts:9`). O perfil precisa dele sem copiar o bloco: extrair uma função pura (`causoParaItemDoFeed`, no mesmo módulo ou em `tipos`) e usar nas duas telas.
+- Número real: `useEngajamento` cai em `ZERO` quando a contagem ainda não chegou (`useEngajamento.ts:6`, uso em `propsDeEngajamento`). Hoje o 0 fica escondido; com contador sempre visível ele apareceria como fato antes de carregar. Ver condição 4.
+- Coração: para causo, `aoCurtir` já existe e vem de `comunidadePort.alternarCurtida` (`useEngajamento.ts:122`); para tópico, de `forum.alternarReacaoDoTopico`. A regra do plano ("`alternarCurtida`/`curtidoPorMim`") é estreita demais. A regra certa é `aoCurtir !== undefined`, que o hook já calcula.
+
+**2. O que muda nas telas e o que os testes travam**
+- Protótipo canônico do feed (`Bonde do Arroto.dc.html:172-195`) já usa: `@handle · tempo` na primeira linha, `⋯` à direita no topo, comunidade em linha própria ("Postado em ..."), play em `--fg`, contadores sempre visíveis (respostas, reposts, curtidas), sem emoji de reação, duração em `ui-monospace`. Então `@handle`, `⋯` no topo, contador visível e play neutro **aproximam** o feed do protótipo. Afastam: a duração em sans (o Luiz decidiu sans; o protótipo do feed usa monospace, Rian precisa alinhar) e o `r/slug` (o protótipo do feed escreve "Postado em"; o do perfil usa `r/`). Rian decide qual vale e escreve.
+- No feed, Seguindo e comunidade o que muda de fato: `@handle`, `r/` em linha própria, `⋯` sai da barra de ações, contadores `0` aparecem, player novo. **Não pode mudar**: composer, filtros, comentários, reações emoji (ficam, a variante `perfil` é a única que as esconde), banner de anúncio.
+- Hoje o card quase não tem CSS de layout (item 3). O visual "de antes" é, na prática, avatar empilhado em cima do conteúdo e sem moldura. Então o "antes e depois" do feed é mais diferença que ajuste fino; Marcelo e Rian precisam saber disso antes de olhar a captura.
+- Testes que travam e **precisam ser atualizados de propósito** (não são regressão):
+  - `CardDoPost.test.tsx` (~42): espera `u/mestre_eco`; passa a `@mestre_eco`. (~151) "botão sem ação fica desabilitado" fica valendo para a variante `feed`; cria-se um teste para o `perfil` (coração ausente sem `aoCurtir`). (~190) toolbar com 7 botões continua valendo na variante `feed`.
+  - `InicioOpenDesign.test.tsx:162-163`: `u/ze_do_eco` e o `aria-label` "Abrir perfil de u/ze_do_eco" mudam. `:166` (🔥 no feed) **deve continuar passando**, é a prova de que o feed não perde reação.
+  - `PlayerDoArroto.test.tsx` (~15, ~29): esperam "1:01 / 1:33" e "0:12 / 0:36"; passam a só duração. Quando a duração é `null`, segue mostrando o tempo corrido (o teste "não inventa duração" continua valendo).
+  - `useEngajamento.test.tsx:41,56,66,69,70`: acessam `.reacoes.like` sem `?.`; se a condição 4 for feita no hook, esses acessos ganham `?.`.
+  - `DenunciarEApagar.test.tsx:67-68`: acha `Mais ações` por `within(article)`. O `⋯` indo para o cabeçalho continua dentro do `<article>`, passa.
+  - `MenuDoPost.test.tsx`: não muda enquanto o `MenuDoPost` mantiver a assinatura.
+  - `ThreadDeComentarios.test.tsx` só trava texto e comentários; não é afetado.
+
+**3. CSS**
+- Confirmado por `grep` em `src/**/*.css`: `feed-post`, `post-avatar-col`, `post-main-content`, `post-meta-header`, `post-meta-ident`, `badge-comunidade`, `card-do-post` e `post-avatar-static` têm **zero** regras. Já existem regras soltas para classes irmãs em `InicioOpenDesign.css`: `.post-avatar-link/-fallback` (348), `.post-meta-handle/-time/-dot` (380-388), `.post-meta-badges` (390), `.post-topic-tag` (396), `.post-audio-wrapper` (428), `.post-actions--twitter` (446), `.action-btn` (457-510, 1146, 1195-1213), `.post-media-image` (301). O CSS novo reaproveita ou sobrescreve essas; não as apaga.
+- Armadilhas do bloco legado: `<p className="post-body">` (CardDoPost linha 227) pega `casca.css:467` (`padding: 16px 18px 14px`) e `:1185` (mobile `12px 14px`). `.badge-nota` (`casca.css:517`) é verde cheio. `.burp-player/.play/.wave/.wave i/.player-time` existem **duplicados** em `casca.css:591-645` e `InicioOpenDesign.css:433, 1215-1230`, e `.play` e `.wave` são nomes globais. Só o `PlayerDoArroto` usa essas classes (busca em `tsx`); a Arena (`arena.css`) não define nenhuma delas.
+- Onde o CSS novo mora: **um arquivo novo `src/features/novo-aue/CardDoPost.css`**, importado por `CardDoPost.tsx` (como `PerfilConectado.tsx` faz com o seu), com todo seletor começando por `.card-do-post`. Isso dá especificidade (0,2,0) sobre `.post-body` e `.badge-nota` (0,1,0) sem depender de ordem de import e sem editar `casca.css`. O `.post-body` global **não se edita**: o `CardDeCauso` legado ainda o usa. Dentro do card, `.card-do-post .post-body { padding: 0 }`.
+- O player ganha o mesmo tratamento: `PlayerDoArroto.tsx` passa a usar classes próprias (`player-arroto`, `player-arroto__play`, `player-arroto__onda`, `player-arroto__tempo`) em `PlayerDoArroto.css`. Assim a aba Arrotos do perfil (`InicioOpenDesign.tsx:2220`) herda o mesmo visual e nenhuma regra global `.play`/`.wave` é tocada. As regras antigas ficam órfãs; remover é issue futura (mexer em `casca.css` fora da barra está vetado neste cartão).
+- Tokens: `--border-strong` e `--ind` estão no `DESIGN.md` (linhas 82-83, 99-100) mas **não são declarados no CSS do app** (só em `tema-claro.css`, das páginas públicas). No card, usar `var(--border-strong, var(--aue-line))`. Isso não é token novo no design system, então não dispara o critério 8 do Gate. Em `casca.css`, `--aue-text` é `var(--fg)`: "`--fg`" do cartão é `--aue-text`.
+- Verde no perfil (opção A, no máximo 2 por estado): dentro do card existem quatro fontes de verde fora da aba ativa e do ARROTAR: `.badge-nota` (`casca.css:517`), `.post-topic-tag__label` (`InicioOpenDesign.css:401`), `.action-btn.is-active` (1146) e `.action-btn--save.is-saved`/`__feedback` (493, 505). Na variante `perfil`, todas passam a `--aue-text`/`--aue-muted` (a nota vira contorno neutro, como o `.pf-nota` do protótipo). Sem isso o perfil estoura o orçamento de verde.
+- Tamanho: estimo 120 a 160 linhas num bloco só (grade avatar + conteúdo, cabeçalho, linha da roda, player, barra de ações, 4 overrides da variante `perfil`, um bloco `@media (min-width: 700px)`), mais ~40 do player. **Cabe num bloco coeso.** Não pede token novo. O critério 8 não barra.
+
+**4. `PlayerDoArroto` e `MenuDoPost` fora do card**
+- `PlayerDoArroto`: usado no `CardDoPost` (233) e em `InicioOpenDesign.tsx:2220` (aba Arrotos do perfil). Nenhuma outra tela. Mudar a onda, a duração e o ícone muda as duas, e é o desejado (o protótipo usa o mesmo player nas duas). A **assinatura não muda** (`tocando`, `tempoAtualSegundos`, `duracaoSegundos`, `aoAlternar`); só o que ele desenha. Gatilho (d) **não dispara**. Regra: com duração conhecida, mostra só a duração; sem duração, o tempo corrido; nunca inventa.
+- `MenuDoPost`: só o `CardDoPost` o usa. Muda de lugar (topo do card) sem mudar assinatura. Atenção: o menu abre para cima (`bottom: 100%`, `MenuDoPost.tsx:57`) com estilos inline; no topo do card o menu pode sair da tela e ficar atrás da barra superior. Abrir para baixo no topo (condição 8).
+
+**5. Fronteira do ADR 0001**
+- Nenhum arquivo do plano acrescenta API de navegador. Dívida que **já existe** e não cresce: `CardDoPost.tsx:103-115` usa `window`, `navigator.share`, `navigator.clipboard`, `window.prompt`; `MenuDoPost.tsx:26-30` usa `document.addEventListener`; `ThreadDeComentarios.tsx:111-152` usa `window.setInterval`. Essa pasta (`features/novo-aue`) não está na lista `PASTAS_LIMPAS` de `src/arquitetura.fronteira.test.ts`, por isso nenhum teste reclama. Não faço a migração aqui (não é escopo, e mover o compartilhar do card para uma porta é outro cartão), mas o Kayky não pode escrever mais nenhuma linha dessas no card, no player nem no perfil. Áudio: um player por vez continua pelo `alternarAudio` do `InicioOpenDesign`; o `Audio` fica em `elementoAudio` e nada novo sai de `plataforma/`.
+
+**6. Barra inferior**
+- A regra `.nav-item.active` (`casca.css:192-196`) **já está em `--aue-text`** (com fundo `--aue-surface-2`). Ela só atinge a barra lateral do desktop e não é verde. O verde do item ativo no celular vem de outra regra: `.mobile-nav-item.active svg { stroke: var(--aue-accent) }` (`casca.css:1098-1100`), dentro do `@media (max-width: 699px)` que abre em `:1021`. O rótulo do item ativo já é `--aue-text` (`:1093-1096`) e o `svg` herda `stroke: currentColor` (`:1086-1088`).
+- Os dois ficam separados sem tocar na estrutura: o seletor é exclusivo do celular e a barra lateral não o usa. A barra do celular só existe em `BarraLateral.tsx:137-210` com `.mobile-nav-item`, e o desktop usa `.nav-item` (linhas 49-122). **Gatilho (e) não dispara.**
+- Menor diff: apagar as três linhas `:1098-1100` (o traço passa a seguir `currentColor`, que no item ativo é `--aue-text`). Uma regra, nenhuma linha acrescentada. Os ícones `.nav-item .ico` verdes (`:198-204`) são do desktop e do modo tablet (`@media (max-width: 1059px)`, `:985+`); ficam como estão. Observação para o Tiago: o Luiz não pediu isso, mas o menu lateral continua com todos os ícones em verde, e isso é do desktop.
+- O FAB (`.mobile-nav-item--arrotar`, `:1106+`) não recebe a classe `active` e define o próprio `svg` (`fill: accent-on`, `stroke: none`, `:1129-1134`), então a mudança não o toca. Reduzir de 56 para 52 é só `width`/`height`; só entra se o Rian cravar 52 no protótipo, em commit separado, sem mexer em `top`/`border`/grade.
+- `casca.layout.test.ts` (13 linhas) trava hoje **uma coisa só**: o bloco `.app` (`\n\.app \{[^}]*\}`) com `grid-template-columns: 275px minmax(0, 600px) 320px` e `justify-content: center`. Ele não diz nada sobre a barra. Verde antes e depois só prova que o `.app` não foi tocado. Precisa ganhar duas asserções: (1) o CSS não contém regra `.mobile-nav-item.active svg` com `--aue-accent`; (2) `.mobile-nav-item--arrotar` continua com `background: var(--aue-accent)`. Cuidado para não inserir outra regra `.app {` antes da existente, o regex pega a primeira.
+
+### Condições para o Kayky (todas obrigatórias)
+
+1. **Uma prop nova só no card**: `variante?: 'feed' | 'perfil'`, padrão `'feed'`. Nada de prop "para deixar preparado" para a Fase B. `tsc -b && tsc -p tsconfig.test.json` passa sem editar os chamadores só para compilar.
+2. **Capturas de antes** (feed, Seguindo, comunidade e thread; 320, 390, 430, 1280; claro e escuro) **antes** do primeiro commit do card. É o único jeito de saber como renderiza hoje.
+3. **CSS do card em `CardDoPost.css`** (e do player em `PlayerDoArroto.css`), seletores sempre sob `.card-do-post`, sem editar `.post-body` nem `.burp-player/.play/.wave` e sem `!important`. `casca.css` só recebe a remoção das linhas 1098-1100.
+4. **Nenhum número inventado**: o contador de curtidas só aparece com `reacoes` carregado. Fazer em `propsDeEngajamento`: omitir `reacoes` enquanto não houver contagem do servidor nem `post.engajamento` (e ajustar os acessos de `useEngajamento.test.tsx` para `?.`). O contador de comentários vem de `respostasTotal`, que é dado real. O espaço do número tem largura reservada para não saltar o layout.
+5. **Thread**: `ThreadDeComentarios` passa a aceitar e repassar `reacoes`, `minhas`, `aoDenunciar`, `aoApagar` (opcionais). Teste novo: a thread mostra o `⋯` quando há `aoApagar`/`aoDenunciar`. Sem isso o card novo regride na thread.
+6. **Perfil**: extrair `causoParaItemDoFeed` (a partir de `InicioOpenDesign.tsx:572-588`) e usar na lista do perfil e no Seguindo; não duplicar o bloco. Perfil usa `variante="perfil"` e as mesmas props de engajamento e moderação dos outros chamadores (`propsDeEngajamento`, `propsDeModeracao`), de modo que o `⋯` mostre apagar no perfil do dono e denunciar no de outra pessoa.
+7. **Verde**: na variante `perfil`, nota, tag de tópico, estado ativo e salvo/feedback sem `--aue-accent`. Teste de CSS (leitura do arquivo, no estilo do `casca.layout.test.ts`) ou captura contada pelo Rian. Fora do perfil, as cores não mudam.
+8. **`MenuDoPost`** no topo abre para baixo e para dentro da tela (hoje abre para cima, `MenuDoPost.tsx:57`); alvo do `⋯` de 44px com margem negativa para não aumentar a linha, como no protótipo. Assinatura intacta.
+9. **`PlayerDoArroto`**: assinatura intacta; mostra só a duração quando existe e o tempo corrido quando não; `aria-label` de tempo preservado; altura fixa de 44. Atualizar `PlayerDoArroto.test.tsx` e conferir a aba Arrotos.
+10. **Testes alterados de propósito** (lista do item 2) entram no mesmo commit da mudança, cada um explicado na mensagem. O `InicioOpenDesign.test.tsx:166` (🔥 no feed) e `DenunciarEApagar.test.tsx` passam sem edição.
+11. **Fronteira**: nenhuma chamada nova de `window`, `navigator`, `document`, `localStorage`, `Audio` nem Supabase em arquivo de `features/`. Nada de migrar o compartilhar do card neste cartão.
+12. **Barra**: só apagar `casca.css:1098-1100` e acrescentar as duas asserções ao `casca.layout.test.ts`. Rodar o teste antes (base verde) e depois. FAB 52 só com o Rian pedindo.
+
+### Gatilhos que ainda sobem a pista
+
+- **(a)** se a condição 5 ou a 6 exigirem prop **obrigatória** nova no card, ou se algum dos quatro chamadores precisar mudar de forma que o TypeScript acuse;
+- **(b)** se o perfil precisar de campo que `listarFeed({ autorId })` não devolve (por exemplo contagem de curtidas de tópico fora do `forum.contarReacoesDosTopicos`);
+- **(d)** se o `PlayerDoArroto` ou o `MenuDoPost` precisarem mudar de assinatura (hoje não precisam);
+- **(e)** se, ao mexer na barra, aparecer necessidade de alterar grade, rotas ou o FAB além de `width`/`height`; hoje não;
+- **novo, (f)**: se o CSS do card passar de um arquivo coeso (mais de uns 200 linhas) ou pedir token fora do `DESIGN.md`, o Kayky para e o Camillo divide o trabalho.
+
+### Ordem segura de commits
+
+0. PR #329 mergeado antes de qualquer código (já definido no cartão).
+1. **Player**: `PlayerDoArroto.tsx` + `PlayerDoArroto.css` + teste. Muda a aba Arrotos e o card ao mesmo tempo, mas é peça pequena e isolada.
+2. **Encanamento sem mudança visual**: `causoParaItemDoFeed` extraído, condição 4 no hook, thread repassando as quatro props. Tudo opcional; feed e Seguindo iguais.
+3. **Card**: `CardDoPost.tsx` + `CardDoPost.css` + `variante` + `MenuDoPost` no topo + testes atualizados. Aqui as quatro telas mudam; é onde entram as capturas de depois (itens 8 e 21 da matriz).
+4. **Perfil**: view `perfil`, `InicioOpenDesign.css`, `BarraSuperior` (placeholder), `ModalEditarPerfil`, `TelaPerfilOpenDesign.test.tsx`.
+5. **Barra inferior por último**: apagar `casca.css:1098-1100` + asserções no `casca.layout.test.ts`. Fica por último porque é a única mudança global e a mais barata de reverter.
+
+Rodar `typecheck`, `lint`, `test` e `build` em cada commit, não só no último. Mobile primeiro, `min-width` sobe para o desktop; `dvh/svh`, `env(safe-area-inset-*)`, `touch-action: manipulation` e `overscroll-behavior-y: contain` como na matriz (itens 10, 13, 14); o critério do Luiz é perfil mobile com cara de app, sem quebrar e sem "sambar".
+
+**Item 6 de "Ainda sem resposta do Luiz": resolvido.** O desktop não muda; a regra do menu lateral já estava em `--aue-text`.

@@ -37,6 +37,7 @@ import { ModalConexoes, type EstadoDasConexoes } from './ModalConexoes';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
+import { semEspelhosDeCausos } from './semEspelhos';
 import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
@@ -443,7 +444,7 @@ export function InicioOpenDesign({
           });
         }
       }
-      setTopicosDaComunidade(itens);
+      setTopicosDaComunidade(semEspelhosDeCausos(itens));
     });
 
     return () => {
@@ -575,7 +576,7 @@ export function InicioOpenDesign({
             engajamento: engajamentoDoCauso(c),
           });
         }
-        setItensFeed(itens);
+        setItensFeed(semEspelhosDeCausos(itens));
       })
       .catch(() => {});
 

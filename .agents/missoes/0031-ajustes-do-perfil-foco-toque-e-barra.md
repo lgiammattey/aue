@@ -461,3 +461,102 @@ Nenhum token de foco no DESIGN.md. O `base.css` do design system manda `outline:
 - **Luiz:** decidiu a B em 21/10/2026 (decidido pelo Luiz). O "Entrar" maior (63px) e o ARROTAR no centro são ajustes pequenos; o Tiago pode levar junto se achar que ele quer ver.
 - **Tiago (decidido em 21/10/2026, item (a) do Fechamento: entra, condicionada ao OK do Camillo):** aceitar ou não o commit 4 da barra (centralizar o ARROTAR em 320 a 389), porque passa do que o Gate liberou.
 - **Camillo (conferir):** (1) o `.sidebar .mobile-bottom-nav` precisa da especificidade (0,2,0), senão o `gap: 0` perde para `.sidebar nav { gap: 4px }`; (2) a regra do `Entrar` é a opção B dele com 14px/700 e `padding: 0 10px`, 63px de largura; a trava em `estilosDoPerfil.test.ts` lê `width: auto` e o `font-size`; (3) se o commit 4 entrar, a asserção nova vai em `casca.layout.test.ts` (grade de 56/1fr/56/1fr/56 em `max-width: 389px` e o `gap: 0`), porque aí `casca.css` muda; (4) o `.badge-nota` do feed passa a `align-self: center` e o `z-index: 1` do `r/roda` sai; (5) o teste de medida dele deu `scrollWidth` 320 em 320 no visitante com `--hide-scrollbars`; o meu deu 323 só com contexto móvel ligado, então a prova do Marcelo (3.2) tem de rodar assim.
+
+## Conferência do Camillo sobre o desenho do Rian (21/10/2026)
+
+Li `src/features/novo-aue/` (`CardDoPost.tsx/.css`, `BarraSuperior.tsx/.css`, `casca.css`, `BarraLateral.tsx`, `FolhaDaFoto.css`, `index.css`, os testes de CSS) e medi no Chromium do Playwright (build 1194, `isMobile` e `hasTouch` ligados, `--hide-scrollbars`) com o harness do `.shots/` copiado para o scratchpad. Injetei o CSS do Rian na página aberta; nada em `src/` foi alterado. Scripts em `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/` (`cam-confere-b.mjs`, `cam-cauda.mjs`, `cam-entrar2.mjs`, `cam-barra2.mjs`, `cam-foco2.mjs`), fora do git. Base antes de medir: `estilosDoPerfil`, `casca.layout`, `verdeDoPerfil`, `CardDoPost` e `arquitetura.fronteira` com 45 testes passando.
+
+**Veredito: APROVADO COM CONDIÇÕES.** Dois defeitos no desenho do Rian, ambos de uma linha: o `z-index: 1` do `r/roda` não pode sair, e o `top` do anel de foco precisa seguir o `--cab-linha`. O resto está certo e bate com a medida. O commit da barra (ARROTAR centrado) pode entrar: o gatilho (e) não dispara.
+
+### 1. Card B
+
+Medido nas cinco telas (feed, Seguindo, comunidade, thread, perfil), em 320 e 390, em todos os cards de cada tela, com a regra do Rian e `--cab-linha: 32px`:
+
+| o que | antes | depois |
+|---|---|---|
+| altura de cada card | 117 / 161 (390), 161 / 205 (320) | **+24px em todos** (141 / 185; 185 / 229) |
+| área que responde ao toque, nome | 20 | **44** (0,5 a 44,5) |
+| idem, `@handle` | 20 | **44,5** |
+| idem, `r/roda` | 44,5, mas roubando o nome | **44,5** (44,5 a 89) |
+| interseção entre nome, `@handle`, `r/roda`, `⋯` e avatar | 8 pares no perfil, 5 no feed (medida do Rian) | **zero** |
+| `⋯` dentro do card, rolagem lateral | sim, 0 | sim, 0 |
+| centro do `⋯` contra o centro do texto do nome | não medido | 29 e 29 |
+| centro da nota contra o centro do texto do `r/roda` | alinhados | 61 e 60,5 |
+
+- **O `.badge-nota` com `align-self: center` não muda nada que se veja.** A linha de baixo deixa de ser centrada (`align-items: flex-start`, para o `r/roda` ficar no topo da caixa) e a nota precisa continuar na altura do texto do `r/roda`. Com o `center` ela fica a 0,5px do texto, igual a hoje. Sem ele iria para o topo da linha. Aprovado.
+- **Os 5 pontos de renderização** (`InicioOpenDesign.tsx:1703`, `:1744`, `:1932`, `:2139`, `ThreadDeComentarios.tsx:269`) não mudam: o diff é só `CardDoPost.css`, sem prop, sem TSX. Os cinco foram medidos rodando o card real.
+- **CSS sob `.card-do-post`, sem `!important`, sem `.post-body`, sem `casca.css`:** confere. Todos os seletores são de 0,2,0, já existentes. Uma ressalva de ordem: as regras novas têm a mesma especificidade das antigas (`min-height: 44px; margin: -12px 0` no nome e no `@`, `height: 44px` no `r/roda`) e só ganham por vir depois. O Kayky deve **editar as regras antigas no lugar**, não empilhar uma camada por cima.
+- **Defeito 1, o `z-index: 1` do `r/roda` fica.** O Rian tirou. Medi com e sem:
+
+  | caso | com `z-index: 1` | com `z-index: auto` |
+  |---|---|---|
+  | post com texto | 44,5 | 44,5 |
+  | post só com áudio (sem corpo) | 44,5 | **32** |
+  | post sem corpo e sem áudio, só ações | 44,5 | **28** |
+
+  A caixa do `r/roda` entra 12px na linha de baixo (margem negativa, como hoje). O play e os botões de ação são `position: relative` e vêm depois no DOM; sem o `z-index` eles passam por cima dos 12px e o `r/roda` perde toque. Arroto sem texto é caso do dia a dia no Auê. Com o `z-index: 1` nada muda em relação a hoje (o `r/roda` ainda leva os 12px de cima do play, como já levava, e isso fica fora do 2.2, que só lista nome, `@`, `r/roda`, `⋯` e avatar).
+- **Quanto CSS:** o bloco do Rian tem 19 linhas e o anel uns 12. Substituindo as regras antigas no lugar, o saldo fica perto de +25 (385 para uns 410). **Gatilho (f):** o arquivo já passava de 200 linhas no 0030 e foi liberado como bloco coeso; nada mudou nisso. `--cab-linha` é variável local do `.card-do-post`, não token global, então não pede o `DESIGN.md`. Não dispara de novo, com a condição de a variável ficar declarada só em `.card-do-post`.
+- **O que trava a altura e a estrutura hoje:** nada trava altura, margem ou caixa. `CardDoPost.test.tsx` trava texto e links (e que o `r/roda` fica fora do `.post-meta-ident`). `estilosDoPerfil.test.ts:21-25` trava o `::after` do avatar e a ausência de `!important` no arquivo (a regra do Rian passa). `verdeDoPerfil.test.ts` proíbe `accent` nas regras do perfil (a regra do Rian passa, usa `--aue-text`). Os testes de `InicioOpenDesign`, `DenunciarEApagar`, `ThreadDeComentarios` e `TelaPerfilOpenDesign` só usam os links e o `⋯`.
+- **Teste novo** (em `estilosDoPerfil.test.ts`, lendo o CSS sem comentários, mesmo padrão do arquivo): `--cab-linha: 32px` em `.card-do-post`; nome, `@` e `r/roda` com `height: calc(var(--cab-linha) + 12px)`; `r/roda` com `z-index: 1`; `.badge-nota` com `align-self: center`; o anel com `outline: 0` e `::before` em `var(--aue-text)`; nenhum `accent` nem `!important`. Isso trava o contrato escrito, não o pixel (jsdom não mede). A prova de **44px e zero sobreposição** é o script do Marcelo (2.1, 2.2, 2.3): `getBoundingClientRect` mais `elementFromPoint` de 0,5 em 0,5px em três x de cada alvo (esquerda + 2, meio e direita - 2), **incluindo o post só com áudio e o post sem corpo** (os dois casos que o `z-index` protege). O `cam-confere-b.mjs` faz isso nos cards do harness e serve de base. Não existe spec Playwright commitado do card (o `e2e/harness.tsx` está fora de sincronia, fora deste cartão), então a evidência fica no PR, não no CI.
+
+### 2. "Entrar" do visitante
+
+- **Reconciliação do 323 contra 320: concordo com o Rian.** Medi de novo os dois jeitos. Sem `isMobile`, o visitante em 320 dá `innerWidth` 320 e nenhuma rolagem: o Chrome de mesa não alarga o viewport. Com `isMobile` e `hasTouch`, o mesmo visitante dá `innerWidth` 323, `scrollWidth` 323 e `clientWidth` 320. A minha tabela do Gate (323) veio de scripts móveis; a linha "320 em todo lugar" veio do `cam-real.mjs`, que roda sem modo móvel, e é falso verde. O estouro é de 3 a 4px em todas as larguras de 320 a 350 (320: 3, 330: 3, 339: 4, 350: 4) e some em 360. Está certo exigir o modo móvel na prova.
+- **Regra do Rian conferida** (`width: auto; padding: 0 10px; font-size: 14px; font-weight: 700`, só no bloco `max-width: 699px`), visitante, modo móvel:
+
+  | largura | `scrollWidth` hoje | depois | botão | busca hoje | busca depois |
+  |---|---|---|---|---|---|
+  | 320 | 323 | **320** | 63,4 x 44 | 179,7 | 160,3 |
+  | 330 | 333 | **330** | 63,4 x 44 | 189,7 | 170,3 |
+  | 340 | 343 | **340** | 63,4 x 44 | 199,7 | 180,3 |
+  | 350 | 354 | **350** | 63,4 x 44 | 209,7 | 190,3 |
+  | 360 | 360 | 360 | 63,4 x 44 | 207,7 | 188,3 |
+  | 390 | 390 | 390 | 63,4 x 44 | 237,7 | 218,3 |
+
+  O texto passa a caber na caixa em todas as larguras (`scrollWidth` do botão igual a `clientWidth`; hoje o texto sai da caixa até em 390). Logado não muda (o `.top-actions` some).
+- **Condições do código:** (a) seletor `.topbar .top-actions .icon-btn`, não `.topbar .icon-btn`: o segundo também pega o botão de busca (hoje escondido no mobile) e qualquer `.icon-btn` futuro no topo. (b) **Escrever `font-size` e `font-weight` separados.** Na mensagem de passagem apareceu `font:700 14px`; esse atalho sem família é inválido e o navegador joga a declaração inteira fora. O texto da seção do Rian está certo (`font-size: 14px; font-weight: 700`). (c) `index.css` e o `.icon-btn` global ficam como estão.
+- **Trava em `estilosDoPerfil.test.ts`:** dentro do bloco `max-width: 699px` do `BarraSuperior.css`, a regra `.topbar .top-actions .icon-btn` com `width: auto`, `padding: 0 10px`, `font-size: 14px` e `font-weight: 700`; o arquivo sem `overflow-x: hidden` e sem `!important`. O teste atual da busca (`font-size: 16px`, placeholder 14px e 12px) continua. jsdom não mede largura: a prova é o 3.2 do Marcelo, com `isMobile` e `hasTouch`, em 320, 330, 340, 350, 360, 390, 402, 412 e 430.
+
+### 3. Commit da barra (ARROTAR centrado): pode entrar, com condições
+
+- **É só CSS mobile, sem estrutura.** Nenhuma linha de `BarraLateral.tsx`, nenhum elemento novo, nenhuma rota. A coluna do FAB passa de `1fr` para 56px, igual à largura do botão: o FAB segue com **56 x 56, no mesmo `y` (724), mesma cor e mesmo `top: -14px`**, medido em 320 a 430. Barra 56 e `.sidebar` 67 em todas as larguras. Altura, tamanho e posição do FAB ficam como o cartão exige.
+- **Gatilho (e) deste cartão: não dispara.** A definição dele é estrutura da casca, grade do `.app` ou FAB além de tamanho. A grade que muda é a da `.mobile-bottom-nav` (cinco colunas de uma barra que só existe abaixo de 700px), não a do `.app`. A regra vale só até 389px e não toca o desktop.
+- **Medido com a regra do Rian**, logado e visitante, 320 a 430:
+  - desvio do ARROTAR: **0** em todas as larguras (hoje 7,9 em 320; 6,5 em 330; 5,3 em 340; 2,8 em 360);
+  - espaço entre os ícones: igual entre os quatro vãos (41 em 320, 43,5 em 330, 46 em 340, 51 em 360); hoje desiguais (45, 45, 37, 37 em 320);
+  - rótulo sem corte e sem colisão em todas; em 390 para cima **idêntico a hoje**, inclusive o `gap: 4px`;
+  - `.sidebar .mobile-bottom-nav` com `gap: 0` pega em computed style; com o seletor simples não pegava, como o Rian disse.
+- **Condições:**
+  1. Só dentro de `casca.css`, em dois `@media` novos (`max-width: 389px` e `339px`), depois do bloco de 699px. Sem mexer na regra de 699px, no `.mobile-nav-item--arrotar`, no TSX nem em `index.css`.
+  2. A regra de rótulo `.mobile-nav-item span` também pega o `.arrotar-label` do FAB (`overflow: hidden` e reticência). Medi: não corta nada em 320 a 389. Fica, mas o Marcelo olha o "ARROTAR" na captura.
+  3. Marcelo mede também o caso que eu **não repeti**: "Comunidades" em negrito (ativo) em 320, folga >= 3px, como o 3.9 pede. Só vi o rótulo inativo (64,4 de largura em 10px contra coluna de 70).
+  4. **`casca.layout.test.ts`**, asserção nova, sem enfraquecer as quatro de hoje: dentro de `@media (max-width: 389px)`, `.sidebar .mobile-bottom-nav` com `grid-template-columns: 56px minmax(0, 1fr) 56px minmax(0, 1fr) 56px` e `gap: 0`; dentro de `@media (max-width: 339px)`, rótulo em `font-size: 10px` excluindo o `--arrotar`; `text-overflow: ellipsis` e `white-space: nowrap` no rótulo; a base `repeat(5, 1fr)` do bloco de 699px segue lá (de 390 para cima nada muda); sem `overflow-x: hidden` no arquivo.
+  5. Commit isolado, o mais barato de reverter. Se o Marcelo achar corte ou deslocamento na captura, ele cai sem levar os outros.
+
+### 4. Foco: divergência do `base.css` aceitável, com um acerto
+
+- **A divergência é aceitável.** O limite de dois verdes por estado (AGENTS.md, fidelidade ao Design System) vence o `outline` verde do `base.css`, que é detalhe do protótipo. Contraste de uns 18:1 nos dois temas.
+- **Conflito com regra existente: confirmado, e o desenho do Rian resolve.** Hoje, com Tab, o card mostra anel **verde**: o nome vem de `casca.css:501` (2px `--aue-accent`) e o `@handle` e o `r/roda` vêm do `*:focus-visible` global de `index.css:150` (3px `--accent`). Medi os três: verde `rgb(198, 255, 0)`. O `outline: 0` do Rian sob `.card-do-post` (0,3,0) ganha dos dois (0,2,0 e 0,1,0). `⋯` e botões de ação já têm anel próprio; o avatar tem `tabIndex={-1}` e não recebe foco. A folha: o contêiner tem `outline: none` (`FolhaDaFoto.css:15`) e os botões têm anel de 2px em `--aue-text` com offset 2px (0,2,0 contra 0,1,0 do global); não conflita.
+- **Defeito 2, o `top` do `::before` é da opção A, não da B.** O Rian escreveu `top: 12px` (nome e `@`) e `top: 0` (`r/roda`), que centram o anel de 24px na linha de 24 da opção A. Com `--cab-linha: 32px` a linha tem 32 e o anel fica 4px mais alto que o texto, cortando a base das letras (capturei os dois: `foco2-comp.png` no scratchpad). Parametrizado centra:
+  - nome e `@handle`: `top: calc(12px + (var(--cab-linha) - 24px) / 2)` (16px em B);
+  - `r/roda`: `top: calc((var(--cab-linha) - 24px) / 2)` (4px em B).
+  
+  O item (d)5 do Fechamento do Tiago cita `top: 12px`; vale a fórmula acima. O resto do anel do Rian fica: `position: relative` nos três, `outline: 0` só no `:focus-visible`, `left: 0; right: 0`, `height: 24px`, borda de 2px em `--aue-text`, raio 8px, `pointer-events: none`. O `overflow: hidden` do link não corta, o anel está dentro da caixa.
+- **`DESIGN.md`: não anotar agora.** "Foco nunca é verde" ainda não é verdade no app: o `*:focus-visible` global e quatro regras de `casca.css` (269, 502, 825, 980) ainda pintam foco de verde. Escrever a regra no `DESIGN.md` documentaria o que não existe. Vai para o backlog como issue: foco global verde.
+
+### 5. Fronteira do ADR 0001 e gatilhos
+
+- **ADR 0001:** nada. Card, "Entrar", barra e anel são CSS; o helper de foco segue em `plataforma/web/`. Nenhuma linha nova de `window`, `navigator`, `document` ou `localStorage` em `features/`. A dívida que já existia (`window.prompt` e `navigator.share` em `CardDoPost.tsx`, `document.addEventListener` em `MenuDoPost.tsx`) não cresce.
+- **(a)** não (assinatura do helper intacta). **(b)** não: o card B não pede prop nem muda o `MenuDoPost` (o `⋯` só troca a margem). **(c)** não. **(d)** disparou e está fechado pelo Luiz: +24px por post, medido igual em todas as telas. **(e)** não (ver seção 3). **(f)** sem disparo novo (ver seção 1).
+- **Nada novo para o Luiz.** O que ele vê já foi decidido por ele (card +24px). O "Entrar" fica 19px mais largo e a busca do visitante 19 a 20px mais curta; isso é do Rian e do Tiago, já está no Fechamento.
+
+### Condições para o Kayky (todas obrigatórias, na ordem de commits do Tiago)
+
+1. **Foco (commit 1):** como na seção A do Gate, sem mudança.
+2. **"Entrar" (commit 2):** `BarraSuperior.css`, só `.topbar .top-actions .icon-btn` no bloco mobile, `width: auto`, `padding: 0 10px`, `font-size: 14px`, `font-weight: 700` (longhand, nunca `font:`), sem `!important`, sem `overflow-x: hidden`, `index.css` intacto. Trava em `estilosDoPerfil.test.ts` como na seção 2. Prova do Marcelo em modo móvel, 320 a 430.
+3. **Barra (commit 3):** as condições 1 a 5 da seção 3. `casca.layout.test.ts` com a asserção nova.
+4. **Cabeçalho B (commit 4):** só `CardDoPost.css`, `--cab-linha: 32px` declarada só em `.card-do-post`; editar as regras antigas no lugar; **manter `z-index: 1` no `.badge-comunidade`**; `.badge-nota { align-self: center }`; sem TSX, sem `!important`, sem `.post-body`, sem `casca.css`. Teste novo da seção 1. Prova do Marcelo com `elementFromPoint` em feed, Seguindo, comunidade, thread e perfil, 320 e 390, **mais post só com áudio e post sem corpo**: nome, `@` e `r/roda` com 44 (tolerância 0,5), zero sobreposição, `⋯` dentro do card, altura +24 (1px), zero rolagem lateral.
+5. **Anel (commit 5):** `top` parametrizado pelo `--cab-linha` como na seção 4, não `12px` e `0` literais. Prova com Tab real em nome, `@` e `r/roda`: anel de 2px em `--aue-text`, centrado no texto, nenhum verde. A captura mostra a base das letras dentro do anel.
+6. **Fronteira:** nenhuma API de navegador nova em `features/`; `arquitetura.fronteira.test.ts` verde. `typecheck`, `lint`, `test` e `build` a cada commit.
+7. **Não medido por mim (fica com o Marcelo ou NÃO VALIDADO):** nome e `@` longos com reticência empurrando o `⋯` (o harness só tem nome curto; a regra mantém o `max-width: 45%` de hoje), "Comunidades" ativo em 320, claro e escuro, e tudo que depende de aparelho (Safari iOS, Chrome Android, toque com o dedo, safe area).
+8. **Pedido ao Tiago:** trocar `top: 12px` por `top` parametrizado no (d)5 do Fechamento e a regra do `z-index: 1` no desenho do `r/roda`; avisar o Rian para ajustar o texto da sua seção A (a linha "O `z-index: 1` do `r/roda` sai") e da C (anel com `top: 12px` e `top: 0`), porque o Kayky vai ler a dele.

@@ -109,6 +109,7 @@ const HINTS_DE_ESCRITA: Readonly<Record<string, MotivoDeEscrita>> = {
   audio_sem_consentimento: 'audioSemConsentimento',
   nao_e_autor: 'naoEAutor',
   nada_para_editar: 'nadaParaEditar',
+  limite_de_frequencia: 'limiteDeFrequencia',
   nao_pode_gerir_midia: 'naoEAutor',
   midia_invalida: 'falhou',
 };

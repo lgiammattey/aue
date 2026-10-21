@@ -103,7 +103,13 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
       if (post.tipo === 'topico') {
         const r = await forum.alternarReacaoDoTopico?.(id, tipo);
         if (!r?.ok) {
-          exibirToast(r?.motivo === 'precisaEntrar' ? 'Entre com sua conta para reagir.' : 'Não deu para registrar sua reação agora.');
+          exibirToast(
+            r?.motivo === 'precisaEntrar'
+              ? 'Entre com sua conta para reagir.'
+              : r?.motivo === 'limiteDeFrequencia'
+                ? 'Muita reação de uma vez. Tenta daqui a pouco.'
+                : 'Não deu para registrar sua reação agora.',
+          );
           return;
         }
         const c = await forum.contarReacoesDosTopicos?.([id]);
@@ -145,6 +151,8 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
       if (!r.ok) {
         exibirToast(r.motivo === 'topicoNaoEncontrado'
           ? 'Esse post não está mais disponível.'
+          : r.motivo === 'limiteDeFrequencia'
+            ? 'Muita coisa de uma vez. Tenta daqui a pouco.'
           : r.motivo === 'precisaEntrar'
             ? 'Entre com sua conta para salvar.'
             : 'Não deu para salvar agora.');

@@ -382,6 +382,13 @@ describe('leituras: HINT decide', () => {
     expect(await criarForumWeb().listarTopicos('x')).toEqual({ ok: false, motivo });
   });
 
+  it('limite de frequência do banco (54000 + HINT) vira motivo próprio: o servidor recusou antes de gravar', async () => {
+    rpc.mockResolvedValue(erroDoServidor('54000', 'limite_de_frequencia', 'Muita coisa de uma vez. Tenta daqui a pouco.'));
+    const f = criarForumWeb();
+    expect(await f.alternarSalvo!('topico', ID_A)).toEqual({ ok: false, motivo: 'limiteDeFrequencia' });
+    expect(await f.alternarReacaoDoTopico!(ID_A, 'like')).toEqual({ ok: false, motivo: 'limiteDeFrequencia' });
+  });
+
   it('o HINT manda, não a classe nem a mensagem', async () => {
     rpc.mockResolvedValue(erroDoServidor('P0001', 'cursor_invalido', 'Comunidade não existe'));
     expect(await criarForumWeb().explorarTopicos()).toEqual({ ok: false, motivo: 'cursorInvalido' });

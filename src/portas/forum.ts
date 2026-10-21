@@ -476,6 +476,17 @@ export interface PortaDeForum {
     opcoes?: OpcoesDePaginaCronologica,
   ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, RespostaDoForum>>>;
 
+  /**
+   * Uma resposta e a cadeia de pais que a torna legível. É a leitura estreita
+   * usada por link direto: não pagina nem baixa a conversa inteira.
+   * `ok: true` com lista vazia quer dizer que a resposta não está disponível
+   * naquele tópico (apagada, oculta, de outra conversa ou endereço inválido).
+   */
+  obterContextoDaResposta?(
+    topicoId: string,
+    respostaId: string,
+  ): Promise<ResultadoDaLeitura<readonly RespostaDoForum[]>>;
+
   /** Leitura em lote para cards: máximo de 2 respostas visíveis por tópico. */
   listarPreviaRespostasDosTopicos?(
     topicoIds: readonly string[],

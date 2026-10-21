@@ -635,6 +635,19 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       );
     },
 
+    async obterContextoDaResposta(topicoId, respostaId) {
+      if (!UUID.test(topicoId) || !UUID.test(respostaId)) {
+        return usaServidor()
+          ? { ok: true, valor: [] as readonly RespostaDoForum[] }
+          : { ok: false, motivo: 'semServidor' };
+      }
+      return ler(
+        'obter_contexto_da_resposta',
+        { p_topico_id: topicoId, p_resposta_id: respostaId },
+        (linhas) => linhas.map(paraResposta),
+      );
+    },
+
     listarPreviaRespostasDosTopicos(topicoIds) {
       const ids = [...new Set(topicoIds)].filter((id) => UUID.test(id)).slice(0, 100);
       if (ids.length === 0) {

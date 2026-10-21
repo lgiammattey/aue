@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { CursorDoForum, PortaDeForum, RespostaDoForum, TopicoDoForum } from '../../portas/forum';
 import { limparListasVistas } from './hooks';
 import { Rotas, ambienteFalso, comunidade, forumFalso, resposta, sondas, topico } from './dublesParaTeste';
@@ -174,6 +174,57 @@ describe('áudio e nota: só o que o servidor devolveu', () => {
 });
 
 describe('respostas encadeadas', () => {
+  it('link direto busca só a resposta e seus ancestrais, abre o ramo e destaca o alvo', async () => {
+    const alvo = '33333333-3333-4333-8333-333333333333';
+    const pai = resposta({ id: '22222222-2222-4222-8222-222222222222', corpo: 'pai que não estava na primeira página' });
+    const filha = resposta({ id: alvo, paiId: pai.id, nivel: 1, corpo: 'fala compartilhada' });
+    const contexto = vi.fn(async () => ({ ok: true as const, valor: [pai, filha] }));
+    const forum = forumDo(
+      topico({ respostasTotal: 300 }),
+      vi.fn(async () => paginaR([resposta({ id: 'r1' })])),
+    );
+    abrir({ ...forum, obterContextoDaResposta: contexto }, `${ROTA}?resposta=${alvo}`);
+
+    expect(await screen.findByText('fala compartilhada')).toBeDefined();
+    expect(contexto).toHaveBeenCalledWith(ID, alvo);
+    expect(screen.getByText('fala compartilhada').closest('.forum-resposta')?.className).toContain('forum-resposta--em-destaque');
+    expect(screen.getByText('pai que não estava na primeira página')).toBeDefined();
+  });
+
+  it('link de resposta indisponível não finge que abriu', async () => {
+    const alvo = '33333333-3333-4333-8333-333333333333';
+    const contexto = vi.fn(async () => ({ ok: true as const, valor: [] }));
+    const forum = forumDo(topico(), vi.fn(async () => paginaR([])));
+    abrir({ ...forum, obterContextoDaResposta: contexto }, `${ROTA}?resposta=${alvo}`);
+
+    expect(await screen.findByText('Essa resposta não está disponível.')).toBeDefined();
+    expect(screen.queryByText('Resposta aberta na conversa.')).toBeNull();
+  });
+
+  it('ao remover ou trocar o link, limpa o ramo e o destaque anteriores antes de abrir o próximo', async () => {
+    const primeiro = '33333333-3333-4333-8333-333333333333';
+    const segundo = '44444444-4444-4444-8444-444444444444';
+    const respostaInicial = resposta({ id: primeiro, corpo: 'ramo do primeiro link' });
+    const respostaSeguinte = resposta({ id: segundo, corpo: 'ramo do segundo link' });
+    const contexto = vi.fn(async (_topicoId: string, respostaId: string) => ({
+      ok: true as const,
+      valor: respostaId === primeiro ? [respostaInicial] : [respostaSeguinte],
+    }));
+    const forum = forumDo(topico(), vi.fn(async () => paginaR([resposta({ id: 'r1' })])));
+    abrir({ ...forum, obterContextoDaResposta: contexto }, `${ROTA}?resposta=${primeiro}`);
+    expect(await screen.findByText('ramo do primeiro link')).toBeDefined();
+
+    await act(async () => sondas.navegar?.(ROTA));
+    await waitFor(() => expect(screen.queryByText('ramo do primeiro link')).toBeNull());
+    expect(document.querySelector('.forum-resposta--em-destaque')).toBeNull();
+
+    await act(async () => sondas.navegar?.(`${ROTA}?resposta=${segundo}`));
+    expect(await screen.findByText('ramo do segundo link')).toBeDefined();
+    expect(screen.queryByText('ramo do primeiro link')).toBeNull();
+    expect(screen.getByText('ramo do segundo link').closest('.forum-resposta')?.className).toContain('forum-resposta--em-destaque');
+    expect(contexto).toHaveBeenLastCalledWith(ID, segundo);
+  });
+
   it('põe cada resposta sob o pai certo, em listas aninhadas, sem cortar o texto', async () => {
     const texto = 'x'.repeat(480);
     const lista = [

@@ -100,6 +100,7 @@ export function forumFalso(partes: Partial<PortaDeForum> = {}): PortaDeForum {
     listarTopicos: naoPrevisto('listarTopicos'),
     obterTopico: naoPrevisto('obterTopico'),
     listarRespostasDoTopico: naoPrevisto('listarRespostasDoTopico'),
+    obterContextoDaResposta: naoPrevisto('obterContextoDaResposta'),
     explorarTopicos: naoPrevisto('explorarTopicos'),
     listarTopicosDoAutor: naoPrevisto('listarTopicosDoAutor'),
     listarRespostasDoAutor: naoPrevisto('listarRespostasDoAutor'),

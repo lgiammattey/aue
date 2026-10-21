@@ -19,7 +19,7 @@ import { useDependenciasDoForum } from './contexto';
 import { DialogoDeConfirmacao } from './DialogoDeConfirmacao';
 import { DialogoDeDenuncia } from './DialogoDeDenuncia';
 import { useTituloDoDocumento } from './encaixes';
-import { enderecoDaComunidade, enderecoDoTopico } from './enderecos';
+import { enderecoDaComunidade, enderecoDoTopico, respostaDoEndereco } from './enderecos';
 import { FormularioDeTopico } from './FormularioDeTopico';
 import { esquecerListasVistas, useLeitura, useOnline } from './hooks';
 import { MenuDeAcoes, type ItemDoMenu } from './MenuDeAcoes';
@@ -167,7 +167,15 @@ function AcaoDoAside({ comunidade, souMembro, aoMudar }: { readonly comunidade: 
 
 type DialogoDoTopico = 'editar' | 'apagar' | 'denunciar' | null;
 
-function ConversaDoTopico({ topico, atualizar }: { readonly topico: TopicoDoForum; readonly atualizar: () => Promise<boolean> }) {
+function ConversaDoTopico({
+  topico,
+  atualizar,
+  respostaEmLink,
+}: {
+  readonly topico: TopicoDoForum;
+  readonly atualizar: () => Promise<boolean>;
+  readonly respostaEmLink: string | null;
+}) {
   const { forum, ambiente } = useDependenciasDoForum();
   const papel = usePapel();
   const navegar = useNavigate();
@@ -230,6 +238,7 @@ function ConversaDoTopico({ topico, atualizar }: { readonly topico: TopicoDoForu
         comunidade={topico.comunidade}
         souMembro={souMembro}
         aoMudarConversa={aoMudarConversa}
+        respostaEmLink={respostaEmLink}
         api={respostas}
       />
 
@@ -307,6 +316,8 @@ export function TelaTopico() {
   const { slug = '', id = '' } = useParams<{ slug: string; id: string }>();
   const { forum, ambiente } = useDependenciasDoForum();
   const online = useOnline(ambiente);
+  const local = useLocation();
+  const respostaEmLink = respostaDoEndereco(local.search);
   const { estado, recarregar, atualizar } = useLeitura(() => forum.obterTopico(id), `topico:${id}`);
 
   const topico = estado.fase === 'pronto' ? estado.valor : null;
@@ -344,8 +355,8 @@ export function TelaTopico() {
     );
   }
   if (topico.comunidade.slug !== slug) {
-    return <Navigate to={enderecoDoTopico(topico.comunidade.slug, topico.id)} replace />;
+    return <Navigate to={`${enderecoDoTopico(topico.comunidade.slug, topico.id)}${local.search}`} replace />;
   }
 
-  return <ConversaDoTopico key={topico.id} topico={topico} atualizar={atualizar} />;
+  return <ConversaDoTopico key={topico.id} topico={topico} atualizar={atualizar} respostaEmLink={respostaEmLink} />;
 }

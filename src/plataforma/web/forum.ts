@@ -13,6 +13,7 @@ import type {
   OrdemDosTopicos,
   PaginaDoForum,
   ItemSalvo,
+  DetalhesDaComunidadeDoForum,
   PaginaDeBusca,
   ReacaoDoTopico,
   ReacoesDoTopico,
@@ -561,6 +562,28 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       return ler('obter_comunidade_do_forum', { p_slug: slug }, (linhas) =>
         linhas.length ? paraComunidadeDoForum(linhas[0]) : null,
       );
+    },
+
+    obterDetalhesDaComunidade(slug) {
+      return ler('obter_detalhes_da_comunidade', { p_slug: slug }, (linhas): DetalhesDaComunidadeDoForum | null => {
+        if (!linhas.length) return null;
+        const l = linhas[0] as Linha;
+        const regras = l.regras;
+        const moderadores = l.moderadores;
+        if (!Array.isArray(regras) || regras.some((r) => typeof r !== 'string')) malformada('regras');
+        if (!Array.isArray(moderadores)) malformada('moderadores');
+        return {
+          regras: regras as string[],
+          moderadores: (moderadores as unknown[]).map((m) => {
+            const linha = linhaDe(m);
+            return { handle: texto(linha, 'handle'), apelido: textoOuNulo(linha, 'apelido') };
+          }),
+        };
+      });
+    },
+
+    definirRegrasDaComunidade(comunidadeSlug, regras) {
+      return escrever('definir_regras_da_comunidade', { p_slug: comunidadeSlug, p_regras: [...regras] }, () => true as const);
     },
 
     listarTopicos(slug, op = {}) {

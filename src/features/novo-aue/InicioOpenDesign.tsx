@@ -30,14 +30,13 @@ import { ModalCompositor, type AnexoRascunho } from './ModalCompositor';
 import { ModalComentarios } from './ModalComentarios';
 import { ModalEditarPerfil } from './ModalEditarPerfil';
 import { ModalAjustarImagem, type RecorteVisual, type TipoDeImagemAjustavel } from './ModalAjustarImagem';
-import { ModalFundarComunidade } from './ModalFundarComunidade';
 import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDireta } from './ModalGravarArroto';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
 import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
-import type { DetalhesDaComunidade, ItemComentario, ItemDoFeed } from './tipos';
+import type { ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
 import './InicioOpenDesign.css';
 
@@ -56,39 +55,6 @@ interface Props {
   readonly abrirCompositor?: boolean;
   readonly aoEntrar?: () => void;
 }
-
-const DETALHES_PADRAO: Record<string, DetalhesDaComunidade> = {
-  'arena-do-arroto': {
-    title: 'r/arena-do-arroto',
-    description: 'O ponto de encontro para quem coleciona sons, histórias e coragem desnecessária.',
-    members: '42,8k',
-    rules: [
-      'Respeite quem está na roda.',
-      'Publique conteúdo próprio ou autorizado.',
-      'Sem humilhação, preconceito ou spam.',
-      'Marcações de vídeo devem ser sinceras.',
-    ],
-    moderators: [
-      ['u/barulhofausto', 'mestre da roda'],
-      ['u/ana_tempo', 'guardião dos causos'],
-      ['u/jota_m', 'mod de vídeo'],
-    ],
-  },
-  'arroto-em-video': {
-    title: 'r/arroto-em-video',
-    description: 'Vídeos, duelos e momentos que pediam uma câmera ligada.',
-    members: '18,2k',
-    rules: [
-      'Respeite quem está na roda.',
-      'Vídeos devem ter relação com a comunidade.',
-      'Sem spam.',
-    ],
-    moderators: [
-      ['u/equipe_aue', 'moderação Auê'],
-      ['u/jota_m', 'mod de vídeo'],
-    ],
-  },
-};
 
 class ErroDePublicacaoDoAnexo extends Error {}
 
@@ -137,22 +103,12 @@ export function InicioOpenDesign({
     return 'feed';
   });
 
-  const [comunidadeSlug, setComunidadeSlug] = useState(() => slugParam || 'arena-do-arroto');
+  const [comunidadeSlug, setComunidadeSlug] = useState(() => slugParam || 'eu-arroto-e-dai');
   const [comunidadeAtiva, setComunidadeAtiva] = useState<ComunidadeDoForum | null>(null);
-  const [regrasDaComunidade, setRegrasDaComunidade] = useState<readonly string[]>(() => {
-    return DETALHES_PADRAO[comunidadeSlug]?.rules || [
-      'Respeite quem está na roda.',
-      'Publique conteúdo próprio ou autorizado.',
-      'Sem humilhação, preconceito ou spam.',
-    ];
-  });
-  const [moderadoresDaComunidade, setModeradoresDaComunidade] = useState<readonly (readonly [string, string])[]>(() => {
-    return DETALHES_PADRAO[comunidadeSlug]?.moderators || [
-      ['u/barulhofausto', 'mestre da roda'],
-      ['u/ana_tempo', 'guardião dos causos'],
-    ];
-  });
+  const [regrasDaComunidade, setRegrasDaComunidade] = useState<readonly string[]>([]);
+  const [moderadoresDaComunidade, setModeradoresDaComunidade] = useState<readonly (readonly [string, string])[]>([]);
   const [falhaComunidade, setFalhaComunidade] = useState(false);
+  const [comunidadeInexistente, setComunidadeInexistente] = useState(false);
   const [falhaTopico, setFalhaTopico] = useState(false);
   const [secaoComunidade, setSecaoComunidade] = useState<'causos' | 'sobre'>('causos');
   const [abaComunidade, setAbaComunidade] = useState<'Quentes' | 'Novos'>('Quentes');
@@ -227,7 +183,6 @@ export function InicioOpenDesign({
   const [listaComentarios, setListaComentarios] = useState<readonly ItemComentario[]>([]);
   const [carregandoComentarios, setCarregandoComentarios] = useState(false);
   const [enviandoComentario, setEnviandoComentario] = useState(false);
-  const [modalFundarAberto, setModalFundarAberto] = useState(false);
   const [modalGerirComunidadeAberto, setModalGerirComunidadeAberto] = useState(false);
   const [midiaDaComunidadeEnviando, setMidiaDaComunidadeEnviando] = useState<TipoDeMidiaDaComunidade | null>(null);
   const [modalInstitucionalAberto, setModalInstitucionalAberto] = useState(false);
@@ -388,18 +343,25 @@ export function InicioOpenDesign({
     let ativo = true;
     if (!comunidadeSlug) return;
 
-    const padrao = DETALHES_PADRAO[comunidadeSlug];
-    if (padrao) {
-      setRegrasDaComunidade(padrao.rules);
-      setModeradoresDaComunidade(padrao.moderators);
-    }
+    setComunidadeInexistente(false);
+    setRegrasDaComunidade([]);
+    setModeradoresDaComunidade([]);
+    void forum.obterDetalhesDaComunidade?.(comunidadeSlug).then((res) => {
+      if (!ativo || !res.ok || !res.valor) return;
+      setRegrasDaComunidade(res.valor.regras);
+      setModeradoresDaComunidade(res.valor.moderadores.map((m) => [`u/${m.handle}`, 'moderação'] as const));
+    }).catch(() => undefined);
 
     const promessaComunidade = forum.obterComunidadeDoForum?.(comunidadeSlug);
     if (promessaComunidade && typeof promessaComunidade.then === 'function') {
       promessaComunidade
         .then((res) => {
           if (!ativo) return;
-          if (res?.ok && res.valor) {
+          if (res?.ok && !res.valor) {
+            setComunidadeAtiva(null);
+            setFalhaComunidade(false);
+            setComunidadeInexistente(true);
+          } else if (res?.ok && res.valor) {
             setComunidadeAtiva(res.valor);
             setFalhaComunidade(false);
             if (res.valor.souMembro) {
@@ -595,7 +557,7 @@ export function InicioOpenDesign({
           itens.push({
             id: `causo-${c.id}`,
             tipo: 'causo',
-            comunidadeSlug: c.comunidadeSlug || 'arena-do-arroto',
+            comunidadeSlug: c.comunidadeSlug || 'eu-arroto-e-dai',
             titulo: c.conteudo.slice(0, 65) + (c.conteudo.length > 65 ? '…' : ''),
             corpo: c.conteudo,
             autorNome: c.autorNome,
@@ -634,7 +596,7 @@ export function InicioOpenDesign({
         setItensSeguindo(causos.map((causo) => ({
           id: `causo-${causo.id}`,
           tipo: 'causo',
-          comunidadeSlug: causo.comunidadeSlug || 'arena-do-arroto',
+          comunidadeSlug: causo.comunidadeSlug || 'eu-arroto-e-dai',
           titulo: causo.conteudo.slice(0, 65) + (causo.conteudo.length > 65 ? '…' : ''),
           corpo: causo.conteudo,
           autorNome: causo.autorNome,
@@ -1154,13 +1116,6 @@ export function InicioOpenDesign({
     return true;
   };
 
-  const fundarNovaComunidade = async (dados: { nome: string; slug: string; descricao: string }) => {
-    exibirToast(`Comunidade r/${dados.slug} fundada!`);
-    setComunidadeSlug(dados.slug);
-    setViewAtual('comunidade');
-    navigate(`/c/${dados.slug}`);
-  };
-
   const salvarEdicaoPerfil = async (dados: {
     apelido: string;
     handle: string;
@@ -1543,7 +1498,6 @@ export function InicioOpenDesign({
           if (s) setComunidadeSlug(s);
         }}
         aoAbrirCompositor={abrirGravacaoDireta}
-        aoAbrirFundar={() => setModalFundarAberto(true)}
         aoSair={async () => {
           await contaPort.sair();
           setEstaAutenticado(false);
@@ -1732,6 +1686,12 @@ export function InicioOpenDesign({
               <div className="panel" style={{ padding: 24 }}>
                 <p>Deu ruim pra carregar o tópico.</p>
               </div>
+            ) : comunidadeInexistente ? (
+              <div className="panel" style={{ padding: 24 }}>
+                <h2 style={{ margin: '0 0 8px' }}>Comunidade não encontrada.</h2>
+                <p style={{ margin: '0 0 16px' }}>Não existe r/{comunidadeSlug} no Auê, ou ela foi removida.</p>
+                <Link className="submit" style={{ float: 'none' }} to="/comunidades">Ver comunidades</Link>
+              </div>
             ) : falhaComunidade ? (
               <div className="panel" style={{ padding: 24 }}>
                 <p>Deu ruim pra carregar a comunidade.</p>
@@ -1844,9 +1804,7 @@ export function InicioOpenDesign({
                       </div>
                     </div>
                     <p style={{ color: 'var(--aue-muted)', margin: '10px 0 0', fontSize: 14 }}>
-                      {comunidadeAtiva?.descricao ||
-                        DETALHES_PADRAO[comunidadeSlug]?.description ||
-                        'O ponto de encontro para quem coleciona sons, histórias e coragem desnecessária.'}
+                      {comunidadeAtiva?.descricao ?? ''}
                     </p>
                   </div>
                 </div>
@@ -1915,15 +1873,22 @@ export function InicioOpenDesign({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div className="panel" style={{ padding: 20 }}>
                       <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Regras rápidas</h2>
-                      <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14, color: 'var(--aue-fg)' }}>
-                        {regrasDaComunidade.map((regra, i) => (
-                          <li key={i}>{regra}</li>
-                        ))}
-                      </ol>
+                      {regrasDaComunidade.length === 0 ? (
+                        <p style={{ margin: 0, fontSize: 14, color: 'var(--aue-muted)' }}>Essa comunidade ainda não tem regras escritas.</p>
+                      ) : (
+                        <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14, color: 'var(--aue-fg)' }}>
+                          {regrasDaComunidade.map((regra, i) => (
+                            <li key={i}>{regra}</li>
+                          ))}
+                        </ol>
+                      )}
                     </div>
                     <div className="panel" style={{ padding: 20 }}>
                       <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Moderadores</h2>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {moderadoresDaComunidade.length === 0 && (
+                          <p style={{ margin: 0, fontSize: 14, color: 'var(--aue-muted)' }}>Nenhum moderador definido.</p>
+                        )}
                         {moderadoresDaComunidade.map(([mod, papel], i) => (
                           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14 }}>
                             <strong>{mod}</strong>
@@ -1946,16 +1911,8 @@ export function InicioOpenDesign({
               <span className="eyebrow">Rodas do Auê</span>
               <h1 style={{ margin: '6px 0 10px' }}>Comunidades</h1>
               <p style={{ color: 'var(--aue-muted)', margin: 0 }}>
-                Explore as rodas de arrotadores ou funde a sua própria turma.
+                Explore as rodas de arrotadores do Auê.
               </p>
-              <button
-                type="button"
-                className="submit"
-                style={{ float: 'none', marginTop: 14 }}
-                onClick={() => setModalFundarAberto(true)}
-              >
-                + Fundar comunidade
-              </button>
             </div>
 
             <div style={{ display: 'grid', gap: 12 }}>
@@ -2479,11 +2436,6 @@ export function InicioOpenDesign({
         aoEnviarComentario={enviarComentario}
       />
 
-      <ModalFundarComunidade
-        aberto={modalFundarAberto}
-        aoFechar={() => setModalFundarAberto(false)}
-        aoCriar={fundarNovaComunidade}
-      />
 
       <ModalAjustarImagem
         aberto={Boolean(ajusteDeImagem)}
@@ -2523,18 +2475,25 @@ export function InicioOpenDesign({
         podeGerirMidia={Boolean(comunidadeAtiva?.possoGerirMidia)}
         midiaEnviando={midiaDaComunidadeEnviando}
         aoFechar={() => setModalGerirComunidadeAberto(false)}
-        aoSalvar={(dados) => {
-          setRegrasDaComunidade(dados.regras);
-          setModeradoresDaComunidade(dados.moderadores);
-          if (comunidadeAtiva) {
-            setComunidadeAtiva({
-              ...comunidadeAtiva,
-              icone: comunidadeAtiva.icone,
-              avatarUrl: comunidadeAtiva.avatarUrl,
-              capaUrl: comunidadeAtiva.capaUrl,
-            });
+        podeEditarRegras={Boolean(comunidadeAtiva?.possoGerirMidia) && Boolean(forum.definirRegrasDaComunidade)}
+        aoSalvar={async (regras) => {
+          if (!comunidadeAtiva || !forum.definirRegrasDaComunidade) {
+            return { ok: false, mensagem: 'Não consegui salvar as regras agora.' };
           }
-          exibirToast('Gestão da comunidade salva.');
+          const resultado = await forum.definirRegrasDaComunidade(comunidadeAtiva.slug, regras);
+          if (!resultado.ok) {
+            return {
+              ok: false,
+              mensagem: resultado.motivo === 'naoEAutor'
+                ? 'Só a moderação da comunidade pode mudar as regras.'
+                : resultado.motivo === 'precisaEntrar'
+                  ? 'Entre com sua conta para mudar as regras.'
+                  : 'Não consegui salvar as regras agora. Nada mudou.',
+            };
+          }
+          setRegrasDaComunidade(regras);
+          exibirToast('Regras salvas.');
+          return { ok: true };
         }}
         aoEscolherMidia={(tipo, arquivo) => void abrirAjusteDeImagem(arquivo, tipo === 'capa' ? 'capa' : 'foto', 'comunidade')}
         aoRemoverMidia={(tipo) => {

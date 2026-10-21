@@ -10,9 +10,7 @@ describe('Adaptador Web da Comunidade (Auê 3.0)', () => {
     const adapter = criarComunidadeWeb({ forcarOffline: true });
     const comunidades = await adapter.listarComunidades();
 
-    expect(comunidades.length).toBeGreaterThanOrEqual(5);
-    expect(comunidades.some((c) => c.slug === 'eu-arroto-e-dai')).toBe(true);
-    expect(comunidades.some((c) => c.slug === 'reuniao-da-firma')).toBe(true);
+    expect(comunidades.map((c) => c.slug).sort()).toEqual(['arrotos-youtube', 'eu-arroto-e-dai']);
   });
 
   it('retorna feed vazio por padrão quando não há posts semeados', async () => {

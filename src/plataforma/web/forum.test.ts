@@ -323,6 +323,17 @@ describe('cursor com microssegundo', () => {
     expect(r.ok && r.valor.proximo).toBe(4);
   });
 
+  it('obterDetalhesDaComunidade traduz regras e moderadores; slug inexistente vira null', async () => {
+    rpc.mockResolvedValue({ data: [{ regras: ['Respeite.'], moderadores: [{ handle: 'giamzinn_aue', apelido: 'giamz' }] }], error: null });
+    const r = await criarForumWeb().obterDetalhesDaComunidade!('eu-arroto-e-dai');
+    expect(rpc).toHaveBeenCalledWith('obter_detalhes_da_comunidade', { p_slug: 'eu-arroto-e-dai' });
+    expect(r).toEqual({ ok: true, valor: { regras: ['Respeite.'], moderadores: [{ handle: 'giamzinn_aue', apelido: 'giamz' }] } });
+    rpc.mockResolvedValue({ data: [], error: null });
+    expect(await criarForumWeb().obterDetalhesDaComunidade!('nao-existe')).toEqual({ ok: true, valor: null });
+    rpc.mockResolvedValue({ data: [{ regras: 'texto', moderadores: [] }], error: null });
+    expect(await criarForumWeb().obterDetalhesDaComunidade!('x')).toEqual({ ok: false, motivo: 'falhou' });
+  });
+
   it('buscarNoAue: resposta malformada é falha, não resultado vazio', async () => {
     rpc.mockResolvedValue({ data: [{ tipo: 'outro', id: 'x' }], error: null });
     const r = await criarForumWeb().buscarNoAue!({ termo: 'ab', tipo: 'pessoas' });

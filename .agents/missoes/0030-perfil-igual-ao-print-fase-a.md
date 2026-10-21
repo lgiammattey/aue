@@ -154,6 +154,19 @@ Decididas pelo **Luiz**, registradas pelo Tiago em 21/10/2026:
 
 Já respondidas antes e fora de dúvida: print vence a decisão de 19/10; sem chat; sem bolinha online; bio, cidade, "na roda desde" e redes ficam; capa some no mobile.
 
+### Decisões do Luiz depois do Gate (21/10/2026, requisito, não se reabre)
+
+Dadas ao Kayky no momento de abrir o código. Valem acima do que o Gate do Camillo e o aceite do Rian escreveram sobre os mesmos pontos.
+
+| # | Pergunta | Decisão do Luiz |
+|---|---|---|
+| 8 | O que o card único mantém do feed? | O feed mantém repostar, desafiar e a nota verde no card. O `CardDoPost` ganha `variante?: 'feed' \| 'perfil'`, padrão `'feed'`. A `'feed'` segue com esses elementos e com as reações emoji. A `'perfil'` segue o print. Os itens comuns às duas variantes (`@handle`, `r/comunidade` em linha própria, `⋯` no topo) só valem para as duas se não tirarem repost, desafiar nem nota do feed. Se uma mudança do card comum tirar algo do feed, ela fica restrita à variante `'perfil'` e o Kayky registra no relatório. Na dúvida, o feed não muda de comportamento. |
+| 9 | Brilho verde atrás do ARROTAR | Fica como no print. É sombra decorativa e não conta no limite de 2 verdes. |
+| 10 | Barra inferior | O item ativo do celular vai a `--fg` (apagar `casca.css:1098-1100`, como o Camillo definiu). O menu lateral do desktop não muda. |
+| 11 | Foto, capa, abas e detalhes | Foto do avatar tocável abre a folha de troca de foto. Capa só no desktop; no mobile "Trocar capa" e "Remover" ficam no `ModalEditarPerfil`. A aba Curtidas não existe no DOM. Duração do áudio em sans. "Seguir" do visitante neutro. |
+
+O Luiz quer o perfil mobile perfeito e com cara de app nativo, sem quebrar e sem "sambar". Aparelhos: iPhone 17 (402x874, Safari) e Moto G67 (412x915, premissa). Teste de 320 a 430, depois 768 e 1280, claro e escuro.
+
 ### Ainda sem resposta do Luiz
 
 1. **"Melhor nota" e vitórias no X1.** O Luiz não respondeu. Segue a recomendação do Tiago: "Melhor nota" fica dentro da aba Arrotos, no topo da lista, em faixa neutra; "vitórias no X1" não entra, porque não há fonte de dado. Vira pergunta de novo só se o Luiz quiser outra coisa.

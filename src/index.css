@@ -1,16 +1,29 @@
+/* A casca pública entra no CSS inicial mesmo quando a rota React é lazy. */
+@import './features/publico/LayoutPublico.css';
+
 /*
-  A fonte NÃO é carregada daqui.
-
-  Isto era um `@import` do Google Fonts nesta primeira linha, e esse é o pior
-  lugar possível: o navegador só descobre a fonte depois de baixar o CSS
-  inteiro, então a requisição entra numa fila que ela mesma não podia ter
-  começado. Agora o `<link>` mora no `<head>` das quatro entradas HTML, junto
-  com os dois `preconnect` — o navegador vê a fonte no primeiro byte do
-  documento.
-
-  Trocar aqui de volta desfaz isso em silêncio. Se precisar mexer, mexe nas
-  quatro entradas; `src/fonte-nas-entradas.test.ts` briga se uma ficar para trás.
+  As fontes são auto-hospedadas e pré-carregadas no HTML. Mantê-las aqui como
+  faces locais evita que a primeira pintura dependa de uma viagem ao Google.
+  `src/fonte-nas-entradas.test.ts` protege tanto os arquivos quanto os preloads.
 */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/anton-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('/fonts/archivo-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   --bg: #000000;

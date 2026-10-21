@@ -15,7 +15,9 @@
     "assets:marca": "node docs/design/design-system/system/scripts/gerar-marca.mjs && python docs/design/design-system/system/scripts/build-favicons.py",
     "typecheck": "tsc -b && tsc -p tsconfig.test.json",
     "test": "NODE_OPTIONS=\"--no-experimental-webstorage\" vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
@@ -30,6 +32,7 @@
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",

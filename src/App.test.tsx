@@ -63,13 +63,12 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(await screen.findByPlaceholderText('O que tá rolando no bonde?')).toBeTruthy();
   });
 
-  it('abre a Arena diretamente na rota "/arena" integrada à casca com navegação para o Feed', async () => {
+  it('abre a Arena diretamente na rota "/arena", sem montar a casca legada do feed', async () => {
     window.history.pushState({}, 'Arena', '/arena');
     render(<App />);
 
-    // Deve conter a navegação integrada com acesso ao Feed e a aba Auê
-    expect(await screen.findByRole('button', { name: 'Feed' })).toBeTruthy();
-    expect(screen.getAllByRole('button', { name: 'Auê' }).length).toBeGreaterThanOrEqual(1);
+    expect(await screen.findByRole('button', { name: 'Toque para começar' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Feed' })).toBeNull();
   });
 
   it('abre o desafio X1 diretamente pela rota "/x1/:code" na Arena', async () => {

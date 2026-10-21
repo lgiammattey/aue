@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import type { ControleDeDialogo } from '../../portas/controleDeDialogo';
 
 export type EstadoDaGravacaoDireta = 'ocioso' | 'solicitando' | 'gravando' | 'pronto' | 'erro';
 
@@ -14,6 +15,7 @@ export type DestinoDoArrotoDireto =
 
 interface Props {
   readonly aberto: boolean;
+  readonly controleDeDialogo: ControleDeDialogo;
   readonly estado: EstadoDaGravacaoDireta;
   readonly erro?: string | null;
   readonly enviando?: boolean;
@@ -42,6 +44,7 @@ function formatarDuracao(duracaoEmSegundos: number | null | undefined): string |
 
 export function ModalGravarArroto({
   aberto,
+  controleDeDialogo,
   estado,
   erro,
   enviando = false,
@@ -71,6 +74,11 @@ export function ModalGravarArroto({
     setErroLocal(null);
     botaoPrincipal.current?.focus();
   }, [aberto, comunidades, destinoFixo]);
+
+  useEffect(() => {
+    if (!aberto) return;
+    return controleDeDialogo.bloquearRolagemDoDocumento();
+  }, [aberto, controleDeDialogo]);
 
   useEffect(() => {
     if (!aberto) return;

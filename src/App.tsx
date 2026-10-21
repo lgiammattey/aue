@@ -78,21 +78,6 @@ function EntradaInicial() {
   return <InicioOpenDesign autenticado={autenticado} aoEntrar={() => navigate(enderecoDoLoginComVolta('/', 'entrar'))} />;
 }
 
-function EntradaArena() {
-  const navigate = useNavigate();
-  const irParaLogin = useIrParaLogin();
-  return (
-    <TelaComunidade
-      initialTab="arena"
-      onArrotar={() => navigate('/arena')}
-      aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
-      aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
-      aoSair={() => navigate('/login')}
-      aoEntrar={() => irParaLogin()}
-    />
-  );
-}
-
 function EntradaPrincipal() {
   const navigate = useNavigate();
   const irParaLogin = useIrParaLogin();
@@ -179,7 +164,7 @@ export function App() {
           <Route path="/seguindo" element={<EntradaSeguindo />} />
 
           {/* Arena de Arrotos */}
-          <Route path="/arena" element={<EntradaArena />} />
+          <Route path="/arena" element={<Arena />} />
 
           {/* Comunidades (Open Design 1:1) */}
           <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />

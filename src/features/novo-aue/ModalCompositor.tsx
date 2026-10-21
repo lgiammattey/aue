@@ -8,6 +8,7 @@
  */
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ComunidadeDoForum, GravacaoLivreDoForum } from '../../portas/forum';
+import type { ControleDeDialogo } from '../../portas/controleDeDialogo';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 
 export type AnexoRascunho =
@@ -17,6 +18,7 @@ export type AnexoRascunho =
 
 interface Props {
   readonly aberto: boolean;
+  readonly controleDeDialogo: ControleDeDialogo;
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly comunidadePadraoSlug?: string;
   readonly aoFechar: () => void;
@@ -32,6 +34,7 @@ const LIMITE = 180;
 
 export function ModalCompositor({
   aberto,
+  controleDeDialogo,
   comunidades,
   comunidadePadraoSlug,
   aoFechar,
@@ -52,6 +55,7 @@ export function ModalCompositor({
 
   const gravacao = useRef<GravacaoLivreDoForum | null>(null);
   const timerGravacao = useRef<number | null>(null);
+  const limparVisibilidadeDoCampo = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (comunidadePadraoSlug) setComunidadeSlug(comunidadePadraoSlug);
@@ -63,6 +67,26 @@ export function ModalCompositor({
       if (timerGravacao.current) window.clearInterval(timerGravacao.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!aberto) return;
+    return controleDeDialogo.bloquearRolagemDoDocumento();
+  }, [aberto, controleDeDialogo]);
+
+  useEffect(() => {
+    if (!aberto) return;
+    limparVisibilidadeDoCampo.current?.();
+    limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('compositor-campo');
+    return () => {
+      limparVisibilidadeDoCampo.current?.();
+      limparVisibilidadeDoCampo.current = null;
+    };
+  }, [aberto, controleDeDialogo]);
+
+  const manterCampoVisivel = () => {
+    limparVisibilidadeDoCampo.current?.();
+    limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('compositor-campo');
+  };
 
   if (!aberto) return null;
 
@@ -208,11 +232,13 @@ export function ModalCompositor({
           )}
 
           <textarea
+            id="compositor-campo"
             maxLength={LIMITE}
             rows={4}
             placeholder="O que tá pegando na roda?"
             value={corpo}
             onChange={(e) => setCorpo(e.target.value)}
+            onFocus={manterCampoVisivel}
             aria-label="Texto da publicação"
             disabled={enviando || gravando}
           />

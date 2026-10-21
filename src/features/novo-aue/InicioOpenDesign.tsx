@@ -15,6 +15,7 @@ import { criarForumWeb } from '../../plataforma/web/forum';
 import { criarArrotosDoPerfilRemoto } from '../../plataforma/web/arrotosDoPerfil';
 import { criarUrlDePreviewDeImagem, prepararImagemDePerfil, revokeUrlDePreviewDeImagem } from '../../plataforma/web/imagem';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
+import { criarControleDeDialogoWeb } from '../../plataforma/web/controleDeDialogo';
 import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
 import type { AudioCapturado, CapturaDeAudio } from '../../portas/captura';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
@@ -99,6 +100,7 @@ export function InicioOpenDesign({
   const [contaPort] = useState(() => portaConta ?? criarContaWeb());
   const [arrotosPort] = useState(() => portaArrotosDoPerfil ?? criarArrotosDoPerfilRemoto());
   const [capturaDoArroto] = useState(() => capturaDireta ?? criarCapturaWeb());
+  const [controleDeDialogo] = useState(criarControleDeDialogoWeb);
 
   const [viewAtual, setViewAtual] = useState<'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar'>(() => {
     if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades' || viewInicial === 'seguindo') return viewInicial;
@@ -2447,6 +2449,7 @@ export function InicioOpenDesign({
       {/* ==================== MODAIS ==================== */}
       <ModalCompositor
         aberto={modalCompositorAberto}
+        controleDeDialogo={controleDeDialogo}
         comunidades={comunidades}
         comunidadePadraoSlug={comunidadeSlug}
         aoFechar={() => setModalCompositorAberto(false)}
@@ -2456,6 +2459,7 @@ export function InicioOpenDesign({
 
       <ModalGravarArroto
         aberto={modalGravarArrotoAberto}
+        controleDeDialogo={controleDeDialogo}
         estado={estadoGravacaoDireta}
         erro={erroDaGravacaoDireta}
         enviando={enviandoArrotoDireto}
@@ -2498,6 +2502,7 @@ export function InicioOpenDesign({
 
       <ModalComentarios
         aberto={modalComentariosAberto}
+        controleDeDialogo={controleDeDialogo}
         post={postComentariosAtivo}
         comentarios={listaComentarios}
         carregando={carregandoComentarios}

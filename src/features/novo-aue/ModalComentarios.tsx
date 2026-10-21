@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import type { ControleDeDialogo } from '../../portas/controleDeDialogo';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import type { ItemComentario, ItemDoFeed } from './tipos';
@@ -11,6 +12,7 @@ interface Props {
   readonly comentarios: readonly ItemComentario[];
   readonly carregando: boolean;
   readonly enviando: boolean;
+  readonly controleDeDialogo: ControleDeDialogo;
   readonly aoFechar: () => void;
   readonly criarGravacao?: () => GravacaoLivreDoForum;
   readonly aoEnviarComentario: (dados: {
@@ -40,6 +42,7 @@ export function ModalComentarios({
   comentarios,
   carregando,
   enviando,
+  controleDeDialogo,
   aoFechar,
   criarGravacao,
   aoEnviarComentario,
@@ -57,6 +60,7 @@ export function ModalComentarios({
   const gravacao = useRef<GravacaoLivreDoForum | null>(null);
   const timerGravacao = useRef<number | null>(null);
   const inputTextoRef = useRef<HTMLTextAreaElement>(null);
+  const limparVisibilidadeDoCampo = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     return () => {
@@ -64,6 +68,26 @@ export function ModalComentarios({
       if (timerGravacao.current) window.clearInterval(timerGravacao.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!aberto) return;
+    return controleDeDialogo.bloquearRolagemDoDocumento();
+  }, [aberto, controleDeDialogo]);
+
+  useEffect(() => {
+    if (!aberto) return;
+    limparVisibilidadeDoCampo.current?.();
+    limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('comentarios-campo');
+    return () => {
+      limparVisibilidadeDoCampo.current?.();
+      limparVisibilidadeDoCampo.current = null;
+    };
+  }, [aberto, controleDeDialogo]);
+
+  const manterCampoVisivel = () => {
+    limparVisibilidadeDoCampo.current?.();
+    limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('comentarios-campo');
+  };
 
   if (!aberto || !post) return null;
 
@@ -345,9 +369,11 @@ export function ModalComentarios({
           <div className="comments-input-row">
             <textarea
               ref={inputTextoRef}
+              id="comentarios-campo"
               maxLength={LIMITE}
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
+              onFocus={manterCampoVisivel}
               placeholder={autorResposta ? `Responder a ${autorResposta}…` : 'Responder para a roda…'}
               aria-label="Escrever resposta"
               rows={2}

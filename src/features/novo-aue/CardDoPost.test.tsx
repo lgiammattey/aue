@@ -51,6 +51,29 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(screen.getByText('Estava 0x0 quando soltei o trovão e a torcida calou.')).toBeTruthy();
   });
 
+  it('reserva o quadro da imagem antes do carregamento, sem declarar dimensões da origem', () => {
+    render(
+      <MemoryRouter>
+        <CardDoPost
+          post={{ ...postExemplo, anexo: { tipo: 'imagem', url: 'https://cdn.test/causo.jpg' } }}
+          salvo={false}
+          audioTocando={false}
+          tempoAtualDoAudio={0}
+          duracaoDoAudio={null}
+          aoTocarAudio={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    const quadro = document.querySelector('.post-media-image');
+    const imagem = screen.getByRole('img', { name: 'Anexo do causo' });
+    expect(quadro).toBeTruthy();
+    expect(imagem.classList.contains('post-attachment-img')).toBe(true);
+    expect(imagem.getAttribute('loading')).toBe('lazy');
+    expect(imagem.hasAttribute('width')).toBe(false);
+    expect(imagem.hasAttribute('height')).toBe(false);
+  });
+
   it('dispara ação de curtir e abrir comentários com ícones estilo Twitter', () => {
     const aoCurtir = vi.fn();
     const aoAbrirComentarios = vi.fn();

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Como arrotar: técnicas pra aprender e arrotar alto — Auê!</title>
 
     <meta name="theme-color" content="#0a0a08" />
@@ -11,16 +11,12 @@
     <!--
       A FONTE VEM DAQUI, E NÃO DE DENTRO DO CSS.
 
-      Mesmo bloco das outras entradas, byte por byte — `src/fonte-nas-entradas.test.ts`
-      derruba a suíte quando uma fica para trás. O porquê está escrito por
-      inteiro em `index.html`.
+      Anton e Archivo são WOFF2 locais em /fonts, pré-carregados no primeiro
+      byte. O contrato em `src/fonte-nas-entradas.test.ts` mantém todas as
+      entradas iguais; o porquê completo está em `index.html`.
     -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preload" href="/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     <!--
       POR QUE ESTA PÁGINA EXISTE

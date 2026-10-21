@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest';
  * navegador só descobre a fonte depois de baixar o CSS inteiro, então o
  * primeiro texto da Arena espera duas viagens de rede em vez de uma.
  *
- * O preço de consertar isso é que agora a mesma declaração vive em QUATRO
+ * O preço de consertar isso é que agora a mesma declaração vive nas entradas
  * arquivos `.html`, e nenhum deles falha quando diverge. Uma entrada sem o
  * `<link>` não quebra build, não quebra teste e não dá erro no console: ela
  * simplesmente serve a página no fallback do sistema, com outra cara, e
@@ -22,7 +22,7 @@ import { describe, expect, it } from 'vitest';
  * Este arquivo é o que faz ela nascer gritando em vez de nascer sem fonte.
  *
  * A REGRA TRAVADA AQUI: **toda entrada de build declarada em `vite.config.ts`
- * carrega o MESMO `<link>` de fonte, e o CSS não carrega fonte nenhuma.**
+ * carrega os MESMOS preloads locais.**
  *
  * A lista de entradas é lida do `vite.config.ts`, não escrita à mão — quem
  * acrescentar uma entrada lá já entra neste teste sem perceber, que é o ponto.
@@ -39,11 +39,10 @@ function entradasDoBuild(): string[] {
   return [...new Set(achados)];
 }
 
-/** A URL do Google Fonts que a entrada carrega, ou `null` se ela não carrega nenhuma. */
-function urlDaFonte(html: string): string | null {
-  const achado = /<link[^>]*href="(https:\/\/fonts\.googleapis\.com\/css2[^"]+)"/.exec(html);
-  return achado ? achado[1] : null;
-}
+const PRELOADS_DE_FONTE = [
+  '<link rel="preload" href="/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin />',
+  '<link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />',
+] as const;
 
 const CSS_RAIZ = ler('./index.css');
 
@@ -59,71 +58,38 @@ describe('a fonte chega igual em toda entrada HTML', () => {
     expect(entradas).toContain('termos.html');
   });
 
-  it('toda entrada carrega a fonte, e nenhuma fica para trás', () => {
-    for (const arquivo of entradasDoBuild()) {
-      expect(
-        urlDaFonte(ler(`../${arquivo}`)),
-        `${arquivo} ficou sem o <link> da fonte — vai servir a página no fallback do sistema`,
-      ).not.toBeNull();
-    }
-  });
-
-  it('todas carregam exatamente a MESMA URL', () => {
-    // Duas entradas pedindo listas de peso diferentes é o mesmo defeito de
-    // sempre, só que mais caro: baixa fonte a mais em uma e falta na outra.
-    const urls = new Set(entradasDoBuild().map((arquivo) => urlDaFonte(ler(`../${arquivo}`))));
-    expect([...urls], 'as entradas HTML discordam sobre qual fonte carregar').toHaveLength(1);
-  });
-
-  it('toda entrada abre a conexão antes com os dois preconnect', () => {
-    /*
-      Sem os dois, o `<link>` da fonte ainda funciona — só que o navegador
-      resolve DNS, TLS e handshake na hora em que precisa do arquivo. O
-      `crossorigin` no gstatic não é enfeite: sem ele o preconnect abre uma
-      conexão que a requisição de fonte (que é CORS) não reaproveita, e a
-      economia vira zero.
-    */
+  it('toda entrada pré-carrega as duas fontes locais, e nenhuma fica para trás', () => {
     for (const arquivo of entradasDoBuild()) {
       const html = ler(`../${arquivo}`);
-      expect(html, `${arquivo} sem preconnect do fonts.googleapis.com`).toContain(
-        '<link rel="preconnect" href="https://fonts.googleapis.com" />',
-      );
-      expect(html, `${arquivo} sem preconnect com crossorigin do fonts.gstatic.com`).toContain(
-        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />',
+      for (const preload of PRELOADS_DE_FONTE) {
+        expect(html, `${arquivo} ficou sem ${preload}`).toContain(preload);
+      }
+    }
+  });
+
+  it('toda entrada declara viewport-fit=cover para respeitar a safe area', () => {
+    for (const arquivo of entradasDoBuild()) {
+      expect(ler(`../${arquivo}`), `${arquivo} ficou sem viewport-fit=cover`).toContain(
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />',
       );
     }
   });
 
-  it('a URL pede Anton, Archivo em 400/600/700/800/900, e nada além disso', () => {
-    const url = urlDaFonte(ler('../index.html')) as string;
-
-    expect(url).toContain('family=Anton');
-    // 800 e 900 são os títulos e a marca das páginas públicas
-    // (`src/features/publico/LayoutPublico.css`, protótipo `Páginas Públicas.dc.html`).
-    expect(url).toContain('family=Archivo:wght@400;600;700;800;900');
-
-    // 500 não é usado por nenhum CSS do Auê. Ele estava na URL antiga da Inter
-    // e está na do protótipo; carregar peso que ninguém aplica é rede jogada
-    // fora no primeiro paint. Quem precisar dele acrescenta aqui JUNTO com o
-    // CSS que usa.
-    expect(url, 'voltou um peso que nenhum CSS usa').not.toContain('500');
-
-    // Sem `swap`, o navegador esconde o texto enquanto espera a fonte. Num
-    // jogo que abre pedindo para a pessoa arrotar, tela sem texto é tela
-    // quebrada.
-    expect(url, 'sumiu o display=swap — o texto ficaria invisível esperando a fonte').toContain(
-      'display=swap',
-    );
+  it('nenhuma entrada ainda depende do Google Fonts', () => {
+    for (const arquivo of entradasDoBuild()) {
+      expect(ler(`../${arquivo}`), `${arquivo} ainda aponta para fonte externa`).not.toMatch(
+        /https:\/\/fonts\.(?:googleapis|gstatic)\.com/,
+      );
+    }
   });
 
-  it('o CSS não carrega fonte nenhuma — o @import não pode voltar', () => {
-    /*
-      Este é o defeito que a mudança conserta, e ele volta fácil: `@import` de
-      Google Fonts é o jeito que toda documentação ensina, e ninguém percebe
-      o custo porque em rede boa a diferença some.
-    */
-    expect(CSS_RAIZ, 'o @import de fonte voltou para dentro do CSS').not.toMatch(
-      /@import\s+url\(\s*['"]https:\/\/fonts\.googleapis\.com/,
+  it('as faces locais preservam Anton, Archivo, pesos e display swap', () => {
+    expect(existsSync(fileURLToPath(new URL('../public/fonts/anton-latin.woff2', import.meta.url)))).toBe(true);
+    expect(existsSync(fileURLToPath(new URL('../public/fonts/archivo-latin.woff2', import.meta.url)))).toBe(true);
+    expect(CSS_RAIZ).toMatch(/font-family: 'Anton';[\s\S]*font-display: swap;[\s\S]*\/fonts\/anton-latin\.woff2/);
+    expect(CSS_RAIZ).toMatch(/font-family: 'Archivo';[\s\S]*font-weight: 400 900;[\s\S]*font-display: swap;[\s\S]*\/fonts\/archivo-latin\.woff2/);
+    expect(CSS_RAIZ, 'o CSS não pode voltar a depender do Google Fonts').not.toMatch(
+      /fonts\.(?:googleapis|gstatic)\.com/,
     );
   });
 });

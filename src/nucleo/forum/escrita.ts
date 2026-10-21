@@ -97,6 +97,8 @@ const erro = (texto: string, onde: OndeMostrar = 'geral', acao: AcaoDoErro | nul
 export const TEXTO_SEM_CONFIRMACAO =
   'Não deu pra confirmar o envio. Seu texto continua aqui. Antes de tentar de novo, confere se já apareceu.';
 export const TEXTO_RECUSADO = 'Não deu para enviar. Seu texto continua aqui, tenta de novo.';
+/** O banco recusou antes de gravar: pode tentar de novo depois, sem risco de duplicar. */
+export const TEXTO_LIMITE_DE_FREQUENCIA = 'Muita coisa de uma vez. Seu texto continua aqui, tenta daqui a pouco.';
 export const TEXTO_SEM_INTERNET = 'Sem internet. Seu texto continua aqui.';
 /** Apagar e denunciar não têm texto para guardar: sem o "seu texto continua aqui" (6.3 e 6.4). */
 export const TEXTO_SEM_INTERNET_SEM_TEXTO = 'Sem internet. Confere a conexão e tenta de novo.';
@@ -141,6 +143,8 @@ export function erroDeEnvio(motivo: MotivoDeEscrita, operacao: OperacaoDeEscrita
       return erro('Só quem escreveu pode mexer nisso.');
     case 'nadaParaEditar':
       return erro('Você não mudou nada.');
+    case 'limiteDeFrequencia':
+      return erro(TEXTO_LIMITE_DE_FREQUENCIA);
     case 'precisaEntrar':
       return erro(TEXTO_SESSAO_ACABOU, 'geral', 'entrar');
     case 'semConfirmacao':

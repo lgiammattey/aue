@@ -72,6 +72,7 @@ const TODOS: readonly MotivoDeEscrita[] = [
   'audioSemConsentimento',
   'naoEAutor',
   'nadaParaEditar',
+  'limiteDeFrequencia',
   'falhou',
   'semConfirmacao',
 ];
@@ -98,6 +99,8 @@ describe('erroDeEnvio: tabela 6.6, por motivo tipado', () => {
     ['respostaNaoEncontrada', 'edicaoDeResposta', 'Essa resposta não está mais disponível.', 'geral', null],
     ['naoEAutor', 'edicaoDeTopico', 'Só quem escreveu pode mexer nisso.', 'geral', null],
     ['nadaParaEditar', 'edicaoDeTopico', 'Você não mudou nada.', 'geral', null],
+    ['limiteDeFrequencia', 'resposta', 'Muita coisa de uma vez. Seu texto continua aqui, tenta daqui a pouco.', 'geral', null],
+    ['limiteDeFrequencia', 'topico', 'Muita coisa de uma vez. Seu texto continua aqui, tenta daqui a pouco.', 'geral', null],
     ['precisaEntrar', 'topico', TEXTO_SESSAO_ACABOU, 'geral', 'entrar'],
   ])('%s em %s', (motivo, operacao, texto, onde, acao) => {
     expect(erroDeEnvio(motivo, operacao)).toMatchObject({ texto, onde, acao, ambiguo: false });

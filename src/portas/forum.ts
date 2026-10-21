@@ -47,6 +47,8 @@ export type MotivoDeEscrita =
   | 'audioSemConsentimento'
   | 'naoEAutor'
   | 'nadaParaEditar'
+  /** Passou do teto de escritas da conta (por minuto ou por hora). O servidor recusou antes de gravar. */
+  | 'limiteDeFrequencia'
   /** O servidor recusou (ou nem chegou a ser chamado) e sabemos que NÃO gravou. */
   | 'falhou'
   /**

@@ -70,6 +70,21 @@ describe('useEngajamento', () => {
     expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(2);
   });
 
+  it('passou do limite: mostra o aviso próprio e não mexe na contagem', async () => {
+    const contar = vi.fn(async () => ({ ok: true as const, valor: { [ID]: reacoes(2) } }));
+    const { result, exibirToast } = montar({
+      contarReacoesDosTopicos: contar,
+      alternarReacaoDoTopico: vi.fn(async () => ({ ok: false as const, motivo: 'limiteDeFrequencia' as const })),
+      alternarSalvo: vi.fn(async () => ({ ok: false as const, motivo: 'limiteDeFrequencia' as const })),
+    });
+    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(2));
+    await act(async () => result.current.propsDeEngajamento(topico).aoCurtir?.());
+    await act(async () => result.current.propsDeEngajamento(topico).aoAlternarSalvar?.());
+    expect(exibirToast).toHaveBeenCalledWith('Muita reação de uma vez. Tenta daqui a pouco.');
+    expect(exibirToast).toHaveBeenCalledWith('Muita coisa de uma vez. Tenta daqui a pouco.');
+    expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(2);
+  });
+
   it('visitante é levado a entrar e nada vai ao servidor', async () => {
     const alternar = vi.fn();
     const alternarSalvo = vi.fn();

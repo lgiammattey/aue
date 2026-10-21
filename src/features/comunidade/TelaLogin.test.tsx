@@ -47,7 +47,8 @@ describe('TelaLogin (cartão estilo Google, só pra quem já tem conta)', () => 
     expect(screen.queryByRole('button', { name: /Criar conta/ })).toBeNull();
     expect(screen.queryByRole('link', { name: /Criar conta/ })).toBeNull();
     expect(screen.queryByText(/Google/)).toBeNull();
-    expect((screen.getByRole('button', { name: 'Pedir convite' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByRole('button', { name: /convite/i })).toBeNull();
+    expect(screen.queryAllByRole('button').filter((b) => (b as HTMLButtonElement).disabled && !b.hasAttribute('hidden'))).toHaveLength(0);
   });
 
   it('o primeiro passo só avança com e-mail válido', async () => {

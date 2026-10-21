@@ -24,10 +24,16 @@ export function useAnunciar(): (mensagem: string) => void {
 }
 
 /** Título da aba: "{Título} · Auê!". Vazio enquanto não há o que dizer. */
+export const TITULO_PADRAO_DO_DOCUMENTO = 'Auê! — A comunidade de quem gosta de arrotar';
+
 export function useTituloDoDocumento(titulo: string | null): void {
   const { ambiente } = useDependenciasDoForum();
   useEffect(() => {
-    if (titulo) ambiente.definirTituloDoDocumento(`${titulo} · Auê!`);
+    if (!titulo) return;
+    ambiente.definirTituloDoDocumento(`${titulo} · Auê!`);
+    // Sem isto o título da tela anterior ficava preso em telas que não definem o próprio
+    // (ex.: "Explorar · Auê!" em /u/:handle).
+    return () => ambiente.definirTituloDoDocumento(TITULO_PADRAO_DO_DOCUMENTO);
   }, [ambiente, titulo]);
 }
 

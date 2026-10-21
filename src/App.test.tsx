@@ -30,6 +30,15 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.getByRole('button', { name: 'Você está só olhando. Entre para participar.' })).toBeTruthy();
   });
 
+  it('endereço que o Auê não conhece mostra a página não encontrada, sem mandar para a home calado', async () => {
+    window.history.pushState({}, 'Test', '/rota-que-nao-existe');
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Página não encontrada.' })).toBeTruthy();
+    expect(window.location.pathname).toBe('/rota-que-nao-existe');
+    expect(document.head.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex');
+  });
+
   it('abre o Início na raiz "/" também para uma conta pronta', async () => {
     estadoDaConta.valor = { temSessao: true, anonima: false, perfilSocialPendente: false };
     render(<App />);

@@ -13,6 +13,29 @@ export function engajamentoDoCauso(c: CausoPostado): EngajamentoDoPost {
   return { like: c.curtidas, fogo: c.reacoes.fogo, nojo: c.reacoes.nojo, trofeu: c.reacoes.trofeu, minhas };
 }
 
+/**
+ * O causo da porta de comunidade como item do card. Um mapeamento só para as
+ * telas que listam causos (Seguindo e perfil): nada de copiar o bloco.
+ */
+export function causoParaItemDoFeed(causo: CausoPostado): ItemDoFeed {
+  return {
+    id: `causo-${causo.id}`,
+    tipo: 'causo',
+    comunidadeSlug: causo.comunidadeSlug || 'eu-arroto-e-dai',
+    titulo: causo.conteudo.slice(0, 65) + (causo.conteudo.length > 65 ? '…' : ''),
+    corpo: causo.conteudo,
+    autorNome: causo.autorNome,
+    autorHandle: causo.autorHandle,
+    criadoEm: causo.criadoEm || new Date().toISOString(),
+    respostasTotal: causo.totalComentarios || 0,
+    temAudio: causo.temAudio,
+    enderecoDoAudio: causo.enderecoDoAudio,
+    nota: causo.nota,
+    videoUrl: causo.videoUrl,
+    engajamento: engajamentoDoCauso(causo),
+  };
+}
+
 const idLimpo = (post: ItemDoFeed) => post.id.replace(/^(topico|causo)-/, '');
 const chaveDeSalvo = (post: ItemDoFeed) => `${post.tipo}:${idLimpo(post)}`;
 
@@ -174,11 +197,13 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
 
   /** Tudo o que o card precisa. Só liga o botão que tem o que chamar. */
   const propsDeEngajamento = (post: ItemDoFeed) => {
-    const atual = engajamento[post.id] ?? post.engajamento ?? ZERO;
+    // Sem contagem do servidor e sem `post.engajamento`, nada é entregue: o card
+    // não mostra "0" antes de a contagem chegar.
+    const atual = engajamento[post.id] ?? post.engajamento;
     const podeReagir = post.tipo === 'causo' || Boolean(forum.alternarReacaoDoTopico);
     return {
       reacoes: atual,
-      minhas: atual.minhas,
+      minhas: atual?.minhas,
       salvo: salvos.has(chaveDeSalvo(post)),
       aoCurtir: podeReagir ? () => void reagir(post, 'like') : undefined,
       aoReagir: podeReagir ? (tipo: 'fogo' | 'nojo' | 'trofeu') => void reagir(post, tipo) : undefined,

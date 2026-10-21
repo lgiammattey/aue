@@ -40,7 +40,7 @@ import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
 import { erroDeEnvio } from '../../nucleo/forum/escrita';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
-import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
+import { causoParaItemDoFeed, useEngajamento } from './useEngajamento';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
 import './InicioOpenDesign.css';
@@ -571,22 +571,7 @@ export function InicioOpenDesign({
     comunidadePort.listarFeed({ seguindo: true, limite: 30 }).then(
       (causos) => {
         if (!ativo) return;
-        setItensSeguindo(causos.map((causo) => ({
-          id: `causo-${causo.id}`,
-          tipo: 'causo',
-          comunidadeSlug: causo.comunidadeSlug || 'eu-arroto-e-dai',
-          titulo: causo.conteudo.slice(0, 65) + (causo.conteudo.length > 65 ? '…' : ''),
-          corpo: causo.conteudo,
-          autorNome: causo.autorNome,
-          autorHandle: causo.autorHandle,
-          criadoEm: causo.criadoEm || new Date().toISOString(),
-          respostasTotal: causo.totalComentarios || 0,
-          temAudio: causo.temAudio,
-          enderecoDoAudio: causo.enderecoDoAudio,
-          nota: causo.nota,
-          videoUrl: causo.videoUrl,
-          engajamento: engajamentoDoCauso(causo),
-        })));
+        setItensSeguindo(causos.map(causoParaItemDoFeed));
         setEstadoSeguindo('pronto');
       },
       () => { if (ativo) setEstadoSeguindo('erro'); },

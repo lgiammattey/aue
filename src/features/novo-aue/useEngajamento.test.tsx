@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeForum, ReacoesDoTopico } from '../../portas/forum';
 import type { ItemDoFeed } from './tipos';
-import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
+import { causoParaItemDoFeed, engajamentoDoCauso, useEngajamento } from './useEngajamento';
 
 afterEach(cleanup);
 
@@ -38,10 +38,18 @@ describe('useEngajamento', () => {
   it('busca uma vez as contagens dos tópicos da tela e mostra o que o servidor disse', async () => {
     const contar = vi.fn(async () => ({ ok: true as const, valor: { [ID]: reacoes(4, ['like']) } }));
     const { result } = montar({ contarReacoesDosTopicos: contar, alternarReacaoDoTopico: vi.fn() });
-    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(4));
+    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(4));
     expect(result.current.propsDeEngajamento(topico).minhas).toEqual(['like']);
     expect(contar).toHaveBeenCalledTimes(1);
     expect(contar).toHaveBeenCalledWith([ID]);
+  });
+
+  it('enquanto a contagem do servidor não chega, não entrega número nenhum ao card', async () => {
+    const contar = vi.fn(() => new Promise<never>(() => undefined));
+    const { result } = montar({ contarReacoesDosTopicos: contar, alternarReacaoDoTopico: vi.fn() });
+    await waitFor(() => expect(contar).toHaveBeenCalledTimes(1));
+    expect(result.current.propsDeEngajamento(topico).reacoes).toBeUndefined();
+    expect(result.current.propsDeEngajamento(topico).minhas).toBeUndefined();
   });
 
   it('reagir em tópico chama o servidor e relê a contagem (não soma na tela)', async () => {
@@ -53,7 +61,7 @@ describe('useEngajamento', () => {
     await waitFor(() => expect(contar).toHaveBeenCalledTimes(1));
     await act(async () => result.current.propsDeEngajamento(topico).aoCurtir?.());
     expect(alternar).toHaveBeenCalledWith(ID, 'like');
-    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(1));
+    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(1));
     expect(result.current.propsDeEngajamento(topico).minhas).toContain('like');
   });
 
@@ -63,11 +71,11 @@ describe('useEngajamento', () => {
       contarReacoesDosTopicos: contar,
       alternarReacaoDoTopico: vi.fn(async () => ({ ok: false as const, motivo: 'semConfirmacao' as const })),
     });
-    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(2));
+    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(2));
     await act(async () => result.current.propsDeEngajamento(topico).aoReagir?.('fogo'));
     expect(exibirToast).toHaveBeenCalledWith('Não deu para registrar sua reação agora.');
-    expect(result.current.propsDeEngajamento(topico).reacoes.fogo).toBe(0);
-    expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(2);
+    expect(result.current.propsDeEngajamento(topico).reacoes?.fogo).toBe(0);
+    expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(2);
   });
 
   it('passou do limite: mostra o aviso próprio e não mexe na contagem', async () => {
@@ -77,12 +85,12 @@ describe('useEngajamento', () => {
       alternarReacaoDoTopico: vi.fn(async () => ({ ok: false as const, motivo: 'limiteDeFrequencia' as const })),
       alternarSalvo: vi.fn(async () => ({ ok: false as const, motivo: 'limiteDeFrequencia' as const })),
     });
-    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(2));
+    await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(2));
     await act(async () => result.current.propsDeEngajamento(topico).aoCurtir?.());
     await act(async () => result.current.propsDeEngajamento(topico).aoAlternarSalvar?.());
     expect(exibirToast).toHaveBeenCalledWith('Muita reação de uma vez. Tenta daqui a pouco.');
     expect(exibirToast).toHaveBeenCalledWith('Muita coisa de uma vez. Tenta daqui a pouco.');
-    expect(result.current.propsDeEngajamento(topico).reacoes.like).toBe(2);
+    expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(2);
   });
 
   it('visitante é levado a entrar e nada vai ao servidor', async () => {
@@ -138,13 +146,27 @@ describe('useEngajamento', () => {
     );
     await act(async () => result.current.propsDeEngajamento(causoItem).aoCurtir?.());
     expect(alternarCurtida).toHaveBeenCalledWith(ID);
-    await waitFor(() => expect(result.current.propsDeEngajamento(causoItem).reacoes.like).toBe(7));
+    await waitFor(() => expect(result.current.propsDeEngajamento(causoItem).reacoes?.like).toBe(7));
     expect(result.current.propsDeEngajamento(causoItem).minhas).toEqual(['like', 'fogo']);
   });
 
   it('engajamentoDoCauso traduz contagens e marcas', () => {
     const c = { curtidas: 2, curtidoPorMim: false, minhaReacao: 'trofeu', reacoes: { fogo: 1, nojo: 2, trofeu: 3 } } as unknown as CausoPostado;
     expect(engajamentoDoCauso(c)).toEqual({ like: 2, fogo: 1, nojo: 2, trofeu: 3, minhas: ['trofeu'] });
+  });
+
+  it('causoParaItemDoFeed leva o causo ao card sem inventar nada', () => {
+    const c = {
+      id: 'c9', comunidadeSlug: '', conteudo: 'Coe galera', autorNome: 'giamz', autorHandle: 'giamzinn_aue',
+      criadoEm: '2026-10-19T10:00:00Z', totalComentarios: 0, temAudio: true, nota: 70,
+      curtidas: 1, curtidoPorMim: true, reacoes: { fogo: 0, nojo: 0, trofeu: 0 },
+    } as unknown as CausoPostado;
+    const item = causoParaItemDoFeed(c);
+    expect(item).toMatchObject({
+      id: 'causo-c9', tipo: 'causo', comunidadeSlug: 'eu-arroto-e-dai', titulo: 'Coe galera', corpo: 'Coe galera',
+      autorHandle: 'giamzinn_aue', respostasTotal: 0, temAudio: true, nota: 70,
+    });
+    expect(item.engajamento).toEqual({ like: 1, fogo: 0, nojo: 0, trofeu: 0, minhas: ['like'] });
   });
 
   it('sem a capacidade na porta, o botão nem é oferecido', () => {

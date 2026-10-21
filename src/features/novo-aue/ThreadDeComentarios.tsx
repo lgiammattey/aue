@@ -8,7 +8,7 @@
  */
 import { memo, useRef, useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
-import type { ItemComentario, ItemDoFeed } from './tipos';
+import type { EngajamentoDoPost, ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { CardDoPost } from './CardDoPost';
@@ -25,9 +25,16 @@ export interface ThreadDeComentariosProps {
     paiId: string | null;
     anexo: AnexoRascunho | null;
   }) => Promise<boolean>;
+  /** Contagens e marcas do post-raiz, como o card as recebe nas outras telas. */
+  reacoes?: Pick<EngajamentoDoPost, 'like' | 'fogo' | 'nojo' | 'trofeu'>;
+  minhas?: readonly string[];
   aoCurtir?: () => void;
   aoReagir?: (tipo: 'fogo' | 'nojo' | 'trofeu') => void;
   aoAlternarSalvar?: () => void;
+  /** Só chega em post de outra pessoa. */
+  aoDenunciar?: () => void;
+  /** Só chega em post do próprio autor. */
+  aoApagar?: () => void;
   aoTocarAudio?: (fonte?: string | (() => Promise<string | null>)) => void;
   salvo?: boolean;
   audioTocando?: boolean;
@@ -81,9 +88,13 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   criarGravacao,
   aoVoltar,
   aoEnviarComentario,
+  reacoes,
+  minhas,
   aoCurtir,
   aoReagir,
   aoAlternarSalvar,
+  aoDenunciar,
+  aoApagar,
   aoTocarAudio,
   salvo = false,
   audioTocando = false,
@@ -258,12 +269,16 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
         <CardDoPost
           post={post}
           salvo={salvo}
+          reacoes={reacoes}
+          minhas={minhas}
           audioTocando={audioTocando}
           tempoAtualDoAudio={tempoAtualDoAudio}
           duracaoDoAudio={duracaoDoAudio}
           aoCurtir={aoCurtir}
           aoReagir={aoReagir}
           aoAlternarSalvar={aoAlternarSalvar}
+          aoDenunciar={aoDenunciar}
+          aoApagar={aoApagar}
           aoTocarAudio={aoTocarAudio}
           aoAbrirComentarios={() => {}}
         />

@@ -10,10 +10,9 @@ interface Props {
   readonly podeGerirMidia: boolean;
   readonly midiaEnviando?: TipoDeMidiaDaComunidade | null;
   readonly aoFechar: () => void;
-  readonly aoSalvar: (dados: {
-    regras: string[];
-    moderadores: (readonly [string, string])[];
-  }) => void;
+  /** Só as regras são editáveis; moderação é definida pela administração do Auê. */
+  readonly podeEditarRegras: boolean;
+  readonly aoSalvar: (regras: string[]) => Promise<{ readonly ok: boolean; readonly mensagem?: string }>;
   readonly aoEscolherMidia: (tipo: TipoDeMidiaDaComunidade, arquivo?: File) => void;
   readonly aoRemoverMidia: (tipo: TipoDeMidiaDaComunidade) => void;
 }
@@ -25,6 +24,7 @@ export function ModalGerirComunidade({
   fotoUrlInicial,
   capaUrlInicial,
   podeGerirMidia,
+  podeEditarRegras,
   midiaEnviando,
   aoFechar,
   aoSalvar,
@@ -32,35 +32,37 @@ export function ModalGerirComunidade({
   aoRemoverMidia,
 }: Props) {
   const [regrasTexto, setRegrasTexto] = useState(() => regrasIniciais.join('\n'));
-  const [modsTexto, setModsTexto] = useState(() =>
-    moderadoresIniciais.map(([handle, papel]) => `${handle}: ${papel}`).join('\n'),
-  );
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
   const fileInputFoto = useRef<HTMLInputElement | null>(null);
   const fileInputCapa = useRef<HTMLInputElement | null>(null);
 
   if (!aberto) return null;
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!podeEditarRegras || salvando) return;
     const novasRegras = regrasTexto
       .split('\n')
       .map((r) => r.trim())
       .filter(Boolean);
-
-    const novosMods: (readonly [string, string])[] = modsTexto
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .map((l) => {
-        const [handle, papel] = l.split(':').map((s) => s.trim());
-        return [handle ?? 'u/mod', papel ?? 'moderador'] as const;
-      });
-
-    aoSalvar({
-      regras: novasRegras,
-      moderadores: novosMods,
-    });
-    aoFechar();
+    if (novasRegras.length > 10) {
+      setErro('No máximo 10 regras.');
+      return;
+    }
+    if (novasRegras.some((r) => r.length > 140)) {
+      setErro('Cada regra tem até 140 caracteres.');
+      return;
+    }
+    setSalvando(true);
+    setErro(null);
+    try {
+      const resultado = await aoSalvar(novasRegras);
+      if (resultado.ok) aoFechar();
+      else setErro(resultado.mensagem ?? 'Não consegui salvar as regras agora.');
+    } finally {
+      setSalvando(false);
+    }
   };
 
   return (
@@ -190,32 +192,41 @@ export function ModalGerirComunidade({
           </div>
 
           <label style={{ display: 'grid', gap: 6, marginBottom: 12 }}>
-            Regras da comunidade
+            Regras da comunidade (uma por linha, até 10)
             <textarea
               value={regrasTexto}
               onChange={(e) => setRegrasTexto(e.target.value)}
               aria-label="Regras da comunidade"
-              rows={3}
+              rows={4}
+              disabled={!podeEditarRegras || salvando}
             />
           </label>
 
-          <label style={{ display: 'grid', gap: 6, marginBottom: 12 }}>
-            Moderadores
-            <textarea
-              value={modsTexto}
-              onChange={(e) => setModsTexto(e.target.value)}
-              aria-label="Moderadores"
-              rows={2}
-            />
-          </label>
+          <div style={{ marginBottom: 12 }}>
+            <strong>Moderadores</strong>
+            {moderadoresIniciais.length === 0 ? (
+              <p style={{ margin: '6px 0 0' }}>Nenhum moderador definido.</p>
+            ) : (
+              <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+                {moderadoresIniciais.map(([handle, papel]) => (
+                  <li key={handle}>{handle} · {papel}</li>
+                ))}
+              </ul>
+            )}
+            <p style={{ margin: '6px 0 0', fontSize: 13, opacity: 0.7 }}>A moderação é definida pela administração do Auê.</p>
+          </div>
+
+          {erro && <p role="alert" style={{ margin: '0 0 8px' }}>{erro}</p>}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
-            <button type="button" className="tab" onClick={aoFechar}>
-              Cancelar
+            <button type="button" className="tab" onClick={aoFechar} disabled={salvando}>
+              {podeEditarRegras ? 'Cancelar' : 'Fechar'}
             </button>
-            <button type="submit" className="submit">
-              Salvar gestão
-            </button>
+            {podeEditarRegras && (
+              <button type="submit" className="submit" disabled={salvando}>
+                {salvando ? 'Salvando…' : 'Salvar regras'}
+              </button>
+            )}
           </div>
         </form>
       </div>

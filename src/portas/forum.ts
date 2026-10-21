@@ -124,6 +124,12 @@ export interface ComunidadeDoForum extends ReferenciaDeComunidade {
   readonly possoGerirMidia?: boolean;
 }
 
+/** Regras e moderação reais, como o servidor guarda. Nada daqui vem fixo no cliente. */
+export interface DetalhesDaComunidadeDoForum {
+  readonly regras: readonly string[];
+  readonly moderadores: readonly { readonly handle: string; readonly apelido: string | null }[];
+}
+
 /** Só a imagem já normalizada pelo editor segue para esta porta. */
 export type TipoDeMidiaDaComunidade = 'avatar' | 'capa';
 
@@ -419,6 +425,8 @@ export interface PortaDeForum {
 
   /** `valor: null` = slug inexistente (a tela mostra "não achei", nunca outra comunidade). */
   obterComunidadeDoForum(slug: string): Promise<ResultadoDaLeitura<ComunidadeDoForum | null>>;
+  /** `valor: null` quando o slug não existe. */
+  obterDetalhesDaComunidade?(slug: string): Promise<ResultadoDaLeitura<DetalhesDaComunidadeDoForum | null>>;
 
   /**
    * Tópicos de UMA comunidade. O servidor só recusa slug em BRANCO
@@ -485,6 +493,8 @@ export interface PortaDeForum {
   responderTopico(pedido: PedidoDeResposta): Promise<ResultadoDaEscrita<RespostaCriada>>;
   /** Envia o JPEG normalizado e só então o referencia pela RPC segura. */
   definirMidiaDaComunidade?(pedido: PedidoDeMidiaDaComunidade): Promise<ResultadoDaEscrita<ComunidadeDoForum>>;
+  /** Só criador ou moderador (papel `admin`); o servidor recusa o resto com `naoEAutor`. */
+  definirRegrasDaComunidade?(comunidadeSlug: string, regras: readonly string[]): Promise<ResultadoDaEscrita<true>>;
   /** Remove a referência pública e incrementa a revisão de cache da mídia. */
   removerMidiaDaComunidade?(
     comunidadeSlug: string,

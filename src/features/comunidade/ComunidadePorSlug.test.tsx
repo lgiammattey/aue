@@ -23,7 +23,7 @@ function causo(id: string, slug: string, texto: string): CausoPostado {
 
 const CAUSOS = [
   causo('1', 'eu-arroto-e-dai', 'Arroto na oficial.'),
-  causo('2', 'reuniao-da-firma', 'Arroto na reunião da diretoria.'),
+  causo('2', 'arrotos-youtube', 'Arroto no vídeo do YouTube.'),
 ];
 
 function abrir(slug: string) {
@@ -37,14 +37,14 @@ describe('/c/:slug mostra a comunidade pedida e só os causos dela', () => {
   it('eu-arroto-e-dai mostra a oficial e não os causos da reunião', async () => {
     abrir('eu-arroto-e-dai');
     expect(await screen.findByText('Arroto na oficial.')).toBeDefined();
-    expect(screen.queryByText('Arroto na reunião da diretoria.')).toBeNull();
+    expect(screen.queryByText('Arroto no vídeo do YouTube.')).toBeNull();
   });
 
-  it('reuniao-da-firma mostra os dados e causos dela, não da oficial', async () => {
-    abrir('reuniao-da-firma');
-    expect(await screen.findByText('Arroto na reunião da diretoria.')).toBeDefined();
+  it('arrotos-youtube mostra os dados e causos dela, não da oficial', async () => {
+    abrir('arrotos-youtube');
+    expect(await screen.findByText('Arroto no vídeo do YouTube.')).toBeDefined();
     expect(screen.queryByText('Arroto na oficial.')).toBeNull();
-    expect(screen.getAllByText('Na reunião da firma').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Arrotos no YouTube').length).toBeGreaterThan(0);
     expect(screen.queryByText(/criada em 2004/)).toBeNull();
   });
 
@@ -57,20 +57,20 @@ describe('/c/:slug mostra a comunidade pedida e só os causos dela', () => {
   });
 
   it('slug com maiúscula abre a mesma comunidade', async () => {
-    abrir('Reuniao-Da-Firma');
-    expect(await screen.findByText('Arroto na reunião da diretoria.')).toBeDefined();
+    abrir('Arrotos-YouTube');
+    expect(await screen.findByText('Arroto no vídeo do YouTube.')).toBeDefined();
   });
 
-  it('bonde-geral abre o detalhe da comunidade geral', async () => {
+  it('comunidade removida (bonde-geral) diz que não existe, em vez de abrir uma tela fantasma', async () => {
     abrir('bonde-geral');
-    expect(await screen.findAllByText('Bonde Geral')).toBeDefined();
-    expect(screen.queryByText('Comunidade não encontrada')).toBeNull();
+    expect(await screen.findByText('Comunidade não encontrada')).toBeDefined();
+    expect(screen.queryByText('Bonde Geral')).toBeNull();
   });
 
   it('lista de comunidades que não veio diz que não carregou, não que o slug não existe', async () => {
     const base = criarComunidadeWeb({ causosIniciais: CAUSOS, forcarOffline: true });
     const porta = { ...base, listarComunidades: async () => [] };
-    render(<TelaComunidade porta={porta} initialTab="comm" comunidadeSlugInicial="reuniao-da-firma" />);
+    render(<TelaComunidade porta={porta} initialTab="comm" comunidadeSlugInicial="arrotos-youtube" />);
     expect(await screen.findByText('Não deu pra carregar')).toBeDefined();
     expect(screen.queryByText('Comunidade não encontrada')).toBeNull();
   });

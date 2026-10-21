@@ -22,13 +22,6 @@ export interface ItemDoFeed {
   };
 }
 
-export interface DetalhesDaComunidade {
-  readonly title: string;
-  readonly description: string;
-  readonly members: string;
-  readonly rules: readonly string[];
-  readonly moderators: readonly (readonly [string, string])[];
-}
 
 export interface ItemComentario {
   readonly id: string;

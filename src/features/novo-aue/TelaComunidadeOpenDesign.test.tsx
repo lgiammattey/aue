@@ -185,42 +185,81 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     expect(screen.getByText('Você entrou na comunidade.')).toBeTruthy();
   });
 
-  it('abre o modal Administrar comunidade e salva novas regras e moderadores', async () => {
+  const forumComDetalhes = (extra: Partial<PortaDeForum> = {}): PortaDeForum => ({
+    ...mockForum,
+    obterDetalhesDaComunidade: vi.fn(async () => ({
+      ok: true as const,
+      valor: { regras: ['Regra do servidor.'], moderadores: [{ handle: 'giamzinn_aue', apelido: 'giamz' }] },
+    })),
+    definirRegrasDaComunidade: vi.fn(async () => ({ ok: true as const, valor: true as const })),
+    ...extra,
+  });
+
+  const renderizarComunidade = (forum: PortaDeForum, slug = 'arena-do-arroto') =>
     render(
-      <MemoryRouter initialEntries={['/c/arena-do-arroto']}>
+      <MemoryRouter initialEntries={[`/c/${slug}`]}>
         <Routes>
           <Route
             path="/c/:slug"
-            element={
-              <TelaComunidadeOpenDesign
-                portaForum={mockForum}
-                portaComunidade={mockComunidade}
-              />
-            }
+            element={<TelaComunidadeOpenDesign portaForum={forum} portaComunidade={mockComunidade} />}
           />
         </Routes>
       </MemoryRouter>,
     );
 
-    const btnAdmin = await screen.findByRole('button', { name: 'Administrar comunidade' });
-    fireEvent.click(btnAdmin);
+  it('Administrar comunidade: salva as regras no servidor e só então mostra na tela', async () => {
+    const forum = forumComDetalhes();
+    renderizarComunidade(forum);
 
-    // Modal aberto 1:1
+    fireEvent.click(await screen.findByRole('button', { name: 'Administrar comunidade' }));
     expect(screen.getByRole('heading', { level: 2, name: 'Administrar comunidade' })).toBeTruthy();
-    expect(screen.getByLabelText('Regras da comunidade')).toBeTruthy();
-    expect(screen.getByLabelText('Moderadores')).toBeTruthy();
+    expect(screen.getByText(/u\/giamzinn_aue · moderação/)).toBeTruthy();
 
-    // Altera regras e salva
-    const textareaRegras = screen.getByLabelText('Regras da comunidade');
-    fireEvent.change(textareaRegras, { target: { value: 'Nova regra 1 da roda\nNova regra 2 da roda' } });
+    fireEvent.change(screen.getByLabelText('Regras da comunidade'), { target: { value: 'Nova regra 1 da roda\nNova regra 2 da roda' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar regras' }));
 
-    const btnSalvar = screen.getByRole('button', { name: 'Salvar gestão' });
-    fireEvent.click(btnSalvar);
+    expect(await screen.findByText('Regras salvas.')).toBeTruthy();
+    expect(forum.definirRegrasDaComunidade).toHaveBeenCalledWith('arena-do-arroto', ['Nova regra 1 da roda', 'Nova regra 2 da roda']);
+    expect(screen.queryByText('Gestão da comunidade salva.')).toBeNull();
+  });
 
-    // Verifica que atualizou na tela e deu feedback
-    expect(await screen.findByText('Gestão da comunidade salva.')).toBeTruthy();
-    expect(screen.getByText('Nova regra 1 da roda')).toBeTruthy();
-    expect(screen.getByText('Nova regra 2 da roda')).toBeTruthy();
+  it('Administrar comunidade: se o servidor recusar, mostra o erro e as regras da tela não mudam', async () => {
+    const forum = forumComDetalhes({
+      definirRegrasDaComunidade: vi.fn(async () => ({ ok: false as const, motivo: 'naoEAutor' as const })),
+    });
+    renderizarComunidade(forum);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Administrar comunidade' }));
+    fireEvent.change(screen.getByLabelText('Regras da comunidade'), { target: { value: 'Regra que não vale' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar regras' }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain('Só a moderação');
+    expect(screen.queryByText('Regras salvas.')).toBeNull();
+    expect(screen.queryAllByRole('listitem').map((li) => li.textContent)).not.toContain('Regra que não vale');
+  });
+
+  it('comunidade que o servidor não conhece mostra "não encontrada", sem dados inventados', async () => {
+    const forum = forumComDetalhes({
+      obterComunidadeDoForum: vi.fn(async () => ({ ok: true as const, valor: null })),
+    });
+    renderizarComunidade(forum, 'bonde-geral');
+
+    expect(await screen.findByText('Comunidade não encontrada.')).toBeTruthy();
+    expect(screen.queryByText(/membros/)).toBeNull();
+    expect(screen.queryByText('42,8k')).toBeNull();
+    expect(screen.queryByRole('button', { name: '+ Soltar arroto na roda' })).toBeNull();
+  });
+
+  it('sem regras no servidor, a aba Sobre diz isso em vez de inventar moderadores', async () => {
+    const forum = forumComDetalhes({
+      obterDetalhesDaComunidade: vi.fn(async () => ({ ok: true as const, valor: { regras: [], moderadores: [] } })),
+    });
+    renderizarComunidade(forum);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Sobre' }));
+    expect(await screen.findByText('Essa comunidade ainda não tem regras escritas.')).toBeTruthy();
+    expect(screen.getByText('Nenhum moderador definido.')).toBeTruthy();
+    expect(screen.queryByText(/barulhofausto|ana_tempo/)).toBeNull();
   });
 
   it('renderiza o diretório de comunidades 1:1 com todas as rodas', async () => {
@@ -242,7 +281,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
     expect(screen.getByText('Rodas do Auê')).toBeTruthy();
-    expect(screen.getByRole('button', { name: '+ Fundar comunidade' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Fundar comunidade/ })).toBeNull();
     expect(screen.getAllByText('r/arena-do-arroto').length).toBeGreaterThan(0);
     expect(screen.getAllByText('r/arroto-em-video').length).toBeGreaterThan(0);
   });

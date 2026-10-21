@@ -8,6 +8,7 @@
  */
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { MenuDoPost } from './MenuDoPost';
 import type { EngajamentoDoPost, ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
@@ -36,6 +37,10 @@ interface Props {
   readonly aoCurtir?: () => void;
   readonly aoReagir?: (tipo: 'fogo' | 'nojo' | 'trofeu') => void;
   readonly aoAlternarSalvar?: () => void;
+  /** Só chega em post de outra pessoa. */
+  readonly aoDenunciar?: () => void;
+  /** Só chega em post do próprio autor. */
+  readonly aoApagar?: () => void;
   readonly aoTocarAudio?: (urlOuResolver?: string | (() => Promise<string | null>)) => void;
   readonly aoAbrirComentarios?: () => void;
 }
@@ -70,6 +75,8 @@ export const CardDoPost = memo(function CardDoPost({
   aoCurtir,
   aoReagir,
   aoAlternarSalvar,
+  aoDenunciar,
+  aoApagar,
   aoTocarAudio,
   aoAbrirComentarios,
 }: Props) {
@@ -388,6 +395,8 @@ export const CardDoPost = memo(function CardDoPost({
             {copiado && <span className="action-btn__feedback">Copiado!</span>}
             <span className="sr-only">Compartilhar</span>
           </button>
+
+          <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />
         </div>
       </div>
     </article>

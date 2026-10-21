@@ -903,67 +903,136 @@ export function InicioOpenDesign({
     }
   };
 
+  const [erroComentarios, setErroComentarios] = useState(false);
+
+  /** Lê os comentários do post. Falha vira erro na tela (com "Tentar de novo"), nunca lista vazia. */
+  const carregarComentariosDoPost = async (post: ItemDoFeed) => {
+    setCarregandoComentarios(true);
+    setErroComentarios(false);
+    setListaComentarios([]);
+    try {
+      if (post.tipo === 'topico') {
+        const topicoId = post.id.replace('topico-', '');
+        const res = await forum.listarRespostasDoTopico?.(topicoId);
+        if (!res || !res.ok) {
+          setErroComentarios(true);
+          return;
+        }
+        const anexos = forum.listarAnexosDoForum
+          ? await forum.listarAnexosDoForum({ respostaIds: res.valor.itens.map((resposta) => resposta.id) })
+          : null;
+        const anexosPorResposta = new Map((anexos?.ok ? anexos.valor : []).map((anexo) => [anexo.alvoId, anexo]));
+        setListaComentarios(
+          await Promise.all(res.valor.itens.map(async (r) => {
+            const anexo = anexosPorResposta.get(r.id);
+            const url = anexo?.caminho && forum.assinarAnexoDoForum
+              ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+              : anexo?.urlVideo ?? undefined;
+            return {
+              id: r.id,
+              autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
+              autorHandle: r.autor?.handle ?? undefined,
+              autorAvatarUrl: r.autor?.avatarUrl ?? undefined,
+              conteudo: r.corpo ?? '',
+              criadoEm: r.criadoEm,
+              paiId: r.paiId,
+              nivel: r.nivel,
+              anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
+            };
+          })),
+        );
+      } else {
+        const causoId = post.id.replace('causo-', '');
+        const res = await comunidadePort.listarRespostas?.(causoId);
+        setListaComentarios(
+          (res ?? []).map((r) => ({
+            id: r.id,
+            autorNome: r.autorNome,
+            autorHandle: r.autorHandle || undefined,
+            conteudo: r.conteudo,
+            criadoEm: r.criadoEm,
+            paiId: r.respostaAId ?? null,
+            nivel: r.nivel,
+            removido: r.removido,
+          })),
+        );
+      }
+    } catch {
+      setErroComentarios(true);
+    } finally {
+      setCarregandoComentarios(false);
+    }
+  };
+
   const abrirComentarios = async (post: ItemDoFeed) => {
     // Se a thread deste post já estiver aberta, fecha (recolhe)
     if (postComentariosAtivo?.id === post.id) {
       setPostComentariosAtivo(null);
       setModalComentariosAberto(false);
       setListaComentarios([]);
+      setErroComentarios(false);
       return;
     }
-
     setPostComentariosAtivo(post);
-    setCarregandoComentarios(true);
-    setListaComentarios([]);
+    await carregarComentariosDoPost(post);
+  };
 
+  // ---- Apagar e denunciar comentário ------------------------------------------
+  const [acaoDoComentario, setAcaoDoComentario] = useState<{ tipo: 'denunciar' | 'apagar'; comentario: ItemComentario } | null>(null);
+  const [comentarioEnviando, setComentarioEnviando] = useState(false);
+  const [erroDaAcaoDoComentario, setErroDaAcaoDoComentario] = useState<string | null>(null);
+
+  const moderacaoDoComentario = (c: ItemComentario) => {
+    const meu = Boolean(meuPerfil?.handle && c.autorHandle && meuPerfil.handle.toLowerCase() === c.autorHandle.toLowerCase());
+    if (meu) return { aoApagar: () => { setErroDaAcaoDoComentario(null); setAcaoDoComentario({ tipo: 'apagar', comentario: c }); } };
+    return {
+      aoDenunciar: () => {
+        if (!estaAutenticado) {
+          exibirToast('Entre na sua conta para denunciar.');
+          (aoEntrar ?? (() => setViewAtual('auth')))();
+          return;
+        }
+        setErroDaAcaoDoComentario(null);
+        setAcaoDoComentario({ tipo: 'denunciar', comentario: c });
+      },
+    };
+  };
+
+  const confirmarAcaoDoComentario = async (dados: { motivo: string }) => {
+    if (!acaoDoComentario || comentarioEnviando || !postComentariosAtivo) return;
+    const { tipo, comentario } = acaoDoComentario;
+    const deTopico = postComentariosAtivo.tipo === 'topico';
+    setComentarioEnviando(true);
+    setErroDaAcaoDoComentario(null);
     try {
-      if (post.tipo === 'topico') {
-        const topicoId = post.id.replace('topico-', '');
-        const res = await forum.listarRespostasDoTopico?.(topicoId);
-        if (res && res.ok) {
-          const anexos = forum.listarAnexosDoForum
-            ? await forum.listarAnexosDoForum({ respostaIds: res.valor.itens.map((resposta) => resposta.id) })
-            : null;
-          const anexosPorResposta = new Map((anexos?.ok ? anexos.valor : []).map((anexo) => [anexo.alvoId, anexo]));
-          setListaComentarios(
-            await Promise.all(res.valor.itens.map(async (r) => {
-              const anexo = anexosPorResposta.get(r.id);
-              const url = anexo?.caminho && forum.assinarAnexoDoForum
-                ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
-                : anexo?.urlVideo ?? undefined;
-              return {
-                id: r.id,
-                autorNome: r.autor?.apelido ?? (r.autor?.handle ? `@${r.autor.handle}` : 'Anônimo'),
-                autorHandle: r.autor?.handle ?? undefined,
-                autorAvatarUrl: r.autor?.avatarUrl ?? undefined,
-                conteudo: r.corpo ?? '',
-                criadoEm: r.criadoEm,
-                paiId: r.paiId,
-                nivel: r.nivel,
-                anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
-              };
-            })),
-          );
-        }
+      let ok = false;
+      let mensagem = tipo === 'denunciar' ? 'Não deu para enviar a denúncia agora. Tenta de novo.' : 'Não deu para apagar agora. Nada foi apagado.';
+      if (deTopico) {
+        const r = tipo === 'denunciar'
+          ? await forum.denunciarResposta(comentario.id, dados.motivo)
+          : await forum.apagarResposta(comentario.id);
+        ok = r.ok;
+        if (!r.ok) mensagem = erroDeEnvio(r.motivo, tipo === 'denunciar' ? 'denuncia' : 'apagar').texto;
       } else {
-        const causoId = post.id.replace('causo-', '');
-        const res = await comunidadePort.listarRespostas?.(causoId);
-        if (res) {
-          setListaComentarios(
-            res.map((r) => ({
-              id: r.id,
-              autorNome: r.autorNome,
-              autorHandle: r.autorHandle,
-              conteudo: r.conteudo,
-              criadoEm: r.criadoEm,
-            })),
-          );
-        }
+        const { denunciarComentario, apagarComentario } = comunidadePort;
+        ok = tipo === 'denunciar'
+          ? (denunciarComentario ? await denunciarComentario.call(comunidadePort, comentario.id, dados.motivo) : false)
+          : (apagarComentario ? await apagarComentario.call(comunidadePort, comentario.id) : false);
       }
+      if (!ok) {
+        setErroDaAcaoDoComentario(mensagem);
+        return;
+      }
+      setAcaoDoComentario(null);
+      if (tipo === 'apagar') {
+        // O comentário vira marcador; as respostas dos outros continuam onde estavam.
+        setListaComentarios((prev) => prev.map((c) => (c.id === comentario.id ? { ...c, removido: true, conteudo: '', anexo: undefined } : c)));
+      }
+      exibirToast(tipo === 'denunciar' ? 'Denúncia enviada. Obrigado por avisar.' : 'Comentário apagado.');
     } catch {
-      // Mantém lista vazia sem interromper navegação
+      setErroDaAcaoDoComentario(tipo === 'denunciar' ? 'Não deu para enviar a denúncia agora. Tenta de novo.' : 'Não deu para apagar agora. Nada foi apagado.');
     } finally {
-      setCarregandoComentarios(false);
+      setComentarioEnviando(false);
     }
   };
 
@@ -1647,6 +1716,9 @@ export function InicioOpenDesign({
             post={postComentariosAtivo}
             comentarios={listaComentarios}
             carregando={carregandoComentarios}
+            erroDosComentarios={erroComentarios}
+            aoTentarDeNovoComentarios={() => void carregarComentariosDoPost(postComentariosAtivo)}
+            moderacaoDoComentario={moderacaoDoComentario}
             enviando={enviandoComentario}
             criarGravacao={forum.criarGravacaoLivreDoForum}
             aoVoltar={() => {
@@ -2558,6 +2630,19 @@ export function InicioOpenDesign({
           erro={erroDaAcao}
           aoConfirmar={(d) => void confirmarAcaoDoPost(d)}
           aoCancelar={() => { if (!acaoEnviando) setAcaoDoPost(null); }}
+        />
+      )}
+
+      {acaoDoComentario && (
+        <DialogoDoPost
+          tipo={acaoDoComentario.tipo}
+          alvo="comentário"
+          titulo={acaoDoComentario.comentario.conteudo}
+          temAudio={false}
+          enviando={comentarioEnviando}
+          erro={erroDaAcaoDoComentario}
+          aoConfirmar={(d) => void confirmarAcaoDoComentario(d)}
+          aoCancelar={() => { if (!comentarioEnviando) setAcaoDoComentario(null); }}
         />
       )}
 

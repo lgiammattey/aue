@@ -43,6 +43,8 @@ export interface ItemComentario {
   readonly criadoEm: string;
   readonly paiId?: string | null;
   readonly nivel?: 0 | 1 | 2;
+  /** Apagado ou ocultado: mostra um marcador no lugar do texto. */
+  readonly removido?: boolean;
   readonly anexo?: {
     readonly tipo: 'imagem' | 'audio' | 'videoExterno';
     readonly url?: string;

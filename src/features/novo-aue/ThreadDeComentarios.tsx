@@ -12,11 +12,17 @@ import type { ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { CardDoPost } from './CardDoPost';
+import { MenuDoPost } from './MenuDoPost';
 
 export interface ThreadDeComentariosProps {
   post: ItemDoFeed;
   comentarios: readonly ItemComentario[];
   carregando: boolean;
+  /** A leitura falhou: vira erro com "Tentar de novo", nunca "nenhum comentário". */
+  erroDosComentarios?: boolean;
+  aoTentarDeNovoComentarios?: () => void;
+  /** O que a pessoa pode fazer com cada comentário: apagar o próprio, denunciar o dos outros. */
+  moderacaoDoComentario?: (comentario: ItemComentario) => { aoApagar?: () => void; aoDenunciar?: () => void };
   enviando: boolean;
   criarGravacao?: () => GravacaoLivreDoForum;
   aoVoltar: () => void;
@@ -77,6 +83,9 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   post,
   comentarios,
   carregando,
+  erroDosComentarios = false,
+  aoTentarDeNovoComentarios,
+  moderacaoDoComentario,
   enviando,
   criarGravacao,
   aoVoltar,
@@ -479,11 +488,28 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
             <span className="comments-spinner" aria-hidden="true" />
             <p>Ouvindo a roda…</p>
           </div>
+        ) : erroDosComentarios && comentarios.length === 0 ? (
+          <div className="thread-inline-empty" role="alert">
+            <p>Não deu para carregar os comentários. Nada foi perdido.</p>
+            {aoTentarDeNovoComentarios && (
+              <button type="button" className="thread-reply-btn" onClick={aoTentarDeNovoComentarios}>Tentar de novo</button>
+            )}
+          </div>
         ) : comentarios.length === 0 ? (
           <p className="thread-inline-empty">Nenhum comentário ainda. Puxe o papo acima.</p>
         ) : (
           comentarios.map((c) => {
             const inicialResp = (c.autorNome || '?').charAt(0).toUpperCase();
+            if (c.removido) {
+              return (
+                <article key={c.id} className="thread-reply-item" style={{ marginLeft: `${Math.min(c.nivel ?? 0, 2) * 16}px` }}>
+                  <div className="thread-reply-body">
+                    <p className="thread-reply-text" style={{ opacity: 0.6, fontStyle: 'italic' }}>Comentário removido.</p>
+                  </div>
+                </article>
+              );
+            }
+            const moderacao = moderacaoDoComentario?.(c) ?? {};
             return (
               <article
                 key={c.id}
@@ -560,6 +586,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
                     >
                       Responder a {c.autorNome}
                     </button>
+                    <MenuDoPost aoApagar={moderacao.aoApagar} aoDenunciar={moderacao.aoDenunciar} />
                   </div>
                 </div>
               </article>

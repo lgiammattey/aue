@@ -60,4 +60,13 @@ describe('DialogoDoPost', () => {
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     expect(outra.aoCancelar).not.toHaveBeenCalled();
   });
+
+  it('para comentário, só mudam as frases', () => {
+    abrir({ alvo: 'comentário' });
+    expect(screen.getByRole('dialog', { name: 'Denunciar comentário' })).toBeTruthy();
+    expect(screen.getByText(/o comentário não some só porque você denunciou/)).toBeTruthy();
+    cleanup();
+    abrir({ tipo: 'apagar', alvo: 'comentário' });
+    expect(screen.getByRole('dialog', { name: 'Apagar comentário' })).toBeTruthy();
+  });
 });

@@ -30,6 +30,8 @@ export interface RespostaDeCauso {
   readonly respostaAId?: string;
   /** Profundidade: 0 responde o causo; 1 e 2 respondem outro comentário. */
   readonly nivel?: 0 | 1 | 2;
+  /** Apagado ou ocultado por denúncia: o texto e o autor não vêm, mas a conversa embaixo continua. */
+  readonly removido?: boolean;
 }
 
 export interface CausoPostado {
@@ -182,4 +184,9 @@ export interface PortaDeComunidade {
    * `false` quando não foi — a tela não pode dizer que denunciou.
    */
   denunciarCauso(causoId: string, motivo: string): Promise<boolean>;
+
+  /** Só o autor. O comentário vira um marcador e as respostas dos outros continuam. `false` = nada foi apagado. */
+  apagarComentario?(comentarioId: string): Promise<boolean>;
+  /** `false` quando não foi — a tela não pode dizer que denunciou. */
+  denunciarComentario?(comentarioId: string, motivo: string): Promise<boolean>;
 }

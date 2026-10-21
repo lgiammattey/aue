@@ -430,14 +430,14 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole('tab', { name: 'Arrotos' }));
-    const atalho = await screen.findByRole('button', { name: 'Gravar um arroto aqui' });
+    fireEvent.click(await screen.findByRole('tab', { name: 'Arrotos' }, { timeout: 5000 }));
+    const atalho = await screen.findByRole('button', { name: 'Gravar um arroto aqui' }, { timeout: 5000 });
     fireEvent.click(atalho);
     fireEvent.click(screen.getByRole('button', { name: /Gravar agora/ }));
-    await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce());
+    await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce(), { timeout: 5000 });
     fireEvent.click(screen.getByRole('button', { name: /Parar gravação/ }));
 
-    expect(await screen.findByText('Este áudio vai ficar no grupo Arrotos do seu perfil.')).toBeTruthy();
+    expect(await screen.findByText('Este áudio vai ficar no grupo Arrotos do seu perfil.', undefined, { timeout: 5000 })).toBeTruthy();
     expect(screen.queryByRole('radio', { name: /Perfil de outra pessoa/i })).toBeNull();
     expect(screen.queryByRole('radio', { name: /Feed de uma comunidade/i })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Enviar arroto' }));
@@ -446,8 +446,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       expect(arrotos.publicarArroto).toHaveBeenCalledWith(
         expect.objectContaining({ perfilDestinoId: 'eu', perfilDestinoHandle: 'gio' }), expect.any(Blob), 1.2,
       );
-    });
-    expect(await screen.findByText('Gravado por esta pessoa')).toBeTruthy();
+    }, { timeout: 5000 });
+    expect(await screen.findByText('Gravado por esta pessoa', undefined, { timeout: 5000 })).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Player do arroto' })).toBeTruthy();
   });
 

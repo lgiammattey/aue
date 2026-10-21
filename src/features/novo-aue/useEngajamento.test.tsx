@@ -167,6 +167,8 @@ describe('useEngajamento', () => {
       autorHandle: 'giamzinn_aue', respostasTotal: 0, temAudio: true, nota: 70,
     });
     expect(item.engajamento).toEqual({ like: 1, fogo: 0, nojo: 0, trofeu: 0, minhas: ['like'] });
+    // Sem data, nada de data inventada.
+    expect(causoParaItemDoFeed({ ...c, criadoEm: '' } as unknown as CausoPostado).criadoEm).toBe('');
   });
 
   it('sem a capacidade na porta, o botão nem é oferecido', () => {

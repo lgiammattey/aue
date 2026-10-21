@@ -71,11 +71,20 @@
   opacity: 0.6;
 }
 
+/* Parte já tocada: --fg, nada de verde. Sem transição: acompanha o relógio do áudio. */
+.player-arroto__onda i.is-tocada {
+  background: var(--aue-text);
+  opacity: 1;
+}
+
 /* Duração em sans (decisão do Luiz, 21/10/2026), números de largura fixa. */
 .player-arroto__tempo {
   flex: none;
   font: 400 12px/16px var(--font-body, 'Archivo', system-ui, sans-serif);
   font-variant-numeric: tabular-nums;
+  /* Largura fixa: "0:06" e "12:34" não empurram a onda. */
+  min-width: 4ch;
+  text-align: right;
   color: var(--aue-muted);
 }
 

@@ -54,9 +54,12 @@ interface Props {
   readonly aoAbrirComentarios?: () => void;
 }
 
-function formatarTempoRelativo(isoOuData: string): string {
+/** `null` quando não há data válida: o card omite o tempo em vez de dizer "agora". */
+function formatarTempoRelativo(isoOuData: string): string | null {
+  if (!isoOuData) return null;
   try {
     const data = new Date(isoOuData);
+    if (Number.isNaN(data.getTime())) return null;
     const segundos = Math.max(0, Math.floor((Date.now() - data.getTime()) / 1000));
     if (segundos < 60) return 'agora';
     const minutos = Math.floor(segundos / 60);
@@ -68,7 +71,7 @@ function formatarTempoRelativo(isoOuData: string): string {
     if (dias < 7) return `${dias}d`;
     return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(data);
   } catch {
-    return 'agora';
+    return null;
   }
 }
 
@@ -95,6 +98,7 @@ export const CardDoPost = memo(function CardDoPost({
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
   const comunidadeIdentificador = `r/${post.comunidadeSlug}`;
   const noPerfil = variante === 'perfil';
+  const tempo = formatarTempoRelativo(post.criadoEm);
   // Duração do áudio tocando agora, ou a que a porta já trouxe. Sem nenhuma das duas, o player mostra o tempo corrido.
   const duracaoConhecida = duracaoDoAudio
     ?? post.duracaoSegundos
@@ -203,13 +207,17 @@ export const CardDoPost = memo(function CardDoPost({
               </Link>
             )}
 
-            <span className="post-meta-dot" aria-hidden="true">
-              ·
-            </span>
+            {tempo && (
+              <>
+                <span className="post-meta-dot" aria-hidden="true">
+                  ·
+                </span>
 
-            <time dateTime={post.criadoEm} className="post-meta-time">
-              {formatarTempoRelativo(post.criadoEm)}
-            </time>
+                <time dateTime={post.criadoEm} className="post-meta-time">
+                  {tempo}
+                </time>
+              </>
+            )}
           </div>
 
           <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />

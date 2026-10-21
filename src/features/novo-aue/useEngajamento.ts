@@ -26,7 +26,8 @@ export function causoParaItemDoFeed(causo: CausoPostado): ItemDoFeed {
     corpo: causo.conteudo,
     autorNome: causo.autorNome,
     autorHandle: causo.autorHandle,
-    criadoEm: causo.criadoEm || new Date().toISOString(),
+    // Sem data não se inventa uma: o card omite o tempo.
+    criadoEm: causo.criadoEm,
     respostasTotal: causo.totalComentarios || 0,
     temAudio: causo.temAudio,
     enderecoDoAudio: causo.enderecoDoAudio,

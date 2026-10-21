@@ -28,12 +28,18 @@ const CAMINHO_DO_PAUSE = 'M6 4h4v16H6zM14 4h4v16h-4z';
 
 /**
  * Player visual único para causos, tópicos e arrotos do perfil.
- * Com duração conhecida mostra só ela; sem duração mostra o tempo corrido.
- * Nunca inventa duração.
+ * Em repouso, com duração conhecida, mostra só ela (como no print). Tocando,
+ * mostra o tempo corrido e preenche a onda aos poucos, em --fg (nunca verde).
+ * Sem duração conhecida mostra o tempo corrido. Nunca inventa duração.
  */
 export function PlayerDoArroto({ tocando, tempoAtualSegundos, duracaoSegundos, aoAlternar }: Props) {
   const temDuracao = duracaoSegundos !== null && Number.isFinite(duracaoSegundos) && duracaoSegundos > 0;
-  const tempo = temDuracao ? formatarTempo(duracaoSegundos) : formatarTempo(tempoAtualSegundos);
+  const mostraCorrido = tocando || !temDuracao;
+  const tempo = mostraCorrido ? formatarTempo(tempoAtualSegundos) : formatarTempo(duracaoSegundos);
+  // Quantas barras já foram tocadas; só com duração conhecida e tocando.
+  const tocadas = tocando && temDuracao
+    ? Math.min(ALTURAS_DA_ONDA.length, Math.floor((Math.max(0, tempoAtualSegundos) / duracaoSegundos) * ALTURAS_DA_ONDA.length))
+    : 0;
 
   return (
     <div className="player-arroto" role="region" aria-label="Player do arroto">
@@ -49,7 +55,7 @@ export function PlayerDoArroto({ tocando, tempoAtualSegundos, duracaoSegundos, a
       </button>
       <div className="player-arroto__onda" aria-hidden="true">
         {ALTURAS_DA_ONDA.map((altura, i) => (
-          <i key={i} style={{ height: altura }} />
+          <i key={i} className={i < tocadas ? 'is-tocada' : undefined} style={{ height: altura }} />
         ))}
       </div>
       <span className="player-arroto__tempo" aria-label={`Tempo do áudio: ${tempo}`}>{tempo}</span>

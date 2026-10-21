@@ -182,6 +182,16 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(toolbar.contains(mais)).toBe(false);
   });
 
+  it('sem data não inventa "agora": o tempo some do cabeçalho', () => {
+    mostrar({}, { ...postExemplo, criadoEm: '' });
+    expect(document.querySelector('.post-meta-time')).toBeNull();
+    expect(document.querySelector('.post-meta-dot')).toBeNull();
+    expect(screen.queryByText('agora')).toBeNull();
+    cleanup();
+    mostrar({}, { ...postExemplo, criadoEm: 'lixo' });
+    expect(document.querySelector('.post-meta-time')).toBeNull();
+  });
+
   it('r/comunidade fica em linha própria, fora da linha do nome e do @', () => {
     mostrar();
     const roda = screen.getByText('r/arena-do-arroto');

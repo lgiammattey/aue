@@ -18,6 +18,7 @@ describe('verde do perfil (opção A do Luiz: só aba ativa e ARROTAR)', () => {
 
   it('o player não usa o verde de acento em lugar nenhum', () => {
     expect(player).not.toMatch(/accent/);
+    expect(player).toMatch(/\.is-tocada\s*\{[^}]*var\(--aue-text\)/);
     expect(player).not.toMatch(/#c6ff00/i);
   });
 

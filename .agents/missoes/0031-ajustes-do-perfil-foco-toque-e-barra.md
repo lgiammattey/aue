@@ -279,3 +279,149 @@ Nada novo fora de `src/plataforma/`. O helper segue em `plataforma/web/` e `docu
 ### Pergunta que chega ao Luiz (só o que ele vê)
 
 O toque certo no nome faz cada post ficar mais alto no feed, na comunidade, no perfil e na thread: **12px** (nome e `@` com toque de 44, `r/roda` com toque menor onde o corpo encosta) ou **24px** (tudo com 44, mais espaço entre nome e roda). O Rian leva as duas capturas. Fora isso, o botão "Entrar" do visitante vai mudar um pouco (hoje o texto sai da caixa), mas isso é do Rian, não é pergunta.
+
+## Desenho do Rian (21/10/2026)
+
+Medi no Chromium (Playwright, build 1194, `isMobile` e `hasTouch` ligados, Archivo e Anton carregadas) com o harness do Camillo copiado para o scratchpad, e abri o protótipo no mesmo navegador em 320x640, 320x800, 360x800 e 402x874. Nada em `src/` foi alterado. Capturas em `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/` (fora do git, caminhos completos nas seções abaixo).
+
+**Resumo:** o toque do card cabe em **+8px por post com 36px de alvo e zero sobreposição** (opção A), ou em **+24px com 44px** (opção B). A é a que eu recomendo. A decisão é do Luiz, porque 44px só existe pagando +24px. A barra inferior não tem rolagem lateral e o "Entrar" do visitante é o culpado, como o Camillo mediu; mas a barra tem um defeito real em 320 e 360 que ninguém tinha visto: o ARROTAR fica fora do centro da tela. Proponho o conserto e mexi no protótipo. O foco usa `--aue-text` (`--fg`), nunca verde.
+
+### A. Toque de 44px no cabeçalho do card
+
+**Por que as duas faixas de 44px não cabem:** o texto de cada linha tem 20px. Para duas caixas de 44px sem sobreposição os centros das linhas precisam ficar 44px afastados e hoje ficam a 20. Pseudo-elemento invisível e padding vertical não adiantam: o conflito é de espaço, não de técnica. A única variável é quanto a linha cresce. O corte fica no meio entre as duas linhas; o nome usa a folga do topo do card (12px de padding) e o `r/roda` usa os 12px que já tinha embaixo, sobre o corpo (como hoje e como o `.pf-room::after` do protótipo).
+
+Medido por `elementFromPoint` (varredura de 0,5px no centro do alvo), mesma medida em 320 e 390 e nas quatro telas com card (feed, comunidade, thread, perfil). Altura em relação à borda do card:
+
+| | crescimento por post | nome e `@handle` | `r/roda` | sobreposição entre nome, `@handle`, `r/roda`, `⋯` e avatar |
+|---|---|---|---|---|
+| hoje | 0 | **20** (0,5 a 20,5) | 44,5 (20,5 a 65) | 8 pares em 4 cards do perfil, 5 em 3 do feed |
+| Z (0) | 0 | 32 | 32 | zero |
+| **A (+8)** | **8** (perfil 161 para 169; feed 117 para 125, +6,8%) | **36** (0,5 a 36,5) | **36** (36,5 a 73) | **zero** |
+| M (+16) | 16 | 40 | 40 | zero |
+| **B (+24)** | **24** (perfil 161 para 185, +15%; feed 117 para 141, +21%) | **44** (0,5 a 44,5) | **44** (44,5 a 89) | **zero** |
+
+Cada +1px de crescimento dá +0,5px de alvo. Z, A, M e B usam a mesma regra com uma variável (`--cab-linha`: 20, 24, 28, 32). O `⋯` mantém os 44px e se alinha ao centro da linha de cima (`margin-top` de -12px mais metade da diferença). Com nome e `@handle` longos (thread, 320) o `⋯` não sai do card e não há rolagem lateral: zero em todas as combinações.
+
+**Observação ao Gate:** a opção A do Camillo (+12) e a minha A (+8) não são a mesma coisa. A dele mantém a caixa de 44 no nome e deixa o `r/roda` com 20 a 22px; a minha divide o espaço por igual e passa no orçamento. Com isso o gatilho (d) do cartão **não dispara para a A**; só dispara se o Luiz quiser os 44px do item 2.1.
+
+**Capturas lado a lado** (hoje | A +8 | B +24), 390px, claro e escuro, perfil e feed. Cada uma tem a versão limpa e a versão com as áreas de toque pintadas (azul nome, verde-água `@handle`, laranja `r/roda`, magenta `⋯`, amarelo avatar):
+
+- `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-cabecalho-perfil-escuro.png` e `...-perfil-escuro-areas.png`
+- `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-cabecalho-perfil-claro.png` e `...-perfil-claro-areas.png`
+- `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-cabecalho-feed-escuro.png` e `...-feed-escuro-areas.png`
+- `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-cabecalho-feed-claro.png` e `...-feed-claro-areas.png`
+
+**Como cada uma se parece:** A fica a um respiro do print (linha de cima e de baixo 4px mais soltas), o card ainda lê como o do print. B mostra um vão claro entre o nome e o `r/roda` (de 5px para 29px) e o card parece de outro app, mais arejado e com menos posts por tela.
+
+**Minha recomendação: A.** O defeito que o Marcelo achou (tocar no nome abrir a comunidade) é a sobreposição, e a A a elimina: cada alvo tem 12px de folga de cada lado do centro do texto, e o 36px passa com sobra do mínimo de 24px da WCAG 2.5.8. Custa 8px por post, que é o que o Tiago liberou sem consultar. Os 44px do `--hit-target-min` do DESIGN.md pagariam 16px a mais em todos os posts de cinco telas, para ganhar 8px de alvo. **Exceção ao DESIGN.md a registrar se for A:** nome, `@handle` e `r/roda` do card com 36px de alvo, não 44; a linha 2.1 da matriz passa a pedir 36px e zero sobreposição. Se o Luiz quiser os 44, é a B, e a diferença é 16px por post.
+
+**Regra para o Kayky** (só `CardDoPost.css`, seletores que já existem sob `.card-do-post`, sem TSX, sem `!important`). Testada com CSS injetado; `L` é 24px na A e 32px na B:
+
+```css
+.card-do-post { --cab-linha: 24px; }
+.card-do-post .post-meta-ident { height: var(--cab-linha); }
+.card-do-post .author-profile-link,
+.card-do-post .post-meta-handle {
+  align-self: flex-start; box-sizing: border-box; min-height: 0;
+  height: calc(var(--cab-linha) + 12px);
+  margin: -12px 0 0; padding: 12px 3px 0;
+  line-height: var(--cab-linha);
+}
+.card-do-post .author-profile-link { margin-left: -3px; }   /* o texto não anda */
+.card-do-post .post-meta-handle { display: block; }
+.card-do-post .post-meta-dot, .card-do-post .post-meta-time { line-height: var(--cab-linha); }
+.card-do-post .menu-do-post { margin: calc(-12px + (var(--cab-linha) - 20px) / 2) -12px -12px 0; }
+.card-do-post .post-meta-badges { height: var(--cab-linha); align-items: flex-start; }
+.card-do-post .badge-comunidade {
+  z-index: auto; height: calc(var(--cab-linha) + 12px);
+  margin: 0 0 -12px -3px; padding-inline: 3px; line-height: var(--cab-linha);
+}
+.card-do-post .badge-nota { align-self: center; }
+```
+
+O alvo é a própria caixa do link (padding e margem negativa), não um `::after`, porque o `overflow: hidden` do link, que faz a reticência do nome longo, cortaria um pseudo-elemento. Por isso o Marcelo mede o alvo com `getBoundingClientRect` e confirma com `elementFromPoint`: os dois dão o mesmo número. O `z-index: 1` do `r/roda` sai (não é mais preciso). O espaço entre o texto do nome e o do `@handle` continua 6px (3 de cada lado).
+
+**Reserva de altura (sem pulo):** a altura da linha é fixa (`--cab-linha`), não depende de dado. O card não muda de altura quando o tempo, a nota ou o handle chegam, então o CLS do perfil segue em 0.
+
+### B. Barra inferior em 320 e 360
+
+**Primeiro, o que a medida mostrou:** o Camillo está certo e eu repeti por outro caminho. Com `isMobile` ligado, o visitante em 320 tem `innerWidth` 323. Escondendo elemento por elemento (CSS aplicado antes do primeiro layout, porque o Chrome de celular não encolhe o viewport depois), só some com `.topbar` e, dentro dela, com `.top-actions`: o botão "Entrar" (44px de caixa, texto de 56). Esconder a barra inferior, a `.sidebar`, os rótulos ou trocar a grade por `minmax(0, 1fr)` não muda nada. Logado dá 320. Em 360, 402 e acima dá zero nos dois estados. A hipótese das colunas `1fr` está derrubada: as cinco colunas somam 308 e cabem.
+
+**Entrar do visitante (desenho para o commit 2 do Camillo):** `width: auto; min-width: 44px; padding: 0 10px; font-size: 14px; font-weight: 700`, só no bloco mobile do `BarraSuperior.css`. Botão de 63x44 em 320 e 360, `scrollWidth` 320, campo de busca de 160 em 320 (hoje 180) e 188 em 360 (hoje 208). Escolhi essa entre as opções do Camillo (a B dele, com 14px/700 em vez de 13px) porque 12 ou 13px de texto em caixa de 44 fica apertado no Safari e o rótulo não pode parecer dentro de um quadradinho. O placeholder do visitante já era cortado e continua ("Buscar pessoa…" em 320); se o Tiago quiser a copy inteira, encurta para "Buscar" abaixo de 360, decisão de texto que não tomo. Captura: `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-topbar-visitante-320.png`.
+
+**A barra em si (o que a medida achou):** os rótulos não quebram e a altura (56 na barra, 67 na `.sidebar`) não muda em nenhuma largura. O defeito é de equilíbrio, nos dois estados:
+
+| largura | colunas hoje (px) | ARROTAR fora do centro | "Comunidades" |
+|---|---|---|---|
+| 320 | 55, 71, 56, 55, 55 | **7,9** (9,4 com Comunidades ativa) | 70,9 (73,1 em negrito), col. maior que as outras |
+| 360 | 65, 71, 65, 65, 65 | 2,8 (4,2 ativa) | idem |
+| 390 a 430 | iguais | 0 a 0,4 | cabe com folga de 0 a 9px |
+
+A causa é a coluna do meio-esquerda crescer até o rótulo (`1fr` tem mínimo automático) e as outras repartirem o resto. O espaço entre os ícones sai desigual (67, 67, 59, 59 em 320) e o botão ARROTAR sai do eixo da tela. É o tipo de coisa que dá cara de página web.
+
+**Desenho (só `casca.css`, bloco `@media (max-width: 699px)`, nada novo fora disso):**
+
+```css
+@media (max-width: 389px) {
+  .sidebar .mobile-bottom-nav { grid-template-columns: 56px minmax(0, 1fr) 56px minmax(0, 1fr) 56px; gap: 0; }
+  .mobile-nav-item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+@media (max-width: 339px) {
+  .mobile-nav-item:not(.mobile-nav-item--arrotar) span { font-size: 10px; }
+}
+```
+
+- As três colunas de 56px (Feed, ARROTAR, Perfil) e as duas do meio dividindo o resto dão **ícones a distâncias iguais e o ARROTAR no centro exato**: espaço entre ícones 63px em 320, 69 em 344, 73 em 360, 77 em 375; desvio do ARROTAR 0 em todas.
+- Precisa do seletor `.sidebar .mobile-bottom-nav` (0,2,0): `.sidebar nav { gap: 4px }` (`casca.css:111-117`, 0,1,1) ganha de `.mobile-bottom-nav` sozinho e o `gap: 0` não pega.
+- **Rótulos:** 11px em 340 ou mais (negrito no ativo, como já é); **10px de 320 a 339**, em todos os rótulos juntos, porque "Comunidades" em 11px/700 mede 73,1 e a coluna de 320 tem 70. Com 10px mede 66,4 e sobra 3,6px. Nunca quebra linha (altura mantida) e, se uma fonte de reserva alargar, corta com reticência, e o `aria-label` completo já existe ("Rodas e comunidades"). Medido: nenhum rótulo cortado, nenhuma colisão com o botão ARROTAR (6px de vão entre o fim do rótulo e a borda do botão em 320) em 320, 344, 360, 375, com cada item ativo.
+- **De 390 para cima nada muda** (a regra não vale lá): iPhone 17 (402) e Moto G67 (412, premissa) ficam como estão. Em 390 o ativo "Comunidades" tem folga 0 hoje; não toquei.
+- FAB, altura 67 contra 56 e `stroke-width`: intactos, seguem para o cartão separado.
+
+**Isto está além do que o Gate liberou** (o Camillo disse que `casca.css` não muda). Proponho como commit 4, opcional, só se o Tiago aceitar: é a mesma barra, CSS puro, e prova por script. Se o Tiago recusar, o protótipo volta ao que era (a linha acrescentada no `Bonde do Arroto.dc.html`, abaixo).
+
+**Protótipo, 320 e 360:** o `Bonde do Arroto.dc.html` tinha o mesmo defeito, mais forte (colunas 59, 85, 52, 59, 59 em 320; ARROTAR 13,2px fora do centro em 320 e 8,2 em 360). **Não tem os 3px**: aberto na aba Perfil em 320x640 e 320x800, `scrollWidth` 320, nenhum elemento passa da borda (o protótipo nem tem o botão "Entrar" no topo). A aba Início passa de 320 por causa do botão "Postar" do compositor; é legado fora do perfil e não mexi. Atualizei só a barra do Perfil: `.pf-ni` sem padding padrão do botão e sem quebra, grade de 56/1fr/56/1fr/56 até 389px, rótulo de 10px até 339px. Medido depois: desvio do ARROTAR 0 em 320, 360 e 402, altura 56, rótulos inteiros. Antes e depois:
+
+- `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-proto-barra-320x640.png`
+- `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-proto-barra-360x800.png`
+- código real, hoje contra proposta: `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-barra-320.png`, `...-barra-360.png` e `...-barra-402.png` (o de 402 mostra que nada muda)
+
+O card do protótipo (`.pf-post`) **não foi alterado**: ele só tem o `r/roda` com alvo de 44 e o nome nem é link. Fecho essa linha do protótipo depois da escolha do Luiz.
+
+### C. Anel de foco
+
+Nenhum token de foco no DESIGN.md. O `base.css` do design system manda `outline: 2px solid var(--accent)`, mas o foco **não pode ser verde**: a aba ativa e o ARROTAR já gastam os dois verdes do estado (opção A do Luiz) e um anel verde numa terceira coisa estoura o limite. O código já usa `--aue-text`, que vem de `--fg`. Fica assim, nos dois temas:
+
+| onde | cor | espessura | offset | forma |
+|---|---|---|---|---|
+| folha de foto (Fechar, Trocar foto, Remover foto) | `--aue-text` (`--fg`: #f5f3ea escuro, #0a0a08 claro) | 2px | **+2px** (como já está) | raio do botão, 12px |
+| card: nome, `@handle`, `r/roda` | `--aue-text` | 2px | dentro da caixa de toque | **anel só em volta da linha de texto**, 24px de altura, raio 8px |
+| card: `⋯` e botões de ação | `--aue-text` | 2px | -4px (como já está) | círculo e caixa, sem mudança |
+
+- Contraste do anel sobre `--bg`: cerca de 17 a 18:1 nos dois temas (WCAG 2.4.11 pede 3:1). Sobre `--surface` da folha também passa com folga.
+- **Anel do card:** `outline: 0` no `:focus-visible` e um `::before` dentro do link (`position: absolute; left: 0; right: 0; height: 24px; border: 2px solid var(--aue-text); border-radius: 8px; box-sizing: border-box; pointer-events: none`), com `top: 12px` no nome e no `@handle` e `top: 0` no `r/roda`, e `position: relative` nos três. Dentro da caixa de toque o `overflow: hidden` do link não corta. O anel de `outline` na caixa inteira (36 ou 44px de altura) ficava gigante em volta de 13px de texto e o do `r/roda` cortava a primeira linha do corpo; testei os dois, o `::before` é o que aguenta.
+- O verde não aparece em nenhum foco, então a contagem do estado não muda (aba ativa e ARROTAR, 2 no escuro e 1 no claro, como no aceite anterior). Sem sombra, sem gradiente.
+- Capturas: `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/lado-a-lado-foco-card-escuro.png`, `...-foco-card-claro.png`, e a folha com foco em "Trocar foto": `.../foco-folha-trocar-escuro.png` e `.../foco-folha-trocar-claro.png` (mais `foco-folha-fechar-*.png` e `foco-folha-remover-*.png`, a última sem Remover porque o perfil de teste não tem foto).
+- Reproduzi o defeito do item 1 antes de desenhar: abre a folha, Shift+Tab leva o foco a `button.action-btn--share` do card, fora da folha, e o Esc não fecha mais. Desenho nenhum muda na folha; o visual dela segue o aceito no 0030.
+
+### D. O que o Marcelo e o Kayky medem
+
+| item | o que medir | valor esperado | estado |
+|---|---|---|---|
+| 1.1 a 1.3 | `document.activeElement.closest('.folha-da-foto')` depois de cada Tab e Shift+Tab, a partir do contêiner, do primeiro e do último botão; Esc em cada ponto | sempre dentro; a folha fecha e o foco volta ao avatar | Chromium; teclado físico no iPhone e no Moto `NÃO VALIDADO` |
+| 1.8 | anel de foco da folha | 2px `--aue-text`, offset 2px, nos dois temas | Chromium |
+| 2.1 | `getBoundingClientRect` dos links e `elementFromPoint` em x = esquerda + min(largura/2, 20), de 0,5 em 0,5px | **A:** nome e `@handle` 36 (0,5 a 36,5), `r/roda` 36 (36,5 a 73). **B:** 44 e 44. Tolerância de 0,5px (a borda do card conta 1px) | Chromium |
+| 2.2 | interseção entre as caixas de nome, `@handle`, `r/roda`, `⋯` e avatar | **zero** em todos os pares, nas quatro telas, 320 e 390 | Chromium |
+| 2.3 | `elementFromPoint` no topo (+2px), meio e base (-2px) de cada caixa | nome e `@handle` caem em `/u/:handle`, `r/roda` em `/c/:slug`, nunca o nome em `/c/` | Chromium |
+| 2.4 | altura do card, 1º post, 320, 390 e 430 | **A:** +8px (perfil 169, feed de texto 125). **B:** +24px (185 e 141). Se a altura medida fugir mais de 1px, volta | Chromium |
+| 2.5 e 2.6 | rolagem lateral, `⋯` dentro do card, nome e `@handle` longos com reticência, CLS, verde | zero rolagem, `⋯` à direita da borda do card, CLS 0, verde igual ao de hoje | Chromium |
+| 3.1 e 3.2 | `innerWidth`, `documentElement.scrollWidth` e `clientWidth` em 320, 330, 340, 350, 360, 390, 402, 412, 430, visitante e logado. **Precisa de contexto móvel (`isMobile: true`, `hasTouch: true`)**: sem ele o Chrome de mesa não alarga o viewport e o teste passa mesmo com o defeito | `scrollWidth === innerWidth === largura` em todas; o botão "Entrar" com 63x44 e `scrollWidth` do botão igual à `clientWidth` | Chromium |
+| 3.4 (se o commit 4 entrar) | desvio do ARROTAR: `abs(centro do botão - largura/2)`; espaço entre os centros dos ícones; `scrollWidth <= clientWidth` de cada rótulo; altura da barra e da `.sidebar` | desvio <= 0,5px; espaços iguais com tolerância de 0,5px (63 em 320, 73 em 360); rótulo sem corte (folga >= 3px em 320 com Comunidades ativa); barra 56 e `.sidebar` 67 | Chromium |
+| 3.6 | capturas antes e depois em 320, 390, 430 e 1280, claro e escuro | desktop e menu lateral idênticos; de 390 para cima, idêntico | Chromium |
+
+**Fica `NÃO VALIDADO` sem aparelho real:** (1) o comportamento do Safari iOS: o iOS tem a mesma regra de alargar o viewport quando algo passa da borda, mas quem prova é o iPhone; a barra do navegador aparecendo e sumindo muda a altura útil e só o aparelho mostra; (2) fonte: a Archivo é a variável do projeto, mas o Safari e o Chrome do Android podem fatiar o texto com 0,5 a 1px de diferença, o que importa na folga de 3,6px do "Comunidades" em 320 (por isso o 10px e a reticência de reserva); (3) toque real com o dedo em 36 ou 44px, erro de pontaria e zona do polegar (2.8); (4) `env(safe-area-inset-*)`, o recorte do Dynamic Island e o teclado na busca; (5) teclado físico no iPhone e no Moto (1.9); (6) VoiceOver e TalkBack (o cartão já limita a promessa); (7) o Moto G67 segue premissa em 412x915, então o Chrome Android fica `NÃO VALIDADO` por inteiro.
+
+### O que depende do Luiz e o que depende do Gate
+
+- **Luiz (muda o que ele vê):** card A (+8px, alvo 36) ou B (+24px, alvo 44). Eu recomendo A. As capturas estão na seção A. O "Entrar" maior (63px) e o ARROTAR no centro são ajustes pequenos; o Tiago pode levar junto se achar que ele quer ver.
+- **Tiago:** aceitar ou não o commit 4 da barra (centralizar o ARROTAR em 320 a 389), porque passa do que o Gate liberou. E, se for A, registrar a exceção do 36px ao DESIGN.md e mudar a linha 2.1 para 36px com zero sobreposição.
+- **Camillo (conferir):** (1) o `.sidebar .mobile-bottom-nav` precisa da especificidade (0,2,0), senão o `gap: 0` perde para `.sidebar nav { gap: 4px }`; (2) a regra do `Entrar` é a opção B dele com 14px/700 e `padding: 0 10px`, 63px de largura; a trava em `estilosDoPerfil.test.ts` lê `width: auto` e o `font-size`; (3) se o commit 4 entrar, a asserção nova vai em `casca.layout.test.ts` (grade de 56/1fr/56/1fr/56 em `max-width: 389px` e o `gap: 0`), porque aí `casca.css` muda; (4) o `.badge-nota` do feed passa a `align-self: center` e o `z-index: 1` do `r/roda` sai; (5) o teste de medida dele deu `scrollWidth` 320 em 320 no visitante com `--hide-scrollbars`; o meu deu 323 só com contexto móvel ligado, então a prova do Marcelo (3.2) tem de rodar assim.

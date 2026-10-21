@@ -314,7 +314,7 @@ Registro do Kayky depois das auditorias do Camillo (APROVADO COM CONDIÇÕES) e 
 
 - (b) A duração real do áudio aparece no card do feed e do Seguindo antes do play (`ItemDoFeed.duracaoSegundos` ou `anexo.duracaoMs`). Antes era "0:00" até tocar.
 - (c) A variante `perfil` esconde Salvar, como o protótipo e o print. O Camillo tinha deixado o botão; o desenho vence. Salvar segue no feed, na comunidade e na thread.
-- (d) As abas têm teclado (setas, Home, End) e `?aba=arrotos|salvos`. A aba agora é lida da URL a cada render, então voltar e avançar do navegador acompanham (cada troca de aba entra no histórico).
+- (d) As abas têm teclado (setas, Home, End) e `?aba=arrotos|salvos`. A aba é lida da URL a cada render e o `?aba=` é compartilhável (valor inválido, ou Salvos de outra pessoa, cai em Posts). Decisão do Luiz: trocar de aba não empilha histórico (`replace`), como em app nativo; voltar sai do perfil.
 - (f) O gatilho (f) do Gate disparou na letra: o CSS do card tem cerca de 350 linhas e o do perfil cerca de 680. O Camillo liberou os dois como bloco coeso, sem token novo fora do DESIGN.md.
 
 **Conferência do Camillo, em 3 linhas**

@@ -412,15 +412,16 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
       expect(screen.getByRole('tab', { name: 'Posts' }).getAttribute('aria-selected')).toBe('true');
     });
 
-    it('voltar e avançar do navegador acompanham a aba (a URL manda)', async () => {
+    it('trocar de aba não empilha histórico (como app nativo): voltar sai do perfil', async () => {
       const Teste = () => {
         const ir = useNavigate();
-        return <><button onClick={() => ir(-1)}>voltar-teste</button><button onClick={() => ir(1)}>avancar-teste</button></>;
+        return <button onClick={() => ir(-1)}>voltar-teste</button>;
       };
       render(
-        <MemoryRouter initialEntries={['/perfil']}>
+        <MemoryRouter initialEntries={['/inicio', '/perfil']} initialIndex={1}>
           <Teste />
           <Routes>
+            <Route path="/inicio" element={<p>tela anterior</p>} />
             <Route path="/perfil" element={<TelaPerfilOpenDesign portaPerfil={mockPerfilPort} portaConta={mockContaPort} portaComunidade={mockComunidadePort} />} />
           </Routes>
         </MemoryRouter>,
@@ -428,10 +429,22 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
       await screen.findByRole('heading', { level: 1, name: 'burpKing' });
       fireEvent.click(screen.getByRole('tab', { name: 'Arrotos' }));
       expect(screen.getByRole('tab', { name: 'Arrotos' }).getAttribute('aria-selected')).toBe('true');
+      fireEvent.click(screen.getByRole('tab', { name: 'Salvos' }));
+      expect(screen.getByRole('tab', { name: 'Salvos' }).getAttribute('aria-selected')).toBe('true');
+      // Duas trocas de aba e uma só volta: sai do perfil, direto para a tela anterior.
       fireEvent.click(screen.getByText('voltar-teste'));
-      await waitFor(() => expect(screen.getByRole('tab', { name: 'Posts' }).getAttribute('aria-selected')).toBe('true'));
-      fireEvent.click(screen.getByText('avancar-teste'));
-      await waitFor(() => expect(screen.getByRole('tab', { name: 'Arrotos' }).getAttribute('aria-selected')).toBe('true'));
+      expect(await screen.findByText('tela anterior')).toBeTruthy();
+      expect(screen.queryByRole('tablist', { name: 'Abas do perfil' })).toBeNull();
+    });
+
+    it('abrir /perfil?aba=arrotos mostra Arrotos; valor inválido cai em Posts', async () => {
+      abrir(mockPerfilLogado, '/perfil?aba=arrotos');
+      await screen.findByRole('heading', { level: 1, name: 'burpKing' });
+      expect(screen.getByRole('tab', { name: 'Arrotos' }).getAttribute('aria-selected')).toBe('true');
+      cleanup();
+      abrir(mockPerfilLogado, '/perfil?aba=curtidas');
+      await screen.findByRole('heading', { level: 1, name: 'burpKing' });
+      expect(screen.getByRole('tab', { name: 'Posts' }).getAttribute('aria-selected')).toBe('true');
     });
 
     it('posts viram CardDoPost no perfil: @handle, r/roda em linha própria, curtida só da porta e sem nota nem emoji', async () => {

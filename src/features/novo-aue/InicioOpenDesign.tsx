@@ -124,7 +124,7 @@ export function InicioOpenDesign({
 
   // Perfil
   const [parametrosDaUrl, setParametrosDaUrl] = useSearchParams();
-  // A aba vem da URL (?aba=arrotos|salvos) a cada render: voltar e avançar do navegador acompanham.
+  // A aba vem da URL (?aba=arrotos|salvos) a cada render, e trocar de aba substitui a entrada (como app nativo: voltar sai do perfil).
   const abaDaUrl = parametrosDaUrl.get('aba');
   const abaPerfil: 'posts' | 'arrotos' | 'salvos' = abaDaUrl === 'arrotos' || abaDaUrl === 'salvos' ? abaDaUrl : 'posts';
   const [folhaDaFotoAberta, setFolhaDaFotoAberta] = useState(false);
@@ -1581,7 +1581,7 @@ export function InicioOpenDesign({
       if (id === 'posts') proximos.delete('aba');
       else proximos.set('aba', id);
       return proximos;
-    });
+    }, { replace: true });
   };
 
   return (

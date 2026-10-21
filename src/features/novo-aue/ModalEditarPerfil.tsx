@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { LIMITES_DO_PERFIL, primeiroErroDoPerfil } from '../../nucleo/perfil/campos';
 import { normalizarRede, type RedeSocial } from '../../nucleo/perfil/redesSociais';
 
 interface Props {
@@ -64,11 +65,18 @@ export function ModalEditarPerfil({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aberto]);
 
+  const handleMudou = handle.trim().replace(/^@/, '').toLowerCase() !== handleInicial.trim().replace(/^@/, '').toLowerCase();
+
   if (!aberto) return null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!apelido.trim() || !handle.trim()) return;
+    const erroDosCampos = primeiroErroDoPerfil({ apelido, handle, bio, cidade });
+    if (erroDosCampos) {
+      setErro(erroDosCampos);
+      return;
+    }
     const redes: Record<RedeSocial, string> = { instagram: '', tiktok: '', youtube: '', twitter: '' };
     for (const [rede, valor] of [['instagram', instagram], ['tiktok', tiktok], ['youtube', youtube], ['twitter', twitter]] as const) {
       const r = normalizarRede(rede, valor);
@@ -112,7 +120,7 @@ export function ModalEditarPerfil({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="profile-form">
+        <form onSubmit={handleSubmit} className="profile-form" noValidate>
           <label>
             Nome de exibição
             <input
@@ -121,6 +129,7 @@ export function ModalEditarPerfil({
               value={apelido}
               onChange={(e) => setApelido(e.target.value)}
               required
+              maxLength={LIMITES_DO_PERFIL.apelidoMax}
               aria-label="Nome de exibição"
             />
           </label>
@@ -133,11 +142,18 @@ export function ModalEditarPerfil({
               value={handle}
               onChange={(e) => setHandle(e.target.value)}
               required
+              maxLength={LIMITES_DO_PERFIL.handleMax + 1}
               aria-label="@ do Auê"
+              aria-describedby="profileHandleAviso"
               autoCapitalize="none"
               spellCheck={false}
             />
           </label>
+          <p id="profileHandleAviso" className="profile-form__ajuda">
+            {handleMudou
+              ? 'Trocar o @ muda o link do seu perfil: o endereço antigo deixa de funcionar.'
+              : `De ${LIMITES_DO_PERFIL.handleMin} a ${LIMITES_DO_PERFIL.handleMax} letras minúsculas sem acento, números ou _.`}
+          </p>
 
           <label>
             Bio
@@ -145,9 +161,14 @@ export function ModalEditarPerfil({
               id="profileBioInput"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
+              maxLength={LIMITES_DO_PERFIL.bioMax}
               aria-label="Bio do perfil"
+              aria-describedby="profileBioContador"
             />
           </label>
+          <p id="profileBioContador" className="profile-form__ajuda" aria-live="polite">
+            {bio.length}/{LIMITES_DO_PERFIL.bioMax}
+          </p>
 
           <label>
             Cidade
@@ -156,6 +177,7 @@ export function ModalEditarPerfil({
               id="profileCityInput"
               value={cidade}
               onChange={(e) => setCidade(e.target.value)}
+              maxLength={LIMITES_DO_PERFIL.cidadeMax}
               aria-label="Cidade"
             />
           </label>

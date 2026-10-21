@@ -95,8 +95,11 @@ export const PainelDireito = memo(function PainelDireito({
                     type="button"
                     className="join"
                     onClick={() => aoAlternarEntrar(c.slug)}
+                    disabled={Boolean(c.possoGerirMidia)}
+                    title={c.possoGerirMidia ? 'Você modera essa comunidade' : jaEntrou ? 'Sair da comunidade' : undefined}
+                    aria-label={c.possoGerirMidia ? `Você modera r/${c.slug}` : jaEntrou ? `Participando de r/${c.slug}. Tocar para sair.` : `Entrar em r/${c.slug}`}
                   >
-                    {jaEntrou ? 'Participando' : '+ Entrar'}
+                    {c.possoGerirMidia ? 'Moderador' : jaEntrou ? 'Participando' : '+ Entrar'}
                   </button>
                 )}
               </div>

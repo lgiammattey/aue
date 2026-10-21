@@ -1,5 +1,6 @@
 import { configuracaoAusente, supabase } from '../../db/supabase';
 import { garantirSessao } from '../../shared/auth/sessaoAnonima';
+import { primeiroErroDoPerfil } from '../../nucleo/perfil/campos';
 import { normalizarRede, type RedeSocial } from '../../nucleo/perfil/redesSociais';
 import { prepararImagemDePerfil } from './imagem';
 import type {
@@ -187,6 +188,8 @@ export function criarPerfilRemoto(): PortaDePerfil {
       if (!apelido || !handle) {
         return { ok: false, motivo: 'invalido', detalhe: 'Apelido e @ são obrigatórios.' };
       }
+      const erroDosCampos = primeiroErroDoPerfil({ apelido, handle, bio: dados.bio, cidade: dados.cidade });
+      if (erroDosCampos) return { ok: false, motivo: 'invalido', detalhe: erroDosCampos };
       const redes = redesNormalizadas(dados);
       if (!redes.ok) return { ok: false, motivo: 'invalido', detalhe: redes.detalhe };
       try {
@@ -216,6 +219,8 @@ export function criarPerfilRemoto(): PortaDePerfil {
 
     async atualizarMeuPerfil(dados: DadosDoPerfil): Promise<ResultadoDaEdicao> {
       if (configuracaoAusente) return { ok: false, motivo: 'semRede' };
+      const erroDosCampos = primeiroErroDoPerfil(dados);
+      if (erroDosCampos) return { ok: false, motivo: 'invalido', detalhe: erroDosCampos };
       const redes = redesNormalizadas(dados);
       if (!redes.ok) return { ok: false, motivo: 'invalido', detalhe: redes.detalhe };
       try {

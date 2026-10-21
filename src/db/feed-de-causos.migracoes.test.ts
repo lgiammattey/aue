@@ -26,7 +26,8 @@ describe('contrato do feed de causos', () => {
       lerSql('20261018000004_perfil_e_comentarios_aninhados.sql') +
       lerSql('20261018000009_feed_e_perfil_da_casa.sql') +
       socialSql +
-      lerSql('20260807000036_nomenclatura_ptbr_mvp1.sql');
+      lerSql('20260807000036_nomenclatura_ptbr_mvp1.sql') +
+      lerSql('20261021011500_apagar_e_denunciar_comentario_de_causo.sql');
     for (const nome of new Set(chamadas)) {
       expect(sql, `RPC ${nome}`).toMatch(new RegExp(`FUNCTION public\\.${nome}\\(`));
     }

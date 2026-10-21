@@ -5,6 +5,8 @@ export const LIMITE_DO_MOTIVO = 500;
 
 interface Props {
   readonly tipo: 'denunciar' | 'apagar';
+  /** O que está sendo denunciado ou apagado; só muda as frases. */
+  readonly alvo?: 'post' | 'comentário';
   /** Título do post, só para a pessoa saber de qual está falando. */
   readonly titulo: string;
   /** Causo com áudio: oferece apagar o arquivo junto. */
@@ -16,7 +18,7 @@ interface Props {
 }
 
 /** Confirmação de denunciar ou apagar. Quem chama só fecha depois do `ok` do servidor. */
-export function DialogoDoPost({ tipo, titulo, temAudio, enviando, erro, aoConfirmar, aoCancelar }: Props) {
+export function DialogoDoPost({ tipo, alvo = 'post', titulo, temAudio, enviando, erro, aoConfirmar, aoCancelar }: Props) {
   const dialogo = useRef<HTMLDivElement>(null);
   const [motivo, setMotivo] = useState('');
   const [apagarAudio, setApagarAudio] = useState(true);
@@ -49,7 +51,7 @@ export function DialogoDoPost({ tipo, titulo, temAudio, enviando, erro, aoConfir
         }}
       >
         <div className="dialog-head">
-          <h2 id="dialogoDoPostTitulo">{denunciando ? 'Denunciar post' : 'Apagar post'}</h2>
+          <h2 id="dialogoDoPostTitulo">{denunciando ? `Denunciar ${alvo}` : `Apagar ${alvo}`}</h2>
           <button type="button" className="close" onClick={aoCancelar} disabled={enviando} aria-label="Fechar">✕</button>
         </div>
 
@@ -70,7 +72,7 @@ export function DialogoDoPost({ tipo, titulo, temAudio, enviando, erro, aoConfir
                 />
               </label>
               <p style={{ margin: '0 0 12px', fontSize: 13, opacity: 0.7 }}>
-                A denúncia chega para quem cuida do Auê. Não dá para desfazer, e o post não some só porque você denunciou.
+                A denúncia chega para quem cuida do Auê. Não dá para desfazer, e {alvo === 'post' ? 'o post' : 'o comentário'} não some só porque você denunciou.
               </p>
             </>
           ) : (

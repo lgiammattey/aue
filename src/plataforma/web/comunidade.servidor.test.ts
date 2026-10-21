@@ -262,3 +262,40 @@ describe('reação, comentário e denúncia pelo servidor', () => {
     expect(await criarComunidadeWeb().denunciarCauso('p1', 'Spam')).toBe(false);
   });
 });
+
+describe('apagar e denunciar comentário de causo', () => {
+  it('listarRespostas traz o marcador de removido sem texto nem autor', async () => {
+    rpc.mockResolvedValue({
+      data: [
+        { id: 'c1', content: 'oi', created_at: '2026-10-20T10:00:00Z', apelido: 'Ana', handle: 'ana', resposta_a_id: null, nivel: 0, removido: false },
+        { id: 'c2', content: '', created_at: '2026-10-20T11:00:00Z', apelido: null, handle: null, resposta_a_id: 'c1', nivel: 1, removido: true },
+      ],
+      error: null,
+    });
+    const r = await criarComunidadeWeb().listarRespostas('causo-1');
+    expect(r[0]).toMatchObject({ id: 'c1', autorHandle: 'ana', removido: false });
+    expect(r[1]).toMatchObject({ id: 'c2', autorNome: '', autorHandle: '', conteudo: '', respostaAId: 'c1', nivel: 1, removido: true });
+  });
+
+  it('apagarComentario chama a RPC certa e só diz sim com `true` do servidor', async () => {
+    const porta = criarComunidadeWeb();
+    rpc.mockResolvedValue({ data: true, error: null });
+    expect(await porta.apagarComentario!('c1')).toBe(true);
+    expect(rpc).toHaveBeenLastCalledWith('apagar_meu_comentario', { p_comentario_id: 'c1' });
+    rpc.mockResolvedValue({ data: null, error: { message: 'Só quem escreveu pode alterar' } });
+    expect(await porta.apagarComentario!('c1')).toBe(false);
+    rpc.mockResolvedValue({ data: false, error: null });
+    expect(await porta.apagarComentario!('c1')).toBe(false);
+  });
+
+  it('denunciarComentario manda o motivo (ou o padrão) e nunca diz que denunciou sem o servidor confirmar', async () => {
+    const porta = criarComunidadeWeb();
+    rpc.mockResolvedValue({ data: true, error: null });
+    expect(await porta.denunciarComentario!('c1', '  spam  ')).toBe(true);
+    expect(rpc).toHaveBeenLastCalledWith('denunciar_comentario', { p_comentario_id: 'c1', p_motivo: 'spam' });
+    expect(await porta.denunciarComentario!('c1', '')).toBe(true);
+    expect(rpc).toHaveBeenLastCalledWith('denunciar_comentario', { p_comentario_id: 'c1', p_motivo: 'Conteúdo impróprio' });
+    rpc.mockResolvedValue({ data: null, error: { message: 'x' } });
+    expect(await porta.denunciarComentario!('c1', 'spam')).toBe(false);
+  });
+});

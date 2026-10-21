@@ -497,17 +497,19 @@ export function criarComunidadeWeb(
             handle: string | null;
             resposta_a_id: string | null;
             nivel: number | null;
+            removido?: boolean | null;
           }>).map((c) => {
             const nome = c.apelido?.trim() || 'Arrotador';
             return {
               id: c.id,
               causoId,
-              autorNome: nome,
-              autorHandle: c.handle ?? handleDoApelido(nome),
+              autorNome: c.removido ? '' : nome,
+              autorHandle: c.removido ? '' : (c.handle ?? handleDoApelido(nome)),
               conteudo: c.content,
               criadoEm: c.created_at,
               respostaAId: c.resposta_a_id ?? undefined,
               nivel: (Math.min(Math.max(c.nivel ?? 0, 0), 2) as 0 | 1 | 2),
+              removido: Boolean(c.removido),
             };
           });
         } catch (erro) {
@@ -638,6 +640,51 @@ export function criarComunidadeWeb(
         const { data, error } = await supabase.rpc('listar_minhas_comunidades');
         return error ? [] : (data ?? []).map((linha: { slug: string }) => linha.slug);
       } catch { return []; }
+    },
+
+    async apagarComentario(comentarioId: string): Promise<boolean> {
+      if (!usaServidor() || ehLocal(comentarioId)) return false;
+      try {
+        const sessao = await garantirSessao();
+        if (!sessao?.user?.id) return false;
+        const { data, error } = await comTempo(
+          supabase.rpc('apagar_meu_comentario', { p_comentario_id: comentarioId }),
+          TEMPO_DA_ESCRITA_MS,
+          'apagar comentário',
+        );
+        if (error || data !== true) {
+          console.error('O servidor recusou apagar o comentário', error);
+          return false;
+        }
+        return true;
+      } catch (erro) {
+        console.error('Falha ao apagar o comentário', erro);
+        return false;
+      }
+    },
+
+    async denunciarComentario(comentarioId: string, motivo: string): Promise<boolean> {
+      if (!usaServidor() || ehLocal(comentarioId)) return false;
+      try {
+        const sessao = await garantirSessao();
+        if (!sessao?.user?.id) return false;
+        const { data, error } = await comTempo(
+          supabase.rpc('denunciar_comentario', {
+            p_comentario_id: comentarioId,
+            p_motivo: motivo.trim().length >= 3 ? motivo.trim() : 'Conteúdo impróprio',
+          }),
+          TEMPO_DA_ESCRITA_MS,
+          'denunciar comentário',
+        );
+        if (error || data !== true) {
+          console.error('O servidor recusou a denúncia do comentário', error);
+          return false;
+        }
+        return true;
+      } catch (erro) {
+        console.error('Falha ao denunciar o comentário', erro);
+        return false;
+      }
     },
 
     async denunciarCauso(causoId: string, motivo: string): Promise<boolean> {

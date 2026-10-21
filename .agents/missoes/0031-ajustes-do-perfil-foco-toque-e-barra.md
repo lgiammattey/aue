@@ -1,22 +1,22 @@
-# Cartão de Missão 0031 — Três ajustes do perfil: foco da folha de foto, toque no nome do card e rolagem de lado na barra inferior
+# Cartão de Missão 0031 — Três ajustes do perfil: foco da folha de foto, toque no nome do card e rolagem de lado em 320 (botão Entrar do topo)
 
-Aberto em 21/10/2026. Insumo: auditoria do Marcelo no PR #330 (perfil Fase A, mergeado na `main` em `4ea81fc`), achados do commit `f3b1d05`, nível `AJUSTA`. Nenhum bloqueia; os três saíram do PR por decisão do Luiz e viram este cartão. Herda do [0030](0030-perfil-igual-ao-print-fase-a.md) a matriz de aceite, os aparelhos e as decisões do Luiz. Este cartão não implementa nada: só enquadra.
+Aberto em 21/10/2026. Insumo: auditoria do Marcelo no PR #330 (perfil Fase A, mergeado na `main` em `4ea81fc`), achados do commit `f3b1d05`, nível `AJUSTA`. Nenhum bloqueia; os três saíram do PR por decisão do Luiz e viram este cartão. Herda do [0030](0030-perfil-igual-ao-print-fase-a.md) a matriz de aceite, os aparelhos e as decisões do Luiz. Fechado pelo Tiago em 21/10/2026, depois do Gate do Camillo e do desenho do Rian (ver "Fechamento do Tiago"). Este cartão não implementa nada: só enquadra.
 
 ## 1. Enquadramento (Tiago)
 
-- **Dor / Problema da pessoa:** o perfil mobile está quase com cara de app, mas três coisas ainda entregam que é página web. (1) Quem navega por teclado abre a folha de troca de foto e, com Shift+Tab, cai na página de trás, e aí o Esc não fecha mais. (2) O nome de quem postou, e parte do `@handle`, só pega toque numa faixa de uns 20px, porque o link `r/roda` cobre o resto: o dedo erra e abre a comunidade em vez do perfil. (3) Na tela de 320px, quem ainda não entrou na conta arrasta a página 3px para o lado por causa da barra inferior. O Luiz quer o perfil mobile perfeito, sem quebrar e sem "sambar"; os três são o que falta para isso.
+- **Dor / Problema da pessoa:** o perfil mobile está quase com cara de app, mas três coisas ainda entregam que é página web. (1) Quem navega por teclado abre a folha de troca de foto e, com Shift+Tab, cai na página de trás, e aí o Esc não fecha mais. (2) O nome de quem postou, e parte do `@handle`, só pega toque numa faixa de uns 20px, porque o link `r/roda` cobre o resto: o dedo erra e abre a comunidade em vez do perfil. (3) Na tela de 320px, quem ainda não entrou na conta arrasta a página 3px para o lado por causa do botão "Entrar" do topo, cujo texto é maior que a caixa (o Camillo mediu; a barra inferior não é a causa). O Luiz quer o perfil mobile perfeito, sem quebrar e sem "sambar"; os três são o que falta para isso.
 - **Comportamento esperado na tela:**
   1. **Folha de foto** (`FolhaDaFoto.tsx/.css`, `src/features/novo-aue`): com a folha aberta, o foco nunca sai dela. Tab e Shift+Tab ciclam entre Fechar, Trocar foto e Remover foto (quando existe). Esc fecha de qualquer foco dentro, inclusive com o foco no contêiner. Ao fechar, o foco volta ao avatar (já funciona; precisa continuar).
-  2. **Nome no card** (`CardDoPost.tsx/.css`): o link do nome e o do `@handle` têm área tocável de pelo menos 44px de altura e não se sobrepõem a nenhum vizinho (link `r/roda`, menu `⋯`, avatar). Vale para feed, Seguindo, comunidade, thread e perfil, porque o card é um só.
-  3. **Barra inferior** (`casca.css`, regras do `@media (max-width: 699px)`): em 320px, visitante e logado, a página não rola para o lado. A causa se corrige, não se esconde.
+  2. **Nome no card** (`CardDoPost.tsx/.css`): o link do nome, o do `@handle` e o do `r/comunidade` têm área tocável de 44px de altura e não se sobrepõem a nenhum vizinho (menu `⋯`, avatar). O cabeçalho cresce 24px por post (opção B do Rian, decidido pelo Luiz em 21/10/2026). Vale para feed, Seguindo, comunidade, thread e perfil, porque o card é um só.
+  3. **Botão "Entrar" do topo** (`BarraSuperior.css`, bloco mobile): em 320px, visitante e logado, a página não rola para o lado (hoje o visitante rola 3px, e abaixo de 360px o estouro é da faixa toda). A causa se corrige, não se esconde. A barra inferior fica fora deste item, salvo o commit opcional que centra o ARROTAR (decisão (a) do fechamento).
 - **Fora de escopo (Não vira):**
   - Mascarar o problema com `overflow-x: hidden` em `html`, `body` ou `.app`. Se aparecer no diff, volta.
-  - Mexer na grade do `.app`, nas rotas, no FAB (além do que a causa do item 3 exigir, e só com o Camillo dizendo) ou na barra lateral do desktop.
+  - Mexer na grade do `.app`, nas rotas, no tamanho ou na posição do FAB, na altura da barra inferior ou na barra lateral do desktop.
   - Prop nova no `CardDoPost`, mudança de assinatura do `MenuDoPost` ou do `PlayerDoArroto`.
   - Mudar a assinatura de `manterFocoNoDialogo` (ver item 1 do Gate).
   - Barra inferior de 67px para 56px e `stroke-width` 2.4 no ícone ativo: seguem em cartão separado (decisão abaixo).
   - Ver o backlog no fim: foco de teclado que começa pela barra inferior, aba Curtidas (Fase B), issue das variáveis `--border-strong`.
-- **Pista (Lane):** **Full flow comum, com Gate leve do Camillo, por escrito, antes de o Kayky abrir código.**
+- **Pista (Lane):** **Full flow comum, com Gate do Camillo escrito neste cartão (21/10/2026, aprovado com condições). O Kayky só abre código depois da seção em que o Camillo confere o desenho do Rian.**
 - **Por que esta pista:**
   - Não é Fast lane. Fast lane é ajuste local de causa conhecida e sem efeito em contrato. Aqui o item 2 muda o card que quatro telas usam, o item 3 mexe na casca que todas as telas usam e a causa dele ainda não está provada. O item 1 mexe num helper de `src/plataforma/web/` que outros três diálogos também usam (`ModalConexoes`, `DialogoDoPost`, `ModalAjustarImagem`).
   - Não é sistêmica. Não há porta, RPC, migração, contrato de dados, modelo de áudio nem prop nova. É comportamento de foco, geometria de toque e uma regra de CSS dentro de módulos e contratos que já existem. O mesmo raciocínio do 0030 vale: risco de regressão visual, não de arquitetura.
@@ -25,14 +25,15 @@ Aberto em 21/10/2026. Insumo: auditoria do Marcelo no PR #330 (perfil Fase A, me
   1. **Helper de foco.** `focoNoDialogo.ts` só trata Tab quando o foco está exatamente no primeiro ou no último focável. Com o foco no contêiner (`tabIndex={-1}`, que é onde a folha abre), Shift+Tab não bate em nenhum dos dois e o navegador sai do diálogo. A peça certa para estender é esta mesma, porque já vive em `src/plataforma/web/` (ADR 0001) e já é usada por quatro diálogos. Camillo confirma que dá para corrigir sem mudar a assinatura, tratando "foco no contêiner ou fora da lista" como borda, e lista o efeito nos três outros chamadores. Se a correção exigir assinatura nova, ou um listener em `document` fora de `plataforma/`, ele diz e a pista sobe.
   2. **Esc com foco escapado.** O `onKeyDown` da folha está no contêiner; se o foco sair, o Esc nunca chega. Camillo diz se o foco preso resolve (o foco nunca sai, então o Esc sempre chega) ou se precisa de segunda camada, e onde ela mora.
   3. **Card.** Os quatro chamadores (`InicioOpenDesign.tsx` feed, Seguindo e comunidade; `ThreadDeComentarios.tsx`) mais o perfil continuam compilando sem edição. A correção fica em `CardDoPost.css` sob `.card-do-post`, sem `!important`, sem tocar em `.post-body` nem em `casca.css`. Camillo aponta o seletor mais estreito e confirma que nenhum vizinho (`r/roda`, `⋯`, avatar) perde área que já tem.
-  4. **Casca.** Camillo localiza a causa dos 3px com medida (qual elemento passa de 320px, em visitante e em logado) antes de qualquer edição. Hipótese a provar ou derrubar: cinco colunas `1fr` na `.mobile-bottom-nav` crescem até o conteúdo mínimo do rótulo mais largo e empurram a barra além da largura. Se for isso, o conserto é `minmax(0, 1fr)` e corte do rótulo, não overflow escondido. Ele diz também se a causa vive só no `@media (max-width: 699px)` ou se encosta na estrutura da casca (gatilho abaixo).
-  5. **Teste de layout.** `casca.layout.test.ts` roda antes (base verde) e depois. Ele já trava o `.app`, o item ativo sem verde, o FAB verde e o menu lateral; ganha uma asserção da correção do item 3.
+  4. **Os 3px.** Cumprido pelo Camillo: a causa é o botão "Entrar" do topo do visitante (`BarraSuperior.tsx`, `.icon-btn` de 44px com texto de 50px), não a barra inferior. A hipótese das cinco colunas `1fr` foi derrubada por medida. A correção é uma regra em `BarraSuperior.css`, no bloco mobile, sem tocar no `.icon-btn` global de `index.css`.
+  5. **Testes de layout.** `casca.layout.test.ts` roda antes (base verde, 4 testes) e depois, e só ganha asserção se o commit opcional da barra entrar (decisão (a)). A trava dos 3px vai em `estilosDoPerfil.test.ts`, que já lê `BarraSuperior.css`.
   6. **Fronteira.** Nenhuma linha nova de `window`, `navigator`, `document` ou `localStorage` em `features/`. A busca de foco é `document.activeElement` e fica no helper em `plataforma/web/`.
 - **Gatilhos que sobem a pista para sistêmica (Iury para e devolve ao Tiago):**
   - (a) a correção do foco exigir assinatura nova em `manterFocoNoDialogo` ou código de navegador fora de `src/plataforma/`;
   - (b) o card precisar de prop nova ou o `MenuDoPost` mudar de assinatura;
-  - (c) a causa dos 3px estar na grade do `.app`, nas rotas ou no FAB, e não só em largura e conteúdo da barra;
-  - (d) a correção do toque no card fazer o cabeçalho crescer além do orçamento do item 2.4 da matriz sem o Luiz ter visto.
+  - (c) a causa dos 3px estar na grade do `.app`, nas rotas ou no FAB. Não disparou: o Camillo provou que é o botão "Entrar" do topo;
+  - (d) a correção do toque no card fazer o cabeçalho crescer além do orçamento do item 2.4 da matriz sem o Luiz ter visto. Disparou e está resolvido: o Luiz decidiu a opção B (+24px) em 21/10/2026;
+  - (e) o commit opcional da barra (decisão (a)) exigir mexer na estrutura da casca, na grade do `.app` ou no FAB além de tamanho.
 - **Fonte de verdade afetada:** `docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md` (componentes canônicos, sem mudança prevista), `docs/design/design-system/system/DESIGN.md` (alvo de toque de 44px), `docs/technical/adr/0001-arquitetura-oficial-do-aue.md` (fronteira do navegador), protótipo `Bonde do Arroto.dc.html` (nome legado de `Tropa do Arroto`). Não mexe em `ARENA.md`, `REGRAS.md` nem `VISAO.md`.
 
 ### Decisão do Tiago sobre o item 3: barra de 67px e `stroke-width` 2.4
@@ -44,26 +45,47 @@ Justificativa, em ordem:
 2. Mudar a altura da barra (67 para 56) muda o espaço reservado embaixo de toda tela (`padding-bottom` das páginas, posição do FAB, safe area) e o que o Luiz vê em todo o app. Isso é redesenho de peça global, com regressão em todas as rotas, e o Rian ainda precisa cravar a medida no protótipo. Misturar com um conserto de largura aumenta o diff e o risco sem ajudar a corrigir o defeito.
 3. O `stroke-width` 2.4 é acabamento visual puro. Não bloqueia nada.
 4. Condição para juntar, caso o Camillo prove que a causa dos 3px é a mesma coisa que faz a barra ter 67px (por exemplo, o rótulo quebrando em duas linhas e esticando a altura): ele escreve isso na nota do Gate, o Rian crava 56 no protótipo e o Tiago reavalia. Sem essa prova, segue separado.
+5. Atualização de 21/10/2026: o Camillo provou que a condição do ponto 4 não se cumpre. Os 67px são o `padding` do `.sidebar` (4px em cima e 6px embaixo), 1px de borda e o item de 56px; é medida vertical e não depende da largura. Segue separado.
+
+### Fechamento do Tiago (21/10/2026)
+
+Com o Gate do Camillo (3ecd20d) e o desenho do Rian (83ae8b6) no cartão, o Tiago fecha as decisões abaixo. O texto das seções 1 a 5 já está ajustado a elas. As seções do Camillo e do Rian ficam como foram escritas, com nota de superação onde a decisão veio depois. A numeração de commits dessas duas seções é a antiga; vale a ordem final do item (d).
+
+**Decisões do Luiz (21/10/2026, decidido pelo Luiz)**
+
+1. Cabeçalho do card: opção B do Rian. Cada post cresce 24px (`--cab-linha` de 32px), com toque de 44px no nome, no `@handle` e no `r/comunidade`, zero sobreposição. Vale para feed, Seguindo, comunidade, thread e perfil, porque o card é um só. O custo é visível: o feed de texto fica uns 21% mais alto por post (117px para 141px) e o perfil uns 15% (161px para 185px), então cabem menos posts por tela. Como a B cumpre o `--hit-target-min` de 44px do DESIGN.md, não há exceção ao design system. A opção A (+8px) fica só como registro e o gatilho (d) está fechado.
+2. O Luiz não toma decisão técnica. As decisões de (a) a (e) abaixo são do Tiago.
+
+**Decisões do Tiago**
+
+- **(a) Centro do ARROTAR em 320 a 389px (commit 4 opcional do Rian): entra, condicionada ao OK do Camillo.** Decisão provisória. É defeito real e visível em tela pequena (em 320 o ARROTAR fica 7,9px fora do centro e os espaços entre os ícones saem desiguais; em 360 são 2,8px; de 390 para cima não muda nada). É só CSS da barra mobile, dentro do `@media` de `casca.css`, sem estrutura nova, e o Rian já provou por medida. O Camillo precisa dar OK em duas coisas: a especificidade `.sidebar .mobile-bottom-nav` (0,2,0), necessária porque `.sidebar nav { gap: 4px }` ganha do seletor simples, e a asserção nova em `casca.layout.test.ts` (grade `56px minmax(0, 1fr) 56px minmax(0, 1fr) 56px` até 389px e `gap: 0`). Se ele disser que mexe na estrutura da casca ou no FAB além de tamanho, dispara o gatilho (e), a pista sobe e o Tiago decide ali. Se ele barrar sem subir a pista, o commit cai: o Rian devolve a barra do protótipo ao que era, `casca.css` e `casca.layout.test.ts` ficam sem edição e o defeito vai para cartão próprio, junto com os 67px contra 56px e o `stroke-width` 2.4. Os itens 3.9 e 3.10 da matriz só valem se o commit entrar. Altura da barra e FAB não mudam de qualquer jeito.
+- **(b) Referências corrigidas.** Os 3px são do botão "Entrar" do topo do visitante, não da barra. A correção vai em `src/features/novo-aue/BarraSuperior.css` (botão de 44px com texto de 50 a 56px) e a trava em `estilosDoPerfil.test.ts`. Ajustei o item 3 do enquadramento, o item 4 do Gate leve, o item 3 da matriz inteiro (3.1 a 3.8, mais 3.9 e 3.10 novos) e o texto de quem valida o quê. O desenho do Rian para o botão (`width: auto; min-width: 44px; padding: 0 10px; font-size: 14px; font-weight: 700`, botão de 63x44) está aceito, com a conferência do Camillo. O placeholder do visitante ("Buscar pessoa…") já era cortado antes deste cartão e fica como está; não é defeito novo. A prova do Marcelo para os 3px roda com `isMobile` e `hasTouch` ligados, em 320, 330, 340, 350 e 360 no mínimo, porque sem isso o Chrome de mesa não alarga o viewport e o teste passa mesmo com o defeito.
+- **(c) Anel de foco: divergência aceita.** O `base.css` do design system manda `outline: 2px solid var(--accent)`. O app usa `--aue-text`, 2px, nunca verde, porque a aba ativa e o ARROTAR já gastam os dois verdes do estado e um terceiro estoura o limite. Contraste de 17 a 18:1 nos dois temas. O desenho do card (`::before` só em volta da linha de texto) está no item 2.9. Só vira anotação no `DESIGN.md` se o Camillo achar que é regra do app; nesse caso o Rian anota. Sem esse aviso, nada muda em `docs/design/`.
+- **(d) Ordem final de commits do Kayky.** Cada um com `typecheck`, `lint`, `test` e `build` rodados e a prova do item citada na mensagem:
+  1. Foco do diálogo: `src/plataforma/web/focoNoDialogo.ts` e `focoNoDialogo.test.ts`, assinatura intacta, `FolhaDaFoto.tsx` sem edição (provas 1.1 a 1.7).
+  2. "Entrar" do visitante: `BarraSuperior.css` e `estilosDoPerfil.test.ts` (provas 3.1 a 3.5).
+  3. Barra inferior, só se o Camillo der OK (decisão (a)): `casca.css` e `casca.layout.test.ts` (provas 3.9 e 3.10).
+  4. Cabeçalho do card, opção B: `CardDoPost.css`, sem TSX, `--cab-linha: 32px`, capturas antes e depois nas cinco telas (provas 2.1 a 2.7).
+  5. Anel de foco do card: `CardDoPost.css` (prova 2.9). Vem depois do cabeçalho porque o `::before` usa os deslocamentos da caixa nova (`top: 12px` no nome e no `@handle`); feito antes, ficaria no lugar errado. A folha de foto não precisa de commit de anel, o que ela tem já é `--aue-text`, 2px, offset 2px.
+  O Camillo pode reordenar, desde que o foco do helper venha primeiro e cada commit continue isolado.
+- **(e) Matriz, veredito e pendências atualizados** abaixo. O teste intermitente da Arena (issue #187, "Revanche contra Giam.") falhou 3 vezes hoje fora do diff: na `main`, no CI do #330 e no CI do #331. Fica fora deste cartão. O Tiago sugere ao Luiz um cartão próprio para o Lucas ou o Camillo; não foi aberto.
 
 ## 2. Donos e Fronteiras (Iury)
 
 - **Braço direito e Aceite Final:** Tiago
 - **Orquestração e Mesa Limpa:** Iury. Uma entrega por vez; o cartão de Fase B (Curtidas) não abre enquanto este não tiver veredito.
-- **Responsável pela implementação:** Kayky (`FolhaDaFoto`, `CardDoPost.css`, `casca.css`). O ajuste em `src/plataforma/web/focoNoDialogo.ts` também é dele, com o Camillo revendo, porque é a peça mais compartilhada.
+- **Responsável pela implementação:** Kayky (`focoNoDialogo.ts`, `BarraSuperior.css`, `CardDoPost.css` e, se o commit opcional da barra entrar, `casca.css`). O helper de foco em `src/plataforma/web/` tem o Camillo revendo, porque é a peça mais compartilhada.
 - **Especificação e Auditoria Visual:** Rian
-- **Gate Arquitetural (Camillo / Lucas):** Gate leve do Camillo, escrito neste cartão, **pendente**. Lucas fica de fora (sem áudio, sem backend).
+- **Gate Arquitetural (Camillo / Lucas):** Gate do Camillo escrito neste cartão em 21/10/2026 (aprovado com condições). A conferência do desenho do Rian por ele, em paralelo, entra como seção dele e inclui o OK do commit opcional da barra. Lucas fica de fora (sem áudio, sem backend).
 - **Auditoria e Prova Real:** Marcelo
 - **Decisão pendente do Luiz:** ver o fim.
 
 ### Sequência
 
 1. **Iury** recebe o cartão, confere a mesa e libera o Camillo e o Rian em paralelo (um lê código, o outro mede tela).
-2. **Camillo** faz as medidas do item 4 do Gate (qual elemento passa de 320px) e escreve a nota no cartão: aprovado, aprovado com condição ou barrado, mais a resposta sobre a barra de 67px. Sem a nota, o Kayky não abre branch.
-3. **Rian** especifica só o que precisa de desenho: como o link do nome e o do `r/roda` convivem com 44px cada sem sobreposição e sem inflar o card (duas opções com captura, se houver mais de uma), e o que acontece com o rótulo da barra em 320px (corte, reticências ou ícone sozinho). A folha de foto já tem desenho; foco não muda o visual. Atualiza o protótipo só se a geometria do card mudar.
-4. **Kayky** abre código com o cartão, a nota do Camillo e o desenho do Rian. Ordem de commits, cada um com `typecheck`, `lint`, `test` e `build` rodados:
-   1. Foco do diálogo: `focoNoDialogo.ts` + teste novo + `FolhaDaFoto` se precisar. Peça pequena e isolada.
-   2. Toque no card: `CardDoPost.css` (e `.tsx` só se a estrutura exigir) + capturas de antes e depois nas telas.
-   3. Barra inferior por último: `casca.css` + asserção em `casca.layout.test.ts`. É a mudança global e a mais barata de reverter, como no 0030.
+2. **Camillo** (feito): medidas e nota do Gate escritas neste cartão, com a resposta sobre os 67px. Em paralelo, confere o desenho do Rian e acrescenta a seção dele.
+3. **Rian** (feito): desenho do card (A e B, com captura), do "Entrar", da barra e do anel de foco. A escolha do card foi do Luiz: B.
+4. **Kayky** abre código só depois de a seção de conferência do Camillo estar no cartão. Ordem de commits: a do item (d) do Fechamento do Tiago (foco, "Entrar", barra se entrar, cabeçalho B, anel do card).
 5. **Rian + Marcelo** validam: Rian com a tela aberta e as capturas lado a lado; Marcelo com teclado, toque e regressão.
 6. **Iury** consolida com evidência; **Tiago** passa pelas 7 perguntas e dá o veredito.
 
@@ -73,9 +95,9 @@ Justificativa, em ordem:
 - **Aparelhos de referência (decisão do Luiz):** iPhone 17 (402x874, Safari iOS) e Motorola G67 (412x915, Chrome Android, **premissa não confirmada**). Faixa de teste de 320 a 430, mais 768 e 1280 para regressão, claro e escuro.
 - **Maior risco de quebra ou mentira visual:**
   1. **Foco preso em um diálogo mexe em quatro.** `ModalConexoes`, `DialogoDoPost` e `ModalAjustarImagem` usam o mesmo helper. Consertar a folha e travar outro modal é o risco principal do item 1.
-  2. **Duas faixas de 44px empilhadas não cabem em 40px.** Nome e `r/roda` ficam em linhas seguidas, cada uma com uns 20px de texto. Dar 44px a cada uma sem sobrepor exige altura, e altura no card é altura em todo o feed. Esse é o ponto do item 2 que o Luiz enxerga (ver pergunta no fim).
-  3. **Esconder em vez de consertar** a rolagem lateral. Um `overflow-x: hidden` apaga o sintoma e deixa a barra mais larga que a tela, com item cortado.
-  4. **Barra inferior é global.** Qualquer mudança vira regressão silenciosa em toda rota sem a captura em várias telas.
+  2. **Duas faixas de 44px empilhadas não cabem em 40px.** Nome e `r/roda` ficam em linhas seguidas, cada uma com uns 20px de texto. Dar 44px a cada uma sem sobrepor exige altura, e altura no card é altura em todo o feed. O Luiz viu e decidiu: +24px por post (opção B).
+  3. **Esconder em vez de consertar** a rolagem lateral. Um `overflow-x: hidden` apaga o sintoma e deixa o botão "Entrar" vazando da caixa. Medir sem `isMobile` e `hasTouch` também esconde o defeito: o Chrome de mesa não alarga o viewport.
+  4. **Barra inferior é global** (vale se o commit opcional entrar). Qualquer mudança vira regressão silenciosa em toda rota sem a captura em várias telas.
   5. **Sambar:** o ajuste do card mudar a altura do cabeçalho depois que o dado chega (pulo de layout). Altura reservada, CLS em 0.
   6. **Medida sem aparelho.** Chromium não prova Safari. O foco por teclado e o toque real em aparelho ficam `NÃO VALIDADO` até alguém conferir no iPhone 17 e no Moto.
 - **Limite da promessa:** este cartão não promete foco perfeito em leitor de tela (VoiceOver/TalkBack) além do que o Marcelo medir; promete foco preso e Esc por teclado e a área de toque medida em Chromium e conferida em aparelho. Teclado em iPhone depende de teclado físico.
@@ -92,64 +114,69 @@ Ambientes: Teste = `npm run typecheck`, `npm run lint`, `npm test`, `npm run bui
 | 1.2 | 12 Tab seguidos e 12 Shift+Tab seguidos, a partir do contêiner, do primeiro e do último botão: `document.activeElement` está dentro do diálogo em todos os passos, com e sem "Remover foto" (perfil com e sem foto) | Marcelo | Chromium | pendente |
 | 1.3 | Esc fecha com o foco no contêiner, em cada botão e logo depois de um Shift+Tab. Depois de fechar, o foco está no avatar | Marcelo | Teste + Chromium | pendente |
 | 1.4 | Toque fora da folha continua fechando; "Trocar foto" e "Remover foto" continuam chamando os mesmos handlers de antes (sem mudança de comportamento) | Marcelo | Teste | pendente |
-| 1.5 | Teste novo do helper `focoNoDialogo` cobre: foco no contêiner, foco fora da lista, lista vazia, tecla que não é Tab, Tab no último, Shift+Tab no primeiro | Marcelo | Teste | pendente |
+| 1.5 | Teste novo do helper `focoNoDialogo` cobre: foco no contêiner, foco fora da lista, foco no `body`, lista vazia, tecla que não é Tab, Tab no último, Shift+Tab no primeiro | Marcelo | Teste | pendente |
 | 1.6 | Sem regressão nos três outros diálogos (`ModalConexoes`, `DialogoDoPost`, `ModalAjustarImagem`): ciclo de Tab e Shift+Tab igual ao de antes nas bordas, Esc e fechar iguais, foco volta a quem abriu | Marcelo | Teste + Chromium | pendente |
 | 1.7 | Fronteira: `arquitetura.fronteira.test.ts` verde; nenhuma API de navegador nova em `features/` | Marcelo / Camillo | Teste + leitura | pendente |
-| 1.8 | Visual da folha intacto (título, botões, ancoragem embaixo no celular, caixa no desktop), claro e escuro | Rian | Chromium | pendente |
+| 1.8 | Visual da folha intacto (título, botões, ancoragem embaixo no celular, caixa no desktop), claro e escuro; anel de foco de 2px em `--aue-text`, offset 2px, nunca verde | Rian | Chromium | pendente |
 | 1.9 | Teclado físico no iPhone 17 (Safari) e no Moto (Chrome Android): Tab/Shift+Tab/Esc na folha | Luiz (roteiro do Marcelo) | Aparelho | `NÃO VALIDADO` até conferir |
 
 ### Item 2 — Toque no nome do card (vale para as 5 telas)
 
 | # | Critério observável | Dono da prova | Ambiente exigido | Estado |
 |---|---|---|---|---|
-| 2.1 | O link do nome e o do `@handle` têm caixa de toque com altura >= 44px e largura >= 44px, medida por `getBoundingClientRect` da área que responde ao toque (não do texto) | Marcelo | Chromium (script) | pendente |
+| 2.1 | Nome, `@handle` e `r/comunidade`: área de toque de 44px de altura (tolerância de 0,5px) e largura >= 44px, medida por `getBoundingClientRect` e `elementFromPoint` da área que responde ao toque (não do texto), com zero sobreposição entre as caixas. Cabeçalho do card +24px por post (`--cab-linha` de 32px) | Marcelo | Chromium (script) | pendente |
 | 2.2 | Nenhuma sobreposição de área tocável entre nome, `@handle`, `r/roda`, `⋯` e avatar: interseção entre as caixas igual a zero | Marcelo | Chromium (script) | pendente |
 | 2.3 | Toques de verdade nas bordas de cada caixa (topo, meio, base) caem no destino certo: nome e `@handle` vão ao perfil (`/u/:handle`), `r/roda` vai a `/c/:slug`, `⋯` abre o menu. Nenhum toque no nome abre a comunidade | Marcelo | Chromium | pendente |
-| 2.4 | Altura do cabeçalho do card dentro do orçamento: até +8px por card sem consulta; acima disso o Rian mostra captura e o Luiz decide antes do código (ver pergunta). Altura medida antes e depois, em 320, 390 e 430 | Rian / Marcelo | Chromium | pendente |
+| 2.4 | Altura do card +24px por post (opção B, decidida pelo Luiz): perfil de 161 para 185 e feed de texto de 117 para 141, tolerância de 1px, medida antes e depois em 320, 390 e 430. Altura fixa pela variável, sem pulo quando o dado chega | Rian / Marcelo | Chromium | pendente |
 | 2.5 | Regressão nas telas que usam o card, em 320, 360, 390, 402, 412, 430, 768 e 1280, claro e escuro, capturas antes e depois: **feed (com Seguindo), comunidade, thread de comentários e perfil (aba Posts)**. Nada cortado, sem sobreposição, sem rolagem lateral, nome e `@handle` longos com reticências sem empurrar o `⋯` | Marcelo / Rian | Chromium | pendente |
 | 2.6 | Nada mais muda no card: `⋯` com o mesmo comportamento, player, ações, nota do feed, reações emoji do feed, verde do perfil (no máximo 2 por estado) e sem layout shift (CLS em 0 no perfil) | Marcelo / Rian | Teste + Chromium | pendente |
 | 2.7 | `CardDoPost.test.tsx`, `MenuDoPost.test.tsx`, `InicioOpenDesign.test.tsx`, `DenunciarEApagar.test.tsx`, `ThreadDeComentarios.test.tsx` e `TelaPerfilOpenDesign.test.tsx` passam sem enfraquecer asserção | Marcelo | Teste | pendente |
 | 2.8 | Toque real com o dedo no nome em feed, comunidade e perfil, no iPhone 17 e no Moto: acerta o perfil de primeira, sem abrir a comunidade por engano | Luiz (roteiro do Marcelo) | Aparelho | `NÃO VALIDADO` até conferir |
+| 2.9 | Anel de foco do card em nome, `@handle` e `r/comunidade`: 2px em `--aue-text`, nunca verde, só em volta da linha de texto (24px de altura, raio 8px), dentro da caixa de toque e sem corte pelo `overflow` do link. `⋯` e botões de ação com o anel que já tinham. Contagem de verde do estado não muda | Rian / Marcelo | Chromium (Tab real) | pendente |
 
-### Item 3 — Barra inferior sem rolagem lateral
+### Item 3 — Sem rolagem lateral em 320 (botão "Entrar" do topo) e barra inferior centrada (opcional)
 
 | # | Critério observável | Dono da prova | Ambiente exigido | Estado |
 |---|---|---|---|---|
-| 3.1 | **Medida de antes** registrada: em 320px, visitante e logado, `scrollWidth - clientWidth` da página e qual elemento passa da borda. Sem essa medida o Kayky não começa | Camillo / Marcelo | Chromium | pendente |
-| 3.2 | Em 320, 360, 390, 402, 412 e 430, visitante e logado, nas rotas `/`, feed, `/perfil`, `/u/:handle`, comunidades e uma comunidade aberta: `document.documentElement.scrollWidth === clientWidth` (zero de rolagem lateral) | Marcelo | Chromium | pendente |
-| 3.3 | A correção está na causa (largura da grade ou do rótulo). Prova: o diff não traz `overflow-x: hidden` em `html`, `body` nem `.app`, e a barra cabe inteira na tela, sem item cortado | Camillo / Marcelo | Leitura de código + Chromium | pendente |
-| 3.4 | Os cinco itens da barra seguem com alvo >= 44px, rótulo legível ou, se o Rian mandar cortar, com reticências e `aria-label` completo; FAB do ARROTAR intacto (tamanho, posição, verde) | Marcelo / Rian | Chromium (script) | pendente |
-| 3.5 | `casca.layout.test.ts` verde **antes** (base) e **depois**, com uma asserção nova que trava a correção. Nenhuma outra regra do arquivo enfraquecida | Marcelo | Teste | pendente |
-| 3.6 | Regressão da casca: capturas antes e depois da barra em 320, 390, 430 e 1280, claro e escuro. Desktop e menu lateral sem nenhuma diferença; safe area inferior intacta; o fim da última lista rola até o fim sem ficar atrás da barra | Marcelo / Rian | Chromium; safe area só em aparelho | pendente |
-| 3.7 | Altura da barra (hoje 67px) **não muda** neste cartão, salvo se a nota do Camillo juntar o assunto (ver decisão do item 3) | Marcelo | Chromium (medida) | pendente |
+| 3.1 | **Medida de antes**, cumprida pelo Camillo no Gate (seção C): visitante com `scrollWidth` 323 contra 320 em 320 a 359px, logado e 360 ou mais com zero. Culpado: o botão "Entrar" do topo | Camillo | Chromium móvel | feito |
+| 3.2 | Em 320, 330, 340, 350, 360, 390, 402, 412 e 430, visitante e logado, nas rotas `/`, feed, `/perfil`, `/u/:handle`, comunidades e uma comunidade aberta: `documentElement.scrollWidth === clientWidth === innerWidth`. **Contexto móvel obrigatório (`isMobile` e `hasTouch` ligados)**; sem ele o teste passa com o defeito | Marcelo | Chromium móvel | pendente |
+| 3.3 | A correção está na causa: regra do botão "Entrar" em `BarraSuperior.css`, no bloco mobile (`width: auto; min-width: 44px; padding: 0 10px; font-size: 14px; font-weight: 700`, valores finais com OK do Camillo). O diff não traz `overflow-x: hidden` em `html`, `body` nem `.app`, não traz `!important` e não mexe no `.icon-btn` de `index.css` | Camillo / Marcelo | Leitura de código + Chromium móvel | pendente |
+| 3.4 | "Entrar" com 63x44 em 320 e 360 (alvo >= 44px) e o texto inteiro dentro da caixa; campo de busca do visitante encolhe (uns 160px em 320) e segue usável; logado sem diferença | Marcelo / Rian | Chromium móvel (script) | pendente |
+| 3.5 | `estilosDoPerfil.test.ts` verde antes e depois, com asserção nova que trava a regra do "Entrar" no mobile e o arquivo sem `overflow-x: hidden`. `casca.layout.test.ts` segue verde e sem edição, salvo se o commit opcional da barra entrar (3.10) | Marcelo | Teste | pendente |
+| 3.6 | Regressão: capturas antes e depois do topo (visitante e logado) em 320 e 390 e da barra inferior em 320, 390, 430 e 1280, claro e escuro. Desktop e menu lateral sem diferença; safe area inferior intacta; o fim da última lista rola até o fim sem ficar atrás da barra | Marcelo / Rian | Chromium; safe area só em aparelho | pendente |
+| 3.7 | Altura da barra (hoje 67px na `.sidebar` e 56px no item), FAB (tamanho, posição, verde) e alvos de 44px dos cinco itens **não mudam** neste cartão. O Camillo já provou que os 67px não têm a mesma causa dos 3px | Marcelo | Chromium (medida) | pendente |
 | 3.8 | iPhone 17 (Safari) e Moto (Chrome Android): sem rolagem lateral em nenhuma tela do perfil e do app, com a barra do navegador aparecendo e sumindo | Luiz (roteiro do Marcelo) | Aparelho | `NÃO VALIDADO` até conferir |
+| 3.9 | **Só se o commit da barra entrar (decisão (a)).** ARROTAR no centro da tela: desvio <= 0,5px em 320 a 389 (hoje 7,9px em 320); espaço entre os centros dos ícones igual, com tolerância de 0,5px; rótulo sem corte (folga >= 3px em 320 com "Comunidades" ativa); barra 56px e `.sidebar` 67px; de 390 para cima, idêntico ao de hoje | Marcelo / Rian | Chromium móvel | condicional |
+| 3.10 | **Só se o commit da barra entrar.** `casca.layout.test.ts` ganha asserção da grade `56px minmax(0, 1fr) 56px minmax(0, 1fr) 56px` em `max-width: 389px` com `gap: 0` e seletor `.sidebar .mobile-bottom-nav`; as quatro asserções de hoje seguem intactas; sem `overflow-x: hidden` | Marcelo / Camillo | Teste | condicional |
 
 ### Critério final (comum aos três)
 
 | # | Critério observável | Dono da prova | Ambiente exigido | Estado |
 |---|---|---|---|---|
 | F.1 | Perfil mobile perfeito, com cara de app, sem quebrar e sem "sambar": reexecutar os itens 9, 11, 12, 13, 15 e 21 da matriz do 0030 em 320 a 430 (sem rolagem lateral, alvos de 44px, CLS em 0, rolagem sem prender, claro e escuro, regressão de feed e comunidade). Nenhum deles piora | Marcelo / Rian | Chromium | pendente |
-| F.2 | `typecheck`, `lint`, `test` e `build` verdes em cada commit. Falha conhecida e fora deste cartão: o teste intermitente da Arena (`Arena.test.tsx`, contagem 3-2-1), que também falha na `main`; se aparecer, o Marcelo roda de novo e registra | Marcelo | CI local | pendente |
-| F.3 | Gate leve do Camillo escrito neste cartão antes do código, com a resposta sobre a barra de 67px | Camillo | Leitura de código + nota | pendente |
+| F.2 | `typecheck`, `lint`, `test` e `build` verdes em cada commit. Falha conhecida e fora deste cartão: o teste intermitente da Arena (issue #187, "Revanche contra Giam."), que falhou 3 vezes em 21/10/2026 fora deste diff (`main`, CI do #330 e CI do #331). Se aparecer, o Marcelo roda de novo e registra; não bloqueia este cartão | Marcelo | CI local | pendente |
+| F.3 | Gate do Camillo escrito neste cartão antes do código, com a resposta sobre a barra de 67px | Camillo | Leitura de código + nota | feito em 21/10/2026; conferência do desenho do Rian em andamento |
 | F.4 | Cada achado do Marcelo no `f3b1d05` tem prova de fechamento citada com o número da linha da matriz acima | Marcelo | Relatório | pendente |
 
 > Um nível de evidência nunca substitui o seguinte ("compilou" não é "funcionou na tela"). Sem aparelho real, saem `NÃO VALIDADO` os itens 1.9, 2.8 e 3.8 e, do item 3.6, a safe area. O Moto G67 só deixa de ser premissa quando o Luiz confirmar o 412x915; até lá a linha do Chrome Android fica `NÃO VALIDADO` por inteiro.
 
 ### O que cada um valida
 
-- **Rian** olha a tela aberta: o cabeçalho do card com 44px de toque ainda parece o cabeçalho do print (sem inflar, sem espaço vazio estranho), o rótulo da barra em 320px, a folha de foto igual à de antes, claro e escuro. Mede o toque pelo desenho; quem prova o toque é o Marcelo.
-- **Marcelo** prova: teclado (1.1 a 1.6), toque medido e clicado (2.1 a 2.3), rolagem lateral e regressão (2.5, 3.2, 3.6, F.1). Entrega um roteiro curto de aparelho (cinco passos) para o Luiz conferir no iPhone e no Moto, sem jargão.
+- **Rian** olha a tela aberta: o cabeçalho do card com +24px ainda lê como o do print (mais arejado, como o Rian avisou, mas sem espaço vazio estranho), o "Entrar" do topo em 320 e, se o commit da barra entrar, o rótulo e o centro do ARROTAR, a folha de foto igual à de antes e o anel de foco, claro e escuro. Mede o toque pelo desenho; quem prova o toque é o Marcelo.
+- **Marcelo** prova: teclado (1.1 a 1.6), toque medido e clicado (2.1 a 2.3), rolagem lateral com `isMobile` e `hasTouch` ligados e regressão (2.5, 3.2, 3.6, F.1). Entrega um roteiro curto de aparelho (cinco passos) para o Luiz conferir no iPhone e no Moto, sem jargão.
 - **Camillo** não valida tela: prova a causa dos 3px, o efeito do helper nos outros diálogos e a fronteira.
 
-### As 7 perguntas de aceite (leitura de entrada, sem veredito)
+### As 7 perguntas de aceite (leitura provisória de 21/10/2026, sem veredito)
 
 1. **Necessidade:** passa. São três defeitos que o Marcelo mostrou, e os três quebram o "app nativo" que o Luiz pediu.
 2. **Valor:** passa. Foco que não vaza, toque que acerta o perfil e página que não balança são o básico de um perfil confiável no celular.
-3. **Coerência:** passa, com atenção ao verde e ao DESIGN.md (44px de toque). Nada muda de regra do 0030.
-4. **Experiência:** exige prova em aparelho; Chromium não basta.
+3. **Coerência:** passa. A opção B cumpre o 44px do DESIGN.md, sem exceção ao design system. O anel de foco em `--aue-text` diverge do `base.css` por motivo registrado (decisão (c)) e o verde segue em no máximo 2 por estado. Nada muda de regra do 0030.
+4. **Experiência:** exige prova em aparelho; Chromium não basta. O card mais alto no feed é escolha do Luiz e precisa ser visto no celular.
 5. **Funcionamento ponta a ponta:** a folha precisa fechar por Esc em qualquer foco e devolver o foco ao avatar; o nome precisa abrir o perfil, não a comunidade.
-6. **Qualidade e prova:** Marcelo audita; sem aparelho vira `NÃO VALIDADO`.
-7. **Simplicidade:** três correções pequenas, sem prop nova, sem contrato novo. Se o conserto da barra puxar redesenho, volta ao Tiago.
+6. **Qualidade e prova:** Marcelo audita, com `isMobile` e `hasTouch` na prova dos 3px; sem aparelho viram `NÃO VALIDADO` os itens 1.9, 2.8 e 3.8.
+7. **Simplicidade:** um helper de uns 8 linhas, CSS do topo, CSS do card e, se entrar, CSS da barra. Sem prop nova, sem contrato novo. Se o commit da barra puxar estrutura ou FAB, sobe pelo gatilho (e).
+
+**Veredito provisório:** pronto para o Kayky assim que a seção de conferência do Camillo entrar no cartão. Sem aparelho real o veredito final tende a `APROVADO COM RESSALVAS`, com 1.9, 2.8 e 3.8 em `NÃO VALIDADO`. Com Marcelo sem `BLOQUEIA` e o Luiz conferindo os três no iPhone 17 e no Moto, sobe para `APROVADO`.
 
 ## 5. Encerramento e Parecer Final
 
@@ -160,9 +187,12 @@ Ambientes: Teste = `npm run typecheck`, `npm run lint`, `npm test`, `npm run bui
 
 ### Pendências do Luiz (só o que muda o que ele vê)
 
-1. **Altura do cabeçalho do card.** Para dar 44px de toque ao nome sem invadir o `r/roda`, o card pode ficar um pouco mais alto em todo o feed. Padrão do Tiago: até 8px por card passa sem consultar. Se o Rian não conseguir ficar dentro disso, ele leva duas capturas e o Luiz escolhe antes de o Kayky codar. Não é pergunta agora; vira pergunta só se estourar.
-2. **Moto G67.** Confirmar se o aparelho real é 412x915 (pergunta que já vinha do 0030). Sem isso, o Chrome Android fica `NÃO VALIDADO`.
-3. **Conferência no aparelho.** Quando o Marcelo entregar o roteiro, o Luiz passa pelo iPhone 17 e pelo Moto (itens 1.9, 2.8 e 3.8). Sem isso o veredito sai com ressalva.
+Resolvido: a altura do cabeçalho do card. O Luiz decidiu em 21/10/2026 a opção B (+24px por post, toque de 44px), então não é mais pergunta.
+
+1. **Moto G67.** Confirmar se o aparelho real é 412x915 (pergunta que já vinha do 0030). Sem isso, o Chrome Android fica `NÃO VALIDADO`.
+2. **Conferência no aparelho.** Quando o Marcelo entregar o roteiro, o Luiz passa pelo iPhone 17 e pelo Moto (itens 1.9, 2.8 e 3.8). Sem isso o veredito sai com ressalva. Vale olhar com o dedo o card mais alto no feed.
+
+Para o Luiz saber, sem decidir agora: o teste intermitente da Arena (issue #187, "Revanche contra Giam.") falhou 3 vezes hoje fora deste diff. O Tiago sugere um cartão próprio para o Lucas ou o Camillo e não abriu nenhum.
 
 Todo o resto (qual seletor, qual técnica de área de toque, como prender o foco, qual regra da grade) a squad decide.
 
@@ -171,7 +201,9 @@ Todo o resto (qual seletor, qual técnica de área de toque, como prender o foco
 - **Foco de teclado que começa pela barra inferior antes da superior.** Anterior ao PR #330. Pede ajuste na ordem do DOM ou de `tabindex` na casca e conversa com leitor de tela; abre cartão próprio.
 - **Aba Curtidas (Fase B).** Privada, só do dono, com porta e Gate completo do Camillo/Lucas. Segue o 0030.
 - **Issue das variáveis `--border-strong`.** `casca.css` e `Comunidade.css` declaram o token com hex diferentes do `DESIGN.md`. Issue futura, anotada pelo Camillo no 0030.
-- **Barra inferior de 67px para 56px e `stroke-width` 2.4 no ícone ativo.** Backlog do 0030 mantido; cartão separado, salvo a condição do item 4 da decisão do Tiago acima.
+- **Barra inferior de 67px para 56px e `stroke-width` 2.4 no ícone ativo.** Backlog do 0030 mantido; cartão separado. O Camillo provou que os 67px não têm a mesma causa dos 3px. Se o commit opcional da barra cair (decisão (a)), o ARROTAR descentrado em 320 a 389px entra neste mesmo cartão.
+- **Teste intermitente da Arena (issue #187).** Sugestão de cartão próprio para o Lucas ou o Camillo. Não aberto.
+- **Anel de foco no `DESIGN.md`.** Só se o Camillo achar que vira regra do app; o Rian anota. Hoje fica registrado só aqui (decisão (c)).
 - **Harness e CSS morto** (`e2e/harness.tsx` fora de sincronia com o card; regras `.burp-player/.play/.wave` órfãs em `casca.css`). Já registrados no 0030, continuam fora.
 
 ## Gate Arquitetural do Camillo (21/10/2026)
@@ -179,6 +211,8 @@ Todo o resto (qual seletor, qual técnica de área de toque, como prender o foco
 Leitura de código mais medida no Chromium do Playwright (build 1194, `deviceScaleFactor` 2, `--hide-scrollbars`). Harness: cópia do `.shots/main.tsx` do Kayky no scratchpad, só com `?visitante=1` para tirar a sessão (o original fixa `autenticado`). Nada em `src/` foi alterado. Os scripts de medida ficam em `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/` (`cam-*.mjs`, fora do git) para o Marcelo reaproveitar.
 
 **Veredito: APROVADO COM CONDIÇÕES.**
+
+> Nota do Tiago (21/10/2026): o item 2 saiu da parada. O Luiz decidiu a opção B (+24px). A condição 6 foi atendida e o 3.1 está cumprido por esta nota. Na condição 3, o card passa a ser o commit 4 e ganha o anel de foco como commit 5 (ordem final no Fechamento do Tiago).
 
 - Item 1 (foco): aprovado. Corrige-se no helper, sem assinatura nova.
 - Item 3 (rolagem lateral): aprovado, mas a causa não é a do cartão. Não é a barra inferior, é o botão "Entrar" do topo do visitante. O arquivo a editar muda (`BarraSuperior.css`, não `casca.css`) e a asserção nova não vai no `casca.layout.test.ts`.
@@ -266,7 +300,7 @@ Nada novo fora de `src/plataforma/`. O helper segue em `plataforma/web/` e `docu
 3. **Card (commit 3), só depois de o Rian e o Luiz escolherem A ou B.** Só `CardDoPost.css`, seletores existentes sob `.card-do-post`, sem TSX, sem `!important`, sem tocar `.post-body` nem `casca.css`. Medir o crescimento nas cinco telas e mostrar que bate com a opção.
 4. **Provas, no estilo do script do Marcelo:** `elementFromPoint` no topo, meio e base de nome, `@handle`, `r/roda`, `⋯` e avatar (item 2.3); `scrollWidth === clientWidth` em visitante e logado em 320, 330, 340, 350, 360, 390, 430 (3.2); capturas antes e depois das cinco telas do card e do topo do visitante em 320 e 390.
 5. **Fronteira:** nenhuma API de navegador nova em `features/`.
-6. **Pedido ao Tiago:** corrigir o texto do cartão. O item 3 do enquadramento, o item 4 do Gate leve, o 3.3 e o 3.5 apontam `casca.css` e `casca.layout.test.ts`; passam a apontar `BarraSuperior.css` e `estilosDoPerfil.test.ts`. O 3.1 está cumprido por esta nota.
+6. **Pedido ao Tiago (atendido em 21/10/2026):** corrigir o texto do cartão. O item 3 do enquadramento, o item 4 do Gate leve, o 3.3 e o 3.5 apontam `casca.css` e `casca.layout.test.ts`; passam a apontar `BarraSuperior.css` e `estilosDoPerfil.test.ts`. O 3.1 está cumprido por esta nota.
 
 **Ordem segura:** foco, depois "Entrar" (os dois isolados e independentes da decisão do card), por último o card. Cada commit com `typecheck`, `lint`, `test` e `build`.
 
@@ -283,6 +317,8 @@ O toque certo no nome faz cada post ficar mais alto no feed, na comunidade, no p
 ## Desenho do Rian (21/10/2026)
 
 Medi no Chromium (Playwright, build 1194, `isMobile` e `hasTouch` ligados, Archivo e Anton carregadas) com o harness do Camillo copiado para o scratchpad, e abri o protótipo no mesmo navegador em 320x640, 320x800, 360x800 e 402x874. Nada em `src/` foi alterado. Capturas em `/tmp/claude-0/-home-user-aue/46fce86f-8195-57a6-9152-e07d428cf658/scratchpad/rian3/` (fora do git, caminhos completos nas seções abaixo).
+
+> Nota do Tiago (21/10/2026): o Luiz decidiu a opção B. A opção A e a recomendação do Rian abaixo ficam só como registro e não valem mais. Não há exceção ao DESIGN.md.
 
 **Resumo:** o toque do card cabe em **+8px por post com 36px de alvo e zero sobreposição** (opção A), ou em **+24px com 44px** (opção B). A é a que eu recomendo. A decisão é do Luiz, porque 44px só existe pagando +24px. A barra inferior não tem rolagem lateral e o "Entrar" do visitante é o culpado, como o Camillo mediu; mas a barra tem um defeito real em 320 e 360 que ninguém tinha visto: o ARROTAR fica fora do centro da tela. Proponho o conserto e mexi no protótipo. O foco usa `--aue-text` (`--fg`), nunca verde.
 
@@ -313,12 +349,12 @@ Cada +1px de crescimento dá +0,5px de alvo. Z, A, M e B usam a mesma regra com 
 
 **Como cada uma se parece:** A fica a um respiro do print (linha de cima e de baixo 4px mais soltas), o card ainda lê como o do print. B mostra um vão claro entre o nome e o `r/roda` (de 5px para 29px) e o card parece de outro app, mais arejado e com menos posts por tela.
 
-**Minha recomendação: A.** O defeito que o Marcelo achou (tocar no nome abrir a comunidade) é a sobreposição, e a A a elimina: cada alvo tem 12px de folga de cada lado do centro do texto, e o 36px passa com sobra do mínimo de 24px da WCAG 2.5.8. Custa 8px por post, que é o que o Tiago liberou sem consultar. Os 44px do `--hit-target-min` do DESIGN.md pagariam 16px a mais em todos os posts de cinco telas, para ganhar 8px de alvo. **Exceção ao DESIGN.md a registrar se for A:** nome, `@handle` e `r/roda` do card com 36px de alvo, não 44; a linha 2.1 da matriz passa a pedir 36px e zero sobreposição. Se o Luiz quiser os 44, é a B, e a diferença é 16px por post.
+**Minha recomendação: A.** O defeito que o Marcelo achou (tocar no nome abrir a comunidade) é a sobreposição, e a A a elimina: cada alvo tem 12px de folga de cada lado do centro do texto, e o 36px passa com sobra do mínimo de 24px da WCAG 2.5.8. Custa 8px por post, que é o que o Tiago liberou sem consultar. Os 44px do `--hit-target-min` do DESIGN.md pagariam 16px a mais em todos os posts de cinco telas, para ganhar 8px de alvo.
 
-**Regra para o Kayky** (só `CardDoPost.css`, seletores que já existem sob `.card-do-post`, sem TSX, sem `!important`). Testada com CSS injetado; `L` é 24px na A e 32px na B:
+**Regra para o Kayky** (só `CardDoPost.css`, seletores que já existem sob `.card-do-post`, sem TSX, sem `!important`). Testada com CSS injetado; `L` é 24px na A e 32px na B (vale a B, 32px):
 
 ```css
-.card-do-post { --cab-linha: 24px; }
+.card-do-post { --cab-linha: 32px; }   /* opção B, decidida pelo Luiz */
 .card-do-post .post-meta-ident { height: var(--cab-linha); }
 .card-do-post .author-profile-link,
 .card-do-post .post-meta-handle {
@@ -409,10 +445,10 @@ Nenhum token de foco no DESIGN.md. O `base.css` do design system manda `outline:
 |---|---|---|---|
 | 1.1 a 1.3 | `document.activeElement.closest('.folha-da-foto')` depois de cada Tab e Shift+Tab, a partir do contêiner, do primeiro e do último botão; Esc em cada ponto | sempre dentro; a folha fecha e o foco volta ao avatar | Chromium; teclado físico no iPhone e no Moto `NÃO VALIDADO` |
 | 1.8 | anel de foco da folha | 2px `--aue-text`, offset 2px, nos dois temas | Chromium |
-| 2.1 | `getBoundingClientRect` dos links e `elementFromPoint` em x = esquerda + min(largura/2, 20), de 0,5 em 0,5px | **A:** nome e `@handle` 36 (0,5 a 36,5), `r/roda` 36 (36,5 a 73). **B:** 44 e 44. Tolerância de 0,5px (a borda do card conta 1px) | Chromium |
+| 2.1 | `getBoundingClientRect` dos links e `elementFromPoint` em x = esquerda + min(largura/2, 20), de 0,5 em 0,5px | **B (decidida):** nome, `@handle` e `r/roda` com 44 (0,5 a 44,5 e 44,5 a 89). Tolerância de 0,5px (a borda do card conta 1px) | Chromium |
 | 2.2 | interseção entre as caixas de nome, `@handle`, `r/roda`, `⋯` e avatar | **zero** em todos os pares, nas quatro telas, 320 e 390 | Chromium |
 | 2.3 | `elementFromPoint` no topo (+2px), meio e base (-2px) de cada caixa | nome e `@handle` caem em `/u/:handle`, `r/roda` em `/c/:slug`, nunca o nome em `/c/` | Chromium |
-| 2.4 | altura do card, 1º post, 320, 390 e 430 | **A:** +8px (perfil 169, feed de texto 125). **B:** +24px (185 e 141). Se a altura medida fugir mais de 1px, volta | Chromium |
+| 2.4 | altura do card, 1º post, 320, 390 e 430 | **B (decidida):** +24px (perfil 185, feed de texto 141). Se a altura medida fugir mais de 1px, volta | Chromium |
 | 2.5 e 2.6 | rolagem lateral, `⋯` dentro do card, nome e `@handle` longos com reticência, CLS, verde | zero rolagem, `⋯` à direita da borda do card, CLS 0, verde igual ao de hoje | Chromium |
 | 3.1 e 3.2 | `innerWidth`, `documentElement.scrollWidth` e `clientWidth` em 320, 330, 340, 350, 360, 390, 402, 412, 430, visitante e logado. **Precisa de contexto móvel (`isMobile: true`, `hasTouch: true`)**: sem ele o Chrome de mesa não alarga o viewport e o teste passa mesmo com o defeito | `scrollWidth === innerWidth === largura` em todas; o botão "Entrar" com 63x44 e `scrollWidth` do botão igual à `clientWidth` | Chromium |
 | 3.4 (se o commit 4 entrar) | desvio do ARROTAR: `abs(centro do botão - largura/2)`; espaço entre os centros dos ícones; `scrollWidth <= clientWidth` de cada rótulo; altura da barra e da `.sidebar` | desvio <= 0,5px; espaços iguais com tolerância de 0,5px (63 em 320, 73 em 360); rótulo sem corte (folga >= 3px em 320 com Comunidades ativa); barra 56 e `.sidebar` 67 | Chromium |
@@ -422,6 +458,6 @@ Nenhum token de foco no DESIGN.md. O `base.css` do design system manda `outline:
 
 ### O que depende do Luiz e o que depende do Gate
 
-- **Luiz (muda o que ele vê):** card A (+8px, alvo 36) ou B (+24px, alvo 44). Eu recomendo A. As capturas estão na seção A. O "Entrar" maior (63px) e o ARROTAR no centro são ajustes pequenos; o Tiago pode levar junto se achar que ele quer ver.
-- **Tiago:** aceitar ou não o commit 4 da barra (centralizar o ARROTAR em 320 a 389), porque passa do que o Gate liberou. E, se for A, registrar a exceção do 36px ao DESIGN.md e mudar a linha 2.1 para 36px com zero sobreposição.
+- **Luiz:** decidiu a B em 21/10/2026 (decidido pelo Luiz). O "Entrar" maior (63px) e o ARROTAR no centro são ajustes pequenos; o Tiago pode levar junto se achar que ele quer ver.
+- **Tiago (decidido em 21/10/2026, item (a) do Fechamento: entra, condicionada ao OK do Camillo):** aceitar ou não o commit 4 da barra (centralizar o ARROTAR em 320 a 389), porque passa do que o Gate liberou.
 - **Camillo (conferir):** (1) o `.sidebar .mobile-bottom-nav` precisa da especificidade (0,2,0), senão o `gap: 0` perde para `.sidebar nav { gap: 4px }`; (2) a regra do `Entrar` é a opção B dele com 14px/700 e `padding: 0 10px`, 63px de largura; a trava em `estilosDoPerfil.test.ts` lê `width: auto` e o `font-size`; (3) se o commit 4 entrar, a asserção nova vai em `casca.layout.test.ts` (grade de 56/1fr/56/1fr/56 em `max-width: 389px` e o `gap: 0`), porque aí `casca.css` muda; (4) o `.badge-nota` do feed passa a `align-self: center` e o `z-index: 1` do `r/roda` sai; (5) o teste de medida dele deu `scrollWidth` 320 em 320 no visitante com `--hide-scrollbars`; o meu deu 323 só com contexto móvel ligado, então a prova do Marcelo (3.2) tem de rodar assim.

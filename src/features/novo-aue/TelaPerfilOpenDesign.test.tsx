@@ -194,6 +194,79 @@ describe('Tela de Perfil Open Design (1:1 com protótipo)', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Sobre esta ficha' })).toBeTruthy();
   });
 
+  const abrirPerfil = (perfil: PerfilPublico, entrada = '/perfil') =>
+    render(
+      <MemoryRouter initialEntries={[entrada]}>
+        <Routes>
+          <Route
+            path={entrada}
+            element={
+              <TelaPerfilOpenDesign
+                portaPerfil={{ ...mockPerfilPort, obterMeuPerfil: vi.fn(async () => perfil), obterPerfil: vi.fn(async () => perfil) }}
+                portaConta={mockContaPort}
+                portaComunidade={mockComunidadePort}
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+  it('Compartilhar copia o link PÚBLICO (/u/:handle), não /perfil, que mostraria o perfil de quem abrir', async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    abrirPerfil(mockPerfilLogado);
+    fireEvent.click(await screen.findByRole('button', { name: 'Compartilhar' }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/u/arrotador_3573`));
+    expect(await screen.findByText('Link copiado.')).toBeTruthy();
+  });
+
+  it('redes sociais viram links certos; valor antigo com link é consertado e lixo não vira link', async () => {
+    abrirPerfil({
+      ...mockPerfilLogado,
+      tiktok: 'https://www.tiktok.com/@giamzinn',
+      instagram: 'leosam77',
+      youtube: 'https://evil.com/x',
+    });
+    await screen.findByRole('heading', { level: 1, name: 'burpKing' });
+    expect(screen.getByRole('link', { name: 'TikTok' }).getAttribute('href')).toBe('https://www.tiktok.com/@giamzinn');
+    expect(screen.getByRole('link', { name: 'Instagram' }).getAttribute('href')).toBe('https://instagram.com/leosam77');
+    expect(screen.queryByRole('link', { name: 'YouTube' })).toBeNull();
+  });
+
+  it('Seguidores e Seguindo abrem a lista de verdade; falha mostra erro e Tentar de novo refaz', async () => {
+    const listarConexoes = vi.fn()
+      .mockResolvedValueOnce([{ id: 'u1', handle: 'lima', apelido: 'Lima', euSigo: true }])
+      .mockRejectedValueOnce(new Error('fora do ar'))
+      .mockResolvedValueOnce([]);
+    render(
+      <MemoryRouter initialEntries={['/perfil']}>
+        <Routes>
+          <Route
+            path="/perfil"
+            element={
+              <TelaPerfilOpenDesign
+                portaPerfil={{ ...mockPerfilPort, listarConexoes }}
+                portaConta={mockContaPort}
+                portaComunidade={mockComunidadePort}
+              />
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /Ver quem segue/ }));
+    expect(await screen.findByRole('link', { name: /Lima/ })).toBeTruthy();
+    expect(listarConexoes).toHaveBeenLastCalledWith('arrotador_3573', 'seguidores');
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar lista' }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Ver quem é seguido/ }));
+    expect((await screen.findByRole('alert')).textContent).toContain('Não deu para carregar a lista');
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
+    expect(await screen.findByText('Ninguém por aqui ainda.')).toBeTruthy();
+  });
+
   it('abre o modal Editar perfil e salva atualizações com feedback', async () => {
     render(
       <MemoryRouter initialEntries={['/perfil']}>

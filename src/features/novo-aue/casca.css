@@ -60,6 +60,8 @@ button, a {
   min-height: 100dvh;
   display: grid;
   grid-template-columns: 275px minmax(0, 600px) 320px;
+  /* As colunas somam 1195px: sem isto ficam coladas à esquerda e sobra faixa vazia à direita. */
+  justify-content: center;
   max-width: 1540px;
   width: 100%;
   margin: 0 auto;

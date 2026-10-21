@@ -1194,3 +1194,13 @@
   }
 }
 
+
+.od-profile__metric-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.od-profile__metric-btn:hover { text-decoration: underline; }

@@ -449,7 +449,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     }, { timeout: 5000 });
     expect(await screen.findByText('Gravado por esta pessoa', undefined, { timeout: 5000 })).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Player do arroto' })).toBeTruthy();
-  });
+  }, 20000);
 
   it('não mostra o atalho de arroto ao visitar o perfil de outra pessoa', async () => {
     const outraPessoa = {

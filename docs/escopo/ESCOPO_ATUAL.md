@@ -151,6 +151,14 @@ transmitido pelo fornecedor externo, portanto pode falhar sem que a interface
 invente sucesso. Não há documento, arquivo genérico nem upload de vídeo. O
 detalhe do contrato, das falhas e da reversibilidade está no ADR 0010.
 
+**Exceção decidida pelo Luiz em 21/10/2026.**
+O perfil lista os posts da pessoa em card com player, ações e curtida, como no
+print do perfil `giamz` (Cartão de Missão 0030). A aba Curtidas existe só para o
+próprio dono e entra na Fase B; na Fase A ela não aparece. Isso vale para a tela
+de perfil e não reabre o feed solto nem o composer avulso. Sem botão de chat e
+sem indicador de online. Bio, cidade, “na roda desde” e redes sociais continuam
+na tela. O texto das decisões de 19 e 20/10 acima continua valendo fora do perfil.
+
 Contrato de funcionamento (auditoria de 18/10/2026):
 
 - a nota e o áudio de um causo vêm do resultado guardado no servidor; o cliente nunca afirma nota;

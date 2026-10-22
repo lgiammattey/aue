@@ -39,7 +39,7 @@ describe('BarraLateral mobile', () => {
     fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Meu perfil' }));
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/perfil');
 
-    fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Feed de causos' }));
+    fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Feed de resenhas' }));
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/');
   });
 });

@@ -37,7 +37,7 @@ const tecnicas: readonly ItemDaListaPublica[] = [
     eyebrow: 'Sequência',
     titulo: 'Arroto renovado',
     texto: [
-      'Se o jogo mede duração, um arroto seco não separa ninguém do resto. Repete os golinhos em sequência, sem parar pra respirar fundo no meio — o efeito é uma cadeia, um arroto grudando no outro.',
+      'Quando a Arena abrir, ela vai medir duração. Um arroto seco não separa ninguém do resto. Repete os golinhos em sequência, sem parar pra respirar fundo no meio — o efeito é uma cadeia, um arroto grudando no outro.',
       'Treino, não milagre: sai picotado nas primeiras vezes.',
     ],
   },
@@ -47,7 +47,7 @@ const tecnicas: readonly ItemDaListaPublica[] = [
     titulo: 'Arrotar alto',
     texto: [
       'Alto é garganta aberta e boca aberta na hora certa. Peito pra frente, queixo um pouco pra cima, e solta sem segurar no meio.',
-      'Arroto abafado perde volume e perde nota.',
+      'Arroto abafado perde volume. Quando a Arena abrir, isso vai pesar na nota.',
     ],
   },
 ];
@@ -74,7 +74,7 @@ const tecnicas: readonly ItemDaListaPublica[] = [
  */
 export const ComoArrotar: React.FC = () => (
   <LayoutPublico
-    eyebrow="Antes de jogar"
+    eyebrow="Pra aprender"
     titulo="Como arrotar"
     resumo="Não sabe arrotar? Dá pra aprender. Arroto é ar que entrou e resolveu voltar: a entrada dá pra treinar, o resto o corpo resolve sozinho."
   >
@@ -95,7 +95,7 @@ export const ComoArrotar: React.FC = () => (
         ]}
       />
 
-      <p>Nenhum dos dois é melhor. A Arena não julga a origem, julga o som.</p>
+      <p>Nenhum dos dois é melhor. Quando abrir, a Arena vai julgar o som, não a origem.</p>
     </SecaoPublica>
 
     <ListaPublica itens={tecnicas} />
@@ -103,13 +103,13 @@ export const ComoArrotar: React.FC = () => (
     <SecaoPublica eyebrow="Se travar" titulo="E se não sai nada?">
       <p>Tem gente que simplesmente não arrota, e não tem técnica que resolva.</p>
       <p>
-        Se forçar dói, incomoda ou vira azia, para — isso é assunto de médico, não de jogo. O Auê é
+        Se forçar dói, incomoda ou vira azia, para — isso é assunto de médico, não de brincadeira. O Auê é
         brincadeira, não consultório.
       </p>
-      <p>Aprendeu? Leva pra Arena e vê a nota.</p>
+      <p>Aprendeu? A Arena está sendo preparada. Enquanto isso, cola na resenha.</p>
       <LinksPublicos
         links={[
-          { para: '/arena', rotulo: 'Ir pra Arena' },
+          { para: '/arena', rotulo: 'Conhecer a Arena' },
           { para: '/como-jogar', rotulo: 'Como funciona o Auê' },
         ]}
       />

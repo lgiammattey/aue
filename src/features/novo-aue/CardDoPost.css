@@ -14,7 +14,7 @@
 
 .card-do-post {
   --card-recuo: 52px; /* coluna do avatar (40) + vão (12) */
-  --cab-linha: 32px; /* altura de cada linha do cabeçalho: nome e r/roda ganham 44px de toque sem se sobrepor (opção B, 21/10/2026) */
+  --cab-linha: 24px; /* nome e @ ficam juntos; os links preservam alvos tocáveis de 44px */
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
@@ -99,10 +99,10 @@
 }
 
 /*
-  Linha 1: quem, @handle · tempo, ⋯ no canto. Linha 2: r/comunidade.
+  Linha 1: quem. Linha 2: @handle · tempo. Comunidade fica no canto.
   Cada linha tem --cab-linha de altura (fixa, não depende de dado: sem pulo).
-  Nome, @handle e r/roda têm a PRÓPRIA caixa de link com 44px de toque
-  (--cab-linha + 12px de padding/margem negativa), sem pseudo-elemento: o
+  Nome, @handle e r/roda têm a PRÓPRIA caixa de link com 44px de toque,
+  sem pseudo-elemento: o
   overflow:hidden do link, que faz a reticência, cortaria um ::after.
 */
 .card-do-post .post-meta-header {
@@ -115,10 +115,21 @@
   flex: 1;
   min-width: 0;
   display: flex;
-  align-items: center;
-  height: var(--cab-linha);
+  flex-direction: column;
+  align-items: flex-start;
+  height: calc(var(--cab-linha) * 2 + 12px);
   font: 400 13px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
   color: var(--aue-muted);
+}
+
+.card-do-post .post-meta-details {
+  flex: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: var(--cab-linha);
+  margin-top: 0;
   white-space: nowrap;
 }
 
@@ -128,7 +139,7 @@
   align-self: flex-start;
   box-sizing: border-box;
   min-width: 44px;
-  height: calc(var(--cab-linha) + 12px);
+  height: var(--hit-target-min, 44px);
   margin: -12px 0 0;
   padding: 12px 3px 0;
   text-decoration: none;
@@ -141,12 +152,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--aue-text);
-  font: 800 13px/var(--cab-linha) var(--font-body, 'Archivo', system-ui, sans-serif);
-  letter-spacing: -0.02em;
+  font: 400 17px/var(--cab-linha) var(--font-display, 'Anton', sans-serif);
+  letter-spacing: 0.01em;
 }
 
 .card-do-post .author-profile-link {
-  margin-left: -3px; /* o texto não anda: o padding de 3px fica fora dele */
+  margin: -12px 0 -8px -3px; /* a caixa de 44px cobre as duas linhas, mas o @ continua junto do nome */
 }
 
 .card-do-post .author-name {
@@ -155,8 +166,12 @@
 }
 
 .card-do-post .post-meta-handle {
+  align-self: auto;
   min-width: 0;
   display: block;
+  height: var(--hit-target-min, 44px);
+  margin: -10px 0 -10px -3px;
+  padding: 10px 3px;
   line-height: var(--cab-linha);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -219,8 +234,8 @@
   flex: 0 1 auto;
   min-width: 0;
   max-width: calc(100% - 44px);
-  height: calc(var(--cab-linha) + 12px);
-  margin: 0 0 -12px -3px; /* os 12px de baixo entram na linha seguinte; o z-index acima garante o toque sobre o player e as ações */
+  height: var(--hit-target-min, 44px);
+  margin: 0 0 -20px -3px; /* os 20px de baixo entram na linha seguinte; o z-index acima garante o toque sobre o player e as ações */
   padding-inline: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -275,6 +290,10 @@
 .card-do-post .author-profile-link:focus-visible::before,
 .card-do-post .post-meta-handle:focus-visible::before {
   top: calc(12px + (var(--cab-linha) - 24px) / 2);
+}
+
+.card-do-post .post-meta-handle:focus-visible::before {
+  top: calc(10px + (var(--cab-linha) - 24px) / 2);
 }
 
 .card-do-post .badge-comunidade:focus-visible::before {

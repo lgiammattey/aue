@@ -53,14 +53,16 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     expect(ler('../../index.css')).toMatch(/\.icon-btn\s*\{[^}]*width:\s*44px/);
   });
 
-  it('cabeçalho do card (opção B): linha de 32px, toque de 44px na própria caixa do link, r/roda acima do player', () => {
+  it('cabeçalho do card: nome e @ ficam em linhas distintas, ambos com toque de 44px', () => {
     const css = ler('./CardDoPost.css').replace(/\/\*[\s\S]*?\*\//g, '');
-    expect(css.match(/--cab-linha:\s*32px/g)).toHaveLength(1);
-    expect(css).toMatch(/\.card-do-post\s*\{[^}]*--cab-linha:\s*32px/);
-    const alturaDoToque = /height:\s*calc\(var\(--cab-linha\) \+ 12px\)/;
-    expect(css).toMatch(new RegExp(`\\.card-do-post \\.author-profile-link,\\s*\\.card-do-post \\.post-meta-handle\\s*\\{[^}]*${alturaDoToque.source}[^}]*margin:\\s*-12px 0 0[^}]*padding:\\s*12px 3px 0`));
-    expect(css).toMatch(new RegExp(`\\.card-do-post \\.badge-comunidade\\s*\\{[^}]*z-index:\\s*1;[^}]*${alturaDoToque.source}[^}]*margin:\\s*0 0 -12px -3px`));
-    expect(css).toMatch(/\.card-do-post \.post-meta-ident\s*\{[^}]*height:\s*var\(--cab-linha\)/);
+    expect(css.match(/--cab-linha:\s*24px/g)).toHaveLength(1);
+    expect(css).toMatch(/\.card-do-post\s*\{[^}]*--cab-linha:\s*24px/);
+    const alvoMinimo = /height:\s*var\(--hit-target-min, 44px\)/;
+    expect(css).toMatch(new RegExp(`\\.card-do-post \\.author-profile-link,\\s*\\.card-do-post \\.post-meta-handle\\s*\\{[^}]*${alvoMinimo.source}[^}]*margin:\\s*-12px 0 0[^}]*padding:\\s*12px 3px 0`));
+    expect(css).toMatch(new RegExp(`\\.card-do-post \\.badge-comunidade\\s*\\{[^}]*z-index:\\s*1;[^}]*${alvoMinimo.source}[^}]*margin:\\s*0 0 -20px -3px`));
+    expect(css).toMatch(/\.card-do-post \.post-meta-ident\s*\{[^}]*flex-direction:\s*column[^}]*height:\s*calc\(var\(--cab-linha\) \* 2 \+ 12px\)/);
+    expect(css).toMatch(/\.card-do-post \.post-meta-details\s*\{[^}]*display:\s*flex[^}]*height:\s*var\(--cab-linha\)[^}]*margin-top:\s*0/);
+    expect(css).toMatch(/\.card-do-post \.post-meta-handle\s*\{[^}]*height:\s*var\(--hit-target-min, 44px\)[^}]*margin:\s*-10px 0 -10px -3px[^}]*padding:\s*10px 3px/);
     expect(css).toMatch(/\.card-do-post \.post-meta-badges\s*\{[^}]*align-items:\s*flex-start[^}]*height:\s*var\(--cab-linha\)/);
     expect(css).toMatch(/\.card-do-post \.menu-do-post\s*\{[^}]*margin:\s*calc\(-12px \+ \(var\(--cab-linha\) - 20px\) \/ 2\) -12px -12px 0/);
     expect(css).toMatch(/\.card-do-post \.badge-nota\s*\{[^}]*align-self:\s*center/);
@@ -72,10 +74,9 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     const css = ler('./CardDoPost.css').replace(/\/\*[\s\S]*?\*\//g, '');
     expect(css).toMatch(/\.card-do-post \.author-profile-link:focus-visible,[^{]*\.badge-comunidade:focus-visible\s*\{\s*outline:\s*0;/);
     expect(css).toMatch(/:focus-visible::before\s*\{[^}]*height:\s*24px[^}]*border:\s*2px solid var\(--aue-text\)[^}]*border-radius:\s*8px[^}]*pointer-events:\s*none/);
-    expect(css).toMatch(/\.post-meta-handle:focus-visible::before\s*\{\s*top:\s*calc\(12px \+ \(var\(--cab-linha\) - 24px\) \/ 2\)/);
+    expect(css).toMatch(/\.post-meta-handle:focus-visible::before\s*\{\s*top:\s*calc\(10px \+ \(var\(--cab-linha\) - 24px\) \/ 2\)/);
     expect(css).toMatch(/\.badge-comunidade:focus-visible::before\s*\{\s*top:\s*calc\(\(var\(--cab-linha\) - 24px\) \/ 2\)/);
     expect(css).not.toMatch(/focus-visible[^{]*\{[^}]*accent/);
-    expect(css).not.toMatch(/top:\s*(12px|0);/);
   });
 
   it('título do estado de perfil usa a fonte de display do produto', () => {

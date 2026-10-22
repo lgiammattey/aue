@@ -2,7 +2,7 @@
   Os documentos legais na moldura clara das páginas públicas. Texto de leitura
   em `--fg` (13:1 sobre o fundo) e não em `--muted`: é o que a pessoa precisa
   ler de verdade. Os links dos documentos usam `var(--accent)` inline; aqui
-  `--accent` vira o verde escuro, que o elétrico não lê sobre o claro.
+  `--accent` vira o verde elétrico sobre a casca escura.
 */
 .publico-legal {
   padding-bottom: 56px;

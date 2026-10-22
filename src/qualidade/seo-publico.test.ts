@@ -372,7 +372,7 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
       'comunidade de quem gosta de arrotar',
       'comunidades de arrotadores',
       'áudios',
-      'nota de 0 a 100',
+      'arena está sendo preparada',
     ]) {
       expect(textoIndexavel, `sumiu do conteúdo indexável: ${termo}`).toContain(termo);
     }

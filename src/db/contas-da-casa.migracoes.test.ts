@@ -263,7 +263,8 @@ describe('rollback', () => {
     const down = semComentarios(readFileSync(`${RAIZ}/supabase/rollback/20261018000009_feed_e_perfil_da_casa.down.sql`, 'utf8'));
     expect(down).not.toContain('caminho_do_audio_da_casa');
     expect(down).not.toContain('conta_da_casa');
-    expect(down).toContain('ORDER BY p.created_at DESC\n');
+    // A cláusula SQL não muda entre checkout LF e CRLF.
+    expect(down.replace(/\r\n/g, '\n')).toContain('ORDER BY p.created_at DESC\n');
   });
 });
 

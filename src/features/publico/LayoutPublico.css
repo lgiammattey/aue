@@ -74,7 +74,7 @@
 .publico-site .publico-pilula-escura { border-color: var(--fg); background: var(--fg); color: var(--bg); }
 .publico-site .publico-pilula-accent { border-color: var(--accent); background: var(--accent); color: var(--accent-on); }.publico-pilula-grande { min-height: 48px; padding-inline: 22px; }
 .publico-filtros { margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
-.publico-filtro { min-height: 40px; padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 8px; background: transparent; color: var(--fg); font: inherit; font-size: 14px; font-weight: 700; }
+.publico-filtro { min-height: var(--hit-target-min, 44px); padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 8px; background: transparent; color: var(--fg); font: inherit; font-size: 14px; font-weight: 700; }
 .publico-filtro[aria-pressed='true'] { border-color: var(--accent); background: var(--surface-2); color: var(--accent); }
 .publico-grade-videos { padding-bottom: 48px; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 16px; align-items: start; }
 .publico-cta { margin: 24px 0 56px; padding: 30px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }

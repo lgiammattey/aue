@@ -74,6 +74,52 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(comunidade.textContent).toBe('A');
   });
 
+  it('omite somente o fallback de mídia em post pessoal sem texto e preserva título autoral', () => {
+    const postDeMidia: ItemDoFeed = {
+      ...postExemplo,
+      id: 'causo-midia',
+      origem: 'pessoal',
+      titulo: 'Mídia no perfil',
+      corpo: '',
+      anexo: { tipo: 'imagem', url: 'https://cdn.test/midia.jpg' },
+    };
+
+    const { rerender } = render(
+      <MemoryRouter>
+        <CardDoPost post={postDeMidia} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText('Mídia no perfil')).toBeNull();
+    expect(document.querySelector('.post-media-image img')).toBeTruthy();
+
+    rerender(
+      <MemoryRouter>
+        <CardDoPost
+          post={{ ...postDeMidia, anexo: { tipo: 'audio', url: 'https://cdn.test/midia.mp3' } }}
+          audioTocando={false}
+          tempoAtualDoAudio={0}
+          duracaoDoAudio={null}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText('Mídia no perfil')).toBeNull();
+
+    rerender(
+      <MemoryRouter>
+        <CardDoPost
+          post={{ ...postDeMidia, titulo: 'Meu primeiro arroto filmado' }}
+          audioTocando={false}
+          tempoAtualDoAudio={0}
+          duracaoDoAudio={null}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('Meu primeiro arroto filmado')).toBeTruthy();
+  });
+
   it('dispara ação de curtir e abrir comentários com ícones estilo Twitter', () => {
     const aoCurtir = vi.fn();
     const aoAbrirComentarios = vi.fn();
@@ -181,7 +227,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
 
   it('mantém todas as ações do card na toolbar canônica', () => {
     mostrar({ salvo: false, aoCurtir: vi.fn(), aoReagir: vi.fn(), aoAlternarSalvar: vi.fn() });
-    const toolbar = screen.getByRole('toolbar', { name: 'Ações do causo' });
+    const toolbar = screen.getByRole('toolbar', { name: 'Ações do post' });
 
     for (const nome of [/7 comentários/i, 'Curtir', '🔥', '🤢', '🏆', 'Salvar', 'Compartilhar']) {
       expect(screen.getByRole('button', { name: nome })).toBeTruthy();

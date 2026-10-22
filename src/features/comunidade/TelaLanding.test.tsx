@@ -39,7 +39,7 @@ describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
       screen.getByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' }),
     ).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Só quero ouvir' }).getAttribute('href')).toBe('/comunidades');
-    expect(screen.getByRole('link', { name: 'Ir pra Arena' }).getAttribute('href')).toBe('/arena');
+    expect(screen.getByRole('link', { name: 'Conhecer a Arena' }).getAttribute('href')).toBe('/arena');
   });
 
   it('o Auê está fechado: sem criar conta, sem Google, e o convite fica desabilitado', () => {
@@ -52,7 +52,7 @@ describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
     expect(screen.queryByText(/Criar conta/)).toBeNull();
     expect(screen.queryByText(/Google/)).toBeNull();
     expect(screen.queryByRole('tab', { name: /convite/i })).toBeNull();
-    expect(screen.queryByText(/em breve/i)).toBeNull();
+    expect(screen.getByText('EM BREVE')).toBeTruthy();
     expect(screen.queryAllByRole('tab').filter((t) => (t as HTMLButtonElement).disabled)).toHaveLength(0);
     expect(screen.getByRole('tab', { name: 'Entrar' }).getAttribute('aria-selected')).toBe('true');
   });
@@ -146,7 +146,7 @@ describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
     );
 
     fireEvent.click(screen.getByRole('link', { name: 'Só quero ouvir' }));
-    fireEvent.click(screen.getByRole('link', { name: 'Ir pra Arena' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Conhecer a Arena' }));
 
     expect(onEntrarSemConta).toHaveBeenCalledTimes(1);
     expect(onArrotar).toHaveBeenCalledTimes(1);

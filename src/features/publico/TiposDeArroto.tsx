@@ -10,7 +10,7 @@ const tipos: readonly ItemDaListaPublica[] = [
     titulo: 'O Trovão',
     texto: [
       'Volume absurdo, impacto seco e ressonância grave no peito. É o arroto clássico de quem bebeu meio copo de cerveja de uma vez e soltou tudo sem filtro.',
-      'Na pontuação do Auê: bate no teto de potência sonora e de profundidade de graves.',
+      'Quando a Arena abrir, força e graves vão pesar bastante na nota.',
     ],
   },
   {
@@ -19,7 +19,7 @@ const tipos: readonly ItemDaListaPublica[] = [
     titulo: 'O Trator',
     texto: [
       'Vibração rítmica e contínua que parece um motor a diesel dando partida na subida. Não é o mais estridente, mas não acaba nunca.',
-      'Na pontuação do Auê: pontua altíssimo no critério de duração. Manter o fluxo contínuo por mais de 3 segundos exige ar de estômago e garganta totalmente relaxada.',
+      'Quando a Arena abrir, duração vai contar bastante. Manter o fluxo contínuo por mais de 3 segundos exige ar de estômago e garganta totalmente relaxada.',
     ],
   },
   {
@@ -28,7 +28,7 @@ const tipos: readonly ItemDaListaPublica[] = [
     titulo: 'A Rajada',
     texto: [
       'Uma sequência picotada de mini-arrotos em rajada, um colado atrás do outro sem respirar no meio. O famoso efeito metralhadora.',
-      'Na pontuação do Auê: o classificador acústico reconhece a cadeia de repetição contínua. Para a nota valer, a sequência não pode ter pausa para respirar.',
+      'Quando a Arena abrir, a sequência contínua vai entrar na análise. Pra nota valer, não pode haver pausa pra respirar.',
     ],
   },
   {
@@ -37,7 +37,7 @@ const tipos: readonly ItemDaListaPublica[] = [
     titulo: 'O Fraseado',
     texto: [
       'A arte lendária de modular as cordas vocais para falar uma palavra inteira (ou o alfabeto) enquanto o gás sobe.',
-      'Na pontuação do Auê: a textura sonora ganha riqueza harmônica. O juiz de IA avalia a clareza da frequência vocal sobreposta à turbulência do ar.',
+      'Quando a Arena abrir, a textura sonora vai entrar na análise. O juiz vai avaliar a clareza da frequência vocal sobreposta à turbulência do ar.',
     ],
   },
   {
@@ -46,7 +46,7 @@ const tipos: readonly ItemDaListaPublica[] = [
     titulo: 'O Sopro Oco',
     texto: [
       'Muito esforço pra quase nada. O ar sai como um vento fino, sem atrito nas cordas vocais e sem impacto na caixa torácica. O famoso arroto fantasma.',
-      'Na pontuação do Auê: cai direto na primeira faixa (0 a 19 pontos, "Foi isso?"). Se o microfone captar só ar passando, o motor nem valida como arroto.',
+      'Quando a Arena abrir, só ar passando não vai virar nota. O motor nem vai validar como arroto.',
     ],
   },
 ];
@@ -55,13 +55,13 @@ const tipos: readonly ItemDaListaPublica[] = [
  * `/tipos-de-arroto` — Guia público de estilos e física acústica do arroto.
  *
  * Responde a buscas como "tipos de arroto", "nomes de arroto", "sons de arroto"
- * e "classificação de arroto", convertendo curiosidade em desafio na Arena.
+ * e "classificação de arroto", explicando o que a Arena vai avaliar quando abrir.
  */
 export const TiposDeArroto: React.FC = () => (
   <LayoutPublico
     eyebrow="Estilos & Acústica"
     titulo="Tipos de arroto"
-    resumo="Nem todo arroto é igual. Tem o que racha parede, o que parece trator e o sopro oco que não assusta ninguém. Conheça as cinco variantes e como cada uma pontua na Arena."
+    resumo="Nem todo arroto é igual. Tem o que racha parede, o que parece trator e o sopro oco que não assusta ninguém. Conheça as cinco variantes que a Arena vai avaliar quando abrir."
   >
     <SecaoPublica eyebrow="Como o som se forma" titulo="O que separa um trovão de um sopro">
       <p>
@@ -85,8 +85,8 @@ export const TiposDeArroto: React.FC = () => (
       />
 
       <p>
-        No Auê, o algoritmo acústico julga quatro métricas reais: <strong>duração</strong> (tempo de
-        sustentação), <strong>potência</strong> (amplitude do sinal),{' '}
+        Quando a Arena abrir, o algoritmo acústico vai julgar quatro métricas: <strong>duração</strong>{' '}
+        (tempo de sustentação), <strong>potência</strong> (amplitude do sinal),{' '}
         <strong>profundidade</strong> (frequências sub-graves) e <strong>textura</strong>{' '}
         (aspereza espectral).
       </p>
@@ -94,14 +94,13 @@ export const TiposDeArroto: React.FC = () => (
 
     <ListaPublica eyebrow="As cinco categorias" titulo="Os cinco estilos" itens={tipos} />
 
-    <SecaoPublica eyebrow="Dicas" titulo="Como subir a nota na Arena">
+    <SecaoPublica eyebrow="Dicas" titulo="Pra guardar pra Arena">
       <p>
-        Para transformar qualquer tipo de arroto em nota alta no Auê, três detalhes mecânicos fazem
-        a diferença:
+        Quando a Arena abrir, três detalhes mecânicos vão fazer diferença:
       </p>
       <p>
         <strong>1. Distância do microfone:</strong> Deixe o celular a cerca de 10 a 15 centímetros da
-        boca. Falar colado na cápsula distorce o som (clipping) e reduz a nota de textura; longe
+        boca. Falar colado na cápsula distorce o som (clipping) e pode reduzir a nota de textura; longe
         demais perde potência.
       </p>
       <p>
@@ -116,7 +115,7 @@ export const TiposDeArroto: React.FC = () => (
       <LinksPublicos
         links={[
           { para: '/como-arrotar', rotulo: 'Guia passo a passo de como arrotar' },
-          { para: '/ranking-de-arrotos', rotulo: 'Ver tabela oficial de notas e recordes' },
+          { para: '/ranking-de-arrotos', rotulo: 'Entender as notas da Arena' },
         ]}
       />
     </SecaoPublica>

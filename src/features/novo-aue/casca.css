@@ -48,6 +48,9 @@ button, a {
 
 .topbar-brand-mobile {
   display: none;
+  box-sizing: border-box;
+  min-width: var(--hit-target-min, 44px);
+  min-height: var(--hit-target-min, 44px);
   font-family: var(--font-display, 'Anton', sans-serif);
   font-size: 26px;
   letter-spacing: 0.04em;
@@ -287,7 +290,7 @@ button, a {
 
 .sidebar-account-action {
   width: 100%;
-  min-height: 40px;
+  min-height: var(--hit-target-min, 44px);
   padding: 0 18px;
   border: 1px solid var(--aue-line);
   border-radius: 999px;
@@ -489,7 +492,7 @@ main {
   flex: 1 1 auto;
   align-items: center;
   min-width: 0;
-  height: 40px;
+  min-height: var(--hit-target-min, 44px);
   padding: 0 12px;
   border: 0;
   border-radius: 12px;
@@ -506,7 +509,7 @@ main {
 .search {
   flex: 1;
   min-width: 0;
-  height: 40px;
+  min-height: var(--hit-target-min, 44px);
   padding: 0 0 0 10px;
   border: 0;
   border-radius: 0;
@@ -633,7 +636,7 @@ main {
 .topbar-search__submit {
   flex: 0 0 auto;
   min-width: 88px;
-  min-height: 40px;
+  min-height: var(--hit-target-min, 44px);
   padding: 0 16px;
   white-space: nowrap;
 }
@@ -792,7 +795,11 @@ main {
 
 /* Thumbnail do feed: carimbo e palavra de impacto, sem métrica inventada. */
 .hero--feed {
-  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 0;
   padding: 20px 24px;
   border: 1px solid var(--aue-line);
   border-radius: 0;
@@ -810,10 +817,7 @@ main {
 }
 
 .hero--feed .hero__stamp {
-  top: 66px;
-  right: auto;
-  bottom: auto;
-  left: 24px;
+  position: static;
   max-width: none;
   padding: 7px 10px;
   border: 2px solid currentColor;
@@ -828,18 +832,23 @@ main {
 }
 
 .hero--feed h1 {
-  position: absolute;
-  right: 20px;
-  bottom: 17px;
-  max-width: 62%;
+  position: static;
+  max-width: 660px;
   margin: 0;
   color: var(--aue-text);
-  font-family: var(--font-body, 'Archivo', sans-serif);
+  font-family: var(--font-display, 'Anton', sans-serif);
   font-size: clamp(36px, 6.8vw, 52px);
-  font-weight: 900;
+  font-weight: 400;
   line-height: .9;
-  letter-spacing: -.06em;
-  text-align: right;
+  letter-spacing: .015em;
+  text-align: left;
+}
+
+.hero--feed p {
+  max-width: 540px;
+  margin: 0;
+  color: var(--aue-muted);
+  font: 500 15px/1.45 var(--font-body, 'Archivo', sans-serif);
 }
 
 @media (max-width: 520px) {
@@ -858,22 +867,20 @@ main {
   }
 
   .hero--feed {
-    min-height: 154px;
     padding: 18px;
+    gap: 10px;
   }
 
   .hero--feed .hero__stamp {
-    top: 62px;
-    left: 18px;
     font-size: 14px !important;
   }
 
   .hero--feed h1 {
-    right: 15px;
-    bottom: 14px;
-    max-width: 64%;
+    max-width: none;
     font-size: clamp(32px, 10vw, 44px);
   }
+
+  .hero--feed p { font-size: 14px; }
 }
 
 .hero-cta {
@@ -912,7 +919,7 @@ main {
 
 .feed-filter {
   min-width: 0;
-  min-height: 38px;
+  min-height: var(--hit-target-min, 44px);
   padding: 9px 8px;
   border: 0;
   border-radius: 999px;
@@ -1521,6 +1528,9 @@ main {
 }
 
 .rightbar-roads__head a {
+  min-height: var(--hit-target-min, 44px);
+  display: inline-flex;
+  align-items: center;
   color: var(--aue-muted);
   font-size: 12px;
   font-weight: 800;
@@ -1578,6 +1588,10 @@ main {
 }
 
 .rightbar-roads__state button {
+  min-height: var(--hit-target-min, 44px);
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
   padding: 0;
   border: 0;
   color: var(--aue-text);
@@ -2100,7 +2114,7 @@ main {
     display: block;
     grid-column: 2 / -1;
     margin: 0 18px;
-    padding: 24px 0 calc(24px + env(safe-area-inset-bottom));
+    padding: 24px 0 calc(88px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--aue-line);
   }
 }
@@ -2250,7 +2264,8 @@ main {
   }
 
   .topbar-brand-mobile {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     margin-right: 4px;
     flex-shrink: 0;
   }

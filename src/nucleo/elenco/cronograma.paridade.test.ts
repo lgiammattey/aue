@@ -130,7 +130,9 @@ describe('o sorteio registrado', () => {
 
   it('o arquivo gerado tem exatamente o texto que o script escreveria', () => {
     const arquivo = readFileSync(`${raiz}/scripts/elenco-burpzilla/sorteio.gerado.ts`, 'utf8');
-    expect(arquivo).toBe(textoDoSorteio(SORTEIO));
+    // O gerador declara o formato do conteúdo; a quebra de linha é adaptada
+    // pelo checkout no Windows e não muda o TypeScript produzido.
+    expect(arquivo.replace(/\r\n/g, '\n')).toBe(textoDoSorteio(SORTEIO));
   });
 
   it('só sorteia gente do pool, e nunca o Lucas', () => {

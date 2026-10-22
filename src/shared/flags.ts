@@ -49,12 +49,11 @@ export interface Flags {
   */
 
   /**
-   * Login social (Google). Desligada: o botão "Entrar" não é renderizado.
+   * Login pelo X. Desligada: os botões do X não são renderizados.
    *
-   * O MVP não pede login: a identidade é a sessão anônima. O código de
-   * `signInWithGoogle` continua em `db/supabase.ts` — ligar esta flag é o
-   * primeiro passo do MVP 2, onde o login vira uma PROMOÇÃO da conta anônima
-   * (`linkIdentity`), preservando o histórico, e não um muro na entrada.
+   * O MVP não pede login: a identidade é a sessão anônima. Criar com X usa
+   * `linkIdentity`, preservando o histórico; entrar com X só abre uma conta
+   * já associada. A flag só sobe depois do provedor estar configurado.
    */
   loginSocial: boolean;
 

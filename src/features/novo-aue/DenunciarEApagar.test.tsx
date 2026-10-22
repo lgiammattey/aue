@@ -64,7 +64,10 @@ const montar = (opcoes: { autenticado?: boolean; apagar?: PortaDeForum['apagarTo
   return { apagarTopico, denunciarTopico };
 };
 
-const cartao = async (texto: string) => (await screen.findByText(texto)).closest('article') as HTMLElement;
+const cartao = async (texto: string) => {
+  fireEvent.click(await screen.findByRole('button', { name: `Abrir tópico: ${texto}` }));
+  return (await screen.findByRole('button', { name: 'Mais ações' })).closest('article') as HTMLElement;
+};
 const abrirMenu = (c: HTMLElement) => fireEvent.click(within(c).getByRole('button', { name: 'Mais ações' }));
 
 describe('denunciar e apagar post na tela canônica', () => {
@@ -79,7 +82,7 @@ describe('denunciar e apagar post na tela canônica', () => {
     await waitFor(() => expect(denunciarTopico).toHaveBeenCalledWith('t-outro', 'spam'));
     expect(await screen.findByText('Denúncia enviada. Obrigado por avisar.')).toBeTruthy();
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(screen.getByText('Post de outra pessoa')).toBeTruthy();
+    expect(screen.getAllByText('Post de outra pessoa').length).toBeGreaterThan(0);
   });
 
   it('post próprio: só Apagar; confirma, o servidor responde e o card sai da tela', async () => {
@@ -93,7 +96,7 @@ describe('denunciar e apagar post na tela canônica', () => {
     await waitFor(() => expect(apagarTopico).toHaveBeenCalledWith('t-meu'));
     expect(await screen.findByText('Post apagado.')).toBeTruthy();
     await waitFor(() => expect(screen.queryByText('Meu post')).toBeNull());
-    expect(screen.getByText('Post de outra pessoa')).toBeTruthy();
+    expect(screen.getAllByText('Post de outra pessoa').length).toBeGreaterThan(0);
   });
 
   it('falha ao apagar NÃO tira o post e mostra o motivo no diálogo', async () => {

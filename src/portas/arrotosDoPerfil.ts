@@ -38,8 +38,24 @@ export type ResultadoDaPublicacaoDeArroto =
   | { readonly ok: true; readonly arroto: ArrotoDoPerfil }
   | { readonly ok: false; readonly motivo: 'formatoInvalido' | 'grandeDemais' | 'duracaoInvalida' | 'semConta' | 'semRede' | 'falhou' };
 
+/** Áudio escolhido pela pessoa, já lido e validado pela plataforma web. */
+export interface AudioDeArquivoDoPerfil {
+  readonly dados: Blob;
+  /** Duração confirmada pelos metadados do próprio arquivo, nunca estimada pela tela. */
+  readonly duracaoMs: number;
+}
+
+export type ResultadoDoPreparoDeArquivoDeAudio =
+  | { readonly ok: true; readonly audio: AudioDeArquivoDoPerfil }
+  | { readonly ok: false; readonly motivo: 'formatoInvalido' | 'grandeDemais' | 'duracaoInvalida' | 'metadadosIndisponiveis' };
+
 /** Contrato puro. Upload e URL assinada pertencem ao adaptador web. */
 export interface PortaDeArrotosDoPerfil {
+  /**
+   * Confere um arquivo local antes de ele ganhar preview ou ocupar Storage.
+   * A plataforma mede a duração: a UI nunca infere segundos pelo tamanho.
+   */
+  prepararArquivoDeAudio(arquivo: File): Promise<ResultadoDoPreparoDeArquivoDeAudio>;
   /** Resolve o @ no servidor e cria o rascunho privado antes de qualquer upload. */
   prepararArroto(destinoHandle?: string): Promise<ResultadoDoPreparoDeArroto>;
   /** Sobe o Blob para o caminho imutável do rascunho e só então o publica. */

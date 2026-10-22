@@ -3,6 +3,9 @@
     "site": "aue",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      { "source": "/comunidade", "destination": "/comunidades", "type": 301 }
+    ],
     "rewrites": [
       { "source": "/privacidade", "destination": "/privacidade.html" },
       { "source": "/termos", "destination": "/termos.html" },
@@ -10,7 +13,7 @@
       { "source": "/como-arrotar", "destination": "/como-arrotar.html" },
       { "source": "/tipos-de-arroto", "destination": "/tipos-de-arroto.html" },
       { "source": "/ranking-de-arrotos", "destination": "/ranking-de-arrotos.html" },
-      { "source": "/comunidade", "destination": "/comunidade.html" },
+      { "source": "/comunidades", "destination": "/comunidades.html" },
       { "source": "/grupos", "destination": "/grupos.html" },
       { "source": "/videos-de-arroto", "destination": "/videos-de-arroto.html" },
       { "source": "/videos", "destination": "/videos-de-arroto.html" },

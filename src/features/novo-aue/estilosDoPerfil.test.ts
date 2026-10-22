@@ -78,8 +78,8 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     expect(css).not.toMatch(/top:\s*(12px|0);/);
   });
 
-  it('título do estado de erro do perfil não usa mais Anton com linha 1', () => {
+  it('título do estado de perfil usa a fonte de display do produto', () => {
     const css = ler('./InicioOpenDesign.css');
-    expect(css).toMatch(/\.od-profile__state h1\s*\{[^}]*font:\s*800 22px\/28px/);
+    expect(css).toMatch(/\.od-profile__state h1\s*\{[^}]*font-family:\s*var\(--font-display, 'Anton', sans-serif\)[^}]*font-size:\s*30px[^}]*line-height:\s*1/);
   });
 });

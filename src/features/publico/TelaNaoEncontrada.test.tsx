@@ -11,7 +11,7 @@ describe('TelaNaoEncontrada', () => {
     render(<MemoryRouter><TelaNaoEncontrada /></MemoryRouter>);
     expect(screen.getByRole('heading', { level: 1, name: 'Página não encontrada.' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Voltar ao início' }).getAttribute('href')).toBe('/');
-    expect(screen.getByRole('link', { name: 'Ver comunidades' }).getAttribute('href')).toBe('/comunidades');
+    expect(screen.getAllByRole('link', { name: 'Ver comunidades' })[0]?.getAttribute('href')).toBe('/comunidades');
   });
 
   it('pede para o Google não indexar e troca o título; ao sair, desfaz as duas coisas', () => {

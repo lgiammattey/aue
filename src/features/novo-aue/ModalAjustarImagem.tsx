@@ -46,24 +46,38 @@ export function ModalAjustarImagem(p:P) {
   return <div className="od-image-crop" role="presentation">
     <div ref={dialog} className="od-image-crop__dialog" role="dialog" aria-modal="true" aria-labelledby="imageCropTitle" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape' && !locked) p.aoFechar(); manterFocoNoDialogo(e.nativeEvent, dialog.current); }}>
       <header className="od-image-crop__head">
-        <button type="button" className="od-image-crop__close" disabled={locked} onClick={p.aoFechar} aria-label="Fechar ajuste de imagem">×</button>
-        <h2 id="imageCropTitle">Ajustar {cover ? 'capa' : 'foto'}</h2>
-        <button type="button" className="od-image-crop__save" disabled={!ready || !size} onClick={p.aoSalvar}>{p.estado === 'enviando' ? 'Salvando…' : 'Salvar'}</button>
+        <div className="od-image-crop__title-wrap">
+          <span>{cover ? 'Capa da comunidade' : 'Foto da comunidade'}</span>
+          <h2 id="imageCropTitle">Ajustar {cover ? 'capa' : 'foto'}</h2>
+        </div>
+        <button type="button" className="od-image-crop__close" disabled={locked} onClick={p.aoFechar} aria-label="Fechar ajuste de imagem">✕</button>
       </header>
       <section className="od-image-crop__content">
-        <div ref={stage} className={`od-image-crop__stage${cover ? ' od-image-crop__stage--cover' : ''}`} onPointerDown={(e) => { if (ready) { last.current = { x: e.clientX, y: e.clientY }; e.currentTarget.setPointerCapture(e.pointerId); } }} onPointerMove={(e) => { if (last.current) { drag(e.clientX - last.current.x, e.clientY - last.current.y); last.current = { x: e.clientX, y: e.clientY }; } }} onPointerUp={() => { last.current = null; }}>
+        <div className="od-image-crop__stage-wrap">
+          <div ref={stage} className={`od-image-crop__stage${cover ? ' od-image-crop__stage--cover' : ''}`} onPointerDown={(e) => { if (ready) { last.current = { x: e.clientX, y: e.clientY }; e.currentTarget.setPointerCapture(e.pointerId); } }} onPointerMove={(e) => { if (last.current) { drag(e.clientX - last.current.x, e.clientY - last.current.y); last.current = { x: e.clientX, y: e.clientY }; } }} onPointerUp={() => { last.current = null; }}>
           {p.previewUrl ? <img className="od-image-crop__image" style={visual} src={p.previewUrl} alt="" onLoad={(e) => setSize({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })} /> : <p>Preparando imagem…</p>}
+          <span className="od-image-crop__stage-hint">Arraste para enquadrar</span>
+          </div>
         </div>
         {p.erro && <p className="od-image-crop__error" role="alert">{p.erro} <button type="button" onClick={p.aoTrocarArquivo}>Escolher outro arquivo</button></p>}
-        <label>Zoom <input aria-label="Zoom" type="range" min="100" max="220" value={p.recorte.zoom * 100} disabled={!ready} onChange={(e) => alterarRecorte({ ...p.recorte, zoom: Number(e.target.value) / 100 })} /></label>
-        <div className="od-image-crop__move" aria-label="Mover enquadramento">
-          <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroY: p.recorte.centroY - .04 })} aria-label="Mover para cima">↑</button>
-          <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroX: p.recorte.centroX - .04 })} aria-label="Mover para a esquerda">←</button>
-          <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroY: p.recorte.centroY + .04 })} aria-label="Mover para baixo">↓</button>
-          <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroX: p.recorte.centroX + .04 })} aria-label="Mover para a direita">→</button>
+        <div className="od-image-crop__controls">
+          <label className="od-image-crop__zoom">Zoom <input aria-label="Zoom" type="range" min="100" max="220" value={p.recorte.zoom * 100} disabled={!ready} onChange={(e) => alterarRecorte({ ...p.recorte, zoom: Number(e.target.value) / 100 })} /><span>{Math.round(p.recorte.zoom * 100)}%</span></label>
+          <div className="od-image-crop__move" aria-label="Mover enquadramento">
+            <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroY: p.recorte.centroY - .04 })} aria-label="Mover para cima">↑</button>
+            <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroX: p.recorte.centroX - .04 })} aria-label="Mover para a esquerda">←</button>
+            <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroY: p.recorte.centroY + .04 })} aria-label="Mover para baixo">↓</button>
+            <button type="button" disabled={!ready} onClick={() => alterarRecorte({ ...p.recorte, centroX: p.recorte.centroX + .04 })} aria-label="Mover para a direita">→</button>
+          </div>
         </div>
       </section>
-      <footer className="od-image-crop__foot"><button type="button" onClick={p.aoTrocarArquivo} disabled={locked}>Trocar arquivo</button><p>{limits}</p></footer>
+      <footer className="od-image-crop__foot">
+        <p>{limits}</p>
+        <div className="od-image-crop__actions">
+          <button type="button" className="od-image-crop__change" onClick={p.aoTrocarArquivo} disabled={locked}>Trocar</button>
+          <button type="button" className="od-image-crop__cancel" onClick={p.aoFechar} disabled={locked}>Cancelar</button>
+          <button type="button" className="od-image-crop__save" disabled={!ready || !size} onClick={p.aoSalvar}>{p.estado === 'enviando' ? 'Salvando…' : 'Aplicar'}</button>
+        </div>
+      </footer>
     </div>
   </div>;
 }

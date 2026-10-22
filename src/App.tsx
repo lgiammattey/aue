@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { criarContaWeb } from './plataforma/web/conta';
+import { criarArmazenamentoWeb } from './plataforma/web/armazenamento';
+import { criarTelemetriaWeb } from './plataforma/web/telemetria';
 
 const ChallengeView = lazy(() => import('./features/audio/ChallengeView').then((m) => ({ default: m.ChallengeView })));
 const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePrivacidade').then((m) => ({ default: m.PoliticaDePrivacidade })));
@@ -18,6 +20,7 @@ const TelaComunidadeOpenDesign = lazy(() => import('./features/novo-aue/TelaComu
 const TelaDiretorioOpenDesign = lazy(() => import('./features/novo-aue/TelaDiretorioOpenDesign').then((m) => ({ default: m.TelaDiretorioOpenDesign })));
 const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOpenDesign').then((m) => ({ default: m.TelaPerfilOpenDesign })));
 const TelaExplorarOpenDesign = lazy(() => import('./features/novo-aue/TelaExplorarOpenDesign').then((m) => ({ default: m.TelaExplorarOpenDesign })));
+const TelaArenaEmBreveOpenDesign = lazy(() => import('./features/novo-aue/TelaArenaEmBreveOpenDesign').then((m) => ({ default: m.TelaArenaEmBreveOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
@@ -26,6 +29,7 @@ import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
 import { rotasDoForum } from './features/forum/rotas';
+import { RastreadorDePaginas } from './features/telemetria/RastreadorDePaginas';
 
 /** Leva ao login guardando a página atual, para a pessoa voltar a ela depois de entrar. */
 function useIrParaLogin() {
@@ -151,10 +155,13 @@ function AliasDeComunidade() {
 }
 
 export function App() {
+  const [telemetriaDeNavegacao] = useState(() => criarTelemetriaWeb(criarArmazenamentoWeb()));
+
   return (
     <>
       <AvisoDeOffline />
       <Router>
+        <RastreadorDePaginas telemetria={telemetriaDeNavegacao} />
         <Suspense fallback={null}>
         <Routes>
           {/* Feed e Entrada Inteligente */}
@@ -164,7 +171,8 @@ export function App() {
           <Route path="/seguindo" element={<EntradaSeguindo />} />
 
           {/* Arena de Arrotos */}
-          <Route path="/arena" element={<Arena />} />
+          <Route path="/arena/em-breve" element={<TelaArenaEmBreveOpenDesign />} />
+          <Route path="/arena" element={<TelaArenaEmBreveOpenDesign />} />
 
           {/* Comunidades (Open Design 1:1) */}
           <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />

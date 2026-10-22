@@ -83,6 +83,7 @@ describe('registrar', () => {
         'conteudo',
         'evento',
         'origem',
+        'pagina',
         'plataforma',
         'sessao_id',
         'versao_app',
@@ -93,6 +94,7 @@ describe('registrar', () => {
     expect(linha.campanha).toBe('duvido_bater_01');
     expect(linha.conteudo).toBe('video_03');
     expect(linha.plataforma).toBe('web');
+    expect(linha.pagina).toBeNull();
     expect(typeof linha.sessao_id).toBe('string');
 
     /* Nenhuma chave lembra nome, e-mail, IP, áudio ou texto digitado. */
@@ -113,6 +115,19 @@ describe('registrar', () => {
   it('sem detalhe, batalha_codigo vai null', () => {
     const telemetria = criarTelemetriaWeb(montarArmazenamento());
     telemetria.registrar('abriu_arena');
+    expect(inserts[0].batalha_codigo).toBeNull();
+  });
+
+  it('grava apenas a categoria permitida da página, uma vez por sessão', () => {
+    const armazenamento = montarArmazenamento();
+    const telemetria = criarTelemetriaWeb(armazenamento);
+
+    telemetria.registrar('visitou_pagina', { pagina: 'comunidade' });
+    vi.advanceTimersByTime(2000);
+    telemetria.registrar('visitou_pagina', { pagina: 'comunidade' });
+
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0].pagina).toBe('comunidade');
     expect(inserts[0].batalha_codigo).toBeNull();
   });
 

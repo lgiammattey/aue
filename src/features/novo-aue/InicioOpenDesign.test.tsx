@@ -154,19 +154,213 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     // Botão Soltar Arroto na sidebar
     expect(screen.getByRole('button', { name: '+ Soltar um arroto' })).toBeTruthy();
 
-    // Hero 1:1
-    expect(await screen.findByRole('heading', { level: 1, name: 'A comunidade dos arrotadores.' })).toBeTruthy();
+    // Hero de entrada da comunidade
+    expect(await screen.findByRole('heading', { level: 1, name: /GERAL ARROTA,\s*PORRA!/i })).toBeTruthy();
+    expect(screen.queryByText('Auê!')).toBeNull();
+    expect(screen.queryByText('Você está só olhando. Entre para participar.')).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Conversas ativas' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Resenha' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Arrotos' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Links' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Poste alguma merda' })).toBeTruthy();
 
     // Feed com tópico real carregado da porta
     expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
     expect(screen.getByText('@ze_do_eco')).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Abrir perfil de @ze_do_eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
+    expect(screen.getByRole('link', { name: 'Abrir perfil de u/ze_do_eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
     expect(screen.queryByLabelText('Votar positivo')).toBeNull();
     expect(screen.getByRole('button', { name: 'Curtir' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '🔥' })).toBeTruthy();
 
     // Comunidades reais na sidebar e rightbar
-    expect(screen.getAllByText('r/arena-do-arroto').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Arena do Arroto').length).toBeGreaterThan(0);
+  });
+
+  it('mostra no feed uma prévia real da conversa sem exigir clique no balão', async () => {
+    const listarPrevias = vi.fn(async () => ({
+      ok: true as const,
+      valor: [
+        {
+          topicoId: 'topico-1',
+          resposta: {
+            id: 'resposta-previa-1',
+            topicoId: 'topico-1',
+            paiId: null,
+            nivel: 0 as const,
+            autor: { id: 'autor-2', handle: 'pedro_som', apelido: 'Pedro Som', avatarUrl: null },
+            corpo: 'Esse som foi histórico na firma! https://youtu.be/dQw4w9WgXcQ',
+            status: 'visivel' as const,
+            criadoEm: '2026-10-19T11:00:00Z',
+            editadoEm: null,
+            souAutor: false,
+          },
+          anexo: null,
+        },
+      ],
+    }));
+    const resposta = (id: string, corpo: string) => ({
+      id,
+      topicoId: 'topico-1',
+      paiId: null,
+      nivel: 0 as const,
+      autor: { id: `autor-${id}`, handle: `pessoa_${id}`, apelido: `Pessoa ${id}`, avatarUrl: null },
+      corpo,
+      status: 'visivel' as const,
+      criadoEm: '2026-10-19T11:00:00Z',
+      editadoEm: null,
+      souAutor: false,
+    });
+    const primeiraPagina = [
+      resposta('1', 'Primeira resposta'),
+      resposta('2', 'Segunda resposta'),
+      resposta('3', 'Terceira resposta'),
+    ];
+    const segundaPagina = [
+      resposta('4', 'Quarta resposta'),
+      resposta('5', 'Quinta resposta'),
+      resposta('6', 'Sexta resposta'),
+    ];
+    const listarEmPaginas = vi.fn(async (_topicoId: string, opcoes?: { limite?: number; cursor?: { valor: string; id: string } | null }) => ({
+      ok: true as const,
+      valor: opcoes?.cursor
+        ? { itens: segundaPagina, proximo: null }
+        : { itens: primeiraPagina, proximo: { valor: '2026-10-19T11:00:00Z', id: '3' } },
+    }));
+    const forumComPrevia: PortaDeForum = {
+      ...mockForum,
+      listarPreviaRespostasDosTopicos: listarPrevias,
+      listarRespostasDoTopico: listarEmPaginas,
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComPrevia} portaComunidade={mockComunidade} autenticado={false} />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/Esse som foi histórico na firma!/)).toBeTruthy();
+    expect(listarPrevias).toHaveBeenCalledWith(['topico-1']);
+    const botaoDeRespostas = screen.getByRole('button', { name: 'Ver 3 respostas' });
+    const conversa = screen.getByLabelText('Conversa: 12 respostas');
+    expect(conversa.textContent).toContain('Pedro Som');
+    expect(conversa.textContent).not.toContain('@pedro_som');
+    expect(screen.getByTitle('Vídeo do YouTube na resposta').getAttribute('src')).toBe(
+      'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0&playsinline=1',
+    );
+
+    fireEvent.click(botaoDeRespostas);
+    expect(await screen.findByText('Terceira resposta')).toBeTruthy();
+    expect(listarEmPaginas).toHaveBeenCalledWith('topico-1', { limite: 3 });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver mais 3 respostas' }));
+    expect(await screen.findByText('Sexta resposta')).toBeTruthy();
+    expect(listarEmPaginas).toHaveBeenLastCalledWith('topico-1', {
+      limite: 3,
+      cursor: { valor: '2026-10-19T11:00:00Z', id: '3' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Responder a Pessoa 1' }));
+
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Responder a Pessoa 1…')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: /GERAL ARROTA,\s*PORRA!/i })).toBeTruthy();
+  });
+
+  it('ordena a Resenha por publicação e filtra arrotos e links pelos anexos reais', async () => {
+    const forumComFiltros: PortaDeForum = {
+      ...mockForum,
+      explorarTopicos: vi.fn(async () => ({
+        ok: true as const,
+        valor: {
+          itens: [
+            {
+              id: 'link-1',
+              comunidade: { id: '1', slug: 'arena-do-arroto', nome: 'Arena do Arroto' },
+              titulo: 'Link do vídeo',
+              autor: { id: 'autor-1', handle: 'ze_do_eco', apelido: 'Zé do Eco', avatarUrl: null },
+              status: 'aberto' as const,
+              fixado: false,
+              criadoEm: '2026-10-18T10:00:00Z',
+              ultimaAtividadeEm: '2026-10-18T10:00:00Z',
+              respostasTotal: 1,
+            },
+            {
+              id: 'audio-1',
+              comunidade: { id: '1', slug: 'arena-do-arroto', nome: 'Arena do Arroto' },
+              titulo: 'Áudio do almoço',
+              autor: { id: 'autor-2', handle: 'bia_som', apelido: 'Bia Som', avatarUrl: null },
+              status: 'aberto' as const,
+              fixado: false,
+              criadoEm: '2026-10-19T10:00:00Z',
+              ultimaAtividadeEm: '2026-10-19T10:00:00Z',
+              respostasTotal: 2,
+            },
+            {
+              id: 'resenha-1',
+              comunidade: { id: '1', slug: 'arena-do-arroto', nome: 'Arena do Arroto' },
+              titulo: 'Resenha mais recente',
+              autor: { id: 'autor-3', handle: 'luis', apelido: 'Luiz', avatarUrl: null },
+              status: 'aberto' as const,
+              fixado: false,
+              criadoEm: '2026-10-20T10:00:00Z',
+              ultimaAtividadeEm: '2026-10-20T10:00:00Z',
+              respostasTotal: 3,
+            },
+          ],
+          proximo: null,
+        },
+      })),
+      listarAnexosDoForum: vi.fn(async () => ({
+        ok: true as const,
+        valor: [
+          {
+            alvo: 'topico' as const,
+            alvoId: 'audio-1',
+            tipo: 'audio' as const,
+            caminho: 'autor-2/forum/audio.webm',
+            mime: 'audio/webm',
+            tamanhoBytes: 456,
+            duracaoMs: 7000,
+            urlVideo: null,
+          },
+          {
+            alvo: 'topico' as const,
+            alvoId: 'link-1',
+            tipo: 'videoExterno' as const,
+            caminho: null,
+            mime: null,
+            tamanhoBytes: null,
+            duracaoMs: null,
+            urlVideo: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          },
+        ],
+      })),
+      assinarAnexoDoForum: vi.fn(async () => ({ ok: true as const, valor: 'https://audio.exemplo/audio.webm' })),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComFiltros} portaComunidade={mockComunidade} autenticado={false} />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Resenha mais recente');
+    expect([...document.querySelectorAll('.card-do-post')].map((post) => post.id)).toEqual([
+      'post-topico-resenha-1',
+      'post-topico-audio-1',
+      'post-topico-link-1',
+    ]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Arrotos' }));
+    expect(screen.getByRole('button', { name: 'Arrotos' }).getAttribute('aria-pressed')).toBe('true');
+    await waitFor(() => expect(screen.getByText('Áudio do almoço')).toBeTruthy());
+    expect(screen.queryByText('Resenha mais recente')).toBeNull();
+    expect(screen.queryByText('Link do vídeo')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Links' }));
+    expect(screen.getByRole('button', { name: 'Links' }).getAttribute('aria-pressed')).toBe('true');
+    await waitFor(() => expect(screen.getByText('Link do vídeo')).toBeTruthy());
+    expect(screen.queryByText('Áudio do almoço')).toBeNull();
   });
 
   it('chama a área das pessoas seguidas de Sua Tropa', async () => {
@@ -252,7 +446,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
-    expect(await screen.findByText('🎙️ Áudio de 2s gravado')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Ouvir áudio gravado' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
 
     expect((await screen.findByRole('status')).textContent).toContain('Entre na sua conta antes de anexar o áudio.');
@@ -260,7 +454,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(forumComUploadRecusado.criarTopico).not.toHaveBeenCalled();
   });
 
-  it('carrega só tópicos por atividade recente, sem ordenar a tela por um placar local', async () => {
+  it('carrega a Resenha por data de publicação, sem usar o feed legado', async () => {
     render(
       <MemoryRouter>
         <InicioOpenDesign
@@ -271,9 +465,9 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => expect(mockForum.explorarTopicos).toHaveBeenCalledWith({ limite: 30, ordem: 'atividade' }));
+    await waitFor(() => expect(mockForum.explorarTopicos).toHaveBeenCalledWith({ limite: 30, ordem: 'recentes' }));
     expect(mockComunidade.listarFeed).not.toHaveBeenCalled();
-    expect(screen.getByText('Conversas ativas')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Resenha' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.queryByRole('button', { name: 'Quentes' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Top' })).toBeNull();
   });
@@ -308,13 +502,11 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     const btnSoltar = screen.getByRole('button', { name: '+ Soltar um arroto' });
     fireEvent.click(btnSoltar);
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Gravar um arroto' })).toBeTruthy();
-    expect(screen.getByText('Gravação direta: não passa pelo motor e não recebe nota.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Gravar agora/ })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Gravar arroto para publicar no feed' })).toBeTruthy();
     expect(screen.queryByLabelText('Título da publicação')).toBeNull();
   });
 
-  it('grava, torna a visibilidade explícita e entrega o áudio para o perfil marcado', async () => {
+  it('grava pelo atalho rápido e entrega o áudio ao feed e ao próprio perfil', async () => {
     const captura: CapturaDeAudio = {
       pedir: vi.fn(async () => ({ ok: true as const })),
       comecar: vi.fn(() => true),
@@ -330,17 +522,18 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       estaGravando: vi.fn(() => false),
     };
     const arrotos: PortaDeArrotosDoPerfil = {
+      prepararArquivoDeAudio: vi.fn(),
       prepararArroto: vi.fn(async () => ({
         ok: true as const,
         rascunho: {
-          id: 'arroto-1', caminhoDoAudio: 'eu/arroto-1', perfilDestinoId: 'destino',
-          perfilDestinoHandle: 'bia', perfilDestinoApelido: 'Bia',
+          id: 'arroto-1', caminhoDoAudio: 'eu/arroto-1', perfilDestinoId: 'eu',
+          perfilDestinoHandle: 'gio', perfilDestinoApelido: 'Gio',
         },
       })),
       publicarArroto: vi.fn(async () => ({
         ok: true as const,
         arroto: {
-          id: 'arroto-1', perfilId: 'destino', autorId: 'eu', autorHandle: 'gio', autorApelido: 'Gio',
+          id: 'arroto-1', perfilId: 'eu', autorId: 'eu', autorHandle: 'gio', autorApelido: 'Gio',
           duracaoSegundos: 1.2, criadoEm: '2026-10-20T12:00:00Z', meu: true, possoOcultar: true,
           enderecoDoAudio: vi.fn(async () => 'https://audio.test/arroto-1'),
         },
@@ -362,19 +555,14 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: '+ Soltar um arroto' }));
-    fireEvent.click(screen.getByRole('button', { name: /Gravar agora/ }));
     await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByRole('button', { name: /Parar gravação/ }));
-    expect(await screen.findByText(/visível no grupo Arrotos do perfil escolhido/i)).toBeTruthy();
-
-    fireEvent.click(screen.getByRole('radio', { name: /Perfil de outra pessoa/i }));
-    fireEvent.change(screen.getByLabelText('@ de quem vai receber o arroto'), { target: { value: '@Bia' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Enviar arroto' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Enviar' }));
 
     await waitFor(() => {
-      expect(arrotos.prepararArroto).toHaveBeenCalledWith('bia');
+      expect(arrotos.prepararArroto).toHaveBeenCalledWith();
       expect(arrotos.publicarArroto).toHaveBeenCalledWith(
-        expect.objectContaining({ perfilDestinoHandle: 'bia' }), expect.any(Blob), 1.2,
+        expect.objectContaining({ perfilDestinoHandle: 'gio' }), expect.any(Blob), 1.2,
       );
     });
   });
@@ -405,6 +593,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       nivelAtual: vi.fn(() => 0), soltar: vi.fn(), estaVivo: vi.fn(() => false), estaGravando: vi.fn(() => false),
     };
     const arrotos: PortaDeArrotosDoPerfil = {
+      prepararArquivoDeAudio: vi.fn(),
       prepararArroto: vi.fn(async () => ({ ok: true as const, rascunho: {
         id: 'arroto-1', caminhoDoAudio: 'eu/arroto-1', perfilDestinoId: 'eu', perfilDestinoHandle: 'gio', perfilDestinoApelido: 'Gio',
       } })),
@@ -430,26 +619,22 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole('tab', { name: 'Arrotos' }, { timeout: 5000 }));
-    const atalho = await screen.findByRole('button', { name: 'Gravar um arroto aqui' }, { timeout: 5000 });
+    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
+    const atalho = await screen.findByRole('button', { name: 'Gravar um arroto no meu perfil' });
     fireEvent.click(atalho);
-    fireEvent.click(screen.getByRole('button', { name: /Gravar agora/ }));
-    await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce(), { timeout: 5000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar arroto' }));
+    await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByRole('button', { name: /Parar gravação/ }));
 
-    expect(await screen.findByText('Este áudio vai ficar no grupo Arrotos do seu perfil.', undefined, { timeout: 5000 })).toBeTruthy();
-    expect(screen.queryByRole('radio', { name: /Perfil de outra pessoa/i })).toBeNull();
-    expect(screen.queryByRole('radio', { name: /Feed de uma comunidade/i })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Enviar arroto' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Enviar' }));
     await waitFor(() => {
       expect(arrotos.prepararArroto).toHaveBeenCalledWith();
       expect(arrotos.publicarArroto).toHaveBeenCalledWith(
         expect.objectContaining({ perfilDestinoId: 'eu', perfilDestinoHandle: 'gio' }), expect.any(Blob), 1.2,
       );
-    }, { timeout: 5000 });
-    expect(await screen.findByText('Gravado por esta pessoa', undefined, { timeout: 5000 })).toBeTruthy();
-    expect(screen.getByRole('region', { name: 'Player do arroto' })).toBeTruthy();
-  }, 20000);
+    });
+    expect(await screen.findByText('Arroto direto · 2s')).toBeTruthy();
+  });
 
   it('não mostra o atalho de arroto ao visitar o perfil de outra pessoa', async () => {
     const outraPessoa = {
@@ -472,8 +657,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole('tab', { name: 'Arrotos' }));
-    expect(screen.queryByRole('button', { name: 'Gravar um arroto aqui' })).toBeNull();
+    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
+    expect(screen.queryByRole('button', { name: 'Gravar um arroto no meu perfil' })).toBeNull();
   });
 
   it('mantém o ajuste aberto e explica a recusa quando salvar a foto falha', async () => {
@@ -507,11 +692,11 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     fireEvent.change(entrada, { target: { files: [new File(['foto'], 'foto.jpg', { type: 'image/jpeg' })] } });
     const dialogo = await screen.findByRole('dialog', { name: 'Ajustar foto' });
     fireEvent.load(dialogo.querySelector('img')!);
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aplicar' }));
 
     await waitFor(() => expect(enviarFoto).toHaveBeenCalledOnce());
     expect(screen.getByRole('dialog', { name: 'Ajustar foto' })).toBeTruthy();
-    expect(screen.getByRole('alert').textContent).toContain('Não foi possível trocar a foto agora.');
+    expect(screen.getAllByRole('alert').some((alerta) => alerta.textContent?.includes('Não foi possível trocar a foto agora.'))).toBe(true);
   });
 
   it('abre modal institucional ao clicar nos links do rodapé', async () => {
@@ -669,11 +854,11 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const entrar = await screen.findAllByRole('button', { name: /^Entrar em r\// });
+    const entrar = await screen.findAllByRole('button', { name: /^Entrar em / });
     fireEvent.click(entrar[0]);
 
     expect((await screen.findByRole('status')).textContent).toContain('Não deu para atualizar sua participação agora.');
-    expect(screen.getAllByRole('button', { name: /^Entrar em r\// }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /^Entrar em / }).length).toBeGreaterThan(0);
   });
 
   it('mantém a comunidade fora da roda quando a porta falha', async () => {
@@ -694,11 +879,11 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const entrar = await screen.findAllByRole('button', { name: /^Entrar em r\// });
+    const entrar = await screen.findAllByRole('button', { name: /^Entrar em / });
     fireEvent.click(entrar[0]);
 
     expect((await screen.findByRole('status')).textContent).toContain('Não deu para atualizar sua participação agora.');
-    expect(screen.getAllByRole('button', { name: /^Entrar em r\// }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: /^Entrar em / }).length).toBeGreaterThan(0);
   });
 
   it('leva o visitante para entrar antes de tentar participar da comunidade', async () => {
@@ -719,10 +904,10 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const entrar = await screen.findAllByRole('button', { name: /^Entrar em r\// });
+    const entrar = await screen.findAllByRole('button', { name: /^Entrar em / });
     fireEvent.click(entrar[0]);
 
-    expect((await screen.findByRole('status')).textContent).toContain('Entre na sua conta para participar da roda.');
+    expect((await screen.findByRole('status')).textContent).toContain('Entre na sua conta para participar da comunidade.');
     expect(pedirEntrada).toHaveBeenCalledOnce();
     expect(comunidadeDoVisitante.entrarComunidade).not.toHaveBeenCalled();
   });

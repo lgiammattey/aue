@@ -11,7 +11,9 @@ import { Link } from 'react-router-dom';
 import type { EngajamentoDoPost, ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
+import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import { CardDoPost } from './CardDoPost';
+import { VideoDaResposta } from './VideoDaResposta';
 
 export interface ThreadDeComentariosProps {
   post: ItemDoFeed;
@@ -20,6 +22,8 @@ export interface ThreadDeComentariosProps {
   enviando: boolean;
   criarGravacao?: () => GravacaoLivreDoForum;
   aoVoltar: () => void;
+  /** Comentário selecionado no feed para abrir a resposta já direcionada. */
+  comentarioInicialParaResponder?: ItemComentario | null;
   aoEnviarComentario: (dados: {
     conteudo: string;
     paiId: string | null;
@@ -62,24 +66,6 @@ function formatarTempoRelativo(isoOuData: string): string {
   }
 }
 
-function detectarLinkDeVideo(url: string): { tipo: 'youtube' | 'tiktok'; embedUrl: string } | null {
-  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-  if (ytMatch) {
-    return {
-      tipo: 'youtube',
-      embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}`,
-    };
-  }
-  const ttMatch = url.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/)(\d+)/);
-  if (ttMatch) {
-    return {
-      tipo: 'tiktok',
-      embedUrl: `https://www.tiktok.com/embed/v2/${ttMatch[1]}`,
-    };
-  }
-  return null;
-}
-
 export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   post,
   comentarios,
@@ -87,6 +73,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   enviando,
   criarGravacao,
   aoVoltar,
+  comentarioInicialParaResponder = null,
   aoEnviarComentario,
   reacoes,
   minhas,
@@ -123,6 +110,13 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
     };
   }, []);
 
+  useEffect(() => {
+    if (!comentarioInicialParaResponder) return;
+    setPaiId(comentarioInicialParaResponder.id);
+    setAutorRespostaNome(comentarioInicialParaResponder.autorNome);
+    inputTextoRef.current?.focus();
+  }, [comentarioInicialParaResponder]);
+
   const alternarGravacaoAudio = async () => {
     if (gravandoAudio) {
       if (timerAudioRef.current) {
@@ -146,6 +140,8 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
       setErroComentario(
         inicio.motivo === 'negado'
           ? 'Libere o microfone para gravar áudio.'
+          : inicio.motivo === 'inseguro'
+            ? 'Para gravar áudio, abra o Auê em localhost ou HTTPS.'
           : 'Não deu para iniciar a gravação.',
       );
       return;
@@ -533,7 +529,6 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
                         c.autorNome
                       )}
                     </strong>
-                    {c.autorHandle && <span>@{c.autorHandle}</span>}
                     <span>·</span>
                     <time>{formatarTempoRelativo(c.criadoEm)}</time>
                   </div>
@@ -555,17 +550,10 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
                     </div>
                   )}
 
-                  {c.anexo?.tipo === 'videoExterno' &&
-                    c.anexo.url &&
-                    detectarLinkDeVideo(c.anexo.url) && (
-                      <iframe
-                        className="post-video"
-                        src={detectarLinkDeVideo(c.anexo.url)!.embedUrl}
-                        title="Vídeo na resposta"
-                        loading="lazy"
-                        allowFullScreen
-                      />
-                    )}
+                  <VideoDaResposta
+                    conteudo={c.conteudo}
+                    urlDoAnexo={c.anexo?.tipo === 'videoExterno' ? c.anexo.url : undefined}
+                  />
 
                   <div className="thread-reply-actions">
                     <button

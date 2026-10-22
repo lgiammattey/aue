@@ -22,6 +22,22 @@ function traduzirErro(mensagem: string): ResultadoDaConta {
   return { ok: false, motivo: 'falhou', detalhe: mensagem };
 }
 
+function retornoDoX(): string {
+  return `${window.location.origin}/perfil?via=x`;
+}
+
+function traduzirErroDoX(mensagem: string): ResultadoDaConta {
+  const normalizada = mensagem.toLowerCase();
+  if (
+    normalizada.includes('already linked')
+    || normalizada.includes('identity is already')
+    || normalizada.includes('already associated')
+  ) {
+    return { ok: false, motivo: 'identidadeXEmUso' };
+  }
+  return { ok: false, motivo: 'falhou', detalhe: mensagem };
+}
+
 /** Adaptador web da porta de conta. */
 export function criarContaWeb(): PortaDeConta {
   return {
@@ -118,6 +134,36 @@ export function criarContaWeb(): PortaDeConta {
       try {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: senha });
         return error ? traduzirErro(error.message) : { ok: true };
+      } catch (erro) {
+        return { ok: false, motivo: 'falhou', detalhe: erro instanceof Error ? erro.message : String(erro) };
+      }
+    },
+
+    async entrarComX(): Promise<ResultadoDaConta> {
+      if (configuracaoAusente) return { ok: false, motivo: 'semServidor' };
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'x',
+          options: { redirectTo: retornoDoX() },
+        });
+        return error ? traduzirErroDoX(error.message) : { ok: true };
+      } catch (erro) {
+        return { ok: false, motivo: 'falhou', detalhe: erro instanceof Error ? erro.message : String(erro) };
+      }
+    },
+
+    async criarComX(): Promise<ResultadoDaConta> {
+      if (configuracaoAusente) return { ok: false, motivo: 'semServidor' };
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!data.session?.user?.is_anonymous) {
+          return { ok: false, motivo: 'falhou', detalhe: 'A criação com X precisa de uma sessão anônima ativa.' };
+        }
+        const { error } = await supabase.auth.linkIdentity({
+          provider: 'x',
+          options: { redirectTo: retornoDoX() },
+        });
+        return error ? traduzirErroDoX(error.message) : { ok: true };
       } catch (erro) {
         return { ok: false, motivo: 'falhou', detalhe: erro instanceof Error ? erro.message : String(erro) };
       }

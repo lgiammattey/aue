@@ -80,6 +80,13 @@ describe('gravação livre do composer', () => {
     expect(await criarGravacaoLivreDoForum().iniciar()).toEqual({ ok: false, motivo: 'indisponivel' });
   });
 
+  it('identifica quando o endereço HTTP não pode usar o microfone', async () => {
+    vi.stubGlobal('isSecureContext', false);
+    navegador(async () => streamFalso());
+
+    expect(await criarGravacaoLivreDoForum().iniciar()).toEqual({ ok: false, motivo: 'inseguro' });
+  });
+
   it('cancelar não entrega áudio e também para a trilha', async () => {
     const faixa = trilha();
     navegador(async () => streamFalso([faixa]));

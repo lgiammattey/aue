@@ -150,22 +150,22 @@ describe('moldura das páginas legais', () => {
   it.each([
     ['política de privacidade', PoliticaDePrivacidade, 'Política de privacidade'],
     ['termos de uso', TermosDeUso, 'Termos de uso'],
-  ] as const)('%s usa a moldura OpenDesign, com o título como H1', (_nome, componente, titulo) => {
+  ] as const)('%s usa a casca atual do Auê, com o título como H1', (_nome, componente, titulo) => {
     const html = montar(componente);
 
-    expect(html).toContain('publico-site');
-    expect(html).toContain('publico-topo');
-    expect(html).toContain('publico-rodape');
+    expect(html).toContain('app od-informativo');
+    expect(html).toContain('Navegação do Auê');
+    expect(html).toContain('Painel complementar');
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
     expect(html).toMatch(new RegExp(`<h1>${titulo}</h1>`));
   });
 
-  it('entra na casca OpenDesign escura de três colunas', () => {
+  it('entra na casca OpenDesign atual de três colunas', () => {
     const html = montar(TermosDeUso);
 
-    expect(html).toContain('publico-app-shell');
-    expect(html).toContain('publico-lateral');
-    expect(html).toContain('publico-direita');
+    expect(html).toContain('app od-informativo');
+    expect(html).toContain('sidebar');
+    expect(html).toContain('rightbar');
   });
 
   it('mantém os links institucionais separados no rodapé', () => {

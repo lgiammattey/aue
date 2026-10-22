@@ -50,9 +50,9 @@ export async function signInWithTikTok() {
   });
 }
 
-export async function signInWithTwitter() {
+export async function signInWithX() {
   return supabase.auth.signInWithOAuth({
-    provider: 'twitter' as Provider,
+    provider: 'x' as Provider,
   });
 }
 

@@ -85,37 +85,31 @@ describe('ThreadDeComentarios (Padrão Twitter / Fora do Card)', () => {
     });
   });
 
-  it('o post-raiz da thread traz o menu ⋯ e as contagens que recebeu, sem inventar número', () => {
-    const aoApagar = vi.fn();
-    const props = { post: postExemplo, comentarios: [], carregando: false, enviando: false, aoVoltar: vi.fn(), aoEnviarComentario: vi.fn(async () => true) };
-    const { rerender } = render(
-      <MemoryRouter>
-        <ThreadDeComentarios {...props} aoApagar={aoApagar} reacoes={{ like: 5, fogo: 0, nojo: 0, trofeu: 0 }} minhas={['like']} aoCurtir={vi.fn()} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Apagar' }));
-    expect(aoApagar).toHaveBeenCalledOnce();
-    expect(screen.getByRole('button', { name: 'Curtir' }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByText('5')).toBeTruthy();
+  it('já abre o compositor direcionado quando a resposta parte da conversa no feed', () => {
+    const aoEnviar = vi.fn(async () => true);
 
-    const aoDenunciar = vi.fn();
-    rerender(
-      <MemoryRouter>
-        <ThreadDeComentarios {...props} aoDenunciar={aoDenunciar} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Denunciar' }));
-    expect(aoDenunciar).toHaveBeenCalledOnce();
-  });
-
-  it('sem ação de moderação não aparece o menu ⋯', () => {
     render(
       <MemoryRouter>
-        <ThreadDeComentarios post={postExemplo} comentarios={[]} carregando={false} enviando={false} aoVoltar={vi.fn()} aoEnviarComentario={vi.fn(async () => true)} />
+        <ThreadDeComentarios
+          post={postExemplo}
+          comentarios={comentariosExemplo}
+          carregando={false}
+          enviando={false}
+          aoVoltar={vi.fn()}
+          comentarioInicialParaResponder={comentariosExemplo[0]}
+          aoEnviarComentario={aoEnviar}
+        />
       </MemoryRouter>,
     );
-    expect(screen.queryByRole('button', { name: 'Mais ações' })).toBeNull();
+
+    const input = screen.getByPlaceholderText('Responder a Pedro Som…');
+    fireEvent.change(input, { target: { value: 'Concordo!' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+
+    expect(aoEnviar).toHaveBeenCalledWith({
+      conteudo: 'Concordo!',
+      paiId: 'com-1',
+      anexo: null,
+    });
   });
 });

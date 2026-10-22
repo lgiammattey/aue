@@ -1,25 +1,58 @@
 import { memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import type { ComunidadeDoForum } from '../../portas/forum';
 
 interface Props {
-  readonly viewAtual: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar';
-  readonly comunidadeAtivaSlug?: string;
-  readonly comunidades: readonly ComunidadeDoForum[];
+  readonly viewAtual: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar' | 'arena';
   readonly estaAutenticado: boolean;
-  readonly aoMudarView: (view: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar', slug?: string) => void;
-  readonly aoAbrirCompositor: () => void;
+  readonly aoMudarView: (view: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar' | 'arena', slug?: string) => void;
+  readonly aoAbrirGravadorRapido: () => void;
   readonly aoSair: () => void;
   readonly aoEntrar?: () => void;
 }
 
+type IconeDaNavegacao = 'feed' | 'grupos' | 'tropa' | 'arena' | 'eu';
+
+function IconeDaNavegacao({ tipo }: { readonly tipo: IconeDaNavegacao }) {
+  return (
+    <span className="ico" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {tipo === 'feed' && <>
+          <rect x="4" y="3.5" width="16" height="17" rx="3" />
+          <path d="M8 8h8M8 12h8M8 16h5" />
+          <circle cx="6.5" cy="8" r=".5" fill="currentColor" stroke="none" />
+          <circle cx="6.5" cy="12" r=".5" fill="currentColor" stroke="none" />
+          <circle cx="6.5" cy="16" r=".5" fill="currentColor" stroke="none" />
+        </>}
+        {tipo === 'grupos' && <>
+          <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
+          <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
+          <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
+          <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
+        </>}
+        {tipo === 'tropa' && <>
+          <circle cx="8.5" cy="8" r="3" />
+          <circle cx="16.5" cy="9" r="2.5" />
+          <path d="M3.5 20v-1a5 5 0 0 1 10 0v1" />
+          <path d="M14 16.5a4.5 4.5 0 0 1 6.5 4" />
+        </>}
+        {tipo === 'arena' && <>
+          <rect x="9" y="3" width="6" height="11" rx="3" />
+          <path d="M6 10a6 6 0 0 0 12 0M12 16v5M8.5 21h7" />
+        </>}
+        {tipo === 'eu' && <>
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M4.5 20v-1.5a7.5 7.5 0 0 1 15 0V20" />
+        </>}
+      </svg>
+    </span>
+  );
+}
+
 export const BarraLateral = memo(function BarraLateral({
   viewAtual,
-  comunidadeAtivaSlug,
-  comunidades,
   estaAutenticado,
   aoMudarView,
-  aoAbrirCompositor,
+  aoAbrirGravadorRapido,
   aoSair,
   aoEntrar,
 }: Props) {
@@ -44,7 +77,6 @@ export const BarraLateral = memo(function BarraLateral({
 
       {/* Navegação Desktop (>= 700px) */}
       <nav className="sidebar-desktop-nav" aria-label="Menu principal">
-        <div className="nav-label">Índice</div>
         <button
           className={`nav-item ${viewAtual === 'feed' ? 'active' : ''}`}
           type="button"
@@ -53,17 +85,17 @@ export const BarraLateral = memo(function BarraLateral({
             navigate('/');
           }}
         >
-          <span className="ico">⌂</span>Início
+          <IconeDaNavegacao tipo="feed" />Feed
         </button>
         <button
-          className={`nav-item ${viewAtual === 'explorar' ? 'active' : ''}`}
+          className={`nav-item ${viewAtual === 'comunidades' || viewAtual === 'explorar' ? 'active' : ''}`}
           type="button"
           onClick={() => {
-            aoMudarView('explorar');
-            navigate('/explorar');
+            aoMudarView('comunidades');
+            navigate('/comunidades');
           }}
         >
-          <span className="ico">⌕</span>Explorar
+          <IconeDaNavegacao tipo="grupos" />Comunidades
         </button>
         <button
           className={`nav-item ${viewAtual === 'seguindo' ? 'active' : ''}`}
@@ -77,7 +109,17 @@ export const BarraLateral = memo(function BarraLateral({
             }
           }}
         >
-          <span className="ico">◎</span>Tropa
+          <IconeDaNavegacao tipo="tropa" />Tropa
+        </button>
+        <button
+          className={`nav-item ${viewAtual === 'arena' ? 'active' : ''}`}
+          type="button"
+          onClick={() => {
+            aoMudarView('arena');
+            navigate('/arena/em-breve');
+          }}
+        >
+          <IconeDaNavegacao tipo="arena" />Arena
         </button>
         <button
           className={`nav-item ${viewAtual === 'perfil' ? 'active' : ''}`}
@@ -91,46 +133,17 @@ export const BarraLateral = memo(function BarraLateral({
             }
           }}
         >
-          <span className="ico">◉</span>Meu perfil
+          <IconeDaNavegacao tipo="eu" />Eu
         </button>
 
         <button
           className="create-side"
           type="button"
-          onClick={aoAbrirCompositor}
+          onClick={aoAbrirGravadorRapido}
         >
           + Soltar um arroto
         </button>
 
-        <div className="nav-label">Comunidades</div>
-        <button
-          className={`nav-item ${viewAtual === 'comunidades' ? 'active' : ''}`}
-          type="button"
-          onClick={() => {
-            aoMudarView('comunidades');
-            navigate('/comunidades');
-          }}
-        >
-          <span className="ico">◎</span>Todas as rodas
-        </button>
-
-        {comunidades.slice(0, 5).map((c) => {
-          const ativa = viewAtual === 'comunidade' && comunidadeAtivaSlug === c.slug;
-          return (
-            <button
-              key={c.id}
-              className={`nav-item ${ativa ? 'active' : ''}`}
-              type="button"
-              onClick={() => {
-                aoMudarView('comunidade', c.slug);
-                navigate(`/c/${c.slug}`);
-              }}
-            >
-              <span className="community-dot" />
-              <span>r/{c.slug}</span>
-            </button>
-          );
-        })}
       </nav>
 
       {/* Navegação Inferior Mobile (Zona do Polegar com 5 alvos: Feed, Comunidades, ARROTAR, X1, Perfil) */}
@@ -159,7 +172,7 @@ export const BarraLateral = memo(function BarraLateral({
             aoMudarView('comunidades');
             navigate('/comunidades');
           }}
-          aria-label="Rodas e comunidades"
+          aria-label="Comunidades"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -223,12 +236,12 @@ export const BarraLateral = memo(function BarraLateral({
       {/* Footer Desktop */}
       <div className="sidebar-footer">
         {estaAutenticado ? (
-          <button className="nav-item" type="button" onClick={aoSair}>
-            <span className="ico">↩</span>Sair da conta
+          <button className="sidebar-account-action sidebar-account-action--leave" type="button" onClick={aoSair}>
+            Sair da conta
           </button>
         ) : (
-          <button className="nav-item" type="button" onClick={aoEntrar}>
-            <span className="ico">→</span>Entrar
+          <button className="sidebar-account-action sidebar-account-action--enter" type="button" onClick={aoEntrar}>
+            Entrar
           </button>
         )}
       </div>

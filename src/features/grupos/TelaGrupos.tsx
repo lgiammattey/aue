@@ -19,7 +19,7 @@ export const TelaGrupos: React.FC<{ porta?: PortaDeGrupos }> = ({ porta }) => (
   >
     <div style={{ paddingBottom: 48 }}>
       <div style={{ paddingBottom: 24 }}>
-        <LinksPublicos links={[{ para: '/comunidade', rotulo: 'Conhecer as comunidades do Auê' }]} />
+        <LinksPublicos links={[{ para: '/comunidades', rotulo: 'Conhecer as comunidades do Auê' }]} />
       </div>
       <SecaoDeGrupos porta={porta} titulo="Todos os grupos" variante="publica" />
     </div>

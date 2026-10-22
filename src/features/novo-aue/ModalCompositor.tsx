@@ -7,9 +7,11 @@
  * e anexo de imagens/links de vídeo. Não utilize o ComposerCauso legado.
  */
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import type { ComunidadeDoForum, GravacaoLivreDoForum } from '../../portas/forum';
 import type { ControleDeDialogo } from '../../portas/controleDeDialogo';
+import type { ComunidadeDoForum, GravacaoLivreDoForum } from '../../portas/forum';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
+import { criarEnderecoLocal, soltarEnderecoLocal } from '../../plataforma/web/enderecoDeAudio';
+import { PreviaDeVideoNoCompositor } from './PreviaDeVideoNoCompositor';
 
 export type AnexoRascunho =
   | { readonly tipo: 'imagem'; readonly arquivo: File }
@@ -18,14 +20,17 @@ export type AnexoRascunho =
 
 interface Props {
   readonly aberto: boolean;
-  readonly controleDeDialogo: ControleDeDialogo;
+  readonly controleDeDialogo?: ControleDeDialogo;
+  readonly destino?: 'pessoal' | 'comunidade';
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly comunidadePadraoSlug?: string;
+  readonly autor?: { readonly nome: string; readonly avatarUrl?: string };
   readonly aoFechar: () => void;
   readonly criarGravacao?: () => GravacaoLivreDoForum;
   readonly aoPublicar: (dados: {
+    titulo?: string;
     corpo: string;
-    comunidadeSlug: string;
+    comunidadeSlug?: string;
     anexo: AnexoRascunho | null;
   }) => Promise<boolean>;
 }
@@ -35,26 +40,32 @@ const LIMITE = 180;
 export function ModalCompositor({
   aberto,
   controleDeDialogo,
+  destino = 'pessoal',
   comunidades,
   comunidadePadraoSlug,
+  autor,
   aoFechar,
   criarGravacao,
   aoPublicar,
 }: Props) {
+  const [titulo, setTitulo] = useState('');
   const [corpo, setCorpo] = useState('');
   const [comunidadeSlug, setComunidadeSlug] = useState(
     comunidadePadraoSlug ?? comunidades[0]?.slug ?? '',
   );
   const [anexo, setAnexo] = useState<AnexoRascunho | null>(null);
-  const [mostrarCampoLink, setMostrarCampoLink] = useState(false);
-  const [link, setLink] = useState('');
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [gravando, setGravando] = useState(false);
   const [segundosGravacao, setSegundosGravacao] = useState(0);
+  const [enderecoDoAudio, setEnderecoDoAudio] = useState<string | null>(null);
+  const [enderecoDaImagem, setEnderecoDaImagem] = useState<string | null>(null);
+  const [tocandoAudio, setTocandoAudio] = useState(false);
 
   const gravacao = useRef<GravacaoLivreDoForum | null>(null);
   const timerGravacao = useRef<number | null>(null);
+  const inputTextoRef = useRef<HTMLTextAreaElement>(null);
+  const playerDeAudio = useRef<HTMLAudioElement>(null);
   const limparVisibilidadeDoCampo = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -69,12 +80,24 @@ export function ModalCompositor({
   }, []);
 
   useEffect(() => {
-    if (!aberto) return;
+    return () => {
+      if (enderecoDoAudio) soltarEnderecoLocal(enderecoDoAudio);
+    };
+  }, [enderecoDoAudio]);
+
+  useEffect(() => {
+    return () => {
+      if (enderecoDaImagem) soltarEnderecoLocal(enderecoDaImagem);
+    };
+  }, [enderecoDaImagem]);
+
+  useEffect(() => {
+    if (!aberto || !controleDeDialogo) return;
     return controleDeDialogo.bloquearRolagemDoDocumento();
   }, [aberto, controleDeDialogo]);
 
   useEffect(() => {
-    if (!aberto) return;
+    if (!aberto || !controleDeDialogo) return;
     limparVisibilidadeDoCampo.current?.();
     limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('compositor-campo');
     return () => {
@@ -84,33 +107,42 @@ export function ModalCompositor({
   }, [aberto, controleDeDialogo]);
 
   const manterCampoVisivel = () => {
+    if (!controleDeDialogo) return;
     limparVisibilidadeDoCampo.current?.();
     limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('compositor-campo');
   };
 
   if (!aberto) return null;
 
+  const videoNoTexto = detectarLinkDeVideo(corpo);
+  const imagemSelecionada = anexo?.tipo === 'imagem';
+  const comunidadeAtual = comunidades.find((comunidade) => comunidade.slug === comunidadeSlug);
+  const contextoDaComunidade = destino === 'comunidade' && comunidadeSlug
+    ? comunidadeAtual
+      ? comunidadeAtual.nome
+      : 'Comunidade selecionada'
+    : null;
+
   const escolherImagem = (evento: ChangeEvent<HTMLInputElement>) => {
     const arquivo = evento.target.files?.[0];
     if (!arquivo) return;
+    if (videoNoTexto) {
+      setErro('Remova o link de vídeo antes de anexar uma imagem.');
+      evento.target.value = '';
+      return;
+    }
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(arquivo.type)) {
       setErro('Só imagem ou GIF entra aqui.');
       return;
     }
+    setEnderecoDaImagem(criarEnderecoLocal(arquivo));
     setAnexo({ tipo: 'imagem', arquivo });
     setErro(null);
   };
 
-  const adicionarLink = () => {
-    const video = detectarLinkDeVideo(link.trim());
-    if (!video) {
-      setErro('Cole um link válido do YouTube ou TikTok.');
-      return;
-    }
-    setAnexo({ tipo: 'videoExterno', url: video.urlOriginal });
-    setLink('');
-    setMostrarCampoLink(false);
-    setErro(null);
+  const descartarImagem = () => {
+    setEnderecoDaImagem(null);
+    setAnexo(null);
   };
 
   const alternarGravacao = async () => {
@@ -136,6 +168,8 @@ export function ModalCompositor({
       setErro(
         inicio.motivo === 'negado'
           ? 'Libere o microfone para gravar áudio.'
+          : inicio.motivo === 'inseguro'
+            ? 'Para gravar áudio, abra o Auê em localhost ou HTTPS.'
           : 'Não deu para iniciar a gravação.',
       );
       return;
@@ -149,6 +183,7 @@ export function ModalCompositor({
 
     const fim = await inicio.conclusao;
     setGravando(false);
+    gravacao.current = null;
     if (timerGravacao.current) {
       window.clearInterval(timerGravacao.current);
       timerGravacao.current = null;
@@ -159,6 +194,7 @@ export function ModalCompositor({
       return;
     }
 
+    setEnderecoDoAudio(criarEnderecoLocal(fim.audio.dados));
     setAnexo({
       tipo: 'audio',
       arquivo: fim.audio.dados,
@@ -167,24 +203,62 @@ export function ModalCompositor({
     setErro(null);
   };
 
+  const descartarAudio = () => {
+    setEnderecoDoAudio(null);
+    setTocandoAudio(false);
+    setAnexo(null);
+  };
+
+  const alternarPlayerDeAudio = async () => {
+    const player = playerDeAudio.current;
+    if (!player) return;
+
+    if (!player.paused) {
+      player.pause();
+      return;
+    }
+
+    try {
+      await player.play();
+      setTocandoAudio(true);
+    } catch {
+      setErro('Não deu para tocar esse áudio agora.');
+    }
+  };
+
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault();
-    if (enviando || (!corpo.trim() && !anexo) || !comunidadeSlug) return;
+    if (enviando) return;
+
+    if (destino === 'comunidade' && (!comunidadeSlug || !titulo.trim() || !corpo.trim())) {
+      setErro(!titulo.trim() ? 'Dê um assunto ao tópico.' : 'Escreva a mensagem do tópico.');
+      return;
+    }
+
+    if (destino !== 'comunidade' && !corpo.trim() && !anexo) return;
     setEnviando(true);
     setErro(null);
 
     try {
-      const publicado = await aoPublicar({ corpo: corpo.trim(), comunidadeSlug, anexo });
+      const publicado = await aoPublicar({
+        ...(destino === 'comunidade' ? { titulo: titulo.trim() } : {}),
+        corpo: corpo.trim(),
+        ...(destino === 'comunidade' ? { comunidadeSlug } : {}),
+        anexo,
+      });
       if (!publicado) return;
+      setTitulo('');
       setCorpo('');
-      setAnexo(null);
-      setLink('');
-      setMostrarCampoLink(false);
+      if (anexo?.tipo === 'audio') descartarAudio();
+      else if (anexo?.tipo === 'imagem') descartarImagem();
+      else setAnexo(null);
       aoFechar();
     } finally {
       setEnviando(false);
     }
   };
+
+  const inicialDoAutor = (autor?.nome || 'Você').charAt(0).toUpperCase();
 
   return (
     <div
@@ -192,13 +266,13 @@ export function ModalCompositor({
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialogComposerTitle"
-      onClick={(e) => e.target === e.currentTarget && aoFechar()}
+      onClick={(e) => e.target === e.currentTarget && !gravando && aoFechar()}
     >
       <div className="modal-comentarios-sheet composer-sheet" style={{ maxWidth: 600 }}>
         <header className="comments-sheet-header">
           <div className="comments-sheet-title-wrap">
             <h2 id="dialogComposerTitle" className="comments-sheet-title">
-              Novo post na roda
+              {destino === 'pessoal' ? 'Novo post' : 'Novo tópico'}
             </h2>
           </div>
           <button
@@ -213,45 +287,135 @@ export function ModalCompositor({
         </header>
 
         <form onSubmit={enviar} className="composer-clean-form">
-          {comunidades.length > 0 && (
-            <div className="composer-community-selector">
-              <span className="selector-label">Roda:</span>
-              <select
-                value={comunidadeSlug}
-                onChange={(e) => setComunidadeSlug(e.target.value)}
-                aria-label="Escolha a roda"
+          {destino === 'comunidade' && (
+            <label className="composer-topic-title">
+              <span>Assunto</span>
+              <input
+                value={titulo}
+                onChange={(e) => { setTitulo(e.target.value); setErro(null); }}
+                maxLength={120}
+                placeholder="Qual é a resenha?"
+                aria-label="Título do tópico"
                 disabled={enviando || gravando}
+                required
+              />
+            </label>
+          )}
+          <div className="composer-message-row">
+            <span className="composer-author-avatar" aria-hidden="true">
+              {autor?.avatarUrl ? <img src={autor.avatarUrl} alt="" /> : inicialDoAutor}
+            </span>
+            <textarea
+              ref={inputTextoRef}
+              id="compositor-campo"
+              maxLength={LIMITE}
+              rows={4}
+              placeholder={destino === 'pessoal' ? 'O que tá pegando?' : 'Conta a resenha…'}
+              value={corpo}
+              onChange={(e) => {
+                const proximoCorpo = e.target.value;
+                if (imagemSelecionada && detectarLinkDeVideo(proximoCorpo)) {
+                  setErro('Remova a imagem antes de anexar um link de vídeo.');
+                  return;
+                }
+                setCorpo(proximoCorpo);
+                setErro(null);
+              }}
+              onFocus={manterCampoVisivel}
+              aria-label={destino === 'pessoal' ? 'Texto da publicação' : 'Mensagem do tópico'}
+              disabled={enviando || gravando}
+            />
+          </div>
+
+          {!anexo && <PreviaDeVideoNoCompositor texto={corpo} />}
+
+          {anexo?.tipo === 'imagem' && enderecoDaImagem && (
+            <figure className="composer-image-preview">
+              <img src={enderecoDaImagem} alt="Prévia da imagem selecionada" />
+              <figcaption>
+                <span>Imagem pronta para publicar</span>
+                <button
+                  type="button"
+                  className="composer-image-discard"
+                  onClick={descartarImagem}
+                  disabled={enviando}
+                  aria-label="Remover imagem selecionada"
+                >
+                  Remover
+                </button>
+              </figcaption>
+            </figure>
+          )}
+
+          {gravando && (
+            <div className="composer-audio-strip composer-audio-strip--recording" role="status">
+              <span className="composer-recording-dot" aria-hidden="true" />
+              <span className="composer-audio-state">Gravando</span>
+              <div className="composer-audio-wave" aria-hidden="true">
+                {Array.from({ length: 14 }, (_, indice) => <i key={indice} />)}
+              </div>
+              <time className="composer-audio-time">
+                0:{String(segundosGravacao).padStart(2, '0')}
+              </time>
+              <button
+                type="button"
+                className="composer-stop-recording"
+                onClick={() => void alternarGravacao()}
+                aria-label="Parar e revisar gravação"
               >
-                {comunidades.map((c) => (
-                  <option key={c.id} value={c.slug}>
-                    r/{c.slug} — {c.nome}
-                  </option>
-                ))}
-              </select>
+                Parar
+              </button>
             </div>
           )}
 
-          <textarea
-            id="compositor-campo"
-            maxLength={LIMITE}
-            rows={4}
-            placeholder="O que tá pegando na roda?"
-            value={corpo}
-            onChange={(e) => setCorpo(e.target.value)}
-            onFocus={manterCampoVisivel}
-            aria-label="Texto da publicação"
-            disabled={enviando || gravando}
-          />
+          {anexo?.tipo === 'audio' && enderecoDoAudio && (
+            <div className="composer-audio-strip composer-audio-strip--preview">
+              <audio
+                ref={playerDeAudio}
+                src={enderecoDoAudio}
+                onPlay={() => setTocandoAudio(true)}
+                onPause={() => setTocandoAudio(false)}
+                onEnded={() => setTocandoAudio(false)}
+              />
+              <button
+                type="button"
+                className="composer-audio-play"
+                onClick={() => void alternarPlayerDeAudio()}
+                aria-label={tocandoAudio ? 'Pausar áudio gravado' : 'Ouvir áudio gravado'}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  {tocandoAudio
+                    ? <path d="M7 5h3v14H7zm7 0h3v14h-3z" />
+                    : <path d="M8 5v14l11-7z" />}
+                </svg>
+              </button>
+              <div className={`composer-audio-wave ${tocandoAudio ? 'is-playing' : ''}`} aria-hidden="true">
+                {Array.from({ length: 14 }, (_, indice) => <i key={indice} />)}
+              </div>
+              <time className="composer-audio-time">
+                {formatarDuracao(anexo.duracaoMs)}
+              </time>
+              <button
+                type="button"
+                className="composer-audio-discard"
+                onClick={descartarAudio}
+                disabled={enviando}
+                aria-label="Descartar áudio gravado"
+                title="Descartar áudio"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4h8v2" />
+                  <path d="M19 6l-1 14H6L5 6" />
+                  <path d="M10 11v5M14 11v5" />
+                </svg>
+              </button>
+            </div>
+          )}
 
-          {anexo && (
+          {anexo?.tipo === 'videoExterno' && (
             <div className="composer-attachment-pill">
-              <span>
-                {anexo.tipo === 'imagem'
-                  ? '📷 Imagem selecionada'
-                  : anexo.tipo === 'audio'
-                    ? `🎙️ Áudio de ${Math.ceil(anexo.duracaoMs / 1000)}s gravado`
-                    : '🎥 Vídeo externo anexado'}
-              </span>
+              <span>🎥 Vídeo externo anexado</span>
               <button
                 type="button"
                 className="attachment-remove-btn"
@@ -260,34 +424,6 @@ export function ModalCompositor({
                 aria-label="Remover anexo"
               >
                 ✕
-              </button>
-            </div>
-          )}
-
-          {mostrarCampoLink && !anexo && (
-            <div className="composer-link-input-bar">
-              <input
-                type="url"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-                placeholder="Cole o link do YouTube ou TikTok"
-                aria-label="Link do vídeo"
-                disabled={enviando || gravando}
-              />
-              <button
-                type="button"
-                className="action-pill-btn"
-                onClick={adicionarLink}
-                disabled={enviando || gravando || !link.trim()}
-              >
-                Adicionar
-              </button>
-              <button
-                type="button"
-                className="action-pill-btn"
-                onClick={() => setMostrarCampoLink(false)}
-              >
-                Cancelar
               </button>
             </div>
           )}
@@ -306,8 +442,8 @@ export function ModalCompositor({
                 className={`composer-tool-btn ${gravando ? 'is-recording' : ''}`}
                 onClick={() => void alternarGravacao()}
                 disabled={enviando || (!gravando && Boolean(anexo))}
-                title={gravando ? 'Parar gravação' : 'Gravar áudio (1 clique)'}
-                aria-label={gravando ? 'Parar gravação' : 'Gravar áudio'}
+                title="Gravar áudio"
+                aria-label="Gravar áudio"
               >
                 <svg
                   width="19"
@@ -325,18 +461,14 @@ export function ModalCompositor({
                   <line x1="12" y1="19" x2="12" y2="23" />
                   <line x1="8" y1="23" x2="16" y2="23" />
                 </svg>
-                {gravando && (
-                  <span className="recording-counter">
-                    0:{String(segundosGravacao).padStart(2, '0')}
-                  </span>
-                )}
               </button>
 
               {/* Imagem */}
               <label
-                className="composer-tool-btn"
+                className={`composer-tool-btn ${videoNoTexto ? 'is-disabled' : ''}`}
                 title="Adicionar imagem"
                 aria-label="Adicionar imagem"
+                aria-disabled={Boolean(videoNoTexto)}
               >
                 <svg
                   width="19"
@@ -357,7 +489,7 @@ export function ModalCompositor({
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   onChange={escolherImagem}
-                  disabled={enviando || gravando || Boolean(anexo)}
+                  disabled={enviando || gravando || Boolean(anexo) || Boolean(videoNoTexto)}
                   style={{ display: 'none' }}
                 />
               </label>
@@ -366,10 +498,10 @@ export function ModalCompositor({
               <button
                 type="button"
                 className="composer-tool-btn"
-                onClick={() => setMostrarCampoLink((ant) => !ant)}
-                disabled={enviando || gravando || Boolean(anexo)}
-                title="Adicionar vídeo do YouTube/TikTok"
-                aria-label="Adicionar link de vídeo"
+                onClick={() => inputTextoRef.current?.focus()}
+                disabled={enviando || gravando || imagemSelecionada}
+                title="Cole um link do YouTube ou TikTok no texto"
+                aria-label="Colar link de vídeo no texto"
               >
                 <svg
                   width="19"
@@ -391,6 +523,12 @@ export function ModalCompositor({
                 {corpo.length}/{LIMITE}
               </span>
             </div>
+
+            {contextoDaComunidade && (
+              <span className="composer-community-context" title={contextoDaComunidade}>
+                {contextoDaComunidade}
+              </span>
+            )}
 
             <div className="composer-actions-group">
               <button
@@ -414,4 +552,9 @@ export function ModalCompositor({
       </div>
     </div>
   );
+}
+
+function formatarDuracao(duracaoMs: number): string {
+  const segundos = Math.ceil(duracaoMs / 1000);
+  return `${Math.floor(segundos / 60)}:${String(segundos % 60).padStart(2, '0')}`;
 }

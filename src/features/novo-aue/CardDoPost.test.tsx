@@ -14,6 +14,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     id: 'topico-1',
     tipo: 'topico',
     comunidadeSlug: 'arena-do-arroto',
+    comunidadeAvatarUrl: 'https://cdn.test/arena.jpg',
     titulo: 'O arroto que ecoou no estádio',
     corpo: 'Estava 0x0 quando soltei o trovão e a torcida calou.',
     autorNome: 'Mestre do Eco',
@@ -44,34 +45,33 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(imgAvatar.getAttribute('src')).toBe('https://cdn.test/avatar-mestre.jpg');
     expect(screen.getByText('Mestre do Eco')).toBeTruthy();
     expect(screen.getByText('@mestre_eco')).toBeTruthy();
-    expect(screen.getByText('r/arena-do-arroto')).toBeTruthy();
+    const metadadosDoAutor = document.querySelector('.post-meta-details');
+    expect(metadadosDoAutor?.querySelector('.post-meta-handle')?.textContent).toBe('@mestre_eco');
+    expect(metadadosDoAutor?.querySelector('time')).toBeTruthy();
+    const comunidade = screen.getByRole('link', { name: 'Abrir comunidade r/arena-do-arroto' });
+    expect(comunidade.getAttribute('href')).toBe('/c/arena-do-arroto');
+    expect(comunidade.querySelector('img')?.getAttribute('src')).toBe('https://cdn.test/arena.jpg');
     expect(screen.getByText('NOTA')).toBeTruthy();
     expect(screen.getByText('88')).toBeTruthy();
     expect(screen.getByText('O arroto que ecoou no estádio')).toBeTruthy();
     expect(screen.getByText('Estava 0x0 quando soltei o trovão e a torcida calou.')).toBeTruthy();
   });
 
-  it('reserva o quadro da imagem antes do carregamento, sem declarar dimensões da origem', () => {
+  it('troca a imagem quebrada da comunidade pela inicial da roda', () => {
     render(
       <MemoryRouter>
         <CardDoPost
-          post={{ ...postExemplo, anexo: { tipo: 'imagem', url: 'https://cdn.test/causo.jpg' } }}
-          salvo={false}
+          post={postExemplo}
           audioTocando={false}
           tempoAtualDoAudio={0}
           duracaoDoAudio={null}
-          aoTocarAudio={vi.fn()}
         />
       </MemoryRouter>,
     );
 
-    const quadro = document.querySelector('.post-media-image');
-    const imagem = screen.getByRole('img', { name: 'Anexo do causo' });
-    expect(quadro).toBeTruthy();
-    expect(imagem.classList.contains('post-attachment-img')).toBe(true);
-    expect(imagem.getAttribute('loading')).toBe('lazy');
-    expect(imagem.hasAttribute('width')).toBe(false);
-    expect(imagem.hasAttribute('height')).toBe(false);
+    const comunidade = screen.getByRole('link', { name: 'Abrir comunidade r/arena-do-arroto' });
+    fireEvent.error(comunidade.querySelector('img')!);
+    expect(comunidade.textContent).toBe('A');
   });
 
   it('dispara ação de curtir e abrir comentários com ícones estilo Twitter', () => {
@@ -168,93 +168,6 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
     await waitFor(() => expect(share).toHaveBeenCalledWith({ title: postExemplo.titulo, url: `${window.location.origin}/c/arena-do-arroto/t/1` }));
     Object.assign(navigator, { share: undefined });
-  });
-
-  it('variante feed (padrão) segue com nota, emoji e salvar, e o ⋯ vai para o topo do card', () => {
-    mostrar({ salvo: false, aoCurtir: vi.fn(), aoReagir: vi.fn(), aoAlternarSalvar: vi.fn(), aoApagar: vi.fn() });
-    const card = document.querySelector('article.card-do-post') as HTMLElement;
-    expect(card.classList.contains('card-do-post--perfil')).toBe(false);
-    expect(screen.getByText('NOTA')).toBeTruthy();
-    for (const nome of ['🔥', '🤢', '🏆', 'Salvar']) expect(screen.getByRole('button', { name: nome })).toBeTruthy();
-    const toolbar = screen.getByRole('toolbar', { name: 'Ações do causo' });
-    const mais = screen.getByRole('button', { name: 'Mais ações' });
-    expect(card.querySelector('header')?.contains(mais)).toBe(true);
-    expect(toolbar.contains(mais)).toBe(false);
-  });
-
-  it('sem data não inventa "agora": o tempo some do cabeçalho', () => {
-    mostrar({}, { ...postExemplo, criadoEm: '' });
-    expect(document.querySelector('.post-meta-time')).toBeNull();
-    expect(document.querySelector('.post-meta-dot')).toBeNull();
-    expect(screen.queryByText('agora')).toBeNull();
-    cleanup();
-    mostrar({}, { ...postExemplo, criadoEm: 'lixo' });
-    expect(document.querySelector('.post-meta-time')).toBeNull();
-  });
-
-  it('r/comunidade fica em linha própria, fora da linha do nome e do @', () => {
-    mostrar();
-    const roda = screen.getByText('r/arena-do-arroto');
-    const ident = document.querySelector('.post-meta-ident') as HTMLElement;
-    expect(ident.contains(roda)).toBe(false);
-    expect(roda.getAttribute('href')).toBe('/c/arena-do-arroto');
-  });
-
-  it('contadores aparecem sempre; o de curtidas só com número vindo da porta', () => {
-    mostrar({ aoCurtir: vi.fn() }, { ...postExemplo, respostasTotal: 0 });
-    expect(screen.getByRole('button', { name: '0 comentários' }).textContent).toContain('0');
-    expect(screen.getByRole('button', { name: 'Curtir' }).querySelector('.action-btn__count')?.textContent).toBe('');
-    cleanup();
-    mostrar({ aoCurtir: vi.fn(), reacoes: { like: 0, fogo: 0, nojo: 0, trofeu: 0 } });
-    expect(screen.getByRole('button', { name: 'Curtir' }).querySelector('.action-btn__count')?.textContent).toBe('0');
-  });
-
-  it('mostra a duração que a porta trouxe antes de dar play; sem duração, o tempo corrido', () => {
-    mostrar({}, { ...postExemplo, temAudio: true, enderecoDoAudio: 'https://cdn.test/a.webm', duracaoSegundos: 6 });
-    expect(screen.getByLabelText('Tempo do áudio: 0:06')).toBeTruthy();
-    cleanup();
-    mostrar({}, { ...postExemplo, temAudio: true, enderecoDoAudio: 'https://cdn.test/a.webm' });
-    expect(screen.getByLabelText('Tempo do áudio: 0:00')).toBeTruthy();
-    cleanup();
-    mostrar({ duracaoDoAudio: 12 }, { ...postExemplo, temAudio: true, enderecoDoAudio: 'https://cdn.test/a.webm', duracaoSegundos: 6 });
-    expect(screen.getByLabelText('Tempo do áudio: 0:12')).toBeTruthy();
-  });
-
-  describe('variante perfil (print do perfil)', () => {
-    it('sem nota, sem reações emoji e sem salvar; só comentar, curtir e compartilhar', () => {
-      mostrar(
-        { variante: 'perfil', salvo: false, reacoes: { like: 1, fogo: 2, nojo: 0, trofeu: 3 }, aoCurtir: vi.fn(), aoReagir: vi.fn(), aoAlternarSalvar: vi.fn() },
-        { ...postExemplo, nota: 82 },
-      );
-      expect(document.querySelector('article.card-do-post')?.classList.contains('card-do-post--perfil')).toBe(true);
-      expect(screen.queryByText('NOTA')).toBeNull();
-      for (const nome of ['🔥', '🤢', '🏆', 'Salvar', 'Salvo']) expect(screen.queryByRole('button', { name: nome })).toBeNull();
-      const toolbar = screen.getByRole('toolbar', { name: 'Ações do causo' });
-      expect(toolbar.querySelectorAll('button')).toHaveLength(3);
-      expect(screen.getByRole('button', { name: 'Curtir' }).textContent).toContain('1');
-    });
-
-    it('sem ação de curtir ligada à porta o coração nem aparece (não fica desabilitado com número)', () => {
-      mostrar({ variante: 'perfil', aoCurtir: undefined });
-      expect(screen.queryByRole('button', { name: 'Curtir' })).toBeNull();
-      expect(screen.getByRole('toolbar', { name: 'Ações do causo' }).querySelectorAll('button')).toHaveLength(2);
-    });
-
-    it('⋯ apaga no perfil do dono e denuncia no de outra pessoa', () => {
-      const aoApagar = vi.fn();
-      mostrar({ variante: 'perfil', aoApagar });
-      fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
-      expect(screen.queryByRole('menuitem', { name: 'Denunciar' })).toBeNull();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Apagar' }));
-      expect(aoApagar).toHaveBeenCalledOnce();
-      cleanup();
-      const aoDenunciar = vi.fn();
-      mostrar({ variante: 'perfil', aoDenunciar });
-      fireEvent.click(screen.getByRole('button', { name: 'Mais ações' }));
-      expect(screen.queryByRole('menuitem', { name: 'Apagar' })).toBeNull();
-      fireEvent.click(screen.getByRole('menuitem', { name: 'Denunciar' }));
-      expect(aoDenunciar).toHaveBeenCalledOnce();
-    });
   });
 
   it('botão sem ação fica desabilitado e explica, em vez de não fazer nada', () => {

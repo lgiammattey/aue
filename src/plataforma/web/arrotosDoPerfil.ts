@@ -1,9 +1,11 @@
 import { configuracaoAusente, supabase } from '../../db/supabase';
 import { garantirSessao } from '../../shared/auth/sessaoAnonima';
 import type {
+  AudioDeArquivoDoPerfil,
   ArrotoDoPerfil,
   PortaDeArrotosDoPerfil,
   RascunhoDeArrotoDoPerfil,
+  ResultadoDoPreparoDeArquivoDeAudio,
   ResultadoDaPublicacaoDeArroto,
   ResultadoDoPreparoDeArroto,
 } from '../../portas/arrotosDoPerfil';
@@ -12,7 +14,49 @@ const BUCKET_DE_ARROTOS_DO_PERFIL = 'arrotos_de_perfil';
 const TIPOS_DE_AUDIO = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/mpeg'];
 const LIMITE_DO_AUDIO = 12 * 1024 * 1024;
 const DURACAO_MAXIMA = 90;
+const DURACAO_MAXIMA_DO_ARQUIVO_MS = 30_000;
 const SEGUNDOS_DA_URL_ASSINADA = 60;
+
+function normalizarMimeDoAudio(mime: string): string {
+  return mime.trim().toLowerCase().split(';', 1)[0] ?? '';
+}
+
+function normalizarAudioParaEnvio(audio: Blob): Blob | null {
+  const mime = normalizarMimeDoAudio(audio.type);
+  if (!TIPOS_DE_AUDIO.includes(mime)) return null;
+  return audio.type === mime ? audio : new Blob([audio], { type: mime });
+}
+
+/**
+ * Lê a duração do próprio arquivo por metadados. Não há fallback por tamanho:
+ * um arquivo cuja duração não pode ser aberta não é seguro para publicar.
+ */
+function lerDuracaoDoArquivo(arquivo: Blob): Promise<number | null> {
+  if (typeof Audio === 'undefined' || typeof URL === 'undefined' || !URL.createObjectURL) {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolver) => {
+    const url = URL.createObjectURL(arquivo);
+    const audio = new Audio();
+    let encerrado = false;
+    const finalizar = (duracao: number | null) => {
+      if (encerrado) return;
+      encerrado = true;
+      globalThis.clearTimeout(tempoLimite);
+      audio.removeAttribute('src');
+      audio.load();
+      URL.revokeObjectURL(url);
+      resolver(duracao);
+    };
+    const tempoLimite = globalThis.setTimeout(() => finalizar(null), 8_000);
+
+    audio.preload = 'metadata';
+    audio.onloadedmetadata = () => finalizar(Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : null);
+    audio.onerror = () => finalizar(null);
+    audio.src = url;
+  });
+}
 
 interface LinhaDeArroto {
   id: string;
@@ -51,6 +95,22 @@ function traduzirArroto(linha: LinhaDeArroto): ArrotoDoPerfil {
 /** Adaptador Supabase para gravações diretas publicadas em perfis autenticados. */
 export function criarArrotosDoPerfilRemoto(): PortaDeArrotosDoPerfil {
   return {
+    async prepararArquivoDeAudio(arquivo: File): Promise<ResultadoDoPreparoDeArquivoDeAudio> {
+      const audio = normalizarAudioParaEnvio(arquivo);
+      if (!audio) return { ok: false, motivo: 'formatoInvalido' };
+      if (audio.size < 1 || audio.size > LIMITE_DO_AUDIO) return { ok: false, motivo: 'grandeDemais' };
+
+      const duracaoSegundos = await lerDuracaoDoArquivo(audio);
+      if (duracaoSegundos === null) return { ok: false, motivo: 'metadadosIndisponiveis' };
+      const duracaoMs = Math.round(duracaoSegundos * 1_000);
+      if (duracaoMs < 1 || duracaoMs > DURACAO_MAXIMA_DO_ARQUIVO_MS) {
+        return { ok: false, motivo: 'duracaoInvalida' };
+      }
+
+      const pronto: AudioDeArquivoDoPerfil = { dados: audio, duracaoMs };
+      return { ok: true, audio: pronto };
+    },
+
     async prepararArroto(destinoHandle?: string): Promise<ResultadoDoPreparoDeArroto> {
       if (configuracaoAusente) return { ok: false, motivo: 'semRede' };
       try {
@@ -84,8 +144,9 @@ export function criarArrotosDoPerfilRemoto(): PortaDeArrotosDoPerfil {
 
     async publicarArroto(rascunho: RascunhoDeArrotoDoPerfil, audio: Blob, duracaoSegundos: number): Promise<ResultadoDaPublicacaoDeArroto> {
       if (configuracaoAusente) return { ok: false, motivo: 'semRede' };
-      if (!TIPOS_DE_AUDIO.includes(audio.type)) return { ok: false, motivo: 'formatoInvalido' };
-      if (audio.size > LIMITE_DO_AUDIO) return { ok: false, motivo: 'grandeDemais' };
+      const audioNormalizado = normalizarAudioParaEnvio(audio);
+      if (!audioNormalizado) return { ok: false, motivo: 'formatoInvalido' };
+      if (audioNormalizado.size > LIMITE_DO_AUDIO) return { ok: false, motivo: 'grandeDemais' };
       if (!Number.isFinite(duracaoSegundos) || duracaoSegundos <= 0 || duracaoSegundos > DURACAO_MAXIMA) {
         return { ok: false, motivo: 'duracaoInvalida' };
       }
@@ -94,7 +155,7 @@ export function criarArrotosDoPerfilRemoto(): PortaDeArrotosDoPerfil {
         if (!sessao?.user?.id) return { ok: false, motivo: 'semConta' };
         const { error: erroDoUpload } = await supabase.storage
           .from(BUCKET_DE_ARROTOS_DO_PERFIL)
-          .upload(rascunho.caminhoDoAudio, audio, { upsert: false, contentType: audio.type });
+          .upload(rascunho.caminhoDoAudio, audioNormalizado, { upsert: false, contentType: audioNormalizado.type });
         if (erroDoUpload) throw erroDoUpload;
         const { data, error } = await supabase.rpc('publicar_arroto_do_perfil', {
           p_arroto_id: rascunho.id,

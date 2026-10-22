@@ -1,5 +1,5 @@
 /**
- * A porta da telemetria — os dez eventos do funil, e nada além disso.
+ * A porta da telemetria — o funil da Arena e acessos agregados a páginas.
  *
  * A Arena manda o nome do evento (e, quando existe, o código da batalha) e
  * esquece. Ela não sabe o que é sessão, Supabase, `sessionStorage` nem CHECK de
@@ -11,7 +11,9 @@
  * aparece para quem está jogando.
  */
 
-/** Os dez eventos do funil v1 (`docs/schema/nomenclatura.md`, `eventos_de_telemetria`). */
+import type { PaginaMonitorada } from '../nucleo/telemetria/paginas';
+
+/** Eventos permitidos pela tabela `eventos_de_telemetria`. */
 export const EVENTOS_DE_TELEMETRIA = [
   'abriu_arena',
   'iniciou_arroto',
@@ -23,6 +25,7 @@ export const EVENTOS_DE_TELEMETRIA = [
   'respondeu_x1',
   'pediu_revanche',
   'concluiu_roda',
+  'visitou_pagina',
 ] as const;
 
 export type EventoDeTelemetria = (typeof EVENTOS_DE_TELEMETRIA)[number];
@@ -35,6 +38,8 @@ export interface DetalheDoEvento {
    * código do link (ver a migração `20260826000001`).
    */
   readonly batalhaCodigo?: string;
+  /** Categoria pública, sem URL, slug, termo de busca ou identificador. */
+  readonly pagina?: PaginaMonitorada;
 }
 
 export interface Telemetria {

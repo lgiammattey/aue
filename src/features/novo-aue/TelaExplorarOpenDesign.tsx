@@ -179,8 +179,8 @@ export function TelaExplorarOpenDesign({ portaForum, portaConta, portaPerfil, am
   const mensagemDeErro = online ? 'Deu ruim pra carregar o que está acontecendo.' : 'Sem internet.';
   return (
     <div className="app od-explore" data-testid="explorar-opendesign">
-      <BarraLateral viewAtual="explorar" comunidades={comunidades} estaAutenticado={autenticado}
-        aoMudarView={() => undefined} aoAbrirCompositor={() => navigate('/arena')} aoSair={async () => { await conta.sair(); navigate('/'); }}
+      <BarraLateral viewAtual="explorar" estaAutenticado={autenticado}
+        aoMudarView={() => undefined} aoAbrirGravadorRapido={() => navigate('/?gravar=1')} aoSair={async () => { await conta.sair(); navigate('/'); }}
         aoEntrar={() => navigate('/login?modo=entrar')} />
       <main className="od-explore__main">
         <BarraSuperior busca={rascunho} estaAutenticado={autenticado} meuPerfil={meuPerfil} aoBuscar={setRascunho} aoEntrar={() => navigate('/login?modo=entrar')} mostrarBusca={false} />
@@ -219,7 +219,7 @@ export function TelaExplorarOpenDesign({ portaForum, portaConta, portaPerfil, am
           )}
         </section>
       </main>
-      <PainelDireito comunidades={comunidades} viewAtual="explorar" estadoDasComunidades={faseComunidades} aoTentarComunidades={() => setTentativaComunidades((atual) => atual + 1)} aoAbrirComunidade={() => undefined} />
+      <PainelDireito comunidades={comunidades} viewAtual="explorar" estaAutenticado={autenticado} contaPerfil={meuPerfil} estadoDasComunidades={faseComunidades} aoTentarComunidades={() => setTentativaComunidades((atual) => atual + 1)} aoAbrirComunidade={() => undefined} />
     </div>
   );
 }

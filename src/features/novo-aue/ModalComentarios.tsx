@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import type { ControleDeDialogo } from '../../portas/controleDeDialogo';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
-import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
+import { VideoDaResposta } from './VideoDaResposta';
+import { PreviaDeVideoNoCompositor } from './PreviaDeVideoNoCompositor';
 
 interface Props {
   readonly aberto: boolean;
@@ -12,7 +12,9 @@ interface Props {
   readonly comentarios: readonly ItemComentario[];
   readonly carregando: boolean;
   readonly enviando: boolean;
-  readonly controleDeDialogo: ControleDeDialogo;
+  readonly autor?: { readonly nome: string; readonly avatarUrl?: string };
+  /** Comentário acionado no feed; abre o compositor já endereçado a ele. */
+  readonly comentarioInicialParaResponder?: ItemComentario | null;
   readonly aoFechar: () => void;
   readonly criarGravacao?: () => GravacaoLivreDoForum;
   readonly aoEnviarComentario: (dados: {
@@ -42,7 +44,8 @@ export function ModalComentarios({
   comentarios,
   carregando,
   enviando,
-  controleDeDialogo,
+  autor,
+  comentarioInicialParaResponder = null,
   aoFechar,
   criarGravacao,
   aoEnviarComentario,
@@ -51,8 +54,6 @@ export function ModalComentarios({
   const [paiId, setPaiId] = useState<string | null>(null);
   const [autorResposta, setAutorResposta] = useState<string | null>(null);
   const [anexo, setAnexo] = useState<AnexoRascunho | null>(null);
-  const [mostrarCampoLink, setMostrarCampoLink] = useState(false);
-  const [link, setLink] = useState('');
   const [erro, setErro] = useState<string | null>(null);
   const [gravando, setGravando] = useState(false);
   const [segundosGravacao, setSegundosGravacao] = useState(0);
@@ -60,7 +61,6 @@ export function ModalComentarios({
   const gravacao = useRef<GravacaoLivreDoForum | null>(null);
   const timerGravacao = useRef<number | null>(null);
   const inputTextoRef = useRef<HTMLTextAreaElement>(null);
-  const limparVisibilidadeDoCampo = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     return () => {
@@ -70,24 +70,11 @@ export function ModalComentarios({
   }, []);
 
   useEffect(() => {
-    if (!aberto) return;
-    return controleDeDialogo.bloquearRolagemDoDocumento();
-  }, [aberto, controleDeDialogo]);
-
-  useEffect(() => {
-    if (!aberto) return;
-    limparVisibilidadeDoCampo.current?.();
-    limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('comentarios-campo');
-    return () => {
-      limparVisibilidadeDoCampo.current?.();
-      limparVisibilidadeDoCampo.current = null;
-    };
-  }, [aberto, controleDeDialogo]);
-
-  const manterCampoVisivel = () => {
-    limparVisibilidadeDoCampo.current?.();
-    limparVisibilidadeDoCampo.current = controleDeDialogo.manterCampoVisivelAoAbrirTeclado('comentarios-campo');
-  };
+    if (!aberto || !comentarioInicialParaResponder) return;
+    setPaiId(comentarioInicialParaResponder.id);
+    setAutorResposta(comentarioInicialParaResponder.autorNome);
+    inputTextoRef.current?.focus();
+  }, [aberto, comentarioInicialParaResponder]);
 
   if (!aberto || !post) return null;
 
@@ -101,18 +88,6 @@ export function ModalComentarios({
       return;
     }
     setAnexo({ tipo: 'imagem', arquivo });
-    setErro(null);
-  };
-
-  const adicionarLink = () => {
-    const video = detectarLinkDeVideo(link.trim());
-    if (!video) {
-      setErro('Cole um link válido do YouTube ou TikTok.');
-      return;
-    }
-    setAnexo({ tipo: 'videoExterno', url: video.urlOriginal });
-    setLink('');
-    setMostrarCampoLink(false);
     setErro(null);
   };
 
@@ -139,6 +114,8 @@ export function ModalComentarios({
       setErro(
         inicio.motivo === 'negado'
           ? 'Libere o microfone para gravar.'
+          : inicio.motivo === 'inseguro'
+            ? 'Para gravar áudio, abra o Auê em localhost ou HTTPS.'
           : 'Não deu para iniciar a gravação.',
       );
       return;
@@ -196,10 +173,10 @@ export function ModalComentarios({
       setPaiId(null);
       setAutorResposta(null);
       setAnexo(null);
-      setLink('');
-      setMostrarCampoLink(false);
     }
   };
+
+  const inicialDoAutor = (autor?.nome || 'Você').charAt(0).toUpperCase();
 
   return (
     <div
@@ -216,9 +193,9 @@ export function ModalComentarios({
         {/* Cabeçalho */}
         <header className="comments-sheet-header">
           <div className="comments-sheet-title-wrap">
-            <span className="comments-sheet-badge">r/{post.comunidadeSlug}</span>
+            {post.origem !== 'pessoal' && <span className="comments-sheet-badge">r/{post.comunidadeSlug}</span>}
             <h2 id="modalComentariosTitulo" className="comments-sheet-title">
-              Resenha na roda
+              {post.origem === 'pessoal' ? 'Conversa do post' : 'Resenha na roda'}
             </h2>
           </div>
           <button
@@ -300,7 +277,6 @@ export function ModalComentarios({
                           c.autorNome
                         )}
                       </strong>
-                      {c.autorHandle && <span>@{c.autorHandle}</span>}
                       <span>·</span>
                       <time>{tempoRelativo(c.criadoEm)}</time>
                     </div>
@@ -322,17 +298,10 @@ export function ModalComentarios({
                       </div>
                     )}
 
-                    {c.anexo?.tipo === 'videoExterno' &&
-                      c.anexo.url &&
-                      detectarLinkDeVideo(c.anexo.url) && (
-                        <iframe
-                          className="post-video"
-                          src={detectarLinkDeVideo(c.anexo.url)!.embedUrl}
-                          title="Vídeo no comentário"
-                          loading="lazy"
-                          allowFullScreen
-                        />
-                      )}
+                    <VideoDaResposta
+                      conteudo={c.conteudo}
+                      urlDoAnexo={c.anexo?.tipo === 'videoExterno' ? c.anexo.url : undefined}
+                    />
 
                     <div className="comment-actions">
                       <button
@@ -366,20 +335,26 @@ export function ModalComentarios({
             </div>
           )}
 
-          <div className="comments-input-row">
+          <div className="composer-message-row comments-input-row">
+            <span className="composer-author-avatar" aria-hidden="true">
+              {autor?.avatarUrl ? <img src={autor.avatarUrl} alt="" /> : inicialDoAutor}
+            </span>
             <textarea
               ref={inputTextoRef}
-              id="comentarios-campo"
               maxLength={LIMITE}
               value={texto}
-              onChange={(e) => setTexto(e.target.value)}
-              onFocus={manterCampoVisivel}
+              onChange={(e) => {
+                setTexto(e.target.value);
+                setErro(null);
+              }}
               placeholder={autorResposta ? `Responder a ${autorResposta}…` : 'Responder para a roda…'}
               aria-label="Escrever resposta"
               rows={2}
               disabled={enviando || gravando}
             />
           </div>
+
+          {!anexo && <PreviaDeVideoNoCompositor texto={texto} />}
 
           {/* Anexo selecionado */}
           {anexo && (
@@ -399,35 +374,6 @@ export function ModalComentarios({
                 aria-label="Remover anexo"
               >
                 ✕
-              </button>
-            </div>
-          )}
-
-          {/* Campo para colar link de vídeo */}
-          {mostrarCampoLink && !anexo && (
-            <div className="composer-link-input-bar">
-              <input
-                type="url"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-                placeholder="Cole o link do YouTube ou TikTok"
-                aria-label="Link do vídeo"
-                disabled={enviando || gravando}
-              />
-              <button
-                type="button"
-                className="action-pill-btn"
-                onClick={adicionarLink}
-                disabled={enviando || gravando || !link.trim()}
-              >
-                Anexar
-              </button>
-              <button
-                type="button"
-                className="action-pill-btn"
-                onClick={() => setMostrarCampoLink(false)}
-              >
-                Cancelar
               </button>
             </div>
           )}
@@ -506,10 +452,10 @@ export function ModalComentarios({
               <button
                 type="button"
                 className="composer-tool-btn"
-                onClick={() => setMostrarCampoLink((ant) => !ant)}
-                disabled={enviando || gravando || Boolean(anexo)}
-                title="Adicionar vídeo do YouTube/TikTok"
-                aria-label="Adicionar vídeo externo"
+                onClick={() => inputTextoRef.current?.focus()}
+                disabled={enviando || gravando}
+                title="Cole um link do YouTube ou TikTok no texto"
+                aria-label="Colar link de vídeo no texto"
               >
                 <svg
                   width="19"

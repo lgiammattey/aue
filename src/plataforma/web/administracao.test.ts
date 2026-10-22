@@ -17,8 +17,9 @@ describe('administração web', () => {
     rpc.mockResolvedValue({
       data: {
         periodo: { inicio: '2026-10-01', fim: '2026-10-20' },
-        resumo: { total_contas_de_email_atual: 12, cadastros_acompanhados_no_periodo: 2, acompanhamento_de_cadastros_iniciado_em: '2026-10-20T16:39:54Z', perfis_concluidos_no_periodo: 1, perfis_pendentes_atuais: 1, eventos: { abriu_arena: 9 } },
-        eventos_por_dia: [{ data: '2026-10-20', abriu_arena: 2 }],
+        resumo: { total_contas_de_email_atual: 12, contas_anonimas_atuais: 4, contas_ativas_no_periodo: 7, cadastros_acompanhados_no_periodo: 2, acompanhamento_de_cadastros_iniciado_em: '2026-10-20T16:39:54Z', perfis_concluidos_no_periodo: 1, perfis_pendentes_atuais: 1, topicos_publicados_no_periodo: 3, respostas_publicadas_no_periodo: 4, comunidades_ativas_no_periodo: 2, acessos_de_paginas_no_periodo: 9, acompanhamento_de_acessos_iniciado_em: '2026-10-22T12:00:00Z', eventos: { abriu_arena: 9 } },
+        acessos_por_pagina: [{ pagina: 'comunidade', acessos: 5 }],
+        eventos_por_dia: [{ data: '2026-10-20', abriu_arena: 2, acessos_de_paginas: 2, topicos_publicados: 1, respostas_publicadas: 3 }],
         pessoas: [{ apelido: 'Luiz', handle: 'luiz', criado_em: '2026-10-20T10:00:00Z', perfil_social_concluido_em: null, estado: 'ficha_pendente' }],
       },
       error: null,
@@ -26,8 +27,12 @@ describe('administração web', () => {
 
     await expect(criarAdministracaoWeb().obterResumo('2026-10-01', '2026-10-20')).resolves.toMatchObject({
       totalContasDeEmailAtual: 12,
+      contasAnonimasAtuais: 4,
+      contasAtivasNoPeriodo: 7,
       cadastrosNoPeriodo: 2,
       eventos: { abriu_arena: 9 },
+      acessosDePaginasNoPeriodo: 9,
+      acessosPorPagina: [{ pagina: 'comunidade', acessos: 5 }],
       pessoas: [{ apelido: 'Luiz', handle: 'luiz', estado: 'ficha_pendente' }],
     });
     expect(rpc).toHaveBeenCalledWith('painel_administrativo_resumo', {

@@ -102,8 +102,11 @@ button.pf-stat{cursor:pointer}
 @keyframes pfPulse{50%{opacity:.55}}
 /* barra inferior: 5 itens, ARROTAR no centro */
 .pf-nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);height:calc(56px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);border-top:1px solid var(--border);background:var(--bg)}
-.pf-ni{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font:700 11px/14px Archivo,system-ui,sans-serif;cursor:pointer}
+.pf-ni{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font:700 11px/14px Archivo,system-ui,sans-serif;cursor:pointer;padding:0;min-width:0;white-space:nowrap}
 .pf-ni[aria-current="page"]{color:var(--fg)}
+/* Cartão 0031: até 389px as colunas laterais e a do ARROTAR medem 56px e as duas do meio dividem o resto. O ARROTAR fica no centro da tela e os ícones ficam a distâncias iguais; "Comunidades" cabe sem cortar. Até 339px o rótulo vai a 10px. A altura da barra (56px) não muda. */
+@media (max-width:389px){.pf-nav{grid-template-columns:56px minmax(0,1fr) 56px minmax(0,1fr) 56px}}
+@media (max-width:339px){.pf-ni{font-size:10px}}
 .pf-fab{position:relative;justify-self:center;align-self:start;margin-top:-8px;width:52px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0;border-radius:50%;background:var(--accent);color:var(--accent-on);box-shadow:0 0 0 4px var(--bg),0 0 18px rgba(198,255,0,.3);cursor:pointer}
 .pf-fab>span{font:400 8px/9px var(--font-display);letter-spacing:.04em}
 /* desktop: coluna de 600px, capa fina de volta, medidas um degrau acima */

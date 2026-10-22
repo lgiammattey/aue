@@ -25,3 +25,33 @@ describe('layout desktop de 3 colunas', () => {
     expect(css).toMatch(/\.nav-item\.active,[^{]*\{[^}]*color:\s*var\(--aue-text\)/);
   });
 });
+
+describe('barra inferior em telas estreitas (320 a 389px)', () => {
+  const sem = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const bloco = (consulta: string) => {
+    const ini = sem.indexOf(`@media (${consulta})`);
+    expect(ini).toBeGreaterThan(-1);
+    let nivel = 0;
+    for (let i = sem.indexOf('{', ini); i < sem.length; i++) {
+      if (sem[i] === '{') nivel++;
+      if (sem[i] === '}' && --nivel === 0) return sem.slice(ini, i + 1);
+    }
+    return '';
+  };
+
+  it('centra o ARROTAR: três colunas de 56px, as do meio dividem o resto, sem vão', () => {
+    const b = bloco('max-width: 389px');
+    expect(b).toMatch(/\.sidebar \.mobile-bottom-nav\s*\{[^}]*grid-template-columns:\s*56px minmax\(0, 1fr\) 56px minmax\(0, 1fr\) 56px/);
+    expect(b).toMatch(/\.sidebar \.mobile-bottom-nav\s*\{[^}]*gap:\s*0;/);
+  });
+
+  it('rótulo não quebra linha e corta com reticência; 10px de 320 a 339, sem tocar o ARROTAR', () => {
+    expect(bloco('max-width: 389px')).toMatch(/\.mobile-nav-item span\s*\{[^}]*overflow:\s*hidden[^}]*text-overflow:\s*ellipsis[^}]*white-space:\s*nowrap/);
+    expect(bloco('max-width: 339px')).toMatch(/\.mobile-nav-item:not\(\.mobile-nav-item--arrotar\) span\s*\{[^}]*font-size:\s*10px/);
+  });
+
+  it('de 390px para cima nada muda: a base segue repeat(5, 1fr) e o arquivo não esconde rolagem', () => {
+    expect(bloco('max-width: 699px')).toMatch(/\.mobile-bottom-nav\s*\{[^}]*grid-template-columns:\s*repeat\(5, 1fr\)/);
+    expect(sem).not.toContain('overflow-x: hidden');
+  });
+});

@@ -1225,6 +1225,35 @@ main {
   }
 }
 
+/*
+  Barra inferior em telas estreitas (320 a 389px): as colunas do meio ficam com
+  o espaço que sobra e as três de 56px (Feed, ARROTAR, Perfil) não crescem, então
+  o ARROTAR cai no centro da tela e os ícones ficam a distâncias iguais. Com
+  `1fr` puro a coluna de "Comunidades" crescia até o rótulo e empurrava o resto.
+  `.sidebar .mobile-bottom-nav` (0,2,0) é preciso para o `gap: 0` ganhar de
+  `.sidebar nav { gap: 4px }`. De 390px para cima nada muda.
+*/
+@media (max-width: 389px) {
+  .sidebar .mobile-bottom-nav {
+    grid-template-columns: 56px minmax(0, 1fr) 56px minmax(0, 1fr) 56px;
+    gap: 0;
+  }
+
+  .mobile-nav-item span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 339px) {
+  .mobile-nav-item:not(.mobile-nav-item--arrotar) span {
+    font-size: 10px;
+  }
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;

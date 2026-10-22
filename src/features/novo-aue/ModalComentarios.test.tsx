@@ -116,13 +116,13 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
     );
 
     const input = screen.getByPlaceholderText('Responder para a roda…');
-    fireEvent.change(input, { target: { value: 'Comentário teste!' } });
+    fireEvent.change(input, { target: { value: 'Comentário teste!\nSegunda linha\n\nOutro parágrafo' } });
 
     const btnEnviar = screen.getByRole('button', { name: 'Responder' });
     fireEvent.click(btnEnviar);
 
     expect(aoEnviar).toHaveBeenCalledWith({
-      conteudo: 'Comentário teste!',
+      conteudo: 'Comentário teste!\nSegunda linha\n\nOutro parágrafo',
       paiId: null,
       anexo: null,
     });

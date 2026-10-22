@@ -324,8 +324,8 @@ describe('responder o tópico', () => {
 
 describe('responder: cada motivo do servidor (spec 6.6)', () => {
   const simples: ReadonlyArray<readonly [MotivoDeEscrita, string]> = [
-    ['respostaInvalida', 'A resposta precisa ter de 1 a 500 caracteres.'],
-    ['corpoInvalido', 'A resposta precisa ter de 1 a 500 caracteres.'],
+    ['respostaInvalida', 'A resposta precisa ter de 1 a 1000 caracteres.'],
+    ['corpoInvalido', 'A resposta precisa ter de 1 a 1000 caracteres.'],
     ['precisaEntrar', 'Sua sessão acabou ou essa conta não pode participar. Entra de novo, seu texto fica aqui.'],
     ['semConfirmacao', 'Não deu pra confirmar o envio. Seu texto continua aqui. Antes de tentar de novo, confere se já apareceu.'],
     ['falhou', 'Não deu para enviar. Seu texto continua aqui, tenta de novo.'],

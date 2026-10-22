@@ -12,15 +12,19 @@ import {
 } from './limites';
 
 describe('limites de texto', () => {
+  it.each([LIMITE_TEXTO_TOPICO, LIMITE_RESPOSTA])('aceita o limite de %i e recusa um caractere a mais', (limite) => {
+    expect(cabeNoLimite('a'.repeat(limite), limite)).toBe(true);
+    expect(cabeNoLimite('a'.repeat(limite + 1), limite)).toBe(false);
+  });
   it('bate com os limites das RPCs', () => {
     expect(LIMITE_CAUSO).toBe(1000);
     expect(LIMITE_COMENTARIO).toBe(500);
   });
 
-  it('limites do fórum batem com as RPCs de tópico (título 120, texto 1000, resposta 500, motivo 500)', () => {
+  it('limites do fórum batem com as RPCs de tópico (título 120, texto 2000, resposta 1000, motivo 500)', () => {
     expect(LIMITE_TITULO_TOPICO).toBe(120);
-    expect(LIMITE_TEXTO_TOPICO).toBe(1000);
-    expect(LIMITE_RESPOSTA).toBe(500);
+    expect(LIMITE_TEXTO_TOPICO).toBe(2000);
+    expect(LIMITE_RESPOSTA).toBe(1000);
     expect(LIMITE_MOTIVO_DE_DENUNCIA).toBe(500);
   });
 

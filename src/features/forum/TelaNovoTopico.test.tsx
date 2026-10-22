@@ -398,7 +398,7 @@ describe('duplo toque e duplo envio (spec 6.7)', () => {
 describe('falhas: texto intacto e frase por motivo (spec 6.6)', () => {
   const casos: ReadonlyArray<readonly [MotivoDeEscrita, string, 'titulo' | 'corpo' | 'geral']> = [
     ['tituloInvalido', 'O título precisa ter de 1 a 120 caracteres.', 'titulo'],
-    ['corpoInvalido', 'A mensagem precisa ter de 1 a 1000 caracteres.', 'corpo'],
+    ['corpoInvalido', 'A mensagem precisa ter de 1 a 2000 caracteres.', 'corpo'],
     ['comunidadeInexistente', 'Essa comunidade não existe mais.', 'geral'],
     ['naoEMembro', 'Entre na comunidade antes de participar.', 'geral'],
     ['precisaEntrar', 'Sua sessão acabou ou essa conta não pode participar. Entra de novo, seu texto fica aqui.', 'geral'],

@@ -6,9 +6,11 @@ const upload = vi.fn();
 const remove = vi.fn();
 const createSignedUrl = vi.fn();
 const getPublicUrl = vi.fn();
+const assinarUrlDoAudio = vi.fn();
 
 vi.mock('../../db/supabase', () => ({
   configuracaoAusente: false,
+  assinarUrlDoAudio: (...a: unknown[]) => assinarUrlDoAudio(...a),
   supabase: {
     rpc: (...a: unknown[]) => rpc(...a),
     auth: { getSession: (...a: unknown[]) => getSession(...a) },
@@ -97,6 +99,12 @@ const linhaDoExplorar = (o: Record<string, unknown> = {}) => ({
   criado_em: '2026-10-19T12:00:00.111111+00:00',
   ultima_atividade_em: '2026-10-19T13:00:00.222222+00:00',
   respostas_total: 0,
+  resultado_id: null,
+  nota: null,
+  duracao: null,
+  subtipo_de_origem: null,
+  caminho_do_audio: null,
+  caminho_do_audio_da_casa: null,
   ...o,
 });
 
@@ -116,6 +124,7 @@ beforeEach(() => {
   remove.mockReset();
   createSignedUrl.mockReset();
   getPublicUrl.mockReset();
+  assinarUrlDoAudio.mockReset();
   getPublicUrl.mockReturnValue({ data: { publicUrl: 'https://cdn.aue.test/midia.jpg' } });
   vi.spyOn(console, 'error').mockImplementation(() => {});
   comoMembro();
@@ -142,6 +151,21 @@ describe('dependência de gravação livre', () => {
     expect(gravador).toMatchObject({
       iniciar: expect.any(Function), parar: expect.any(Function), cancelar: expect.any(Function),
     });
+  });
+});
+
+describe('áudio da casa', () => {
+  it('resolve o arquivo público na plataforma, sem expor Storage para a tela', () => {
+    getPublicUrl.mockReturnValue({ data: { publicUrl: 'https://cdn.aue.test/audio_da_casa/burpzilla/a.m4a' } });
+    const endereco = criarForumWeb().enderecoDoAudioDaCasa?.('burpzilla/a.m4a');
+    expect(endereco).toBe('https://cdn.aue.test/audio_da_casa/burpzilla/a.m4a');
+    expect(getPublicUrl).toHaveBeenCalledWith('burpzilla/a.m4a');
+  });
+
+  it('assina resultado autorizado pela plataforma somente quando o player pedir', async () => {
+    assinarUrlDoAudio.mockResolvedValue('https://assinada.aue.test/a.webm');
+    await expect(criarForumWeb().assinarAudioDoResultado?.('resultados/a.webm')).resolves.toBe('https://assinada.aue.test/a.webm');
+    expect(assinarUrlDoAudio).toHaveBeenCalledWith('resultados/a.webm');
   });
 });
 
@@ -219,6 +243,24 @@ describe('cursor com microssegundo', () => {
     expect(porAtividade.ok && porAtividade.valor.proximo?.valor).toBe('2026-10-19T13:00:00.222222+00:00');
     const recentes = await f.explorarTopicos({ limite: 1, ordem: 'recentes' });
     expect(recentes.ok && recentes.valor.proximo?.valor).toBe('2026-10-19T12:00:00.111111+00:00');
+  });
+
+  it('hidrata áudio autorizado em lote, sem buscar tópico por tópico', async () => {
+    rpc.mockResolvedValue({
+      data: [{
+        topico_id: ID_A,
+        resultado_id: ID_B,
+        nota: 88,
+        duracao: 3.2,
+        subtipo_de_origem: 'arena',
+        caminho_do_audio: 'resultados/a.webm',
+        caminho_do_audio_da_casa: null,
+      }],
+      error: null,
+    });
+    const leitura = await criarForumWeb().listarAudioDosTopicos?.([ID_A, ID_A, 'fora-do-formato']);
+    expect(leitura).toMatchObject({ ok: true, valor: [{ topicoId: ID_A, audio: { caminhoDoAudio: 'resultados/a.webm', nota: 88 } }] });
+    expect(rpc).toHaveBeenCalledWith('audio_de_topicos', { p_ids: [ID_A] });
   });
 
   it('listas do autor: cursor por criado_em, mandado de volta sem conversão', async () => {
@@ -809,6 +851,15 @@ describe('escritas: sucesso e o que vai ao servidor', () => {
 });
 
 describe('mídia persistente da comunidade', () => {
+  it.each(['avatar', 'capa'] as const)('não envia %s sem autorização do dono ou moderador', async (tipo) => {
+    rpc.mockResolvedValueOnce({ data: [linhaDaComunidade({ posso_gerir_midia: false })], error: null });
+    const resultado = await criarForumWeb().definirMidiaDaComunidade?.({
+      comunidadeSlug: 'bonde-geral', tipo, arquivo: new Blob(['jpeg'], { type: 'image/jpeg' }),
+    });
+    expect(resultado).toEqual({ ok: false, motivo: 'naoEAutor' });
+    expect(upload).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalledWith('definir_midia_da_comunidade', expect.anything());
+  });
   it('envia apenas JPEG para o caminho determinístico e publica pela RPC', async () => {
     const arquivo = new Blob(['jpeg final'], { type: 'image/jpeg' });
     rpc.mockResolvedValueOnce({ data: [linhaDaComunidade()], error: null });

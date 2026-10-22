@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { LIMITE_RESPOSTA } from '../../nucleo/comunidade/limites';
 import { Link } from 'react-router-dom';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import type { ItemComentario, ItemDoFeed } from './tipos';
@@ -24,7 +25,7 @@ interface Props {
   }) => Promise<boolean>;
 }
 
-const LIMITE = 180;
+
 
 function tempoRelativo(iso: string): string {
   try {
@@ -50,6 +51,7 @@ export function ModalComentarios({
   criarGravacao,
   aoEnviarComentario,
 }: Props) {
+  const LIMITE = post?.tipo === 'topico' ? LIMITE_RESPOSTA : 180;
   const [texto, setTexto] = useState('');
   const [paiId, setPaiId] = useState<string | null>(null);
   const [autorResposta, setAutorResposta] = useState<string | null>(null);

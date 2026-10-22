@@ -178,6 +178,12 @@ export interface AnexoDeAudioDoTopico {
   readonly caminhoDoAudioDaCasa: string | null;
 }
 
+/** Metadados de áudio já autorizados para uma página de tópicos. */
+export interface AudioDeTopico {
+  readonly topicoId: string;
+  readonly audio: AnexoDeAudioDoTopico;
+}
+
 /** Mídia livre de uma conversa. `caminho` não é URL: a plataforma o assina. */
 export type AnexoDoForum =
   | {
@@ -292,7 +298,7 @@ export interface PreviaDeRespostaDoTopico {
   readonly anexo: AnexoDoForum | null;
 }
 
-/** Linha do Explorar: sem corpo, sem áudio, sem nota. */
+/** Linha do Explorar: sem corpo; o áudio autorizado vem sem URL. */
 export interface TopicoDoExplorar {
   readonly id: string;
   readonly comunidade: ReferenciaDeComunidade;
@@ -303,6 +309,8 @@ export interface TopicoDoExplorar {
   readonly criadoEm: string;
   readonly ultimaAtividadeEm: string;
   readonly respostasTotal: number;
+  /** Ausente enquanto o servidor antigo ainda não projeta metadados de áudio. */
+  readonly audio?: AnexoDeAudioDoTopico | null;
 }
 
 export interface TopicoDoAutor {
@@ -316,6 +324,8 @@ export interface TopicoDoAutor {
   readonly editadoEm: string | null;
   readonly ultimaAtividadeEm: string;
   readonly respostasTotal: number;
+  /** Ausente enquanto o servidor antigo ainda não projeta metadados de áudio. */
+  readonly audio?: AnexoDeAudioDoTopico | null;
 }
 
 export interface RespostaDoAutor {
@@ -526,6 +536,9 @@ export interface PortaDeForum {
     opcoes?: OpcoesDePaginaCronologica,
   ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, TopicoDoAutor>>>;
 
+  /** Projeção única para uma página; o servidor aplica consentimento e visibilidade. */
+  listarAudioDosTopicos?(topicoIds: readonly string[]): Promise<ResultadoDaLeitura<readonly AudioDeTopico[]>>;
+
   listarRespostasDoAutor(
     handle: string,
     opcoes?: OpcoesDePaginaCronologica,
@@ -556,6 +569,15 @@ export interface PortaDeForum {
 
   /** Gera URL curta para mídia do bucket privado. Link externo não passa aqui. */
   assinarAnexoDoForum?(caminho: string): Promise<ResultadoDaLeitura<string>>;
+
+  /**
+   * Resolve o endereço público e estável do acervo da casa. A tela só recebe
+   * caminhos que a leitura do tópico já autorizou; ela não conhece Storage.
+   */
+  enderecoDoAudioDaCasa?(caminho: string): string | null;
+
+  /** Assina sob demanda um resultado já liberado pela leitura do tópico. */
+  assinarAudioDoResultado?(caminho: string): Promise<string | null>;
 
   /** Fábrica injetada pela plataforma; tela não conhece MediaRecorder nem navigator. */
   criarGravacaoLivreDoForum?(): GravacaoLivreDoForum;

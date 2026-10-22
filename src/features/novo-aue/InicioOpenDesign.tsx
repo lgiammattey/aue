@@ -13,6 +13,7 @@ import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarCapturaWeb } from '../../plataforma/web/captura';
 import { criarControleDeDialogoWeb } from '../../plataforma/web/controleDeDialogo';
 import { criarForumWeb } from '../../plataforma/web/forum';
+import { criarPautasWeb } from '../../plataforma/web/pautas';
 import { criarArrotosDoPerfilRemoto } from '../../plataforma/web/arrotosDoPerfil';
 import { criarUrlDePreviewDeImagem, prepararImagemDePerfil, revokeUrlDePreviewDeImagem } from '../../plataforma/web/imagem';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
@@ -20,12 +21,14 @@ import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arroto
 import type { CapturaDeAudio } from '../../portas/captura';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import { sugerirHandle, type PortaDeConta, type ResultadoDaConta } from '../../portas/conta';
-import type { AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, CursorDoForum, NotificacaoDeMencao, PortaDeForum, PreviaDeRespostaDoTopico, PublicacaoPessoal, RespostaDoForum, TipoDeMidiaDaComunidade, TopicoDoAutor } from '../../portas/forum';
+import type { AnexoDeAudioDoTopico, AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, CursorDoForum, NotificacaoDeMencao, PortaDeForum, PreviaDeRespostaDoTopico, PublicacaoPessoal, RespostaDoForum, TipoDeMidiaDaComunidade, TopicoDoAutor } from '../../portas/forum';
 import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
+import type { PautaDoForum, PortaDePautas } from '../../portas/pautas';
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
 import { CardDoPost } from './CardDoPost';
 import { ListaDeTopicos } from './ListaDeTopicos';
+import { PautaAbertaDaComunidade } from './PautaDaComunidade';
 import { SlotPatrocinadoDoFeed } from './SlotPatrocinadoDoFeed';
 import { PreviaDaConversa } from './PreviaDaConversa';
 import { ThreadDeComentarios } from './ThreadDeComentarios';
@@ -49,6 +52,7 @@ import './InicioOpenDesign.css';
 
 interface Props {
   readonly portaForum?: PortaDeForum;
+  readonly portaPautas?: PortaDePautas;
   readonly portaComunidade?: PortaDeComunidade;
   readonly portaPerfil?: PortaDePerfil;
   readonly portaConta?: PortaDeConta;
@@ -102,6 +106,36 @@ function fonteDaCapaDaComunidade(comunidade: Pick<ComunidadeDoForum, 'slug' | 'c
   return comunidade?.capaUrl ?? undefined;
 }
 
+/**
+ * O acervo da casa só chega pela leitura autorizada do tópico. A URL pública
+ * é resolvida pela plataforma, para a tela não conhecer o Storage.
+ */
+function audioDoTopico(audio: AnexoDeAudioDoTopico | null | undefined, forum: PortaDeForum) {
+  if (audio?.caminhoDoAudioDaCasa) {
+    const enderecoDoAudio = forum.enderecoDoAudioDaCasa?.(audio.caminhoDoAudioDaCasa) ?? undefined;
+    return {
+      temAudio: Boolean(enderecoDoAudio),
+      enderecoDoAudio,
+      nota: audio.nota ?? undefined,
+      duracaoSegundos: audio.duracao ?? undefined,
+    };
+  }
+  if (audio?.caminhoDoAudio && forum.assinarAudioDoResultado) {
+    return {
+      temAudio: true,
+      enderecoDoAudio: () => forum.assinarAudioDoResultado!(audio.caminhoDoAudio!),
+      nota: audio.nota ?? undefined,
+      duracaoSegundos: audio.duracao ?? undefined,
+    };
+  }
+  return {
+    temAudio: false,
+    enderecoDoAudio: undefined,
+    nota: undefined,
+    duracaoSegundos: undefined,
+  };
+}
+
 function paraItemDePublicacaoPessoal(publicacao: PublicacaoPessoal, anexo?: AnexoDoForum, urlDoAnexo?: string): ItemDoFeed {
   return {
     id: `topico-${publicacao.id}`,
@@ -120,7 +154,8 @@ function paraItemDePublicacaoPessoal(publicacao: PublicacaoPessoal, anexo?: Anex
   };
 }
 
-function paraItemDeTopicoDoPerfil(topico: TopicoDoAutor, perfil: PerfilPublico, anexo?: AnexoDoForum, urlDoAnexo?: string): ItemDoFeed {
+function paraItemDeTopicoDoPerfil(topico: TopicoDoAutor, perfil: PerfilPublico, forum: PortaDeForum, anexo?: AnexoDoForum, urlDoAnexo?: string, audioProjetado?: AnexoDeAudioDoTopico): ItemDoFeed {
+  const audio = audioDoTopico(audioProjetado ?? topico.audio, forum);
   return {
     id: `topico-${topico.id}`,
     tipo: 'topico',
@@ -132,7 +167,10 @@ function paraItemDeTopicoDoPerfil(topico: TopicoDoAutor, perfil: PerfilPublico, 
     autorAvatarUrl: perfil.avatarUrl ?? undefined,
     criadoEm: topico.criadoEm,
     respostasTotal: topico.respostasTotal,
-    temAudio: anexo?.tipo === 'audio',
+    temAudio: anexo?.tipo === 'audio' || audio.temAudio,
+    enderecoDoAudio: audio.enderecoDoAudio,
+    nota: audio.nota,
+    duracaoSegundos: audio.duracaoSegundos,
     anexo: anexo ? { tipo: anexo.tipo, url: urlDoAnexo, duracaoMs: anexo.duracaoMs } : undefined,
   };
 }
@@ -168,6 +206,7 @@ function paraItemDaPrevia({ resposta, anexo }: PreviaDeRespostaDoTopico): ItemCo
 
 export function InicioOpenDesign({
   portaForum,
+  portaPautas,
   portaComunidade,
   portaPerfil,
   portaConta,
@@ -189,6 +228,11 @@ export function InicioOpenDesign({
   const topicoIdParam = topicoIdInicial ?? params.id;
 
   const [forum] = useState(() => portaForum ?? criarForumWeb());
+  // Testes que injetam o fórum não devem disparar a RPC real de pautas. Em
+  // produção as duas portas vêm da plataforma e a leitura agrupada acontece.
+  const [pautas] = useState<PortaDePautas>(() => portaPautas ?? (portaForum
+    ? { obterPautaPorTopico: async () => ({ ok: true, valor: null }) }
+    : criarPautasWeb()));
   const [comunidadePort] = useState(() => portaComunidade ?? criarComunidadeWeb());
   const [perfilPort] = useState(() => portaPerfil ?? criarPerfilRemoto());
   const [contaPort] = useState(() => portaConta ?? criarContaWeb());
@@ -210,6 +254,9 @@ export function InicioOpenDesign({
   const [falhaComunidade, setFalhaComunidade] = useState(false);
   const [comunidadeInexistente, setComunidadeInexistente] = useState(false);
   const [falhaTopico, setFalhaTopico] = useState(false);
+  const [pautaAberta, setPautaAberta] = useState<PautaDoForum | null>(null);
+  const [entradasDaPauta, setEntradasDaPauta] = useState<readonly ItemDoFeed[]>([]);
+  const [estadoDaPauta, setEstadoDaPauta] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
   const [secaoComunidade, setSecaoComunidade] = useState<'causos' | 'sobre'>('causos');
   const [abaComunidade, setAbaComunidade] = useState<'Ativos' | 'Recentes'>('Ativos');
   const [topicosDaComunidade, setTopicosDaComunidade] = useState<readonly ItemDoFeed[]>([]);
@@ -461,9 +508,14 @@ export function InicioOpenDesign({
 
       const topicos = resultado.valor.itens;
       const anexosPorTopico = new Map<string, AnexoDoForum>();
+      const audioPorTopico = new Map<string, AnexoDeAudioDoTopico>();
       if (forum.listarAnexosDoForum) {
         const leituraAnexos = await forum.listarAnexosDoForum({ topicoIds: topicos.map((topico) => topico.id) });
         if (leituraAnexos.ok) leituraAnexos.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
+      }
+      if (forum.listarAudioDosTopicos) {
+        const leituraAudio = await forum.listarAudioDosTopicos(topicos.map((topico) => topico.id));
+        if (leituraAudio.ok) leituraAudio.valor.forEach(({ topicoId, audio }) => audioPorTopico.set(topicoId, audio));
       }
       if (!ativo) return;
 
@@ -472,7 +524,7 @@ export function InicioOpenDesign({
         const url = anexo?.caminho && forum.assinarAnexoDoForum
           ? await forum.assinarAnexoDoForum(anexo.caminho).then((leitura) => leitura.ok ? leitura.valor : undefined)
           : anexo?.urlVideo ?? undefined;
-        return paraItemDeTopicoDoPerfil(topico, alvo, anexo, url);
+        return paraItemDeTopicoDoPerfil(topico, alvo, forum, anexo, url, audioPorTopico.get(topico.id));
       }));
       if (!ativo) return;
       setTopicosDaComunidadeDoPerfil(itens);
@@ -645,6 +697,7 @@ export function InicioOpenDesign({
           ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
           : anexo?.urlVideo ?? undefined;
         if (!ativo) return;
+        const audio = audioDoTopico(t.audio, forum);
         itens.push({
           id: `topico-${t.id}`,
           tipo: 'topico',
@@ -657,7 +710,10 @@ export function InicioOpenDesign({
           autorAvatarUrl: t.autor.avatarUrl ?? undefined,
           criadoEm: t.criadoEm,
           respostasTotal: t.respostasTotal,
-          temAudio: Boolean(t.audio?.resultadoId || t.audio?.caminhoDoAudio),
+          temAudio: audio.temAudio || anexo?.tipo === 'audio',
+          enderecoDoAudio: audio.enderecoDoAudio,
+          nota: audio.nota,
+          duracaoSegundos: audio.duracaoSegundos,
           anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
         });
       }
@@ -680,57 +736,80 @@ export function InicioOpenDesign({
     let ativo = true;
     if (!topicoIdParam) return;
 
-    const promessa = forum.obterTopico?.(topicoIdParam);
-    if (!promessa) {
-      setFalhaTopico(true);
-      return;
-    }
+    setFalhaTopico(false);
+    setPautaAberta(null);
+    setEntradasDaPauta([]);
+    setEstadoDaPauta('carregando');
 
-    promessa
-      .then(async (res) => {
+    const paraItem = async (t: import('../../portas/forum').TopicoDoForum, anexos: ReadonlyMap<string, AnexoDoForum>): Promise<ItemDoFeed> => {
+      const anexo = anexos.get(t.id);
+      const url = anexo?.caminho && forum.assinarAnexoDoForum
+        ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
+        : anexo?.urlVideo ?? undefined;
+      const audio = audioDoTopico(t.audio, forum);
+      return {
+        id: `topico-${t.id}`,
+        tipo: 'topico',
+        comunidadeSlug: t.comunidade.slug,
+        comunidadeAvatarUrl: fonteDoAvatarDaComunidade(comunidadeAtiva),
+        titulo: t.titulo,
+        corpo: t.corpo,
+        autorNome: t.autor.apelido ?? (t.autor.handle ? `@${t.autor.handle}` : 'Anônimo'),
+        autorHandle: t.autor.handle ?? undefined,
+        autorAvatarUrl: t.autor.avatarUrl ?? undefined,
+        criadoEm: t.criadoEm,
+        respostasTotal: t.respostasTotal,
+        temAudio: audio.temAudio || anexo?.tipo === 'audio',
+        enderecoDoAudio: audio.enderecoDoAudio,
+        nota: audio.nota,
+        duracaoSegundos: audio.duracaoSegundos,
+        anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
+      };
+    };
+
+    const carregar = async () => {
+      try {
+        const agrupada = await pautas.obterPautaPorTopico(topicoIdParam);
         if (!ativo) return;
-        if (res.ok && res.valor) {
-          const t = res.valor;
-          let anexoItem: ItemDoFeed['anexo'] = undefined;
-          if (forum.listarAnexosDoForum) {
-            const leituraAnexo = await forum.listarAnexosDoForum({ topicoIds: [t.id] });
-            if (leituraAnexo.ok && leituraAnexo.valor[0]) {
-              const a = leituraAnexo.valor[0];
-              const url = a.caminho && forum.assinarAnexoDoForum
-                ? await forum.assinarAnexoDoForum(a.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
-                : a.urlVideo ?? undefined;
-              anexoItem = { tipo: a.tipo, url, duracaoMs: a.duracaoMs };
-            }
+        if (agrupada.ok && agrupada.valor) {
+          const ids = agrupada.valor.entradas.map((entrada) => entrada.id);
+          const anexos = new Map<string, AnexoDoForum>();
+          if (forum.listarAnexosDoForum && ids.length > 0) {
+            const leitura = await forum.listarAnexosDoForum({ topicoIds: ids });
+            if (leitura.ok) leitura.valor.forEach((anexo) => anexos.set(anexo.alvoId, anexo));
           }
-          const post: ItemDoFeed = {
-            id: `topico-${t.id}`,
-            tipo: 'topico',
-            comunidadeSlug: t.comunidade.slug,
-            comunidadeAvatarUrl: fonteDoAvatarDaComunidade(comunidadeAtiva),
-            titulo: t.titulo,
-            corpo: t.corpo,
-            autorNome: t.autor.apelido ?? (t.autor.handle ? `@${t.autor.handle}` : 'Anônimo'),
-            autorHandle: t.autor.handle ?? undefined,
-            autorAvatarUrl: t.autor.avatarUrl ?? undefined,
-            criadoEm: t.criadoEm,
-            respostasTotal: t.respostasTotal,
-            temAudio: Boolean(t.audio?.resultadoId || t.audio?.caminhoDoAudio),
-            anexo: anexoItem,
-          };
-          setPostComentariosAtivo(post);
-          void abrirComentarios(post);
-        } else {
-          setFalhaTopico(true);
+          const entradas = await Promise.all(agrupada.valor.entradas.map((entrada) => paraItem(entrada, anexos)));
+          if (!ativo) return;
+          setPautaAberta(agrupada.valor);
+          setEntradasDaPauta(entradas);
+          void carregarPreviasDasConversas(entradas);
+          setEstadoDaPauta('pronto');
+          return;
         }
-      })
-      .catch(() => {
-        if (ativo) setFalhaTopico(true);
-      });
+
+        const res = await forum.obterTopico(topicoIdParam);
+        if (!ativo) return;
+        if (!res.ok || !res.valor) {
+          setFalhaTopico(true);
+          setEstadoDaPauta('ocioso');
+          return;
+        }
+        const post = await paraItem(res.valor, new Map());
+        if (!ativo) return;
+        setEstadoDaPauta('ocioso');
+        setPostComentariosAtivo(post);
+        void abrirComentarios(post, undefined, true);
+      } catch {
+        if (!ativo) return;
+        setEstadoDaPauta('erro');
+      }
+    };
+    void carregar();
 
     return () => {
       ativo = false;
     };
-  }, [topicoIdParam, forum]);
+  }, [topicoIdParam, forum, pautas, comunidadeAtiva]);
 
   // Carregar feed geral e lista de comunidades
   useEffect(() => {
@@ -754,6 +833,7 @@ export function InicioOpenDesign({
 
         const itens: ItemDoFeed[] = [];
         const anexosPorTopico = new Map<string, AnexoDoForum>();
+        const audioPorTopico = new Map<string, AnexoDeAudioDoTopico>();
         const topicosPessoais = resPessoais?.ok ? resPessoais.valor.itens : [];
         if (forum.listarAnexosDoForum) {
           const leituraAnexos = await forum.listarAnexosDoForum({
@@ -761,6 +841,12 @@ export function InicioOpenDesign({
           });
           if (leituraAnexos.ok) {
             leituraAnexos.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
+          }
+        }
+        if (forum.listarAudioDosTopicos) {
+          const leituraAudio = await forum.listarAudioDosTopicos(resTopicos.valor.itens.map((topico) => topico.id));
+          if (leituraAudio.ok) {
+            leituraAudio.valor.forEach(({ topicoId, audio }) => audioPorTopico.set(topicoId, audio));
           }
         }
         if (!ativo) return;
@@ -776,6 +862,7 @@ export function InicioOpenDesign({
             ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
             : anexo?.urlVideo ?? undefined;
           if (!ativo) return;
+          const audio = audioDoTopico(audioPorTopico.get(t.id) ?? t.audio, forum);
           itens.push({
             id: `topico-${t.id}`,
             tipo: 'topico',
@@ -788,7 +875,10 @@ export function InicioOpenDesign({
             autorAvatarUrl: t.autor.avatarUrl ?? undefined,
             criadoEm: t.criadoEm,
             respostasTotal: t.respostasTotal,
-            temAudio: anexo?.tipo === 'audio',
+            temAudio: anexo?.tipo === 'audio' || audio.temAudio,
+            enderecoDoAudio: audio.enderecoDoAudio,
+            nota: audio.nota,
+            duracaoSegundos: audio.duracaoSegundos,
             anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
           });
         }
@@ -957,8 +1047,8 @@ export function InicioOpenDesign({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aoEntrar]);
   const itensVisiveis = useMemo(
-    () => [...itensFeed, ...itensSeguindo, ...topicosDaComunidade, ...(postComentariosAtivo ? [postComentariosAtivo] : [])],
-    [itensFeed, itensSeguindo, topicosDaComunidade, postComentariosAtivo],
+    () => [...itensFeed, ...itensSeguindo, ...topicosDaComunidade, ...entradasDaPauta, ...(postComentariosAtivo ? [postComentariosAtivo] : [])],
+    [itensFeed, itensSeguindo, topicosDaComunidade, entradasDaPauta, postComentariosAtivo],
   );
   const { propsDeEngajamento } = useEngajamento({
     forum,
@@ -1215,12 +1305,12 @@ export function InicioOpenDesign({
     }
   }, [conversasExpandidas, cursoresDasConversas, forum, paraItensDeResposta, respostasEmExpansao]);
 
-  const abrirComentarios = async (post: ItemDoFeed, respostaInicial?: ItemComentario) => {
-    const responderNoFeed = Boolean(respostaInicial);
+  const abrirComentarios = async (post: ItemDoFeed, respostaInicial?: ItemComentario, forcarAbertura = false) => {
+    const responderNoFeed = Boolean(respostaInicial) || Boolean(pautaAberta);
 
     // Abrir o balão do post preserva a thread; responder alguém abre o
     // compositor por cima do feed, sem trocar a pessoa de contexto.
-    if (!responderNoFeed && postComentariosAtivo?.id === post.id) {
+    if (!forcarAbertura && !responderNoFeed && postComentariosAtivo?.id === post.id) {
       setPostComentariosAtivo(null);
       setModalComentariosAberto(false);
       setComentarioInicialParaResponder(null);
@@ -1366,6 +1456,7 @@ export function InicioOpenDesign({
 
       setItensFeed(incrementar);
       setTopicosDaComunidade(incrementar);
+      setEntradasDaPauta(incrementar);
       exibirToast('Comentário publicado na roda!');
       return true;
     } catch (erro) {
@@ -1694,6 +1785,7 @@ export function InicioOpenDesign({
     setItensSeguindo((prev) => prev.filter(sai));
     setTopicosDaComunidade((prev) => prev.filter(sai));
     setTopicosDaComunidadeDoPerfil((prev) => prev.filter(sai));
+    setEntradasDaPauta((prev) => prev.filter(sai));
     if (postComentariosAtivo?.id === post.id) {
       setPostComentariosAtivo(null);
       setListaComentarios([]);
@@ -2025,7 +2117,45 @@ export function InicioOpenDesign({
         />}
 
         {/* ==================== VIEW: THREAD DE COMENTÁRIOS (PADRÃO TWITTER / FORA DO CARD) ==================== */}
-        {postComentariosAtivo && !modalComentariosAberto ? (
+        {topicoIdParam && (estadoDaPauta === 'carregando' || estadoDaPauta === 'erro' || pautaAberta) ? (
+          <PautaAbertaDaComunidade
+            titulo={pautaAberta?.pauta.titulo ?? 'Tópico'}
+            descricao={pautaAberta?.pauta.corpo}
+            carregando={estadoDaPauta === 'carregando'}
+            erro={estadoDaPauta === 'erro'}
+            aoVoltar={() => {
+              setPautaAberta(null);
+              setEntradasDaPauta([]);
+              setEstadoDaPauta('ocioso');
+              navigate(`/c/${comunidadeSlug}`);
+            }}
+            entradas={entradasDaPauta.map((post) => (
+              <div key={post.id} id={pautaAberta?.entradaEmFocoId === post.id.replace('topico-', '') ? 'entrada-em-foco' : undefined}>
+                <CardDoPost
+                  post={post}
+                  {...propsDeEngajamento(post)}
+                  {...propsDeModeracao(post)}
+                  audioTocando={audioTocandoId === post.id}
+                  tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0}
+                  duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null}
+                  aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)}
+                  aoAbrirComentarios={() => void abrirComentarios(post)}
+                  {...propsDeComentariosDoPost(post)}
+                />
+                <PreviaDaConversa
+                  post={post}
+                  comentarios={previasDasConversas.get(post.id) ?? []}
+                  carregando={previasEmCarregamento.has(post.id)}
+                  expandida={conversasExpandidas.has(post.id)}
+                  carregandoMais={respostasEmExpansao.has(post.id)}
+                  temMais={conversasExpandidas.has(post.id) ? cursoresDasConversas.get(post.id) !== null : (previasDasConversas.get(post.id)?.length ?? 0) < post.respostasTotal}
+                  aoCarregarMais={() => void carregarMaisRespostasNaPrevia(post)}
+                  aoResponder={(comentario) => void abrirComentarios(post, comentario)}
+                />
+              </div>
+            ))}
+          />
+        ) : postComentariosAtivo && !modalComentariosAberto ? (
           <ThreadDeComentarios
             post={postComentariosAtivo}
             comentarios={listaComentarios}
@@ -2370,7 +2500,10 @@ export function InicioOpenDesign({
                       {topicosDaComunidade.length > 0 && (
                         <ListaDeTopicos
                           topicos={topicosDaComunidade}
-                          aoAbrirTopico={(topico) => void abrirComentarios(topico)}
+                          aoAbrirTopico={(topico) => {
+                            void abrirComentarios(topico);
+                            navigate(`/c/${encodeURIComponent(topico.comunidadeSlug)}/t/${encodeURIComponent(topico.id.replace('topico-', ''))}`);
+                          }}
                         />
                       )}
                     </div>

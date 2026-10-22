@@ -15,8 +15,6 @@
       { "source": "/ranking-de-arrotos", "destination": "/ranking-de-arrotos.html" },
       { "source": "/comunidades", "destination": "/comunidades.html" },
       { "source": "/grupos", "destination": "/grupos.html" },
-      { "source": "/videos-de-arroto", "destination": "/videos-de-arroto.html" },
-      { "source": "/videos", "destination": "/videos-de-arroto.html" },
       { "source": "**", "destination": "/index.html" }
     ],
     "headers": [

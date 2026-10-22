@@ -7,13 +7,18 @@ function streamFalso(trilhas = [trilha()]) { return { getTracks: () => trilhas }
 
 class GravadorFalso {
   static ultimo: GravadorFalso | null = null;
+  static deveEmitirDados = true;
   state: 'inactive' | 'recording' = 'inactive';
   mimeType = 'audio/mp4';
   ondataavailable: ((evento: { data: Blob }) => void) | null = null;
   onstop: (() => void) | null = null;
   onerror: (() => void) | null = null;
   start() { this.state = 'recording'; GravadorFalso.ultimo = this; }
-  stop() { this.state = 'inactive'; this.ondataavailable?.({ data: new Blob(['voz'], { type: this.mimeType }) }); this.onstop?.(); }
+  stop() {
+    this.state = 'inactive';
+    if (GravadorFalso.deveEmitirDados) this.ondataavailable?.({ data: new Blob(['voz'], { type: this.mimeType }) });
+    this.onstop?.();
+  }
 }
 
 function navegador(getUserMedia: () => Promise<MediaStream>) {
@@ -21,7 +26,12 @@ function navegador(getUserMedia: () => Promise<MediaStream>) {
   vi.stubGlobal('MediaRecorder', GravadorFalso);
 }
 
-afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); GravadorFalso.ultimo = null; });
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  GravadorFalso.ultimo = null;
+  GravadorFalso.deveEmitirDados = true;
+});
 
 describe('gravação livre do composer', () => {
   it('entrega Blob e duração real ao parar manualmente, e solta o stream', async () => {
@@ -99,4 +109,46 @@ describe('gravação livre do composer', () => {
     await expect(inicio.conclusao).resolves.toEqual({ ok: false, motivo: 'cancelado' });
     expect(faixa.stop).toHaveBeenCalledOnce();
   });
+
+  it('cancela e solta o stream quando a permissão responde tarde', async () => {
+    let liberarMicrofone!: (stream: MediaStream) => void;
+    const faixa = trilha();
+    const pedirMicrofone = vi.fn(() => new Promise<MediaStream>((resolve) => { liberarMicrofone = resolve; }));
+    navegador(pedirMicrofone);
+    const gravacao = criarGravacaoLivreDoForum();
+
+    const inicioPendente = gravacao.iniciar();
+    gravacao.cancelar();
+    liberarMicrofone(streamFalso([faixa]));
+
+    await expect(inicioPendente).resolves.toEqual({ ok: false, motivo: 'cancelado' });
+    expect(faixa.stop).toHaveBeenCalledOnce();
+    expect(gravacao.estaGravando()).toBe(false);
+  });
+
+  it('recusa uma segunda inicialização enquanto a permissão ainda está pendente', async () => {
+    let liberarMicrofone!: (stream: MediaStream) => void;
+    const pedirMicrofone = vi.fn(() => new Promise<MediaStream>((resolve) => { liberarMicrofone = resolve; }));
+    navegador(pedirMicrofone);
+    const gravacao = criarGravacaoLivreDoForum();
+
+    const primeiro = gravacao.iniciar();
+    await expect(gravacao.iniciar()).resolves.toMatchObject({ ok: false, motivo: 'falhou' });
+    expect(pedirMicrofone).toHaveBeenCalledOnce();
+    gravacao.cancelar();
+    liberarMicrofone(streamFalso());
+    await expect(primeiro).resolves.toEqual({ ok: false, motivo: 'cancelado' });
+  });
+
+  it('não transforma uma gravação sem dados em áudio pronto', async () => {
+    navegador(async () => streamFalso());
+    const gravacao = criarGravacaoLivreDoForum();
+    const inicio = await gravacao.iniciar();
+    if (!inicio.ok) throw new Error('o microfone devia iniciar');
+    GravadorFalso.deveEmitirDados = false;
+
+    gravacao.parar();
+    await expect(inicio.conclusao).resolves.toMatchObject({ ok: false, motivo: 'falhou' });
+  });
+
 });

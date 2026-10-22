@@ -15,6 +15,7 @@ import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import { LIMITE_RESPOSTA as LIMITE_RESPOSTA_FORUM } from '../../nucleo/comunidade/limites';
 import { CardDoPost } from './CardDoPost';
 import { VideoDaResposta } from './VideoDaResposta';
+import { useCicloDeGravacaoLivre } from './useCicloDeGravacaoLivre';
 
 export interface ThreadDeComentariosProps {
   post: ItemDoFeed;
@@ -100,13 +101,12 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   // Gravação de áudio com 1 clique
   const [gravandoAudio, setGravandoAudio] = useState(false);
   const [segundosAudio, setSegundosAudio] = useState(0);
-  const gravacaoRef = useRef<GravacaoLivreDoForum | null>(null);
   const timerAudioRef = useRef<number | null>(null);
   const inputTextoRef = useRef<HTMLTextAreaElement | null>(null);
+  const cicloDaGravacao = useCicloDeGravacaoLivre();
 
   useEffect(() => {
     return () => {
-      gravacaoRef.current?.cancelar();
       if (timerAudioRef.current) window.clearInterval(timerAudioRef.current);
     };
   }, []);
@@ -118,13 +118,18 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
     inputTextoRef.current?.focus();
   }, [comentarioInicialParaResponder]);
 
+  useEffect(() => {
+    cicloDaGravacao.descartar();
+    if (timerAudioRef.current) window.clearInterval(timerAudioRef.current);
+    setGravandoAudio(false);
+    setAnexo(null);
+  // A troca de tópico descarta a sessão anterior, mesmo sem desmontar a thread.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post.id]);
+
   const alternarGravacaoAudio = async () => {
     if (gravandoAudio) {
-      if (timerAudioRef.current) {
-        window.clearInterval(timerAudioRef.current);
-        timerAudioRef.current = null;
-      }
-      gravacaoRef.current?.parar();
+      cicloDaGravacao.parar();
       return;
     }
 
@@ -134,10 +139,13 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
     }
 
     const nova = criarGravacao();
-    gravacaoRef.current = nova;
+    const geracao = cicloDaGravacao.iniciar(nova);
+    if (geracao === null) return;
     const inicio = await nova.iniciar();
+    if (!cicloDaGravacao.aindaAtual(geracao)) return;
 
     if (!inicio.ok) {
+      cicloDaGravacao.falhou(geracao);
       setErroComentario(
         inicio.motivo === 'negado'
           ? 'Libere o microfone para gravar áudio.'
@@ -148,6 +156,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
       return;
     }
 
+    if (!cicloDaGravacao.marcouInicio(geracao)) return;
     setGravandoAudio(true);
     setSegundosAudio(0);
     timerAudioRef.current = window.setInterval(() => {
@@ -155,6 +164,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
     }, 1000);
 
     const fim = await inicio.conclusao;
+    if (!cicloDaGravacao.aindaAtual(geracao)) return;
     setGravandoAudio(false);
     if (timerAudioRef.current) {
       window.clearInterval(timerAudioRef.current);
@@ -162,10 +172,12 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
     }
 
     if (!fim.ok) {
+      cicloDaGravacao.falhou(geracao);
       if (fim.motivo !== 'cancelado') setErroComentario('A gravação falhou. Tente de novo.');
       return;
     }
 
+    if (!cicloDaGravacao.audioPronto(geracao)) return;
     setAnexo({
       tipo: 'audio',
       arquivo: fim.audio.dados,
@@ -174,6 +186,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   };
 
   const escolherImagem = (e: ChangeEvent<HTMLInputElement>) => {
+    if (cicloDaGravacao.bloqueiaTrocaDeMidia()) return;
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -189,6 +202,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   };
 
   const adicionarLink = () => {
+    if (cicloDaGravacao.bloqueiaTrocaDeMidia()) return;
     const info = detectarLinkDeVideo(linkVideo.trim());
     if (!info) {
       setErroComentario('Cole um link válido do YouTube ou TikTok.');
@@ -211,6 +225,10 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
 
   const submeterComentario = async (e: FormEvent) => {
     e.preventDefault();
+    if (cicloDaGravacao.bloqueiaEnvio()) {
+      setErroComentario('Termine, tente de novo ou descarte a gravação antes de responder.');
+      return;
+    }
     if (!textoResposta.trim() && !anexo) {
       setErroComentario('Escreva algo ou anexe um áudio/mídia.');
       return;
@@ -224,12 +242,24 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
     });
 
     if (ok) {
+      if (anexo?.tipo === 'audio') cicloDaGravacao.descartar();
       setTextoResposta('');
       setPaiId(null);
       setAutorRespostaNome(null);
       setAnexo(null);
       setMostrarCampoLink(false);
     }
+  };
+
+  const descartarGravacao = () => {
+    cicloDaGravacao.descartar();
+    setAnexo(null);
+  };
+  const voltar = () => {
+    descartarGravacao();
+    if (timerAudioRef.current) window.clearInterval(timerAudioRef.current);
+    setGravandoAudio(false);
+    aoVoltar();
   };
 
   return (
@@ -239,7 +269,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
         <button
           type="button"
           className="thread-back-btn"
-          onClick={aoVoltar}
+          onClick={voltar}
           aria-label="Voltar para o feed"
         >
           <svg
@@ -315,9 +345,13 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
             }
             aria-label="Escrever resposta"
             rows={2}
-            disabled={enviando || gravandoAudio}
+                disabled={enviando || gravandoAudio || cicloDaGravacao.bloqueiaTrocaDeMidia()}
           />
         </div>
+
+        {cicloDaGravacao.estado === 'iniciando' && (
+          <div className="composer-attachment-pill" role="status"><span>Preparando microfone…</span></div>
+        )}
 
         {/* Anexo selecionado */}
         {anexo && (
@@ -332,7 +366,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
             <button
               type="button"
               className="attachment-remove-btn"
-              onClick={() => setAnexo(null)}
+                onClick={descartarGravacao}
               disabled={enviando || gravandoAudio}
               aria-label="Remover anexo"
             >
@@ -356,7 +390,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
               type="button"
               className="action-pill-btn"
               onClick={adicionarLink}
-              disabled={enviando || gravandoAudio || !linkVideo.trim()}
+                disabled={enviando || gravandoAudio || cicloDaGravacao.bloqueiaTrocaDeMidia() || !linkVideo.trim()}
             >
               Anexar
             </button>
@@ -376,6 +410,13 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
           </p>
         )}
 
+          {cicloDaGravacao.estado === 'falhou' && (
+            <div className="composer-attachment-pill" role="status">
+              <span>Gravação não concluída.</span>
+              <button type="button" className="attachment-remove-btn" onClick={descartarGravacao}>Descartar gravação</button>
+            </div>
+          )}
+
         <footer className="comments-composer-footer">
           <div className="comments-tools-icons">
             {/* Gravação de áudio com 1 clique */}
@@ -383,7 +424,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
               type="button"
               className={`composer-tool-btn ${gravandoAudio ? 'is-recording' : ''}`}
               onClick={() => void alternarGravacaoAudio()}
-              disabled={enviando || (!gravandoAudio && Boolean(anexo))}
+                disabled={enviando || cicloDaGravacao.estado === 'iniciando' || cicloDaGravacao.estado === 'finalizando' || (!gravandoAudio && Boolean(anexo))}
               title={gravandoAudio ? 'Parar gravação' : 'Gravar áudio (1 clique)'}
               aria-label={gravandoAudio ? 'Parar gravação' : 'Gravar áudio'}
             >
@@ -435,7 +476,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
                 type="file"
                 accept="image/png,image/jpeg,image/webp,image/gif"
                 onChange={escolherImagem}
-                disabled={enviando || gravandoAudio || Boolean(anexo)}
+                disabled={enviando || gravandoAudio || cicloDaGravacao.bloqueiaTrocaDeMidia() || Boolean(anexo)}
                 style={{ display: 'none' }}
               />
             </label>
@@ -445,7 +486,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
               type="button"
               className="composer-tool-btn"
               onClick={() => setMostrarCampoLink((ant) => !ant)}
-              disabled={enviando || gravandoAudio || Boolean(anexo)}
+              disabled={enviando || gravandoAudio || cicloDaGravacao.bloqueiaTrocaDeMidia() || Boolean(anexo)}
               title="Adicionar link de vídeo"
               aria-label="Adicionar vídeo externo"
             >
@@ -476,6 +517,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
             disabled={
               enviando ||
               gravandoAudio ||
+              cicloDaGravacao.bloqueiaEnvio() ||
               (!textoResposta.trim() && !anexo)
             }
           >

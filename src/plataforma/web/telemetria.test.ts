@@ -132,6 +132,41 @@ describe('registrar', () => {
     expect(inserts[0].batalha_codigo).toBeNull();
   });
 
+  it('só confirma a página na sessão depois do insert aceito', async () => {
+    resultadoDoInsert = { error: { message: 'permission denied' } };
+    const armazenamento = montarArmazenamento();
+    const telemetria = criarTelemetriaWeb(armazenamento);
+
+    telemetria.registrar('visitou_pagina', { pagina: 'comunidade' });
+    await Promise.resolve();
+    expect(armazenamento.ler('aue.sessao-telemetria.v1')).not.toContain('"comunidade"');
+
+    resultadoDoInsert = { error: null };
+    vi.advanceTimersByTime(2000);
+    telemetria.registrar('visitou_pagina', { pagina: 'comunidade' });
+    await Promise.resolve();
+
+    expect(inserts).toHaveLength(2);
+    expect(armazenamento.ler('aue.sessao-telemetria.v1')).toContain('paginasConfirmadas');
+
+    vi.advanceTimersByTime(2000);
+    criarTelemetriaWeb(armazenamento).registrar('visitou_pagina', { pagina: 'comunidade' });
+    expect(inserts).toHaveLength(2);
+  });
+
+  it('não deixa a marca legada de página bloquear a primeira confirmação', () => {
+    const armazenamento = montarArmazenamento();
+    armazenamento.gravar('aue.sessao-telemetria.v1', JSON.stringify({
+      id: '11111111-1111-4111-8111-111111111111',
+      origem: 'direct', campanha: null, conteudo: null,
+      expiraEm: Date.now() + 60_000,
+      abriuArenaRegistrada: false,
+      paginasVisitadas: ['comunidade'],
+    }));
+    criarTelemetriaWeb(armazenamento).registrar('visitou_pagina', { pagina: 'comunidade' });
+    expect(inserts).toHaveLength(1);
+  });
+
   it('cria e reaproveita sessao_id entre chamadas', () => {
     const telemetria = criarTelemetriaWeb(montarArmazenamento());
 

@@ -50,7 +50,7 @@ describe('administração web', () => {
     await expect(criarAdministracaoWeb().obterResumo()).rejects.toBe(negado);
   });
 
-  it('não aceita pessoas ou dias malformados como dados do painel', async () => {
+  it('recusa resumo incompleto e não transforma ausência em zero', async () => {
     rpc.mockResolvedValue({
       data: {
         periodo: { inicio: '2026-10-20', fim: '2026-10-20' },
@@ -61,10 +61,7 @@ describe('administração web', () => {
       error: null,
     });
 
-    await expect(criarAdministracaoWeb().obterResumo()).resolves.toMatchObject({
-      eventosPorDia: [],
-      pessoas: [],
-    });
+    await expect(criarAdministracaoWeb().obterResumo()).rejects.toThrow('Resposta administrativa inválida.');
   });
 
   it('lê monetização apenas pela função administrativa e recusa contrato incompleto', async () => {
@@ -74,5 +71,11 @@ describe('administração web', () => {
 
     invoke.mockResolvedValueOnce({ data: { ok: false }, error: null });
     await expect(criarAdministracaoWeb().obterMonetizacao()).rejects.toThrow('Métricas de monetização indisponíveis.');
+
+    invoke.mockResolvedValueOnce({
+      data: { ok: true, monetizacao: { inicio: '2026-10-01', fim: '2026-10-20', total_cliques: 3, receita_total: 0.2, cpm_medio: 2 } },
+      error: null,
+    });
+    await expect(criarAdministracaoWeb().obterMonetizacao()).rejects.toThrow('Resposta administrativa inválida.');
   });
 });

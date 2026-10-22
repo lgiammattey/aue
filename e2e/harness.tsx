@@ -7,8 +7,10 @@ import { ModalGravarArroto } from '../src/features/novo-aue/ModalGravarArroto';
 import { CardDoPost } from '../src/features/novo-aue/CardDoPost';
 import { ThreadDeComentarios } from '../src/features/novo-aue/ThreadDeComentarios';
 import { PautaAbertaDaComunidade } from '../src/features/novo-aue/PautaDaComunidade';
+import { TelaAdministracao } from '../src/features/administracao/TelaAdministracao';
 import { criarControleDeDialogoWeb } from '../src/plataforma/web/controleDeDialogo';
 import type { ItemDoFeed } from '../src/features/novo-aue/tipos';
+import type { PortaDeAdministracao, ResumoAdministrativo } from '../src/portas/administracao';
 import '../src/index.css';
 import '../src/features/novo-aue/casca.css';
 import '../src/features/novo-aue/InicioOpenDesign.css';
@@ -35,5 +37,55 @@ function HarnessPauta() {
   ];
   return <BrowserRouter><main style={{ maxWidth: 600, margin: '0 auto' }}><PautaAbertaDaComunidade titulo="Mural da vergonha" entradas={entradas.map((post) => <CardDoPost key={post.id} post={post} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} />)} aoVoltar={() => {}} /></main></BrowserRouter>;
 }
+
+// Fixture E2E no formato exato da porta: só agregados e a lista mínima que o
+// painel pode receber. Não há sessão, e-mail, UUID, URL de áudio ou Supabase.
+const diasDoPainel = Array.from({ length: 30 }, (_, indice) => {
+  const data = new Date(Date.UTC(2026, 9, indice + 1)).toISOString().slice(0, 10);
+  return {
+    data,
+    acessosDePaginas: 8 + (indice % 5),
+    abriuArena: 4 + (indice % 4),
+    iniciouArroto: 2 + (indice % 3),
+    recebeuNota: 2 + (indice % 2),
+    compartilhou: indice % 2,
+    criouX1: indice % 3,
+    respondeuX1: (indice + 1) % 2,
+    pediuRevanche: indice % 4,
+    topicosPublicados: 1 + (indice % 3),
+    respostasPublicadas: 2 + (indice % 4),
+  };
+});
+
+const resumoAdministrativoDoHarness: ResumoAdministrativo = {
+  inicio: '2026-10-01', fim: '2026-10-30',
+  totalContasDeEmailAtual: 184, contasAnonimasAtuais: 17, contasAtivasNoPeriodo: 76,
+  cadastrosNoPeriodo: 34, acompanhamentoDeCadastrosIniciadoEm: '2026-10-01T12:00:00Z',
+  perfisConcluidosNoPeriodo: 28, perfisPendentesAtuais: 9,
+  topicosPublicadosNoPeriodo: 57, respostasPublicadasNoPeriodo: 113, comunidadesAtivasNoPeriodo: 12,
+  acessosDePaginasNoPeriodo: 312, acompanhamentoDeAcessosIniciadoEm: '2026-10-01T12:00:00Z',
+  eventos: { abriu_arena: 96, recebeu_nota: 61, criou_x1: 12, respondeu_x1: 9 },
+  acessosPorPagina: [
+    { pagina: 'feed', acessos: 128 }, { pagina: 'comunidade', acessos: 82 },
+    { pagina: 'perfil', acessos: 57 }, { pagina: 'arena', acessos: 45 },
+  ],
+  eventosPorDia: diasDoPainel,
+  pessoas: [
+    { apelido: 'Luiz', handle: 'giamzinn_aue', criadoEm: '2026-10-29T12:00:00Z', perfilSocialConcluidoEm: '2026-10-29T12:05:00Z', estado: 'perfil_pronto' },
+    { apelido: 'Bia', handle: 'bia_do_grave', criadoEm: '2026-10-28T12:00:00Z', perfilSocialConcluidoEm: null, estado: 'ficha_pendente' },
+  ],
+};
+
+const portaAdministrativaDoHarness: PortaDeAdministracao = {
+  obterResumo: async () => resumoAdministrativoDoHarness,
+  obterMonetizacao: async () => ({ inicio: '2026-10-01', fim: '2026-10-30', totalImpressoes: 841, totalCliques: 23, receitaTotal: 6.72, cpmMedio: 7.99 }),
+};
+
+function HarnessAdministracao() {
+  return <TelaAdministracao porta={portaAdministrativaDoHarness} />;
+}
+
 const parametrosDoHarness = new URLSearchParams(window.location.search);
-createRoot(document.getElementById('root')!).render(parametrosDoHarness.has('pauta') ? <HarnessPauta /> : parametrosDoHarness.has('quebras') ? <HarnessQuebras /> : <Harness />);
+createRoot(document.getElementById('root')!).render(
+  parametrosDoHarness.has('admin') ? <HarnessAdministracao /> : parametrosDoHarness.has('pauta') ? <HarnessPauta /> : parametrosDoHarness.has('quebras') ? <HarnessQuebras /> : <Harness />,
+);

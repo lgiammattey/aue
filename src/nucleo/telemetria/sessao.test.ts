@@ -28,6 +28,7 @@ describe('decidirSessao', () => {
       expiraEm: 1000 + DURACAO_DA_SESSAO_MS,
       abriuArenaRegistrada: false,
       paginasVisitadas: [],
+      paginasConfirmadas: [],
     });
   });
 

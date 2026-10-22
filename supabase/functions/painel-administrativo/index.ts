@@ -1,5 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
+import { normalizarMetricasDaAdsterra, urlDasEstatisticasDaAdsterra } from "./metricas.ts";
 
 const ORIGENS_PERMITIDAS = new Set([
   "https://aue.web.app",
@@ -25,11 +26,6 @@ function resposta(status: number, corpo: Record<string, unknown>, origem: string
   });
 }
 
-function numero(valor: unknown): number {
-  const convertido = Number(valor);
-  return Number.isFinite(convertido) && convertido >= 0 ? convertido : 0;
-}
-
 const funcaoProtegida = withSupabase({ auth: "user" }, async (requisicao, contexto) => {
   const origem = requisicao.headers.get("origin");
   const { data: eAdministrador, error: erroDaPermissao } = await contexto.supabase.rpc("aue_e_administrador");
@@ -49,7 +45,7 @@ const funcaoProtegida = withSupabase({ auth: "user" }, async (requisicao, contex
   let respostaDaAdsterra: Response;
   try {
     respostaDaAdsterra = await fetch(
-      `https://api3.adsterratools.com/publisher/stats.json?start_date=${inicio}&finish_date=${fim}`,
+      urlDasEstatisticasDaAdsterra(inicio, fim),
       { headers: { "X-API-Key": chave, Accept: "application/json" } },
     );
   } catch (erro) {
@@ -62,7 +58,7 @@ const funcaoProtegida = withSupabase({ auth: "user" }, async (requisicao, contex
     return resposta(502, { ok: false, mensagem: "Métricas de monetização indisponíveis." }, origem);
   }
 
-  let bruto: { items?: Array<Record<string, unknown>> };
+  let bruto: unknown;
   try {
     bruto = await respostaDaAdsterra.json();
   } catch (erro) {
@@ -70,21 +66,23 @@ const funcaoProtegida = withSupabase({ auth: "user" }, async (requisicao, contex
     return resposta(502, { ok: false, mensagem: "Métricas de monetização indisponíveis." }, origem);
   }
 
-  const itens = Array.isArray(bruto.items) ? bruto.items : [];
-  const totalImpressoes = itens.reduce((soma, item) => soma + numero(item.impressions), 0);
-  const totalCliques = itens.reduce((soma, item) => soma + numero(item.clicks), 0);
-  const receitaTotal = itens.reduce((soma, item) => soma + numero(item.revenue), 0);
-  const cpmMedio = totalImpressoes > 0 ? Number(((receitaTotal * 1000) / totalImpressoes).toFixed(2)) : 0;
+  let metricas;
+  try {
+    metricas = normalizarMetricasDaAdsterra(bruto);
+  } catch (erro) {
+    console.error("painel-administrativo: métricas Adsterra inválidas", erro);
+    return resposta(502, { ok: false, mensagem: "Métricas de monetização indisponíveis." }, origem);
+  }
 
   return resposta(200, {
     ok: true,
     monetizacao: {
       inicio,
       fim,
-      total_impressoes: totalImpressoes,
-      total_cliques: totalCliques,
-      receita_total: Number(receitaTotal.toFixed(2)),
-      cpm_medio: cpmMedio,
+      total_impressoes: metricas.totalImpressoes,
+      total_cliques: metricas.totalCliques,
+      receita_total: metricas.receitaTotal,
+      cpm_medio: metricas.cpmMedio,
     },
   }, origem);
 });

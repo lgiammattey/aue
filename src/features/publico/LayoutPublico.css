@@ -1,4 +1,21 @@
 /* Casca OpenDesign compartilhada por conteúdo público e legal. */
+.od-informativo__main {
+  min-width: 0;
+  border-right: 1px solid var(--aue-line);
+  background: var(--aue-bg);
+}
+
+.od-informativo__content {
+  min-height: calc(100dvh - 92px);
+}
+
+.od-informativo .publico-site {
+  --bg: var(--aue-bg); --surface: var(--aue-surface); --surface-2: var(--aue-surface-2);
+  --fg: var(--aue-text); --muted: var(--aue-muted); --border: var(--aue-line);
+  --border-strong: var(--aue-muted); --accent: var(--aue-accent); --accent-on: var(--aue-accent-on);
+  min-height: 0;
+}
+
 .publico-site {
   --bg: #0a0a08; --surface: #171712; --surface-2: #1f1f18; --fg: #f5f3ea;
   --muted: #93917f; --border: #2b2a22; --border-strong: #74725f;

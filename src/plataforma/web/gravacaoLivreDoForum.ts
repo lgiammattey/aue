@@ -68,6 +68,11 @@ export function criarGravacaoLivreDoForum(): GravacaoLivreDoForum {
       if (gravador?.state === 'recording') {
         return { ok: false, motivo: 'falhou', detalhe: 'A gravação livre já está em andamento.' };
       }
+      // Navegadores não expõem microfone para um IP servido em HTTP. `localhost`
+      // é a única exceção segura para desenvolvimento.
+      if (typeof window !== 'undefined' && window.isSecureContext === false) {
+        return { ok: false, motivo: 'inseguro' };
+      }
       const midia = typeof navigator === 'undefined' ? undefined : navigator.mediaDevices;
       if (!midia?.getUserMedia || typeof MediaRecorder === 'undefined') {
         return { ok: false, motivo: 'indisponivel' };

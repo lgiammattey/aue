@@ -129,8 +129,8 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
       </MemoryRouter>,
     );
 
-    // Hero e título r/arena-do-arroto
-    expect(await screen.findByRole('heading', { level: 1, name: 'r/arena-do-arroto' })).toBeTruthy();
+    // Hero e título humano da comunidade
+    expect(await screen.findByRole('heading', { level: 1, name: 'Arena do Arroto' })).toBeTruthy();
     expect(screen.getAllByText('O ponto de encontro para quem coleciona sons, histórias e coragem desnecessária.').length).toBeGreaterThan(0);
 
     // Botão de Entrar
@@ -144,16 +144,16 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     const btnAdmin = container.querySelector('#manageCommunity');
     expect(btnAdmin).toBeTruthy();
 
-    // Colunas da comunidade: conversas, moderadores e regras rápidas
-    expect(screen.getByText('Conversas da roda')).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 2, name: 'Moderadores' })).toBeTruthy();
-    expect(screen.getAllByRole('heading', { level: 2, name: 'Regras rápidas' }).length).toBeGreaterThan(0);
+    // Comunidade abre a lista de tópicos e preserva suas regras.
+    expect(screen.getByText('Tópicos')).toBeTruthy();
 
     // Card fixado
-    expect(screen.getByText('Antes de soltar: leia as regras da comunidade.')).toBeTruthy();
+    expect(screen.getByText('Antes de criar um tópico: leia as regras da comunidade.')).toBeTruthy();
 
     // Tópico real carregado
     expect(await screen.findByText('O áudio mais curto da semana conseguiu ser o mais comentado.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Abrir tópico: O áudio mais curto/ })).toBeTruthy();
+    expect(screen.queryByRole('toolbar', { name: 'Ações do causo' })).toBeNull();
     expect(mockForum.listarTopicos).toHaveBeenCalledWith('arena-do-arroto', { ordem: 'atividade' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Recentes' }));
@@ -198,7 +198,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     const comunidade = { ...mockComunidade, entrarComunidade: vi.fn(async () => true), sairComunidade: vi.fn(async () => true) };
     const { container } = abrirComunidade(comoMembroComum(), comunidade);
 
-    await screen.findByRole('heading', { level: 1, name: 'r/arena-do-arroto' });
+    await screen.findByRole('heading', { level: 1, name: 'Arena do Arroto' });
     const botao = container.querySelector('#joinCommunity') as HTMLButtonElement;
     expect(botao.textContent).toBe('Entrar');
     expect(screen.getAllByText(/10 membros|10 na roda/).length).toBeGreaterThan(0);
@@ -208,7 +208,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     expect(comunidade.entrarComunidade).toHaveBeenCalledWith('arena-do-arroto');
     expect(screen.getByText('Você entrou na comunidade.')).toBeTruthy();
     expect(screen.getAllByText(/11 membros|11 na roda/).length).toBeGreaterThan(0);
-    expect(botao.getAttribute('aria-label')).toBe('Participando de r/arena-do-arroto. Tocar para sair.');
+    expect(botao.getAttribute('aria-label')).toBe('Participando de Arena do Arroto. Tocar para sair.');
 
     fireEvent.click(botao);
     await waitFor(() => expect(botao.textContent).toBe('Entrar'));
@@ -220,7 +220,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
   it('se a porta recusar, não muda o botão nem a contagem e avisa', async () => {
     const comunidade = { ...mockComunidade, entrarComunidade: vi.fn(async () => false) };
     const { container } = abrirComunidade(comoMembroComum(), comunidade);
-    await screen.findByRole('heading', { level: 1, name: 'r/arena-do-arroto' });
+    await screen.findByRole('heading', { level: 1, name: 'Arena do Arroto' });
     const botao = container.querySelector('#joinCommunity') as HTMLButtonElement;
     fireEvent.click(botao);
     expect(await screen.findByText('Não deu para atualizar sua participação agora.')).toBeTruthy();
@@ -231,7 +231,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
   it('moderador não sai: o botão diz "Moderador", fica desabilitado e a porta nunca é chamada', async () => {
     const comunidade = { ...mockComunidade, sairComunidade: vi.fn(async () => true) };
     const { container } = abrirComunidade(mockForum, comunidade);
-    await screen.findByRole('heading', { level: 1, name: 'r/arena-do-arroto' });
+    await screen.findByRole('heading', { level: 1, name: 'Arena do Arroto' });
     const botao = container.querySelector('#joinCommunity') as HTMLButtonElement;
     expect(botao.textContent).toBe('Moderador');
     expect(botao.disabled).toBe(true);
@@ -333,11 +333,11 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
-    expect(screen.getByText('Rodas do Auê')).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Encontre sua comunidade.' })).toBeTruthy();
+    expect(screen.getAllByText('Comunidades').length).toBeGreaterThan(0);
     expect(screen.queryByRole('button', { name: /Fundar comunidade/ })).toBeNull();
-    expect(screen.getAllByText('r/arena-do-arroto').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('r/arroto-em-video').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Arena do Arroto').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Arroto em Vídeo').length).toBeGreaterThan(0);
   });
 
   it('alterna entre as abas Causos e Sobre exibindo regras e moderadores', async () => {
@@ -358,7 +358,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     );
 
     // Inicialmente na aba Causos
-    expect(await screen.findByRole('heading', { level: 2, name: 'Conversas da roda' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 2, name: 'Tópicos' })).toBeTruthy();
 
     // Clica na aba Sobre
     const btnSobre = screen.getByRole('button', { name: 'Sobre' });
@@ -371,7 +371,7 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     // Volta para a aba Posts
     const btnPosts = screen.getByRole('button', { name: /Posts|Causos/ });
     fireEvent.click(btnPosts);
-    expect(screen.getByRole('heading', { level: 2, name: 'Conversas da roda' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Tópicos' })).toBeTruthy();
   });
 
   it('exibe erro caso a rota direta de tópico /c/:slug/t/:id não encontre o tópico', async () => {

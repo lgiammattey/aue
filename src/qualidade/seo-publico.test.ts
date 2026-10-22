@@ -48,7 +48,7 @@ const ENTRADAS: ReadonlyArray<{ caminho: string; arquivo: string; temOpenGraph: 
   { caminho: '/como-arrotar', arquivo: '../como-arrotar.html', temOpenGraph: true },
   { caminho: '/tipos-de-arroto', arquivo: '../tipos-de-arroto.html', temOpenGraph: true },
   { caminho: '/ranking-de-arrotos', arquivo: '../ranking-de-arrotos.html', temOpenGraph: true },
-  { caminho: '/comunidade', arquivo: '../comunidade.html', temOpenGraph: true },
+  { caminho: '/comunidades', arquivo: '../comunidades.html', temOpenGraph: true },
   { caminho: '/grupos', arquivo: '../grupos.html', temOpenGraph: true },
   /*
     As duas legais ficam SEM Open Graph, e é decisão, não esquecimento: ninguém
@@ -186,6 +186,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       '../como-arrotar.html',
       '../tipos-de-arroto.html',
       '../ranking-de-arrotos.html',
+      '../comunidades.html',
       '../grupos.html',
       '../privacidade.html',
       '../termos.html',
@@ -220,6 +221,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       '../como-arrotar.html',
       '../tipos-de-arroto.html',
       '../ranking-de-arrotos.html',
+      '../comunidades.html',
       '../grupos.html',
       '../privacidade.html',
       '../termos.html',
@@ -274,6 +276,18 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
         expect(rewrites[indice].destination).toBe(`${rota}.html`);
       }
     }
+  });
+
+  it('a URL antiga do diretório redireciona permanentemente para a canônica', () => {
+    const firebase = JSON.parse(ler('../firebase.json')) as {
+      hosting: { redirects?: Array<{ source: string; destination: string; type: number }> };
+    };
+
+    expect(firebase.hosting.redirects).toContainEqual({
+      source: '/comunidade',
+      destination: '/comunidades',
+      type: 301,
+    });
   });
 
   it('toda rota de conteúdo é entrada de build — senão o rewrite aponta para arquivo que não existe', () => {

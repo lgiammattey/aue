@@ -8,7 +8,14 @@ interface AdBannerProps {
   isPremium?: boolean;
   /** Id do bloco criado no painel do AdSense. Sem ele, nada é servido. */
   adSlot?: string;
+  /** Estado observado do bloco. Permite preencher só os slots que o Google recusou. */
+  aoMudarEstado?: (estado: EstadoDoAdSense) => void;
 }
+
+export type EstadoDoAdSense = 'aguardando' | 'preenchido' | 'vazio';
+
+/** Há cliente do Google disponível nesta build; ainda depende do id do slot. */
+export const ADSENSE_CONFIGURADO = Boolean(CLIENTE_ADSENSE);
 
 /**
  * Bloco de anúncio pronto para produção, inerte até a liberação do Google.
@@ -36,9 +43,10 @@ function garantirScriptAdSense(cliente: string) {
   document.head.appendChild(script);
 }
 
-export const AdBanner: React.FC<AdBannerProps> = ({ isPremium = false, adSlot }) => {
+export const AdBanner: React.FC<AdBannerProps> = ({ isPremium = false, adSlot, aoMudarEstado }) => {
   const configurado = Boolean(CLIENTE_ADSENSE && adSlot);
   const jaEmpurrado = useRef(false);
+  const elementoDoAnuncio = useRef<HTMLModElement | null>(null);
 
   useEffect(() => {
     if (isPremium || !configurado || jaEmpurrado.current) return;
@@ -55,6 +63,25 @@ export const AdBanner: React.FC<AdBannerProps> = ({ isPremium = false, adSlot })
       console.error('Falha ao registrar bloco AdSense', err);
     }
   }, [configurado, isPremium]);
+
+  useEffect(() => {
+    if (isPremium || !configurado) return undefined;
+
+    aoMudarEstado?.('aguardando');
+    const elemento = elementoDoAnuncio.current;
+    if (!elemento) return undefined;
+
+    const informarEstado = () => {
+      const status = elemento.getAttribute('data-ad-status');
+      if (status === 'filled') aoMudarEstado?.('preenchido');
+      if (status === 'unfilled') aoMudarEstado?.('vazio');
+    };
+
+    informarEstado();
+    const observador = new MutationObserver(informarEstado);
+    observador.observe(elemento, { attributes: true, attributeFilter: ['data-ad-status'] });
+    return () => observador.disconnect();
+  }, [aoMudarEstado, configurado, isPremium]);
 
   // Assinante nunca vê anúncio — é o que a tela de perfil promete
   // ("Sem anúncios, arrotos ilimitados e favoritos").
@@ -78,6 +105,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ isPremium = false, adSlot })
   return (
     <ins
       className="adsbygoogle"
+      ref={elementoDoAnuncio}
       style={{ display: 'block', margin: '16px 0', minHeight: 100 }}
       data-ad-client={CLIENTE_ADSENSE}
       data-ad-slot={adSlot}

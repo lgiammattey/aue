@@ -10,7 +10,11 @@ export interface EngajamentoDoPost {
 export interface ItemDoFeed {
   readonly id: string;
   readonly tipo: 'topico' | 'causo';
+  /** Post do perfil não tem roda, mesmo quando aparece no feed geral. */
+  readonly origem?: 'pessoal' | 'comunidade';
   readonly comunidadeSlug: string;
+  /** Avatar público da roda, quando a listagem já o trouxe. */
+  readonly comunidadeAvatarUrl?: string;
   readonly titulo: string;
   readonly corpo: string;
   readonly autorNome: string;

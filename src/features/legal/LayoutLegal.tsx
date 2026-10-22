@@ -39,13 +39,13 @@ export const LayoutLegal: React.FC<{
   children: React.ReactNode;
 }> = ({ rotulo, children }) => (
   <MolduraPublica>
-    <main className="publico-shell publico-legal">
+    <section className="publico-shell publico-legal">
       <section className="publico-hero">
         <span className="publico-eyebrow">Documento</span>
         <h1>{rotulo}</h1>
       </section>
       <div className="publico-legal-corpo">{children}</div>
-    </main>
+    </section>
   </MolduraPublica>
 );
 

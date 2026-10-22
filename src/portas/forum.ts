@@ -224,7 +224,7 @@ export interface AudioLivreDoForum {
 
 export type ResultadoDaGravacaoLivreDoForum =
   | { readonly ok: true; readonly audio: AudioLivreDoForum; readonly encerramento: 'manual' | 'limite' }
-  | { readonly ok: false; readonly motivo: 'negado' | 'indisponivel' | 'falhou' | 'naoGravando' | 'cancelado'; readonly detalhe?: string };
+  | { readonly ok: false; readonly motivo: 'negado' | 'indisponivel' | 'inseguro' | 'falhou' | 'naoGravando' | 'cancelado'; readonly detalhe?: string };
 
 export type InicioDaGravacaoLivreDoForum =
   | { readonly ok: true; readonly conclusao: Promise<ResultadoDaGravacaoLivreDoForum> }
@@ -420,6 +420,24 @@ export interface TopicoCriado {
   readonly criadoEm: string;
 }
 
+/** Publicação que nasce no perfil e aparece também no feed geral. */
+export interface PublicacaoPessoal {
+  readonly id: string;
+  readonly autor: AutorDoForum;
+  readonly titulo: string;
+  readonly corpo: string;
+  readonly criadoEm: string;
+  readonly respostasTotal: number;
+}
+
+export interface NotificacaoDeMencao {
+  readonly id: string;
+  readonly autor: AutorDoForum;
+  readonly topicoId: string;
+  readonly criadoEm: string;
+  readonly lidaEm: string | null;
+}
+
 export interface RespostaCriada {
   readonly id: string;
   readonly topicoId: string;
@@ -513,6 +531,23 @@ export interface PortaDeForum {
     opcoes?: OpcoesDePaginaCronologica,
   ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, RespostaDoAutor>>>;
 
+  /** Feed público das publicações sem roda. */
+  listarPublicacoesPessoais?(
+    opcoes?: OpcoesDePaginaCronologica,
+  ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, PublicacaoPessoal>>>;
+  /** Posts que pertencem ao perfil da pessoa. */
+  listarPublicacoesPessoaisDoAutor?(
+    handle: string,
+    opcoes?: OpcoesDePaginaCronologica,
+  ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, PublicacaoPessoal>>>;
+  /** Posts de outras pessoas nos quais este perfil foi marcado. */
+  listarPublicacoesMarcadas?(
+    handle: string,
+    opcoes?: OpcoesDePaginaCronologica,
+  ): Promise<ResultadoDaLeitura<PaginaDoForum<CursorDoForum, PublicacaoPessoal>>>;
+  listarMinhasNotificacoesDeMencao?(): Promise<ResultadoDaLeitura<readonly NotificacaoDeMencao[]>>;
+  marcarNotificacoesDeMencaoComoLidas?(ids: readonly string[]): Promise<ResultadoDaEscrita<true>>;
+
   /** Busca a mídia dos cards já retornados por uma página; não vaza anexo oculto. */
   listarAnexosDoForum?(ids: {
     readonly topicoIds?: readonly string[];
@@ -528,6 +563,10 @@ export interface PortaDeForum {
   // Escritas (conta promovida e membro; visitante recebe `precisaEntrar`)
 
   criarTopico(pedido: PedidoDeNovoTopico): Promise<ResultadoDaEscrita<TopicoCriado>>;
+  /** Não pertence a nenhuma roda; o banco encontra as marcações no corpo. */
+  criarPublicacaoPessoal?(
+    pedido: Omit<PedidoDeNovoTopico, 'comunidadeSlug'>,
+  ): Promise<ResultadoDaEscrita<TopicoCriado>>;
   responderTopico(pedido: PedidoDeResposta): Promise<ResultadoDaEscrita<RespostaCriada>>;
   /** Envia o JPEG normalizado e só então o referencia pela RPC segura. */
   definirMidiaDaComunidade?(pedido: PedidoDeMidiaDaComunidade): Promise<ResultadoDaEscrita<ComunidadeDoForum>>;

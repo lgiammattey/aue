@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DURACAO_DA_SESSAO_MS, comAbriuArenaRegistrada, decidirSessao } from './sessao';
+import { DURACAO_DA_SESSAO_MS, comAbriuArenaRegistrada, comPaginaVisitada, decidirSessao, jaVisitouPagina } from './sessao';
 import type { SessaoDeTelemetria } from './sessao';
 
 const AQUISICAO_TIKTOK = { origem: 'tiktok', campanha: 'duvido_bater_01', conteudo: null };
@@ -27,6 +27,7 @@ describe('decidirSessao', () => {
       conteudo: null,
       expiraEm: 1000 + DURACAO_DA_SESSAO_MS,
       abriuArenaRegistrada: false,
+      paginasVisitadas: [],
     });
   });
 
@@ -38,6 +39,7 @@ describe('decidirSessao', () => {
       conteudo: null,
       expiraEm: 5000,
       abriuArenaRegistrada: true,
+      paginasVisitadas: [],
     };
 
     // Aquisição atual É DIFERENTE — simula abrir um link interno com outro ?src=.
@@ -59,6 +61,7 @@ describe('decidirSessao', () => {
       conteudo: 'video_03',
       expiraEm: 5000,
       abriuArenaRegistrada: false,
+      paginasVisitadas: [],
     };
 
     const sessao = decidirSessao({
@@ -81,6 +84,7 @@ describe('decidirSessao', () => {
       conteudo: null,
       expiraEm: 5000,
       abriuArenaRegistrada: false,
+      paginasVisitadas: [],
     };
 
     const sessao = decidirSessao({
@@ -101,6 +105,7 @@ describe('decidirSessao', () => {
       conteudo: null,
       expiraEm: 999,
       abriuArenaRegistrada: true,
+      paginasVisitadas: [],
     };
 
     const sessao = decidirSessao({
@@ -123,6 +128,7 @@ describe('decidirSessao', () => {
       conteudo: null,
       expiraEm: 1000,
       abriuArenaRegistrada: false,
+      paginasVisitadas: [],
     };
 
     const sessao = decidirSessao({
@@ -145,8 +151,23 @@ describe('comAbriuArenaRegistrada', () => {
       conteudo: null,
       expiraEm: 1000,
       abriuArenaRegistrada: false,
+      paginasVisitadas: [],
     };
 
     expect(comAbriuArenaRegistrada(sessao)).toEqual({ ...sessao, abriuArenaRegistrada: true });
+  });
+});
+
+describe('páginas visitadas', () => {
+  const sessao: SessaoDeTelemetria = {
+    id: 'sessao-1', origem: 'direct', campanha: null, conteudo: null,
+    expiraEm: 1000, abriuArenaRegistrada: false, paginasVisitadas: [],
+  };
+
+  it('marca uma categoria sem guardar caminho e não a duplica', () => {
+    const marcada = comPaginaVisitada(sessao, 'comunidade');
+    expect(marcada.paginasVisitadas).toEqual(['comunidade']);
+    expect(jaVisitouPagina(marcada, 'comunidade')).toBe(true);
+    expect(comPaginaVisitada(marcada, 'comunidade')).toBe(marcada);
   });
 });

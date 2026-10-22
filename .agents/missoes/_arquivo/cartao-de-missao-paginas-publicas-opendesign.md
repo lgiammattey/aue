@@ -29,10 +29,10 @@
 
 | Critério observável | Dono da prova | Ambiente exigido | Estado |
 |---|---|---|---|
-| Todas as rotas públicas e legais usam a casca OpenDesign | Kayky | Código e teste | pendente |
-| Conteúdo, links e URLs existentes continuam disponíveis | Kayky | Teste | pendente |
-| Links institucionais não colam e quebram com leitura no mobile | Rian / Marcelo | Desktop e webapp | pendente |
-| `typecheck`, `lint`, `test` e `build` passam | Marcelo | Código | pendente |
+| Todas as rotas públicas e legais usam a casca OpenDesign | Kayky | Código e teste | em validação |
+| Conteúdo, links e URLs existentes continuam disponíveis | Kayky | Teste | em validação |
+| Links institucionais não colam e quebram com leitura no mobile | Rian / Marcelo | Desktop e webapp | em validação |
+| `typecheck`, `lint`, `test` e `build` passam | Marcelo | Código | em validação |
 
 ## 5. Encerramento e Parecer Final
 

@@ -43,6 +43,20 @@ describe('adaptador de Arrotos do Perfil', () => {
     expect(from).not.toHaveBeenCalled();
   });
 
+  it('só prepara arquivo local com metadados e até 30 segundos', async () => {
+    const audio = {
+      preload: '', duration: 30.1, onloadedmetadata: null as null | (() => void), onerror: null as null | (() => void),
+      removeAttribute: vi.fn(), load: vi.fn(),
+      set src(_url: string) { queueMicrotask(() => this.onloadedmetadata?.()); },
+    };
+    vi.stubGlobal('Audio', vi.fn(function AudioDeTeste() { return audio; }));
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:teste');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+
+    await expect(criarArrotosDoPerfilRemoto().prepararArquivoDeAudio(new Blob(['audio'], { type: 'audio/mpeg' }) as File))
+      .resolves.toEqual({ ok: false, motivo: 'duracaoInvalida' });
+  });
+
   it('sobe uma única vez no caminho autorizado e só depois publica', async () => {
     upload.mockResolvedValue({ error: null });
     rpc.mockResolvedValue({ data: [{ id: RASCUNHO.id, perfil_id: 'destino', autor_id: 'eu', autor_handle: 'giam', autor_apelido: 'Giam', caminho_do_audio: RASCUNHO.caminhoDoAudio, duracao_segundos: 3, criado_em: '2026-10-20T12:00:00Z', meu: true, posso_ocultar: true }], error: null });

@@ -4,9 +4,9 @@
  * O PROBLEMA QUE ISTO RESOLVE
  * ---------------------------
  * A política dizia, numa lista de "o que o Auê não faz": "Não exibe anúncios
- * nesta versão". Ao mesmo tempo, `ResultadoScreen` monta um `<AdBanner>` que
- * liga SOZINHO quando `VITE_ADSENSE_CLIENT` e `VITE_ADSENSE_SLOT_RESULT` são
- * preenchidas e o build é refeito — sem mudar uma linha de código.
+ * nesta versão". Ao mesmo tempo, `ResultadoScreen` e o feed montam um
+ * `<AdBanner>` quando `VITE_ADSENSE_CLIENT` e algum slot são preenchidos e o
+ * build é refeito — sem mudar uma linha de código.
  *
  * Ou seja: bastava alguém preencher duas variáveis na Vercel, exatamente como o
  * checklist de lançamento manda fazer, para o app passar a exibir anúncio do
@@ -24,13 +24,14 @@
  * declarar a menos é o documento legal mentindo. Os dois erros não custam o
  * mesmo.
  *
- * Havia um segundo slot aqui, o do feed. O feed saiu do produto (#109) e o slot
- * saiu junto: variável que não liga colocação nenhuma só serve para o documento
- * legal declarar anúncio que ninguém vê.
+ * O feed usa o mesmo contrato: se o Google puder ocupar qualquer slot, a
+ * política admite a publicidade; campanha própria não aciona script externo.
  */
 
 const CLIENTE = import.meta.env.VITE_ADSENSE_CLIENT as string | undefined;
 const SLOT_RESULTADO = import.meta.env.VITE_ADSENSE_SLOT_RESULT as string | undefined;
+const SLOT_FEED = import.meta.env.VITE_ADSENSE_SLOT_FEED as string | undefined;
+const SLOT_LATERAL = import.meta.env.VITE_ADSENSE_SLOT_SIDEBAR as string | undefined;
 
 /**
  * `true` quando esta build pode servir anúncio do Google a alguém.
@@ -39,4 +40,4 @@ const SLOT_RESULTADO = import.meta.env.VITE_ADSENSE_SLOT_RESULT as string | unde
  * de regra crítica, e por isso tem contrato de paridade em teste — é o padrão
  * que `AGENTS.md` pede para este caso.
  */
-export const ANUNCIOS_ATIVOS = Boolean(CLIENTE) && Boolean(SLOT_RESULTADO);
+export const ANUNCIOS_ATIVOS = Boolean(CLIENTE) && Boolean(SLOT_RESULTADO || SLOT_FEED || SLOT_LATERAL);

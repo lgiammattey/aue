@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/gerar-paginas-de-grupos.ts",
+    "build": "tsc -b && vite build && node scripts/gerar-paginas-de-grupos.ts && node scripts/gerar-pagina-de-comunidades.ts",
     "lint": "oxlint",
     "elenco:preparar": "node scripts/elenco-burpzilla/preparar-audio.ts",
     "elenco:sortear": "node scripts/elenco-burpzilla/sortear.ts",

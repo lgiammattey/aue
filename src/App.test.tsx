@@ -26,8 +26,8 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
   it('exibe o Início Open Design na raiz "/" para primeiro visitante sem sessão', async () => {
     render(<App />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'A comunidade dos arrotadores.' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Você está só olhando. Entre para participar.' })).toBeTruthy();
+    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
+    expect(screen.getByRole('button', { name: '+ Soltar um arroto' })).toBeTruthy();
   });
 
   it('endereço que o Auê não conhece mostra a página não encontrada, sem mandar para a home calado', async () => {
@@ -43,7 +43,7 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     estadoDaConta.valor = { temSessao: true, anonima: false, perfilSocialPendente: false };
     render(<App />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'A comunidade dos arrotadores.' })).toBeTruthy();
+    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
     expect(window.location.pathname).toBe('/');
   });
 
@@ -51,8 +51,8 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     localStorage.setItem('aue.visitou', 'true');
     render(<App />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'A comunidade dos arrotadores.' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Você está só olhando. Entre para participar.' })).toBeTruthy();
+    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
+    expect(screen.getByRole('button', { name: '+ Soltar um arroto' })).toBeTruthy();
   });
 
   it('exibe o Feed diretamente quando acessa a rota "/feed"', async () => {
@@ -63,12 +63,12 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(await screen.findByPlaceholderText('O que tá rolando no bonde?')).toBeTruthy();
   });
 
-  it('abre a Arena diretamente na rota "/arena", sem montar a casca legada do feed', async () => {
+  it('leva a Arena para a apresentação de em breve, sem montar a casca legada do feed', async () => {
     window.history.pushState({}, 'Arena', '/arena');
     render(<App />);
 
-    expect(await screen.findByRole('button', { name: 'Toque para começar' })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Feed' })).toBeNull();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Aqui o arroto vira jogo.' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Toque para começar' })).toBeNull();
   });
 
   it('abre o desafio X1 diretamente pela rota "/x1/:code" na Arena', async () => {
@@ -84,7 +84,7 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     window.history.pushState({}, 'Comunidades', '/comunidades');
     render(<App />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Encontre sua comunidade.' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Comunidade' })).toBeNull();
   });
 
@@ -113,7 +113,7 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
       window.history.pushState({}, 'Comunidades', caminho);
       const { unmount } = render(<App />);
 
-      expect(await screen.findByRole('heading', { level: 1, name: 'Comunidades' })).toBeTruthy();
+      expect(await screen.findByRole('heading', { level: 1, name: 'Encontre sua comunidade.' })).toBeTruthy();
       expect(screen.queryByRole('button', { name: 'Comunidade' })).toBeNull();
       unmount();
     }

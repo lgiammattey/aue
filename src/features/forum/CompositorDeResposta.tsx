@@ -205,7 +205,7 @@ export function CompositorDeResposta({
       gravacao.current = nova;
       const inicio = await nova.iniciar();
       if (!inicio.ok) {
-        const mensagem = inicio.motivo === 'negado' ? 'Libera o microfone para gravar áudio.' : inicio.motivo === 'indisponivel' ? 'Não achei um microfone disponível.' : 'Não deu pra iniciar a gravação.';
+        const mensagem = inicio.motivo === 'negado' ? 'Libera o microfone para gravar áudio.' : inicio.motivo === 'inseguro' ? 'Para gravar áudio, abra o Auê em localhost ou HTTPS.' : inicio.motivo === 'indisponivel' ? 'Não achei um microfone disponível.' : 'Não deu pra iniciar a gravação.';
         setErroDoServidor({ texto: mensagem, onde: 'geral', acao: null, ambiguo: false });
         return null;
       }

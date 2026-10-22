@@ -1,6 +1,7 @@
 import { configuracaoAusente, supabase } from '../../db/supabase';
 import type {
   EventosDiariosDoPainel,
+  AcessoPorPaginaDoPainel,
   MonetizacaoAdministrativa,
   PessoaDoPainel,
   PortaDeAdministracao,
@@ -11,14 +12,22 @@ interface RespostaDoBanco {
   periodo?: { inicio?: string; fim?: string };
   resumo?: {
     total_contas_de_email_atual?: number;
+    contas_anonimas_atuais?: number;
+    contas_ativas_no_periodo?: number;
     cadastros_acompanhados_no_periodo?: number;
     acompanhamento_de_cadastros_iniciado_em?: string | null;
     perfis_concluidos_no_periodo?: number;
     perfis_pendentes_atuais?: number;
+    topicos_publicados_no_periodo?: number;
+    respostas_publicadas_no_periodo?: number;
+    comunidades_ativas_no_periodo?: number;
+    acessos_de_paginas_no_periodo?: number;
+    acompanhamento_de_acessos_iniciado_em?: string | null;
     eventos?: Record<string, number>;
   };
   eventos_por_dia?: Array<{
     data?: string;
+    acessos_de_paginas?: number;
     abriu_arena?: number;
     iniciou_arroto?: number;
     recebeu_nota?: number;
@@ -26,7 +35,10 @@ interface RespostaDoBanco {
     criou_x1?: number;
     respondeu_x1?: number;
     pediu_revanche?: number;
+    topicos_publicados?: number;
+    respostas_publicadas?: number;
   }>;
+  acessos_por_pagina?: Array<{ pagina?: string; acessos?: number }>;
   pessoas?: Array<{
     apelido?: string | null;
     handle?: string | null;
@@ -57,6 +69,7 @@ function transformarDias(linhas: RespostaDoBanco['eventos_por_dia']): readonly E
     if (!linha?.data) return [];
     return [{
       data: linha.data,
+      acessosDePaginas: numero(linha.acessos_de_paginas),
       abriuArena: numero(linha.abriu_arena),
       iniciouArroto: numero(linha.iniciou_arroto),
       recebeuNota: numero(linha.recebeu_nota),
@@ -64,7 +77,16 @@ function transformarDias(linhas: RespostaDoBanco['eventos_por_dia']): readonly E
       criouX1: numero(linha.criou_x1),
       respondeuX1: numero(linha.respondeu_x1),
       pediuRevanche: numero(linha.pediu_revanche),
+      topicosPublicados: numero(linha.topicos_publicados),
+      respostasPublicadas: numero(linha.respostas_publicadas),
     }];
+  });
+}
+
+function transformarAcessos(linhas: RespostaDoBanco['acessos_por_pagina']): readonly AcessoPorPaginaDoPainel[] {
+  return (linhas ?? []).flatMap((linha) => {
+    if (!linha?.pagina || !/^[a-z_]+$/.test(linha.pagina)) return [];
+    return [{ pagina: linha.pagina, acessos: numero(linha.acessos) }];
   });
 }
 
@@ -101,11 +123,19 @@ export function criarAdministracaoWeb(): PortaDeAdministracao {
         inicio: resposta.periodo.inicio,
         fim: resposta.periodo.fim,
         totalContasDeEmailAtual: numero(resposta.resumo.total_contas_de_email_atual),
+        contasAnonimasAtuais: numero(resposta.resumo.contas_anonimas_atuais),
+        contasAtivasNoPeriodo: numero(resposta.resumo.contas_ativas_no_periodo),
         cadastrosNoPeriodo: numero(resposta.resumo.cadastros_acompanhados_no_periodo),
         acompanhamentoDeCadastrosIniciadoEm: resposta.resumo.acompanhamento_de_cadastros_iniciado_em ?? null,
         perfisConcluidosNoPeriodo: numero(resposta.resumo.perfis_concluidos_no_periodo),
         perfisPendentesAtuais: numero(resposta.resumo.perfis_pendentes_atuais),
+        topicosPublicadosNoPeriodo: numero(resposta.resumo.topicos_publicados_no_periodo),
+        respostasPublicadasNoPeriodo: numero(resposta.resumo.respostas_publicadas_no_periodo),
+        comunidadesAtivasNoPeriodo: numero(resposta.resumo.comunidades_ativas_no_periodo),
+        acessosDePaginasNoPeriodo: numero(resposta.resumo.acessos_de_paginas_no_periodo),
+        acompanhamentoDeAcessosIniciadoEm: resposta.resumo.acompanhamento_de_acessos_iniciado_em ?? null,
         eventos: resposta.resumo.eventos ?? {},
+        acessosPorPagina: transformarAcessos(resposta.acessos_por_pagina),
         eventosPorDia: transformarDias(resposta.eventos_por_dia),
         pessoas: transformarPessoas(resposta.pessoas),
       };

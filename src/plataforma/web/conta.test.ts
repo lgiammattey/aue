@@ -5,6 +5,8 @@ const getSession = vi.fn();
 const updateUser = vi.fn();
 const signUp = vi.fn();
 const signInWithPassword = vi.fn();
+const signInWithOAuth = vi.fn();
+const linkIdentity = vi.fn();
 const rpc = vi.fn();
 const signOut = vi.fn();
 
@@ -16,6 +18,8 @@ vi.mock('../../db/supabase', () => ({
       updateUser: (...a: unknown[]) => updateUser(...a),
       signUp: (...a: unknown[]) => signUp(...a),
       signInWithPassword: (...a: unknown[]) => signInWithPassword(...a),
+      signInWithOAuth: (...a: unknown[]) => signInWithOAuth(...a),
+      linkIdentity: (...a: unknown[]) => linkIdentity(...a),
       resetPasswordForEmail: vi.fn(async () => ({ error: null })),
       signOut: (...a: unknown[]) => signOut(...a),
     },
@@ -27,7 +31,7 @@ vi.mock('../../db/supabase', () => ({
 import { criarContaWeb } from './conta';
 
 beforeEach(() => {
-  [getSession, updateUser, signUp, signInWithPassword, rpc, signOut].forEach((f) => f.mockReset());
+  [getSession, updateUser, signUp, signInWithPassword, signInWithOAuth, linkIdentity, rpc, signOut].forEach((f) => f.mockReset());
   rpc.mockResolvedValue({ error: null });
 });
 
@@ -97,6 +101,38 @@ describe('conta: cadastro por e-mail e senha', () => {
 
     signInWithPassword.mockResolvedValue({ error: { message: 'Invalid login credentials' } });
     expect(await criarContaWeb().entrar('a@b.com', 'errada123')).toEqual({ ok: false, motivo: 'credenciaisInvalidas' });
+  });
+});
+
+describe('conta: X', () => {
+  it('entra pelo provider nativo do X e volta ao perfil', async () => {
+    signInWithOAuth.mockResolvedValue({ error: null });
+
+    await expect(criarContaWeb().entrarComX!()).resolves.toEqual({ ok: true });
+    expect(signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'x',
+      options: { redirectTo: `${window.location.origin}/perfil?via=x` },
+    });
+  });
+
+  it('cria com X vinculando a sessão anônima, sem abrir outra identidade', async () => {
+    getSession.mockResolvedValue({ data: { session: { user: { id: 'anon-1', is_anonymous: true } } } });
+    linkIdentity.mockResolvedValue({ error: null });
+
+    await expect(criarContaWeb().criarComX!()).resolves.toEqual({ ok: true });
+    expect(linkIdentity).toHaveBeenCalledWith({
+      provider: 'x',
+      options: { redirectTo: `${window.location.origin}/perfil?via=x` },
+    });
+    expect(signUp).not.toHaveBeenCalled();
+    expect(signInWithOAuth).not.toHaveBeenCalled();
+  });
+
+  it('explica quando o X já está vinculado a outra conta', async () => {
+    getSession.mockResolvedValue({ data: { session: { user: { id: 'anon-1', is_anonymous: true } } } });
+    linkIdentity.mockResolvedValue({ error: { message: 'Identity is already linked to another user' } });
+
+    await expect(criarContaWeb().criarComX!()).resolves.toEqual({ ok: false, motivo: 'identidadeXEmUso' });
   });
 });
 

@@ -41,7 +41,7 @@ export default defineConfig({
         comoArrotar: entrada('como-arrotar.html'),
         tiposDeArroto: entrada('tipos-de-arroto.html'),
         rankingDeArrotos: entrada('ranking-de-arrotos.html'),
-        comunidade: entrada('comunidade.html'),
+        comunidades: entrada('comunidades.html'),
         grupos: entrada('grupos.html'),
       },
     },

@@ -24,12 +24,12 @@ describe('Explorar na casca OpenDesign', () => {
     expect(within(titulo.closest('li')!).getByRole('link', { name: 'Cerveja Gelada' }).getAttribute('href')).toBe('/c/cerveja-gelada');
   });
 
-  it('usa a casca da Tropa e deixa Explorar ativo', async () => {
+  it('usa a casca da Tropa sem ressuscitar a shell legada', async () => {
     abrir(vi.fn(async () => pagina([itemDoExplorar({ id: '1' })])));
     await screen.findByRole('link', { name: 'Tópico 1' });
     expect(document.querySelector('.app')).toBeTruthy();
     expect(document.querySelector('.forum-shell')).toBeNull();
-    expect(screen.getByRole('button', { name: /Explorar$/ }).className).toContain('active');
+    expect(screen.getByRole('button', { name: 'Feed' })).toBeTruthy();
   });
 
   it('tem busca real e não oferece escrita de tópico ou resposta', async () => {

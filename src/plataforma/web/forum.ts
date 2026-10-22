@@ -10,6 +10,7 @@ import type {
   CursorDoForum,
   MotivoDeEscrita,
   MotivoDeLeitura,
+  NotificacaoDeMencao,
   OrdemDosTopicos,
   PaginaDoForum,
   ItemSalvo,
@@ -20,6 +21,7 @@ import type {
   PortaDeForum,
   ResultadoDeBusca,
   PreviaDeRespostaDoTopico,
+  PublicacaoPessoal,
   ReferenciaDeComunidade,
   ResultadoDaEscrita,
   ResultadoDaLeitura,
@@ -342,6 +344,27 @@ function paraTopicoDoAutor(l: Linha): TopicoDoAutor {
     editadoEm: textoOuNulo(l, 'editado_em'),
     ultimaAtividadeEm: texto(l, 'ultima_atividade_em'),
     respostasTotal: inteiro(l, 'respostas_total'),
+  };
+}
+
+function paraPublicacaoPessoal(l: Linha): PublicacaoPessoal {
+  return {
+    id: texto(l, 'id'),
+    autor: autorDe(l),
+    titulo: texto(l, 'titulo'),
+    corpo: textoLivre(l, 'corpo'),
+    criadoEm: texto(l, 'criado_em'),
+    respostasTotal: inteiro(l, 'respostas_total'),
+  };
+}
+
+function paraNotificacaoDeMencao(l: Linha): NotificacaoDeMencao {
+  return {
+    id: texto(l, 'id'),
+    autor: autorDe(l),
+    topicoId: texto(l, 'topico_id'),
+    criadoEm: texto(l, 'criado_em'),
+    lidaEm: textoOuNulo(l, 'lida_em'),
   };
 }
 
@@ -780,6 +803,57 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       );
     },
 
+    listarPublicacoesPessoais(op = {}) {
+      const limite = limiteEfetivo(op.limite, LIMITE_PADRAO_DO_AUTOR, LIMITE_MAXIMO_DO_AUTOR);
+      return ler(
+        'listar_publicacoes_pessoais',
+        {
+          p_limite: limite,
+          p_cursor_criado_em: op.cursor?.valor ?? null,
+          p_cursor_id: op.cursor?.id ?? null,
+        },
+        (linhas) => paginaDe(linhas, limite, paraPublicacaoPessoal, (l, p): CursorDoForum => ({ valor: texto(l, 'criado_em'), id: p.id })),
+      );
+    },
+
+    listarPublicacoesPessoaisDoAutor(handle, op = {}) {
+      const limite = limiteEfetivo(op.limite, LIMITE_PADRAO_DO_AUTOR, LIMITE_MAXIMO_DO_AUTOR);
+      return ler(
+        'listar_publicacoes_pessoais_do_autor',
+        {
+          p_handle: handle,
+          p_limite: limite,
+          p_cursor_criado_em: op.cursor?.valor ?? null,
+          p_cursor_id: op.cursor?.id ?? null,
+        },
+        (linhas) => paginaDe(linhas, limite, paraPublicacaoPessoal, (l, p): CursorDoForum => ({ valor: texto(l, 'criado_em'), id: p.id })),
+      );
+    },
+
+    listarPublicacoesMarcadas(handle, op = {}) {
+      const limite = limiteEfetivo(op.limite, LIMITE_PADRAO_DO_AUTOR, LIMITE_MAXIMO_DO_AUTOR);
+      return ler(
+        'listar_publicacoes_marcadas',
+        {
+          p_handle: handle,
+          p_limite: limite,
+          p_cursor_criado_em: op.cursor?.valor ?? null,
+          p_cursor_id: op.cursor?.id ?? null,
+        },
+        (linhas) => paginaDe(linhas, limite, paraPublicacaoPessoal, (l, p): CursorDoForum => ({ valor: texto(l, 'criado_em'), id: p.id })),
+      );
+    },
+
+    listarMinhasNotificacoesDeMencao() {
+      return ler('listar_minhas_notificacoes_de_mencao', {}, (linhas) => linhas.map(paraNotificacaoDeMencao));
+    },
+
+    marcarNotificacoesDeMencaoComoLidas(ids) {
+      const validos = [...new Set(ids)].filter((id) => UUID.test(id));
+      if (validos.length === 0) return Promise.resolve({ ok: true as const, valor: true as const });
+      return escrever('marcar_notificacoes_de_mencao_como_lidas', { p_ids: validos }, () => true as const);
+    },
+
     listarAnexosDoForum(ids) {
       const topicos = [...new Set(ids.topicoIds ?? [])].filter((id) => UUID.test(id));
       const respostas = [...new Set(ids.respostaIds ?? [])].filter((id) => UUID.test(id));
@@ -821,6 +895,21 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
         'criar_topico_com_anexo',
         {
           p_slug: pedido.comunidadeSlug,
+          p_titulo: pedido.titulo ?? '',
+          p_corpo: pedido.corpo,
+          ...parametrosDoAnexo(pedido.anexo),
+        },
+        (dados): TopicoCriado => {
+          const l = linhaDe(dados);
+          return { id: texto(l, 'id'), criadoEm: texto(l, 'criado_em') };
+        },
+      );
+    },
+
+    criarPublicacaoPessoal(pedido) {
+      return escrever(
+        'criar_publicacao_pessoal_com_anexo',
+        {
           p_titulo: pedido.titulo ?? '',
           p_corpo: pedido.corpo,
           ...parametrosDoAnexo(pedido.anexo),

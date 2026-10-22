@@ -1,9 +1,7 @@
 /**
- * As páginas públicas de conteúdo usam `LayoutPublico`, a moldura desenhada em
- * `docs/design/prototipo/Páginas Públicas.dc.html`. O conteúdo (título, texto,
- * ordem) não mudou quando a moldura mudou. Este arquivo trava as duas coisas:
- * que o conteúdo continua lá, e que a moldura é mesmo a compartilhada
- * (`publico-*`), não uma reinvenção por página.
+ * As páginas públicas de conteúdo usam `LayoutPublico`. O conteúdo (título,
+ * texto e ordem) não muda quando a casca muda; a leitura segue dentro da
+ * mesma navegação OpenDesign do restante da rede.
  */
 import { describe, expect, it } from 'vitest';
 import { createElement } from 'react';
@@ -37,11 +35,11 @@ describe('/como-jogar com a moldura pública', () => {
     expect(html).toContain('Os grupos de WhatsApp e Telegram são outra coisa');
   });
 
-  it('usa a casca pública compartilhada, não uma própria', () => {
+  it('usa a casca OpenDesign compartilhada, não uma própria', () => {
     const html = montar(ComoJogar);
-    expect(html).toContain('publico-site');
-    expect(html).toContain('publico-topo');
-    expect(html).toContain('publico-rodape');
+    expect(html).toContain('app od-informativo');
+    expect(html).toContain('Navegação do Auê');
+    expect(html).toContain('Painel complementar');
   });
 
   it('leva pra política de privacidade e de volta pro jogo', () => {
@@ -50,10 +48,10 @@ describe('/como-jogar com a moldura pública', () => {
     expect(html).toContain('href="/"');
   });
 
-  it('o rodapé tem os links institucionais', () => {
+  it('o rodapé atual mantém os links institucionais', () => {
     const html = montar(ComoJogar);
     expect(html).toContain('href="/como-jogar"');
-    expect(html).toContain('href="/como-arrotar"');
+    expect(html).toContain('href="/ranking-de-arrotos"');
     expect(html).toContain('href="/privacidade"');
     expect(html).toContain('href="/termos"');
   });
@@ -79,11 +77,11 @@ describe('/como-arrotar com a moldura pública', () => {
     expect(html).toContain('não de jogo');
   });
 
-  it('usa a casca pública compartilhada, não uma própria', () => {
+  it('usa a casca OpenDesign compartilhada, não uma própria', () => {
     const html = montar(ComoArrotar);
-    expect(html).toContain('publico-site');
-    expect(html).toContain('publico-topo');
-    expect(html).toContain('publico-rodape');
+    expect(html).toContain('app od-informativo');
+    expect(html).toContain('Navegação do Auê');
+    expect(html).toContain('Painel complementar');
   });
 
   it('leva de volta pro jogo e pra como jogar', () => {
@@ -113,7 +111,7 @@ describe('/tipos-de-arroto com a moldura pública', () => {
 
   it('usa a casca compartilhada e links de retorno', () => {
     const html = montar(TiposDeArroto);
-    expect(html).toContain('publico-site');
+    expect(html).toContain('app od-informativo');
     expect(html).toContain('href="/como-arrotar"');
     expect(html).toContain('href="/ranking-de-arrotos"');
   });
@@ -138,7 +136,7 @@ describe('/ranking-de-arrotos com a moldura pública', () => {
 
   it('usa a casca compartilhada e links de retorno', () => {
     const html = montar(RankingDeArrotos);
-    expect(html).toContain('publico-site');
+    expect(html).toContain('app od-informativo');
     expect(html).toContain('href="/como-jogar"');
     expect(html).toContain('href="/tipos-de-arroto"');
   });
@@ -165,7 +163,7 @@ describe('/videos-de-arroto com a moldura pública', () => {
 
   it('usa a casca compartilhada e links de navegação', () => {
     const html = montar(VideosDeArroto);
-    expect(html).toContain('publico-site');
+    expect(html).toContain('app od-informativo');
     expect(html).toContain('href="/ranking-de-arrotos"');
     expect(html).toContain('href="/grupos"');
   });
@@ -194,12 +192,10 @@ describe('voz das páginas públicas', () => {
     expect(html).not.toContain('entra na competição');
   });
 
-  it('o menu do celular existe, fechado, e a navegação tem as comunidades', () => {
+  it('a navegação móvel atual tem o atalho para comunidades', () => {
     const html = montar(ComoJogar);
 
-    expect(html).toContain('aria-label="Abrir menu"');
-    expect(html).toContain('aria-expanded="false"');
-    expect(html).toContain('id="menu-publico"');
-    expect(html).toContain('href="/comunidade"');
+    expect(html).toContain('aria-label="Comunidades"');
+    expect(html).toContain('mobile-bottom-nav');
   });
 });

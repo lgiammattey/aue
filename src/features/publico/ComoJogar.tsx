@@ -30,7 +30,7 @@ export const ComoJogar: React.FC = () => (
       <p>Os grupos de WhatsApp e Telegram são outra coisa: ficam fora do Auê.</p>
       <LinksPublicos
         links={[
-          { para: '/comunidade', rotulo: 'Ver as comunidades' },
+          { para: '/comunidades', rotulo: 'Ver as comunidades' },
           { para: '/grupos', rotulo: 'Grupos externos' },
         ]}
       />

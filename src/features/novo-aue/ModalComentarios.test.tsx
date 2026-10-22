@@ -5,13 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ModalComentarios } from './ModalComentarios';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 
-function criarControleDeDialogoFalso() {
-  return {
-    bloquearRolagemDoDocumento: vi.fn(() => vi.fn()),
-    manterCampoVisivelAoAbrirTeclado: vi.fn(() => vi.fn()),
-  };
-}
-
 describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
   afterEach(() => {
     cleanup();
@@ -41,7 +34,6 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
   ];
 
   it('renderiza a thread de comentários com post pai, resposta e formulário de resposta', () => {
-    const controleDeDialogo = criarControleDeDialogoFalso();
     render(
       <MemoryRouter>
         <ModalComentarios
@@ -50,7 +42,6 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
           comentarios={comentariosExemplo}
           carregando={false}
           enviando={false}
-          controleDeDialogo={controleDeDialogo}
           aoFechar={vi.fn()}
           aoEnviarComentario={vi.fn()}
         />
@@ -66,7 +57,6 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
   });
 
   it('permite focar em responder a um usuário específico', () => {
-    const controleDeDialogo = criarControleDeDialogoFalso();
     render(
       <MemoryRouter>
         <ModalComentarios
@@ -75,7 +65,6 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
           comentarios={comentariosExemplo}
           carregando={false}
           enviando={false}
-          controleDeDialogo={controleDeDialogo}
           aoFechar={vi.fn()}
           aoEnviarComentario={vi.fn()}
         />
@@ -89,9 +78,28 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
     expect(screen.getByPlaceholderText('Responder a @bia_grave…')).toBeTruthy();
   });
 
+  it('abre já direcionado quando a resposta parte da trilha do feed', () => {
+    render(
+      <MemoryRouter>
+        <ModalComentarios
+          aberto={true}
+          post={postExemplo}
+          comentarios={comentariosExemplo}
+          carregando={false}
+          enviando={false}
+          comentarioInicialParaResponder={comentariosExemplo[0]}
+          aoFechar={vi.fn()}
+          aoEnviarComentario={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/Respondendo a/)).toBeTruthy();
+    expect(screen.getByPlaceholderText('Responder a Bia do Grave…')).toBeTruthy();
+  });
+
   it('envia comentário digitado', async () => {
     const aoEnviar = vi.fn(async () => true);
-    const controleDeDialogo = criarControleDeDialogoFalso();
 
     render(
       <MemoryRouter>
@@ -101,7 +109,6 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
           comentarios={comentariosExemplo}
           carregando={false}
           enviando={false}
-          controleDeDialogo={controleDeDialogo}
           aoFechar={vi.fn()}
           aoEnviarComentario={aoEnviar}
         />
@@ -121,13 +128,8 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
     });
   });
 
-  it('pede à plataforma o bloqueio e a manutenção do campo ao abrir e focar', () => {
-    const liberarRolagem = vi.fn();
-    const controleDeDialogo = {
-      bloquearRolagemDoDocumento: vi.fn(() => liberarRolagem),
-      manterCampoVisivelAoAbrirTeclado: vi.fn(() => vi.fn()),
-    };
-    const { unmount } = render(
+  it('detecta um link do YouTube no texto e mostra sua prévia antes do envio', () => {
+    render(
       <MemoryRouter>
         <ModalComentarios
           aberto={true}
@@ -135,20 +137,18 @@ describe('ModalComentarios (Thread de Respostas / Estilo Twitter)', () => {
           comentarios={comentariosExemplo}
           carregando={false}
           enviando={false}
-          controleDeDialogo={controleDeDialogo}
           aoFechar={vi.fn()}
           aoEnviarComentario={vi.fn()}
         />
       </MemoryRouter>,
     );
 
-    const campo = screen.getByRole('textbox', { name: 'Escrever resposta' });
-    expect(campo.id).toBe('comentarios-campo');
-    expect(controleDeDialogo.bloquearRolagemDoDocumento).toHaveBeenCalledOnce();
-    expect(controleDeDialogo.manterCampoVisivelAoAbrirTeclado).toHaveBeenCalledWith('comentarios-campo');
-    fireEvent.focus(campo);
-    expect(controleDeDialogo.manterCampoVisivelAoAbrirTeclado).toHaveBeenCalledTimes(2);
-    unmount();
-    expect(liberarRolagem).toHaveBeenCalledOnce();
+    fireEvent.change(screen.getByPlaceholderText('Responder para a roda…'), {
+      target: { value: 'Olha isso https://youtu.be/dQw4w9WgXcQ' },
+    });
+
+    expect(screen.getByTitle('Prévia do YouTube').getAttribute('src')).toBe(
+      'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0&playsinline=1',
+    );
   });
 });

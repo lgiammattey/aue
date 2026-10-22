@@ -1,4 +1,5 @@
 import type { AquisicaoDaSessao } from './aquisicao';
+import type { PaginaMonitorada } from './paginas';
 
 /**
  * A sessão de telemetria — anônima, do navegador, sem fingerprinting.
@@ -35,6 +36,8 @@ export interface SessaoDeTelemetria {
    * e o funil mentiria sobre a taxa de abertura → primeiro arroto.
    */
   readonly abriuArenaRegistrada: boolean;
+  /** Categorias de página já medidas nesta sessão, sem caminho ou slug. */
+  readonly paginasVisitadas: readonly PaginaMonitorada[];
 }
 
 export interface DecisaoDeSessao {
@@ -66,10 +69,21 @@ export function decidirSessao(decisao: DecisaoDeSessao): SessaoDeTelemetria {
     conteudo: aquisicaoAtual.conteudo,
     expiraEm: agora + DURACAO_DA_SESSAO_MS,
     abriuArenaRegistrada: false,
+    paginasVisitadas: [],
   };
 }
 
 /** A mesma sessão, com `abriu_arena` marcada como já enviada. */
 export function comAbriuArenaRegistrada(sessao: SessaoDeTelemetria): SessaoDeTelemetria {
   return { ...sessao, abriuArenaRegistrada: true };
+}
+
+export function jaVisitouPagina(sessao: SessaoDeTelemetria, pagina: PaginaMonitorada): boolean {
+  return sessao.paginasVisitadas.includes(pagina);
+}
+
+/** Marca a categoria apenas uma vez por sessão, sem guardar o caminho real. */
+export function comPaginaVisitada(sessao: SessaoDeTelemetria, pagina: PaginaMonitorada): SessaoDeTelemetria {
+  if (jaVisitouPagina(sessao, pagina)) return sessao;
+  return { ...sessao, paginasVisitadas: [...sessao.paginasVisitadas, pagina] };
 }

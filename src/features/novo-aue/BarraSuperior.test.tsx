@@ -16,7 +16,7 @@ const montar = (extra: Partial<React.ComponentProps<typeof BarraSuperior>> = {})
 describe('BarraSuperior', () => {
   it('campo de busca com o texto do print e sem botão de chat', () => {
     montar();
-    expect(screen.getByPlaceholderText('Buscar pessoas, rodas e posts')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Buscar pessoas, comunidades e publicações…')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /chat|mensagem/i })).toBeNull();
     expect(screen.getByRole('link', { name: 'Auê mobile' })).toBeTruthy();
   });

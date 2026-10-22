@@ -9,9 +9,12 @@ import {
 import { lerAquisicaoDaURL } from '../../nucleo/telemetria/aquisicao';
 import {
   comAbriuArenaRegistrada,
+  comPaginaVisitada,
   decidirSessao,
+  jaVisitouPagina,
   type SessaoDeTelemetria,
 } from '../../nucleo/telemetria/sessao';
+import { PAGINAS_MONITORADAS } from '../../nucleo/telemetria/paginas';
 
 /**
  * A telemetria de verdade: `eventos_de_telemetria`, gravada best-effort.
@@ -41,7 +44,7 @@ const VERSAO_APP = (import.meta.env.VITE_APP_VERSION as string | undefined) || n
 const JANELA_DE_DEDUPLICACAO_MS = 1500;
 
 function assinaturaDoEvento(evento: EventoDeTelemetria, detalhe?: DetalheDoEvento): string {
-  return `${evento}:${detalhe?.batalhaCodigo ?? ''}`;
+  return `${evento}:${detalhe?.batalhaCodigo ?? ''}:${detalhe?.pagina ?? ''}`;
 }
 
 function lerSessaoGuardada(armazenamento: ArmazenamentoLocal): SessaoDeTelemetria | null {
@@ -60,7 +63,11 @@ function lerSessaoGuardada(armazenamento: ArmazenamentoLocal): SessaoDeTelemetri
     ) {
       return null;
     }
-    return valor as SessaoDeTelemetria;
+    const paginas = (valor as { paginasVisitadas?: unknown }).paginasVisitadas;
+    const paginasVisitadas = Array.isArray(paginas) && paginas.every((pagina) =>
+      typeof pagina === 'string' && (PAGINAS_MONITORADAS as readonly string[]).includes(pagina),
+    ) ? paginas : [];
+    return { ...(valor as SessaoDeTelemetria), paginasVisitadas };
   } catch {
     /* JSON corrompido: trata como se não houvesse sessão guardada. */
     return null;
@@ -94,6 +101,7 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
         plataforma: PLATAFORMA,
         versao_app: VERSAO_APP,
         batalha_codigo: detalhe?.batalhaCodigo ?? null,
+        pagina: detalhe?.pagina ?? null,
       });
 
       /*
@@ -128,6 +136,8 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
       if (!(EVENTOS_DE_TELEMETRIA as readonly string[]).includes(evento)) {
         return;
       }
+      if (evento === 'visitou_pagina' && (!detalhe?.pagina || !(PAGINAS_MONITORADAS as readonly string[]).includes(detalhe.pagina))) return;
+      if (evento !== 'visitou_pagina' && detalhe?.pagina) return;
 
       const agora = Date.now();
       const assinatura = assinaturaDoEvento(evento, detalhe);
@@ -142,6 +152,12 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
       if (evento === 'abriu_arena') {
         if (sessao.abriuArenaRegistrada) return;
         sessao = comAbriuArenaRegistrada(sessao);
+        armazenamento.gravar(CHAVE_DA_SESSAO, JSON.stringify(sessao));
+      }
+
+      if (evento === 'visitou_pagina') {
+        if (jaVisitouPagina(sessao, detalhe!.pagina!)) return;
+        sessao = comPaginaVisitada(sessao, detalhe!.pagina!);
         armazenamento.gravar(CHAVE_DA_SESSAO, JSON.stringify(sessao));
       }
 

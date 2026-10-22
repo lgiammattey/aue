@@ -1,37 +1,58 @@
 import { useCallback, useEffect, useState } from 'react';
+
 import { criarAdministracaoWeb } from '../../plataforma/web/administracao';
-import type { MonetizacaoAdministrativa, PortaDeAdministracao, ResumoAdministrativo } from '../../portas/administracao';
+import type { EventosDiariosDoPainel, MonetizacaoAdministrativa, PortaDeAdministracao, ResumoAdministrativo } from '../../portas/administracao';
 import './TelaAdministracao.css';
 
-interface Props {
-  readonly porta?: PortaDeAdministracao;
-}
+interface Props { readonly porta?: PortaDeAdministracao; }
 
-const EVENTOS: ReadonlyArray<readonly [string, string]> = [
-  ['abriu_arena', 'Abriu a Arena'],
-  ['iniciou_arroto', 'Começou um arroto'],
-  ['recebeu_nota', 'Recebeu uma nota'],
-  ['compartilhou', 'Compartilhou'],
-  ['criou_x1', 'Criou um X1'],
-  ['respondeu_x1', 'Respondeu um X1'],
-  ['pediu_revanche', 'Pediu revanche'],
-];
+const PERIODOS = [7, 30, 90] as const;
+const NOMES_DAS_PAGINAS: Readonly<Record<string, string>> = {
+  feed: 'Feed', comunidades: 'Diretório', comunidade: 'Comunidades', topico: 'Tópicos', explorar: 'Explorar', arena: 'Arena', perfil: 'Perfis', entrada: 'Entrada', publica: 'Páginas públicas',
+};
 
-function numero(valor: number): string {
-  return new Intl.NumberFormat('pt-BR').format(valor);
-}
-
+function numero(valor: number): string { return new Intl.NumberFormat('pt-BR').format(valor); }
 function dataCurta(valor: string): string {
-  const data = new Date(`${valor}T12:00:00`);
+  const data = new Date(`${valor.slice(0, 10)}T12:00:00`);
   return Number.isNaN(data.getTime()) ? valor : new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(data);
 }
+function dataLocal(data: Date): string { return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`; }
+function intervalo(dias: number): { inicio: string; fim: string } {
+  const fim = new Date(); fim.setHours(12, 0, 0, 0);
+  const inicio = new Date(fim); inicio.setDate(inicio.getDate() - (dias - 1));
+  return { inicio: dataLocal(inicio), fim: dataLocal(fim) };
+}
+function percentual(numerador: number, denominador: number): string { return denominador === 0 ? '—' : `${Math.round((numerador / denominador) * 100)}%`; }
 
-function CartaoDeMetrica({ titulo, valor, apoio }: { readonly titulo: string; readonly valor: number; readonly apoio: string }) {
-  return <article className="admin-metrica">
-    <p>{titulo}</p>
-    <strong>{numero(valor)}</strong>
-    <span>{apoio}</span>
-  </article>;
+function CartaoDeMetrica({ titulo, valor, apoio, destaque = false }: { readonly titulo: string; readonly valor: number; readonly apoio: string; readonly destaque?: boolean }) {
+  return <article className={`admin-metrica${destaque ? ' admin-metrica--destaque' : ''}`}><p>{titulo}</p><strong>{numero(valor)}</strong><span>{apoio}</span></article>;
+}
+
+function GraficoDeAtividade({ dias }: { readonly dias: readonly EventosDiariosDoPainel[] }) {
+  const serie = dias.filter((_, indice) => dias.length <= 14 || indice % Math.ceil(dias.length / 14) === 0 || indice === dias.length - 1);
+  const maximo = Math.max(1, ...serie.map((dia) => dia.abriuArena + dia.acessosDePaginas + dia.topicosPublicados + dia.respostasPublicadas));
+  const houveAtividade = serie.some((dia) => dia.abriuArena + dia.acessosDePaginas + dia.topicosPublicados + dia.respostasPublicadas > 0);
+  if (!houveAtividade) return <p className="admin__empty">Ainda não entrou atividade nesse intervalo.</p>;
+  return <div className="admin-grafico" role="img" aria-label="Atividade diária: Arena, acessos de página, tópicos e respostas">
+    <div className="admin-grafico__legenda"><span><i className="admin-grafico__ponto admin-grafico__ponto--arena" />Arena</span><span><i className="admin-grafico__ponto admin-grafico__ponto--acesso" />Acessos</span><span><i className="admin-grafico__ponto admin-grafico__ponto--topico" />Tópicos</span><span><i className="admin-grafico__ponto admin-grafico__ponto--resposta" />Respostas</span></div>
+    <div className="admin-grafico__barras">{serie.map((dia) => {
+      const total = dia.abriuArena + dia.acessosDePaginas + dia.topicosPublicados + dia.respostasPublicadas;
+      return <div className="admin-grafico__dia" key={dia.data} title={`${dataCurta(dia.data)} · ${numero(dia.abriuArena)} Arena · ${numero(dia.acessosDePaginas)} acessos · ${numero(dia.topicosPublicados)} tópicos · ${numero(dia.respostasPublicadas)} respostas`}>
+        <div className="admin-grafico__pilha" style={{ height: `${Math.max(3, (total / maximo) * 100)}%` }}>
+          {dia.abriuArena > 0 && <i className="admin-grafico__barra admin-grafico__barra--arena" style={{ flexGrow: dia.abriuArena }} />}
+          {dia.acessosDePaginas > 0 && <i className="admin-grafico__barra admin-grafico__barra--acesso" style={{ flexGrow: dia.acessosDePaginas }} />}
+          {dia.topicosPublicados > 0 && <i className="admin-grafico__barra admin-grafico__barra--topico" style={{ flexGrow: dia.topicosPublicados }} />}
+          {dia.respostasPublicadas > 0 && <i className="admin-grafico__barra admin-grafico__barra--resposta" style={{ flexGrow: dia.respostasPublicadas }} />}
+        </div><time dateTime={dia.data}>{dataCurta(dia.data)}</time>
+      </div>;
+    })}</div>
+  </div>;
+}
+
+function AcessosPorPagina({ resumo }: { readonly resumo: ResumoAdministrativo }) {
+  const maior = Math.max(1, ...resumo.acessosPorPagina.map((item) => item.acessos));
+  if (resumo.acessosPorPagina.length === 0) return <p className="admin__empty">A coleta começa quando esta versão estiver publicada. Não há histórico inventado.</p>;
+  return <ol className="admin-ranking">{resumo.acessosPorPagina.map((item) => <li key={item.pagina}><span>{NOMES_DAS_PAGINAS[item.pagina] ?? item.pagina}</span><div aria-hidden="true"><i style={{ width: `${Math.max(4, (item.acessos / maior) * 100)}%` }} /></div><strong>{numero(item.acessos)}</strong></li>)}</ol>;
 }
 
 export function TelaAdministracao({ porta }: Props) {
@@ -40,104 +61,32 @@ export function TelaAdministracao({ porta }: Props) {
   const [monetizacao, setMonetizacao] = useState<MonetizacaoAdministrativa | null>(null);
   const [estadoDaMonetizacao, setEstadoDaMonetizacao] = useState<'carregando' | 'pronto' | 'indisponivel'>('carregando');
   const [estado, setEstado] = useState<'carregando' | 'pronto' | 'indisponivel'>('carregando');
-
-  const carregar = useCallback(async () => {
+  const [periodo, setPeriodo] = useState<(typeof PERIODOS)[number]>(30);
+  const carregar = useCallback(async (dias: (typeof PERIODOS)[number]) => {
     setEstado('carregando');
     try {
-      const res = await portaDeAdministracao.obterResumo();
-      setResumo(res);
-      setEstado('pronto');
-      setEstadoDaMonetizacao('carregando');
-      try {
-        setMonetizacao(await portaDeAdministracao.obterMonetizacao());
-        setEstadoDaMonetizacao('pronto');
-      } catch {
-        setMonetizacao(null);
-        setEstadoDaMonetizacao('indisponivel');
-      }
-    } catch {
-      // A resposta é intencionalmente neutra: não revela se a rota existe ou
-      // se a pessoa autenticada não tem permissão no banco.
-      setResumo(null);
-      setEstado('indisponivel');
-    }
+      const faixa = intervalo(dias);
+      const proximoResumo = await portaDeAdministracao.obterResumo(faixa.inicio, faixa.fim);
+      setResumo(proximoResumo); setEstado('pronto'); setEstadoDaMonetizacao('carregando');
+      try { setMonetizacao(await portaDeAdministracao.obterMonetizacao()); setEstadoDaMonetizacao('pronto'); }
+      catch { setMonetizacao(null); setEstadoDaMonetizacao('indisponivel'); }
+    } catch { setResumo(null); setEstado('indisponivel'); }
   }, [portaDeAdministracao]);
+  useEffect(() => { void carregar(30); }, [carregar]);
+  const selecionarPeriodo = (dias: (typeof PERIODOS)[number]) => { setPeriodo(dias); void carregar(dias); };
 
-  useEffect(() => { void carregar(); }, [carregar]);
+  if (estado === 'carregando' && !resumo) return <main className="admin" aria-busy="true"><p className="admin__state">Carregando o pulso do Auê…</p></main>;
+  if (estado === 'indisponivel' || !resumo) return <main className="admin"><section className="admin__state" aria-live="polite"><h1>Este painel não está disponível agora.</h1><p>Tente de novo em instantes.</p><button type="button" className="admin__button admin__button--outline" onClick={() => void carregar(periodo)}>Tentar novamente</button></section></main>;
 
-  if (estado === 'carregando') {
-    return <main className="admin" aria-busy="true"><p className="admin__state">Carregando painel…</p></main>;
-  }
-
-  if (estado === 'indisponivel' || !resumo) {
-    return <main className="admin">
-      <section className="admin__state" aria-live="polite">
-        <h1>Esta página não está disponível agora.</h1>
-        <p>Tente de novo em instantes.</p>
-        <button type="button" className="admin__button admin__button--outline" onClick={() => void carregar()}>Tentar novamente</button>
-      </section>
-    </main>;
-  }
-
+  const abriuArena = resumo.eventos.abriu_arena ?? 0;
+  const recebeuNota = resumo.eventos.recebeu_nota ?? 0;
+  const x1 = (resumo.eventos.criou_x1 ?? 0) + (resumo.eventos.respondeu_x1 ?? 0);
+  const larguraDoFunil = (valor: number) => `${abriuArena === 0 ? 0 : Math.round((valor / abriuArena) * 100)}%`;
   return <main className="admin">
-    <header className="admin__header">
-      <div>
-        <p className="admin__eyebrow">Administração</p>
-        <h1>Como está a roda</h1>
-        <p>Dados do período: {dataCurta(resumo.inicio)} a {dataCurta(resumo.fim)}.</p>
-      </div>
-      <button type="button" className="admin__button admin__button--outline" onClick={() => void carregar()}>Atualizar</button>
-    </header>
-
-    <section className="admin__metricas" aria-label="Resumo de cadastros">
-      <CartaoDeMetrica titulo="Contas de e-mail" valor={resumo.totalContasDeEmailAtual} apoio="total agora" />
-      <CartaoDeMetrica titulo="Cadastros acompanhados" valor={resumo.cadastrosNoPeriodo} apoio={resumo.acompanhamentoDeCadastrosIniciadoEm ? `desde ${dataCurta(resumo.acompanhamentoDeCadastrosIniciadoEm)}` : 'acompanhamento ainda não iniciado'} />
-      <CartaoDeMetrica titulo="Perfis concluídos" valor={resumo.perfisConcluidosNoPeriodo} apoio="no período" />
-      <CartaoDeMetrica titulo="Ficha pendente" valor={resumo.perfisPendentesAtuais} apoio="agora" />
-    </section>
-
-    <section className="admin__section" aria-labelledby="admin-eventos">
-      <div className="admin__section-head"><h2 id="admin-eventos">Movimento na Arena</h2><span>sessões, não pessoas únicas</span></div>
-      <div className="admin__eventos">
-        {EVENTOS.map(([chave, rotulo]) => <div key={chave}><span>{rotulo}</span><strong>{numero(resumo.eventos[chave] ?? 0)}</strong></div>)}
-      </div>
-      <p className="admin__note">A telemetria é anônima e best-effort. Ela não mede retenção nem pessoas únicas.</p>
-    </section>
-
-    <section className="admin__section" aria-labelledby="admin-dias">
-      <div className="admin__section-head"><h2 id="admin-dias">Últimos dias</h2><span>eventos recebidos</span></div>
-      {resumo.eventosPorDia.length === 0 ? <p className="admin__empty">Ainda não há eventos no período.</p> : (
-        <div className="admin__dias" role="list">
-          {resumo.eventosPorDia.map((dia) => <div role="listitem" key={dia.data}>
-            <time dateTime={dia.data}>{dataCurta(dia.data)}</time>
-            <span>Arena {numero(dia.abriuArena)}</span><span>Notas {numero(dia.recebeuNota)}</span><span>X1 {numero(dia.criouX1 + dia.respondeuX1)}</span>
-          </div>)}
-        </div>
-      )}
-    </section>
-
-    <section className="admin__section" aria-labelledby="admin-monetizacao">
-      <div className="admin__section-head"><h2 id="admin-monetizacao">Monetização</h2><span>Adsterra, últimos 30 dias</span></div>
-      {estadoDaMonetizacao === 'carregando' && <p className="admin__empty">Carregando métricas de monetização…</p>}
-      {estadoDaMonetizacao === 'indisponivel' && <p className="admin__empty">Não foi possível carregar as métricas de monetização agora.</p>}
-      {estadoDaMonetizacao === 'pronto' && monetizacao && <div className="admin__metricas" style={{ margin: '14px 0 0' }}>
-        <article className="admin-metrica"><p>Receita estimada</p><strong>$ {monetizacao.receitaTotal.toFixed(2)}</strong><span>{dataCurta(monetizacao.inicio)} a {dataCurta(monetizacao.fim)}</span></article>
-        <article className="admin-metrica"><p>Impressões</p><strong>{numero(monetizacao.totalImpressoes)}</strong><span>visualizações de anúncios</span></article>
-        <article className="admin-metrica"><p>Cliques e CPM</p><strong>{numero(monetizacao.totalCliques)}</strong><span>CPM: $ {monetizacao.cpmMedio.toFixed(2)}</span></article>
-      </div>}
-    </section>
-
-    <section className="admin__section" aria-labelledby="admin-pessoas">
-      <div className="admin__section-head"><h2 id="admin-pessoas">Entradas recentes</h2><span>sem e-mail, ID ou áudio</span></div>
-      {resumo.pessoas.length === 0 ? <p className="admin__empty">Ainda não há cadastros para mostrar.</p> : (
-        <ul className="admin__pessoas">
-          {resumo.pessoas.map((pessoa, indice) => <li key={`${pessoa.handle ?? pessoa.apelido ?? 'conta'}-${pessoa.criadoEm}-${indice}`}>
-            <div><strong>{pessoa.apelido ?? 'Sem apelido'}</strong>{pessoa.handle && <span>@{pessoa.handle}</span>}</div>
-            <time dateTime={pessoa.criadoEm}>{dataCurta(pessoa.criadoEm.slice(0, 10))}</time>
-            <em>{pessoa.estado === 'perfil_pronto' ? 'Perfil pronto' : 'Ficha pendente'}</em>
-          </li>)}
-        </ul>
-      )}
-    </section>
+    <header className="admin__header"><div><p className="admin__eyebrow">Administração · dados agregados</p><h1>O pulso do Auê</h1><p>{dataCurta(resumo.inicio)} a {dataCurta(resumo.fim)} · atualização manual</p></div><div className="admin__acoes"><div className="admin__periodos" aria-label="Intervalo do painel">{PERIODOS.map((dias) => <button key={dias} type="button" className={dias === periodo ? 'ativo' : ''} onClick={() => selecionarPeriodo(dias)}>{dias}d</button>)}</div><button type="button" className="admin__button admin__button--outline" onClick={() => void carregar(periodo)}>Atualizar</button></div></header>
+    <section className="admin__metricas" aria-label="Números principais"><CartaoDeMetrica titulo="Acessos de página" valor={resumo.acessosDePaginasNoPeriodo} destaque apoio={resumo.acompanhamentoDeAcessosIniciadoEm ? `coleta desde ${dataCurta(resumo.acompanhamentoDeAcessosIniciadoEm)}` : 'coleta ainda não iniciada'} /><CartaoDeMetrica titulo="Cadastros" valor={resumo.cadastrosNoPeriodo} apoio={resumo.acompanhamentoDeCadastrosIniciadoEm ? `coleta desde ${dataCurta(resumo.acompanhamentoDeCadastrosIniciadoEm)}` : 'coleta ainda não iniciada'} /><CartaoDeMetrica titulo="Tópicos publicados" valor={resumo.topicosPublicadosNoPeriodo} apoio={`${numero(resumo.comunidadesAtivasNoPeriodo)} comunidades ativas`} /><CartaoDeMetrica titulo="Respostas" valor={resumo.respostasPublicadasNoPeriodo} apoio="conversas visíveis no período" /></section>
+    <section className="admin__grade admin__grade--movimento" aria-label="Atividade e páginas"><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Movimento</p><h2>Atividade dia a dia</h2></div><span>alcance + conversa</span></div><GraficoDeAtividade dias={resumo.eventosPorDia} /></article><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Alcance</p><h2>Por onde entraram</h2></div><span>por sessão</span></div><AcessosPorPagina resumo={resumo} /></article></section>
+    <section className="admin__grade" aria-label="Arena e base"><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Arena</p><h2>Funil de arroto</h2></div><span>eventos recebidos</span></div><div className="admin-funil" role="img" aria-label={`Funil da Arena: ${abriuArena} aberturas, ${recebeuNota} notas e ${x1} movimentos em X1`}><div><span>Abriu a Arena</span><strong>{numero(abriuArena)}</strong><i className="admin-funil__barra" style={{ width: larguraDoFunil(abriuArena) }} /><em>base</em></div><div><span>Recebeu nota</span><strong>{numero(recebeuNota)}</strong><i className="admin-funil__barra" style={{ width: larguraDoFunil(recebeuNota) }} /><em>{percentual(recebeuNota, abriuArena)} da abertura</em></div><div><span>Movimento em X1</span><strong>{numero(x1)}</strong><i className="admin-funil__barra" style={{ width: larguraDoFunil(x1) }} /><em>{percentual(x1, recebeuNota)} das notas</em></div></div><p className="admin__note">Telemetria anônima e best-effort. Não mede pessoas únicas nem retenção.</p></article><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Base</p><h2>Contas e perfis</h2></div><span>agora</span></div><dl className="admin-base admin-base--cinco"><div><dt>Contas de e-mail</dt><dd>{numero(resumo.totalContasDeEmailAtual)}</dd></div><div><dt>Ativas no período</dt><dd>{numero(resumo.contasAtivasNoPeriodo)}</dd></div><div><dt>Anônimas agora</dt><dd>{numero(resumo.contasAnonimasAtuais)}</dd></div><div><dt>Perfil completo</dt><dd>{numero(resumo.perfisConcluidosNoPeriodo)}</dd></div><div><dt>Ficha pendente</dt><dd>{numero(resumo.perfisPendentesAtuais)}</dd></div></dl><p className="admin__note">Ativa = entrou ou participou no período. Anônima = identidade atual sem cadastro.</p></article></section>
+    <section className="admin__grade admin__grade--final" aria-label="Monetização e entradas recentes"><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Monetização</p><h2>Anúncios</h2></div><span>últimos 30 dias</span></div>{estadoDaMonetizacao === 'carregando' && <p className="admin__empty">Carregando métricas de monetização…</p>}{estadoDaMonetizacao === 'indisponivel' && <p className="admin__empty">Métricas de monetização indisponíveis agora.</p>}{estadoDaMonetizacao === 'pronto' && monetizacao && <dl className="admin-base admin-base--monetizacao"><div><dt>Receita estimada</dt><dd>$ {monetizacao.receitaTotal.toFixed(2)}</dd></div><div><dt>Impressões</dt><dd>{numero(monetizacao.totalImpressoes)}</dd></div><div><dt>Cliques</dt><dd>{numero(monetizacao.totalCliques)}</dd></div></dl>}</article><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Entradas recentes</p><h2>Gente chegando</h2></div><span>sem e-mail ou ID</span></div>{resumo.pessoas.length === 0 ? <p className="admin__empty">Ainda não há cadastros para mostrar.</p> : <ul className="admin__pessoas">{resumo.pessoas.slice(0, 5).map((pessoa, indice) => <li key={`${pessoa.handle ?? pessoa.apelido ?? 'conta'}-${pessoa.criadoEm}-${indice}`}><div><strong>{pessoa.apelido ?? 'Sem apelido'}</strong>{pessoa.handle && <span>@{pessoa.handle}</span>}</div><time dateTime={pessoa.criadoEm}>{dataCurta(pessoa.criadoEm)}</time><em>{pessoa.estado === 'perfil_pronto' ? 'Perfil pronto' : 'Ficha pendente'}</em></li>)}</ul>}</article></section>
   </main>;
 }

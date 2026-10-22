@@ -27,6 +27,7 @@ export type ResultadoDaConta =
   | { readonly ok: false; readonly motivo: 'handleEmUso' }
   | { readonly ok: false; readonly motivo: 'handleInvalido' }
   | { readonly ok: false; readonly motivo: 'credenciaisInvalidas' }
+  | { readonly ok: false; readonly motivo: 'identidadeXEmUso' }
   | { readonly ok: false; readonly motivo: 'semServidor' }
   | { readonly ok: false; readonly motivo: 'falhou'; readonly detalhe: string };
 
@@ -42,6 +43,10 @@ export interface PortaDeConta {
   estado(): Promise<EstadoDaConta>;
   cadastrar(pedido: PedidoDeCadastro): Promise<ResultadoDaConta>;
   entrar(email: string, senha: string): Promise<ResultadoDaConta>;
+  /** Entra na conta já associada ao X. */
+  entrarComX?(): Promise<ResultadoDaConta>;
+  /** Vincula o X à sessão anônima atual, sem trocar o uid dela. */
+  criarComX?(): Promise<ResultadoDaConta>;
   /** Manda o link de redefinição. Responde igual exista o e-mail ou não. */
   enviarLinkDeRedefinicao(email: string): Promise<ResultadoDaConta>;
   /** Vale só depois de abrir o link do e-mail. */

@@ -21,6 +21,7 @@ describe('ModalGravarArroto', () => {
         aoIniciarGravacao={vi.fn()}
         aoPararGravacao={vi.fn()}
         aoRegravar={vi.fn()}
+        aoEscolherArquivo={vi.fn()}
         aoEnviar={vi.fn()}
       />,
     );

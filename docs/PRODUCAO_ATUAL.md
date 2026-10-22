@@ -1,11 +1,25 @@
 # Produção atual — Auê
 
-**Verificado em:** 20/10/2026, 17:40 BRT
+**Verificado em:** 22/10/2026 (painel e coleta); conferência da casca social abaixo em 20/10/2026
 **Endereço verificado:** `https://aue.web.app/`
 
 Este é o retrato do que foi observado no site publicado. Ele existe para evitar
 que uma decisão aceita, um protótipo ou uma rota presente no código seja chamado
 de recurso entregue sem prova no navegador.
+
+## Painel e coleta — 22/10/2026
+
+A coleta voltou a gravar visitas reais após a correção do limitador no banco.
+Uma visita pública a um perfil entrou na tabela e apareceu no painel administrativo.
+Os clientes continuam sem acesso de leitura à telemetria; o painel recebe somente
+os agregados protegidos. Visitas anteriores que falharam não foram reconstruídas.
+
+Os nove tópicos criados para organizar conteúdo não contam como novas publicações.
+A monetização voltou a mostrar impressões: a conferência do fornecedor retornou
+308 impressões e US$ 0,05 de receita estimada, números daquele instante.
+O gráfico soma todos os dias do intervalo, e os textos distinguem período sem
+acessos de coleta indisponível. Testes locais cobrem desktop e mobile sem trocar
+o layout. A evidência da publicação e do smoke final fica na PR desta correção.
 
 ## O que está publicado
 

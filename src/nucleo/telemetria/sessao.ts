@@ -38,6 +38,8 @@ export interface SessaoDeTelemetria {
   readonly abriuArenaRegistrada: boolean;
   /** Categorias de página já medidas nesta sessão, sem caminho ou slug. */
   readonly paginasVisitadas: readonly PaginaMonitorada[];
+  /** Só entra após o banco aceitar o evento; flags antigas não bloqueiam retry. */
+  readonly paginasConfirmadas?: readonly PaginaMonitorada[];
 }
 
 export interface DecisaoDeSessao {
@@ -70,6 +72,7 @@ export function decidirSessao(decisao: DecisaoDeSessao): SessaoDeTelemetria {
     expiraEm: agora + DURACAO_DA_SESSAO_MS,
     abriuArenaRegistrada: false,
     paginasVisitadas: [],
+    paginasConfirmadas: [],
   };
 }
 
@@ -79,11 +82,15 @@ export function comAbriuArenaRegistrada(sessao: SessaoDeTelemetria): SessaoDeTel
 }
 
 export function jaVisitouPagina(sessao: SessaoDeTelemetria, pagina: PaginaMonitorada): boolean {
-  return sessao.paginasVisitadas.includes(pagina);
+  return (sessao.paginasConfirmadas ?? []).includes(pagina);
 }
 
 /** Marca a categoria apenas uma vez por sessão, sem guardar o caminho real. */
 export function comPaginaVisitada(sessao: SessaoDeTelemetria, pagina: PaginaMonitorada): SessaoDeTelemetria {
   if (jaVisitouPagina(sessao, pagina)) return sessao;
-  return { ...sessao, paginasVisitadas: [...sessao.paginasVisitadas, pagina] };
+  return {
+    ...sessao,
+    paginasVisitadas: [...sessao.paginasVisitadas, pagina],
+    paginasConfirmadas: [...(sessao.paginasConfirmadas ?? []), pagina],
+  };
 }

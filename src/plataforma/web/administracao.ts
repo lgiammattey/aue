@@ -64,6 +64,13 @@ function numero(valor: unknown): number {
   return typeof valor === 'number' && Number.isFinite(valor) ? valor : 0;
 }
 
+function numeroObrigatorio(valor: unknown): number {
+  if (typeof valor !== 'number' || !Number.isFinite(valor) || valor < 0) {
+    throw new Error('Resposta administrativa inválida.');
+  }
+  return valor;
+}
+
 function transformarDias(linhas: RespostaDoBanco['eventos_por_dia']): readonly EventosDiariosDoPainel[] {
   return (linhas ?? []).flatMap((linha) => {
     if (!linha?.data) return [];
@@ -119,22 +126,23 @@ export function criarAdministracaoWeb(): PortaDeAdministracao {
         throw new Error('Resposta administrativa inválida.');
       }
 
+      const resumo = resposta.resumo;
       return {
         inicio: resposta.periodo.inicio,
         fim: resposta.periodo.fim,
-        totalContasDeEmailAtual: numero(resposta.resumo.total_contas_de_email_atual),
-        contasAnonimasAtuais: numero(resposta.resumo.contas_anonimas_atuais),
-        contasAtivasNoPeriodo: numero(resposta.resumo.contas_ativas_no_periodo),
-        cadastrosNoPeriodo: numero(resposta.resumo.cadastros_acompanhados_no_periodo),
-        acompanhamentoDeCadastrosIniciadoEm: resposta.resumo.acompanhamento_de_cadastros_iniciado_em ?? null,
-        perfisConcluidosNoPeriodo: numero(resposta.resumo.perfis_concluidos_no_periodo),
-        perfisPendentesAtuais: numero(resposta.resumo.perfis_pendentes_atuais),
-        topicosPublicadosNoPeriodo: numero(resposta.resumo.topicos_publicados_no_periodo),
-        respostasPublicadasNoPeriodo: numero(resposta.resumo.respostas_publicadas_no_periodo),
-        comunidadesAtivasNoPeriodo: numero(resposta.resumo.comunidades_ativas_no_periodo),
-        acessosDePaginasNoPeriodo: numero(resposta.resumo.acessos_de_paginas_no_periodo),
-        acompanhamentoDeAcessosIniciadoEm: resposta.resumo.acompanhamento_de_acessos_iniciado_em ?? null,
-        eventos: resposta.resumo.eventos ?? {},
+        totalContasDeEmailAtual: numeroObrigatorio(resumo.total_contas_de_email_atual),
+        contasAnonimasAtuais: numeroObrigatorio(resumo.contas_anonimas_atuais),
+        contasAtivasNoPeriodo: numeroObrigatorio(resumo.contas_ativas_no_periodo),
+        cadastrosNoPeriodo: numeroObrigatorio(resumo.cadastros_acompanhados_no_periodo),
+        acompanhamentoDeCadastrosIniciadoEm: resumo.acompanhamento_de_cadastros_iniciado_em ?? null,
+        perfisConcluidosNoPeriodo: numeroObrigatorio(resumo.perfis_concluidos_no_periodo),
+        perfisPendentesAtuais: numeroObrigatorio(resumo.perfis_pendentes_atuais),
+        topicosPublicadosNoPeriodo: numeroObrigatorio(resumo.topicos_publicados_no_periodo),
+        respostasPublicadasNoPeriodo: numeroObrigatorio(resumo.respostas_publicadas_no_periodo),
+        comunidadesAtivasNoPeriodo: numeroObrigatorio(resumo.comunidades_ativas_no_periodo),
+        acessosDePaginasNoPeriodo: numeroObrigatorio(resumo.acessos_de_paginas_no_periodo),
+        acompanhamentoDeAcessosIniciadoEm: resumo.acompanhamento_de_acessos_iniciado_em ?? null,
+        eventos: resumo.eventos ?? {},
         acessosPorPagina: transformarAcessos(resposta.acessos_por_pagina),
         eventosPorDia: transformarDias(resposta.eventos_por_dia),
         pessoas: transformarPessoas(resposta.pessoas),
@@ -154,10 +162,10 @@ export function criarAdministracaoWeb(): PortaDeAdministracao {
       return {
         inicio: monetizacao.inicio,
         fim: monetizacao.fim,
-        totalImpressoes: numero(monetizacao.total_impressoes),
-        totalCliques: numero(monetizacao.total_cliques),
-        receitaTotal: numero(monetizacao.receita_total),
-        cpmMedio: numero(monetizacao.cpm_medio),
+        totalImpressoes: numeroObrigatorio(monetizacao.total_impressoes),
+        totalCliques: numeroObrigatorio(monetizacao.total_cliques),
+        receitaTotal: numeroObrigatorio(monetizacao.receita_total),
+        cpmMedio: numeroObrigatorio(monetizacao.cpm_medio),
       };
     },
   };

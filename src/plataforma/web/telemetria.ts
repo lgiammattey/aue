@@ -14,7 +14,7 @@ import {
   jaVisitouPagina,
   type SessaoDeTelemetria,
 } from '../../nucleo/telemetria/sessao';
-import { PAGINAS_MONITORADAS } from '../../nucleo/telemetria/paginas';
+import { PAGINAS_MONITORADAS, type PaginaMonitorada } from '../../nucleo/telemetria/paginas';
 
 /**
  * A telemetria de verdade: `eventos_de_telemetria`, gravada best-effort.
@@ -86,7 +86,11 @@ function lerSessaoGuardada(armazenamento: ArmazenamentoLocal): SessaoDeTelemetri
     const paginasVisitadas = Array.isArray(paginas) && paginas.every((pagina) =>
       typeof pagina === 'string' && (PAGINAS_MONITORADAS as readonly string[]).includes(pagina),
     ) ? paginas : [];
-    return { ...(valor as SessaoDeTelemetria), paginasVisitadas };
+    const confirmadas = (valor as { paginasConfirmadas?: unknown }).paginasConfirmadas;
+    const paginasConfirmadas = Array.isArray(confirmadas) && confirmadas.every((pagina) =>
+      typeof pagina === 'string' && (PAGINAS_MONITORADAS as readonly string[]).includes(pagina),
+    ) ? confirmadas : [];
+    return { ...(valor as SessaoDeTelemetria), paginasVisitadas, paginasConfirmadas };
   } catch {
     /* JSON corrompido: trata como se não houvesse sessão guardada. */
     return null;
@@ -96,6 +100,7 @@ function lerSessaoGuardada(armazenamento: ArmazenamentoLocal): SessaoDeTelemetri
 /** `plataforma/web/*` é o único lugar que pode tocar `window`, `crypto` e o cliente do Supabase (ADR 0001 §2). */
 export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetria {
   let ultimoEnvio: { assinatura: string; em: number } | null = null;
+  const eventosPendentes = new Set<string>();
 
   function sessaoAtual(agora: number): SessaoDeTelemetria {
     const aquisicaoAtual = lerAquisicaoDaURL(new URLSearchParams(window.location.search));
@@ -109,7 +114,25 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
     return sessao;
   }
 
-  function enviar(evento: EventoDeTelemetria, sessao: SessaoDeTelemetria, detalhe?: DetalheDoEvento): void {
+  function confirmarPaginaVisitada(sessao: SessaoDeTelemetria, pagina: PaginaMonitorada): void {
+    const guardada = lerSessaoGuardada(armazenamento);
+    if (!guardada || guardada.id !== sessao.id) return;
+    armazenamento.gravar(CHAVE_DA_SESSAO, JSON.stringify(comPaginaVisitada(guardada, pagina)));
+  }
+
+  function confirmarAbriuArena(sessao: SessaoDeTelemetria): void {
+    const guardada = lerSessaoGuardada(armazenamento);
+    if (!guardada || guardada.id !== sessao.id) return;
+    armazenamento.gravar(CHAVE_DA_SESSAO, JSON.stringify(comAbriuArenaRegistrada(guardada)));
+  }
+
+  function enviar(
+    evento: EventoDeTelemetria,
+    sessao: SessaoDeTelemetria,
+    detalhe?: DetalheDoEvento,
+    aoConfirmar?: () => void,
+    aoFalhar?: () => void,
+  ): void {
     try {
       const promessa = supabase.from('eventos_de_telemetria').insert({
         evento,
@@ -133,14 +156,19 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
         ({ error }) => {
           if (error) {
             console.warn('[telemetria] evento não gravado:', evento, error.message);
+            aoFalhar?.();
+            return;
           }
+          aoConfirmar?.();
         },
         () => {
           /* Sem rede, ou o servidor não respondeu. A jornada segue igual. */
+          aoFalhar?.();
         },
       );
     } catch {
       /* Configuração ausente, ou qualquer outra coisa síncrona dando errado. */
+      aoFalhar?.();
     }
   }
 
@@ -168,19 +196,33 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
 
       let sessao = sessaoAtual(agora);
 
+      let chavePendente: string | null = null;
       if (evento === 'abriu_arena') {
         if (sessao.abriuArenaRegistrada) return;
-        sessao = comAbriuArenaRegistrada(sessao);
-        armazenamento.gravar(CHAVE_DA_SESSAO, JSON.stringify(sessao));
+        chavePendente = `${sessao.id}:${assinatura}`;
+        if (eventosPendentes.has(chavePendente)) return;
+        eventosPendentes.add(chavePendente);
       }
 
       if (evento === 'visitou_pagina') {
         if (jaVisitouPagina(sessao, detalhe!.pagina!)) return;
-        sessao = comPaginaVisitada(sessao, detalhe!.pagina!);
-        armazenamento.gravar(CHAVE_DA_SESSAO, JSON.stringify(sessao));
+        chavePendente = `${sessao.id}:${assinatura}`;
+        if (eventosPendentes.has(chavePendente)) return;
+        eventosPendentes.add(chavePendente);
       }
 
-      enviar(evento, sessao, detalhe);
+      const pagina = evento === 'visitou_pagina' ? detalhe!.pagina! : null;
+      enviar(
+        evento,
+        sessao,
+        detalhe,
+        chavePendente ? () => {
+          eventosPendentes.delete(chavePendente!);
+          if (pagina) confirmarPaginaVisitada(sessao, pagina);
+          if (evento === 'abriu_arena') confirmarAbriuArena(sessao);
+        } : undefined,
+        chavePendente ? () => eventosPendentes.delete(chavePendente!) : undefined,
+      );
     },
   };
 }

@@ -2246,6 +2246,11 @@
   .composer-audio-wave { gap: 2px; }
   .composer-audio-wave i { width: 2px; }
   .composer-stop-recording { padding: 0 10px; }
+  .comments-tools-icons { gap: 4px; }
+  .composer-community-context { max-width: 96px; margin-inline: 0; }
+  .composer-actions-group { gap: 4px; }
+  .composer-actions-group .action-pill-btn { padding-inline: 8px; }
+  .composer-actions-group .comments-submit-btn { padding-inline: 14px; }
 }
 
 

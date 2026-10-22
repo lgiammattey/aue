@@ -27,6 +27,16 @@ async function atrasarPermissaoDoMicrofone(page: Page) {
   });
 }
 
+async function aguardarPinturaEstavel(page: Page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  });
+  // A faixa de áudio entra por animação curta; a captura deve representar o
+  // estado já assentado, não o frame de transição.
+  await page.waitForTimeout(220);
+}
+
 for (const viewport of [
   { nome: 'mobile', width: 390, height: 844 },
   { nome: 'desktop', width: 1440, height: 900 },
@@ -39,7 +49,8 @@ for (const viewport of [
     const texto = page.getByRole('textbox', { name: 'Texto da publicação' });
     const publicar = page.getByRole('button', { name: 'Publicar' });
     const resultado = page.getByRole('status', { name: 'Resultado da persistência simulada' });
-    await texto.fill('Meu áudio precisa entrar junto');
+    await texto.fill('a'.repeat(180));
+    await expect(page.getByText('180/180', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Gravar áudio' }).click();
 
     await expect(page.getByText('Preparando microfone…', { exact: true })).toBeVisible();
@@ -61,7 +72,8 @@ for (const viewport of [
 
     const ouvir = page.getByRole('button', { name: 'Ouvir áudio gravado' });
     await expect(ouvir).toBeVisible();
-    await page.screenshot({ path: `test-results/microfone-compositor-preview-${viewport.nome}.png`, fullPage: true });
+    await aguardarPinturaEstavel(page);
+    await page.screenshot({ path: `test-results/microfone-compositor-preview-${viewport.nome}.png`, fullPage: true, animations: 'disabled' });
 
     await ouvir.click();
     await expect.poll(() => page.locator('audio').evaluate((audio) => audio.currentTime > 0)).toBe(true);
@@ -76,10 +88,17 @@ for (const viewport of [
         };
       });
       const tamanhoDoPublicar = await publicar.boundingBox();
+      const caixaDoModal = await page.locator('.modal-comentarios-sheet').boundingBox();
+      const larguraCliente = await page.evaluate(() => document.documentElement.clientWidth);
       expect(geometria.dentroDaTela).toBe(true);
       expect(geometria.semOverflow).toBe(true);
+      expect(tamanhoDoPublicar).not.toBeNull();
+      expect(caixaDoModal).not.toBeNull();
       expect(tamanhoDoPublicar?.width).toBeGreaterThanOrEqual(44);
       expect(tamanhoDoPublicar?.height).toBeGreaterThanOrEqual(44);
+      expect(tamanhoDoPublicar!.x).toBeGreaterThanOrEqual(caixaDoModal!.x - 1);
+      expect(tamanhoDoPublicar!.x + tamanhoDoPublicar!.width).toBeLessThanOrEqual(caixaDoModal!.x + caixaDoModal!.width + 1);
+      expect(tamanhoDoPublicar!.x + tamanhoDoPublicar!.width).toBeLessThanOrEqual(larguraCliente + 1);
     }
 
     // Descartar não publica um texto isolado: a pessoa regrava e só então envia.
@@ -92,6 +111,7 @@ for (const viewport of [
 
     await publicar.click();
     await expect(resultado).toHaveText(/fixture recebeu audio com [1-9]\d* bytes/);
-    await page.screenshot({ path: `test-results/microfone-compositor-publicado-${viewport.nome}.png`, fullPage: true });
+    await aguardarPinturaEstavel(page);
+    await page.screenshot({ path: `test-results/microfone-compositor-publicado-${viewport.nome}.png`, fullPage: true, animations: 'disabled' });
   });
 }

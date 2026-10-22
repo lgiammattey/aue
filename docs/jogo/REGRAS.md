@@ -27,7 +27,7 @@ está errado e precisa ser corrigido. As fontes reais são
 
 Antes de qualquer nota, o áudio passa por uma checagem de que aquilo **é arroto
 mesmo**, com o classificador YAMNet rodando local no aparelho. Ver
-[`../technical/deteccao-de-arroto-yamnet.md`](../technical/deteccao-de-arroto-yamnet.md).
+[`../technical/audio/deteccao-de-arroto-yamnet.md`](../technical/audio/deteccao-de-arroto-yamnet.md).
 
 - conversa, sopro, silêncio e barulho ambiente **não recebem nota**;
 - recusar é um estado do jogo (`ERROR`, caso "não é arroto"), não um erro
@@ -73,7 +73,7 @@ ou depois de arrotar. Janelas de 25 ms, passo de 10 ms e pequenos buracos de at�
 120 ms fazem um mesmo evento continuar sendo um evento.
 
 A tabela completa por arquivo está em
-[`../technical/calibracao-motor-arroto-2026-08.md`](../technical/calibracao-motor-arroto-2026-08.md).
+[`../technical/audio/calibracao-motor-arroto-2026-08.md`](../technical/audio/calibracao-motor-arroto-2026-08.md).
 
 ### Peso da origem
 

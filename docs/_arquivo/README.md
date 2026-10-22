@@ -38,5 +38,5 @@ Não porque estão aqui, mas porque foram **migradas** para as fontes atuais:
   fica, e isso está escrito na política) → [`../jogo/REGRAS.md`](../jogo/REGRAS.md) §8
   e [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md) §2.14;
 - a fórmula do Auê Score e o critério dos pesos de origem → [`../jogo/REGRAS.md`](../jogo/REGRAS.md) §3;
-- o que aprendemos sobre o limiar de detecção de arroto → [`../technical/deteccao-de-arroto-yamnet.md`](../technical/deteccao-de-arroto-yamnet.md)
+- o que aprendemos sobre o limiar de detecção de arroto → [`../technical/audio/deteccao-de-arroto-yamnet.md`](../technical/audio/deteccao-de-arroto-yamnet.md)
   e a issue [#90](https://github.com/gmmattey/aue/issues/90).

@@ -47,7 +47,7 @@ export default defineConfig({
        * FLAGS DESLIGADAS À FORÇA — pelo mesmo motivo das chaves acima.
        *
        * O Vitest carrega `.env.local` junto com o Vite. Quem estivesse
-       * o `lancamento.smoke.test.ts` ficar vermelho sem ter mexido em nada — e
+       * o `qualidade/lancamento.smoke.test.ts` ficar vermelho sem ter mexido em nada — e
        * o mesmo valia para qualquer outra flag, desde sempre. Pior: a suíte
        * passaria a testar um corte de lançamento diferente por máquina.
        *

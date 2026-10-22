@@ -126,7 +126,7 @@ const IMPORTS_LEGADOS_TOLERADOS: readonly string[] = [];
 
 describe('a fronteira do ADR 0001', () => {
   /**
-   * A FRONTEIRA DA CASCA — [ADR 0002](../docs/technical/adr/0002-o-aue-nas-lojas.md) §2.
+   * A FRONTEIRA DA CASCA — [ADR 0002](../../docs/technical/adr/0002-o-aue-nas-lojas.md) §2.
    *
    * Esta é mais dura que as outras de propósito: ela vale para **todo o `src/`**
    * menos `plataforma/`, inclusive o legado em quarentena. As outras toleram o

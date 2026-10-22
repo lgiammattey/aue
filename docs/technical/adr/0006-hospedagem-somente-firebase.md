@@ -4,7 +4,7 @@
 **Data:** 2026-10-18
 **Decidiu:** Luiz, com o Giam
 **Substitui:** a linha "Hospedagem | Vercel" do [ADR 0001](0001-arquitetura-oficial-do-aue.md) §3 e a convivência dos dois endereços descrita em
-[`hospedagem-firebase.md`](../hospedagem-firebase.md)
+[`hospedagem-firebase.md`](../operacao/hospedagem-firebase.md)
 **Vale para:** publicação
 
 ---
@@ -23,7 +23,7 @@ hospedagem.
 ## O que muda
 
 - `vercel.json` sai do repositório. `firebase.json` é a única fonte de rewrites e
-  é travado por `src/seo-publico.test.ts`.
+  é travado por `src/qualidade/seo-publico.test.ts`.
 - Flags de lançamento se ligam no workflow do Firebase, e só lá.
 - A prévia dinâmica do link continua como no ADR 0003 §10 (fora do ar).
 

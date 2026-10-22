@@ -61,4 +61,4 @@ sozinho — mesmo com zero amostra ele devolve um quadro, verificado.
 3. rode `npm run test`. O índice 53 é a única amarra entre o app e o modelo, e
    ela é silenciosa quando quebra: a inferência continua rodando e o juiz passa
    a julgar arroto pela pontuação de outra classe;
-4. remeça o limiar. Ver `docs/technical/deteccao-de-arroto-yamnet.md`.
+4. remeça o limiar. Ver `docs/technical/audio/deteccao-de-arroto-yamnet.md`.

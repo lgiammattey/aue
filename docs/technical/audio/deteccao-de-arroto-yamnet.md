@@ -5,7 +5,7 @@
 **Escopo:** decide se a gravação **contém arroto**. Não mexe na fórmula da nota.
 
 O comportamento de produto está detalhado no GDD
-[`../jogo/AUÊ!-2.md`](../jogo/AUÊ!-2.md) §§7–12: classificação local, preferência
+[`../../jogo/AUÊ!-2.md`](../../jogo/AUÊ!-2.md) §§7–12: classificação local, preferência
 por falso positivo ocasional em vez de rejeição agressiva e separação entre
 detecção e score. Este documento continua sendo a fonte técnica da implementação.
 
@@ -37,7 +37,7 @@ FÔLEGO, FORÇA e GRAVE medidos no trecho ativo. O YAMNet continua sendo a porta
 
 YAMNet oficial do Google, sem alteração nenhuma, servido do nosso próprio
 domínio. Procedência, contrato do grafo e receita de troca de versão:
-[`public/modelos/yamnet/PROCEDENCIA.md`](../../public/modelos/yamnet/PROCEDENCIA.md).
+[`public/modelos/yamnet/PROCEDENCIA.md`](../../../public/modelos/yamnet/PROCEDENCIA.md).
 
 **A classe existe, e foi conferida no modelo que usamos:**
 
@@ -46,7 +46,7 @@ domínio. Procedência, contrato do grafo e receita de troca de versão:
 ```
 
 Índice 53 das 521 classes do AudioSet. Isso não é confiança de quem escreveu —
-[`classesDoYamnet.test.ts`](../../src/features/audio/juiz/classesDoYamnet.test.ts)
+[`classesDoYamnet.test.ts`](../../../src/features/audio/juiz/classesDoYamnet.test.ts)
 lê o `yamnet_class_map.csv` publicado junto dos pesos e falha se a linha 53
 deixar de ser o arroto. É o teste mais importante do conjunto: o índice é a
 única amarra entre o app e o modelo, e quando ela quebra **não dá erro** — a
@@ -98,7 +98,7 @@ vão (0,39):
 Um arroto teria que pontuar quatro vezes menos que o pior do lote inteiro para
 ser recusado.
 
-[`vereditoDeArroto.test.ts`](../../src/features/audio/juiz/vereditoDeArroto.test.ts)
+[`vereditoDeArroto.test.ts`](../../../src/features/audio/juiz/vereditoDeArroto.test.ts)
 trava a constante **dentro** do vão medido e **na metade de baixo** dele. Mudar
 o limiar exige mudar também os números de medição — e isso aparece na revisão de
 PR, ao contrário de um `0.2` virando `0.6` sozinho.

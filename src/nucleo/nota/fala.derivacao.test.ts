@@ -18,7 +18,7 @@
  * teste, não sobe erro, não aparece em desenvolvimento: só chega torto do outro
  * lado, dentro de uma foto que já saiu do celular e não volta.
  *
- * Fica no molde do `arquitetura.fronteira.test.ts`: lê a fonte, ignora
+ * Fica no molde do `qualidade/arquitetura.fronteira.test.ts`: lê a fonte, ignora
  * comentário e não deixa passar por não ter olhado nada.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';

@@ -171,7 +171,7 @@ errado. Isso morre quando a Arena assumir a raiz de vez — a
 no shell velho, não o shell.
 
 **Hospedagem e endereço canônico foram corrigidos.** `aue.web.app` é a produção
-e `docs/technical/hospedagem-firebase.md` registra o procedimento vigente.
+e `docs/technical/operacao/hospedagem-firebase.md` registra o procedimento vigente.
 
 **A vitrine ainda diz nome de criatura.**
 `docs/design/design-system/aue-design-system-showcase.html`. Não vai pra tela de
@@ -205,7 +205,7 @@ escondem coisa que ainda vai acontecer.
 
 O banco ficou de pé. A lista do que sobrou sem consumidor, com a decisão
 "mantém, não apaga", está em
-[`docs/technical/banco-sem-consumidor.md`](../technical/banco-sem-consumidor.md).
+[`docs/technical/dados/banco-sem-consumidor.md`](../technical/dados/banco-sem-consumidor.md).
 
 ---
 
@@ -275,4 +275,4 @@ integrações, Auê+ e app nativo — além das issues de UX escritas em cima do
 sequencial e da sequência de páginas.
 
 Registro completo em
-[`../inventario-do-reposicionamento.md`](../inventario-do-reposicionamento.md).
+[`../_arquivo/inventarios/reposicionamento-2026-08.md`](../_arquivo/inventarios/reposicionamento-2026-08.md).

@@ -37,4 +37,4 @@ remoto.
 - Migração nova é sempre para frente, com timestamp maior que todas.
 - Não edite migração já aplicada: corrija com uma nova.
 - Desfazer é manual: `supabase/rollback/`.
-- Nomes seguem [`../schema/nomenclatura.md`](../schema/nomenclatura.md).
+- Nomes seguem [`../../schema/nomenclatura.md`](../../schema/nomenclatura.md).

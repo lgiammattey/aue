@@ -141,7 +141,7 @@ código para manter e publicar sem ganhar nada.
 
 O argumento original aqui era outro — "o repositório já tem uma Edge Function
 (`og-preview`), então a segunda sai barata". Essa premissa caiu: a `og-preview`
-saiu do ar e do repositório em 13/08 ([ADR 0003](adr/0003-a-previa-do-link.md)
+saiu do ar e do repositório em 13/08 ([ADR 0003](../adr/0003-a-previa-do-link.md)
 §10), e hoje o projeto **não tem função nenhuma**. A escolha não muda; ela fica
 mais forte, porque agora seria a primeira, não a segunda.
 

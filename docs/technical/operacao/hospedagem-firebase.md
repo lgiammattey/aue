@@ -13,7 +13,7 @@ Issue: [#137](https://github.com/gmmattey/aue/issues/137).
 
 O Auê é publicado em **`https://aue.web.app`** pelo Firebase Hosting, projeto
 `aue-game`, site `aue`. Este é o endereço de produção a usar em testes e
-documentação. A decisão está no [ADR 0006](adr/0006-hospedagem-somente-firebase.md).
+documentação. A decisão está no [ADR 0006](../adr/0006-hospedagem-somente-firebase.md).
 
 ## 2. Endereço canônico
 
@@ -21,7 +21,7 @@ documentação. A decisão está no [ADR 0006](adr/0006-hospedagem-somente-fireb
 `https://aue.web.app`.
 
 Endereço canônico é o que o site declara ao buscador como "o de verdade", e ele
-aparece em cinco lugares travados por `src/seo-publico.test.ts`. Apontar o
+aparece em cinco lugares travados por `src/qualidade/seo-publico.test.ts`. Apontar o
 canônico para um endereço antes de ele estar validado é o pior caso possível de
 SEO: manda o buscador desindexar a URL que está de pé e indexar uma que talvez
 não responda.
@@ -82,7 +82,7 @@ rodar `npm run build`:
 ### As flags: leia a produção, não o `.env.example`
 
 O `.env.example` já conta o corte certo, e uma trava de teste segura os dois
-juntos: `src/corte-de-producao.paridade.test.ts` compara o que o
+juntos: `src/qualidade/corte-de-producao.paridade.test.ts` compara o que o
 `.github/workflows/publicar-firebase.yml` declara com o que o `.env.example` e o
 `src/shared/flags.ts` dizem. Divergiu, a suíte fica vermelha nomeando a flag.
 
@@ -128,6 +128,6 @@ estático, a Edge Function saiu do ar, e a nota viaja como imagem pela
 [#151](https://github.com/gmmattey/aue/issues/151).
 
 O que foi testado, e o que continuaria valendo com domínio próprio, está no
-[ADR 0003](adr/0003-a-previa-do-link.md) §10. **Isso deixou de ser pendência de
+[ADR 0003](../adr/0003-a-previa-do-link.md) §10. **Isso deixou de ser pendência de
 hospedagem** — não é mais o Firebase que trava, e a dúvida sobre `has:
 user-agent` morreu junto, porque o desvio por user-agent saiu do desenho.

@@ -21,7 +21,7 @@ import { describe, expect, it } from 'vitest';
  * NÃO BATE NA REDE. Comparar com o que `aue.web.app` serve exigiria internet, e
  * teste que fica vermelho porque o wifi caiu é teste que alguém deleta. A prova
  * contra a produção de verdade continua sendo o `diff` dos `assets/main-*.js`
- * documentado em `docs/technical/hospedagem-firebase.md`.
+ * documentado em `docs/technical/operacao/hospedagem-firebase.md`.
  */
 
 function ler(caminhoRelativo: string): string {
@@ -33,9 +33,9 @@ function ler(caminhoRelativo: string): string {
   );
 }
 
-const ENV_EXAMPLE = ler('../.env.example');
-const FLAGS_TS = ler('./shared/flags.ts');
-const WORKFLOW = ler('../.github/workflows/publicar-firebase.yml');
+const ENV_EXAMPLE = ler('../../.env.example');
+const FLAGS_TS = ler('../shared/flags.ts');
+const WORKFLOW = ler('../../.github/workflows/publicar-firebase.yml');
 
 const NOME_DO_STEP = 'Build de produção';
 

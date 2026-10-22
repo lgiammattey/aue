@@ -63,7 +63,7 @@ src/plataforma/
 A escolha da montagem acontece em `src/arena/adaptadores.ts`, que já é função e
 já recebe tudo por injeção. **Nada fora de `plataforma/` pode importar
 Capacitor, plugin ou `@capacitor/*`** — e isso entra em
-`src/arquitetura.fronteira.test.ts` junto com o resto, na mesma fatia que
+`src/qualidade/arquitetura.fronteira.test.ts` junto com o resto, na mesma fatia que
 instalar o Capacitor. Fronteira que ninguém checa é decoração (0001 §2).
 
 A porta é a unidade. Adaptador nativo que precise de uma porta nova é sinal de

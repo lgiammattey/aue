@@ -38,8 +38,8 @@ function ler(caminhoRelativo: string): Buffer {
 
 describe('os ícones que o jogo serve são os que o script gerou', () => {
   it.each(PARES)('%s é byte a byte public/%s', (gerado, servido) => {
-    const doDesignSystem = ler(`../docs/design/design-system/assets/favicon/${gerado}`);
-    const doJogo = ler(`../public/${servido}`);
+    const doDesignSystem = ler(`../../docs/design/design-system/assets/favicon/${gerado}`);
+    const doJogo = ler(`../../public/${servido}`);
     expect(doJogo.equals(doDesignSystem)).toBe(true);
   });
 });

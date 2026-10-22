@@ -2,12 +2,12 @@
 
 > **Atualização de 18/10/2026 (Auê 3.0).** `posts_comunidade`, `comentarios`,
 > `reacoes` e `denuncias` voltaram a ter consumidor: o feed de causos
-> ([ADR 0004](adr/0004-arquitetura-aue-3-comunidades-e-feed.md)), pelas RPCs
+> ([ADR 0004](../adr/0004-arquitetura-aue-3-comunidades-e-feed.md)), pelas RPCs
 > `listar_feed_de_causos`, `alternar_reacao_do_causo`, `listar_comentarios` e
 > `criar_comentario` (migração `20261018000002`). O resto da lista abaixo
 > continua sem consumidor.
 > As migrações novas chegam à produção pelo workflow descrito em
-> [`migracoes-supabase.md`](migracoes-supabase.md).
+> [`migracoes-supabase.md`](../operacao/migracoes-supabase.md).
 
 A [#109](https://github.com/gmmattey/aue/issues/109) tirou do repositório feed,
 ranking global, XP na tela, conquistas, perfil social, grupos, comunidades,

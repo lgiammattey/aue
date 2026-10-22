@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { ORIGEM_CANONICA, URL_CANONICA_DA_HOME } from './shared/enderecoPublico';
+import { ORIGEM_CANONICA, URL_CANONICA_DA_HOME } from '../shared/enderecoPublico';
 
 /**
  * O contrato entre sitemap, canonical, robots e o endereço que o app usa.
@@ -31,7 +31,8 @@ import { ORIGEM_CANONICA, URL_CANONICA_DA_HOME } from './shared/enderecoPublico'
  */
 
 function ler(caminhoRelativo: string): string {
-  return readFileSync(fileURLToPath(new URL(caminhoRelativo, import.meta.url)), 'utf8');
+  const caminhoAteARaiz = caminhoRelativo.replace(/^\.\.\//, '../../');
+  return readFileSync(fileURLToPath(new URL(caminhoAteARaiz, import.meta.url)), 'utf8');
 }
 
 /**
@@ -449,7 +450,7 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
       NÃO é segredo: este arquivo é publicamente acessível por natureza — é
       justamente assim que a verificação funciona.
     */
-    const nomes = readdirSync(fileURLToPath(new URL('../public', import.meta.url))).filter((n) =>
+    const nomes = readdirSync(fileURLToPath(new URL('../../public', import.meta.url))).filter((n) =>
       /^google[a-f0-9]+\.html$/.test(n),
     );
 

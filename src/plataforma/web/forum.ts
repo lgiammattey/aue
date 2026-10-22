@@ -1,8 +1,9 @@
-import { configuracaoAusente, supabase } from '../../db/supabase';
+import { assinarUrlDoAudio, configuracaoAusente, supabase } from '../../db/supabase';
 import { criarGravacaoLivreDoForum } from './gravacaoLivreDoForum';
 import type {
   AnexoDoForum,
   AnexoDeAudioDoTopico,
+  AudioDeTopico,
   AnexoParaPublicar,
   AutorDoForum,
   ComunidadeDoForum,
@@ -61,6 +62,7 @@ const LIMITE_MAXIMO_DO_AUTOR = 100;
 const LIMITE_AVATAR_DA_COMUNIDADE_BYTES = 2 * 1024 * 1024;
 const LIMITE_CAPA_DA_COMUNIDADE_BYTES = 3 * 1024 * 1024;
 const BUCKET_DE_MIDIAS_DA_COMUNIDADE = 'midias_de_comunidades';
+const BUCKET_DE_AUDIO_DA_CASA = 'audio_da_casa';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -148,7 +150,8 @@ function motivoDeEscrita(erro: ErroDoServidor): MotivoDeEscrita {
 // Leitura defensiva da linha
 // ---------------------------------------------------------------------------
 
-type Linha = Record<string, unknown>;
+/** Linha bruta de RPC, traduzida na fronteira da plataforma. */
+export type Linha = Record<string, unknown>;
 
 class RespostaMalformada extends Error {}
 
@@ -272,7 +275,8 @@ function paraComunidadeDoForum(l: Linha): ComunidadeDoForum {
   };
 }
 
-function paraTopico(l: Linha): TopicoDoForum {
+/** Tradutor único dos tópicos retornados por RPCs do fórum e das pautas. */
+export function paraTopico(l: Linha): TopicoDoForum {
   const anexo: AnexoDeAudioDoTopico = {
     resultadoId: textoOuNulo(l, 'resultado_id'),
     nota: numeroOuNulo(l, 'nota'),
@@ -319,6 +323,15 @@ function paraResposta(l: Linha): RespostaDoForum {
 }
 
 function paraTopicoDoExplorar(l: Linha): TopicoDoExplorar {
+  const audio: AnexoDeAudioDoTopico = {
+    resultadoId: textoOuNulo(l, 'resultado_id'),
+    nota: numeroOuNulo(l, 'nota'),
+    duracao: numeroOuNulo(l, 'duracao'),
+    subtipoDeOrigem: textoOuNulo(l, 'subtipo_de_origem'),
+    caminhoDoAudio: textoOuNulo(l, 'caminho_do_audio'),
+    caminhoDoAudioDaCasa: textoOuNulo(l, 'caminho_do_audio_da_casa'),
+  };
+  const temAudio = audio.resultadoId !== null || audio.caminhoDoAudio !== null || audio.caminhoDoAudioDaCasa !== null;
   return {
     id: texto(l, 'id'),
     comunidade: comunidadeDe(l),
@@ -329,10 +342,20 @@ function paraTopicoDoExplorar(l: Linha): TopicoDoExplorar {
     criadoEm: texto(l, 'criado_em'),
     ultimaAtividadeEm: texto(l, 'ultima_atividade_em'),
     respostasTotal: inteiro(l, 'respostas_total'),
+    audio: temAudio ? audio : null,
   };
 }
 
 function paraTopicoDoAutor(l: Linha): TopicoDoAutor {
+  const audio: AnexoDeAudioDoTopico = {
+    resultadoId: textoOuNulo(l, 'resultado_id'),
+    nota: numeroOuNulo(l, 'nota'),
+    duracao: numeroOuNulo(l, 'duracao'),
+    subtipoDeOrigem: textoOuNulo(l, 'subtipo_de_origem'),
+    caminhoDoAudio: textoOuNulo(l, 'caminho_do_audio'),
+    caminhoDoAudioDaCasa: textoOuNulo(l, 'caminho_do_audio_da_casa'),
+  };
+  const temAudio = audio.resultadoId !== null || audio.caminhoDoAudio !== null || audio.caminhoDoAudioDaCasa !== null;
   return {
     id: texto(l, 'id'),
     comunidade: comunidadeDe(l),
@@ -344,6 +367,21 @@ function paraTopicoDoAutor(l: Linha): TopicoDoAutor {
     editadoEm: textoOuNulo(l, 'editado_em'),
     ultimaAtividadeEm: texto(l, 'ultima_atividade_em'),
     respostasTotal: inteiro(l, 'respostas_total'),
+    audio: temAudio ? audio : null,
+  };
+}
+
+function paraAudioDeTopico(l: Linha): AudioDeTopico {
+  return {
+    topicoId: texto(l, 'topico_id'),
+    audio: {
+      resultadoId: textoOuNulo(l, 'resultado_id'),
+      nota: numeroOuNulo(l, 'nota'),
+      duracao: numeroOuNulo(l, 'duracao'),
+      subtipoDeOrigem: textoOuNulo(l, 'subtipo_de_origem'),
+      caminhoDoAudio: textoOuNulo(l, 'caminho_do_audio'),
+      caminhoDoAudioDaCasa: textoOuNulo(l, 'caminho_do_audio_da_casa'),
+    },
   };
 }
 
@@ -788,6 +826,16 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       );
     },
 
+    listarAudioDosTopicos(topicoIds) {
+      const ids = [...new Set(topicoIds)].filter((id) => UUID.test(id)).slice(0, 100);
+      if (ids.length === 0) {
+        return usaServidor()
+          ? Promise.resolve({ ok: true as const, valor: [] as readonly AudioDeTopico[] })
+          : Promise.resolve({ ok: false as const, motivo: 'semServidor' as const });
+      }
+      return ler('audio_de_topicos', { p_ids: ids }, (linhas) => linhas.map(paraAudioDeTopico));
+    },
+
     listarRespostasDoAutor(handle, op = {}) {
       const limite = limiteEfetivo(op.limite, LIMITE_PADRAO_DO_AUTOR, LIMITE_MAXIMO_DO_AUTOR);
       return ler(
@@ -886,6 +934,15 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
         console.error('Falha ao assinar anexo do fórum', erro);
         return { ok: false, motivo: 'falhou' };
       }
+    },
+
+    enderecoDoAudioDaCasa(caminho) {
+      const { data } = supabase.storage.from(BUCKET_DE_AUDIO_DA_CASA).getPublicUrl(caminho);
+      return data.publicUrl || null;
+    },
+
+    assinarAudioDoResultado(caminho) {
+      return assinarUrlDoAudio(caminho);
     },
 
     criarGravacaoLivreDoForum,

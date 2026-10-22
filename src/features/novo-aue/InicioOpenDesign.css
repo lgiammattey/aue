@@ -1252,6 +1252,8 @@
 }
 
 .thread-parent-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 2px 0 0;
   font-size: 14px;
   line-height: 1.45;
@@ -1314,6 +1316,8 @@
 }
 
 .comment-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 4px 0 6px;
   font-size: 14px;
   line-height: 1.45;
@@ -1951,6 +1955,8 @@
 }
 
 .thread-reply-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 4px 0 6px;
   font-size: 14px;
   line-height: 1.45;

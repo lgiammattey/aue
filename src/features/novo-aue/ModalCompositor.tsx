@@ -3,12 +3,13 @@
  * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
  * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
  * 
- * Permite digitação com limite de 180 caracteres, gravação de áudio em 1 clique
+ * Permite digitação com o limite do destino, gravação de áudio em 1 clique
  * e anexo de imagens/links de vídeo. Não utilize o ComposerCauso legado.
  */
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ControleDeDialogo } from '../../portas/controleDeDialogo';
 import type { ComunidadeDoForum, GravacaoLivreDoForum } from '../../portas/forum';
+import { LIMITE_TEXTO_TOPICO } from '../../nucleo/comunidade/limites';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import { criarEnderecoLocal, soltarEnderecoLocal } from '../../plataforma/web/enderecoDeAudio';
 import { PreviaDeVideoNoCompositor } from './PreviaDeVideoNoCompositor';
@@ -35,7 +36,7 @@ interface Props {
   }) => Promise<boolean>;
 }
 
-const LIMITE = 180;
+
 
 export function ModalCompositor({
   aberto,
@@ -48,6 +49,7 @@ export function ModalCompositor({
   criarGravacao,
   aoPublicar,
 }: Props) {
+  const LIMITE = destino === 'comunidade' ? LIMITE_TEXTO_TOPICO : 180;
   const [titulo, setTitulo] = useState('');
   const [corpo, setCorpo] = useState('');
   const [comunidadeSlug, setComunidadeSlug] = useState(

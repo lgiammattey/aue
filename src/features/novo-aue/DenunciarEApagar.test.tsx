@@ -6,6 +6,7 @@ import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeConta } from '../../portas/conta';
 import type { PortaDeForum } from '../../portas/forum';
 import type { PerfilPublico, PortaDePerfil } from '../../portas/perfil';
+import type { PortaDePautas } from '../../portas/pautas';
 import { TelaComunidadeOpenDesign } from './TelaComunidadeOpenDesign';
 
 afterEach(cleanup);
@@ -29,6 +30,19 @@ const topico = (id: string, handle: string, titulo: string) => ({
 const montar = (opcoes: { autenticado?: boolean; apagar?: PortaDeForum['apagarTopico']; denunciar?: PortaDeForum['denunciarTopico'] } = {}) => {
   const apagarTopico = opcoes.apagar ?? vi.fn(async () => ({ ok: true as const, valor: true as const }));
   const denunciarTopico = opcoes.denunciar ?? vi.fn(async () => ({ ok: true as const, valor: true as const }));
+  const topicosDaComunidade = [topico('t-meu', 'eu_mesmo', 'Meu post'), topico('t-outro', 'outra_pessoa', 'Post de outra pessoa')];
+  const pautas: PortaDePautas = {
+    obterPautaPorTopico: vi.fn(async (id: string) => {
+      const entrada = topicosDaComunidade.find((item) => item.id === id);
+      return {
+        ok: true as const,
+        valor: entrada ? {
+          pauta: { ...entrada, id: `pauta-${id}`, titulo: 'Tópico agrupado', corpo: '' },
+          entradas: topicosDaComunidade, entradaEmFocoId: id,
+        } : null,
+      };
+    }),
+  };
   const forum = {
     listarComunidadesDoForum: vi.fn(async () => ({ ok: true as const, valor: [] })),
     obterComunidadeDoForum: vi.fn(async (slug: string) => ({
@@ -37,10 +51,10 @@ const montar = (opcoes: { autenticado?: boolean; apagar?: PortaDeForum['apagarTo
     })),
     listarTopicos: vi.fn(async () => ({
       ok: true as const,
-      valor: { itens: [topico('t-meu', 'eu_mesmo', 'Meu post'), topico('t-outro', 'outra_pessoa', 'Post de outra pessoa')], proximo: null },
+      valor: { itens: topicosDaComunidade, proximo: null },
     })),
     explorarTopicos: vi.fn(async () => ({ ok: true as const, valor: { itens: [], proximo: null } })),
-    obterTopico: vi.fn(), listarRespostasDoTopico: vi.fn(), listarTopicosDoAutor: vi.fn(), listarRespostasDoAutor: vi.fn(),
+    obterTopico: vi.fn(async (id: string) => ({ ok: true as const, valor: topicosDaComunidade.find((item) => item.id === id) ?? null })), listarRespostasDoTopico: vi.fn(), listarTopicosDoAutor: vi.fn(), listarRespostasDoAutor: vi.fn(),
     criarTopico: vi.fn(), responderTopico: vi.fn(), editarTopico: vi.fn(), editarResposta: vi.fn(), apagarResposta: vi.fn(), denunciarResposta: vi.fn(),
     apagarTopico, denunciarTopico,
   } as unknown as PortaDeForum;
@@ -57,7 +71,8 @@ const montar = (opcoes: { autenticado?: boolean; apagar?: PortaDeForum['apagarTo
   render(
     <MemoryRouter initialEntries={['/c/eu-arroto-e-dai']}>
       <Routes>
-        <Route path="/c/:slug" element={<TelaComunidadeOpenDesign portaForum={forum} portaComunidade={comunidade} portaPerfil={perfil} portaConta={conta} />} />
+        <Route path="/c/:slug" element={<TelaComunidadeOpenDesign portaForum={forum} portaPautas={pautas} portaComunidade={comunidade} portaPerfil={perfil} portaConta={conta} />} />
+        <Route path="/c/:slug/t/:id" element={<TelaComunidadeOpenDesign portaForum={forum} portaPautas={pautas} portaComunidade={comunidade} portaPerfil={perfil} portaConta={conta} />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -66,7 +81,10 @@ const montar = (opcoes: { autenticado?: boolean; apagar?: PortaDeForum['apagarTo
 
 const cartao = async (texto: string) => {
   fireEvent.click(await screen.findByRole('button', { name: `Abrir tópico: ${texto}` }));
-  return (await screen.findByRole('button', { name: 'Mais ações' })).closest('article') as HTMLElement;
+  const titulo = await screen.findByText(texto);
+  const card = titulo.closest('article') as HTMLElement;
+  await within(card).findByRole('button', { name: 'Mais ações' });
+  return card;
 };
 const abrirMenu = (c: HTMLElement) => fireEvent.click(within(c).getByRole('button', { name: 'Mais ações' }));
 

@@ -4,9 +4,11 @@ import type { PortaDeForum } from '../../portas/forum';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeConta } from '../../portas/conta';
 import type { PortaDePerfil } from '../../portas/perfil';
+import type { PortaDePautas } from '../../portas/pautas';
 
 interface Props {
   readonly portaForum?: PortaDeForum;
+  readonly portaPautas?: PortaDePautas;
   readonly portaComunidade?: PortaDeComunidade;
   readonly portaPerfil?: PortaDePerfil;
   readonly portaConta?: PortaDeConta;
@@ -15,6 +17,7 @@ interface Props {
 
 export function TelaComunidadeOpenDesign({
   portaForum,
+  portaPautas,
   portaComunidade,
   portaPerfil,
   portaConta,
@@ -24,6 +27,7 @@ export function TelaComunidadeOpenDesign({
   return (
     <InicioOpenDesign
       portaForum={portaForum}
+      portaPautas={portaPautas}
       portaComunidade={portaComunidade}
       portaPerfil={portaPerfil}
       portaConta={portaConta}

@@ -115,11 +115,11 @@ export function erroDeEnvio(motivo: MotivoDeEscrita, operacao: OperacaoDeEscrita
       return erro('O título precisa ter de 1 a 120 caracteres.', 'titulo');
     case 'corpoInvalido':
       if (operacao === 'resposta' || operacao === 'edicaoDeResposta') {
-        return erro('A resposta precisa ter de 1 a 500 caracteres.', 'corpo');
+        return erro('A resposta precisa ter de 1 a 1000 caracteres.', 'corpo');
       }
-      return erro('A mensagem precisa ter de 1 a 1000 caracteres.', 'corpo');
+      return erro('A mensagem precisa ter de 1 a 2000 caracteres.', 'corpo');
     case 'respostaInvalida':
-      return erro('A resposta precisa ter de 1 a 500 caracteres.', 'corpo');
+      return erro('A resposta precisa ter de 1 a 1000 caracteres.', 'corpo');
     case 'comunidadeInexistente':
       return erro('Essa comunidade não existe mais.', 'geral', 'verComunidades');
     case 'naoEMembro':

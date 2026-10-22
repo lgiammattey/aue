@@ -12,6 +12,7 @@ import type { EngajamentoDoPost, ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
+import { LIMITE_RESPOSTA as LIMITE_RESPOSTA_FORUM } from '../../nucleo/comunidade/limites';
 import { CardDoPost } from './CardDoPost';
 import { VideoDaResposta } from './VideoDaResposta';
 
@@ -46,7 +47,6 @@ export interface ThreadDeComentariosProps {
   duracaoDoAudio?: number | null;
 }
 
-const LIMITE_RESPOSTA = 180;
 
 function formatarTempoRelativo(isoOuData: string): string {
   try {
@@ -88,6 +88,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   tempoAtualDoAudio = 0,
   duracaoDoAudio = null,
 }: ThreadDeComentariosProps) {
+  const LIMITE_RESPOSTA = post.tipo === 'topico' ? LIMITE_RESPOSTA_FORUM : 180;
   const [textoResposta, setTextoResposta] = useState('');
   const [paiId, setPaiId] = useState<string | null>(null);
   const [autorRespostaNome, setAutorRespostaNome] = useState<string | null>(null);

@@ -8,6 +8,7 @@ import type { PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
 import type { CapturaDeAudio } from '../../portas/captura';
 import type { PortaDeConta } from '../../portas/conta';
 import type { PortaDePerfil } from '../../portas/perfil';
+import type { PortaDePautas } from '../../portas/pautas';
 import { InicioOpenDesign } from './InicioOpenDesign';
 
 describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
@@ -409,6 +410,150 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(await screen.findByRole('button', { name: 'Ouvir áudio' })).toBeTruthy();
     expect(forumComAudio.listarAnexosDoForum).toHaveBeenCalledWith({ topicoIds: ['topico-1'] });
     expect(forumComAudio.assinarAnexoDoForum).toHaveBeenCalledWith('autor-1/forum/arroto.webm');
+  });
+
+  it('restaura o player do áudio da casa na comunidade e no link direto', async () => {
+    const topicoDaCasa = {
+      id: 'topico-casa',
+      comunidade: { id: '1', slug: 'arena-do-arroto', nome: 'Arena do Arroto' },
+      autor: { id: 'autor-casa', handle: 'burpzilla', apelido: 'Burpzilla', avatarUrl: null },
+      titulo: 'Relíquia da casa',
+      corpo: 'Escuta essa.',
+      status: 'aberto' as const,
+      fixado: false,
+      criadoEm: '2026-10-19T10:00:00Z',
+      editadoEm: null,
+      ultimaAtividadeEm: '2026-10-19T10:00:00Z',
+      respostasTotal: 0,
+      souAutor: false,
+      audio: {
+        resultadoId: null, nota: null, duracao: null, subtipoDeOrigem: null,
+        caminhoDoAudio: null, caminhoDoAudioDaCasa: 'burpzilla/topico-casa.m4a',
+      },
+    };
+    const forumComAudioDaCasa: PortaDeForum = {
+      ...mockForum,
+      listarTopicos: vi.fn(async () => ({ ok: true as const, valor: { itens: [topicoDaCasa], proximo: null } })),
+      obterTopico: vi.fn(async () => ({ ok: true as const, valor: topicoDaCasa })),
+      enderecoDoAudioDaCasa: vi.fn(() => 'https://cdn.aue.test/audio_da_casa/burpzilla/topico-casa.m4a'),
+    };
+
+    const { unmount } = render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComAudioDaCasa} portaComunidade={mockComunidade} autenticado={false} viewInicial="comunidade" slugInicial="arena-do-arroto" />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Abrir tópico: Relíquia da casa' }));
+    expect(await screen.findByRole('button', { name: 'Ouvir áudio' })).toBeTruthy();
+    expect(forumComAudioDaCasa.enderecoDoAudioDaCasa).toHaveBeenCalledWith('burpzilla/topico-casa.m4a');
+    unmount();
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComAudioDaCasa} portaComunidade={mockComunidade} autenticado={false} topicoIdInicial="topico-casa" />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('button', { name: 'Ouvir áudio' })).toBeTruthy();
+  });
+
+  it('abre um tópico agrupado mantendo cada publicação no seu ID original', async () => {
+    const original = {
+      id: 'post-original', comunidade: { id: '1', slug: 'arena-do-arroto', nome: 'Arena do Arroto' },
+      autor: { id: 'autor-1', handle: 'ze_do_eco', apelido: 'Zé do Eco', avatarUrl: null },
+      titulo: 'O copo tremeu', corpo: 'Foi alto demais.', status: 'aberto' as const, fixado: false,
+      criadoEm: '2026-10-19T10:00:00Z', editadoEm: null, ultimaAtividadeEm: '2026-10-19T10:00:00Z',
+      respostasTotal: 2, souAutor: false, audio: null,
+    };
+    const pauta: PortaDePautas = {
+      obterPautaPorTopico: vi.fn(async () => ({ ok: true as const, valor: {
+        pauta: { ...original, id: 'pauta-mural', titulo: 'Mural da vergonha', corpo: 'Os melhores vacilos da roda.' },
+        entradas: [original], entradaEmFocoId: 'post-original',
+      } })),
+    };
+
+    const alternarReacaoDoTopico = vi.fn(async () => ({ ok: true as const, valor: true }));
+    const contarReacoesDosTopicos = vi.fn(async () => ({
+      ok: true as const,
+      valor: { 'post-original': { total: { like: 1, fogo: 0, nojo: 0, trofeu: 0 }, minhas: ['like' as const] } },
+    }));
+    const listarRespostasDoTopico = vi.fn(async (topicoId: string) => ({
+      ok: true as const,
+      valor: {
+        itens: [{
+          id: 'resposta-original', topicoId, paiId: null, nivel: 0 as const,
+          autor: { id: 'autor-2', handle: 'bia', apelido: 'Bia', avatarUrl: null },
+          corpo: 'Eu vi esse copo pular.', status: 'visivel' as const,
+          criadoEm: '2026-10-19T10:01:00Z', editadoEm: null, souAutor: false,
+        }],
+        proximo: null,
+      },
+    }));
+
+    render(<MemoryRouter><InicioOpenDesign portaForum={{ ...mockForum, obterTopico: vi.fn(), alternarReacaoDoTopico, contarReacoesDosTopicos, listarRespostasDoTopico }} portaPautas={pauta} portaComunidade={mockComunidade} portaConta={contaAutenticada} autenticado topicoIdInicial="post-original" /></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Mural da vergonha' })).toBeTruthy();
+    expect(screen.getByText('O copo tremeu')).toBeTruthy();
+    expect(document.getElementById('entrada-em-foco')).toBeTruthy();
+    expect(pauta.obterPautaPorTopico).toHaveBeenCalledWith('post-original');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Curtir' }));
+    await waitFor(() => expect(alternarReacaoDoTopico).toHaveBeenCalledWith('post-original', 'like'));
+
+    fireEvent.click(screen.getByRole('button', { name: '2 comentários' }));
+    expect(await screen.findByRole('dialog', { name: 'Resenha na roda' })).toBeTruthy();
+    expect(await screen.findByText('Eu vi esse copo pular.')).toBeTruthy();
+    expect(listarRespostasDoTopico).toHaveBeenCalledWith('post-original');
+  });
+
+  it('mantém o card de um tópico sem agrupamento após a comunidade carregar', async () => {
+    const original = {
+      id: 'topico-solto', comunidade: { id: '1', slug: 'arena-do-arroto', nome: 'Arena do Arroto' },
+      autor: { id: 'autor-1', handle: 'ze_do_eco', apelido: 'Zé do Eco', avatarUrl: null },
+      titulo: 'Recado do WhatsApp', corpo: 'Esse tópico continua separado.', status: 'aberto' as const, fixado: false,
+      criadoEm: '2026-10-19T10:00:00Z', editadoEm: null, ultimaAtividadeEm: '2026-10-19T10:00:00Z',
+      respostasTotal: 0, souAutor: false, audio: null,
+    };
+    const obterTopico = vi.fn(async () => ({ ok: true as const, valor: original }));
+    const pauta: PortaDePautas = { obterPautaPorTopico: vi.fn(async () => ({ ok: true as const, valor: null })) };
+    const obterComunidadeDoForum = vi.fn(async () => ({
+      ok: true as const,
+      valor: {
+        id: '1', slug: 'arena-do-arroto', nome: 'Arena do Arroto', descricao: 'Roda oficial', icone: null,
+        membrosTotal: 1, topicosTotal: 1, ultimaAtividadeEm: '2026-10-19T10:00:00Z', souMembro: true,
+      },
+    }));
+
+    render(<MemoryRouter><InicioOpenDesign portaForum={{ ...mockForum, obterTopico, obterComunidadeDoForum }} portaPautas={pauta} portaComunidade={mockComunidade} topicoIdInicial="topico-solto" /></MemoryRouter>);
+    expect(await screen.findByText('Recado do WhatsApp')).toBeTruthy();
+    await waitFor(() => expect(obterComunidadeDoForum).toHaveBeenCalled());
+    expect(screen.getByText('Recado do WhatsApp')).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Mural da vergonha' })).toBeNull();
+  });
+
+  it('hidrata em lote o áudio legado no feed, sem uma leitura por tópico', async () => {
+    const forumComAudioNoFeed: PortaDeForum = {
+      ...mockForum,
+      listarAudioDosTopicos: vi.fn(async () => ({
+        ok: true as const,
+        valor: [{
+          topicoId: 'topico-1',
+          audio: {
+            resultadoId: null, nota: null, duracao: null, subtipoDeOrigem: null,
+            caminhoDoAudio: null, caminhoDoAudioDaCasa: 'burpzilla/topico-casa.m4a',
+          },
+        }],
+      })),
+      enderecoDoAudioDaCasa: vi.fn(() => 'https://cdn.aue.test/audio_da_casa/burpzilla/topico-casa.m4a'),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComAudioNoFeed} portaComunidade={mockComunidade} autenticado={false} />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole('button', { name: 'Ouvir áudio' })).toBeTruthy();
+    expect(forumComAudioNoFeed.listarAudioDosTopicos).toHaveBeenCalledWith(['topico-1']);
+    expect(forumComAudioNoFeed.enderecoDoAudioDaCasa).toHaveBeenCalledWith('burpzilla/topico-casa.m4a');
   });
 
   it('não anuncia publicação quando o upload de áudio é recusado por falta de conta', async () => {

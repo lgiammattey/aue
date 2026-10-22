@@ -80,10 +80,10 @@ const TODOS: readonly MotivoDeEscrita[] = [
 describe('erroDeEnvio: tabela 6.6, por motivo tipado', () => {
   it.each<[MotivoDeEscrita, OperacaoDeEscrita, string, string, string | null]>([
     ['tituloInvalido', 'topico', 'O título precisa ter de 1 a 120 caracteres.', 'titulo', null],
-    ['corpoInvalido', 'topico', 'A mensagem precisa ter de 1 a 1000 caracteres.', 'corpo', null],
-    ['corpoInvalido', 'edicaoDeTopico', 'A mensagem precisa ter de 1 a 1000 caracteres.', 'corpo', null],
-    ['corpoInvalido', 'resposta', 'A resposta precisa ter de 1 a 500 caracteres.', 'corpo', null],
-    ['respostaInvalida', 'resposta', 'A resposta precisa ter de 1 a 500 caracteres.', 'corpo', null],
+    ['corpoInvalido', 'topico', 'A mensagem precisa ter de 1 a 2000 caracteres.', 'corpo', null],
+    ['corpoInvalido', 'edicaoDeTopico', 'A mensagem precisa ter de 1 a 2000 caracteres.', 'corpo', null],
+    ['corpoInvalido', 'resposta', 'A resposta precisa ter de 1 a 1000 caracteres.', 'corpo', null],
+    ['respostaInvalida', 'resposta', 'A resposta precisa ter de 1 a 1000 caracteres.', 'corpo', null],
     ['comunidadeInexistente', 'topico', 'Essa comunidade não existe mais.', 'geral', 'verComunidades'],
     ['naoEMembro', 'topico', 'Entre na comunidade antes de participar.', 'geral', 'participar'],
     ['naoEMembro', 'resposta', 'Entre na comunidade antes de participar.', 'geral', 'participar'],

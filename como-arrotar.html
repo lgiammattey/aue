@@ -12,7 +12,7 @@
       A FONTE VEM DAQUI, E NÃO DE DENTRO DO CSS.
 
       Anton e Archivo são WOFF2 locais em /fonts, pré-carregados no primeiro
-      byte. O contrato em `src/fonte-nas-entradas.test.ts` mantém todas as
+      byte. O contrato em `src/qualidade/fonte-nas-entradas.test.ts` mantém todas as
       entradas iguais; o porquê completo está em `index.html`.
     -->
     <link rel="preload" href="/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin />
@@ -34,7 +34,7 @@
       OS SEIS PONTOS QUE ANDAM JUNTOS: este arquivo, o componente
       (`src/features/publico/ComoArrotar.tsx`), a entrada no `vite.config.ts`,
       o rewrite no `vercel.json`, o rewrite no `firebase.json` (antes do
-      catch-all `**`) e a `<url>` no `public/sitemap.xml`. `src/seo-publico.test.ts`
+      catch-all `**`) e a `<url>` no `public/sitemap.xml`. `src/qualidade/seo-publico.test.ts`
       é quem faz os seis se cobrarem.
 
       LIMITE DECLARADO: isto NÃO é prerender. O conteúdo completo é montado pelo

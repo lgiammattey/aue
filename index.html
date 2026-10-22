@@ -45,7 +45,7 @@
       `font-display: swap` sem depender de uma conexão externa.
 
       Todas as entradas HTML carregam isto igual, byte por byte.
-      `src/fonte-nas-entradas.test.ts` derruba a suíte quando uma fica para trás.
+      `src/qualidade/fonte-nas-entradas.test.ts` derruba a suíte quando uma fica para trás.
     -->
     <link rel="preload" href="/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
@@ -102,7 +102,7 @@
         4. public/sitemap.xml
         5. src/shared/desktop/enderecoPublico.ts (QR Code e "copiar link")
 
-      Todos estão travados por src/seo-publico.test.ts: mudar um e esquecer os
+      Todos estão travados por src/qualidade/seo-publico.test.ts: mudar um e esquecer os
       outros quebra o teste. Havia um sexto, a Edge Function og-preview, que era
       conferência à mão — saiu do ar e do repositório em 13/08, junto com a
       prévia do link (docs/technical/adr/0003-a-previa-do-link.md §10).

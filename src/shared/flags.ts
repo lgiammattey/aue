@@ -9,7 +9,7 @@
  * algum lugar: build sem variável nenhuma não sai com o corte de produção, sai
  * com tudo desligado. O corte mora no `.github/workflows/publicar-firebase.yml`,
  * está copiado no `.env.example` e os dois são travados por
- * `src/corte-de-producao.paridade.test.ts`.
+ * `src/qualidade/corte-de-producao.paridade.test.ts`.
  *
  * Antes deste módulo, cada tela lia `import.meta.env` por conta própria, com
  * convenções diferentes. Não havia como responder "o que está ligado neste

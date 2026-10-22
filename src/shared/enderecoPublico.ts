@@ -20,7 +20,7 @@
  *   3. `public/robots.txt` (linha `Sitemap:`)
  *   4. `public/sitemap.xml` (todas as `<loc>`)
  *
- * Todos estão travados por `src/seo-publico.test.ts`: se alguém trocar o
+ * Todos estão travados por `src/qualidade/seo-publico.test.ts`: se alguém trocar o
  * domínio em um lugar e esquecer os outros, o teste cai. Havia um quinto, a
  * Edge Function `og-preview`, que era conferência à mão — ela saiu do ar e do
  * repositório em 13/08, junto com a prévia do link

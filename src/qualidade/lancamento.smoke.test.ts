@@ -19,14 +19,14 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
-import { ChallengeView } from './features/audio/ChallengeView';
-import { PoliticaDePrivacidade } from './features/legal/PoliticaDePrivacidade';
-import { AudioPlayback } from './features/audio/AudioPlayback';
-import { ReportButton } from './shared/components/ReportButton';
-import { AudioRecorder } from './features/audio/AudioRecorder';
-import { BottomNav } from './shared/components/BottomNav';
-import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguracaoAusente';
-import { FLAGS } from './shared/flags';
+import { ChallengeView } from '../features/audio/ChallengeView';
+import { PoliticaDePrivacidade } from '../features/legal/PoliticaDePrivacidade';
+import { AudioPlayback } from '../features/audio/AudioPlayback';
+import { ReportButton } from '../shared/components/ReportButton';
+import { AudioRecorder } from '../features/audio/AudioRecorder';
+import { BottomNav } from '../shared/components/BottomNav';
+import { TelaDeConfiguracaoAusente } from '../shared/components/TelaDeConfiguracaoAusente';
+import { FLAGS } from '../shared/flags';
 
 describe('corte de lançamento', () => {
   it('nenhuma feature de fachada liga sozinha', () => {

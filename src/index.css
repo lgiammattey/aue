@@ -4,7 +4,7 @@
 /*
   As fontes são auto-hospedadas e pré-carregadas no HTML. Mantê-las aqui como
   faces locais evita que a primeira pintura dependa de uma viagem ao Google.
-  `src/fonte-nas-entradas.test.ts` protege tanto os arquivos quanto os preloads.
+  `src/qualidade/fonte-nas-entradas.test.ts` protege tanto os arquivos quanto os preloads.
 */
 @font-face {
   font-family: 'Anton';

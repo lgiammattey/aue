@@ -23,8 +23,8 @@ function ler(caminhoRelativo: string): string {
   return readFileSync(fileURLToPath(new URL(caminhoRelativo, import.meta.url)), 'utf8');
 }
 
-const ADS_TXT = ler('../public/ads.txt');
-const ENV_EXAMPLE = ler('../.env.example');
+const ADS_TXT = ler('../../public/ads.txt');
+const ENV_EXAMPLE = ler('../../.env.example');
 
 /** As linhas de declaração do ads.txt, sem comentários nem linhas vazias. */
 function declaracoes(): string[] {

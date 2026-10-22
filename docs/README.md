@@ -20,7 +20,7 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 7. [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) — **o mapa de páginas, rotas e componentes canônicos** (guia anti-confusão).
 8. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
 9. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
-10. [`technical/adr/README.md`](technical/adr/README.md) — índice dos ADRs aceitos.
+10. [`technical/README.md`](technical/README.md) — arquitetura, ADRs, áudio, dados e operação.
 11. [`jogo/VOZ.md`](jogo/VOZ.md) — o tom de voz autêntico, zoeiro e direto.
 
 ---
@@ -52,7 +52,7 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 | Como as páginas públicas de grupos são geradas? | [`technical/adr/0008-paginas-publicas-dos-grupos.md`](technical/adr/0008-paginas-publicas-dos-grupos.md) |
 | Posso trocar isso ou preciso de decisão formal? | [`technical/adr/`](technical/adr/) (§8 do ADR 0001) |
 | Como o código está organizado hoje? | [`technical/arquitetura.md`](technical/arquitetura.md) + o código |
-| Por que essa gravação não virou nota? | [`technical/deteccao-de-arroto-yamnet.md`](technical/deteccao-de-arroto-yamnet.md) |
+| Por que essa gravação não virou nota? | [`technical/audio/deteccao-de-arroto-yamnet.md`](technical/audio/deteccao-de-arroto-yamnet.md) |
 | Qual é o schema realmente aplicado? | `../supabase/migrations/` + ambiente aplicado |
 | Como nomear um objeto novo do banco? | [`schema/nomenclatura.md`](schema/nomenclatura.md) |
 
@@ -78,7 +78,7 @@ docs/
 ├── jogo/        VISAO · LOOP · JORNADA · ARENA · REGRAS · VOZ · HISTORIA · AUÊ!-2
 ├── design/      README · AUÊ! (Art Bible) · prototipo/ · design-system/ · fontes/
 ├── escopo/      ESCOPO_ATUAL · BACKLOG
-├── technical/   adr/ · arquitetura · ambientes · deploy · yamnet · moderação
+├── technical/   README · arquitetura · adr/ · audio/ · dados/ · operacao/
 ├── schema/      nomenclatura · banco_de_dados
 ├── pesquisa/    análise competitiva de mercado
 └── _arquivo/    histórico, versões anteriores, protótipos e pacotes legados

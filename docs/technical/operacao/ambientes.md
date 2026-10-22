@@ -117,7 +117,7 @@ As do lançamento atual:
 | `VITE_CONTATO_PRIVACIDADE` | vazia, a política publica "canal de contato não configurado" |
 | `VITE_FEATURE_DISPUTA_LOCAL` | sem `1`, a disputa presencial não existe no build |
 
-O corte de flags está em [`src/shared/flags.ts`](../../src/shared/flags.ts), que
+O corte de flags está em [`src/shared/flags.ts`](../../../src/shared/flags.ts), que
 é a fonte única: o padrão é sempre desligado, e ligar é ato deliberado.
 
 ---
@@ -128,11 +128,11 @@ São duas coisas separadas, e confundir as duas gera deploy duplicado.
 
 | O quê | Quem faz | Quando |
 |---|---|---|
-| **Publicar** | [`.github/workflows/publicar-firebase.yml`](../../.github/workflows/publicar-firebase.yml) | merge na `main` publica no Firebase Hosting |
-| **Validar** | [`.github/workflows/validacao.yml`](../../.github/workflows/validacao.yml) | toda PR para a `main`, e todo push na `main` |
+| **Publicar** | [`.github/workflows/publicar-firebase.yml`](../../../.github/workflows/publicar-firebase.yml) | merge na `main` publica no Firebase Hosting |
+| **Validar** | [`.github/workflows/validacao.yml`](../../../.github/workflows/validacao.yml) | toda PR para a `main`, e todo push na `main` |
 
 O Firebase é a única publicação deste repositório. A regra de hospedagem está no
-[ADR 0006](adr/0006-hospedagem-somente-firebase.md); referência à Vercel abaixo
+[ADR 0006](../adr/0006-hospedagem-somente-firebase.md); referência à Vercel abaixo
 de `docs/_arquivo/` é histórico, não instrução operacional.
 
 ### O workflow de validação não tem segredo nenhum

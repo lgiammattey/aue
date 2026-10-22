@@ -34,7 +34,7 @@ function ler(caminhoRelativo: string): string {
 
 /** As entradas HTML do build, direto de `vite.config.ts`. */
 function entradasDoBuild(): string[] {
-  const config = ler('../vite.config.ts');
+  const config = ler('../../vite.config.ts');
   const achados = [...config.matchAll(/entrada\('([^']+\.html)'\)/g)].map((m) => m[1]);
   return [...new Set(achados)];
 }
@@ -44,7 +44,7 @@ const PRELOADS_DE_FONTE = [
   '<link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />',
 ] as const;
 
-const CSS_RAIZ = ler('./index.css');
+const CSS_RAIZ = ler('../index.css');
 
 describe('a fonte chega igual em toda entrada HTML', () => {
   it('o build tem as entradas conhecidas — se mudou, o resto deste arquivo cobre as novas', () => {
@@ -60,7 +60,7 @@ describe('a fonte chega igual em toda entrada HTML', () => {
 
   it('toda entrada pré-carrega as duas fontes locais, e nenhuma fica para trás', () => {
     for (const arquivo of entradasDoBuild()) {
-      const html = ler(`../${arquivo}`);
+      const html = ler(`../../${arquivo}`);
       for (const preload of PRELOADS_DE_FONTE) {
         expect(html, `${arquivo} ficou sem ${preload}`).toContain(preload);
       }
@@ -69,7 +69,7 @@ describe('a fonte chega igual em toda entrada HTML', () => {
 
   it('toda entrada declara viewport-fit=cover para respeitar a safe area', () => {
     for (const arquivo of entradasDoBuild()) {
-      expect(ler(`../${arquivo}`), `${arquivo} ficou sem viewport-fit=cover`).toContain(
+      expect(ler(`../../${arquivo}`), `${arquivo} ficou sem viewport-fit=cover`).toContain(
         '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />',
       );
     }
@@ -77,15 +77,15 @@ describe('a fonte chega igual em toda entrada HTML', () => {
 
   it('nenhuma entrada ainda depende do Google Fonts', () => {
     for (const arquivo of entradasDoBuild()) {
-      expect(ler(`../${arquivo}`), `${arquivo} ainda aponta para fonte externa`).not.toMatch(
+      expect(ler(`../../${arquivo}`), `${arquivo} ainda aponta para fonte externa`).not.toMatch(
         /https:\/\/fonts\.(?:googleapis|gstatic)\.com/,
       );
     }
   });
 
   it('as faces locais preservam Anton, Archivo, pesos e display swap', () => {
-    expect(existsSync(fileURLToPath(new URL('../public/fonts/anton-latin.woff2', import.meta.url)))).toBe(true);
-    expect(existsSync(fileURLToPath(new URL('../public/fonts/archivo-latin.woff2', import.meta.url)))).toBe(true);
+    expect(existsSync(fileURLToPath(new URL('../../public/fonts/anton-latin.woff2', import.meta.url)))).toBe(true);
+    expect(existsSync(fileURLToPath(new URL('../../public/fonts/archivo-latin.woff2', import.meta.url)))).toBe(true);
     expect(CSS_RAIZ).toMatch(/font-family: 'Anton';[\s\S]*font-display: swap;[\s\S]*\/fonts\/anton-latin\.woff2/);
     expect(CSS_RAIZ).toMatch(/font-family: 'Archivo';[\s\S]*font-weight: 400 900;[\s\S]*font-display: swap;[\s\S]*\/fonts\/archivo-latin\.woff2/);
     expect(CSS_RAIZ, 'o CSS não pode voltar a depender do Google Fonts').not.toMatch(
@@ -132,7 +132,7 @@ describe('os tokens de tipografia batem com o protótipo canônico', () => {
       foram COPIADOS de lá; este teste é o que impede o app de sair andando
       sozinho de novo.
     */
-    const prototipo = ler('../docs/design/design-system/tokens/typography.css');
+    const prototipo = ler('../../docs/design/design-system/tokens/typography.css');
     const normalizar = (valor: string) => valor.replace(/['\s]/g, '').toLowerCase();
 
     for (const nome of ['font-display', 'font-body', 'font-mono']) {

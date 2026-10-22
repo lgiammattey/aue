@@ -11,6 +11,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { criarCapturaWeb } from '../../plataforma/web/captura';
+import { criarControleDeDialogoWeb } from '../../plataforma/web/controleDeDialogo';
 import { criarForumWeb } from '../../plataforma/web/forum';
 import { criarArrotosDoPerfilRemoto } from '../../plataforma/web/arrotosDoPerfil';
 import { criarUrlDePreviewDeImagem, prepararImagemDePerfil, revokeUrlDePreviewDeImagem } from '../../plataforma/web/imagem';
@@ -193,6 +194,7 @@ export function InicioOpenDesign({
   const [contaPort] = useState(() => portaConta ?? criarContaWeb());
   const [arrotosPort] = useState(() => portaArrotosDoPerfil ?? criarArrotosDoPerfilRemoto());
   const [capturaDoArroto] = useState(() => capturaDireta ?? criarCapturaWeb());
+  const controleDeDialogo = useMemo(() => criarControleDeDialogoWeb(), []);
 
   const [viewAtual, setViewAtual] = useState<'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar' | 'arena'>(() => {
     if (viewInicial === 'auth' || viewInicial === 'perfil' || viewInicial === 'comunidades' || viewInicial === 'seguindo') return viewInicial;
@@ -1946,6 +1948,23 @@ export function InicioOpenDesign({
     .map((parte) => parte[0]?.toUpperCase())
     .join('') ?? '';
 
+  const haDialogoAberto = modalCompositorAberto
+    || modalGravarArrotoAberto
+    || modalComentariosAberto
+    || modalPerfilAberto
+    || modalGerirComunidadeAberto
+    || modalInstitucionalAberto
+    || Boolean(ajusteDeImagem)
+    || Boolean(acaoDoPost)
+    || conexoesAbertas !== null;
+
+  // Toda superfície modal da casca passa pelo mesmo bloqueio. Sem isso cada
+  // diálogo parece fechado, mas o feed continua andando por trás no celular.
+  useEffect(() => {
+    if (!haDialogoAberto) return;
+    return controleDeDialogo.bloquearRolagemDoDocumento();
+  }, [controleDeDialogo, haDialogoAberto]);
+
   useEffect(() => {
     if (new URLSearchParams(location.search).get('gravar') !== '1') return;
 
@@ -2978,6 +2997,7 @@ export function InicioOpenDesign({
       {/* ==================== MODAIS ==================== */}
       <ModalCompositor
         aberto={modalCompositorAberto}
+        controleDeDialogo={controleDeDialogo}
         destino={destinoDoCompositor}
         comunidades={comunidades}
         comunidadePadraoSlug={destinoDoCompositor === 'comunidade' ? comunidadeSlug : undefined}
@@ -2989,6 +3009,7 @@ export function InicioOpenDesign({
 
       <ModalGravarArroto
         aberto={modalGravarArrotoAberto}
+        controleDeDialogo={controleDeDialogo}
         estado={estadoGravacaoDireta}
         erro={erroDaGravacaoDireta}
         enviando={enviandoArrotoDireto}

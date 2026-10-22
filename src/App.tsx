@@ -82,43 +82,6 @@ function EntradaInicial() {
   return <InicioOpenDesign autenticado={autenticado} aoEntrar={() => navigate(enderecoDoLoginComVolta('/', 'entrar'))} />;
 }
 
-function EntradaPrincipal() {
-  const navigate = useNavigate();
-  const irParaLogin = useIrParaLogin();
-  const { state } = useLocation();
-  const [perfilPendente, setPerfilPendente] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let ativo = true;
-    criarContaWeb().estado().then(
-      (conta) => {
-        if (ativo) setPerfilPendente(Boolean(conta.perfilSocialPendente));
-      },
-      () => {
-        if (ativo) setPerfilPendente(false);
-      },
-    );
-    return () => {
-      ativo = false;
-    };
-  }, []);
-
-  if (perfilPendente === null) return null;
-  if (perfilPendente) return <Navigate to="/perfil?boas-vindas=1" replace />;
-
-  return (
-    <TelaComunidade
-      initialTab="feed"
-      resultadoRecente={state?.resultadoRecente}
-      onArrotar={() => navigate('/arena')}
-      aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
-      aoAbrirPerfil={(handle) => navigate(handle ? `/u/${handle}` : '/perfil')}
-      aoSair={() => navigate('/login')}
-      aoEntrar={() => irParaLogin()}
-    />
-  );
-}
-
 function EntradaHistoria() {
   const navigate = useNavigate();
   const irParaLogin = useIrParaLogin();
@@ -166,7 +129,8 @@ export function App() {
         <Routes>
           {/* Feed e Entrada Inteligente */}
           <Route path="/" element={<EntradaInicial />} />
-          <Route path="/feed" element={<EntradaPrincipal />} />
+          {/* /feed ainda circula em links antigos; ele usa a mesma casca canônica da raiz. */}
+          <Route path="/feed" element={<EntradaInicial />} />
           <Route path="/em-alta" element={<Navigate to="/explorar" replace />} />
           <Route path="/seguindo" element={<EntradaSeguindo />} />
 

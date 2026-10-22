@@ -68,7 +68,10 @@ function abrir(perfil: PerfilPublico) {
 }
 
 describe('Tela de Perfil Open Design', () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    document.body.removeAttribute('style');
+  });
 
   it('mostra identidade, ações por ícone e controles de mídia discretos no perfil próprio', async () => {
     abrir(eu);
@@ -95,12 +98,16 @@ describe('Tela de Perfil Open Design', () => {
     expect(screen.getByRole('button', { name: 'Criar novo post' }).textContent).toContain('Alguma merda');
   });
 
-  it('abre a edição sem transformar trocar foto e capa em CTAs permanentes', async () => {
+  it('abre a edição sem transformar trocar foto e capa em CTAs permanentes e fixa a leitura por trás', async () => {
     abrir(eu);
     await screen.findByRole('heading', { level: 1, name: 'burpKing' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Editar perfil' }));
     expect(await screen.findByRole('dialog', { name: 'Editar perfil' })).toBeTruthy();
+    expect(document.body.style.position).toBe('fixed');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar modal' }));
+    expect(document.body.style.position).toBe('');
   });
 
   it('mostra seguir, mas não oferece os controles privados ao visitar outra pessoa', async () => {

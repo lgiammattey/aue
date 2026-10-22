@@ -8,6 +8,19 @@ import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguraca
 
 const raiz = createRoot(document.getElementById('root')!)
 
+// O PWA só existe no build publicado. Se uma sessão mobile de desenvolvimento
+// ficou controlada por um worker antigo, ela veria a casca anterior mesmo com o
+// Vite já entregando módulos novos. Limpa apenas a origem local, uma vez que a
+// pessoa recarregar, para o feedback de UI sempre refletir o código atual.
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  void Promise.all([
+    navigator.serviceWorker.getRegistrations().then((registros) =>
+      Promise.all(registros.map((registro) => registro.unregister())),
+    ),
+    caches.keys().then((chaves) => Promise.all(chaves.map((chave) => caches.delete(chave)))),
+  ])
+}
+
 /*
   Barreira de configuração, ANTES de montar o app.
 

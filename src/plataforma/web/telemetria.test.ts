@@ -65,6 +65,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('registrar', () => {
@@ -188,6 +189,15 @@ describe('registrar', () => {
 
     expect(() => telemetria.registrar('abriu_arena')).not.toThrow();
     expect(inserts).toHaveLength(1);
+  });
+
+  it('continua registrando quando HTTP local não expõe crypto.randomUUID', () => {
+    vi.stubGlobal('crypto', {});
+    const telemetria = criarTelemetriaWeb(montarArmazenamento());
+
+    expect(() => telemetria.registrar('abriu_arena')).not.toThrow();
+    expect(inserts).toHaveLength(1);
+    expect(inserts[0].sessao_id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
   });
 
   it('nunca devolve promessa: quem chama não tem como esperar por ela', () => {

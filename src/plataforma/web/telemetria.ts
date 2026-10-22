@@ -43,6 +43,25 @@ const VERSAO_APP = (import.meta.env.VITE_APP_VERSION as string | undefined) || n
  */
 const JANELA_DE_DEDUPLICACAO_MS = 1500;
 
+/**
+ * Identificador de sessão não é segredo nem credencial. Em HTTP local alguns
+ * navegadores expõem `crypto`, mas não `crypto.randomUUID`; telemetria jamais
+ * pode derrubar a tela por isso.
+ */
+function gerarIdDeSessao(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+
+  // A coluna `sessao_id` é UUID. A queda precisa continuar compatível com o
+  // contrato do banco, mesmo que tenha entropia menor em um HTTP local.
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (marcador) => {
+    const aleatorio = Math.floor(Math.random() * 16);
+    const nibble = marcador === 'x' ? aleatorio : (aleatorio & 0x3) | 0x8;
+    return nibble.toString(16);
+  });
+}
+
 function assinaturaDoEvento(evento: EventoDeTelemetria, detalhe?: DetalheDoEvento): string {
   return `${evento}:${detalhe?.batalhaCodigo ?? ''}:${detalhe?.pagina ?? ''}`;
 }
@@ -84,7 +103,7 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
       guardada: lerSessaoGuardada(armazenamento),
       agora,
       aquisicaoAtual,
-      gerarId: () => crypto.randomUUID(),
+      gerarId: gerarIdDeSessao,
     });
     armazenamento.gravar(CHAVE_DA_SESSAO, JSON.stringify(sessao));
     return sessao;

@@ -26,10 +26,10 @@ describe('/como-jogar com a moldura pública', () => {
     expect(html).toMatch(/<h1>[\s\S]*Como funciona o Auê/);
   });
 
-  it('mantém o conteúdo que já existia', () => {
+  it('explica a comunidade sem prometer a Arena antes da hora', () => {
     const html = montar(ComoJogar);
-    expect(html).toContain('nota de 0 a 100');
-    expect(html).toContain('Depois da nota, chame alguém para o X1');
+    expect(html).toContain('A Arena, com nota e X1, está sendo preparada.');
+    expect(html).toContain('Quando abrir, você vai poder gravar um arroto');
     expect(html).toContain('sem baixar app');
     expect(html).not.toContain('burp game');
     expect(html).toContain('Os grupos de WhatsApp e Telegram são outra coisa');
@@ -74,7 +74,7 @@ describe('/como-arrotar com a moldura pública', () => {
     expect(html).toContain('Arroto de ar');
     expect(html).toContain('Arroto de estômago');
     expect(html).toContain('assunto de médico');
-    expect(html).toContain('não de jogo');
+    expect(html).toContain('não de brincadeira');
   });
 
   it('usa a casca OpenDesign compartilhada, não uma própria', () => {
@@ -121,7 +121,7 @@ describe('/ranking-de-arrotos com a moldura pública', () => {
   it('tem um H1 só, e é o da página', () => {
     const html = montar(RankingDeArrotos);
     expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
-    expect(html).toMatch(/<h1>[\s\S]*Ranking e notas de arroto/);
+    expect(html).toMatch(/<h1>[\s\S]*Notas de arroto na Arena/);
   });
 
   it('traz as faixas de nota oficiais e não repete recorde sem fonte', () => {

@@ -155,14 +155,15 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getByRole('button', { name: '+ Soltar um arroto' })).toBeTruthy();
 
     // Hero de entrada da comunidade
-    expect(await screen.findByRole('heading', { level: 1, name: /GERAL ARROTA,\s*PORRA!/i })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: /Arrotar é um dom\.\s*Aqui, ele tem turma\./i })).toBeTruthy();
+    expect(screen.getByText(/Arrota, aprende ou só vem ouvir\./)).toBeTruthy();
     expect(screen.queryByText('Auê!')).toBeNull();
     expect(screen.queryByText('Você está só olhando. Entre para participar.')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Conversas ativas' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Resenha' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: 'Arrotos' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Links' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Poste alguma merda' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Conta sua resenha' })).toBeTruthy();
 
     // Feed com tópico real carregado da porta
     expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
@@ -263,7 +264,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     expect(await screen.findByRole('dialog')).toBeTruthy();
     expect(screen.getByPlaceholderText('Responder a Pessoa 1…')).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 1, name: /GERAL ARROTA,\s*PORRA!/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: /Arrotar é um dom\.\s*Aqui, ele tem turma\./i })).toBeTruthy();
   });
 
   it('ordena a Resenha por publicação e filtra arrotos e links pelos anexos reais', async () => {

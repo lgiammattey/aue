@@ -87,6 +87,12 @@ export const CardDoPost = memo(function CardDoPost({
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
   const comunidadeInicial = post.comunidadeSlug.charAt(0).toUpperCase();
   const ePessoal = post.origem === 'pessoal';
+  const temAnexoOuVideo = Boolean(post.anexo) || Boolean(post.videoUrl);
+  const tituloAutomaticoDeMidia = ePessoal
+    && temAnexoOuVideo
+    && !post.corpo.trim()
+    && post.titulo.trim() === 'Mídia no perfil';
+  const tituloExibivel = tituloAutomaticoDeMidia ? '' : post.titulo;
 
   // Vídeos antigos (ex.: r/arrotos-youtube) foram espelhados como tópico com o link
   // dentro do texto e sem anexo; sem este último recurso ficariam só como texto.
@@ -224,15 +230,15 @@ export const CardDoPost = memo(function CardDoPost({
         )}
 
         {/* Tag de Tópico (só quando há título distinto do corpo do post) */}
-        {post.corpo && post.titulo && post.titulo.trim() !== post.corpo.trim() && !post.corpo.startsWith(post.titulo) && (
+        {post.corpo && tituloExibivel && tituloExibivel.trim() !== post.corpo.trim() && !post.corpo.startsWith(tituloExibivel) && (
           <div className="post-topic-tag">
-            <span className="post-topic-tag__label">{post.titulo}</span>
+            <span className="post-topic-tag__label">{tituloExibivel}</span>
           </div>
         )}
 
         {/* Corpo do Texto */}
-        {(post.corpo || post.titulo) && (
-          <p className="post-body">{post.corpo || post.titulo}</p>
+        {(post.corpo || tituloExibivel) && (
+          <p className="post-body">{post.corpo || tituloExibivel}</p>
         )}
 
         {/* Player de Áudio integrado */}
@@ -254,7 +260,7 @@ export const CardDoPost = memo(function CardDoPost({
           <div className="post-media-image">
             <img
               src={post.anexo.url}
-              alt="Anexo do causo"
+              alt="Anexo do post"
               className="post-attachment-img"
               loading="lazy"
             />
@@ -276,7 +282,7 @@ export const CardDoPost = memo(function CardDoPost({
         )}
 
         {/* Barra de Ações (Estilo Twitter/X: Ícones vetoriais enxutos com contadores numéricos) */}
-        <div className="post-actions--twitter" role="toolbar" aria-label="Ações do causo">
+        <div className="post-actions--twitter" role="toolbar" aria-label="Ações do post">
           {/* Responder / Comentários */}
           <button
             type="button"

@@ -34,9 +34,8 @@ export const TermosDeUso: React.FC = () => (
     <Secao titulo="O que o Auê é">
       <p>
         Uma comunidade de quem gosta de arrotar. Dá para ler, ouvir e
-        conversar. Na Arena, você grava um arroto e o Auê analisa duração,
-        potência, profundidade e textura do som e devolve uma nota de 0 a 100.
-        Dá para mandar o link para os amigos e ver quem se sai melhor.
+        conversar. A Arena está sendo preparada; quando abrir, vai analisar o
+        som e devolver uma nota de 0 a 100.
       </p>
       <p>
         <strong>A nota é brincadeira</strong>, não medição científica de coisa
@@ -75,7 +74,7 @@ export const TermosDeUso: React.FC = () => (
       </p>
       <p>
         Onde isso fica guardado, por quanto tempo e quem consegue ouvir está na{' '}
-        <Link to="/privacidade" style={{ color: 'var(--accent)' }}>
+        <Link to="/privacidade" style={{ color: 'var(--publico-verde)' }}>
           política de privacidade
         </Link>
         . Leia essa parte: ela é a que tem consequência.
@@ -89,7 +88,7 @@ export const TermosDeUso: React.FC = () => (
         mundo. Gravação escondida à mão não volta por falta de denúncia nova.
       </p>
       <p>
-        Causos, comentários e perfis também podem ser denunciados e escondidos. A
+        Resenhas, comentários e perfis também podem ser denunciados e escondidos. A
         moderação age primeiro sobre o conteúdo. Quem abusar repetidamente pode
         ter a conta ou o acesso bloqueados.
       </p>

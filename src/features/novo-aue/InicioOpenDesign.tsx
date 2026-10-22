@@ -1429,7 +1429,7 @@ export function InicioOpenDesign({
       origem: ePostPessoal ? 'pessoal' : 'comunidade',
       comunidadeSlug: ePostPessoal ? '' : dados.comunidadeSlug ?? '',
       comunidadeAvatarUrl: ePostPessoal ? undefined : fonteDoAvatarDaComunidade(comunidades.find((comunidade) => comunidade.slug === dados.comunidadeSlug)),
-      titulo: dados.titulo ?? (dados.corpo || (dados.anexo?.tipo === 'imagem' ? (ePostPessoal ? 'Imagem no perfil' : 'Imagem na comunidade') : dados.anexo?.tipo === 'audio' ? (ePostPessoal ? 'Áudio no perfil' : 'Áudio na comunidade') : ePostPessoal ? 'Vídeo no perfil' : 'Vídeo na comunidade')),
+      titulo: dados.titulo ?? (dados.corpo || (ePostPessoal && dados.anexo ? '' : dados.anexo?.tipo === 'imagem' ? 'Imagem na comunidade' : dados.anexo?.tipo === 'audio' ? 'Áudio na comunidade' : 'Vídeo na comunidade')),
       corpo: dados.corpo,
       autorNome: meuNome,
       autorHandle: meuHandle,
@@ -2055,8 +2055,9 @@ export function InicioOpenDesign({
           <section aria-label="Feed principal">
             <div className="hero hero--feed">
               <span className="hero__kicker">COMUNIDADE DOS ARROTADORES</span>
-              <span className="hero__stamp">ARROTEI! FDC.</span>
-              <h1>GERAL ARROTA,<br />PORRA!</h1>
+              <span className="hero__stamp">CHEGA MAIS.</span>
+              <h1>Arrotar é um dom.<br />Aqui, ele tem turma.</h1>
+              <p>Um lugar pra quem gosta de arrotar, trocar ideia e mostrar o que sabe fazer. Arrota, aprende ou só vem ouvir.</p>
             </div>
 
             <div className="feed-head">
@@ -2095,7 +2096,7 @@ export function InicioOpenDesign({
                 onClick={() => { setDestinoDoCompositor('pessoal'); setModalCompositorAberto(true); }}
               >
                 <span className="composer__cta-plus" aria-hidden="true">+</span>
-                <span>Poste alguma merda</span>
+                <span>Conta sua resenha</span>
               </button>
             </div>
 
@@ -2771,7 +2772,7 @@ export function InicioOpenDesign({
               <form onSubmit={submeterLogin} className="dialog">
                 <h1>Entra na roda</h1>
                 <p style={{ color: 'var(--aue-muted)', marginBottom: 16 }}>
-                  Entre para soltar arrotos e postar seus causos.
+                  Entre para soltar arrotos e participar da resenha.
                 </p>
 
                 <label style={{ display: 'grid', gap: 6, marginBottom: 12 }}>
@@ -2802,14 +2803,12 @@ export function InicioOpenDesign({
 
                 <div className="auth-divider" aria-hidden="true"><span>ou entre por</span></div>
                 <div className="auth-social-soon" aria-label="Entradas sociais em breve">
-                  <button type="button" className="auth-social-soon__button" disabled>
-                    <IconeDoX />
-                    <span>X</span>
+                  <button type="button" className="auth-social-soon__button" disabled aria-label="X: em breve">
+                    <span className="auth-social-soon__provider"><IconeDoX /></span>
                     <small>Em breve</small>
                   </button>
-                  <button type="button" className="auth-social-soon__button" disabled>
-                    <IconeDaRede rede="tiktok" />
-                    <span>TikTok</span>
+                  <button type="button" className="auth-social-soon__button" disabled aria-label="TikTok: em breve">
+                    <span className="auth-social-soon__provider"><IconeDaRede rede="tiktok" /><span>TikTok</span></span>
                     <small>Em breve</small>
                   </button>
                 </div>
@@ -3172,8 +3171,8 @@ export function InicioOpenDesign({
               </button>
             </div>
             <p style={{ lineHeight: 1.6, color: 'var(--aue-muted)' }}>
-              O Auê é uma comunidade brasileira para quem valoriza a arte sonora do arroto.
-              Aqui você grava, descobre seu score e compete com amigos no X1.
+              O Auê é uma comunidade brasileira para quem gosta de arrotar.
+              Aqui você encontra gente para trocar histórias, ouvir arrotos e participar da resenha.
             </p>
           </div>
         </div>

@@ -50,7 +50,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
         </p>
         <p>
           Quem quiser pode <strong>criar uma conta com e-mail e senha</strong>. A
-          conta aproveita a identidade que você já tinha: seus arrotos, causos e
+          conta aproveita a identidade que você já tinha: seus arrotos, resenhas e
           comentários continuam seus. O e-mail serve para confirmar a conta, para
           você entrar de outro aparelho e para recuperar a senha. Nada além disso.
         </p>
@@ -70,7 +70,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
             abaixo). A foto é reduzida no seu aparelho antes de subir.
           </li>
           <li>
-            <strong>O que você faz no jogo.</strong> Seus resultados, causos,
+            <strong>O que você faz no jogo.</strong> Seus resultados, resenhas,
             comentários, reações e quem você segue.
           </li>
         </ul>
@@ -87,7 +87,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
           conta:
         </p>
         <ul style={{ margin: 0, paddingLeft: '1.2em', display: 'grid', gap: 6 }}>
-          <li>seu perfil: apelido, @, foto, bio, cidade, links das redes que você informar, título, quando entrou, quantidade de resenhas, quem você segue e quem segue você, e a sua melhor nota <em>entre os causos publicados</em>;</li>
+          <li>seu perfil: apelido, @, foto, bio, cidade, links das redes que você informar, título, quando entrou, quantidade de resenhas, quem você segue e quem segue você, e a sua melhor nota <em>entre as resenhas publicadas</em>;</li>
           <li>suas resenhas, comentários e respostas;</li>
           <li>a nota e o áudio de uma resenha, <strong>só se você marcou a autorização de publicar o arroto</strong> na hora de postar.</li>
         </ul>
@@ -222,7 +222,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
 
       <Secao titulo="Denúncia e moderação">
         <p>
-          Toda gravação e todo causo têm um botão de denúncia. Quando três pessoas
+          Toda gravação e toda resenha têm um botão de denúncia. Quando três pessoas
           diferentes denunciam o mesmo conteúdo, ele é escondido automaticamente e
           deixa de aparecer para qualquer pessoa. Uma decisão tomada à mão sobre
           uma gravação não é desfeita por denúncias posteriores.
@@ -288,7 +288,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
         <p>
           A Lei Geral de Proteção de Dados garante a você acesso, correção e
           exclusão dos seus dados. Na prática: o perfil você corrige direto na
-          tela de perfil; causos e áudios você apaga pelo próprio app; e o que o
+          tela de perfil; resenhas e áudios você apaga pelo próprio app; e o que o
           app não alcança, como <strong>excluir a conta inteira</strong> (e-mail,
           perfil e histórico), é por pedido pelo contato abaixo. Ainda não existe
           botão para isso.
@@ -296,7 +296,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
         {contato ? (
           <p>
             Para pedidos, escreva para{' '}
-            <a href={`mailto:${contato}`} style={{ color: 'var(--accent)' }}>
+            <a href={`mailto:${contato}`} style={{ color: 'var(--publico-verde)' }}>
               {contato}
             </a>
             . Para conta, escreva do e-mail cadastrado. Para um áudio sem conta,

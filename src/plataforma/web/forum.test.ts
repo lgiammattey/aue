@@ -706,6 +706,23 @@ describe('escritas: sucesso e o que vai ao servidor', () => {
     });
   });
 
+  it('criarPublicacaoPessoal preserva título vazio para post só com mídia', async () => {
+    rpc.mockResolvedValue({ data: { id: ID_A, criado_em: '2026-10-22T10:00:00.000000+00:00' }, error: null });
+
+    const resultado = await criarForumWeb().criarPublicacaoPessoal?.({
+      corpo: '',
+      anexo: { tipo: 'videoExterno', url: 'https://youtu.be/abcDEF12345' },
+    });
+
+    expect(resultado).toEqual({ ok: true, valor: { id: ID_A, criadoEm: '2026-10-22T10:00:00.000000+00:00' } });
+    expect(rpc).toHaveBeenCalledWith('criar_publicacao_pessoal_com_anexo', expect.objectContaining({
+      p_titulo: '',
+      p_corpo: '',
+      p_anexo_tipo: 'video_externo',
+      p_url_video: 'https://youtu.be/abcDEF12345',
+    }));
+  });
+
   it('responderTopico manda o pai quando há e null quando não há', async () => {
     rpc.mockResolvedValue({
       data: { id: ID_C, topico_id: ID_A, pai_id: ID_B, nivel: 1, criado_em: '2026-10-19T12:00:00.5+00:00' },

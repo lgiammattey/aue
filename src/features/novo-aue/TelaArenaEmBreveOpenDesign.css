@@ -112,6 +112,11 @@
 }
 
 .od-arena-coming__footer a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--hit-target-min, 44px);
+  padding-inline: 10px;
   color: var(--aue-text);
   font: 800 14px/1 Archivo, sans-serif;
   text-decoration: none;

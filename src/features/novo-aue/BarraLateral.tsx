@@ -157,7 +157,7 @@ export const BarraLateral = memo(function BarraLateral({
             aoMudarView('feed');
             navigate('/');
           }}
-          aria-label="Feed de causos"
+          aria-label="Feed de resenhas"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1V11z" />

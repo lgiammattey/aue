@@ -66,21 +66,21 @@ export function TelaArenaEmBreveOpenDesign() {
               </svg>
             </div>
             <h1 id="arena-em-breve-titulo">Aqui o arroto vira jogo.</h1>
-            <p>Você solta, o juiz confere e a nota sai na hora. Depois, a resenha é sua — publica se quiser ou chama alguém pro X1.</p>
+            <p>A Arena ainda está sendo preparada. Enquanto isso, entra na resenha, ouve a galera e encontra sua turma.</p>
           </header>
 
-          <ol className="od-arena-coming__steps" aria-label="Como a Arena vai funcionar">
+          <ol className="od-arena-coming__steps" aria-label="O que vem na Arena">
             <li>
               <span>01</span>
-              <div><h2>Solta um</h2><p>A gravação só começa quando você pedir. Nada sai do seu microfone por conta própria.</p></div>
+              <div><h2>Grava quando abrir</h2><p>A gravação só vai começar quando você pedir. Nada sai do seu microfone por conta própria.</p></div>
             </li>
             <li>
               <span>02</span>
-              <div><h2>O juiz confere</h2><p>O som passa pela análise e vira uma nota de 0 a 100, com força, fôlego e grave na resenha.</p></div>
+              <div><h2>O juiz confere</h2><p>Quando a Arena abrir, o som vai passar pela análise e receber uma nota de 0 a 100.</p></div>
             </li>
             <li>
               <span>03</span>
-              <div><h2>Escolhe o próximo passo</h2><p>Guarda pra você, publica na Tropa ou manda um desafio privado de X1 para alguém.</p></div>
+              <div><h2>Compartilha se quiser</h2><p>O resultado poderá ficar só com você, virar resenha ou seguir num desafio privado.</p></div>
             </li>
           </ol>
 

@@ -20,7 +20,7 @@ export const ComoJogar: React.FC = () => (
   <LayoutPublico
     eyebrow="Guia rápido"
     titulo="Como funciona o Auê"
-    resumo="O Auê é a comunidade de quem gosta de arrotar. Você entra, ouve, conversa e, quando quiser, solta um arroto na Arena pra ver a nota."
+    resumo="O Auê é a comunidade de quem gosta de arrotar. Você entra, ouve e conversa. A Arena, com nota e X1, está sendo preparada."
   >
     <SecaoPublica eyebrow="As comunidades" titulo="Cada turma tem seu canto">
       <p>
@@ -36,23 +36,23 @@ export const ComoJogar: React.FC = () => (
       />
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="A Arena" titulo="Solta um e vê a nota">
+    <SecaoPublica eyebrow="A Arena" titulo="A Arena está sendo preparada">
       <p>
-        Toque em ARROTAR e solte. O microfone só é pedido nessa hora. O Auê ouve e mostra a nota de
-        0 a 100, com as quatro medidas: duração, potência, profundidade e textura.
+        Quando abrir, você vai poder gravar um arroto, receber uma nota de 0 a 100 e chamar alguém
+        pro X1. O microfone só será pedido quando você decidir gravar.
       </p>
       <p>
-        Não é sorteio: o que não for arroto não vira nota. Não gostou do número? Manda outro. O
-        arroto só vai pra comunidade se você escolher publicar.
+        O arroto só poderá ir pra comunidade se você escolher publicar. Até lá, a resenha já está
+        rolando nas comunidades.
       </p>
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="O X1" titulo="Desafie alguém">
+    <SecaoPublica eyebrow="O X1" titulo="O desafio vem junto com a Arena">
       <p>
-        Depois da nota, chame alguém para o X1. O Auê gera um link privado: quem abrir ouve o seu
-        arroto, arrota a resposta no próprio aparelho e as duas notas se enfrentam.
+        Quando a Arena abrir, a nota vai poder virar um X1. O desafio terá link privado e cada
+        pessoa grava no próprio aparelho.
       </p>
-      <p>No fim tem placar e tem revanche.</p>
+      <p>No fim, placar e revanche.</p>
     </SecaoPublica>
 
     <SecaoPublica eyebrow="Sem instalar" titulo="Direto no navegador, de graça">

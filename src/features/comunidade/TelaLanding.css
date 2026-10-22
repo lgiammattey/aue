@@ -31,6 +31,9 @@
 }
 
 .landing-olhada {
+  min-height: var(--hit-target-min, 44px);
+  display: inline-flex;
+  align-items: center;
   font-size: 15px;
   font-weight: 600;
   text-decoration: underline;
@@ -193,7 +196,7 @@
 
 .landing-aba {
   flex: 1;
-  height: 36px;
+  min-height: var(--hit-target-min, 44px);
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -232,6 +235,9 @@
 
 .landing-link {
   align-self: flex-start;
+  min-height: var(--hit-target-min, 44px);
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   border: 0;
   background: none;
@@ -360,6 +366,9 @@
 }
 
 .landing-rodape a {
+  min-height: var(--hit-target-min, 44px);
+  display: inline-flex;
+  align-items: center;
   color: var(--muted);
 }
 

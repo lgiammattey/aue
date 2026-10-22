@@ -40,8 +40,8 @@ const PASSOS = [
   },
   {
     n: '03',
-    t: 'Teste na Arena',
-    d: 'Grave um arroto, veja a nota e chame alguém pro X1.',
+    t: 'A Arena vem aí',
+    d: 'Quando ela abrir, seu arroto ganha nota e pode virar X1.',
   },
 ];
 
@@ -97,7 +97,7 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
                   <span className="landing-avatar">DA</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div>
-                      <b>@danigas</b> Minha tentativa na Arena, igreja ao fundo.
+                      <b>@danigas</b> Quando a Arena abrir, vou testar essa na igreja.
                     </div>
                     <div className="landing-audio" aria-hidden="true">
                       <span className="landing-play">
@@ -110,7 +110,7 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
                           <i key={i} style={{ height: altura }} />
                         ))}
                       </div>
-                      <span className="landing-nota">91</span>
+                      <span className="landing-nota">EM BREVE</span>
                     </div>
                   </div>
                 </div>
@@ -212,15 +212,15 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
         <section className="landing-arena">
           <div className="landing-arena-inner">
             <div className="landing-arena-texto">
-              <h2>Acha que arrota bem?</h2>
-              <p>Solta um e vê a nota. Publicar o resultado é sempre escolha sua.</p>
+              <h2>A Arena está chegando.</h2>
+              <p>Quando abrir, ela dá nota pro arroto e deixa você chamar alguém pro X1.</p>
             </div>
             <Link
               className="publico-pilula publico-pilula-accent"
               to="/arena"
               onClick={() => onArrotar?.()}
             >
-              Ir pra Arena
+              Conhecer a Arena
             </Link>
           </div>
         </section>

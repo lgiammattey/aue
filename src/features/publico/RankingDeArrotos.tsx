@@ -16,13 +16,13 @@ const faixasDeNota = [
 
 const faixas: readonly ItemDaListaPublica[] = faixasDeNota.map(({ pontos, veredito, descricao }) => ({
   numero: pontos,
-  eyebrow: 'Faixa oficial',
+  eyebrow: 'Faixa da Arena',
   titulo: veredito,
   texto: [descricao],
 }));
 
 /**
- * `/ranking-de-arrotos` — a tabela de notas da Arena e como a nota é calculada.
+ * `/ranking-de-arrotos` — como a Arena vai calcular as notas quando abrir.
  *
  * Responde a buscas como "ranking de arrotos" e "nota de arroto". Os recordes
  * mundiais de decibéis saíram desta página: eram números de terceiros que a
@@ -31,25 +31,25 @@ const faixas: readonly ItemDaListaPublica[] = faixasDeNota.map(({ pontos, veredi
  */
 export const RankingDeArrotos: React.FC = () => (
   <LayoutPublico
-    eyebrow="Notas e vereditos"
-    titulo="Ranking e notas de arroto"
-    resumo="Como a Arena dá a nota de 0 a 100 e o que cada faixa quer dizer."
+    eyebrow="A Arena vem aí"
+    titulo="Notas de arroto na Arena"
+    resumo="A Arena está sendo preparada. Quando abrir, a nota vai de 0 a 100 e cada faixa terá seu veredito."
   >
-    <ListaPublica eyebrow="A escala de 0 a 100" titulo="A tabela de vereditos do Auê" itens={faixas} />
+    <ListaPublica eyebrow="A escala de 0 a 100" titulo="Os vereditos que vêm com a Arena" itens={faixas} />
 
-    <SecaoPublica eyebrow="Sem sorteio" titulo="Como a Arena calcula a nota">
+    <SecaoPublica eyebrow="Sem sorteio" titulo="Como a Arena vai calcular a nota">
       <p>
-        Não tem roleta nem botão de compra de nota. Um modelo de inteligência artificial (YAMNet),
-        rodando no navegador do seu celular, confere se o áudio é mesmo um arroto e descarta palmas,
-        assobios, fala e ruído de vento.
+        Quando abrir, não vai ter roleta nem botão de compra de nota. Um modelo de inteligência
+        artificial (YAMNet), rodando no navegador, vai conferir se o áudio é mesmo um arroto e
+        descartar palmas, assobios, fala e ruído de vento.
       </p>
       <p>
-        Depois mede a potência máxima, o tempo de sustentação e o equilíbrio dos graves. Com a nota
-        na mão, você publica na comunidade, chama alguém pro X1 ou arrota de novo.
+        Depois, a Arena vai medir potência, tempo de sustentação e equilíbrio dos graves. A nota
+        poderá ficar só com você, virar resenha na comunidade ou seguir pra um X1.
       </p>
       <LinksPublicos
         links={[
-          { para: '/como-jogar', rotulo: 'Como funciona o X1' },
+          { para: '/como-jogar', rotulo: 'Ver o que vem com a Arena' },
           { para: '/tipos-de-arroto', rotulo: 'Qual é o seu estilo de arroto' },
         ]}
       />

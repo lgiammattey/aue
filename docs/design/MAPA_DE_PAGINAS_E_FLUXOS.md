@@ -19,7 +19,7 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 | **Hub de Comunidades** | [`src/features/novo-aue/TelaComunidadeOpenDesign.tsx`](../../src/features/novo-aue/TelaComunidadeOpenDesign.tsx)<br>[`src/features/novo-aue/TelaDiretorioOpenDesign.tsx`](../../src/features/novo-aue/TelaDiretorioOpenDesign.tsx) | `src/features/comunidade/components/AbaComunidades.tsx`<br>`src/features/comunidade/TelaComunidade.tsx` | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) |
 | **Perfil de Jogador** | A tela é a view `perfil` de [`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx), com [`PerfilDoUsuario.tsx`](../../src/features/novo-aue/PerfilDoUsuario.tsx) (cabeçalho e abas, `PerfilDoUsuario.css`), [`FolhaDaFoto.tsx`](../../src/features/novo-aue/FolhaDaFoto.tsx) (troca de foto pelo avatar, `FolhaDaFoto.css`), [`BarraSuperior.tsx`](../../src/features/novo-aue/BarraSuperior.tsx) (`BarraSuperior.css`), `CardDoPost` (variante `perfil`) e `PlayerDoArroto`. [`TelaPerfilOpenDesign.tsx`](../../src/features/novo-aue/TelaPerfilOpenDesign.tsx) é só um invólucro de 32 linhas | `src/features/novo-aue/PerfilConectado.tsx` (código morto: só o próprio teste o importa, conferido por `grep` em 21/10/2026). Não criar telas desconexas em `/perfil` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
 | **Arena de Arroto (10 Estados)** | [`src/arena/Arena.tsx`](../../src/arena/Arena.tsx)<br>Faixas em [`src/arena/faixas/`](../../src/arena/faixas/)<br>Bolha em [`src/arena/bolha/`](../../src/arena/bolha/) | Telas avulsas de fluxo antigo em `src/features/audio/fluxo/` | [`Arena.dc.html`](prototipo/Arena.dc.html) |
-| **Páginas Públicas Institucionais & SEO** | [`src/features/publico/ComoJogar.tsx`](../../src/features/publico/ComoJogar.tsx)<br>[`src/features/publico/ComoArrotar.tsx`](../../src/features/publico/ComoArrotar.tsx)<br>[`src/features/publico/TiposDeArroto.tsx`](../../src/features/publico/TiposDeArroto.tsx)<br>[`src/features/publico/RankingDeArrotos.tsx`](../../src/features/publico/RankingDeArrotos.tsx)<br>[`src/features/grupos/TelaGrupos.tsx`](../../src/features/grupos/TelaGrupos.tsx) | Nunca aplicar tema escuro nas públicas (seguem tema claro fixo) | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
+| **Páginas Públicas Institucionais & SEO** | [`src/features/publico/ComoJogar.tsx`](../../src/features/publico/ComoJogar.tsx)<br>[`src/features/publico/ComoArrotar.tsx`](../../src/features/publico/ComoArrotar.tsx)<br>[`src/features/publico/TiposDeArroto.tsx`](../../src/features/publico/TiposDeArroto.tsx)<br>[`src/features/publico/RankingDeArrotos.tsx`](../../src/features/publico/RankingDeArrotos.tsx)<br>[`src/features/grupos/TelaGrupos.tsx`](../../src/features/grupos/TelaGrupos.tsx) | Não substituir `MolduraPublica` → `CascaInformativaOpenDesign` por outra moldura ou impor tema claro fixo sem pedido explícito do Luiz | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
 | **Páginas Legais (Termos & Privacidade)** | [`src/features/legal/TermosDeUso.tsx`](../../src/features/legal/TermosDeUso.tsx)<br>[`src/features/legal/PoliticaDePrivacidade.tsx`](../../src/features/legal/PoliticaDePrivacidade.tsx) | - | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
 | **Painel Administrativo** | [`src/features/administracao/TelaAdministracao.tsx`](../../src/features/administracao/TelaAdministracao.tsx) | Não expor na navegação lateral pública | - |
 
@@ -30,27 +30,33 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 | Rota URL | Componente Renderizado | Status / Papel | Protótipo Canônico | Descrição e Comportamento |
 |---|---|---|---|---|
 | `/` | `InicioOpenDesign` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Entrada da rede social (3 colunas desktop, webapp mobile). Mostra conversas em comunidades, busca e Rodas para explorar. |
-| `/feed` | `EntradaPrincipal` (`TelaComunidade`) | **COMPATIBILIDADE** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Rota mantida para testes e acessos diretos. Para nova experiência de feed, consulte `/`. |
+| `/feed` | `EntradaInicial` → `InicioOpenDesign` | **ALIAS ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Link antigo que usa a mesma entrada social canônica da raiz. |
 | `/em-alta` | redireciona para `/explorar` | **ALIAS** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Atalho mantido para descoberta de comunidades e tópicos. |
 | `/seguindo` | `InicioOpenDesign` (`view="seguindo"`) | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Sua Tropa: feed exclusivo das pessoas seguidas por quem está conectado. |
-| `/arena` | `EntradaArena` (`Arena`) | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Máquina de 10 estados da Arena (gravação, julgamento de áudio, nota e duelo). |
+| `/arena` e `/arena/em-breve` | `TelaArenaEmBreveOpenDesign` | **CANÔNICO ATIVO — EM BREVE** | [`Arena.dc.html`](prototipo/Arena.dc.html) | A entrada mostra a indisponibilidade da Arena; não promete gravação, nota ou duelo ativos. |
 | `/comunidades` | `TelaDiretorioOpenDesign` | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Diretório completo de comunidades temáticas do Auê. |
 | `/c/:slug` | `TelaComunidadeOpenDesign` | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Comunidade específica. Não declarar a tela de tópicos como publicada sem evidência própria. |
 | `/c/:slug/novo` | `TelaComunidadeOpenDesign` | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Entrada de criação associada à comunidade; depende do corte de tópicos do ADR 0010. |
-| `/c/:slug/t/:id` | `rotasDoForum` (`TelaTopico`) | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Rota da conversa por tópico prevista no ADR 0010; não é prova de publicação. |
-| `/explorar` | `rotasDoForum` (`TelaExplorar`) | **EM MIGRAÇÃO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Descoberta de comunidades e tópicos prevista no ADR 0010; requer prova de produção antes de virar canônica. |
+| `/c/:slug/t/:id` | `TelaComunidadeOpenDesign` | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Abre a comunidade no OpenDesign; a presença da rota não declara publicação nem disponibilidade de cada tópico. |
+| `/explorar` | `TelaExplorarOpenDesign` | **CANÔNICO ATIVO** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Superfície OpenDesign de descoberta; a evidência de produção é documentada separadamente. |
 | `/desafios` | `EntradaDesafios` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Central de desafios e duelos de quem está jogando. |
 | `/x1/:code` | `EntradaPorLink` (`Arena`) | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Desafio X1 direto por código curto. Abre a Arena pronta para ouvir e responder. |
 | `/b/:code` | `EntradaPorLink` (`Arena`) | **ALIAS** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Atalho alternativo para desafio X1. |
 | `/d/:id` | `ChallengeView` | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Visualização legada/direta de desafio por UUID longo. |
 | `/perfil` | `TelaPerfilOpenDesign` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Perfil próprio da pessoa conectada (arrotos postados, nota média, vitórias no X1). |
 | `/u/:handle` | `TelaPerfilOpenDesign` | **CANÔNICO ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Perfil público de qualquer participante pelo `@handle`. |
+| `/perfil/:handle` | `TelaPerfilOpenDesign` | **ALIAS ATIVO** | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) | Compatibilidade para o perfil público por handle. |
 | `/login` | `InicioOpenDesign` (`view="auth"`) | **CANÔNICO ATIVO** | [`Login.dc.html`](prototipo/Login.dc.html) | Tela ágil de autenticação / criação de apelido social. |
-| `/como-jogar` | `ComoJogar` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Tutorial público indexável explicando a mecânica do jogo e nota. |
+| `/entrar` | redireciona para `/login` | **ALIAS** | [`Login.dc.html`](prototipo/Login.dc.html) | Atalho de entrada. |
+| `/redefinir-senha` | `TelaRedefinirSenha` | **ATIVO** | [`Login.dc.html`](prototipo/Login.dc.html) | Recuperação de senha fora da tela de autenticação principal. |
+| `/como-jogar` | `ComoJogar` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Guia público indexável sobre comunidade e o que a Arena vai oferecer quando abrir. |
 | `/como-arrotar` | `ComoArrotar` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Guia bem-humorado com dicas de postura, respiração e gaseificação. |
-| `/tipos-de-arroto` | `TiposDeArroto` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Enciclopédia dos arrotos julgados pelo motor (trovão, silencioso, falso, etc.). |
-| `/ranking-de-arrotos` | `RankingDeArrotos` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Tabela histórica dos maiores scores auditados. |
+| `/tipos-de-arroto` | `TiposDeArroto` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Guia dos estilos que a Arena pretende avaliar quando estiver disponível. |
+| `/ranking-de-arrotos` | `RankingDeArrotos` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Explica as faixas de nota previstas para a Arena; não declara recordes ativos. |
+| `/ranking` | redireciona para `/ranking-de-arrotos` | **ALIAS** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Atalho para o ranking público. |
+| `/videos-de-arroto` e `/videos` | redirecionam para `/c/arrotos-youtube` | **ALIAS** | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) | Não renderizam `VideosDeArroto`; levam à comunidade de vídeos. |
 | `/grupos` | `TelaGrupos` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Diretório de grupos externos no WhatsApp, Telegram e TikTok. |
+| `/g/:slug` | redireciona para `/grupos` | **ALIAS** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Grupo externo que não tem página individual ativa. |
 | `/privacidade` | `PoliticaDePrivacidade` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Política formal de tratamento de dados e áudio. |
 | `/termos` | `TermosDeUso` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Regras de conduta, opt-in e responsabilidade na rede. |
 | `/admin` | `TelaAdministracao` | **CANÔNICO RESTRITO** | - | Painel interno seguro para aprovações e moderação (RPC autorizada). |
@@ -112,10 +118,26 @@ DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA →
 
 ## 4. Diretrizes Visuais Inegociáveis
 
+### Família visual aprovada por rota
+
+Decisão do Luiz em 22/10/2026: restaurar o visual anterior do login e das páginas informativas. Esta decisão substitui a orientação anterior que impunha tema claro fixo a toda rota pública. O protótipo `Páginas Públicas.dc.html` não autoriza converter a casca OpenDesign em uma landing independente.
+
+| Rotas | Família e componentes ativos | O que preservar |
+|---|---|---|
+| `/`, `/feed`, `/seguindo`, perfis e comunidades | Casca social OpenDesign e componentes ativos da tabela de rotas | Tema da aplicação, navegação e tokens sociais; não transformar a raiz em landing. |
+| `/login` | `InicioOpenDesign`, view `auth`, com `.app--auth` | Padrão anterior do app, wordmark e título em Anton, cores herdadas dos tokens sociais. Não editar `TelaLogin` legado nem forçar outra paleta no formulário. |
+| `/como-jogar`, `/como-arrotar`, `/tipos-de-arroto`, `/ranking-de-arrotos`, `/grupos`, `/privacidade`, `/termos` | `MolduraPublica` → `CascaInformativaOpenDesign` | Navegação e moldura OpenDesign; tema herdado da aplicação; títulos em Anton e interface em Archivo. Uma rota pública não implica tema claro fixo. |
+| `/landing` | `TelaLanding`, apoio | O visual claro que já existia nesta rota, com suas próprias fontes e tokens. Não aplicar essa exceção à raiz ou ao login. |
+| `/videos-de-arroto`, `/videos` | Alias para `/c/arrotos-youtube` | Família da comunidade de destino; não reconstruir a página antiga de vídeos para satisfazer um protótipo ou teste. |
+
+Pedidos de copy, testes ou toque não abrem mudança de tema, tipografia ou moldura. Qualquer mudança futura de família precisa de pedido explícito e comparação da mesma rota antes/depois no navegador. O contrato E2E protege essa separação; sua expectativa não deve ser alterada para aprovar um redesign não solicitado.
+
+### Regras comuns
+
 1. **Tipografia:**
    - **Anton:** reservada estritamente para wordmarks (`AUÊ!`), scores numéricos da Arena, badges de nota e destaques hero.
    - **Archivo:** para todo o corpo de texto, botões, cabeçalhos de posts, legendas e navegação.
-   - **Exceção das Páginas Públicas:** títulos e wordmark seguem Archivo 800/900 em tema claro fixo (conforme [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html)).
+   - **Família por rota:** login e páginas informativas mantêm o visual OpenDesign aprovado, sem exceção automática de tema claro. `/landing` mantém sua família clara de apoio. A tabela de famílias acima decide onde cada uma se aplica.
 2. **Cores & Acentos:**
    - O verde elétrico (`--accent: #c6ff00`) é de alto contraste e deve ter no máximo **2 aparições por tela/estado** para não poluir a visão.
    - Sem gradientes falsos: fundos são sólidos e contrastantes.

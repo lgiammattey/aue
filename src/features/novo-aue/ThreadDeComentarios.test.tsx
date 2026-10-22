@@ -112,4 +112,45 @@ describe('ThreadDeComentarios (Padrão Twitter / Fora do Card)', () => {
       anexo: null,
     });
   });
+
+  it('não envia texto enquanto o início da gravação ainda está pendente', () => {
+    const aoEnviar = vi.fn(async () => true);
+    const inicioPendente = new Promise<never>(() => {});
+    const gravacao = {
+      iniciar: vi.fn(() => inicioPendente), parar: vi.fn(), cancelar: vi.fn(), estaGravando: vi.fn(() => false),
+    };
+    render(<MemoryRouter><ThreadDeComentarios post={postExemplo} comentarios={comentariosExemplo} carregando={false} enviando={false} criarGravacao={() => gravacao} aoVoltar={vi.fn()} aoEnviarComentario={aoEnviar} /></MemoryRouter>);
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Escrever resposta' }), { target: { value: 'Texto não pode escapar sem o áudio.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
+    fireEvent.submit(screen.getByRole('button', { name: 'Responder' }).closest('form')!);
+
+    expect(aoEnviar).not.toHaveBeenCalled();
+  });
+
+  it('mantém a intenção após falha até descartar a gravação explicitamente', async () => {
+    const aoEnviar = vi.fn(async () => false);
+    const gravacao = { iniciar: vi.fn(async () => ({ ok: false as const, motivo: 'falhou' as const })), parar: vi.fn(), cancelar: vi.fn(), estaGravando: vi.fn(() => false) };
+    render(<MemoryRouter><ThreadDeComentarios post={postExemplo} comentarios={comentariosExemplo} carregando={false} enviando={false} criarGravacao={() => gravacao} aoVoltar={vi.fn()} aoEnviarComentario={aoEnviar} /></MemoryRouter>);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Escrever resposta' }), { target: { value: 'Texto preservado.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
+    expect(await screen.findByText('Gravação não concluída.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Responder' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar gravação' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+    expect(aoEnviar).toHaveBeenCalledWith(expect.objectContaining({ conteudo: 'Texto preservado.', anexo: null }));
+  });
+
+  it('cancela a tentativa pendente ao voltar, mesmo sem desmontar a thread', async () => {
+    const inicioPendente = new Promise<never>(() => {});
+    const gravacao = { iniciar: vi.fn(() => inicioPendente), parar: vi.fn(), cancelar: vi.fn(), estaGravando: vi.fn(() => false) };
+    const aoVoltar = vi.fn();
+    render(<MemoryRouter><ThreadDeComentarios post={postExemplo} comentarios={comentariosExemplo} carregando={false} enviando={false} criarGravacao={() => gravacao} aoVoltar={aoVoltar} aoEnviarComentario={vi.fn(async () => false)} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
+    expect(await screen.findByText('Preparando microfone…')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar para o feed' }));
+    expect(gravacao.cancelar).toHaveBeenCalledOnce();
+    expect(aoVoltar).toHaveBeenCalledOnce();
+    expect(screen.queryByText('Preparando microfone…')).toBeNull();
+  });
 });

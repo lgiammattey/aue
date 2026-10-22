@@ -9,6 +9,7 @@ import { ThreadDeComentarios } from '../src/features/novo-aue/ThreadDeComentario
 import { PautaAbertaDaComunidade } from '../src/features/novo-aue/PautaDaComunidade';
 import { TelaAdministracao } from '../src/features/administracao/TelaAdministracao';
 import { criarControleDeDialogoWeb } from '../src/plataforma/web/controleDeDialogo';
+import { criarGravacaoLivreDoForum } from '../src/plataforma/web/gravacaoLivreDoForum';
 import type { ItemDoFeed } from '../src/features/novo-aue/tipos';
 import type { PortaDeAdministracao, ResumoAdministrativo } from '../src/portas/administracao';
 import '../src/index.css';
@@ -21,6 +22,33 @@ const postComTituloAutoral: ItemDoFeed = { ...postDeMidia, id: 'post-e2e-autoral
 function Harness() {
   const [modal, setModal] = useState<'comentarios' | 'compositor' | 'gravar' | null>(null);
   return <BrowserRouter><main style={{ minHeight: '1900px', padding: 24 }}><h1>Harness local E2E</h1><p>Sem Supabase, feed ou porta remota.</p><button onClick={() => setModal('comentarios')}>Abrir comentários</button><button onClick={() => setModal('compositor')}>Abrir compositor</button><button onClick={() => setModal('gravar')}>Abrir gravador</button><CardDoPost post={postDeMidia} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} aoAbrirComentarios={() => setModal('comentarios')} /><CardDoPost post={postComTituloAutoral} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} /><ModalComentarios aberto={modal === 'comentarios'} post={postDeMidia} comentarios={[{ id: 'c1', autorNome: 'Gui', autorHandle: 'gui', conteudo: 'Comentário local.', criadoEm: '2026-10-21T00:00:00Z', nivel: 0 }]} carregando={false} enviando={false} controleDeDialogo={controle} aoFechar={() => setModal(null)} aoEnviarComentario={async () => false} /><ModalCompositor aberto={modal === 'compositor'} controleDeDialogo={controle} comunidades={[{ id: 'roda-1', slug: 'teste', nome: 'Roda de teste' }]} aoFechar={() => setModal(null)} aoPublicar={async () => false} /><ModalGravarArroto aberto={modal === 'gravar'} controleDeDialogo={controle} estado="ocioso" aoFechar={() => setModal(null)} aoIniciarGravacao={() => {}} aoPararGravacao={() => {}} aoRegravar={() => {}} aoEnviar={() => {}} /></main></BrowserRouter>;
+}
+/**
+ * Fixture E2E local: usa a porta real de gravação, mas guarda o resultado só
+ * na tela. Ela prova o ciclo do compositor sem vender upload ou post remoto.
+ */
+function HarnessMicrofoneCompositor() {
+  const [publicado, setPublicado] = useState<{ tipo: string; tamanho: number } | null>(null);
+  return <BrowserRouter><main style={{ minHeight: '900px', padding: 24 }}>
+    <h1>Harness local do microfone</h1>
+    <p>Gravação real do navegador de teste; persistência simulada e identificada.</p>
+    <ModalCompositor
+      aberto
+      controleDeDialogo={controle}
+      comunidades={[]}
+      criarGravacao={criarGravacaoLivreDoForum}
+      aoFechar={() => {}}
+      aoPublicar={async (dados) => {
+        setPublicado(dados.anexo?.tipo === 'audio'
+          ? { tipo: dados.anexo.tipo, tamanho: dados.anexo.arquivo.size }
+          : null);
+        return dados.anexo?.tipo === 'audio' && dados.anexo.arquivo.size > 0;
+      }}
+    />
+    <output aria-label="Resultado da persistência simulada">
+      {publicado ? `fixture recebeu ${publicado.tipo} com ${publicado.tamanho} bytes` : 'fixture ainda não recebeu publicação'}
+    </output>
+  </main></BrowserRouter>;
 }
 function HarnessQuebras() {
   const texto = 'Primeira linha\nSegunda linha\n\nOutro parágrafo';
@@ -87,5 +115,5 @@ function HarnessAdministracao() {
 
 const parametrosDoHarness = new URLSearchParams(window.location.search);
 createRoot(document.getElementById('root')!).render(
-  parametrosDoHarness.has('admin') ? <HarnessAdministracao /> : parametrosDoHarness.has('pauta') ? <HarnessPauta /> : parametrosDoHarness.has('quebras') ? <HarnessQuebras /> : <Harness />,
+  parametrosDoHarness.has('microfone') ? <HarnessMicrofoneCompositor /> : parametrosDoHarness.has('admin') ? <HarnessAdministracao /> : parametrosDoHarness.has('pauta') ? <HarnessPauta /> : parametrosDoHarness.has('quebras') ? <HarnessQuebras /> : <Harness />,
 );

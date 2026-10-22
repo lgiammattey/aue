@@ -13,6 +13,7 @@ import { LIMITE_TEXTO_TOPICO } from '../../nucleo/comunidade/limites';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import { criarEnderecoLocal, soltarEnderecoLocal } from '../../plataforma/web/enderecoDeAudio';
 import { PreviaDeVideoNoCompositor } from './PreviaDeVideoNoCompositor';
+import { useCicloDeGravacaoLivre } from './useCicloDeGravacaoLivre';
 
 export type AnexoRascunho =
   | { readonly tipo: 'imagem'; readonly arquivo: File }
@@ -64,21 +65,18 @@ export function ModalCompositor({
   const [enderecoDaImagem, setEnderecoDaImagem] = useState<string | null>(null);
   const [tocandoAudio, setTocandoAudio] = useState(false);
 
-  const gravacao = useRef<GravacaoLivreDoForum | null>(null);
   const timerGravacao = useRef<number | null>(null);
   const inputTextoRef = useRef<HTMLTextAreaElement>(null);
   const playerDeAudio = useRef<HTMLAudioElement>(null);
   const limparVisibilidadeDoCampo = useRef<(() => void) | null>(null);
+  const cicloDaGravacao = useCicloDeGravacaoLivre(aberto);
 
   useEffect(() => {
     if (comunidadePadraoSlug) setComunidadeSlug(comunidadePadraoSlug);
   }, [comunidadePadraoSlug]);
 
-  useEffect(() => {
-    return () => {
-      gravacao.current?.cancelar();
-      if (timerGravacao.current) window.clearInterval(timerGravacao.current);
-    };
+  useEffect(() => () => {
+    if (timerGravacao.current) window.clearInterval(timerGravacao.current);
   }, []);
 
   useEffect(() => {
@@ -126,6 +124,7 @@ export function ModalCompositor({
     : null;
 
   const escolherImagem = (evento: ChangeEvent<HTMLInputElement>) => {
+    if (cicloDaGravacao.bloqueiaTrocaDeMidia()) return;
     const arquivo = evento.target.files?.[0];
     if (!arquivo) return;
     if (videoNoTexto) {
@@ -149,11 +148,7 @@ export function ModalCompositor({
 
   const alternarGravacao = async () => {
     if (gravando) {
-      if (timerGravacao.current) {
-        window.clearInterval(timerGravacao.current);
-        timerGravacao.current = null;
-      }
-      gravacao.current?.parar();
+      cicloDaGravacao.parar();
       return;
     }
 
@@ -163,10 +158,13 @@ export function ModalCompositor({
     }
 
     const nova = criarGravacao();
-    gravacao.current = nova;
+    const geracao = cicloDaGravacao.iniciar(nova);
+    if (geracao === null) return;
     const inicio = await nova.iniciar();
+    if (!cicloDaGravacao.aindaAtual(geracao)) return;
 
     if (!inicio.ok) {
+      cicloDaGravacao.falhou(geracao);
       setErro(
         inicio.motivo === 'negado'
           ? 'Libere o microfone para gravar áudio.'
@@ -177,6 +175,7 @@ export function ModalCompositor({
       return;
     }
 
+    if (!cicloDaGravacao.marcouInicio(geracao)) return;
     setGravando(true);
     setSegundosGravacao(0);
     timerGravacao.current = window.setInterval(() => {
@@ -184,18 +183,20 @@ export function ModalCompositor({
     }, 1000);
 
     const fim = await inicio.conclusao;
+    if (!cicloDaGravacao.aindaAtual(geracao)) return;
     setGravando(false);
-    gravacao.current = null;
     if (timerGravacao.current) {
       window.clearInterval(timerGravacao.current);
       timerGravacao.current = null;
     }
 
     if (!fim.ok) {
+      cicloDaGravacao.falhou(geracao);
       if (fim.motivo !== 'cancelado') setErro('A gravação não deu certo. Tenta de novo.');
       return;
     }
 
+    if (!cicloDaGravacao.audioPronto(geracao)) return;
     setEnderecoDoAudio(criarEnderecoLocal(fim.audio.dados));
     setAnexo({
       tipo: 'audio',
@@ -206,6 +207,7 @@ export function ModalCompositor({
   };
 
   const descartarAudio = () => {
+    cicloDaGravacao.descartar();
     setEnderecoDoAudio(null);
     setTocandoAudio(false);
     setAnexo(null);
@@ -231,6 +233,10 @@ export function ModalCompositor({
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault();
     if (enviando) return;
+    if (cicloDaGravacao.bloqueiaEnvio()) {
+      setErro('Termine, tente de novo ou descarte a gravação antes de publicar.');
+      return;
+    }
 
     if (destino === 'comunidade' && (!comunidadeSlug || !titulo.trim() || !corpo.trim())) {
       setErro(!titulo.trim() ? 'Dê um assunto ao tópico.' : 'Escreva a mensagem do tópico.');
@@ -261,6 +267,12 @@ export function ModalCompositor({
   };
 
   const inicialDoAutor = (autor?.nome || 'Você').charAt(0).toUpperCase();
+  const fechar = () => {
+    cicloDaGravacao.descartar();
+    if (timerGravacao.current) window.clearInterval(timerGravacao.current);
+    setGravando(false);
+    aoFechar();
+  };
 
   return (
     <div
@@ -268,7 +280,7 @@ export function ModalCompositor({
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialogComposerTitle"
-      onClick={(e) => e.target === e.currentTarget && !gravando && aoFechar()}
+      onClick={(e) => e.target === e.currentTarget && fechar()}
     >
       <div className="modal-comentarios-sheet composer-sheet" style={{ maxWidth: 600 }}>
         <header className="comments-sheet-header">
@@ -280,9 +292,9 @@ export function ModalCompositor({
           <button
             type="button"
             className="comments-sheet-close"
-            onClick={aoFechar}
+            onClick={fechar}
             aria-label="Fechar modal"
-            disabled={enviando || gravando}
+            disabled={enviando}
           >
             ✕
           </button>
@@ -370,6 +382,10 @@ export function ModalCompositor({
             </div>
           )}
 
+          {cicloDaGravacao.estado === 'iniciando' && (
+            <div className="composer-audio-strip composer-audio-strip--preparando" role="status"><span className="composer-audio-state">Preparando microfone…</span></div>
+          )}
+
           {anexo?.tipo === 'audio' && enderecoDoAudio && (
             <div className="composer-audio-strip composer-audio-strip--preview">
               <audio
@@ -415,6 +431,13 @@ export function ModalCompositor({
             </div>
           )}
 
+          {cicloDaGravacao.estado === 'falhou' && (
+            <div className="composer-audio-strip" role="status">
+              <span className="composer-audio-state">Gravação não concluída.</span>
+              <button type="button" className="composer-audio-discard" onClick={descartarAudio}>Descartar gravação</button>
+            </div>
+          )}
+
           {anexo?.tipo === 'videoExterno' && (
             <div className="composer-attachment-pill">
               <span>🎥 Vídeo externo anexado</span>
@@ -443,7 +466,7 @@ export function ModalCompositor({
                 type="button"
                 className={`composer-tool-btn ${gravando ? 'is-recording' : ''}`}
                 onClick={() => void alternarGravacao()}
-                disabled={enviando || (!gravando && Boolean(anexo))}
+                disabled={enviando || cicloDaGravacao.estado === 'iniciando' || cicloDaGravacao.estado === 'finalizando' || (!gravando && Boolean(anexo))}
                 title="Gravar áudio"
                 aria-label="Gravar áudio"
               >
@@ -491,7 +514,7 @@ export function ModalCompositor({
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   onChange={escolherImagem}
-                  disabled={enviando || gravando || Boolean(anexo) || Boolean(videoNoTexto)}
+                  disabled={enviando || gravando || cicloDaGravacao.bloqueiaTrocaDeMidia() || Boolean(anexo) || Boolean(videoNoTexto)}
                   style={{ display: 'none' }}
                 />
               </label>
@@ -501,7 +524,7 @@ export function ModalCompositor({
                 type="button"
                 className="composer-tool-btn"
                 onClick={() => inputTextoRef.current?.focus()}
-                disabled={enviando || gravando || imagemSelecionada}
+                disabled={enviando || gravando || cicloDaGravacao.bloqueiaTrocaDeMidia() || imagemSelecionada}
                 title="Cole um link do YouTube ou TikTok no texto"
                 aria-label="Colar link de vídeo no texto"
               >
@@ -536,15 +559,15 @@ export function ModalCompositor({
               <button
                 type="button"
                 className="action-pill-btn"
-                onClick={aoFechar}
-                disabled={enviando || gravando}
+                onClick={fechar}
+                disabled={enviando}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 className="comments-submit-btn"
-                disabled={enviando || gravando || (!corpo.trim() && !anexo)}
+                disabled={enviando || gravando || cicloDaGravacao.bloqueiaEnvio() || (!corpo.trim() && !anexo)}
               >
                 {enviando ? 'Publicando…' : 'Publicar'}
               </button>

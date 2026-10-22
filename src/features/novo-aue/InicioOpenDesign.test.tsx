@@ -600,6 +600,47 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(forumComUploadRecusado.criarTopico).not.toHaveBeenCalled();
   });
 
+  it('preserva a gravação após falha no upload e só publica o post pessoal com o áudio confirmado', async () => {
+    const audio = new Blob(['gravacao-do-microfone'], { type: 'audio/webm' });
+    const anexoConfirmado = {
+      tipo: 'audio' as const, caminho: 'eu/forum/gravacao.webm', mime: 'audio/webm',
+      tamanhoBytes: audio.size, duracaoMs: 1200,
+    };
+    const enviarAnexo = vi.fn()
+      .mockResolvedValueOnce({ ok: false, motivo: 'falhou' })
+      .mockResolvedValueOnce({ ok: true, valor: anexoConfirmado });
+    const criarPublicacao = vi.fn(async () => ({ ok: true as const, valor: { id: 'novo-audio', criadoEm: '2026-10-22T12:00:00Z' } }));
+    const forumComGravacao: PortaDeForum = {
+      ...mockForum,
+      criarGravacaoLivreDoForum: () => ({
+        iniciar: async () => ({ ok: true as const, conclusao: Promise.resolve({
+          ok: true as const, encerramento: 'manual' as const,
+          audio: { dados: audio, formato: 'audio/webm', mimeParaEnvio: 'audio/webm', duracaoMs: 1200 },
+        }) }),
+        parar: vi.fn(), cancelar: vi.fn(), estaGravando: () => false,
+      }),
+      enviarAnexoDoForum: enviarAnexo,
+      criarPublicacaoPessoal: criarPublicacao,
+    };
+    render(<MemoryRouter><InicioOpenDesign portaForum={forumComGravacao} portaComunidade={mockComunidade} autenticado abrirCompositor /></MemoryRouter>);
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Texto da publicação' }), { target: { value: 'Post com a gravação' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Gravar áudio$/ }));
+    await screen.findByRole('button', { name: 'Ouvir áudio gravado' });
+    fireEvent.click(screen.getByRole('button', { name: /^Publicar$/ }));
+
+    expect((await screen.findByRole('status')).textContent).toContain('O anexo foi recusado e não foi publicado.');
+    expect(criarPublicacao).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Ouvir áudio gravado' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^Publicar$/ }));
+
+    await waitFor(() => expect(criarPublicacao).toHaveBeenCalledOnce());
+    expect(enviarAnexo).toHaveBeenCalledTimes(2);
+    for (const [pedido] of enviarAnexo.mock.calls) expect(pedido.arquivo).toBe(audio);
+    expect(criarPublicacao).toHaveBeenCalledWith({ corpo: 'Post com a gravação', anexo: anexoConfirmado });
+    expect(await screen.findByText('Publicado no seu perfil e no feed.')).toBeTruthy();
+  });
+
   it('carrega a Resenha por data de publicação, sem usar o feed legado', async () => {
     render(
       <MemoryRouter>

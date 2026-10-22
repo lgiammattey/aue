@@ -40,4 +40,32 @@ describe('ModalCompositor', () => {
     unmount();
     expect(liberarRolagem).toHaveBeenCalledOnce();
   });
+
+  it('não publica texto enquanto o início da gravação ainda está pendente', () => {
+    const aoPublicar = vi.fn(async () => true);
+    const inicioPendente = new Promise<never>(() => {});
+    const gravacao = {
+      iniciar: vi.fn(() => inicioPendente), parar: vi.fn(), cancelar: vi.fn(), estaGravando: vi.fn(() => false),
+    };
+    render(<ModalCompositor aberto comunidades={[]} criarGravacao={() => gravacao} aoFechar={vi.fn()} aoPublicar={aoPublicar} />);
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Texto da publicação' }), { target: { value: 'Texto não pode escapar sem o áudio.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
+    fireEvent.submit(screen.getByRole('button', { name: 'Publicar' }).closest('form')!);
+
+    expect(aoPublicar).not.toHaveBeenCalled();
+  });
+
+  it('mantém a intenção após falha até descartar a gravação explicitamente', async () => {
+    const aoPublicar = vi.fn(async () => false);
+    const gravacao = { iniciar: vi.fn(async () => ({ ok: false as const, motivo: 'falhou' as const })), parar: vi.fn(), cancelar: vi.fn(), estaGravando: vi.fn(() => false) };
+    render(<ModalCompositor aberto comunidades={[]} criarGravacao={() => gravacao} aoFechar={vi.fn()} aoPublicar={aoPublicar} />);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Texto da publicação' }), { target: { value: 'Texto preservado.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
+    expect(await screen.findByText('Gravação não concluída.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Publicar' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Descartar gravação' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    expect(aoPublicar).toHaveBeenCalledWith(expect.objectContaining({ corpo: 'Texto preservado.', anexo: null }));
+  });
 });

@@ -6,6 +6,7 @@ import type { ItemComentario, ItemDoFeed } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import { VideoDaResposta } from './VideoDaResposta';
 import { PreviaDeVideoNoCompositor } from './PreviaDeVideoNoCompositor';
+import { useCicloDeGravacaoLivre } from './useCicloDeGravacaoLivre';
 
 interface Props {
   readonly aberto: boolean;
@@ -60,13 +61,12 @@ export function ModalComentarios({
   const [gravando, setGravando] = useState(false);
   const [segundosGravacao, setSegundosGravacao] = useState(0);
 
-  const gravacao = useRef<GravacaoLivreDoForum | null>(null);
   const timerGravacao = useRef<number | null>(null);
   const inputTextoRef = useRef<HTMLTextAreaElement>(null);
+  const cicloDaGravacao = useCicloDeGravacaoLivre(aberto);
 
   useEffect(() => {
     return () => {
-      gravacao.current?.cancelar();
       if (timerGravacao.current) window.clearInterval(timerGravacao.current);
     };
   }, []);
@@ -78,11 +78,21 @@ export function ModalComentarios({
     inputTextoRef.current?.focus();
   }, [aberto, comentarioInicialParaResponder]);
 
+  useEffect(() => {
+    cicloDaGravacao.descartar();
+    if (timerGravacao.current) window.clearInterval(timerGravacao.current);
+    setGravando(false);
+    setAnexo(null);
+  // A troca da conversa precisa invalidar qualquer conclusão tardia anterior.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post?.id]);
+
   if (!aberto || !post) return null;
 
   const autorPostInicial = (post.autorNome || '?').charAt(0).toUpperCase();
 
   const escolherImagem = (evento: ChangeEvent<HTMLInputElement>) => {
+    if (cicloDaGravacao.bloqueiaTrocaDeMidia()) return;
     const arquivo = evento.target.files?.[0];
     if (!arquivo) return;
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(arquivo.type)) {
@@ -95,11 +105,7 @@ export function ModalComentarios({
 
   const alternarGravacao = async () => {
     if (gravando) {
-      if (timerGravacao.current) {
-        window.clearInterval(timerGravacao.current);
-        timerGravacao.current = null;
-      }
-      gravacao.current?.parar();
+      cicloDaGravacao.parar();
       return;
     }
 
@@ -109,10 +115,13 @@ export function ModalComentarios({
     }
 
     const nova = criarGravacao();
-    gravacao.current = nova;
+    const geracao = cicloDaGravacao.iniciar(nova);
+    if (geracao === null) return;
     const inicio = await nova.iniciar();
+    if (!cicloDaGravacao.aindaAtual(geracao)) return;
 
     if (!inicio.ok) {
+      cicloDaGravacao.falhou(geracao);
       setErro(
         inicio.motivo === 'negado'
           ? 'Libere o microfone para gravar.'
@@ -123,6 +132,7 @@ export function ModalComentarios({
       return;
     }
 
+    if (!cicloDaGravacao.marcouInicio(geracao)) return;
     setGravando(true);
     setSegundosGravacao(0);
     timerGravacao.current = window.setInterval(() => {
@@ -130,6 +140,7 @@ export function ModalComentarios({
     }, 1000);
 
     const fim = await inicio.conclusao;
+    if (!cicloDaGravacao.aindaAtual(geracao)) return;
     setGravando(false);
     if (timerGravacao.current) {
       window.clearInterval(timerGravacao.current);
@@ -137,10 +148,12 @@ export function ModalComentarios({
     }
 
     if (!fim.ok) {
+      cicloDaGravacao.falhou(geracao);
       if (fim.motivo !== 'cancelado') setErro('A gravação falhou. Tente de novo.');
       return;
     }
 
+    if (!cicloDaGravacao.audioPronto(geracao)) return;
     setAnexo({
       tipo: 'audio',
       arquivo: fim.audio.dados,
@@ -162,6 +175,10 @@ export function ModalComentarios({
 
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault();
+    if (cicloDaGravacao.bloqueiaEnvio()) {
+      setErro('Termine, tente de novo ou descarte a gravação antes de responder.');
+      return;
+    }
     if (enviando || (!texto.trim() && !anexo)) return;
 
     const ok = await aoEnviarComentario({
@@ -171,6 +188,7 @@ export function ModalComentarios({
     });
 
     if (ok) {
+      if (anexo?.tipo === 'audio') cicloDaGravacao.descartar();
       setTexto('');
       setPaiId(null);
       setAutorResposta(null);
@@ -179,6 +197,16 @@ export function ModalComentarios({
   };
 
   const inicialDoAutor = (autor?.nome || 'Você').charAt(0).toUpperCase();
+  const descartarGravacao = () => {
+    cicloDaGravacao.descartar();
+    setAnexo(null);
+  };
+  const fechar = () => {
+    descartarGravacao();
+    if (timerGravacao.current) window.clearInterval(timerGravacao.current);
+    setGravando(false);
+    aoFechar();
+  };
 
   return (
     <div
@@ -186,7 +214,7 @@ export function ModalComentarios({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modalComentariosTitulo"
-      onClick={(e) => e.target === e.currentTarget && aoFechar()}
+      onClick={(e) => e.target === e.currentTarget && fechar()}
     >
       <div className="modal-comentarios-sheet" style={{ maxWidth: 620 }}>
         {/* Puxador para mobile (bottom sheet) */}
@@ -203,7 +231,7 @@ export function ModalComentarios({
           <button
             type="button"
             className="comments-sheet-close"
-            onClick={aoFechar}
+            onClick={fechar}
             aria-label="Fechar comentários"
           >
             ✕
@@ -221,7 +249,7 @@ export function ModalComentarios({
                 {post.autorHandle ? (
                   <Link
                     to={`/u/${post.autorHandle}`}
-                    onClick={aoFechar}
+                    onClick={fechar}
                     aria-label={`Abrir perfil de ${post.autorNome}`}
                   >
                     {post.autorNome}
@@ -270,7 +298,7 @@ export function ModalComentarios({
                         {c.autorHandle ? (
                           <Link
                             to={`/u/${c.autorHandle}`}
-                            onClick={aoFechar}
+                            onClick={fechar}
                             aria-label={`Abrir perfil de ${c.autorNome}`}
                           >
                             {c.autorNome}
@@ -358,6 +386,10 @@ export function ModalComentarios({
 
           {!anexo && <PreviaDeVideoNoCompositor texto={texto} />}
 
+          {cicloDaGravacao.estado === 'iniciando' && (
+            <div className="composer-attachment-pill" role="status"><span>Preparando microfone…</span></div>
+          )}
+
           {/* Anexo selecionado */}
           {anexo && (
             <div className="composer-attachment-pill">
@@ -371,12 +403,19 @@ export function ModalComentarios({
               <button
                 type="button"
                 className="attachment-remove-btn"
-                onClick={() => setAnexo(null)}
+                onClick={() => anexo.tipo === 'audio' ? descartarGravacao() : setAnexo(null)}
                 disabled={enviando || gravando}
                 aria-label="Remover anexo"
               >
                 ✕
               </button>
+            </div>
+          )}
+
+          {cicloDaGravacao.estado === 'falhou' && (
+            <div className="composer-attachment-pill" role="status">
+              <span>Gravação não concluída.</span>
+              <button type="button" className="attachment-remove-btn" onClick={descartarGravacao}>Descartar gravação</button>
             </div>
           )}
 
@@ -393,7 +432,7 @@ export function ModalComentarios({
                 type="button"
                 className={`composer-tool-btn ${gravando ? 'is-recording' : ''}`}
                 onClick={() => void alternarGravacao()}
-                disabled={enviando || (!gravando && Boolean(anexo))}
+                disabled={enviando || cicloDaGravacao.estado === 'iniciando' || cicloDaGravacao.estado === 'finalizando' || (!gravando && Boolean(anexo))}
                 title={gravando ? 'Parar gravação' : 'Gravar áudio (1 clique)'}
                 aria-label={gravando ? 'Parar gravação' : 'Gravar áudio'}
               >
@@ -445,7 +484,7 @@ export function ModalComentarios({
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   onChange={escolherImagem}
-                  disabled={enviando || gravando || Boolean(anexo)}
+                disabled={enviando || gravando || cicloDaGravacao.bloqueiaTrocaDeMidia() || Boolean(anexo)}
                   style={{ display: 'none' }}
                 />
               </label>
@@ -455,7 +494,7 @@ export function ModalComentarios({
                 type="button"
                 className="composer-tool-btn"
                 onClick={() => inputTextoRef.current?.focus()}
-                disabled={enviando || gravando}
+                disabled={enviando || gravando || cicloDaGravacao.bloqueiaTrocaDeMidia()}
                 title="Cole um link do YouTube ou TikTok no texto"
                 aria-label="Colar link de vídeo no texto"
               >
@@ -483,7 +522,7 @@ export function ModalComentarios({
             <button
               type="submit"
               className="comments-submit-btn"
-              disabled={enviando || gravando || (!texto.trim() && !anexo)}
+              disabled={enviando || gravando || cicloDaGravacao.bloqueiaEnvio() || (!texto.trim() && !anexo)}
             >
               {enviando ? 'Enviando…' : 'Responder'}
             </button>

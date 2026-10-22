@@ -25,6 +25,8 @@ export function criarGravacaoLivreDoForum(): GravacaoLivreDoForum {
   let temporizador: ReturnType<typeof setTimeout> | null = null;
   let intencao: 'manual' | 'limite' | 'cancelado' | null = null;
   let concluir: ((resultado: ResultadoDaGravacaoLivreDoForum) => void) | null = null;
+  let inicioPendente = false;
+  let cancelamentoDuranteInicio = false;
 
   function liberarStream() {
     if (temporizador !== null) {
@@ -39,6 +41,8 @@ export function criarGravacaoLivreDoForum(): GravacaoLivreDoForum {
     pedacos = [];
     iniciouEm = 0;
     intencao = null;
+    inicioPendente = false;
+    cancelamentoDuranteInicio = false;
   }
 
   function resolver(resultado: ResultadoDaGravacaoLivreDoForum) {
@@ -65,7 +69,7 @@ export function criarGravacaoLivreDoForum(): GravacaoLivreDoForum {
 
   return {
     async iniciar(): Promise<InicioDaGravacaoLivreDoForum> {
-      if (gravador?.state === 'recording') {
+      if (inicioPendente || gravador?.state === 'recording') {
         return { ok: false, motivo: 'falhou', detalhe: 'A gravação livre já está em andamento.' };
       }
       // Navegadores não expõem microfone para um IP servido em HTTP. `localhost`
@@ -77,11 +81,28 @@ export function criarGravacaoLivreDoForum(): GravacaoLivreDoForum {
       if (!midia?.getUserMedia || typeof MediaRecorder === 'undefined') {
         return { ok: false, motivo: 'indisponivel' };
       }
+      inicioPendente = true;
+      cancelamentoDuranteInicio = false;
+      let novoStream: MediaStream;
       try {
-        stream = await midia.getUserMedia({ audio: true });
+        novoStream = await midia.getUserMedia({ audio: true });
       } catch (erro) {
+        const cancelado = cancelamentoDuranteInicio;
+        inicioPendente = false;
+        cancelamentoDuranteInicio = false;
+        if (cancelado) return { ok: false, motivo: 'cancelado' };
         return traduzirPermissao(erro);
       }
+
+      if (cancelamentoDuranteInicio) {
+        for (const trilha of novoStream.getTracks()) trilha.stop();
+        inicioPendente = false;
+        cancelamentoDuranteInicio = false;
+        return { ok: false, motivo: 'cancelado' };
+      }
+
+      stream = novoStream;
+      inicioPendente = false;
 
       try {
         const novo = new MediaRecorder(stream);
@@ -108,6 +129,10 @@ export function criarGravacaoLivreDoForum(): GravacaoLivreDoForum {
           const formato = novo.mimeType || 'audio/webm';
           const mimeParaEnvio = normalizarMimeDaGravacaoLivre(formato);
           const dados = new Blob(pedacos, { type: mimeParaEnvio });
+          if (dados.size < 1) {
+            resolver({ ok: false, motivo: 'falhou', detalhe: 'A gravação terminou sem dados de áudio.' });
+            return;
+          }
           const duracaoMs = Math.min(DURACAO_MAXIMA_DA_GRAVACAO_LIVRE_MS, Math.max(0, Date.now() - iniciouEm));
           resolver({ ok: true, encerramento, audio: { dados, formato, mimeParaEnvio, duracaoMs } });
         };
@@ -125,6 +150,10 @@ export function criarGravacaoLivreDoForum(): GravacaoLivreDoForum {
     },
 
     cancelar() {
+      if (inicioPendente) {
+        cancelamentoDuranteInicio = true;
+        return;
+      }
       encerrar('cancelado');
     },
 

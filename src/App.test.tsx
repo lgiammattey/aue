@@ -55,12 +55,13 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.getByRole('button', { name: '+ Soltar um arroto' })).toBeTruthy();
   });
 
-  it('exibe o Feed diretamente quando acessa a rota "/feed"', async () => {
+  it('mantém "/feed" na casca Open Design, sem ressuscitar o feed legado', async () => {
     window.history.pushState({}, 'Feed', '/feed');
     render(<App />);
 
-    // Deve exibir o Feed do Bonde do Arroto diretamente
-    expect(await screen.findByPlaceholderText('O que tá rolando no bonde?')).toBeTruthy();
+    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
+    expect(screen.queryByPlaceholderText('O que tá rolando no bonde?')).toBeNull();
+    expect(window.location.pathname).toBe('/feed');
   });
 
   it('leva a Arena para a apresentação de em breve, sem montar a casca legada do feed', async () => {

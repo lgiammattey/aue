@@ -51,7 +51,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true,
+        // O service worker de produção é parte do produto. No Vite ele só
+        // serve casca velha e esconde mudanças de navegação no celular.
+        enabled: false,
       },
       workbox: {
         /*

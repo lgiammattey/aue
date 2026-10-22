@@ -60,6 +60,7 @@ export const BarraLateral = memo(function BarraLateral({
 
   const isFeedAtivo = viewAtual === 'feed' || viewAtual === 'seguindo';
   const isComunidadesAtivo = viewAtual === 'comunidades' || viewAtual === 'comunidade';
+  const isTropaAtivo = viewAtual === 'seguindo';
   const isPerfilAtivo = viewAtual === 'perfil';
 
   return (
@@ -146,7 +147,7 @@ export const BarraLateral = memo(function BarraLateral({
 
       </nav>
 
-      {/* Navegação Inferior Mobile (Zona do Polegar com 5 alvos: Feed, Comunidades, ARROTAR, X1, Perfil) */}
+      {/* Navegação Inferior Mobile (Zona do Polegar: Feed, Comunidades, ARROTAR, Tropa e Perfil) */}
       <nav className="mobile-bottom-nav" aria-label="Navegação móvel inferior">
         {/* 1. Feed */}
         <button
@@ -187,9 +188,9 @@ export const BarraLateral = memo(function BarraLateral({
         <button
           type="button"
           className="mobile-nav-item mobile-nav-item--arrotar"
-          onClick={() => navigate('/arena')}
-          aria-label="Entrar na Arena para arrotar"
-          title="Arrotar agora na Arena"
+          onClick={aoAbrirGravadorRapido}
+          aria-label="Gravar um arroto para publicar"
+          title="Gravar arroto agora"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2a4 4 0 00-4 4v6a4 4 0 008 0V6a4 4 0 00-4-4z" />
@@ -198,17 +199,27 @@ export const BarraLateral = memo(function BarraLateral({
           <span className="arrotar-label">ARROTAR</span>
         </button>
 
-        {/* 4. X1 (Desafios) */}
+        {/* 4. Tropa */}
         <button
           type="button"
-          className="mobile-nav-item"
-          onClick={() => navigate('/desafios')}
-          aria-label="Central de Desafios X1"
+          className={`mobile-nav-item ${isTropaAtivo ? 'active' : ''}`}
+          onClick={() => {
+            if (!estaAutenticado) {
+              aoEntrar?.();
+              return;
+            }
+            aoMudarView('seguindo');
+            navigate('/seguindo');
+          }}
+          aria-label="Minha Tropa"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            <circle cx="8.5" cy="8" r="3" />
+            <circle cx="16.5" cy="9" r="2.5" />
+            <path d="M3.5 20v-1a5 5 0 0 1 10 0v1" />
+            <path d="M14 16.5a4.5 4.5 0 0 1 6.5 4" />
           </svg>
-          <span>X1</span>
+          <span>Tropa</span>
         </button>
 
         {/* 5. Perfil */}

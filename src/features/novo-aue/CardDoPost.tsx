@@ -14,6 +14,7 @@ import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { PlayerDoArroto } from './PlayerDoArroto';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
+import './CardDoPost.css';
 
 interface Props {
   readonly post: ItemDoFeed;

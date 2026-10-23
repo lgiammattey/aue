@@ -12,10 +12,12 @@ const RankingDeArrotos = lazy(() => import('./features/publico/RankingDeArrotos'
 const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade').then((m) => ({ default: m.TelaComunidade })));
 const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then((m) => ({ default: m.TelaLanding })));
 const VideosDeArroto = lazy(() => import('./features/publico/VideosDeArroto').then((m) => ({ default: m.VideosDeArroto })));
-const TelaLogin = lazy(() => import('./features/comunidade/TelaLogin').then((m) => ({ default: m.TelaLogin })));
 const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
-const PerfilConectado = lazy(() => import('./features/novo-aue/PerfilConectado').then((m) => ({ default: m.PerfilConectado })));
-const TelaPerfilLegado = lazy(() => import('./features/perfil/TelaPerfil').then((m) => ({ default: m.TelaPerfil })));
+const InicioOpenDesign = lazy(() => import('./features/novo-aue/InicioOpenDesign').then((m) => ({ default: m.InicioOpenDesign })));
+const TelaComunidadeOpenDesign = lazy(() => import('./features/novo-aue/TelaComunidadeOpenDesign').then((m) => ({ default: m.TelaComunidadeOpenDesign })));
+const TelaDiretorioOpenDesign = lazy(() => import('./features/novo-aue/TelaDiretorioOpenDesign').then((m) => ({ default: m.TelaDiretorioOpenDesign })));
+const VersaoMobileOpenDesign = lazy(() => import('./features/novo-aue/VersaoMobileOpenDesign').then((m) => ({ default: m.VersaoMobileOpenDesign })));
+const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOpenDesign').then((m) => ({ default: m.TelaPerfilOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
@@ -43,6 +45,7 @@ function EntradaPorLink() {
 function EntradaInicial() {
   const navigate = useNavigate();
   const [destino, setDestino] = useState<'inicio' | 'perfil' | null>(null);
+  const [autenticado, setAutenticado] = useState(false);
 
   useEffect(() => {
     let ativo = true;
@@ -51,11 +54,12 @@ function EntradaInicial() {
       .estado()
       .then((e) => {
         if (ativo) {
+          setAutenticado(e.temSessao && !e.anonima && !e.perfilSocialPendente);
           setDestino(e.perfilSocialPendente ? 'perfil' : 'inicio');
         }
       })
       .catch(() => {
-        if (ativo) setDestino('inicio');
+        if (ativo) { setAutenticado(false); setDestino('inicio'); }
       });
     return () => {
       ativo = false;
@@ -70,12 +74,7 @@ function EntradaInicial() {
     return <Navigate to="/perfil?boas-vindas=1" replace />;
   }
 
-  return (
-    <TelaLanding
-      onEntrarSemConta={() => navigate('/comunidades')}
-      onArrotar={() => navigate('/arena')}
-    />
-  );
+  return <InicioOpenDesign autenticado={autenticado} aoEntrar={() => navigate(enderecoDoLoginComVolta('/', 'entrar'))} />;
 }
 
 function EntradaArena() {
@@ -147,32 +146,11 @@ function EntradaDesafios() {
 }
 
 function EntradaPerfil() {
-  return <EntradaDoPerfil />;
+  return <TelaPerfilOpenDesign />;
 }
 
 function EntradaPerfilHandle() {
-  const { handle } = useParams<{ handle: string }>();
-  return <EntradaDoPerfil handle={handle} />;
-}
-
-function EntradaDoPerfil({ handle }: { handle?: string }) {
-  const navigate = useNavigate();
-  const irParaLogin = useIrParaLogin();
-  const location = useLocation();
-  if (!handle) {
-    return <PerfilConectado aoEntrar={() => irParaLogin('cadastro')} />;
-  }
-  return (
-    <TelaPerfilLegado
-      handle={handle}
-      boasVindas={new URLSearchParams(location.search).get('boas-vindas') === '1'}
-      aoVoltar={() => navigate('/comunidades')}
-      aoArrotar={() => navigate('/arena')}
-      aoAbrirHistoria={(id) => navigate(`/historia/${id}`)}
-      aoAbrirPerfil={(h) => navigate(`/u/${h}`)}
-      aoEntrar={(modo) => irParaLogin(modo === 'cadastro' ? 'cadastro' : 'entrar')}
-    />
-  );
+  return <TelaPerfilOpenDesign />;
 }
 
 /** Mantém links antigos de comunidades vivos, levando-os ao endereço novo equivalente. */
@@ -196,14 +174,14 @@ export function App() {
           {/* Arena de Arrotos */}
           <Route path="/arena" element={<EntradaArena />} />
 
-          {/* Comunidades (endereços sociais antigos caem no diretório novo) */}
+          {/* Comunidades (Open Design 1:1) */}
           <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />
           <Route path="/bondes" element={<Navigate to="/comunidades" replace />} />
           <Route path="/comm" element={<Navigate to="/comunidades" replace />} />
-          {/*
-            Telas de leitura do fórum (cartão 0017, pedaço 2b): /comunidades, /explorar,
-            /c/:slug e /c/:slug/t/:id. As rotas antigas ao lado seguem como estavam até o corte (2e).
-          */}
+          <Route path="/comunidades" element={<TelaDiretorioOpenDesign />} />
+          <Route path="/c/:slug" element={<TelaComunidadeOpenDesign />} />
+          <Route path="/c/:slug/novo" element={<TelaComunidadeOpenDesign abrirCompositor />} />
+          {/* Sub-rotas do fórum como /c/:slug/t/:id e /explorar */}
           {rotasDoForum()}
           <Route path="/comunidade/:slug" element={<AliasDeComunidade />} />
           <Route path="/comunidades/:slug" element={<AliasDeComunidade />} />
@@ -218,7 +196,8 @@ export function App() {
           <Route path="/perfil" element={<EntradaPerfil />} />
           <Route path="/u/:handle" element={<EntradaPerfilHandle />} />
           <Route path="/perfil/:handle" element={<EntradaPerfilHandle />} />
-          <Route path="/login" element={<TelaLogin />} />
+          <Route path="/login" element={<InicioOpenDesign viewInicial="auth" />} />
+          <Route path="/entrar" element={<Navigate to="/login" replace />} />
           <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />
 
           {/* Resenhas e Histórias */}
@@ -243,6 +222,8 @@ export function App() {
           {/* Ambientes de Apoio e Design */}
           <Route path="/landing" element={<TelaLanding />} />
           <Route path="/versoes" element={<TelaVersoesWebapp />} />
+          <Route path="/mobile" element={<VersaoMobileOpenDesign />} />
+          <Route path="/versao-mobile" element={<VersaoMobileOpenDesign />} />
 
           {/* Fallback */}
           <Route path="*" element={<EntradaPrincipal />} />

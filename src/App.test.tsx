@@ -23,30 +23,27 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     localStorage.clear();
   });
 
-  it('exibe a Landing na raiz "/" para primeiro visitante sem sessão', async () => {
+  it('exibe o Início Open Design na raiz "/" para primeiro visitante sem sessão', async () => {
     render(<App />);
 
-    // Deve exibir os elementos da Landing
-    expect(await screen.findByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Ir pra Arena' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Só quero ouvir' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'A comunidade dos arrotadores.' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Você está só olhando. Entre para participar.' })).toBeTruthy();
   });
 
   it('abre o Início na raiz "/" também para uma conta pronta', async () => {
     estadoDaConta.valor = { temSessao: true, anonima: false, perfilSocialPendente: false };
     render(<App />);
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'A comunidade dos arrotadores.' })).toBeTruthy();
     expect(window.location.pathname).toBe('/');
   });
 
-  it('mantém o visitante deslogado na Landing na raiz "/" sem forçar o feed', async () => {
+  it('mantém o visitante no Início na raiz "/" sem forçar o feed', async () => {
     localStorage.setItem('aue.visitou', 'true');
     render(<App />);
 
-    // Mesmo com dados no localStorage, deslogado permanece na Landing com opções públicas
-    expect(await screen.findByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Só quero ouvir' }).getAttribute('href')).toBe('/comunidades');
+    expect(await screen.findByRole('heading', { level: 1, name: 'A comunidade dos arrotadores.' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Você está só olhando. Entre para participar.' })).toBeTruthy();
   });
 
   it('exibe o Feed diretamente quando acessa a rota "/feed"', async () => {

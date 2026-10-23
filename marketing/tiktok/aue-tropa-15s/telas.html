@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @font-face { font-family: Anton; src: url("../../../public/fonts/anton-latin.woff2") format("woff2"); }
+      @font-face { font-family: Archivo; src: url("../../../public/fonts/archivo-latin.woff2") format("woff2"); }
+      * { box-sizing: border-box; }
+      body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #0a0a08; color: #f5f3ea; }
+      main { height: 100%; padding: 148px 82px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .marca { width: 500px; height: 500px; object-fit: contain; }
+      .titulo { margin: 100px 0 0; font: 72px/0.93 Anton, sans-serif; letter-spacing: .01em; text-transform: uppercase; }
+      .kicker { margin: 0; font: 700 38px/1.1 Archivo, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+      .tela { display: none; height: 100%; flex-direction: column; align-items: center; }
+      .tela.ativa { display: flex; }
+      .play { justify-content: center; }
+      .play h1 { margin: 0; font: 142px/.9 Anton, sans-serif; text-transform: uppercase; }
+      .play p { margin: 48px 0 0; font: 700 47px/1.15 Archivo, sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+      .onda { width: 900px; height: 260px; margin: 120px 0 78px; object-fit: contain; }
+      .resenha { justify-content: center; }
+      .resenha h1 { margin: 0; font: 94px/.92 Anton, sans-serif; text-transform: uppercase; }
+      .resenha p { margin: 70px 0 0; font: 700 52px/1.1 Archivo, sans-serif; color: #c6ff00; letter-spacing: .035em; text-transform: uppercase; }
+      .cta { padding-top: 132px; }
+      .cta .marca { width: 510px; height: 510px; }
+      .url { margin: 120px 0 0; font: 700 82px/1 Archivo, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="tela abertura">
+        <img class="marca" src="../../../public/pwa-512x512.png" alt="Auê" />
+        <h1 class="titulo">Arroto bom não morre no grupo.</h1>
+      </section>
+      <section class="tela play">
+        <h1>Dá o play.</h1>
+        <img class="onda" src="waveform.png" alt="Forma de onda do áudio" />
+        <p>A Tropa tá ouvindo.</p>
+      </section>
+      <section class="tela resenha">
+        <h1>História,<br />áudio e<br />resenha.</h1>
+        <p>Entra pra ouvir.</p>
+      </section>
+      <section class="tela cta">
+        <img class="marca" src="../../../public/pwa-512x512.png" alt="Auê" />
+        <p class="url">aue.web.app</p>
+      </section>
+    </main>
+    <script>
+      const cena = new URLSearchParams(location.search).get('cena') || 'abertura';
+      document.querySelector(`.${cena}`).classList.add('ativa');
+    </script>
+  </body>
+</html>

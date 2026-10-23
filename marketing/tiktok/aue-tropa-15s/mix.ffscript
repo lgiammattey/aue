@@ -1,0 +1,7 @@
+[0:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[v0];
+[1:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[v1];
+[2:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[v2];
+[3:v]fps=30,format=yuv420p,setpts=PTS-STARTPTS[v3];
+[v0][v1][v2][v3]concat=n=4:v=1:a=0[base];
+[4:a]adelay=2300|2300,apad=whole_dur=15[audio_saida];
+[base]null[video_final]

@@ -60,4 +60,25 @@ describe('SlotPatrocinadoDoFeed', () => {
 
     await waitFor(() => expect(document.querySelector('.vitrine-apps--sidebar')).toBeTruthy());
   });
+
+  it('renderiza o banner nativo da Adsterra no feed quando a flag está ligada', async () => {
+    vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
+    const { SlotPatrocinadoDoFeed } = await import('./SlotPatrocinadoDoFeed');
+
+    const { getByLabelText } = render(<SlotPatrocinadoDoFeed />);
+
+    expect(getByLabelText('Conteúdo patrocinado')).toBeTruthy();
+    expect(document.querySelector('[data-testid="adsterra-native-container"]')).toBeTruthy();
+  });
+
+  it('renderiza o card de parceiro da Adsterra na lateral quando a flag está ligada', async () => {
+    vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
+    const { SlotPatrocinado } = await import('./SlotPatrocinadoDoFeed');
+
+    const { getByText, getByRole } = render(<SlotPatrocinado posicionamento="sidebar" />);
+
+    expect(getByText('Combustível Oficial 🍺')).toBeTruthy();
+    const link = getByRole('link', { name: /Conferir ofertas parceiras/i });
+    expect(link.getAttribute('href')).toContain('arwf.org');
+  });
 });

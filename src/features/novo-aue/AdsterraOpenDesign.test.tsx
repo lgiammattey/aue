@@ -12,6 +12,8 @@ describe('Adsterra no OpenDesign — placements ficam desligados até publicaç�
 
   afterEach(() => {
     cleanup();
+    vi.unstubAllEnvs();
+    vi.resetModules();
     vi.useRealTimers();
   });
 
@@ -27,5 +29,24 @@ describe('Adsterra no OpenDesign — placements ficam desligados até publicaç�
     );
 
     expect(screen.queryByText('Combustível Oficial 🍺')).toBeNull();
+  });
+
+  it('exibe o card de parceiro com Smartlink quando a flag de publicação está ligada', async () => {
+    vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
+    const { PainelDireito: PainelComAdsterra } = await import('./PainelDireito');
+
+    render(
+      <MemoryRouter>
+        <PainelComAdsterra
+          comunidades={[]}
+          aoAbrirComunidade={() => {}}
+          viewAtual="feed"
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Combustível Oficial 🍺')).toBeTruthy();
+    const link = screen.getByRole('link', { name: /Conferir ofertas parceiras/i });
+    expect(link.getAttribute('href')).toContain('arwf.org');
   });
 });

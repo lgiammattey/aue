@@ -290,6 +290,16 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     });
   });
 
+  it('aliases de vídeos redirecionam ao destino existente sem rewrite para arquivo ausente', () => {
+    const firebase = JSON.parse(ler('../firebase.json')) as {
+      hosting: { redirects: Array<{ source: string; destination: string; type: number }>; rewrites: Array<{ source: string; destination: string }> };
+    };
+    for (const source of ['/videos', '/videos-de-arroto']) {
+      expect(firebase.hosting.redirects).toContainEqual({ source, destination: '/c/arrotos-youtube', type: 301 });
+      expect(firebase.hosting.rewrites.some(regra => regra.source === source)).toBe(false);
+    }
+  });
+
   it('toda rota de conteúdo é entrada de build — senão o rewrite aponta para arquivo que não existe', () => {
     // Os rewrites mandam para `/como-jogar.html` e companhia. Esses arquivos só
     // chegam ao `dist/` porque o `vite.config.ts` os declara como entrada.
@@ -346,8 +356,10 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     const titulo = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? '';
     const descricao = /<meta name="description" content="([^"]+)"/.exec(html)?.[1] ?? '';
 
-    expect(titulo.toLowerCase()).toContain('comunidade de quem gosta de arrotar');
+    expect(titulo.toLowerCase()).toContain('comunidade de arrotadores');
+    expect(titulo.toLowerCase()).toContain('arena');
     expect(descricao.toLowerCase()).toContain('comunidade de arrotadores');
+    expect(descricao.toLowerCase()).toContain('medição experimental');
   });
 
   it('o card compartilhado também diz quem somos, não só o que se faz', () => {
@@ -356,7 +368,8 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     const html = home();
     expect(metaDe(html, 'og:title')?.toLowerCase()).toContain('comunidade');
     expect(metaDe(html, 'twitter:title')?.toLowerCase()).toContain('comunidade');
-    expect(metaDe(html, 'og:description')).toContain('Arrota, aprende ou só vem ouvir');
+    expect(metaDe(html, 'og:description')).toContain('Grave seu arroto na Arena');
+    expect(metaDe(html, 'twitter:description')).toBe(metaDe(html, 'og:description'));
   });
 
   it('os termos do produto aparecem no texto que o rastreador lê sem JavaScript', () => {
@@ -372,7 +385,7 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
       'comunidade de quem gosta de arrotar',
       'comunidades de arrotadores',
       'áudios',
-      'arena está sendo preparada',
+      'medição experimental',
     ]) {
       expect(textoIndexavel, `sumiu do conteúdo indexável: ${termo}`).toContain(termo);
     }
@@ -410,8 +423,10 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
 
     expect(noscript).toContain('comunidade');
-    expect(noscript).toContain('nota');
-    expect(noscript).toContain('x1');
+    expect(noscript).toContain('gravar');
+    expect(noscript).toContain('experimental');
+    expect(noscript).not.toContain('arena está sendo preparada');
+    expect(noscript).not.toContain('placar e revanche');
     expect(noscript).toContain('navegador');
     expect(noscript).toContain('de graça');
   });
@@ -520,20 +535,27 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     expect(html).toContain('"@type": "FAQPage"');
   });
 
-  it('a página de ranking de arrotos traz as faixas oficiais, sem recorde sem fonte, sem JavaScript', () => {
+  it('a página de ranking descreve a Arena atual sem prometer ranking ou nota geral', () => {
     const html = ler('../ranking-de-arrotos.html');
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
 
     expect(noscript, 'ranking-de-arrotos.html sem <noscript>').toBeTruthy();
-    for (const termo of ['foi isso?', 'tá maluco', 'tá roubado', 'arena']) {
+    for (const termo of ['ranking ainda não está disponível', 'duração detectada', 'ruído do ambiente', 'laudo experimental']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
     // Recorde de decibéis de terceiros, sem fonte conferida, não entra.
     expect(html.toLowerCase()).not.toContain('guinness');
     expect(html).not.toContain('112,4');
+    expect(html).not.toContain('inteligência artificial do Auê');
+    expect(html).not.toContain('escala de notas de 0 a 100');
 
-    // Valida JSON-LD FAQPage
-    expect(html).toContain('"@type": "FAQPage"');
+    const json = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)?.[1];
+    const dados = JSON.parse(json ?? '{}');
+    expect(dados['@type']).toBe('FAQPage');
+    expect(dados.mainEntity.map((item: { name: string }) => item.name)).toEqual([
+      'O que a Arena mede?', 'O Auê tem ranking de arrotos?',
+    ]);
+    expect(dados.mainEntity[1].acceptedAnswer.text).toContain('Ainda não há ranking');
   });
 
   it('o diretório de grupos declara CollectionPage em JSON-LD', () => {

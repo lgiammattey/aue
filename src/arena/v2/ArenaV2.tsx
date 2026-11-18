@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import type { CapturaPcmV2, FalhaCapturaPcmV2 } from '../../portas/capturaPcmV2';
 import type { CapturaDeAudio } from '../../portas/captura';
 import type { CompartilhamentoDeAudio } from '../../portas/compartilhamentoDeAudio';
+import type { TelemetriaArenaV2 } from '../../portas/telemetriaArenaV2';
 import { criarCompartilhamentoDeAudioWeb } from '../../plataforma/web/compartilhamentoDeAudio';
 import { criarCapturaWeb } from '../../plataforma/web/captura';
 import { criarCapturaPcmV2 } from '../../plataforma/web/capturaPcmV2';
@@ -21,6 +22,7 @@ interface Props {
   captura?: CapturaPcmV2;
   capturaSemLaudo?: CapturaDeAudio;
   compartilhamentoDeAudio?: CompartilhamentoDeAudio;
+  telemetria?: TelemetriaArenaV2;
   aoUsarTentativa?: (tentativa: TentativaDoDuelo) => void;
   rotuloUsarTentativa?: string;
   aoVoltar?: () => void;
@@ -60,7 +62,7 @@ function falaDoLaudoInconclusivo(motivo: MotivoDeLaudoInconclusivo): string {
 }
 
 /** Primeira versão local: a gravação e o laudo ainda não são publicados. */
-export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar }: Props) {
+export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, telemetria, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar }: Props) {
   const [compartilhamento] = useState(() => compartilhamentoInjetado ?? criarCompartilhamentoDeAudioWeb());
   const [compartilhando, setCompartilhando] = useState(false);
   const compartilhamentoAtivo = useRef<number | null>(null);
@@ -81,6 +83,8 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
   const [mensagem, setMensagem] = useState('');
   const [oferecerSemLaudo, setOferecerSemLaudo] = useState(false);
   const [gravadoSemLaudo, setGravadoSemLaudo] = useState(false);
+  const aberturaRegistrada = useRef(false);
+  useEffect(() => { if (!aberturaRegistrada.current) { aberturaRegistrada.current = true; telemetria?.registrar('abriu_arena_v2'); } }, [telemetria]);
 
   const mudar = useCallback((proximo: Estado) => {
     estadoRef.current = proximo;
@@ -126,10 +130,11 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
     try {
       const resposta = await captura.iniciar({
         aoCalibrar: () => {
-          if (pedido !== geracao.current) return;
+          if (pedido !== geracao.current || calibrada) return;
           calibrada = true;
           inicio.current = Date.now();
           mudar('gravando');
+          telemetria?.registrar('iniciou_gravacao');
         },
         aoLimite: () => {
           if (pedido === geracao.current) finalizarRef.current();
@@ -160,7 +165,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
       setMensagem('Não foi possível abrir o microfone. Tente novamente.');
       mudar('erro');
     }
-  }, [captura, capturaSemLaudo, mudar]);
+  }, [captura, capturaSemLaudo, mudar, telemetria]);
 
   const iniciarSemLaudo = useCallback(async () => {
     if (estadoRef.current !== 'erro') return;
@@ -196,6 +201,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
       inicio.current = Date.now();
       setGravadoSemLaudo(true);
       mudar('gravando');
+      telemetria?.registrar('iniciou_gravacao');
     } catch {
       if (pedido !== geracao.current) return;
       capturaSemLaudo.soltar();
@@ -203,7 +209,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
       setOferecerSemLaudo(true);
       mudar('erro');
     }
-  }, [captura, capturaSemLaudo, mudar]);
+  }, [captura, capturaSemLaudo, mudar, telemetria]);
 
   const finalizar = useCallback(async () => {
     if (estadoRef.current !== 'gravando') return;
@@ -222,6 +228,8 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
         setAudio(resultado.dados);
         setLaudo(null);
         mudar('revisao');
+        telemetria?.registrar('concluiu_gravacao');
+        telemetria?.registrar('laudo_indisponivel');
         return;
       }
       const resultado = await captura.parar();
@@ -235,8 +243,11 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
       // O arquivo comprimido também contém a calibração; só a emissão vai para o player.
       const audioDaTentativa = wavDaEmissao(resultado.emissao, resultado.sampleRate);
       setAudio(audioDaTentativa);
-      setLaudo(calcularLaudoExperimental(resultado.ambiente, resultado.emissao, resultado.sampleRate));
+      const laudoCalculado = calcularLaudoExperimental(resultado.ambiente, resultado.emissao, resultado.sampleRate);
+      setLaudo(laudoCalculado);
       mudar('revisao');
+      telemetria?.registrar('concluiu_gravacao');
+      telemetria?.registrar(laudoCalculado.estado === 'medido' ? 'laudo_disponivel' : 'laudo_indisponivel');
     } catch {
       if (pedido !== geracao.current) return;
       captura.cancelar();
@@ -244,7 +255,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
       setMensagem('Não foi possível concluir a gravação. Tente novamente.');
       mudar('erro');
     }
-  }, [captura, capturaSemLaudo, mudar]);
+  }, [captura, capturaSemLaudo, mudar, telemetria]);
   finalizarRef.current = () => { void finalizar(); };
 
   useEffect(() => {
@@ -282,6 +293,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
     try {
       const resultado = await compartilhamento.compartilhar(audio);
       if (atual !== geracao.current) return;
+      if (resultado === 'aberto') telemetria?.registrar('abriu_compartilhamento_audio');
       setMensagemCompartilhamento(resultado === 'aberto' ? 'Opções de compartilhamento abertas.' : resultado === 'cancelado' ? 'Compartilhamento cancelado.' : resultado === 'indisponivel' ? 'Este aparelho não compartilha este arquivo. Você pode baixá-lo.' : 'Não foi possível compartilhar. Tente novamente ou baixe o arquivo.');
     } catch { if (atual === geracao.current) setMensagemCompartilhamento('Não foi possível compartilhar. Tente novamente ou baixe o arquivo.'); }
     finally { if (compartilhamentoAtivo.current === atual) compartilhamentoAtivo.current = null; if (atual === geracao.current) setCompartilhando(false); }
@@ -289,7 +301,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
 
   const baixarAudio = () => {
     if (!audio) return;
-    try { setMensagemCompartilhamento(compartilhamento.baixar(audio) ? 'Download solicitado ao navegador.' : 'Não foi possível iniciar o download.'); }
+    try { const solicitado = compartilhamento.baixar(audio); if (solicitado) telemetria?.registrar('solicitou_download_audio'); setMensagemCompartilhamento(solicitado ? 'Download solicitado ao navegador.' : 'Não foi possível iniciar o download.'); }
     catch { setMensagemCompartilhamento('Não foi possível iniciar o download.'); }
   };
 

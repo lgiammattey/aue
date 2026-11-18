@@ -1,4 +1,5 @@
 import { supabase } from '../../db/supabase';
+import { telemetriaBloqueada } from './exclusaoTelemetria';
 import type { ArmazenamentoLocal } from '../../portas/armazenamento';
 import {
   EVENTOS_DE_TELEMETRIA,
@@ -174,6 +175,7 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
 
   return {
     registrar(evento, detalhe) {
+      if (telemetriaBloqueada()) return;
       /*
         SEGUNDA CAMADA CONTRA EVENTO INVÁLIDO. O CHECK do banco
         (`eventos_de_telemetria_evento_valido`) já recusaria a linha — isto

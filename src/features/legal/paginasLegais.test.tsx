@@ -24,6 +24,12 @@ afterEach(() => {
 });
 
 describe('política de privacidade', () => {
+  it('informa o Google Analytics e não trata abertura de opções como compartilhamento confirmado', () => {
+    const html = montar(PoliticaDePrivacidade);
+    expect(html).toContain('Google Analytics');
+    expect(html).toContain('não confirma que o áudio foi enviado');
+    expect(html).not.toContain('Não usa Google Analytics');
+  });
   it('diz com todas as letras que o áudio fica guardado sem prazo', () => {
     /*
       DECISÃO DE PRODUTO DE LUIZ: passados os 7 dias, o acesso é bloqueado e o

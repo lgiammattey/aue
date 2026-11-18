@@ -49,6 +49,29 @@ async function iniciar(duble: ReturnType<typeof aparelho>) {
 }
 
 describe('Arena v2', () => {
+  it('mede somente etapas concluídas e não confunde abertura de compartilhamento com envio', async () => {
+    const duble = aparelho(); const registrar = vi.fn();
+    const compartilhamento = { compartilhar: vi.fn(async () => 'aberto' as const), baixar: vi.fn(() => true) };
+    render(<ArenaV2 captura={duble.captura} telemetria={{ registrar }} compartilhamentoDeAudio={compartilhamento} />);
+    expect(registrar).toHaveBeenCalledWith('abriu_arena_v2');
+    await iniciar(duble);
+    expect(registrar).toHaveBeenCalledWith('iniciou_gravacao');
+    fireEvent.click(screen.getByRole('button', { name: 'Finalizar gravação' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Compartilhar áudio' }));
+    await screen.findByText('Opções de compartilhamento abertas.');
+    fireEvent.click(screen.getByRole('button', { name: 'Baixar áudio' }));
+    expect(registrar.mock.calls.map(([evento]) => evento)).toEqual(['abriu_arena_v2', 'iniciou_gravacao', 'concluiu_gravacao', 'laudo_disponivel', 'abriu_compartilhamento_audio', 'solicitou_download_audio']);
+    expect(registrar.mock.calls.every((args) => args.length === 1)).toBe(true);
+  });
+  it('laudo inconclusivo registra indisponibilidade, não resultado', async () => {
+    const duble = aparelho(); const registrar = vi.fn();
+    duble.captura.parar.mockResolvedValueOnce({ ok: true, audio: new Blob(['som']), formato: 'audio/webm', ambiente: new Float32Array(500), emissao: tom(1, 0.1), sampleRate: 1000 });
+    render(<ArenaV2 captura={duble.captura} telemetria={{ registrar }} />);
+    await iniciar(duble); fireEvent.click(screen.getByRole('button', { name: 'Finalizar gravação' }));
+    await screen.findByText(/Não foi possível medir o ambiente/);
+    expect(registrar).toHaveBeenCalledWith('laudo_indisponivel');
+    expect(registrar).not.toHaveBeenCalledWith('laudo_disponivel');
+  });
   it('não pede microfone na entrada e abre o mural pela rota existente', () => {
     const { captura } = aparelho();
     render(<ArenaV2 captura={captura} />);

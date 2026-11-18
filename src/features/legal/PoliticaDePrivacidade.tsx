@@ -194,13 +194,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
       </Secao>
 
       {/*
-        TELEMETRIA — eventos anônimos de PRODUTO, não de publicidade.
-        Migração `20260826000001_telemetria_de_eventos.sql`: tabela
-        write-only para o cliente (sem SELECT/UPDATE/DELETE), sem nome,
-        e-mail, IP, áudio ou texto digitado. A seção "O que o Auê não faz"
-        logo abaixo continua verdadeira: isto não é Google Analytics, não é
-        pixel de rede social e não é rastreamento publicitário — é o próprio
-        Auê contando quantas pessoas passam de uma tela para a outra.
+        TELEMETRIA — eventos próprios e Google Analytics na Arena.
       */}
       <Secao titulo="Eventos de uso, para entender o jogo">
         <p>
@@ -210,13 +204,20 @@ export const PoliticaDePrivacidade: React.FC = () => {
           gente e o que melhorar.
         </p>
         <p>
-          Cada evento carrega só o nome do que aconteceu, o horário, um código
+          Nos eventos próprios, cada registro carrega o que aconteceu, o horário, um código
           de sessão aleatório (trocado sozinho depois de um tempo sem uso) e,
           quando você chegou por um link de campanha, de onde você veio. Nunca
           carrega nome, e-mail, IP, o áudio do seu arroto ou qualquer texto que
-          você tenha digitado. Ninguém, nem o próprio app, consegue ler esses
-          eventos de volta — só quem administra o banco de dados enxerga o
-          total.
+          você tenha digitado. O aplicativo não lê esses registros de volta;
+          a administração consulta os dados no banco.
+        </p>
+        <p>
+          Nas páginas da Arena, o Auê também usa o Google Analytics para medir
+          etapas como iniciar e concluir uma gravação, receber um laudo e abrir
+          opções de compartilhamento. O Google pode usar cookies e identificadores
+          do navegador e receber dados técnicos da conexão. O Auê não envia o
+          áudio, o nome, o link do convite nem as medições como eventos ao Google.
+          Abrir as opções de compartilhamento não confirma que o áudio foi enviado.
         </p>
       </Secao>
 
@@ -268,7 +269,6 @@ export const PoliticaDePrivacidade: React.FC = () => {
 
       <Secao titulo="O que o Auê não faz">
         <ul style={{ margin: 0, paddingLeft: '1.2em', display: 'grid', gap: 6 }}>
-          <li>Não usa Google Analytics nem nenhuma ferramenta de rastreamento.</li>
           <li>Não tem pixel de rede social.</li>
           <li>Não pede acesso a contatos, câmera, localização ou arquivos.</li>
           <li>Não vende, aluga nem compartilha gravações nem e-mails com terceiros.</li>

@@ -21,7 +21,7 @@ function pronta(): JanelaAnalytics | null {
   if (!configurada) {
     try {
       w.dataLayer = w.dataLayer ?? [];
-      w.gtag = (...args: unknown[]) => { w.dataLayer?.push(args); };
+      w.gtag = function (..._args: unknown[]) { w.dataLayer?.push(arguments); };
       w.gtag('js', new Date());
       w.gtag('config', ID_MEDICAO, { send_page_view: false, page_location: LOCAL_CANONICO, page_referrer: '', allow_google_signals: false, allow_ad_personalization_signals: false });
       const script = document.createElement('script');

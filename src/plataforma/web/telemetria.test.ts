@@ -69,6 +69,24 @@ afterEach(() => {
 });
 
 describe('registrar', () => {
+  it('não cria sessão nem envia evento na primeira visita de exclusão', () => {
+    irParaURL('/?nao-contar=1');
+    const armazenamento = montarArmazenamento();
+    const gravar = vi.spyOn(armazenamento, 'gravar');
+    criarTelemetriaWeb(armazenamento).registrar('abriu_arena');
+    expect(inserts).toHaveLength(0);
+    expect(gravar).not.toHaveBeenCalled();
+  });
+
+  it('não envia evento em navegação normal com cookie de exclusão', () => {
+    document.cookie = 'aue_nao_contar=1; Path=/';
+    try {
+      const armazenamento = montarArmazenamento();
+      criarTelemetriaWeb(armazenamento).registrar('recebeu_nota');
+      expect(inserts).toHaveLength(0);
+      expect(armazenamento.ler('aue.sessao-telemetria.v1')).toBeNull();
+    } finally { document.cookie = 'aue_nao_contar=; Path=/; Max-Age=0'; }
+  });
   it('grava o evento com sessao_id, origem, plataforma — e nada de PII', () => {
     irParaURL('/?src=tiktok&campaign=duvido_bater_01&content=video_03');
     const telemetria = criarTelemetriaWeb(montarArmazenamento());

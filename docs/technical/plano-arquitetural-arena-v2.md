@@ -41,6 +41,8 @@ Nomes sujeitos à nomenclatura e às migrations, não são esquema já aplicado:
 
 A duração de validade do link novo ainda não foi escolhida. Até isso ser registrado, preservar os sete dias do produto atual como padrão de compatibilidade, sem alterar links já emitidos. O token deve ser imprevisível com entropia suficiente, nunca sequencial, e armazenado como hash sempre que o fluxo permitir. Evitar gravá-lo em telemetria, logs, analytics, URLs externas e cabeçalhos de referência; a posse do link permite iniciar o desafio, então quem o recebe pode encaminhá-lo.
 
+**Medição da Arena e limite de privacidade:** a tag Google Analytics é carregada só em `/` ou `/arena`, com endereço sem parâmetros ou fragmento e sem exclusão ativa; eventos explícitos usam localização canônica e nenhuma medição de áudio. `send_page_view: false` não desliga necessariamente eventos automáticos de medição otimizada configurados na propriedade Google. Confirmar essa configuração e observar a rede antes de ligar qualquer rota de convite ou navegação SPA que mantenha a tag carregada: eventos automáticos podem incluir URLs. A exclusão de telemetria deste navegador não exclui contagens de contas de autenticação nem desfaz dados já enviados.
+
 ### Contrato de operações
 
 1. **Preparar gravação:** sessão anônima autenticada; servidor cria referência de upload restrita ao dono e aos limites de tamanho/MIME. Upload vai a objeto privado, separado do namespace e das políticas permissivas do áudio legado. Se a criação for interrompida, a tentativa fica pendente, não vira duelo válido.

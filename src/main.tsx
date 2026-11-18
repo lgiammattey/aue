@@ -8,6 +8,10 @@ import { EntradaArenaLocalV2 } from './arena/v2/EntradaArenaLocalV2'
 import { FLAGS } from './shared/flags'
 import { entradaLocalArenaV2 } from './plataforma/web/entradaLocalArenaV2'
 import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguracaoAusente'
+import { configurarExclusaoTelemetria } from './plataforma/web/exclusaoTelemetria'
+import { ComAvisoExclusaoTelemetria } from './plataforma/web/AvisoExclusaoTelemetria'
+
+const estadoExclusao = configurarExclusaoTelemetria()
 
 const raiz = createRoot(document.getElementById('root')!)
 
@@ -54,11 +58,11 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
 */
 if (configuracaoAusente && FLAGS.arenaV2 && entradaLocalArenaV2()) {
   // Só a gravação local: sem App, sessão anônima ou acesso ao Supabase.
-  raiz.render(<StrictMode><EntradaArenaLocalV2 /></StrictMode>)
+  raiz.render(<StrictMode><ComAvisoExclusaoTelemetria estado={estadoExclusao}><EntradaArenaLocalV2 /></ComAvisoExclusaoTelemetria></StrictMode>)
 } else if (configuracaoAusente) {
   raiz.render(
     <StrictMode>
-      <TelaDeConfiguracaoAusente variavel={configuracaoAusente} />
+      <ComAvisoExclusaoTelemetria estado={estadoExclusao}><TelaDeConfiguracaoAusente variavel={configuracaoAusente} /></ComAvisoExclusaoTelemetria>
     </StrictMode>,
   )
 } else {
@@ -78,7 +82,7 @@ if (configuracaoAusente && FLAGS.arenaV2 && entradaLocalArenaV2()) {
 
   raiz.render(
     <StrictMode>
-      <App />
+      <ComAvisoExclusaoTelemetria estado={estadoExclusao}><App /></ComAvisoExclusaoTelemetria>
     </StrictMode>,
   )
 }

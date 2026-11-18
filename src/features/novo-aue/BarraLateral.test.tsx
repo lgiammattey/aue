@@ -40,6 +40,12 @@ describe('BarraLateral mobile', () => {
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/perfil');
 
     fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Feed de resenhas' }));
-    expect(screen.getByTestId('caminho-atual').textContent).toBe('/');
+    expect(screen.getByTestId('caminho-atual').textContent).toBe('/feed');
+
+    const desktop = within(screen.getByRole('navigation', { name: 'Menu principal' }));
+    fireEvent.click(desktop.getByRole('button', { name: 'Arena' }));
+    expect(screen.getByTestId('caminho-atual').textContent).toBe('/arena');
+    fireEvent.click(desktop.getByRole('button', { name: 'Feed' }));
+    expect(screen.getByTestId('caminho-atual').textContent).toBe('/feed');
   });
 });

@@ -85,6 +85,9 @@ export interface Flags {
    */
   anunciosAdsterra: boolean;
 
+  /** Entrada experimental local da Arena v2; desligada por padrão. */
+  arenaV2: boolean;
+
 
 }
 
@@ -93,6 +96,7 @@ export const FLAGS: Flags = {
   disputaLocal: ligada(import.meta.env.VITE_FEATURE_DISPUTA_LOCAL),
   disputaNaArena: ligada(import.meta.env.VITE_FEATURE_DISPUTA_NA_ARENA),
   anunciosAdsterra: ligada(import.meta.env.VITE_FEATURE_ADSTERRA),
+  arenaV2: ligada(import.meta.env.VITE_FEATURE_ARENA_EXPERIMENTAL),
 };
 
 /** Exportado para teste; não use para decidir nada em tela. */

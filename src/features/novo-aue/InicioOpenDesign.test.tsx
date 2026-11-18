@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeForum } from '../../portas/forum';
@@ -902,6 +902,27 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     expect(await screen.findByRole('heading', { level: 2, name: 'Sobre o Auê' })).toBeTruthy();
     expect(screen.getByText(/O Auê é uma comunidade brasileira/)).toBeTruthy();
+  });
+
+  it('após login devolve a intenção de gravação social ao feed', async () => {
+    const conta = { ...contaAutenticada, entrar: vi.fn(async () => ({ ok: true as const })) };
+    const perfil = { obterMeuPerfil: vi.fn(async () => null) } as unknown as PortaDePerfil;
+    const Destino = () => {
+      const location = useLocation();
+      return <p>Destino: {location.pathname}{location.search}</p>;
+    };
+    render(
+      <MemoryRouter initialEntries={['/login?volta=%2Ffeed%3Fgravar%3D1']}>
+        <Routes>
+          <Route path="/login" element={<InicioOpenDesign viewInicial="auth" portaConta={conta} portaPerfil={perfil} portaForum={mockForum} portaComunidade={mockComunidade} />} />
+          <Route path="/feed" element={<Destino />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'teste@example.com' } });
+    fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'senha-de-teste' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar no Auê' }));
+    expect(await screen.findByText('Destino: /feed?gravar=1')).toBeTruthy();
   });
 
   it('renderiza a tela de login 1:1 e permite alternar entre os painéis de autenticação', async () => {

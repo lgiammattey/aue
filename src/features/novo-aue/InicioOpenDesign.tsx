@@ -39,6 +39,7 @@ import { ModalAjustarImagem, type RecorteVisual, type TipoDeImagemAjustavel } fr
 import { ModalGravarArroto, type DestinoDoArrotoDireto, type EstadoDaGravacaoDireta } from './ModalGravarArroto';
 import { ModalGerirComunidade } from './ModalGerirComunidade';
 import { linkDaRede } from '../../nucleo/perfil/redesSociais';
+import { caminhoDeVoltaSeguro } from '../../nucleo/comunidade/caminhoDeVolta';
 import { DialogoDoPost } from './DialogoDoPost';
 import { ModalConexoes, type EstadoDasConexoes } from './ModalConexoes';
 import { PainelDireito } from './PainelDireito';
@@ -1146,7 +1147,8 @@ export function InicioOpenDesign({
         if (meu) setMeuPerfil(meu);
         setTimeout(() => {
           setViewAtual('feed');
-          navigate('/');
+          const volta = caminhoDeVoltaSeguro(new URLSearchParams(location.search).get('volta'));
+          navigate(volta ?? '/feed');
         }, 500);
       } else {
         setAuthStatus('E-mail ou senha incorretos.');
@@ -1996,7 +1998,7 @@ export function InicioOpenDesign({
         if (publicadoNoFeed) {
           fecharGravacaoDireta();
           setViewAtual('feed');
-          navigate('/');
+          navigate('/feed');
         } else {
           fecharGravacaoDireta();
           exibirToast('O arroto ficou salvo na aba Arrotos, mas não entrou no feed.');
@@ -2060,7 +2062,7 @@ export function InicioOpenDesign({
   useEffect(() => {
     if (new URLSearchParams(location.search).get('gravar') !== '1') return;
 
-    navigate('/', { replace: true });
+    navigate('/feed', { replace: true });
     if (!estaAutenticado) {
       (aoEntrar ?? (() => setViewAtual('auth')))();
       return;
@@ -2091,7 +2093,7 @@ export function InicioOpenDesign({
           await contaPort.sair();
           setEstaAutenticado(false);
           setMeuPerfil(null);
-          navigate('/');
+          navigate('/feed');
         }}
         aoEntrar={aoEntrar ?? (() => setViewAtual('auth'))}
       />}

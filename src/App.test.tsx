@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { App } from './App';
+import { FLAGS } from './shared/flags';
 
 const estadoDaConta = vi.hoisted(() => ({
   valor: { temSessao: false, anonima: false, perfilSocialPendente: false },
@@ -13,6 +14,7 @@ vi.mock('./plataforma/web/conta', () => ({
 
 describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => {
   beforeEach(() => {
+    FLAGS.arenaV2 = false;
     localStorage.clear();
     window.history.pushState({}, 'Test', '/');
     estadoDaConta.valor = { temSessao: false, anonima: false, perfilSocialPendente: false };
@@ -20,6 +22,7 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
 
   afterEach(() => {
     cleanup();
+    FLAGS.arenaV2 = false;
     localStorage.clear();
   });
 
@@ -64,12 +67,44 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(window.location.pathname).toBe('/feed');
   });
 
+  it('preserva a intenção do link antigo de gravar ao pedir login', async () => {
+    window.history.pushState({}, 'Gravar', '/?gravar=1');
+    render(<App />);
+
+    await waitFor(() => expect(window.location.pathname).toBe('/login'));
+    expect(new URLSearchParams(window.location.search).get('volta')).toBe('/feed?gravar=1');
+  });
+
   it('leva a Arena para a apresentação de em breve, sem montar a casca legada do feed', async () => {
     window.history.pushState({}, 'Arena', '/arena');
     render(<App />);
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Aqui o arroto vira jogo.' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Toque para começar' })).toBeNull();
+  });
+
+  it.each(['/', '/arena'])('com flag opt-in abre Arena local em %s', async (caminho) => {
+    FLAGS.arenaV2 = true;
+    window.history.pushState({}, 'Arena v2', caminho);
+    render(<App />);
+    expect(await screen.findByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.queryByText(/convite pronto/i)).toBeNull();
+  });
+
+  it('com flag opt-in mantém o feed existente', async () => {
+    FLAGS.arenaV2 = true;
+    window.history.pushState({}, 'Feed', '/feed');
+    render(<App />);
+    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Gravar meu arroto' })).toBeNull();
+  });
+
+  it('com flag opt-in preserva a intenção do link de gravação legado', async () => {
+    FLAGS.arenaV2 = true;
+    window.history.pushState({}, 'Gravar', '/?gravar=1');
+    render(<App />);
+    await waitFor(() => expect(window.location.pathname).toBe('/login'));
+    expect(new URLSearchParams(window.location.search).get('volta')).toBe('/feed?gravar=1');
   });
 
   it('abre o desafio X1 diretamente pela rota "/x1/:code" na Arena', async () => {

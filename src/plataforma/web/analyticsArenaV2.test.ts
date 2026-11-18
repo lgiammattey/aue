@@ -39,7 +39,8 @@ describe('Analytics da Arena', () => {
     const a = await import('./analyticsArenaV2');
     a.registrarPaginaAnalytics('arena'); a.analyticsArenaV2.registrar('concluiu_gravacao');
     const filas = (window as unknown as { dataLayer: unknown[][] }).dataLayer;
-    expect(filas).toEqual([
+    expect(filas.every(item => Object.prototype.toString.call(item) === '[object Arguments]')).toBe(true);
+    expect(filas.map(item => Array.from(item))).toEqual([
       ['js', expect.any(Date)],
       ['config', 'G-43GWYNCCMD', expect.objectContaining({ send_page_view: false, page_location: 'https://aue.web.app/', page_referrer: '' })],
       ['event', 'page_view', expect.objectContaining({ pagina: 'arena', page_location: 'https://aue.web.app/', page_referrer: '' })],

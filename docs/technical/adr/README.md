@@ -25,6 +25,7 @@ nome de pasta dentro de uma camada, refactor. Isso é PR.
 | [0008](0008-paginas-publicas-dos-grupos.md) | Páginas públicas dos grupos externos no build | aceito |
 | [0009](0009-identidade-social-promovida.md) | Identidade social promovida | aceito |
 | [0010](0010-comunidades-topicos-e-respostas.md) | Comunidades, tópicos e respostas (sem feed solto) — decisão aceita; migração e aceite de implementação pendentes | aceito |
+| [0011](0011-exclusao-da-propria-conta.md) | Excluir a própria conta — Edge Function, arquivos do Storage, prazo de arrependimento; aguarda decisões do Luiz | proposto |
 
 ---
 

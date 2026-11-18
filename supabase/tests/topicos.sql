@@ -95,7 +95,8 @@ BEGIN
   FOREACH v_fn IN ARRAY ARRAY[
     'public.listar_topicos(text,integer,timestamptz,uuid,text,boolean)',
     'public.obter_topico(uuid)',
-    'public.listar_respostas_do_topico(uuid,integer,timestamptz,uuid)'] LOOP
+    'public.listar_respostas_do_topico(uuid,integer,timestamptz,uuid)',
+    'public.obter_contexto_da_resposta(uuid,uuid)'] LOOP
     PERFORM t_topicos.ok(has_function_privilege('anon', v_fn, 'EXECUTE') AND has_function_privilege('authenticated', v_fn, 'EXECUTE'), 'leitura pública ' || v_fn);
   END LOOP;
   -- escritas: só authenticated
@@ -286,7 +287,7 @@ END $t$;
 -- =============================================================================
 :como_visitante
 DO $t$
-DECLARE v_n integer; v_l record;
+DECLARE v_n integer; v_l record; v_ids uuid[];
 BEGIN
   SELECT count(*) INTO v_n FROM public.listar_comunidades_sociais();
   PERFORM t_topicos.ok(v_n >= 9, 'visitante lê comunidades');
@@ -300,6 +301,12 @@ BEGIN
   PERFORM t_topicos.ok(v_n = 5, 'visitante lê as 5 respostas');
   SELECT count(*) INTO v_n FROM public.listar_respostas_do_topico(t_topicos.pegar('t2')) WHERE apelido IS NOT NULL AND handle IS NOT NULL;
   PERFORM t_topicos.ok(v_n = 5, 'respostas trazem autor');
+  -- Link direto lê só o ramo: alvo + pais, sem depender de paginação da conversa.
+  SELECT array_agg(id ORDER BY criado_em, id) INTO v_ids
+    FROM public.obter_contexto_da_resposta(t_topicos.pegar('t2'), t_topicos.pegar('r2'));
+  PERFORM t_topicos.ok(v_ids = ARRAY[t_topicos.pegar('r1'), t_topicos.pegar('r2')], 'link direto traz resposta e ancestral');
+  SELECT count(*) INTO v_n FROM public.obter_contexto_da_resposta(t_topicos.pegar('t1'), t_topicos.pegar('r2'));
+  PERFORM t_topicos.ok(v_n = 0, 'link não atravessa tópico');
   -- slug inexistente: lista vazia, sem erro
   SELECT count(*) INTO v_n FROM public.listar_topicos('nao-existe');
   PERFORM t_topicos.ok(v_n = 0, 'comunidade inexistente lista vazio');
@@ -495,6 +502,9 @@ BEGIN
   PERFORM t_topicos.ok(v_n = 5, 'filhas continuam visíveis sob a casca (5 linhas: 1 casca + 4)');
   SELECT respostas_total INTO v_total FROM public.obter_topico(t_topicos.pegar('t2'));
   PERFORM t_topicos.ok(v_total = 4, 'respostas_total não conta a removida');
+  SELECT * INTO v_casca FROM public.obter_contexto_da_resposta(t_topicos.pegar('t2'), t_topicos.pegar('r2')) WHERE id = t_topicos.pegar('r1');
+  PERFORM t_topicos.ok(v_casca.id IS NOT NULL AND v_casca.corpo IS NULL AND v_casca.autor_id IS NULL AND v_casca.status = 'removido',
+    'link da filha preserva pai removido como casca');
 END $t$;
 -- Folha apagada some de vez; resposta oculta pela moderação sem filha visível também.
 :como_b

@@ -7,10 +7,9 @@ import { LayoutPublico, LinksPublicos, SecaoPublica } from './LayoutPublico';
  * no sitemap e no canonical); o texto agora diz "como funciona", porque o Auê
  * é a comunidade de quem gosta de arrotar e a Arena é só uma parte dela.
  *
- * A ordem segue a jornada: comunidades, Arena, X1, navegador.
+ * A ordem segue a jornada: comunidades, Arena, áudio, navegador.
  *
- * Ela não cria estado da Arena, não muda o loop e não é alcançável de dentro
- * da Arena. Também não usa o gate `ehDesktop`: quem chega por busca abre do
+ * Ela não cria estado da Arena nem muda o loop. Também não usa o gate `ehDesktop`: quem chega por busca abre do
  * telefone.
  *
  * O QUE ESTÁ ESCRITO AQUI É SÓ O QUE O PRODUTO FAZ HOJE. Nada de "em breve",
@@ -20,7 +19,7 @@ export const ComoJogar: React.FC = () => (
   <LayoutPublico
     eyebrow="Guia rápido"
     titulo="Como funciona o Auê"
-    resumo="O Auê é a comunidade de quem gosta de arrotar. Você entra, ouve e conversa. A Arena, com nota e X1, está sendo preparada."
+    resumo="O Auê é a comunidade de quem gosta de arrotar. Você entra, ouve, conversa e pode gravar seu arroto na Arena."
   >
     <SecaoPublica eyebrow="As comunidades" titulo="Cada turma tem seu canto">
       <p>
@@ -36,29 +35,24 @@ export const ComoJogar: React.FC = () => (
       />
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="A Arena" titulo="A Arena está sendo preparada">
+    <SecaoPublica eyebrow="A Arena" titulo="Grave na Arena">
       <p>
-        Quando abrir, você vai poder gravar um arroto, receber uma nota de 0 a 100 e chamar alguém
-        pro X1. O microfone só será pedido quando você decidir gravar.
-      </p>
-      <p>
-        O arroto só poderá ir pra comunidade se você escolher publicar. Até lá, a resenha já está
-        rolando nas comunidades.
+        Você pode gravar e ouvir seu arroto. O microfone só é pedido quando você decide gravar.
+        Quando disponível, a medição de duração e potência relativa é experimental.
       </p>
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="O X1" titulo="O desafio vem junto com a Arena">
+    <SecaoPublica eyebrow="Seu áudio" titulo="Você decide o que fazer com o áudio">
       <p>
-        Quando a Arena abrir, a nota vai poder virar um X1. O desafio terá link privado e cada
-        pessoa grava no próprio aparelho.
+        Dá pra baixar a gravação e compartilhá-la em aparelhos compatíveis. O áudio não é
+        publicado automaticamente na comunidade.
       </p>
-      <p>No fim, placar e revanche.</p>
     </SecaoPublica>
 
     <SecaoPublica eyebrow="Sem instalar" titulo="Direto no navegador, de graça">
       <p>
-        Funciona no navegador do celular, Android ou iPhone. Quem recebe um desafio joga pelo mesmo
-        link, sem baixar app e sem criar conta. Não tem assinatura nem moeda dentro do app.
+        A Arena funciona no navegador do celular ou do computador, sem baixar um aplicativo.
+        A gravação pode ser feita sem cadastro.
       </p>
       <LinksPublicos links={[{ para: '/privacidade', rotulo: 'O que o Auê faz com o seu áudio' }]} />
     </SecaoPublica>

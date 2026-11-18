@@ -26,11 +26,13 @@ describe('/como-jogar com a moldura pública', () => {
     expect(html).toMatch(/<h1>[\s\S]*Como funciona o Auê/);
   });
 
-  it('explica a comunidade sem prometer a Arena antes da hora', () => {
+  it('explica a comunidade e a Arena disponível sem prometer nota ou X1', () => {
     const html = montar(ComoJogar);
-    expect(html).toContain('A Arena, com nota e X1, está sendo preparada.');
-    expect(html).toContain('Quando abrir, você vai poder gravar um arroto');
-    expect(html).toContain('sem baixar app');
+    expect(html).toContain('pode gravar seu arroto na Arena');
+    expect(html).toContain('a medição de duração e potência relativa é experimental');
+    expect(html).not.toContain('A Arena está sendo preparada');
+    expect(html).not.toContain('placar e revanche');
+    expect(html).toContain('sem baixar um aplicativo');
     expect(html).not.toContain('burp game');
     expect(html).toContain('Os grupos de WhatsApp e Telegram são outra coisa');
   });

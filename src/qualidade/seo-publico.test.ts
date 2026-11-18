@@ -535,20 +535,27 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     expect(html).toContain('"@type": "FAQPage"');
   });
 
-  it('a página de ranking de arrotos traz as faixas oficiais, sem recorde sem fonte, sem JavaScript', () => {
+  it('a página de ranking descreve a Arena atual sem prometer ranking ou nota geral', () => {
     const html = ler('../ranking-de-arrotos.html');
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
 
     expect(noscript, 'ranking-de-arrotos.html sem <noscript>').toBeTruthy();
-    for (const termo of ['foi isso?', 'tá maluco', 'tá roubado', 'arena']) {
+    for (const termo of ['ranking ainda não está disponível', 'duração detectada', 'ruído do ambiente', 'laudo experimental']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
     // Recorde de decibéis de terceiros, sem fonte conferida, não entra.
     expect(html.toLowerCase()).not.toContain('guinness');
     expect(html).not.toContain('112,4');
+    expect(html).not.toContain('inteligência artificial do Auê');
+    expect(html).not.toContain('escala de notas de 0 a 100');
 
-    // Valida JSON-LD FAQPage
-    expect(html).toContain('"@type": "FAQPage"');
+    const json = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)?.[1];
+    const dados = JSON.parse(json ?? '{}');
+    expect(dados['@type']).toBe('FAQPage');
+    expect(dados.mainEntity.map((item: { name: string }) => item.name)).toEqual([
+      'O que a Arena mede?', 'O Auê tem ranking de arrotos?',
+    ]);
+    expect(dados.mainEntity[1].acceptedAnswer.text).toContain('Ainda não há ranking');
   });
 
   it('o diretório de grupos declara CollectionPage em JSON-LD', () => {

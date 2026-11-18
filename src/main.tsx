@@ -4,6 +4,9 @@ import './index.css'
 import App from './App.tsx'
 import { configuracaoAusente } from './db/supabase'
 import { garantirSessao } from './shared/auth/sessaoAnonima'
+import { EntradaArenaLocalV2 } from './arena/v2/EntradaArenaLocalV2'
+import { FLAGS } from './shared/flags'
+import { entradaLocalArenaV2 } from './plataforma/web/entradaLocalArenaV2'
 import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguracaoAusente'
 
 const raiz = createRoot(document.getElementById('root')!)
@@ -28,31 +31,31 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   até aqui: antes, o import explodia e o navegador ficava com a página em
   branco, sem uma palavra sobre o motivo. Agora ele relata e a tela explica.
 
-  Note que `App` não é montado neste caminho — então nenhuma requisição sai
+  Exceto pela entrada local explícita da Arena v2, `App` não é montado neste caminho — então nenhuma requisição sai
   para o endereço de placeholder.
 
   ------------------------------------------------------------------------
   CONSEQUÊNCIA DE BUILD QUE VOCÊ PRECISA CONHECER ANTES DE PUBLICAR
   ------------------------------------------------------------------------
   `configuracaoAusente` deriva de `import.meta.env.VITE_SUPABASE_*`, que são
-  substituídas em TEMPO DE BUILD. Logo, este `if` é uma constante para o
-  empacotador, e ele elimina o ramo morto:
+  substituídas em TEMPO DE BUILD. O empacotador pode eliminar ramos mortos:
 
     - Build COM as variáveis  -> `App` entra no bundle, esta tela some dele.
-    - Build SEM as variáveis  -> só esta tela entra. O `App` NÃO É EMPACOTADO.
+    - Build SEM as variáveis  -> esta tela ou a Arena local opt-in; o `App` não é montado.
 
   Ou seja: um deploy feito sem as variáveis configuradas publica um bundle que
-  contém apenas a mensagem de erro, e NENHUMA configuração feita depois no
-  painel conserta — é preciso um build novo. Verificado: sem as variáveis o
-  chunk principal sai com 433 KB e nenhuma string do app; com elas, 526 KB e
-  tudo lá dentro.
+  mostra a mensagem de erro nas rotas que precisam do serviço. Configurar o
+  painel depois não altera o bundle: é preciso um build novo.
 
   Isso não é um defeito a corrigir, é a natureza de `VITE_*`. Está escrito aqui
   porque o sintoma ("publiquei e só aparece a tela de erro, mesmo depois de
   configurar") é confuso, e a saída é sempre a mesma: configure as variáveis em
   Production E Preview, e rode um NOVO build.
 */
-if (configuracaoAusente) {
+if (configuracaoAusente && FLAGS.arenaV2 && entradaLocalArenaV2()) {
+  // Só a gravação local: sem App, sessão anônima ou acesso ao Supabase.
+  raiz.render(<StrictMode><EntradaArenaLocalV2 /></StrictMode>)
+} else if (configuracaoAusente) {
   raiz.render(
     <StrictMode>
       <TelaDeConfiguracaoAusente variavel={configuracaoAusente} />

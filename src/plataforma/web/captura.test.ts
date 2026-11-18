@@ -22,6 +22,7 @@ function streamFalso(trilhas = [trilhaFalsa()]) {
 /** O gravador do navegador, reduzido ao que o adaptador usa. */
 class GravadorFalso {
   static ultimo: GravadorFalso | null = null;
+  static finalizarDepois = false;
 
   state: 'inactive' | 'recording' = 'inactive';
   mimeType = 'audio/mp4';
@@ -41,6 +42,10 @@ class GravadorFalso {
   stop() {
     if (this.quebrarAoParar) throw new Error('gravador morreu');
     this.state = 'inactive';
+    if (!GravadorFalso.finalizarDepois) this.finalizar();
+  }
+
+  finalizar() {
     this.ondataavailable?.({ data: new Blob(['arroto']) });
     this.onstop?.();
   }
@@ -77,6 +82,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.useRealTimers();
   GravadorFalso.ultimo = null;
+  GravadorFalso.finalizarDepois = false;
   amplitude = 0;
 });
 
@@ -120,6 +126,64 @@ describe('pedir e soltar', () => {
     // Dois streams vivos significam dois indicadores de microfone no sistema, e
     // um deles sem dono para soltar.
     expect(getUserMedia).toHaveBeenCalledTimes(1);
+  });
+
+  it('pedidos simultâneos compartilham a mesma solicitação', async () => {
+    let liberar!: (stream: MediaStream) => void;
+    const pedir = vi.fn(() => new Promise<MediaStream>((resolve) => { liberar = resolve; }));
+    montarNavegador(pedir);
+    const captura = criarCapturaWeb();
+    const primeiro = captura.pedir();
+    const segundo = captura.pedir();
+    expect(pedir).toHaveBeenCalledTimes(1);
+    liberar(streamFalso());
+    expect(await primeiro).toEqual({ ok: true });
+    expect(await segundo).toEqual({ ok: true });
+    captura.soltar();
+  });
+
+  it('a permissão concedida depois de soltar não deixa o microfone vivo', async () => {
+    let liberar!: (stream: MediaStream) => void;
+    const trilha = trilhaFalsa();
+    montarNavegador(() => new Promise<MediaStream>((resolve) => { liberar = resolve; }));
+    const captura = criarCapturaWeb();
+    const pedido = captura.pedir();
+    captura.soltar();
+    liberar(streamFalso([trilha]));
+    expect(await pedido).toMatchObject({ ok: false, motivo: 'falhou' });
+    expect(trilha.stop).toHaveBeenCalledTimes(1);
+    expect(captura.estaVivo()).toBe(false);
+  });
+
+  it('um pedido antigo não substitui o microfone da tentativa seguinte', async () => {
+    let liberarAntigo!: (stream: MediaStream) => void;
+    const trilhaAntiga = trilhaFalsa();
+    const trilhaNova = trilhaFalsa();
+    const pedir = vi.fn()
+      .mockImplementationOnce(() => new Promise<MediaStream>((resolve) => { liberarAntigo = resolve; }))
+      .mockResolvedValueOnce(streamFalso([trilhaNova]));
+    montarNavegador(pedir);
+    const captura = criarCapturaWeb();
+    const antigo = captura.pedir();
+    captura.soltar();
+    expect(await captura.pedir()).toEqual({ ok: true });
+    liberarAntigo(streamFalso([trilhaAntiga]));
+    expect(await antigo).toMatchObject({ ok: false });
+    expect(trilhaAntiga.stop).toHaveBeenCalledTimes(1);
+    expect(trilhaNova.stop).not.toHaveBeenCalled();
+    expect(captura.estaVivo()).toBe(true);
+    captura.soltar();
+  });
+
+  it('pede desativação de processamento como preferência', async () => {
+    const pedir = vi.fn(async () => streamFalso());
+    montarNavegador(pedir);
+    const captura = criarCapturaWeb();
+    await captura.pedir();
+    expect(pedir).toHaveBeenCalledWith({ audio: {
+      autoGainControl: false, echoCancellation: false, noiseSuppression: false,
+    } });
+    captura.soltar();
   });
 
   it('a pessoa negou vira motivo "negado"', async () => {
@@ -244,6 +308,42 @@ describe('gravar', () => {
     expect(trilha.stop).toHaveBeenCalled();
     expect(captura.estaVivo()).toBe(false);
     expect(captura.estaGravando()).toBe(false);
+  });
+
+  it('interrompe a trilha sem esperar o arquivo e conserva o último pedaço', async () => {
+    GravadorFalso.finalizarDepois = true;
+    const trilha = trilhaFalsa();
+    montarNavegador(async () => streamFalso([trilha]));
+    const captura = criarCapturaWeb();
+    await captura.pedir();
+    captura.comecar();
+    const resultadoPendente = captura.parar();
+    expect(trilha.stop).toHaveBeenCalledTimes(1);
+    expect(captura.estaVivo()).toBe(false);
+    GravadorFalso.ultimo!.finalizar();
+    const resultado = await resultadoPendente;
+    if (!('dados' in resultado)) throw new Error('devia ter gravado');
+    expect(resultado.dados.size).toBe(6);
+  });
+
+  it('finalização antiga não encerra uma gravação nova após cancelar', async () => {
+    GravadorFalso.finalizarDepois = true;
+    const antiga = trilhaFalsa();
+    const nova = trilhaFalsa();
+    const pedir = vi.fn().mockResolvedValueOnce(streamFalso([antiga])).mockResolvedValueOnce(streamFalso([nova]));
+    montarNavegador(pedir);
+    const captura = criarCapturaWeb();
+    await captura.pedir();
+    captura.comecar();
+    const gravadorAntigo = GravadorFalso.ultimo!;
+    const resultadoAntigo = captura.parar();
+    captura.soltar();
+    await captura.pedir();
+    captura.comecar();
+    gravadorAntigo.finalizar();
+    expect(await resultadoAntigo).toMatchObject({ motivo: 'quebrou' });
+    expect(nova.stop).not.toHaveBeenCalled();
+    captura.soltar();
   });
 
   it('soltar no meio da gravação para o gravador antes de matar a trilha', async () => {

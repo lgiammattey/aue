@@ -83,7 +83,7 @@ export const BarraLateral = memo(function BarraLateral({
           type="button"
           onClick={() => {
             aoMudarView('feed');
-            navigate('/');
+            navigate('/feed');
           }}
         >
           <IconeDaNavegacao tipo="feed" />Feed
@@ -117,7 +117,7 @@ export const BarraLateral = memo(function BarraLateral({
           type="button"
           onClick={() => {
             aoMudarView('arena');
-            navigate('/arena/em-breve');
+            navigate('/arena');
           }}
         >
           <IconeDaNavegacao tipo="arena" />Arena
@@ -155,7 +155,7 @@ export const BarraLateral = memo(function BarraLateral({
           className={`mobile-nav-item ${isFeedAtivo ? 'active' : ''}`}
           onClick={() => {
             aoMudarView('feed');
-            navigate('/');
+            navigate('/feed');
           }}
           aria-label="Feed de resenhas"
         >

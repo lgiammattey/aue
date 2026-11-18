@@ -1,14 +1,39 @@
 # Escopo atual — Auê
 
+## Direção aprovada: MVP v2 (17/11/2026)
+
+A [Missão 0035](../../.agents/missoes/0035-arena-mvp-v2.md) muda a direção da
+entrada: a Arena passa a ser o centro, a pessoa pode gravar sem cadastro e o
+feed passa a ser uma opção secundária. O objetivo completo inclui laudo com
+medições honestas, duelo que só revela o adversário após a resposta e liga
+privada semanal. A especificação da experiência está em
+[`../design/ARENA_MVP_V2.md`](../design/ARENA_MVP_V2.md).
+
+**Isso é escopo autorizado, não declaração de entrega.** A implementação está
+em andamento. O que existe em produção é registrado com data e prova em
+[`../PRODUCAO_ATUAL.md`](../PRODUCAO_ATUAL.md); não se deve apresentar a nova
+Arena, a trava ou a liga como disponíveis antes de sua validação e publicação.
+
+As seções abaixo registram o contrato anterior e os recursos sociais existentes.
+Onde houver conflito, a direção desta seção e a Missão 0035 orientam a mudança:
+em particular, o novo duelo não revela o áudio antes da resposta, e a duração é
+a primeira regra proposta para o confronto. As regras antigas permanecem como
+referência de compatibilidade dos links existentes, não como descrição do novo
+duelo. Nenhum conteúdo social, anúncio no feed, prazo, acesso ou retenção de
+dados antigos deve ser alterado silenciosamente durante a transição.
+
+---
+
+## Contrato anterior e recursos existentes
+
 Este recorte foi conferido com o Game Design Document [`../jogo/AUÊ!-2.md`](../jogo/AUÊ!-2.md)
 e com a prancha visual de telas recebida. O GDD detalha o produto; este arquivo
-continua sendo a decisão de escopo vigente.
+registra a direção anterior à Missão 0035 e as partes sociais a preservar.
 
 **O que pertence ao jogo agora.**
 
-Este documento decide escopo. Se uma ideia não está aqui e não é correção
-necessária para manter o jogo funcionando, ela vai para
-[`BACKLOG.md`](BACKLOG.md) — não para o código.
+Ideias fora da Missão 0035 e deste documento, que não sejam correções necessárias,
+vão para [`BACKLOG.md`](BACKLOG.md) — não para o código.
 
 Não existe gate sequencial, fila de Features numeradas nem autorização por
 etapa. Existe esta lista, e a regra de terminar uma coisa antes de começar

@@ -34,6 +34,8 @@ const INTERVALO_DE_MEDICAO_MS = 50;
 export function criarCapturaWeb(): CapturaDeAudio {
   let stream: MediaStream | null = null;
   let gravador: MediaRecorder | null = null;
+  let pedidoPendente: Promise<PedidoDeMicrofone> | null = null;
+  let geracao = 0;
   let contexto: AudioContext | null = null;
   let analisador: AnalyserNode | null = null;
   let amostrador: ReturnType<typeof setInterval> | null = null;
@@ -114,6 +116,8 @@ export function criarCapturaWeb(): CapturaDeAudio {
   }
 
   function soltar(): void {
+    geracao += 1;
+    pedidoPendente = null;
     if (gravador && gravador.state !== 'inactive') {
       try {
         gravador.stop();
@@ -134,26 +138,42 @@ export function criarCapturaWeb(): CapturaDeAudio {
   }
 
   return {
-    async pedir(): Promise<PedidoDeMicrofone> {
-      if (stream) return { ok: true };
+    pedir(): Promise<PedidoDeMicrofone> {
+      if (stream) return Promise.resolve({ ok: true });
+      if (pedidoPendente) return pedidoPendente;
+      if (gravador) {
+        return Promise.resolve({ ok: false, motivo: 'falhou', detalhe: 'A gravação anterior ainda está terminando.' });
+      }
 
       const midia = navigator.mediaDevices;
       if (!midia?.getUserMedia) {
-        /*
-          Acontece de verdade: página servida sem HTTPS, WebView antiga, ou
-          navegador com a API desligada. Para o jogo é o mesmo buraco de não
-          ter aparelho — o que muda é só a frase, e ela é decidida lá na
-          Arena.
-        */
-        return { ok: false, motivo: 'semAparelho' };
+        return Promise.resolve({ ok: false, motivo: 'semAparelho' });
       }
 
-      try {
-        stream = await midia.getUserMedia({ audio: true });
-        return { ok: true };
-      } catch (erro) {
-        return traduzir(erro);
-      }
+      const versao = geracao;
+      const pedido = (async (): Promise<PedidoDeMicrofone> => {
+        try {
+          // São preferências: o navegador ou o aparelho podem não respeitá-las.
+          const recebido = await midia.getUserMedia({
+            audio: { autoGainControl: false, echoCancellation: false, noiseSuppression: false },
+          });
+          if (versao !== geracao) {
+            recebido.getTracks().forEach((trilha) => trilha.stop());
+            return { ok: false, motivo: 'falhou', detalhe: 'O pedido de microfone foi cancelado.' };
+          }
+          stream = recebido;
+          return { ok: true };
+        } catch (erro) {
+          if (versao !== geracao) {
+            return { ok: false, motivo: 'falhou', detalhe: 'O pedido de microfone foi cancelado.' };
+          }
+          return traduzir(erro);
+        } finally {
+          if (versao === geracao) pedidoPendente = null;
+        }
+      })();
+      pedidoPendente = pedido;
+      return pedido;
     },
 
     comecar(): boolean {
@@ -173,8 +193,9 @@ export function criarCapturaWeb(): CapturaDeAudio {
           código gravar Opus no Android e AAC no iPhone.
         */
         gravador = new MediaRecorder(stream);
+        const pedacosDestaGravacao = pedacos;
         gravador.ondataavailable = (evento) => {
-          if (evento.data.size > 0) pedacos.push(evento.data);
+          if (evento.data.size > 0) pedacosDestaGravacao.push(evento.data);
         };
         gravador.start();
 
@@ -213,6 +234,7 @@ export function criarCapturaWeb(): CapturaDeAudio {
 
       const duracaoMs = Date.now() - comecouEm;
       const medido = resumo();
+      const pedacosDestaGravacao = pedacos;
 
       return new Promise<AudioCapturado | FalhaAoParar>((resolve) => {
         /*
@@ -221,21 +243,34 @@ export function criarCapturaWeb(): CapturaDeAudio {
           o final do arroto.
         */
         emUso.onstop = () => {
-          const formato = emUso.mimeType || 'audio/webm';
-          const dados = new Blob(pedacos, { type: formato });
+          if (gravador !== emUso) {
+            resolve({ motivo: 'quebrou', detalhe: 'A gravação foi cancelada.' });
+            return;
+          }
+          const formato = emUso.mimeType || pedacosDestaGravacao.find((p) => p.type)?.type || '';
+          const dados = new Blob(pedacosDestaGravacao, { type: formato });
           pedacos = [];
           soltar();
           resolve({ dados, formato, duracaoMs, resumo: medido });
         };
 
         emUso.onerror = () => {
-          pedacos = [];
-          soltar();
+          if (gravador === emUso) {
+            pedacos = [];
+            soltar();
+          }
           resolve({ motivo: 'quebrou', detalhe: 'o gravador falhou ao fechar' });
         };
 
         try {
           emUso.stop();
+          // O último dataavailable ainda chega no onstop; a trilha não precisa
+          // permanecer ativa enquanto o navegador finaliza o arquivo.
+          pararOMedidor();
+          if (stream) {
+            for (const trilha of stream.getTracks()) trilha.stop();
+            stream = null;
+          }
         } catch (erro) {
           soltar();
           resolve({

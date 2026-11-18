@@ -148,6 +148,7 @@ jobs:
           VITE_CONTATO_PRIVACIDADE: ${{ secrets.VITE_CONTATO_PRIVACIDADE }}
           VITE_FEATURE_DISPUTA_LOCAL: '1'
           VITE_FEATURE_DISPUTA_NA_ARENA: '1'
+          VITE_FEATURE_ARENA_EXPERIMENTAL: '1'
           # Placements Adsterra habilitados conforme decisão do Luiz em 2026-10-20.
           VITE_FEATURE_ADSTERRA: '1'
           # No agendamento, publicar sem as páginas dos grupos apagaria do Google

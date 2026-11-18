@@ -4,6 +4,7 @@ import { criarContaWeb } from './plataforma/web/conta';
 import { criarArmazenamentoWeb } from './plataforma/web/armazenamento';
 import { criarTelemetriaWeb } from './plataforma/web/telemetria';
 
+const ArenaV2 = lazy(() => import('./arena/v2/EntradaArenaLocalV2').then((m) => ({ default: m.EntradaArenaLocalV2 })));
 const ChallengeView = lazy(() => import('./features/audio/ChallengeView').then((m) => ({ default: m.ChallengeView })));
 const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePrivacidade').then((m) => ({ default: m.PoliticaDePrivacidade })));
 const TermosDeUso = lazy(() => import('./features/legal/TermosDeUso').then((m) => ({ default: m.TermosDeUso })));
@@ -25,6 +26,8 @@ const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefini
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
+import { FLAGS } from './shared/flags';
+import { abreArenaV2 } from './nucleo/arena/entradaV2';
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
@@ -49,6 +52,7 @@ function EntradaPorLink() {
 
 function EntradaInicial() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [destino, setDestino] = useState<'inicio' | 'perfil' | null>(null);
   const [autenticado, setAutenticado] = useState(false);
 
@@ -79,7 +83,13 @@ function EntradaInicial() {
     return <Navigate to="/perfil?boas-vindas=1" replace />;
   }
 
-  return <InicioOpenDesign autenticado={autenticado} aoEntrar={() => navigate(enderecoDoLoginComVolta('/', 'entrar'))} />;
+  const volta = new URLSearchParams(location.search).get('gravar') === '1' ? '/feed?gravar=1' : '/feed';
+  return <InicioOpenDesign autenticado={autenticado} aoEntrar={() => navigate(enderecoDoLoginComVolta(volta, 'entrar'))} />;
+}
+
+function EntradaRaiz() {
+  const { pathname, search } = useLocation();
+  return FLAGS.arenaV2 && abreArenaV2(pathname, search) ? <ArenaV2 /> : <EntradaInicial />;
 }
 
 function EntradaHistoria() {
@@ -128,7 +138,7 @@ export function App() {
         <Suspense fallback={null}>
         <Routes>
           {/* Feed e Entrada Inteligente */}
-          <Route path="/" element={<EntradaInicial />} />
+          <Route path="/" element={<EntradaRaiz />} />
           {/* /feed ainda circula em links antigos; ele usa a mesma casca canônica da raiz. */}
           <Route path="/feed" element={<EntradaInicial />} />
           <Route path="/em-alta" element={<Navigate to="/explorar" replace />} />
@@ -136,7 +146,7 @@ export function App() {
 
           {/* Arena de Arrotos */}
           <Route path="/arena/em-breve" element={<TelaArenaEmBreveOpenDesign />} />
-          <Route path="/arena" element={<TelaArenaEmBreveOpenDesign />} />
+          <Route path="/arena" element={FLAGS.arenaV2 ? <ArenaV2 /> : <TelaArenaEmBreveOpenDesign />} />
 
           {/* Comunidades (Open Design 1:1) */}
           <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />

@@ -806,7 +806,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
+    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos/ }));
     const atalho = await screen.findByRole('button', { name: 'Gravar um arroto no meu perfil' });
     fireEvent.click(atalho);
     fireEvent.click(screen.getByRole('button', { name: 'Gravar arroto' }));
@@ -844,7 +844,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos 0/ }));
+    fireEvent.click(await screen.findByRole('tab', { name: /Arrotos/ }));
     expect(screen.queryByRole('button', { name: 'Gravar um arroto no meu perfil' })).toBeNull();
   });
 

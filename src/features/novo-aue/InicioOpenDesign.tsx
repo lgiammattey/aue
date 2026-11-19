@@ -264,7 +264,7 @@ export function InicioOpenDesign({
   const [estadoTopicosDaComunidade, setEstadoTopicosDaComunidade] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
 
   // Perfil
-  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'marcados' | 'arrotos' | 'salvos'>('posts');
+  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'marcados' | 'arrotos' | 'salvos'>('arrotos');
   const [perfilAtivo, setPerfilAtivo] = useState<PerfilPublico | null>(null);
   const [topicosDaComunidadeDoPerfil, setTopicosDaComunidadeDoPerfil] = useState<readonly ItemDoFeed[]>([]);
   const [publicacoesPessoaisDoPerfil, setPublicacoesPessoaisDoPerfil] = useState<readonly ItemDoFeed[]>([]);
@@ -273,6 +273,7 @@ export function InicioOpenDesign({
   const [estadoMarcadasDoPerfil, setEstadoMarcadasDoPerfil] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
   const [arrotosDoPerfil, setArrotosDoPerfil] = useState<readonly ArrotoDoPerfil[]>([]);
   const [estadoArrotosDoPerfil, setEstadoArrotosDoPerfil] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
+  const [handleDosArrotos, setHandleDosArrotos] = useState<string | null>(null);
   const [estadoPerfil, setEstadoPerfil] = useState<'carregando' | 'pronto' | 'pendente' | 'inexistente' | 'erro'>('carregando');
   const [fichaSocialPendente, setFichaSocialPendente] = useState(false);
   const [estadoDaFicha, setEstadoDaFicha] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro' | 'salvando'>('ocioso');
@@ -605,6 +606,7 @@ export function InicioOpenDesign({
     const alvo = perfilAtivo ?? meuPerfil;
     if (!alvo) return;
     setEstadoArrotosDoPerfil('carregando');
+    setHandleDosArrotos(alvo.handle);
     arrotosPort.listarArrotos(alvo.handle).then(
       (lista) => {
         if (!ativo) return;
@@ -2029,6 +2031,7 @@ export function InicioOpenDesign({
     .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
 
   const perfilExibido = perfilAtivo ?? meuPerfil;
+  const estadoDosArrotosExibidos = handleDosArrotos === perfilExibido?.handle ? estadoArrotosDoPerfil : 'carregando';
   const donoDoPerfil = Boolean(perfilExibido?.souEu);
   const postsDoPerfil = useMemo(
     () => [...topicosDaComunidadeDoPerfil, ...publicacoesPessoaisDoPerfil]
@@ -2667,28 +2670,8 @@ export function InicioOpenDesign({
 
             {estadoPerfil === 'pronto' && perfilExibido && (
               <>
-                <article className={`od-profile__hero${perfilExibido.capaUrl ? '' : ' od-profile__hero--plain'}`}>
-                  {perfilExibido.capaUrl && (
-                    <div
-                      className="od-profile__cover od-profile__cover--photo"
-                      style={{ backgroundImage: `url("${perfilExibido.capaUrl}")` }}
-                      aria-label={`Capa de ${perfilExibido.apelido}`}
-                    >
-                      {donoDoPerfil && (
-                        <div className="od-profile__cover-actions">
-                          <button type="button" className="od-profile__cover-action" aria-label="Trocar capa" title="Trocar capa" onClick={() => inputDaCapa.current?.click()} disabled={capaEnviando}>
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h3l1.3-2h7.4l1.3 2h3A1.5 1.5 0 0 1 21.5 9v9.5A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5V9A1.5 1.5 0 0 1 4 7.5Z" /><circle cx="12" cy="13.5" r="3.25" /></svg>
-                          </button>
-                          <button type="button" className="od-profile__cover-action od-profile__cover-remove" aria-label="Remover capa" title="Remover capa" onClick={() => void removerCapaDoPerfil()} disabled={capaEnviando}>×</button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {donoDoPerfil && !perfilExibido.capaUrl && (
-                    <button type="button" className="od-profile__cover-empty-action" aria-label="Adicionar capa" onClick={() => inputDaCapa.current?.click()} disabled={capaEnviando}>
-                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h3l1.3-2h7.4l1.3 2h3A1.5 1.5 0 0 1 21.5 9v9.5A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5V9A1.5 1.5 0 0 1 4 7.5Z" /><circle cx="12" cy="13.5" r="3.25" /></svg>
-                    </button>
-                  )}
+                <article className="od-profile__hero od-profile__hero--plain od-profile__athlete">
+                  <div className="od-profile__athlete-label">PERFIL DE ARROTADOR <span>AUÊ!</span></div>
                   <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'capa')} />
                   <div className="od-profile__body">
                     <div className="od-profile__topline">
@@ -2736,17 +2719,44 @@ export function InicioOpenDesign({
                       </div>
                     </div>
 
-                    <dl className="od-profile__metrics">
-                      <div><dt>Posts</dt><dd>{postsDoPerfil.length}</dd></div>
-                      <div><dt>Seguidores</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem segue (${perfilExibido.totalSeguidores})`} onClick={() => void abrirConexoes('seguidores')}>{perfilExibido.totalSeguidores}</button></dd></div>
-                      <div><dt>Seguindo</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem é seguido (${perfilExibido.totalSeguindo})`} onClick={() => void abrirConexoes('seguindo')}>{perfilExibido.totalSeguindo}</button></dd></div>
-                      {perfilExibido.melhorNota !== undefined && <div><dt>Melhor nota</dt><dd>{perfilExibido.melhorNota}</dd></div>}
-                    </dl>
+                    <section className="od-profile__dashboard" aria-labelledby="perfilPlacar">
+                      <div className="od-profile__dashboard-head">
+                        <div><p>O JOGO ATÉ AQUI</p><h2 id="perfilPlacar">{donoDoPerfil ? 'Seu placar' : 'Placar'}</h2></div>
+                        {donoDoPerfil && <Link className="join od-profile__button od-profile__arena" to="/arena">Ir pra Arena <span aria-hidden="true">↗</span></Link>}
+                      </div>
+                      <div className="od-profile__dashboard-stats">
+                        <div className="od-profile__best">
+                          <h3 id="perfilMelhorNota">Melhor nota publicada</h3>
+                          {perfilExibido.melhorNota !== undefined
+                            ? <p className="od-profile__best-score">{perfilExibido.melhorNota}<span> pts</span></p>
+                            : <p className="od-profile__best-empty">—</p>}
+                          <p className="od-profile__best-caption">{perfilExibido.melhorNota !== undefined ? 'Em comunidades' : 'Ainda não há nota publicada'}</p>
+                        </div>
+                        <div className="od-profile__best">
+                          <h3>Áudios no perfil</h3>
+                          <p className="od-profile__best-score">{estadoDosArrotosExibidos === 'pronto' ? arrotosDoPerfil.length : '—'}</p>
+                          <p className="od-profile__best-caption">{estadoDosArrotosExibidos === 'erro' ? 'Não foi possível carregar' : estadoDosArrotosExibidos === 'carregando' ? 'Carregando…' : 'Áudios deixados aqui'}</p>
+                        </div>
+                      </div>
+                    </section>
+                    <div className="od-profile__connections">
+                      <button type="button" aria-label={`Ver quem segue (${perfilExibido.totalSeguidores})`} onClick={() => void abrirConexoes('seguidores')}><b>{perfilExibido.totalSeguidores}</b> seguidores</button>
+                      <button type="button" aria-label={`Ver quem é seguido (${perfilExibido.totalSeguindo})`} onClick={() => void abrirConexoes('seguindo')}><b>{perfilExibido.totalSeguindo}</b> seguindo</button>
+                    </div>
 
                   </div>
                 </article>
 
                 <div className="od-profile__tabs-nav" role="tablist" aria-label="Abas do perfil">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={abaPerfil === 'arrotos'}
+                    className={`od-profile__tab-btn ${abaPerfil === 'arrotos' ? 'active' : ''}`}
+                    onClick={() => setAbaPerfil('arrotos')}
+                  >
+                    Arrotos {estadoDosArrotosExibidos === 'pronto' && <span>{arrotosDoPerfil.length}</span>}
+                  </button>
                   <button
                     type="button"
                     role="tab"
@@ -2764,15 +2774,6 @@ export function InicioOpenDesign({
                     onClick={() => setAbaPerfil('marcados')}
                   >
                     Marcados <span>{publicacoesMarcadasDoPerfil.length}</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={abaPerfil === 'arrotos'}
-                    className={`od-profile__tab-btn ${abaPerfil === 'arrotos' ? 'active' : ''}`}
-                    onClick={() => setAbaPerfil('arrotos')}
-                  >
-                    Arrotos <span>{arrotosDoPerfil.length}</span>
                   </button>
                   {donoDoPerfil && (
                     <button
@@ -2851,7 +2852,8 @@ export function InicioOpenDesign({
 
                 {abaPerfil === 'arrotos' && (
                   <section className="od-profile__activity" aria-labelledby="profileArrotos">
-                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2><span>{arrotosDoPerfil.length}</span></div>
+                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Áudios do perfil</h2>{estadoDosArrotosExibidos === 'pronto' && <span>{arrotosDoPerfil.length}</span>}</div>
+                    <p className="od-profile__best-caption">Áudios deixados neste perfil. Eles não são resultados da Arena.</p>
                     {donoDoPerfil && (
                       <div className="od-profile__record-cta">
                         <button
@@ -2867,13 +2869,14 @@ export function InicioOpenDesign({
                         </button>
                         <div>
                           <p className="od-profile__record-eyebrow">ARROTO DIRETO</p>
-                          <h3>Grava um arroto pra deixar aqui.</h3>
+                          <h3>Gravar áudio para o perfil</h3>
                         </div>
                       </div>
                     )}
-                    {estadoArrotosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
-                    {estadoArrotosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
-                    {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.map((arroto) => (
+                    {estadoDosArrotosExibidos === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
+                    {estadoDosArrotosExibidos === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
+                    {estadoDosArrotosExibidos === 'pronto' && arrotosDoPerfil.length === 0 && <div className="od-profile__empty"><h3>Ainda não tem arroto neste perfil.</h3><p>Os áudios publicados no perfil aparecem aqui.</p></div>}
+                    {estadoDosArrotosExibidos === 'pronto' && arrotosDoPerfil.map((arroto) => (
                       <article key={arroto.id} className="od-profile__post">
                         <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
                         <h3 style={{ margin: '7px 0', fontSize: 16 }}>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
@@ -3235,6 +3238,10 @@ export function InicioOpenDesign({
         handleInicial={perfilExibido?.handle ?? ''}
         bioInicial={perfilExibido?.bio ?? ''}
         cidadeInicial={perfilExibido?.cidade ?? ''}
+        temCapa={Boolean(perfilExibido?.capaUrl)}
+        capaEnviando={capaEnviando}
+        aoTrocarCapa={() => inputDaCapa.current?.click()}
+        aoRemoverCapa={() => void removerCapaDoPerfil()}
         redesIniciais={{
           instagram: perfilExibido?.instagram,
           tiktok: perfilExibido?.tiktok,

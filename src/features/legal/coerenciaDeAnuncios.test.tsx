@@ -43,7 +43,7 @@ const RESULTADO: ScoreResult = {
   partialScores: { duration: 76, power: 88, depth: 92, texture: 84, origin: 60 },
 };
 
-/** A frase que só pode existir quando NENHUM anúncio pode ser servido. */
+/** Nunca inferir ausência total de anúncios ou scripts a partir dos slots. */
 const NEGA_ANUNCIO = 'Não exibe anúncios nesta versão';
 
 /**
@@ -54,12 +54,16 @@ const NEGA_ANUNCIO = 'Não exibe anúncios nesta versão';
  */
 async function renderizarSob(ambiente: Record<string, string | undefined>) {
   vi.resetModules();
+  for (const chave of ['VITE_FEATURE_ADSTERRA', 'VITE_ADSENSE_CLIENT', 'VITE_ADSENSE_SLOT_RESULT', 'VITE_ADSENSE_SLOT_FEED', 'VITE_ADSENSE_SLOT_SIDEBAR']) {
+    vi.stubEnv(chave, undefined);
+  }
   for (const [chave, valor] of Object.entries(ambiente)) {
     vi.stubEnv(chave, valor);
   }
 
   const { ResultadoScreen } = await import('../audio/resultado/ResultadoScreen');
   const { PoliticaDePrivacidade } = await import('./PoliticaDePrivacidade');
+  const { SlotPatrocinadoDoFeed } = await import('../novo-aue/SlotPatrocinadoDoFeed');
 
   const telaDeResultado = renderToStaticMarkup(
     createElement(ResultadoScreen, {
@@ -82,7 +86,8 @@ async function renderizarSob(ambiente: Record<string, string | undefined>) {
     createElement(MemoryRouter, null, createElement(PoliticaDePrivacidade)),
   );
 
-  return { telaDeResultado, politica };
+  const feed = renderToStaticMarkup(createElement(SlotPatrocinadoDoFeed));
+  return { telaDeResultado, politica, feed };
 }
 
 /** O que caracteriza um bloco de AdSense montado de verdade na marcação. */
@@ -96,7 +101,7 @@ afterEach(() => {
 });
 
 describe('a política e o AdBanner contam a mesma história', () => {
-  it('sem configuração: a tela não serve anúncio e a política pode negar', async () => {
+  it('sem slots configurados: não afirma ausência de anúncios ou scripts', async () => {
     const { telaDeResultado, politica } = await renderizarSob({
       VITE_ADSENSE_CLIENT: undefined,
       VITE_ADSENSE_SLOT_RESULT: undefined,
@@ -104,7 +109,10 @@ describe('a política e o AdBanner contam a mesma história', () => {
 
     expect(servindoAnuncio(telaDeResultado)).toBe(false);
     expect(telaDeResultado).not.toContain('ca-pub-');
-    expect(politica).toContain(NEGA_ANUNCIO);
+    expect(politica).not.toContain(NEGA_ANUNCIO);
+    expect(politica).not.toContain('Nenhum script de');
+    expect(politica).not.toContain('nenhum cookie de anúncio');
+    expect(politica).toContain('Os espaços configuráveis de anúncios');
   });
 
   it('com cliente e slot de resultado: a tela serve anúncio e a política ADMITE', async () => {
@@ -130,16 +138,35 @@ describe('a política e o AdBanner contam a mesma história', () => {
     expect(politica).toContain('cookies');
   });
 
-  it('cliente sem slot nenhum: nada é servido, e a política volta a poder negar', async () => {
-    // Prova que o slot é carregador da regra, e não decoração: sem ele o
-    // AdBanner não monta o bloco, então negar continua sendo verdade.
+  it('cliente sem slot nenhum: não promete ausência de scripts ou anúncios', async () => {
+    // Sem slot o AdBanner não monta o bloco; o HTML pode carregar scripts à parte.
     const { telaDeResultado, politica } = await renderizarSob({
       VITE_ADSENSE_CLIENT: 'ca-pub-5542349230926522',
       VITE_ADSENSE_SLOT_RESULT: undefined,
     });
 
     expect(servindoAnuncio(telaDeResultado)).toBe(false);
-    expect(politica).toContain(NEGA_ANUNCIO);
+    expect(politica).not.toContain(NEGA_ANUNCIO);
+    expect(politica).toContain('Os espaços configuráveis de anúncios');
+  });
+
+  it.each([
+    ['1', undefined, true, false],
+    ['0', '1234567890', false, true],
+    ['1', '1234567890', true, true],
+    ['0', undefined, false, false],
+  ])('descreve Adsterra=%s e slot AdSense=%s sem confundir as redes', async (adsterra, slot, temAdsterra, temAdSense) => {
+    const { telaDeResultado, politica, feed } = await renderizarSob({
+      VITE_FEATURE_ADSTERRA: adsterra,
+      VITE_ADSENSE_CLIENT: 'ca-pub-5542349230926522',
+      VITE_ADSENSE_SLOT_RESULT: slot,
+    });
+    expect(feed.includes('adsterra-native-container')).toBe(temAdsterra);
+    expect(politica.includes('Adsterra')).toBe(temAdsterra);
+    expect(servindoAnuncio(telaDeResultado)).toBe(temAdSense);
+    expect(politica.includes('Google AdSense')).toBe(temAdSense);
+    expect(politica).not.toContain(NEGA_ANUNCIO);
+    expect(politica).not.toContain('Nenhum script de');
   });
 
   it('a lista de "o que o Auê não faz" não fala mais de publicidade', async () => {

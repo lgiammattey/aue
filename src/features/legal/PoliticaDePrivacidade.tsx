@@ -253,14 +253,12 @@ export const PoliticaDePrivacidade: React.FC = () => {
       {/*
         ANÚNCIOS — texto DERIVADO da configuração, não escrito à mão.
 
-        Ver `anunciosAtivos.ts`: a frase muda junto com as variáveis do AdSense,
-        e `coerenciaDeAnuncios.test.tsx` monta a tela de resultado para conferir
-        que os dois lados concordam. Antes, esta afirmação era uma frase solta na
-        lista de "o que o Auê não faz" — e bastava preencher duas variáveis na
-        Vercel para o documento legal publicado virar mentira, sem nada quebrar.
+        A configuração do AdSense e a flag da Adsterra são independentes.
+        O HTML de algumas páginas também carrega o script do Google, então a
+        ausência de slots configurados não prova ausência de scripts ou cookies.
       */}
       <Secao titulo="Anúncios">
-        {ANUNCIOS_ATIVOS ? (
+        {ANUNCIOS_ATIVOS && (
           <>
             <p>
               Esta versão <strong>exibe anúncios do Google AdSense</strong>. Eles
@@ -274,12 +272,15 @@ export const PoliticaDePrivacidade: React.FC = () => {
               qualquer coisa ligada à sua identidade anônima.
             </p>
           </>
-        ) : (
+        )}
+        {FLAGS.anunciosAdsterra && (
           <p>
-            <strong>Não exibe anúncios nesta versão.</strong> Nenhum script de
-            publicidade é carregado e nenhum cookie de anúncio é gravado no seu
-            aparelho.
+            O Auê pode exibir anúncios e links de parceiros da <strong>Adsterra</strong>
+            {' '}no mural.
           </p>
+        )}
+        {!ANUNCIOS_ATIVOS && !FLAGS.anunciosAdsterra && (
+          <p>Os espaços configuráveis de anúncios do feed e do resultado não estão ativos nesta versão.</p>
         )}
       </Secao>
 

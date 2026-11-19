@@ -54,6 +54,7 @@ import './diretorioArena.css';
 import { criarPaginacaoDoMural } from './paginacaoDoMural';
 import './muralArena.css';
 import './perfilArena.css';
+import './authArena.css';
 
 interface Props {
   readonly portaForum?: PortaDeForum;
@@ -2912,13 +2913,20 @@ export function InicioOpenDesign({
 
         {/* ==================== VIEW: AUTH ==================== */}
         {viewAtual === 'auth' && (
-          <section className="auth-shell" style={{ maxWidth: 440, margin: '40px auto' }}>
+          <section className="auth-shell">
             <header className="auth-header">
               <Link to="/" className="auth-brand" aria-label="Auê, página inicial">AUÊ!</Link>
+              <nav aria-label="Navegação principal"><Link to="/">Arena</Link><Link to="/feed">Mural</Link><Link to="/grupos">Grupos</Link></nav>
             </header>
+            <div className="auth-arena__placar"><span>ÁREA DO ARROTADOR</span><span>SUA VEZ DE ENTRAR</span></div>
+            <div className="auth-arena__conteudo">
+              <div className="auth-arena__manifesto" aria-hidden="true">
+                <p>AO SEU COMANDO</p><div>SEU SOM.<br />SUA HISTÓRIA.</div>
+                <svg viewBox="0 0 120 155" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M30 42 42 30h38l12 12 3 76c0 10-15 16-35 16s-35-6-35-16z"/><ellipse cx="61" cy="42" rx="31" ry="8"/><path d="M49 39c1-6 5-9 12-9s11 3 12 9M32 82c25 2 38-18 60-17M30 96c22 2 40-17 63-17"/><circle cx="81" cy="14" r="5"/><circle cx="98" cy="27" r="3"/><circle cx="61" cy="12" r="2"/></svg>
+              </div>
             {painelAuth === 'login' && (
               <form onSubmit={submeterLogin} className="dialog">
-                <h1>Entra na roda</h1>
+                <h1>Entra em campo</h1>
                 <p style={{ color: 'var(--aue-muted)', marginBottom: 16 }}>
                   Entre para soltar arrotos e participar da resenha.
                 </p>
@@ -3034,7 +3042,7 @@ export function InicioOpenDesign({
               <form onSubmit={submeterCadastro} className="dialog auth-signup">
                 <h1>Cria sua conta</h1>
                 <p style={{ color: 'var(--aue-muted)', marginBottom: 16 }}>
-                  Escolhe como a roda vai te chamar. Depois você completa seu perfil.
+                  Escolhe como a galera vai te chamar. Depois você completa seu perfil.
                 </p>
                 <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
                   Apelido
@@ -3113,6 +3121,7 @@ export function InicioOpenDesign({
                 </button>
               </form>
             )}
+            </div>
           </section>
         )}
       </main>

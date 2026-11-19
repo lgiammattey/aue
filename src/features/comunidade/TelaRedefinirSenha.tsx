@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../db/supabase';
 import { criarContaWeb } from '../../plataforma/web/conta';
 import { SENHA_MINIMA, type PortaDeConta } from '../../portas/conta';
+import '../novo-aue/authArena.css';
 
 interface TelaRedefinirSenhaProps {
   portaConta?: PortaDeConta;
@@ -55,54 +56,31 @@ export const TelaRedefinirSenha: React.FC<TelaRedefinirSenhaProps> = ({ portaCon
   };
 
   return (
-    <main
-      style={{
-        minHeight: '100svh',
-        background: 'var(--bg, #000)',
-        color: 'var(--fg, #fff)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-        boxSizing: 'border-box',
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: 420, display: 'grid', gap: 16 }}>
-        <h1 style={{ fontFamily: 'var(--font-display, "Anton", sans-serif)', fontWeight: 400, fontSize: 32, margin: 0, textTransform: 'uppercase' }}>
-          Nova senha
-        </h1>
-
-        {feito && <p role="status">Senha trocada. Te levando de volta pro jogo.</p>}
-
-        {!feito && !pronto && !venceu && <p role="status">Conferindo o link…</p>}
-
-        {!feito && !pronto && venceu && (
-          <p role="alert">
-            Esse link não vale mais ou já foi usado. <Link to="/login" style={{ color: 'inherit' }}>Pede outro na tela de entrar</Link>.
-          </p>
-        )}
-
-        {!feito && pronto && (
-          <form onSubmit={salvar} style={{ display: 'grid', gap: 12 }}>
-            <input
-              type="password"
-              autoComplete="new-password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              placeholder="Nova senha"
-              aria-label="Nova senha"
-              style={{ height: 48, borderRadius: 12, border: '1px solid var(--border-strong, #3a3a3c)', background: 'var(--bg, #000)', color: 'var(--fg, #fff)', padding: '0 14px', fontSize: 16 }}
-            />
-            {erro && <span role="alert" style={{ color: 'var(--danger, #ef4444)', fontSize: 14 }}>{erro}</span>}
-            <button
-              type="submit"
-              disabled={enviando}
-              style={{ height: 52, border: 0, borderRadius: 16, background: 'var(--accent, #c6ff00)', color: 'var(--accent-on, #000)', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}
-            >
-              {enviando ? 'Salvando…' : 'Salvar senha'}
-            </button>
-          </form>
-        )}
+    <main className="auth-arena-reset">
+      <div className="auth-shell">
+        <header className="auth-header">
+          <Link to="/" className="auth-brand" aria-label="Auê, página inicial">AUÊ!</Link>
+          <nav aria-label="Navegação principal"><Link to="/">Arena</Link><Link to="/feed">Mural</Link><Link to="/grupos">Grupos</Link></nav>
+        </header>
+        <div className="auth-arena__placar"><span>ÁREA DO ARROTADOR</span><span>ACESSO À CONTA</span></div>
+        <div className="auth-arena__conteudo">
+          <div className="auth-arena__manifesto" aria-hidden="true"><p>DE VOLTA AO JOGO</p><div>SEU SOM.<br />SUA HISTÓRIA.</div></div>
+          <div className="auth-arena__form">
+            <h1>Nova senha</h1>
+            {feito && <p role="status">Senha trocada. Te levando de volta pro jogo.</p>}
+            {!feito && !pronto && !venceu && <p role="status">Conferindo o link…</p>}
+            {!feito && !pronto && venceu && (
+              <p role="alert">Esse link não vale mais ou já foi usado. <Link to="/login">Pede outro na tela de entrar</Link>.</p>
+            )}
+            {!feito && pronto && (
+              <form onSubmit={salvar}>
+                <input type="password" autoComplete="new-password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Nova senha" aria-label="Nova senha" />
+                {erro && <span role="alert" className="auth-arena__erro">{erro}</span>}
+                <button type="submit" className="auth-arena__submit" disabled={enviando}>{enviando ? 'Salvando…' : 'Salvar senha'}</button>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

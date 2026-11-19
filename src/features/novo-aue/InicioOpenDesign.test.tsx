@@ -943,7 +943,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     );
 
     // Painel Login 1:1
-    expect(screen.getByRole('heading', { level: 1, name: 'Entra na roda' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Entra em campo' })).toBeTruthy();
     expect(screen.queryByLabelText('Navegação lateral')).toBeNull();
     expect(screen.queryByLabelText('Painel complementar')).toBeNull();
     expect(screen.getByLabelText('E-mail')).toBeTruthy();

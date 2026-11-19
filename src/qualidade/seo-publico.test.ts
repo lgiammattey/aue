@@ -335,31 +335,19 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
   });
 });
 
-/**
- * O POSICIONAMENTO — o que o buscador precisa entender sem renderizar nada.
- *
- * O Auê é a comunidade de quem gosta de arrotar. Até 19/10/2026 estes testes
- * travavam a frase "jogo de arroto online" como categoria; Luiz trocou o
- * posicionamento: a Arena (onde o arroto ganha nota) é uma parte da comunidade,
- * não a identidade inteira. A voz e as regras de copy estão em
- * `docs/jogo/VOZ.md`, seção "Direção editorial".
- *
- * O defeito que continua valendo é o mesmo: o produto descrito só pela
- * mecânica deixa o buscador sem saber o que ele é. A categoria agora é
- * "comunidade", e uma revisão de copy não pode apagá-la sem perceber.
- */
-describe('SEO público — o Auê se declara uma comunidade de arrotadores', () => {
+/** Mural e Arena: os metadados descrevem o que a pessoa encontra no Auê. */
+describe('SEO público — Arena e mural de arrotos', () => {
   const home = () => ler('../index.html');
   const comoJogar = () => ler('../como-jogar.html');
 
-  it('o título e a descrição da home dizem que é uma comunidade', () => {
+  it('o título e a descrição da home apresentam Arena e mural', () => {
     const html = home();
     const titulo = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? '';
     const descricao = /<meta name="description" content="([^"]+)"/.exec(html)?.[1] ?? '';
 
-    expect(titulo.toLowerCase()).toContain('comunidade de arrotadores');
+    expect(titulo.toLowerCase()).toContain('mural de arrotos');
     expect(titulo.toLowerCase()).toContain('arena');
-    expect(descricao.toLowerCase()).toContain('comunidade de arrotadores');
+    expect(descricao.toLowerCase()).toContain('mural');
     expect(descricao.toLowerCase()).toContain('medição experimental');
   });
 
@@ -367,8 +355,8 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     // O card é o que chega no grupo do WhatsApp. Se ele descrever só a
     // mecânica, o link continua parecendo qualquer coisa.
     const html = home();
-    expect(metaDe(html, 'og:title')?.toLowerCase()).toContain('comunidade');
-    expect(metaDe(html, 'twitter:title')?.toLowerCase()).toContain('comunidade');
+    expect(metaDe(html, 'og:title')?.toLowerCase()).toContain('mural');
+    expect(metaDe(html, 'twitter:title')?.toLowerCase()).toContain('mural');
     expect(metaDe(html, 'og:description')).toContain('Grave seu arroto na Arena');
     expect(metaDe(html, 'twitter:description')).toBe(metaDe(html, 'og:description'));
   });
@@ -383,8 +371,8 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     const textoIndexavel = `${home()} ${comoJogar()}`.toLowerCase();
 
     for (const termo of [
-      'comunidade de quem gosta de arrotar',
-      'comunidades de arrotadores',
+      'mural de arrotos',
+      'publicações públicas',
       'áudios',
       'medição experimental',
     ]) {
@@ -413,7 +401,7 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     const dados = JSON.parse(bloco as string) as Record<string, unknown>;
     expect(dados.applicationCategory).toBe('SocialNetworkingApplication');
     expect(dados.isAccessibleForFree).toBe(true);
-    expect(String(dados.description).toLowerCase()).toContain('comunidade');
+    expect(String(dados.description).toLowerCase()).toContain('mural');
     expect(dados.url).toBe(URL_CANONICA_DA_HOME);
   });
 
@@ -423,7 +411,7 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     const html = comoJogar().toLowerCase();
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
 
-    expect(noscript).toContain('comunidade');
+    expect(noscript).toContain('mural');
     expect(noscript).toContain('gravar');
     expect(noscript).toContain('experimental');
     expect(noscript).not.toContain('arena está sendo preparada');
@@ -518,7 +506,7 @@ describe('SEO público — o Auê se declara uma comunidade de arrotadores', () 
     )?.[1];
 
     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
-    for (const termo of ['engole o ar', 'arrotar alto', 'gás', 'médico', 'arena']) {
+    for (const termo of ['engole ar', 'gás', 'médica', 'arena', 'não existe técnica garantida']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
   });

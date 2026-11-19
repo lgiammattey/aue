@@ -632,6 +632,44 @@
 .od-profile__social a:focus-visible { outline: 2px solid var(--aue-accent); outline-offset: 2px; }
 .od-profile__social svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .od-profile__profile-actions { display: flex; flex: none; gap: 2px; }
+.od-profile__best { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-top: 20px; padding: 18px; border-radius: 14px; background: var(--aue-surface-2); }
+.od-profile__best h2 { margin: 0; color: var(--aue-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.od-profile__best-score { margin: 5px 0 0; font: 40px/1 var(--font-display, 'Anton', sans-serif); }
+.od-profile__best-empty { margin: 10px 0 0; font-weight: 700; }
+.od-profile__best-caption { margin: 7px 0 0; color: var(--aue-muted); font-size: 12px; line-height: 1.4; }
+.od-profile__arena { flex: none; padding: 0 18px; }
+.od-profile__connections { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 10px; }
+.od-profile__connections button { min-height: 44px; padding: 0; border: 0; background: none; color: var(--aue-muted); font: inherit; font-size: 13px; cursor: pointer; }
+.od-profile__connections b { color: var(--aue-text); }
+.od-profile__connections button:focus-visible { outline: 2px solid var(--aue-accent); outline-offset: 2px; }
+/* Perfil como painel de jogo: identidade compacta, placar e atividade. */
+.od-profile__athlete-label { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--aue-line); color: var(--aue-muted); font: 800 11px var(--font-body, Archivo, sans-serif); letter-spacing: .12em; }
+.od-profile__athlete-label span { color: var(--aue-text); font-family: var(--font-display, Anton, sans-serif); font-size: 17px; letter-spacing: 0; }
+.od-profile__athlete.od-profile__hero--plain .od-profile__body { padding: 22px 0 0; }
+.od-profile__athlete .od-profile__topline { min-height: 68px; }
+.od-profile__athlete .od-profile__avatar-wrap, .od-profile__athlete .od-profile__avatar { width: 68px; height: 68px; }
+.od-profile__athlete .od-profile__avatar { border-width: 2px; font-size: 24px; }
+.od-profile__athlete .od-profile__name h1 { font-family: var(--font-body, Archivo, sans-serif); font-size: 24px; font-weight: 800; letter-spacing: -.03em; }
+.od-profile__athlete .od-profile__handle { margin: 5px 0 0; }
+.od-profile__athlete .od-profile__identity { padding-top: 12px; }
+.od-profile__athlete .od-profile__social-line { margin-top: 2px; }
+.od-profile__dashboard { margin-top: 14px; padding: 22px; background: var(--aue-surface); border: 1px solid var(--aue-line); border-radius: 14px; }
+.od-profile__dashboard-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.od-profile__dashboard-head p { margin: 0 0 5px; color: var(--aue-muted); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.od-profile__dashboard-head h2 { margin: 0; font: 28px/1 var(--font-display, Anton, sans-serif); }
+.od-profile__dashboard-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 20px; border-top: 1px solid var(--aue-line); }
+.od-profile__dashboard .od-profile__best { display: block; margin: 0; padding: 18px 16px 0 0; border-radius: 0; background: transparent; }
+.od-profile__dashboard .od-profile__best + .od-profile__best { padding-left: 18px; border-left: 1px solid var(--aue-line); }
+.od-profile__dashboard .od-profile__best h3 { min-height: 28px; margin: 0; color: var(--aue-muted); font: 700 12px/1.3 var(--font-body, Archivo, sans-serif); }
+.od-profile__dashboard .od-profile__best-score { font-size: 42px; }
+.od-profile__best-score span { font: 700 13px var(--font-body, Archivo, sans-serif); color: var(--aue-muted); }
+.od-profile__dashboard .od-profile__best-empty { font: 42px/1 var(--font-display, Anton, sans-serif); }
+.od-profile__dashboard .od-profile__arena { background: var(--aue-accent); color: var(--aue-accent-on, #0a0a08); border: 0; gap: 10px; font-weight: 800; }
+.od-profile__athlete .od-profile__connections { margin-top: 4px; }
+.od-profile .od-profile__tabs-nav { margin-top: 14px; padding: 0; border-bottom: 1px solid var(--aue-line); border-radius: 0; background: transparent; box-shadow: none; }
+.od-profile .od-profile__tab-btn { border-radius: 0; padding: 10px 12px; }
+.od-profile .od-profile__tab-btn.active { background: transparent; box-shadow: inset 0 -3px var(--aue-accent); }
+.od-profile .od-profile__activity { margin-top: 20px; padding: 20px; background: var(--aue-surface); border: 1px solid var(--aue-line); }
 .od-profile__metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 22px 0 0; }
 .od-profile__metrics div { min-width: 0; padding: 11px 12px; border-radius: 12px; background: var(--aue-surface-2); }
 .od-profile__metrics dt { color: var(--aue-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
@@ -693,9 +731,9 @@
 .od-profile__new-post-cta:hover { filter: brightness(1.06); transform: translateY(-1px); }
 .od-profile__new-post-cta:active { transform: scale(.98); }
 .od-profile__new-post-cta:focus-visible { outline: 2px solid var(--aue-text); outline-offset: 2px; }
-.od-profile__record-cta { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 0 20px; text-align: center; }
-.od-profile__record-button { width: 72px; height: 72px; flex: 0 0 72px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--aue-accent, var(--accent, #c6ff00)); color: var(--aue-accent-on, var(--accent-on, #0a0a08)); cursor: pointer; transition: background-color .15s ease, transform .1s ease; }
-.od-profile__record-button:hover { background: var(--accent-strong, #a8d900); }
+.od-profile__record-cta { display: flex; align-items: center; gap: 12px; padding: 16px 0; text-align: left; }
+.od-profile__record-button { width: 48px; height: 48px; flex: 0 0 48px; display: grid; place-items: center; border: 1px solid var(--aue-muted); border-radius: 50%; background: var(--aue-surface-2); color: var(--aue-text); cursor: pointer; transition: background-color .15s ease, transform .1s ease; }
+.od-profile__record-button:hover { background: var(--aue-surface); }
 .od-profile__record-button:active { transform: scale(.96); }
 .od-profile__record-button:focus-visible { outline: 2px solid var(--aue-text); outline-offset: 3px; }
 .od-profile__record-button svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
@@ -2150,6 +2188,7 @@
 
 /* ==================== RESPONSIVO / BOTTOM SHEET MOBILE ==================== */
 @media (max-width: 699px) {
+  .od-profile__best { align-items: flex-start; flex-direction: column; }
   .composer-audio-strip { margin-left: 0; }
   .composer-image-preview { margin-left: 0; }
   .composer-community-context { max-width: 112px; margin: 0 6px; }
@@ -2167,7 +2206,7 @@
   .od-profile__activity { padding: 16px; }
   .conversation-preview { margin-right: 12px; margin-left: 16px; }
   .od-profile__record-cta { gap: 8px; padding: 16px 0 18px; }
-  .od-profile__record-button { width: 64px; height: 64px; flex-basis: 64px; }
+  .od-profile__record-button { width: 48px; height: 48px; flex-basis: 48px; }
   .od-profile__record-button svg { width: 24px; height: 24px; }
   .profile-form__redes { grid-template-columns: 1fr; }
 

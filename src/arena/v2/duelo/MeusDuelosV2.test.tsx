@@ -42,7 +42,7 @@ it('recupera resultado pelo servidor e só baixa o áudio ao pedir', async () =>
   expect(await screen.findByText('Você levou esta rodada.')).toBeTruthy();
   expect(d.recuperar).toHaveBeenCalledExactlyOnceWith(item.id);
   expect(d.baixarAudioRecuperado).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', { name: 'Ouvir adversário' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Abrir áudio do adversário' }));
   expect(await screen.findByLabelText('Áudio do adversário')).toBeTruthy();
   expect(d.baixarAudioRecuperado).toHaveBeenCalledExactlyOnceWith(item.id, 'desafiante');
   fireEvent.click(screen.getByRole('button', { name: 'Voltar para desafios' }));
@@ -55,7 +55,7 @@ it('usa o lado da sessão ao apresentar resultado do respondente', async () => {
   render(<MeusDuelosV2 duelo={duelo} aoVoltar={vi.fn()} />);
   fireEvent.click(await screen.findByRole('button', { name: 'Abrir desafio 1' }));
   expect(await screen.findByText('Seu adversário levou esta rodada.')).toBeTruthy();
-  fireEvent.click(screen.getByRole('button', { name: 'Ouvir minha tentativa' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Abrir minha gravação' }));
   expect(await screen.findByLabelText('Sua gravação')).toBeTruthy();
   expect(d.baixarAudioRecuperado).toHaveBeenCalledExactlyOnceWith(item.id, 'desafiante');
 });

@@ -82,7 +82,6 @@ describe('Tela de Perfil Open Design', () => {
     expect(screen.getByRole('button', { name: 'Editar perfil' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Compartilhar perfil' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Trocar foto' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Adicionar capa' })).toBeTruthy();
     expect(screen.getByLabelText('Escolher nova foto de perfil')).toBeTruthy();
     expect(screen.getByLabelText('Escolher nova capa do perfil')).toBeTruthy();
   });
@@ -95,6 +94,10 @@ describe('Tela de Perfil Open Design', () => {
     expect(screen.getByRole('tab', { name: /Marcados/ })).toBeTruthy();
     expect(screen.getByRole('tab', { name: /Arrotos/ })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Salvos' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: /Arrotos/ }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByRole('link', { name: 'Ir pra Arena' }).getAttribute('href')).toBe('/arena');
+    expect(screen.getByRole('heading', { name: 'Melhor nota publicada' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('tab', { name: /Posts/ }));
     expect(screen.getByRole('button', { name: 'Criar novo post' }).textContent).toContain('Alguma merda');
   });
 
@@ -120,5 +123,14 @@ describe('Tela de Perfil Open Design', () => {
     expect(screen.queryByRole('button', { name: 'Trocar foto' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Adicionar capa' })).toBeNull();
     expect(screen.queryByRole('tab', { name: 'Salvos' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Ir pra Arena' })).toBeNull();
+  });
+
+  it('identifica a nota publicada sem tratar áudios do perfil como recordes da Arena', async () => {
+    abrir({ ...outraPessoa, melhorNota: 87 });
+    expect(await screen.findByRole('heading', { name: 'Melhor nota publicada' })).toBeTruthy();
+    expect(screen.getAllByText('87').length).toBeGreaterThan(0);
+    expect(screen.getByText('Em publicações')).toBeTruthy();
+    expect(screen.getByText('Áudios deixados neste perfil. Eles não são resultados da Arena.')).toBeTruthy();
   });
 });

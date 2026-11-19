@@ -152,9 +152,8 @@ jobs:
           VITE_FEATURE_DUELO_PRIVADO: '1'
           # Placements Adsterra habilitados conforme decisão do Luiz em 2026-10-20.
           VITE_FEATURE_ADSTERRA: '1'
-          # No agendamento, publicar sem as páginas dos grupos apagaria do Google
-          # o que já estava lá: se a leitura falhar, o build falha.
-          EXIGIR_GRUPOS: ${{ github.event_name == 'schedule' && '1' || '0' }}
+          # Toda publicação preserva as páginas de grupos já descobertas pelo Google.
+          EXIGIR_GRUPOS: '1'
         run: npm run build
 
       - name: Publicar

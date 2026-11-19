@@ -59,7 +59,6 @@ export const BarraLateral = memo(function BarraLateral({
   const navigate = useNavigate();
 
   const isFeedAtivo = viewAtual === 'feed' || viewAtual === 'seguindo';
-  const isComunidadesAtivo = viewAtual === 'comunidades' || viewAtual === 'comunidade';
   const isTropaAtivo = viewAtual === 'seguindo';
   const isPerfilAtivo = viewAtual === 'perfil';
 
@@ -86,17 +85,14 @@ export const BarraLateral = memo(function BarraLateral({
             navigate('/feed');
           }}
         >
-          <IconeDaNavegacao tipo="feed" />Feed
+          <IconeDaNavegacao tipo="feed" />Mural
         </button>
         <button
-          className={`nav-item ${viewAtual === 'comunidades' || viewAtual === 'explorar' ? 'active' : ''}`}
+          className="nav-item"
           type="button"
-          onClick={() => {
-            aoMudarView('comunidades');
-            navigate('/comunidades');
-          }}
+          onClick={() => navigate('/grupos')}
         >
-          <IconeDaNavegacao tipo="grupos" />Comunidades
+          <IconeDaNavegacao tipo="grupos" />Grupos WhatsApp
         </button>
         <button
           className={`nav-item ${viewAtual === 'seguindo' ? 'active' : ''}`}
@@ -157,23 +153,20 @@ export const BarraLateral = memo(function BarraLateral({
             aoMudarView('feed');
             navigate('/feed');
           }}
-          aria-label="Feed de resenhas"
+          aria-label="Mural"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1V11z" />
           </svg>
-          <span>Feed</span>
+          <span>Mural</span>
         </button>
 
-        {/* 2. Comunidades */}
+        {/* 2. Grupos externos */}
         <button
           type="button"
-          className={`mobile-nav-item ${isComunidadesAtivo ? 'active' : ''}`}
-          onClick={() => {
-            aoMudarView('comunidades');
-            navigate('/comunidades');
-          }}
-          aria-label="Comunidades"
+          className="mobile-nav-item"
+          onClick={() => navigate('/grupos')}
+          aria-label="Grupos WhatsApp"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -181,7 +174,7 @@ export const BarraLateral = memo(function BarraLateral({
             <path d="M23 21v-2a4 4 0 00-3-3.87" />
             <path d="M16 3.13a4 4 0 010 7.75" />
           </svg>
-          <span>Comunidades</span>
+          <span>Grupos</span>
         </button>
 
         {/* 3. Botão Central de Arroto (O Botão de Ouro) */}

@@ -24,25 +24,29 @@ export interface FluxoArenaV2Props {
 /** Composição local: dependências explícitas evitam conexão acidental com produção. */
 export function FluxoArenaV2({ modo, duelo, compartilhar, origem, lerToken, captura, capturaSemLaudo, aoVoltar, telemetria }: FluxoArenaV2Props) {
   const [tela, setTela] = useState<'arena' | 'duelo' | 'meus' | 'encerrado'>(modo === 'criar' ? 'arena' : 'duelo');
+  const [modoAtual, setModoAtual] = useState(modo);
+  const [novaArena, setNovaArena] = useState(0);
   const [tentativa, setTentativa] = useState<TentativaDoDuelo | null>(null);
-  const habilitado = Boolean(duelo && (modo === 'responder' || (compartilhar && origem)));
+  const habilitado = Boolean(duelo && (modoAtual === 'responder' || (compartilhar && origem)));
   const sair = () => { setTentativa(null); setTela('encerrado'); aoVoltar?.(); };
   const usar = (nova: TentativaDoDuelo) => { setTentativa(nova); setTela('duelo'); };
+  const novoDesafio = compartilhar && origem ? () => { setTentativa(null); setModoAtual('criar'); setNovaArena((valor) => valor + 1); setTela('arena'); } : undefined;
 
   return <div className="fluxo-arena-v2">
     {tela !== 'encerrado' && tela !== 'meus' && <div hidden={tela !== 'arena'}>
-      <ArenaV2 telemetria={telemetria} captura={captura} capturaSemLaudo={capturaSemLaudo} aoUsarTentativa={habilitado ? usar : undefined}
-        rotuloUsarTentativa={modo === 'criar' ? 'Criar desafio' : 'Usar esta gravação'}
-        aoVoltar={modo === 'responder' ? () => setTela('duelo') : aoVoltar ? sair : undefined} />
-      {habilitado && modo === 'criar' && <button type="button" onClick={() => setTela('meus')}>Meus desafios</button>}
+      <ArenaV2 key={novaArena} telemetria={telemetria} captura={captura} capturaSemLaudo={capturaSemLaudo} aoUsarTentativa={habilitado ? usar : undefined}
+        rotuloUsarTentativa={modoAtual === 'criar' ? 'Criar desafio' : 'Usar esta gravação'}
+        aoAbrirMeusDesafios={habilitado && modoAtual === 'criar' ? () => setTela('meus') : undefined}
+        aoVoltar={modoAtual === 'responder' ? () => setTela('duelo') : aoVoltar ? sair : undefined} />
       {!habilitado && <p role="status">O duelo não está disponível neste ambiente. Sua gravação continua local.</p>}
     </div>}
-    <div hidden={tela !== 'duelo'}>
-      {tela !== 'encerrado' && habilitado && duelo && modo === 'responder' && <EntradaDueloV2 duelo={duelo} lerToken={lerToken} tentativa={tentativa} aoGravar={() => { setTentativa(null); setTela('arena'); }} aoVoltar={sair} />}
-      {habilitado && duelo && modo === 'criar' && tentativa && compartilhar && origem && tela === 'duelo' && <CriarDueloV2 duelo={duelo} compartilhar={compartilhar} origem={origem} tentativa={tentativa} aoVoltar={() => setTela('arena')} />}
+    <div className="duelo-v2__pagina" hidden={tela !== 'duelo'}>
+      <header className="duelo-v2__cabecalho"><a href="/">AUÊ!</a><span>ARENA · DESAFIO</span></header>
+      {tela !== 'encerrado' && habilitado && duelo && modoAtual === 'responder' && <EntradaDueloV2 duelo={duelo} lerToken={lerToken} tentativa={tentativa} compartilhar={compartilhar} origem={origem} aoNovoDesafio={novoDesafio} aoGravar={() => { setTentativa(null); setTela('arena'); }} aoVoltar={sair} />}
+      {habilitado && duelo && modoAtual === 'criar' && tentativa && compartilhar && origem && tela === 'duelo' && <CriarDueloV2 duelo={duelo} compartilhar={compartilhar} origem={origem} tentativa={tentativa} aoVoltar={() => setTela('arena')} />}
       {!habilitado && <section><p role="status">O duelo não está disponível neste ambiente.</p><button type="button" onClick={sair}>Voltar</button></section>}
     </div>
-    {tela === 'meus' && duelo && compartilhar && origem && <MeusDuelosV2 duelo={duelo} compartilhar={compartilhar} origem={origem} aoVoltar={() => setTela('arena')} />}
+    {tela === 'meus' && duelo && compartilhar && origem && <div className="duelo-v2__pagina"><header className="duelo-v2__cabecalho"><a href="/">AUÊ!</a><span>ARENA · DESAFIOS</span></header><MeusDuelosV2 duelo={duelo} compartilhar={compartilhar} origem={origem} aoNovoDesafio={novoDesafio} aoVoltar={() => setTela('arena')} /></div>}
     {tela === 'encerrado' && <p>Fluxo encerrado.</p>}
   </div>;
 }

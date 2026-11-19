@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { LayoutPublico, LinksPublicos, SecaoPublica } from './LayoutPublico';
+import { LinksPublicos, SecaoPublica } from './LayoutPublico';
+import { LayoutArenaPublica as LayoutPublico } from './LayoutArenaPublica';
 
 /**
  * `/como-jogar` — a página que explica o Auê por escrito. A URL fica (ela está
@@ -19,40 +20,36 @@ export const ComoJogar: React.FC = () => (
   <LayoutPublico
     eyebrow="Guia rápido"
     titulo="Como funciona o Auê"
-    resumo="O Auê é a comunidade de quem gosta de arrotar. Você entra, ouve, conversa e pode gravar seu arroto na Arena."
+    resumo="Seu arroto merece mais do que desaparecer no sofá. Grave, dê o play e decida se a obra vai ganhar plateia."
   >
-    <SecaoPublica eyebrow="As comunidades" titulo="Cada turma tem seu canto">
+    <SecaoPublica eyebrow="O mural" titulo="Toda lenda tem sua torcida">
       <p>
-        Quem gosta de arrotar se junta por comunidade. Dá pra ler e ouvir tudo sem conta; pra
-        publicar e responder, precisa de conta.
+        No mural, dá pra acompanhar as publicações públicas da galera. Pra publicar ou responder, você precisa de uma conta.
       </p>
-      <p>Os grupos de WhatsApp e Telegram são outra coisa: ficam fora do Auê.</p>
+      <p>Quer levar a resenha pro zap? Os grupos de WhatsApp ficam fora do Auê.</p>
       <LinksPublicos
         links={[
-          { para: '/comunidades', rotulo: 'Ver as comunidades' },
+          { para: '/feed', rotulo: 'Abrir o mural' },
           { para: '/grupos', rotulo: 'Grupos externos' },
         ]}
       />
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="A Arena" titulo="Grave na Arena">
+    <SecaoPublica eyebrow="A Arena" titulo="Microfone pronto. Solta o som.">
       <p>
-        Você pode gravar e ouvir seu arroto. O microfone só é pedido quando você decide gravar.
-        Quando disponível, a medição de duração e potência relativa é experimental.
+        Toque pra gravar, solte o arroto e dê o play. O microfone só é pedido quando você decide gravar. Quando disponível, a medição de duração e potência relativa é experimental.
       </p>
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="Seu áudio" titulo="Você decide o que fazer com o áudio">
+    <SecaoPublica eyebrow="Seu áudio" titulo="Seu arroto, suas regras">
       <p>
-        Dá pra baixar a gravação e compartilhá-la em aparelhos compatíveis. O áudio não é
-        publicado automaticamente na comunidade.
+        Ficou bom? Baixe ou compartilhe em aparelhos compatíveis. O áudio não é publicado automaticamente no mural.
       </p>
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="Sem instalar" titulo="Direto no navegador, de graça">
+    <SecaoPublica eyebrow="Sem instalar" titulo="Sem download. Sem desculpa.">
       <p>
-        A Arena funciona no navegador do celular ou do computador, sem baixar um aplicativo.
-        A gravação pode ser feita sem cadastro.
+        A Arena funciona no navegador do celular ou computador, de graça e sem baixar um aplicativo. Pra gravar, nem precisa de cadastro.
       </p>
       <LinksPublicos links={[{ para: '/privacidade', rotulo: 'O que o Auê faz com o seu áudio' }]} />
     </SecaoPublica>

@@ -17,6 +17,14 @@ de uma comunidade movimentada ou de um placar público para a tela fazer sentido
 
 ## Princípios visuais
 
+**Nova direção aprovada pelo Luiz:** começar pela Arena com fundo claro, visual
+editorial de esporte, navegação superior enxuta e ilustrações discretas de
+refrigerante e futebol. A ação e a medição ganham espaço; o verde fica
+concentrado na ação e no sinal. A tipografia mantém os arquivos existentes
+enquanto a família definitiva é explorada. Abaixo ficam os princípios anteriores
+que ainda se aplicam ao comportamento e à honestidade das medições; quando
+discordarem da nova aparência, esta direção visual prevalece.
+
 - Tratar a disputa como esporte sério de um jeito engraçado: preto e grafite,
   branco de alto contraste, placas e números com peso. Sem estética de sujeira,
   infantilização ou cores de funções corporais.
@@ -115,6 +123,13 @@ experiência: o objetivo de 30 segundos será medido em aparelhos reais, incluin
 permissão e envio, sem promessa de controlar o tempo gasto no WhatsApp.
 
 ## Novo duelo — entrega posterior
+
+Na implementação local, convite, resposta e placar usam a nova linguagem
+visual da Arena. Após o resultado, compartilhar abre uma prévia do texto e
+“Pedir revanche” inicia **um desafio independente**, que a própria pessoa pode
+enviar ao mesmo adversário. Ainda não há rounds vinculados nem placar acumulado.
+O player do placar só carrega o áudio após o pedido de quem está jogando e a
+autorização do servidor.
 
 - O convite mostra **“Você foi desafiado”** e **“Grave sua resposta para revelar
   o confronto”**, com uma ação direta. Não exibe duração, nota, onda ou áudio do

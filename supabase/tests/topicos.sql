@@ -175,7 +175,7 @@ DO $t$ BEGIN
 END $t$;
 
 -- =============================================================================
--- 3. Membro cria tópico e responde; não-membro não
+-- 3. Criar tópico exige participação; responder a publicação pública não
 -- =============================================================================
 :como_a
 DO $t$
@@ -204,9 +204,23 @@ END $t$;
 :como_c
 DO $t$
 BEGIN
-  -- Conta promovida, mas nunca entrou na cerveja-gelada: não cria nem responde.
+  -- Conta promovida, mas nunca entrou na cerveja-gelada: não cria tópico,
+  -- mas pode responder no mural. A subtransação descarta essa resposta para
+  -- não alterar as contagens e a árvore verificadas mais adiante.
   PERFORM t_topicos.erro($$SELECT public.criar_topico('cerveja-gelada', 'Posso?', 'não')$$, '42501', 'nao_e_membro');
-  PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, 'não sou membro')$$, t_topicos.pegar('t2')), '42501', 'nao_e_membro');
+  BEGIN
+    DECLARE v_resposta public.respostas;
+    BEGIN
+      v_resposta := public.responder_topico(t_topicos.pegar('t2'), 'não sou membro');
+      IF v_resposta.autor_id IS DISTINCT FROM 'a0000000-0000-0000-0000-000000000003'::uuid
+         OR v_resposta.corpo IS DISTINCT FROM 'não sou membro' THEN
+        RAISE EXCEPTION 'TESTE FALHOU: resposta sem filiação perdeu autor ou texto';
+      END IF;
+      RAISE SQLSTATE 'ZX001';
+    END;
+  EXCEPTION WHEN SQLSTATE 'ZX001' THEN NULL;
+  END;
+  PERFORM t_topicos.ok(true, 'conta promovida pode responder sem participar da comunidade');
   -- Comunidade que não existe.
   PERFORM t_topicos.erro($$SELECT public.criar_topico('nao-existe', 'x', 'y')$$, '22023', 'comunidade_inexistente');
   PERFORM t_topicos.erro($$SELECT public.criar_topico('', 'x', 'y')$$, '22023', 'comunidade_inexistente');
@@ -405,9 +419,12 @@ BEGIN
   v_t := public.criar_topico('bonde-geral', repeat('a', 120), 'ok');
   PERFORM t_topicos.ok(char_length(v_t.titulo) = 120, 'título de 120 passa');
   PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', repeat('a', 121), 'ok')$$, '22023', 'titulo_invalido');
-  PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', '', 'ok')$$, '22023', 'titulo_invalido');
-  PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', E'  \n\t ', 'ok')$$, '22023', 'titulo_invalido');
-  PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', NULL, 'ok')$$, '22023', 'titulo_invalido');
+  v_t := public.criar_topico('bonde-geral', '', 'ok');
+  PERFORM t_topicos.ok(v_t.titulo = 'ok', 'título vazio usa o texto');
+  v_t := public.criar_topico('bonde-geral', E'  \n\t ', 'ok');
+  PERFORM t_topicos.ok(v_t.titulo = 'ok', 'título só com espaços usa o texto');
+  v_t := public.criar_topico('bonde-geral', NULL, 'ok');
+  PERFORM t_topicos.ok(v_t.titulo = 'ok', 'título nulo usa o texto');
   v_t := public.criar_topico('bonde-geral', ' ' || repeat('a', 120) || ' ', 'ok');
   PERFORM t_topicos.ok(char_length(v_t.titulo) = 120, 'espaço nas pontas não conta');
   v_t := public.criar_topico('bonde-geral', repeat('😀', 120), 'ok');
@@ -416,30 +433,30 @@ BEGIN
   v_t := public.criar_topico('bonde-geral', E'quebra\n\n   de   linha', 'ok');
   PERFORM t_topicos.ok(v_t.titulo = 'quebra de linha', 'título colapsa espaço e quebra de linha');
 
-  v_t := public.criar_topico('bonde-geral', 't', repeat('b', 1000));
-  PERFORM t_topicos.ok(char_length(v_t.corpo) = 1000, 'corpo de 1000 passa');
-  PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', 't', repeat('b', 1001))$$, '22023', 'corpo_invalido');
+  v_t := public.criar_topico('bonde-geral', 't', repeat('b', 2000));
+  PERFORM t_topicos.ok(char_length(v_t.corpo) = 2000, 'corpo de 2000 passa');
+  PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', 't', repeat('b', 2001))$$, '22023', 'corpo_invalido');
   PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', 't', '')$$, '22023', 'corpo_invalido');
   PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', 't', E' \n ')$$, '22023', 'corpo_invalido');
   PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', 't', NULL)$$, '22023', 'corpo_invalido');
-  v_t := public.criar_topico('bonde-geral', 't', repeat('😀', 1000));
-  PERFORM t_topicos.ok(char_length(v_t.corpo) = 1000, 'emoji conta 1 no corpo');
-  PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', 't', repeat('😀', 1001))$$, '22023', 'corpo_invalido');
+  v_t := public.criar_topico('bonde-geral', 't', repeat('😀', 2000));
+  PERFORM t_topicos.ok(char_length(v_t.corpo) = 2000, 'emoji conta 1 no corpo');
+  PERFORM t_topicos.erro($$SELECT public.criar_topico('bonde-geral', 't', repeat('😀', 2001))$$, '22023', 'corpo_invalido');
 
-  v_r := public.responder_topico(t_topicos.pegar('t1'), repeat('c', 500));
-  PERFORM t_topicos.ok(char_length(v_r.corpo) = 500, 'resposta de 500 passa');
-  PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, repeat('c', 501))$$, t_topicos.pegar('t1')), '22023', 'resposta_invalida');
+  v_r := public.responder_topico(t_topicos.pegar('t1'), repeat('c', 1000));
+  PERFORM t_topicos.ok(char_length(v_r.corpo) = 1000, 'resposta de 1000 passa');
+  PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, repeat('c', 1001))$$, t_topicos.pegar('t1')), '22023', 'resposta_invalida');
   PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, '')$$, t_topicos.pegar('t1')), '22023', 'resposta_invalida');
   PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, NULL)$$, t_topicos.pegar('t1')), '22023', 'resposta_invalida');
-  v_r := public.responder_topico(t_topicos.pegar('t1'), repeat('😀', 500));
-  PERFORM t_topicos.ok(char_length(v_r.corpo) = 500, 'emoji conta 1 na resposta');
-  PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, repeat('😀', 501))$$, t_topicos.pegar('t1')), '22023', 'resposta_invalida');
+  v_r := public.responder_topico(t_topicos.pegar('t1'), repeat('😀', 1000));
+  PERFORM t_topicos.ok(char_length(v_r.corpo) = 1000, 'emoji conta 1 na resposta');
+  PERFORM t_topicos.erro(format($$SELECT public.responder_topico(%L, repeat('😀', 1001))$$, t_topicos.pegar('t1')), '22023', 'resposta_invalida');
 
   -- Mesmos limites na edição.
   PERFORM t_topicos.erro(format($$SELECT public.editar_topico(%L, repeat('a', 121))$$, t_topicos.pegar('t1')), '22023', 'titulo_invalido');
-  PERFORM t_topicos.erro(format($$SELECT public.editar_topico(%L, NULL, repeat('b', 1001))$$, t_topicos.pegar('t1')), '22023', 'corpo_invalido');
+  PERFORM t_topicos.erro(format($$SELECT public.editar_topico(%L, NULL, repeat('b', 2001))$$, t_topicos.pegar('t1')), '22023', 'corpo_invalido');
   PERFORM t_topicos.erro(format($$SELECT public.editar_topico(%L)$$, t_topicos.pegar('t1')), '22023', 'nada_para_editar');
-  PERFORM t_topicos.erro(format($$SELECT public.editar_resposta(%L, repeat('c', 501))$$, t_topicos.pegar('r1')), '22023', 'resposta_invalida');
+  PERFORM t_topicos.erro(format($$SELECT public.editar_resposta(%L, repeat('c', 1001))$$, t_topicos.pegar('r1')), '22023', 'resposta_invalida');
 END $t$;
 :como_admin
 DO $t$ BEGIN

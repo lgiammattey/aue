@@ -72,6 +72,20 @@ describe('Arena v2', () => {
     expect(registrar).toHaveBeenCalledWith('laudo_indisponivel');
     expect(registrar).not.toHaveBeenCalledWith('laudo_disponivel');
   });
+  it('mantém o desafio visível e explica quando a duração não pôde ser medida', async () => {
+    const duble = aparelho();
+    duble.captura.parar.mockResolvedValueOnce({ ok: true, audio: new Blob(['som']), formato: 'audio/webm', ambiente: tom(0.5, 0.01), emissao: new Float32Array(1000), sampleRate: 1000 });
+    const avancar = vi.fn();
+    render(<ArenaV2 captura={duble.captura} aoUsarTentativa={avancar} rotuloUsarTentativa="Criar desafio" />);
+    await iniciar(duble);
+    fireEvent.click(screen.getByRole('button', { name: 'Finalizar gravação' }));
+    const botao = await screen.findByRole('button', { name: 'Criar desafio' });
+    expect(botao.hasAttribute('disabled')).toBe(true);
+    expect(screen.getByText(/Não conseguimos medir a duração desta tentativa/)).toBeTruthy();
+    expect(screen.getByText(/grave outra tentativa com medição disponível/)).toBeTruthy();
+    fireEvent.click(botao);
+    expect(avancar).not.toHaveBeenCalled();
+  });
   it('não pede microfone na entrada e abre o mural pela rota existente', () => {
     const { captura } = aparelho();
     render(<ArenaV2 captura={captura} />);

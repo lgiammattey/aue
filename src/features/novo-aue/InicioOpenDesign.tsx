@@ -50,6 +50,10 @@ import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
 import './InicioOpenDesign.css';
+import './diretorioArena.css';
+import { criarPaginacaoDoMural } from './paginacaoDoMural';
+import './muralArena.css';
+import './perfilArena.css';
 
 interface Props {
   readonly portaForum?: PortaDeForum;
@@ -264,7 +268,7 @@ export function InicioOpenDesign({
   const [estadoTopicosDaComunidade, setEstadoTopicosDaComunidade] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
 
   // Perfil
-  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'marcados' | 'arrotos' | 'salvos'>('posts');
+  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'marcados' | 'arrotos' | 'salvos'>('arrotos');
   const [perfilAtivo, setPerfilAtivo] = useState<PerfilPublico | null>(null);
   const [topicosDaComunidadeDoPerfil, setTopicosDaComunidadeDoPerfil] = useState<readonly ItemDoFeed[]>([]);
   const [publicacoesPessoaisDoPerfil, setPublicacoesPessoaisDoPerfil] = useState<readonly ItemDoFeed[]>([]);
@@ -273,6 +277,7 @@ export function InicioOpenDesign({
   const [estadoMarcadasDoPerfil, setEstadoMarcadasDoPerfil] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
   const [arrotosDoPerfil, setArrotosDoPerfil] = useState<readonly ArrotoDoPerfil[]>([]);
   const [estadoArrotosDoPerfil, setEstadoArrotosDoPerfil] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
+  const [handleDosArrotos, setHandleDosArrotos] = useState<string | null>(null);
   const [estadoPerfil, setEstadoPerfil] = useState<'carregando' | 'pronto' | 'pendente' | 'inexistente' | 'erro'>('carregando');
   const [fichaSocialPendente, setFichaSocialPendente] = useState(false);
   const [estadoDaFicha, setEstadoDaFicha] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro' | 'salvando'>('ocioso');
@@ -306,6 +311,8 @@ export function InicioOpenDesign({
   const [meuPerfil, setMeuPerfil] = useState<PerfilPublico | null>(null);
 
   const [comunidades, setComunidades] = useState<readonly ComunidadeDoForum[]>([]);
+  const [estadoComunidades, setEstadoComunidades] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
+  const [tentativaComunidades, setTentativaComunidades] = useState(0);
   const [itensFeed, setItensFeed] = useState<readonly ItemDoFeed[]>([]);
   const [previasDasConversas, setPreviasDasConversas] = useState<ReadonlyMap<string, readonly ItemComentario[]>>(() => new Map());
   const [previasEmCarregamento, setPreviasEmCarregamento] = useState<ReadonlySet<string>>(() => new Set());
@@ -315,6 +322,11 @@ export function InicioOpenDesign({
   const [filtroDoFeed, setFiltroDoFeed] = useState<FiltroDoFeed>('resenha');
   const [estadoFeed, setEstadoFeed] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
   const [tentativaFeed, setTentativaFeed] = useState(0);
+  const [temMaisFeed, setTemMaisFeed] = useState(false);
+  const [carregandoMaisFeed, setCarregandoMaisFeed] = useState(false);
+  const [erroMaisFeed, setErroMaisFeed] = useState(false);
+  const carregarMaisFeed = useRef<() => void>(() => {});
+  const fimDoFeed = useRef<HTMLDivElement | null>(null);
   const [itensSeguindo, setItensSeguindo] = useState<readonly ItemDoFeed[]>([]);
   const [estadoSeguindo, setEstadoSeguindo] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro' | 'semConta'>('ocioso');
   const [busca, setBusca] = useState('');
@@ -605,6 +617,7 @@ export function InicioOpenDesign({
     const alvo = perfilAtivo ?? meuPerfil;
     if (!alvo) return;
     setEstadoArrotosDoPerfil('carregando');
+    setHandleDosArrotos(alvo.handle);
     arrotosPort.listarArrotos(alvo.handle).then(
       (lista) => {
         if (!ativo) return;
@@ -812,100 +825,113 @@ export function InicioOpenDesign({
     };
   }, [topicoIdParam, forum, pautas, comunidadeAtiva]);
 
-  // Carregar feed geral e lista de comunidades
+  // Duas leituras públicas, intercaladas com cursores independentes sem antecipar itens antigos.
   useEffect(() => {
     let ativo = true;
+    let emAndamento = false;
+    const paginacao = criarPaginacaoDoMural(forum);
     setEstadoFeed('carregando');
-    Promise.all([
-      forum.listarComunidadesDoForum(),
-      forum.explorarTopicos({ limite: 30, ordem: 'recentes' }),
-      forum.listarPublicacoesPessoais?.({ limite: 30 }) ?? Promise.resolve(null),
-    ])
-      .then(async ([resComunidades, resTopicos, resPessoais]) => {
-        if (!ativo) return;
-        if (resComunidades.ok) {
-          setComunidades(resComunidades.valor);
-        }
-        if (!resTopicos.ok) {
-          setItensFeed([]);
-          setEstadoFeed('erro');
-          return;
-        }
-
-        const itens: ItemDoFeed[] = [];
+    setEstadoComunidades('carregando');
+    setTemMaisFeed(false);
+    setErroMaisFeed(false);
+    const leituraComunidades = forum.listarComunidadesDoForum().then((resultado) => {
+      if (ativo) {
+        if (resultado.ok) setComunidades(resultado.valor);
+        setEstadoComunidades(resultado.ok ? 'pronto' : 'erro');
+      }
+      return resultado;
+    }).catch(() => {
+      if (ativo) setEstadoComunidades('erro');
+      return { ok: false as const, motivo: 'falhou' as const };
+    });
+    const carregarPagina = async (adicionar: boolean) => {
+      if (emAndamento) return;
+      emAndamento = true;
+      if (adicionar) { setCarregandoMaisFeed(true); setErroMaisFeed(false); }
+      try {
+        const [pagina, resComunidades] = await Promise.all([paginacao.proxima(), leituraComunidades]);
+        const topicos = pagina.entradas.flatMap((entrada) => entrada.tipo === 'comunidade' ? [entrada.valor] : []);
+        const pessoais = pagina.entradas.flatMap((entrada) => entrada.tipo === 'pessoal' ? [entrada.valor] : []);
         const anexosPorTopico = new Map<string, AnexoDoForum>();
         const audioPorTopico = new Map<string, AnexoDeAudioDoTopico>();
-        const topicosPessoais = resPessoais?.ok ? resPessoais.valor.itens : [];
+        const corpos = new Map<string, string>();
+        const removidos = new Set<string>();
         if (forum.listarAnexosDoForum) {
-          const leituraAnexos = await forum.listarAnexosDoForum({
-            topicoIds: [...resTopicos.valor.itens.map((topico) => topico.id), ...topicosPessoais.map((topico) => topico.id)],
-          });
-          if (leituraAnexos.ok) {
-            leituraAnexos.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
-          }
+          const leitura = await forum.listarAnexosDoForum({ topicoIds: [...topicos.map((t) => t.id), ...pessoais.map((p) => p.id)] });
+          if (!leitura.ok) throw new Error('Não foi possível carregar os anexos.');
+          leitura.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
         }
         if (forum.listarAudioDosTopicos) {
-          const leituraAudio = await forum.listarAudioDosTopicos(resTopicos.valor.itens.map((topico) => topico.id));
-          if (leituraAudio.ok) {
-            leituraAudio.valor.forEach(({ topicoId, audio }) => audioPorTopico.set(topicoId, audio));
+          const leitura = await forum.listarAudioDosTopicos(topicos.map((t) => t.id));
+          if (!leitura.ok) throw new Error('Não foi possível carregar os áudios.');
+          leitura.valor.forEach(({ topicoId, audio }) => audioPorTopico.set(topicoId, audio));
+        }
+        // A projeção da lista não possui corpo; consulta pública em lotes evita disparar 30 de uma vez.
+        for (let i = 0; i < topicos.length; i += 6) {
+          await Promise.all(topicos.slice(i, i + 6).map(async (topico) => {
+            const detalhe = await forum.obterTopico(topico.id);
+            if (!detalhe) return; // Adaptadores antigos de teste não implementam essa leitura.
+            if (!detalhe.ok) throw new Error('Não foi possível carregar o conteúdo da publicação.');
+            if (!detalhe.valor) { removidos.add(topico.id); return; }
+            corpos.set(topico.id, detalhe.valor.corpo);
+          }));
+        }
+        const avatares = new Map((resComunidades.ok ? resComunidades.valor : []).map((c) => [c.slug, fonteDoAvatarDaComunidade(c)]));
+        const itens: ItemDoFeed[] = [];
+        for (const entrada of pagina.entradas) {
+          const item = entrada.valor;
+          if (entrada.tipo === 'comunidade' && removidos.has(item.id)) continue;
+          const anexo = anexosPorTopico.get(item.id);
+          let url = anexo?.urlVideo ?? undefined;
+          if (anexo?.caminho) {
+            if (!forum.assinarAnexoDoForum) throw new Error('Anexo indisponível.');
+            const assinatura = await forum.assinarAnexoDoForum(anexo.caminho);
+            if (!assinatura.ok) throw new Error('Não foi possível abrir o anexo.');
+            url = assinatura.valor;
+          }
+          if (entrada.tipo === 'pessoal') {
+            itens.push(paraItemDePublicacaoPessoal(entrada.valor, anexo, url));
+          } else {
+            const t = entrada.valor;
+            const audio = audioDoTopico(audioPorTopico.get(t.id) ?? t.audio, forum);
+            itens.push({ id: `topico-${t.id}`, tipo: 'topico', comunidadeSlug: t.comunidade.slug,
+              comunidadeAvatarUrl: avatares.get(t.comunidade.slug), titulo: t.titulo, corpo: corpos.get(t.id) ?? '',
+              autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo', autorHandle: t.autor.handle ?? undefined,
+              autorAvatarUrl: t.autor.avatarUrl ?? undefined, criadoEm: t.criadoEm, respostasTotal: t.respostasTotal,
+              temAudio: anexo?.tipo === 'audio' || audio.temAudio, enderecoDoAudio: audio.enderecoDoAudio,
+              nota: audio.nota, duracaoSegundos: audio.duracaoSegundos,
+              anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined });
           }
         }
         if (!ativo) return;
-        const avataresDasComunidades = new Map(
-          (resComunidades.ok ? resComunidades.valor : []).map((comunidade) => [
-            comunidade.slug,
-            fonteDoAvatarDaComunidade(comunidade),
-          ]),
-        );
-        for (const t of resTopicos.valor.itens) {
-          const anexo = anexosPorTopico.get(t.id);
-          const url = anexo?.caminho && forum.assinarAnexoDoForum
-            ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
-            : anexo?.urlVideo ?? undefined;
-          if (!ativo) return;
-          const audio = audioDoTopico(audioPorTopico.get(t.id) ?? t.audio, forum);
-          itens.push({
-            id: `topico-${t.id}`,
-            tipo: 'topico',
-            comunidadeSlug: t.comunidade.slug,
-            comunidadeAvatarUrl: avataresDasComunidades.get(t.comunidade.slug),
-            titulo: t.titulo,
-            corpo: '',
-            autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo',
-            autorHandle: t.autor.handle ?? undefined,
-            autorAvatarUrl: t.autor.avatarUrl ?? undefined,
-            criadoEm: t.criadoEm,
-            respostasTotal: t.respostasTotal,
-            temAudio: anexo?.tipo === 'audio' || audio.temAudio,
-            enderecoDoAudio: audio.enderecoDoAudio,
-            nota: audio.nota,
-            duracaoSegundos: audio.duracaoSegundos,
-            anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
-          });
-        }
-        for (const p of topicosPessoais) {
-          const anexo = anexosPorTopico.get(p.id);
-          const url = anexo?.caminho && forum.assinarAnexoDoForum
-            ? await forum.assinarAnexoDoForum(anexo.caminho).then((resultado) => resultado.ok ? resultado.valor : undefined)
-            : anexo?.urlVideo ?? undefined;
-          if (!ativo) return;
-          itens.push(paraItemDePublicacaoPessoal(p, anexo, url));
-        }
-        const ordenados = [...itens].sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
-        setItensFeed(ordenados);
-        void carregarPreviasDasConversas(ordenados);
+        pagina.confirmar();
+        setItensFeed((anteriores) => adicionar ? [...anteriores, ...itens.filter((item) => !anteriores.some((a) => a.id === item.id))] : itens);
+        setTemMaisFeed(pagina.temMais);
+        void carregarPreviasDasConversas(itens);
         setEstadoFeed('pronto');
-      })
-      .catch(() => {
+      } catch {
         if (!ativo) return;
-        setItensFeed([]);
-        setEstadoFeed('erro');
-      });
-
-    return () => {
-      ativo = false;
+        if (adicionar) setErroMaisFeed(true);
+        else { setItensFeed([]); setEstadoFeed('erro'); }
+      } finally {
+        emAndamento = false;
+        if (ativo) setCarregandoMaisFeed(false);
+      }
     };
-  }, [forum, tentativaFeed, carregarPreviasDasConversas]);
+    carregarMaisFeed.current = () => { void carregarPagina(true); };
+    if (viewAtual === 'feed') void carregarPagina(false);
+    return () => { ativo = false; carregarMaisFeed.current = () => {}; };
+  }, [forum, viewAtual, tentativaFeed, tentativaComunidades, carregarPreviasDasConversas]);
+
+  useEffect(() => {
+    const alvo = fimDoFeed.current;
+    if (viewAtual !== 'feed' || estadoFeed !== 'pronto' || !temMaisFeed || carregandoMaisFeed || erroMaisFeed || !alvo || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver((entradas) => {
+      if (entradas.some((entrada) => entrada.isIntersecting)) carregarMaisFeed.current();
+    }, { rootMargin: '300px' });
+    observer.observe(alvo);
+    return () => observer.disconnect();
+  }, [viewAtual, estadoFeed, temMaisFeed, carregandoMaisFeed, erroMaisFeed]);
 
   const itensDoFeedFiltrados = useMemo(() => {
     const porDataDePublicacao = [...itensFeed].sort((a, b) =>
@@ -1948,7 +1974,7 @@ export function InicioOpenDesign({
     if (!preparo.ok) {
       throw new Error(
         preparo.motivo === 'destinoInexistente'
-          ? 'Esse @ não está na roda.'
+          ? 'Esse @ não foi encontrado.'
           : preparo.motivo === 'semConta'
             ? 'Entre na sua conta antes de enviar um arroto.'
             : 'Não deu para preparar o envio agora.',
@@ -2029,6 +2055,7 @@ export function InicioOpenDesign({
     .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
 
   const perfilExibido = perfilAtivo ?? meuPerfil;
+  const estadoDosArrotosExibidos = handleDosArrotos === perfilExibido?.handle ? estadoArrotosDoPerfil : 'carregando';
   const donoDoPerfil = Boolean(perfilExibido?.souEu);
   const postsDoPerfil = useMemo(
     () => [...topicosDaComunidadeDoPerfil, ...publicacoesPessoaisDoPerfil]
@@ -2076,7 +2103,7 @@ export function InicioOpenDesign({
   }, [aoEntrar, estaAutenticado, location.search, navigate]);
 
   return (
-    <div className={`app${viewAtual === 'auth' ? ' app--auth' : ''}`}>
+    <div className={`app${viewAtual === 'auth' ? ' app--auth' : ''}${viewAtual === 'comunidades' ? ' app--diretorio' : ''}${viewAtual === 'feed' ? ' app--mural' : ''}${viewAtual === 'perfil' ? ' app--perfil-arena' : ''}`}>
       {viewAtual !== 'auth' && <BarraLateral
         viewAtual={viewAtual}
         estaAutenticado={estaAutenticado}
@@ -2185,51 +2212,21 @@ export function InicioOpenDesign({
             {/* ==================== VIEW: FEED PRINCIPAL ==================== */}
             {viewAtual === 'feed' && (
           <section aria-label="Feed principal">
-            <div className="hero hero--feed">
-              <span className="hero__kicker">COMUNIDADE DOS ARROTADORES</span>
-              <span className="hero__stamp">CHEGA MAIS.</span>
-              <h1>Arrotar é um dom.<br />Aqui, ele tem turma.</h1>
-              <p>Um lugar pra quem gosta de arrotar, trocar ideia e mostrar o que sabe fazer. Arrota, aprende ou só vem ouvir.</p>
+            <nav className="mural-nav" aria-label="Navegação principal">
+              <Link className="mural-nav__marca" to="/" aria-label="Auê, ir para a Arena">AUÊ!</Link>
+              <div><Link to="/">Arena</Link><Link to="/grupos">Grupos</Link><Link to="/perfil">Perfil</Link></div>
+            </nav>
+            <div className="mural-hero">
+              <span>LINHA DO TEMPO</span>
+              <h1>Mural.</h1>
+              <p>O som da galera, em ordem de chegada.</p>
             </div>
-
-            <div className="feed-head">
+            <div className="mural-controles">
               <div className="feed-filters" role="group" aria-label="Filtrar publicações">
-                <button
-                  type="button"
-                  className="feed-filter"
-                  aria-pressed={filtroDoFeed === 'resenha'}
-                  onClick={() => setFiltroDoFeed('resenha')}
-                >
-                  Resenha
-                </button>
-                <button
-                  type="button"
-                  className="feed-filter"
-                  aria-pressed={filtroDoFeed === 'arrotos'}
-                  onClick={() => setFiltroDoFeed('arrotos')}
-                >
-                  Arrotos
-                </button>
-                <button
-                  type="button"
-                  className="feed-filter"
-                  aria-pressed={filtroDoFeed === 'links'}
-                  onClick={() => setFiltroDoFeed('links')}
-                >
-                  Links
-                </button>
+                <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'resenha'} onClick={() => setFiltroDoFeed('resenha')}>Tudo</button>
+                <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'arrotos'} onClick={() => setFiltroDoFeed('arrotos')}>Arrotos</button>
               </div>
-            </div>
-
-            <div className="composer">
-              <button
-                type="button"
-                className="composer__cta"
-                onClick={() => { setDestinoDoCompositor('pessoal'); setModalCompositorAberto(true); }}
-              >
-                <span className="composer__cta-plus" aria-hidden="true">+</span>
-                <span>Conta sua resenha</span>
-              </button>
+              <button type="button" className="mural-publicar" onClick={() => { setDestinoDoCompositor('pessoal'); setModalCompositorAberto(true); }}>Publicar +</button>
             </div>
 
             <div className="feed">
@@ -2249,10 +2246,10 @@ export function InicioOpenDesign({
               {estadoFeed === 'pronto' && itensDoFeedFiltrados.length === 0 && (
                 <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--aue-muted)' }}>
                   <p>{filtroDoFeed === 'arrotos'
-                    ? 'Ainda não tem arrotos publicados.'
+                    ? temMaisFeed ? 'Buscando mais publicações com áudio…' : 'Ainda não tem arrotos publicados.'
                     : filtroDoFeed === 'links'
                       ? 'Ainda não tem links publicados.'
-                      : 'Não tem conversa por aqui ainda. Puxa a primeira da comunidade.'}
+                      : 'O mural está vazio. Que tal publicar o primeiro arroto?'}
                   </p>
                 </div>
               )}
@@ -2285,6 +2282,12 @@ export function InicioOpenDesign({
                   </div>
                 );
               })}
+              {estadoFeed === 'pronto' && (temMaisFeed || erroMaisFeed) && <div className="feed-mais" ref={fimDoFeed}>
+                {erroMaisFeed && <p role="alert">Não foi possível carregar mais publicações.</p>}
+                <button type="button" onClick={() => carregarMaisFeed.current()} disabled={carregandoMaisFeed}>
+                  {carregandoMaisFeed ? 'Carregando…' : erroMaisFeed ? 'Tentar novamente' : 'Carregar mais'}
+                </button>
+              </div>}
             </div>
 
             <footer style={{ marginTop: 32, borderTop: '1px solid var(--aue-line)', paddingTop: 16 }}>
@@ -2550,10 +2553,14 @@ export function InicioOpenDesign({
         {/* ==================== VIEW: DIRETÓRIO DE COMUNIDADES ==================== */}
         {viewAtual === 'comunidades' && (
           <section className="od-groups" aria-label="Grupos do Auê">
+            <nav className="diretorio-nav" aria-label="Navegação principal">
+              <Link className="diretorio-nav__marca" to="/" aria-label="Auê, voltar à Arena">AUÊ<span>!</span></Link>
+              <div><Link to="/feed">Mural</Link><Link to="/perfil">Perfil</Link><Link to="/">Ir pra Arena ↗</Link></div>
+            </nav>
             <header className="od-groups__head">
               <span className="od-groups__eyebrow">Comunidades</span>
               <h1>Encontre sua comunidade.</h1>
-              <p>Escolha um assunto, abra um tópico e participe da conversa.</p>
+              <p>Seu canto na arquibancada. Chegue junto, ouça os arrotos e encontre sua turma.</p>
               {comunidades.length > 0 && <span className="od-groups__total">{comunidades.length} {comunidades.length === 1 ? 'comunidade aberta' : 'comunidades abertas'}</span>}
             </header>
 
@@ -2601,7 +2608,9 @@ export function InicioOpenDesign({
                   </button>
                 </article>
               ))}
-              {comunidades.length === 0 && <p className="od-groups__empty">Ainda não há comunidades abertas por aqui.</p>}
+              {estadoComunidades === 'carregando' && <p className="od-groups__empty" role="status">Buscando as comunidades…</p>}
+              {estadoComunidades === 'erro' && <div className="od-groups__empty" role="alert"><p>Não foi possível carregar as comunidades agora.</p><button type="button" className="od-groups__join" onClick={() => setTentativaComunidades((atual) => atual + 1)}>Tentar novamente</button></div>}
+              {estadoComunidades === 'pronto' && comunidades.length === 0 && <p className="od-groups__empty">Ainda não há comunidades abertas por aqui.</p>}
             </div>
           </section>
         )}
@@ -2609,9 +2618,13 @@ export function InicioOpenDesign({
         {/* ==================== VIEW: PERFIL ==================== */}
         {viewAtual === 'perfil' && (
           <section className="od-profile" aria-label="Perfil do usuário">
+            <nav className="perfil-arena-nav" aria-label="Navegação principal">
+              <Link className="perfil-arena-nav__marca" to="/" aria-label="Auê, ir para a Arena">AUÊ!</Link>
+              <div><Link to="/">Arena</Link><Link to="/feed">Mural</Link><Link to="/grupos">Grupos</Link></div>
+            </nav>
             {estadoPerfil === 'carregando' && (
               <section className="od-profile__state" aria-live="polite">
-                <h1>Abrindo perfil…</h1><p>Buscando a ficha desta pessoa na roda.</p>
+                <h1>Abrindo perfil…</h1><p>Buscando a ficha desta pessoa.</p>
               </section>
             )}
 
@@ -2625,7 +2638,7 @@ export function InicioOpenDesign({
 
             {estadoPerfil === 'inexistente' && (
               <section className="od-profile__state">
-                <h1>Esse @ não está na roda.</h1>
+                <h1>Esse @ não foi encontrado.</h1>
                 <p>O perfil pode ter mudado de nome ou não existir.</p>
                 <Link className="tab od-profile__button" to="/">Voltar ao início</Link>
               </section>
@@ -2659,7 +2672,7 @@ export function InicioOpenDesign({
               ) : (
                 <section className="od-profile__state">
                   <h1>Sua ficha ainda não está pronta.</h1>
-                  <p>Entre na conta e escolha seu nome e @ antes de participar das comunidades.</p>
+                  <p>Entre na conta e escolha seu nome e @ antes de publicar no mural.</p>
                   <Link className="join od-profile__button" to="/login">Entrar na conta</Link>
                 </section>
               )
@@ -2667,28 +2680,8 @@ export function InicioOpenDesign({
 
             {estadoPerfil === 'pronto' && perfilExibido && (
               <>
-                <article className={`od-profile__hero${perfilExibido.capaUrl ? '' : ' od-profile__hero--plain'}`}>
-                  {perfilExibido.capaUrl && (
-                    <div
-                      className="od-profile__cover od-profile__cover--photo"
-                      style={{ backgroundImage: `url("${perfilExibido.capaUrl}")` }}
-                      aria-label={`Capa de ${perfilExibido.apelido}`}
-                    >
-                      {donoDoPerfil && (
-                        <div className="od-profile__cover-actions">
-                          <button type="button" className="od-profile__cover-action" aria-label="Trocar capa" title="Trocar capa" onClick={() => inputDaCapa.current?.click()} disabled={capaEnviando}>
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h3l1.3-2h7.4l1.3 2h3A1.5 1.5 0 0 1 21.5 9v9.5A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5V9A1.5 1.5 0 0 1 4 7.5Z" /><circle cx="12" cy="13.5" r="3.25" /></svg>
-                          </button>
-                          <button type="button" className="od-profile__cover-action od-profile__cover-remove" aria-label="Remover capa" title="Remover capa" onClick={() => void removerCapaDoPerfil()} disabled={capaEnviando}>×</button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {donoDoPerfil && !perfilExibido.capaUrl && (
-                    <button type="button" className="od-profile__cover-empty-action" aria-label="Adicionar capa" onClick={() => inputDaCapa.current?.click()} disabled={capaEnviando}>
-                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h3l1.3-2h7.4l1.3 2h3A1.5 1.5 0 0 1 21.5 9v9.5A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5V9A1.5 1.5 0 0 1 4 7.5Z" /><circle cx="12" cy="13.5" r="3.25" /></svg>
-                    </button>
-                  )}
+                <article className="od-profile__hero od-profile__hero--plain od-profile__athlete">
+                  <div className="od-profile__athlete-label">PERFIL DE ARROTADOR <span>AUÊ!</span></div>
                   <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'capa')} />
                   <div className="od-profile__body">
                     <div className="od-profile__topline">
@@ -2720,7 +2713,7 @@ export function InicioOpenDesign({
                       {perfilExibido.bio && <p id="profileBio" className="od-profile__bio">{perfilExibido.bio}</p>}
                       <div className="od-profile__meta">
                         {perfilExibido.cidade && <span>⌖ {perfilExibido.cidade}</span>}
-                        <span>na roda desde {new Date(perfilExibido.criadoEm).getFullYear()}</span>
+                        <span>no Auê desde {new Date(perfilExibido.criadoEm).getFullYear()}</span>
                       </div>
                       <div className="od-profile__social-line">
                         <div className="od-profile__social" aria-label="Redes sociais">
@@ -2736,17 +2729,44 @@ export function InicioOpenDesign({
                       </div>
                     </div>
 
-                    <dl className="od-profile__metrics">
-                      <div><dt>Posts</dt><dd>{postsDoPerfil.length}</dd></div>
-                      <div><dt>Seguidores</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem segue (${perfilExibido.totalSeguidores})`} onClick={() => void abrirConexoes('seguidores')}>{perfilExibido.totalSeguidores}</button></dd></div>
-                      <div><dt>Seguindo</dt><dd><button type="button" className="od-profile__metric-btn" aria-label={`Ver quem é seguido (${perfilExibido.totalSeguindo})`} onClick={() => void abrirConexoes('seguindo')}>{perfilExibido.totalSeguindo}</button></dd></div>
-                      {perfilExibido.melhorNota !== undefined && <div><dt>Melhor nota</dt><dd>{perfilExibido.melhorNota}</dd></div>}
-                    </dl>
+                    <section className="od-profile__dashboard" aria-labelledby="perfilPlacar">
+                      <div className="od-profile__dashboard-head">
+                        <div><p>O JOGO ATÉ AQUI</p><h2 id="perfilPlacar">{donoDoPerfil ? 'Seu placar' : 'Placar'}</h2></div>
+                        {donoDoPerfil && <Link className="join od-profile__button od-profile__arena" to="/arena">Ir pra Arena <span aria-hidden="true">↗</span></Link>}
+                      </div>
+                      <div className="od-profile__dashboard-stats">
+                        <div className="od-profile__best">
+                          <h3 id="perfilMelhorNota">Melhor nota publicada</h3>
+                          {perfilExibido.melhorNota !== undefined
+                            ? <p className="od-profile__best-score">{perfilExibido.melhorNota}<span> pts</span></p>
+                            : <p className="od-profile__best-empty">—</p>}
+                          <p className="od-profile__best-caption">{perfilExibido.melhorNota !== undefined ? 'Em publicações' : 'Ainda não há nota publicada'}</p>
+                        </div>
+                        <div className="od-profile__best">
+                          <h3>Áudios no perfil</h3>
+                          <p className="od-profile__best-score">{estadoDosArrotosExibidos === 'pronto' ? arrotosDoPerfil.length : '—'}</p>
+                          <p className="od-profile__best-caption">{estadoDosArrotosExibidos === 'erro' ? 'Não foi possível carregar' : estadoDosArrotosExibidos === 'carregando' ? 'Carregando…' : 'Áudios deixados aqui'}</p>
+                        </div>
+                      </div>
+                    </section>
+                    <div className="od-profile__connections">
+                      <button type="button" aria-label={`Ver quem segue (${perfilExibido.totalSeguidores})`} onClick={() => void abrirConexoes('seguidores')}><b>{perfilExibido.totalSeguidores}</b> seguidores</button>
+                      <button type="button" aria-label={`Ver quem é seguido (${perfilExibido.totalSeguindo})`} onClick={() => void abrirConexoes('seguindo')}><b>{perfilExibido.totalSeguindo}</b> seguindo</button>
+                    </div>
 
                   </div>
                 </article>
 
                 <div className="od-profile__tabs-nav" role="tablist" aria-label="Abas do perfil">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={abaPerfil === 'arrotos'}
+                    className={`od-profile__tab-btn ${abaPerfil === 'arrotos' ? 'active' : ''}`}
+                    onClick={() => setAbaPerfil('arrotos')}
+                  >
+                    Arrotos {estadoDosArrotosExibidos === 'pronto' && <span>{arrotosDoPerfil.length}</span>}
+                  </button>
                   <button
                     type="button"
                     role="tab"
@@ -2764,15 +2784,6 @@ export function InicioOpenDesign({
                     onClick={() => setAbaPerfil('marcados')}
                   >
                     Marcados <span>{publicacoesMarcadasDoPerfil.length}</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={abaPerfil === 'arrotos'}
-                    className={`od-profile__tab-btn ${abaPerfil === 'arrotos' ? 'active' : ''}`}
-                    onClick={() => setAbaPerfil('arrotos')}
-                  >
-                    Arrotos <span>{arrotosDoPerfil.length}</span>
                   </button>
                   {donoDoPerfil && (
                     <button
@@ -2851,7 +2862,8 @@ export function InicioOpenDesign({
 
                 {abaPerfil === 'arrotos' && (
                   <section className="od-profile__activity" aria-labelledby="profileArrotos">
-                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2><span>{arrotosDoPerfil.length}</span></div>
+                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Áudios do perfil</h2>{estadoDosArrotosExibidos === 'pronto' && <span>{arrotosDoPerfil.length}</span>}</div>
+                    <p className="od-profile__best-caption">Áudios deixados neste perfil. Eles não são resultados da Arena.</p>
                     {donoDoPerfil && (
                       <div className="od-profile__record-cta">
                         <button
@@ -2867,13 +2879,14 @@ export function InicioOpenDesign({
                         </button>
                         <div>
                           <p className="od-profile__record-eyebrow">ARROTO DIRETO</p>
-                          <h3>Grava um arroto pra deixar aqui.</h3>
+                          <h3>Gravar áudio para o perfil</h3>
                         </div>
                       </div>
                     )}
-                    {estadoArrotosDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
-                    {estadoArrotosDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
-                    {estadoArrotosDoPerfil === 'pronto' && arrotosDoPerfil.map((arroto) => (
+                    {estadoDosArrotosExibidos === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
+                    {estadoDosArrotosExibidos === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
+                    {estadoDosArrotosExibidos === 'pronto' && arrotosDoPerfil.length === 0 && <div className="od-profile__empty"><h3>Ainda não tem arroto neste perfil.</h3><p>Os áudios publicados no perfil aparecem aqui.</p></div>}
+                    {estadoDosArrotosExibidos === 'pronto' && arrotosDoPerfil.map((arroto) => (
                       <article key={arroto.id} className="od-profile__post">
                         <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
                         <h3 style={{ margin: '7px 0', fontSize: 16 }}>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
@@ -3235,6 +3248,10 @@ export function InicioOpenDesign({
         handleInicial={perfilExibido?.handle ?? ''}
         bioInicial={perfilExibido?.bio ?? ''}
         cidadeInicial={perfilExibido?.cidade ?? ''}
+        temCapa={Boolean(perfilExibido?.capaUrl)}
+        capaEnviando={capaEnviando}
+        aoTrocarCapa={() => inputDaCapa.current?.click()}
+        aoRemoverCapa={() => void removerCapaDoPerfil()}
         redesIniciais={{
           instagram: perfilExibido?.instagram,
           tiktok: perfilExibido?.tiktok,

@@ -135,6 +135,7 @@ export function ModalEditarPerfil({
         <form onSubmit={handleSubmit} className="profile-form" noValidate>
           {aoTrocarCapa && (
             <div className="profile-form__capa">
+              <p>A capa salva não aparece no novo perfil.</p>
               <button type="button" className="tab" onClick={aoTrocarCapa} disabled={capaEnviando}>
                 {capaEnviando ? 'Enviando…' : 'Trocar capa'}
               </button>

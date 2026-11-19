@@ -9,9 +9,7 @@
  * pula e avisa. Não é falha.
  *
  * LEITURA FALHOU COM CREDENCIAL DE VERDADE: avisa e segue, para um problema do
- * Supabase não travar a publicação do app. A exceção é `EXIGIR_GRUPOS=1`, que o
- * agendamento liga: ali o único motivo de publicar é a lista de grupos, e
- * publicar sem as páginas apagaria do Google o que já estava lá.
+ * Supabase não travar a publicação do app. A exceção é `EXIGIR_GRUPOS=1`, que a publicação liga para não apagar do Google as páginas já existentes.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -37,7 +35,7 @@ if (!credenciais) {
 const grupos = await lerGruposVisiveis(credenciais.url, credenciais.chave);
 if (!grupos) {
   if (process.env.EXIGIR_GRUPOS === '1') {
-    console.error('grupos: leitura falhou e o agendamento exige a lista. Nada foi publicado.');
+    console.error('grupos: leitura falhou e a publicação exige a lista. Nada foi publicado.');
     process.exit(1);
   }
   console.warn('grupos: leitura falhou, o site sai sem as páginas de grupos desta vez.');

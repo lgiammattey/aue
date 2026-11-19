@@ -340,6 +340,26 @@ describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
     expect(screen.getAllByText('Arroto em Vídeo').length).toBeGreaterThan(0);
   });
 
+  it('mostra carregamento, falha e permite tentar novamente sem chamar falha de lista vazia', async () => {
+    let concluir!: (resultado: { ok: false; motivo: 'falhou' }) => void;
+    const listar = vi.fn()
+      .mockImplementationOnce(() => new Promise((resolve) => { concluir = resolve; }))
+      .mockResolvedValueOnce({ ok: true, valor: [] });
+    render(
+      <MemoryRouter initialEntries={['/comunidades']}>
+        <TelaDiretorioOpenDesign portaForum={{ ...mockForum, listarComunidadesDoForum: listar }} portaComunidade={mockComunidade} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Buscando as comunidades…')).toBeTruthy();
+    expect(screen.queryByText('Ainda não há comunidades abertas por aqui.')).toBeNull();
+    concluir({ ok: false, motivo: 'falhou' });
+    expect((await screen.findByRole('alert')).textContent).toContain('Não foi possível carregar as comunidades agora.');
+    expect(screen.queryByText('Ainda não há comunidades abertas por aqui.')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+    expect(await screen.findByText('Ainda não há comunidades abertas por aqui.')).toBeTruthy();
+    expect(listar).toHaveBeenCalledTimes(2);
+  });
+
   it('alterna entre as abas Causos e Sobre exibindo regras e moderadores', async () => {
     render(
       <MemoryRouter initialEntries={['/c/arena-do-arroto']}>

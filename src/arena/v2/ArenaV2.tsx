@@ -9,6 +9,7 @@ import { criarCapturaPcmV2 } from '../../plataforma/web/capturaPcmV2';
 import { wavDaEmissao } from '../../plataforma/web/wavDaEmissao';
 import { criarCicloDeVidaWeb } from '../../plataforma/web/cicloDeVida';
 import { criarEnderecoLocal, soltarEnderecoLocal } from '../../plataforma/web/enderecoDeAudio';
+import { PlayerDeAudio } from './PlayerDeAudio';
 import { AVISO_A_PARTIR_DE_MS, TETO_DE_GRAVACAO_MS, formatarCronometro } from '../../nucleo/gravacao/regras';
 import { calcularLaudoExperimental, type LaudoExperimental, type MotivoDeLaudoInconclusivo } from '../../nucleo/julgamento/laudoExperimental';
 import './arenaV2.css';
@@ -26,6 +27,7 @@ interface Props {
   aoUsarTentativa?: (tentativa: TentativaDoDuelo) => void;
   rotuloUsarTentativa?: string;
   aoVoltar?: () => void;
+  aoAbrirMeusDesafios?: () => void;
 }
 
 function Player({ audio, player }: { audio: Blob; player: RefObject<HTMLAudioElement | null> }) {
@@ -35,7 +37,7 @@ function Player({ audio, player }: { audio: Blob; player: RefObject<HTMLAudioEle
     setEndereco(url);
     return () => soltarEnderecoLocal(url);
   }, [audio]);
-  return endereco ? <audio ref={player} aria-label="Sua gravação" controls preload="metadata" src={endereco} /> : null;
+  return endereco ? <PlayerDeAudio endereco={endereco} rotulo="Sua gravação" mediaRef={player} /> : null;
 }
 
 function falaDaFalha(motivo: FalhaCapturaPcmV2): string {
@@ -56,13 +58,13 @@ function falaDoLaudoInconclusivo(motivo: MotivoDeLaudoInconclusivo): string {
     case 'ambiente_instavel': return 'O ambiente mudou durante a medição. Fique em silêncio e tente novamente.';
     case 'ambiente_inaudivel':
     case 'ambiente_insuficiente': return 'Não foi possível medir o ambiente. Tente novamente e aguarde a calibração.';
-    case 'emissao_insuficiente': return 'Não detectamos som suficiente para medir essa tentativa. Tente novamente.';
+    case 'emissao_insuficiente': return 'Não conseguimos medir a duração desta tentativa. Grave novamente após aparecer GRAVANDO.';
     default: return 'Não foi possível medir esta tentativa com confiança. Tente novamente.';
   }
 }
 
 /** Primeira versão local: a gravação e o laudo ainda não são publicados. */
-export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, telemetria, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar }: Props) {
+export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, telemetria, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar, aoAbrirMeusDesafios }: Props) {
   const [compartilhamento] = useState(() => compartilhamentoInjetado ?? criarCompartilhamentoDeAudioWeb());
   const [compartilhando, setCompartilhando] = useState(false);
   const compartilhamentoAtivo = useRef<number | null>(null);
@@ -318,36 +320,43 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
   };
 
   return (
-    <main className="arena-v2">
+    <main className={`arena-v2 arena-v2--${estado}`}>
       <header className="arena-v2__cabecalho">
         <span className="arena-v2__marca">AUÊ<span>!</span></span>
-        <nav aria-label="Navegação principal"><a href="/feed">Mural</a><a href="/comunidades">Comunidades</a></nav>
+        <nav aria-label="Navegação principal"><a href="/feed">Mural</a><a href="/grupos">Grupos de WhatsApp</a>{aoAbrirMeusDesafios && (estado === 'pronto' || estado === 'erro') && <button type="button" onClick={aoAbrirMeusDesafios}>Meus desafios</button>}</nav>
       </header>
       <div className="arena-v2__conteudo">
         <section className="arena-v2__desafio" aria-label="Seu desafio">
           <span>SEU DESAFIO</span><strong>CAPRICHE NO FÔLEGO</strong>
         </section>
         <section className="arena-v2__palco" aria-labelledby="arena-v2-titulo">
+          <div className="arena-v2__arte arena-v2__arte--lata" aria-hidden="true">
+            <svg viewBox="0 0 120 155" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M30 42 42 30h38l12 12 3 76c0 10-15 16-35 16s-35-6-35-16z"/><ellipse cx="61" cy="42" rx="31" ry="8"/><path d="M49 39c1-6 5-9 12-9s11 3 12 9M32 82c25 2 38-18 60-17M30 96c22 2 40-17 63-17M49 55h.1m23 7h.1M45 109h.1m26 1h.1"/><circle cx="81" cy="14" r="5"/><circle cx="98" cy="27" r="3"/><circle cx="61" cy="12" r="2"/></svg>
+          </div>
+          <div className="arena-v2__arte arena-v2__arte--flamula" aria-hidden="true">
+            <svg viewBox="0 0 100 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M13 25h74L50 98zM13 25 50 8l37 17M36 25v46m28-46v46M27 25l23 58 23-58"/><circle cx="12" cy="25" r="4"/><circle cx="88" cy="25" r="4"/></svg>
+          </div>
           <p className="arena-v2__identificador">ARENA DE ARROTOS <span>·</span> AO SEU COMANDO</p>
-          <h1 id="arena-v2-titulo">O PALCO É <em>SEU.</em></h1>
-          <p className="arena-v2__instrucao">Um toque. Um arroto. Uma atuação para a história.</p>
+          <h1 id="arena-v2-titulo">{estado === 'revisao' ? 'SUA TENTATIVA.' : estado === 'gravando' ? 'É HORA DO ARROTO.' : 'PRONTO PRA SOLTAR O AUÊ?'}</h1>
+          {(estado === 'pronto' || estado === 'erro') && <p className="arena-v2__instrucao">Um toque e o palco é seu.</p>}
           {estado !== 'revisao' && (
             <button type="button" className="arena-v2__gatilho" disabled={estado === 'finalizando'} onClick={estado === 'permissao' || estado === 'calibrando' ? descartar : estado === 'gravando' ? () => void finalizar() : () => void iniciar()}>
               <span className="arena-v2__circulo" aria-hidden="true">{estado === 'gravando' || estado === 'calibrando' || estado === 'permissao' ? <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor" /></svg> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v4m-4 0h8" /></svg>}</span>
               <span>{estado === 'gravando' ? 'Finalizar gravação' : estado === 'calibrando' ? 'Cancelar gravação' : estado === 'permissao' ? 'Cancelar pedido' : estado === 'finalizando' ? 'Finalizando' : estado === 'erro' ? 'Tentar novamente' : 'Gravar meu arroto'}</span>
             </button>
           )}
-          {estado === 'gravando' && <div className="arena-v2__medidor"><span>GRAVANDO</span><time>{formatarCronometro(decorrido)}</time><div className="arena-v2__onda" aria-hidden="true"><span style={{ transform: `scaleX(${Math.max(0.04, nivel)})` }} /></div>{decorrido >= AVISO_A_PARTIR_DE_MS && <p>Tempo quase esgotado.</p>}</div>}
+          {estado === 'gravando' && <div className="arena-v2__medidor"><span>GRAVANDO</span><time>{formatarCronometro(decorrido)}</time><div className="arena-v2__onda" aria-hidden="true" style={{ opacity: 0.45 + Math.min(1, Math.max(0, nivel)) * 0.55 }} />{decorrido >= AVISO_A_PARTIR_DE_MS && <p>Tempo quase esgotado.</p>}</div>}
           {estado === 'revisao' && audio && <div className="arena-v2__revisao"><h2>SUA GRAVAÇÃO</h2><p>Ouça sua tentativa. Você decide se quer compartilhar; ela não foi publicada no Auê.{!gravadoSemLaudo && ' A calibração não está neste áudio.'}</p><Player audio={audio} player={player} />
-            {laudo?.estado === 'medido' ? <section className="arena-v2__laudo" aria-label="Laudo experimental"><h3>LAUDO EXPERIMENTAL</h3><dl><div><dt>Duração detectada</dt><dd>{laudo.duracaoAtivaSegundos.toFixed(2).replace('.', ',')} s</dd></div><div><dt>Potência relativa</dt><dd>{laudo.potenciaRelativa}/100</dd></div><div><dt>Frequência</dt><dd>Indisponível</dd></div></dl><p>Leitura experimental: aparelho e ambiente alteram os resultados. Potência não é volume físico.</p></section> : <p role="status">{gravadoSemLaudo ? 'Esta gravação não tem laudo nem nota.' : laudo?.estado === 'inconclusivo' ? falaDoLaudoInconclusivo(laudo.motivo) : 'Não foi possível medir esta tentativa.'}</p>}
+            {laudo?.estado === 'medido' ? <section className="arena-v2__laudo" aria-label="Laudo experimental"><h3>LAUDO EXPERIMENTAL</h3><dl><div className="arena-v2__duracao"><dt>Duração detectada</dt><dd>{laudo.duracaoAtivaSegundos.toFixed(2).replace('.', ',')} s</dd></div><div><dt>Potência relativa</dt><dd>{laudo.potenciaRelativa}/100</dd></div><div><dt>Frequência</dt><dd>Indisponível</dd></div></dl><p>Leitura experimental: aparelho e ambiente alteram os resultados. Potência não é volume físico.</p></section> : <p role="status">{gravadoSemLaudo ? 'Esta gravação não tem laudo nem nota.' : laudo?.estado === 'inconclusivo' ? falaDoLaudoInconclusivo(laudo.motivo) : 'Não foi possível medir esta tentativa.'}</p>}
+            {aoUsarTentativa && <><button type="button" className="arena-v2__desafiar" disabled={laudo?.estado !== 'medido'} onClick={() => { if (laudo?.estado !== 'medido') return; if (player.current && !player.current.paused) player.current.pause(); aoUsarTentativa({ audio, duracaoMs: Math.round(laudo.duracaoAtivaSegundos * 1000) }); }}>{rotuloUsarTentativa}</button>{laudo?.estado !== 'medido' && <p className="arena-v2__duelo-aviso">Para continuar o desafio, grave outra tentativa com medição disponível.</p>}</>}
             <button type="button" className="arena-v2__secundario" disabled={compartilhando} onClick={() => void compartilharAudio()}>{compartilhando ? 'Abrindo compartilhamento…' : 'Compartilhar áudio'}</button>
             <button type="button" className="arena-v2__secundario" onClick={baixarAudio}>Baixar áudio</button>
             {mensagemCompartilhamento && <p role="status">{mensagemCompartilhamento}</p>}
-            {aoUsarTentativa && laudo?.estado === 'medido' && <button type="button" className="arena-v2__secundario" onClick={() => { if (player.current && !player.current.paused) player.current.pause(); aoUsarTentativa({ audio, duracaoMs: Math.round(laudo.duracaoAtivaSegundos * 1000) }); }}>{rotuloUsarTentativa}</button>}
             <button type="button" className="arena-v2__secundario" onClick={descartar}>Descartar e gravar outra</button></div>}
           {aoVoltar && <button type="button" className="arena-v2__secundario" onClick={() => { descartar(); aoVoltar(); }}>Voltar</button>}
           {mensagem && <p role="alert" className="arena-v2__erro">{mensagem}</p>}
           {estado === 'erro' && oferecerSemLaudo && <button type="button" className="arena-v2__secundario" onClick={() => void iniciarSemLaudo()}>Gravar sem laudo</button>}
+          {estado === 'pronto' && aoUsarTentativa && <p className="arena-v2__duelo-dica">Grave uma tentativa para {rotuloUsarTentativa === 'Criar desafio' ? 'criar um desafio' : 'continuar o desafio'}.</p>}
           {(estado === 'pronto' || estado === 'erro') && <p className="arena-v2__privacidade">Sem cadastro. O microfone só liga quando você tocar. Com medição experimental, o áudio para ouvir começa após a calibração.</p>}
           {estado === 'permissao' && <p role="status">Aguardando permissão do microfone.</p>}
           {estado === 'calibrando' && <p role="status">Calibrando o ambiente. Um instante de silêncio.</p>}

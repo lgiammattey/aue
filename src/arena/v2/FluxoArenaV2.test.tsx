@@ -60,6 +60,28 @@ it('grava resposta sem carregar áudio do adversário e só revela depois de con
   expect(d.d.responder).toHaveBeenCalledOnce();
   expect(d.d.baixarAudio).not.toHaveBeenCalled();
 });
+it('permite pré-visualizar o placar e iniciar outra disputa sem enviar automaticamente', async () => {
+  const d = dados();
+  vi.mocked(d.compartilhar.compartilhar).mockResolvedValue({ ok: true, via: 'texto' });
+  render(<FluxoArenaV2 modo="responder" duelo={d.duelo} compartilhar={d.compartilhar} origem="https://teste.example" lerToken={() => token} captura={d.captura} />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Aceitar e gravar' }));
+  await gravar(d);
+  fireEvent.click(screen.getByRole('button', { name: 'Usar esta gravação' }));
+  fireEvent.click(screen.getByRole('checkbox', { name: /Autorizo enviar minha gravação/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Confirmar resposta' }));
+  await screen.findByRole('heading', { name: 'RESULTADO PROVISÓRIO' });
+  fireEvent.click(screen.getByRole('button', { name: 'Compartilhar resultado' }));
+  expect(screen.getByText(/Resultado provisório no Auê:/).textContent).not.toContain(token);
+  expect(d.compartilhar.compartilhar).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Abrir compartilhamento' }));
+  await waitFor(() => expect(d.compartilhar.compartilhar).toHaveBeenCalledOnce());
+  expect(vi.mocked(d.compartilhar.compartilhar).mock.calls[0][0].texto).not.toContain(token);
+  fireEvent.click(screen.getByRole('button', { name: 'Pedir revanche' }));
+  expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+  expect(d.d.criar).not.toHaveBeenCalled();
+  await gravar(d);
+  expect(screen.getByRole('button', { name: 'Criar desafio' })).toBeTruthy();
+});
 it('cancela envio pendente no fluxo de criação', async () => {
   const d = dados();
   d.d.iniciarEnvioGravacao.mockReturnValueOnce({ resultado: new Promise(() => {}), cancelar: d.cancelar });
@@ -116,4 +138,19 @@ it('abre meus desafios a partir da Arena e permite voltar', async () => {
   expect(await screen.findByText('Nenhum desafio encontrado nesta sessão.')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
   expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+});
+
+it('não abre meus desafios por cima de uma tentativa em andamento ou revisão', async () => {
+  const d = dados();
+  render(<FluxoArenaV2 modo="criar" duelo={d.duelo} compartilhar={d.compartilhar} origem="https://teste.example" captura={d.captura} />);
+  expect(screen.getByRole('button', { name: 'Meus desafios' })).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+  expect(screen.queryByRole('button', { name: 'Meus desafios' })).toBeNull();
+  await screen.findByText(/Calibrando o ambiente/);
+  act(() => d.eventos().aoCalibrar());
+  fireEvent.click(await screen.findByRole('button', { name: 'Finalizar gravação' }));
+  await screen.findByRole('heading', { name: 'SUA GRAVAÇÃO' });
+  expect(screen.queryByRole('button', { name: 'Meus desafios' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Descartar e gravar outra' }));
+  expect(screen.getByRole('button', { name: 'Meus desafios' })).toBeTruthy();
 });

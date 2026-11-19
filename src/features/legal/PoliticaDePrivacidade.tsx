@@ -2,6 +2,7 @@ import React from 'react';
 
 import { LayoutLegal, QuemResponde, RodapeLegal, Secao } from './LayoutLegal';
 import { ANUNCIOS_ATIVOS } from './anunciosAtivos';
+import { FLAGS } from '../../shared/flags';
 
 /**
  * Política de privacidade.
@@ -123,7 +124,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
         </p>
       </Secao>
 
-      <Secao titulo="O que acontece com o seu áudio">
+      <Secao titulo="O que acontece com seu áudio nas batalhas antigas">
         <p>
           O áudio é enviado e guardado no Auê. Ele fica disponível para quem
           abrir a batalha em que você gravou.
@@ -156,6 +157,20 @@ export const PoliticaDePrivacidade: React.FC = () => {
           qualquer lugar da internet.
         </p>
       </Secao>
+
+      {FLAGS.dueloV2 && <Secao titulo="Áudio nos desafios por convite">
+        <p>
+          Seu áudio não vai para o mural por você criar ou responder um desafio.
+          Depois da resposta, os participantes podem ouvir as gravações; uma
+          denúncia pode torná-las indisponíveis para análise.
+        </p>
+        <p>
+          Você pode solicitar a exclusão da sua gravação no desafio. A remoção
+          pode ficar pendente de confirmação; se isso acontecer, use o contato
+          informado nesta página para pedir ajuda. Quem já baixou uma cópia pode
+          continuar com ela.
+        </p>
+      </Secao>}
 
       {/*
         RETENÇÃO — a seção mais fácil de escrever errado.
@@ -223,11 +238,12 @@ export const PoliticaDePrivacidade: React.FC = () => {
 
       <Secao titulo="Denúncia e moderação">
         <p>
-          Toda gravação e toda resenha têm um botão de denúncia. Quando três pessoas
+          Nas batalhas antigas e nas resenhas, quando três pessoas
           diferentes denunciam o mesmo conteúdo, ele é escondido automaticamente e
           deixa de aparecer para qualquer pessoa. Uma decisão tomada à mão sobre
           uma gravação não é desfeita por denúncias posteriores.
         </p>
+        {FLAGS.dueloV2 && <p>No desafio por convite, uma denúncia pode tornar o áudio indisponível enquanto é analisado.</p>}
         <p>
           A denúncia guarda quem denunciou e o motivo, só para a moderação. Quem
           foi denunciado não é avisado de quem foi.

@@ -121,7 +121,8 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
 
   it('o service worker não trata sitemap e robots como rota da SPA', () => {
     const config = ler('../vite.config.ts');
-    expect(config).toContain('navigateFallbackDenylist: [/^\\/(?:sitemap\\.xml|robots\\.txt)$/]');
+    expect(config).toContain('/^\\/(?:sitemap\\.xml|robots\\.txt)$/');
+    expect(config).toContain('/^\\/duelo(?:\\.html|\\/)?(?:\\?|$)/');
   });
 
   it('o domínio é o mesmo em todo lugar — inclusive no og:url e no JSON-LD da home', () => {

@@ -15,6 +15,7 @@ vi.mock('./plataforma/web/conta', () => ({
 describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => {
   beforeEach(() => {
     FLAGS.arenaV2 = false;
+    FLAGS.dueloV2 = false;
     localStorage.clear();
     window.history.pushState({}, 'Test', '/');
     estadoDaConta.valor = { temSessao: false, anonima: false, perfilSocialPendente: false };
@@ -23,6 +24,7 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
   afterEach(() => {
     cleanup();
     FLAGS.arenaV2 = false;
+    FLAGS.dueloV2 = false;
     localStorage.clear();
   });
 
@@ -97,6 +99,31 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     render(<App />);
     expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Gravar meu arroto' })).toBeNull();
+  });
+
+  it('não abre o duelo com a flag desligada', async () => {
+    FLAGS.arenaV2 = true;
+    window.history.pushState({}, 'Duelo', '/duelo#t=' + 'a'.repeat(64));
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: 'Desafio indisponível.' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Aceitar e gravar' })).toBeNull();
+  });
+
+  it('com as duas flags ligadas encaminha um convite inválido para o fluxo de resposta', async () => {
+    FLAGS.arenaV2 = true;
+    FLAGS.dueloV2 = true;
+    window.history.pushState({}, 'Duelo', '/duelo#t=invalido');
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: 'CONVITE INDISPONÍVEL' })).toBeTruthy();
+    expect(screen.getByText('O link está incompleto ou é inválido. Peça um novo convite.')).toBeTruthy();
+  });
+
+  it('com as duas flags a Arena continua aberta na raiz e o feed continua acessível', async () => {
+    FLAGS.arenaV2 = true;
+    FLAGS.dueloV2 = true;
+    render(<App />);
+    expect(await screen.findByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Mural' }).getAttribute('href')).toBe('/feed');
   });
 
   it('com flag opt-in preserva a intenção do link de gravação legado', async () => {

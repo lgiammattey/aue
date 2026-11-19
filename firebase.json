@@ -17,6 +17,8 @@
       { "source": "/ranking-de-arrotos", "destination": "/ranking-de-arrotos.html" },
       { "source": "/comunidades", "destination": "/comunidades.html" },
       { "source": "/grupos", "destination": "/grupos.html" },
+      { "source": "/duelo", "destination": "/duelo.html" },
+      { "source": "/duelo/", "destination": "/duelo.html" },
       { "source": "**", "destination": "/index.html" }
     ],
     "headers": [
@@ -47,6 +49,30 @@
       {
         "source": "/manifest.webmanifest",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/duelo",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "Referrer-Policy", "value": "no-referrer" },
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
+      },
+      {
+        "source": "/duelo/",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "Referrer-Policy", "value": "no-referrer" },
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
+      },
+      {
+        "source": "/duelo.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "Referrer-Policy", "value": "no-referrer" },
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
       }
     ]
   }

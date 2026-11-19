@@ -88,6 +88,9 @@ export interface Flags {
   /** Entrada experimental local da Arena v2; desligada por padrão. */
   arenaV2: boolean;
 
+  /** Duelo remoto v2; só liga após revisão do backend e configuração do ambiente. */
+  dueloV2: boolean;
+
 
 }
 
@@ -97,6 +100,7 @@ export const FLAGS: Flags = {
   disputaNaArena: ligada(import.meta.env.VITE_FEATURE_DISPUTA_NA_ARENA),
   anunciosAdsterra: ligada(import.meta.env.VITE_FEATURE_ADSTERRA),
   arenaV2: ligada(import.meta.env.VITE_FEATURE_ARENA_EXPERIMENTAL),
+  dueloV2: ligada(import.meta.env.VITE_FEATURE_DUELO_PRIVADO),
 };
 
 /** Exportado para teste; não use para decidir nada em tela. */

@@ -43,11 +43,12 @@ import { supabase } from '../../db/supabase';
  * Sob `StrictMode`, o React monta, desmonta e remonta cada componente em
  * desenvolvimento — efeitos rodam DUAS vezes. Um `signInAnonymously()` dentro
  * de efeito criaria dois usuários em `auth.users`, dois perfis e duas linhas
- * de lixo por recarga de página. A promessa guardada no módulo torna a chamada
- * idempotente por construção: a segunda chamada recebe a primeira promessa,
- * não uma segunda requisição.
+ * de lixo por recarga de página. Chamadas concorrentes dividem uma única
+ * tentativa. Depois que ela termina, o próximo pedido consulta a sessão atual:
+ * uma falha temporária não fica presa e um login posterior não é ignorado.
  */
 let promessa: Promise<Session | null> | null = null;
+let encerramento: Promise<void> | null = null;
 
 /**
  * Por que a sessão não existe, quando não existe. `null` enquanto estiver tudo
@@ -69,9 +70,11 @@ export let motivoSemSessao: string | null = null;
  * quando esta função entrou. Eles são o fallback.
  */
 export function garantirSessao(): Promise<Session | null> {
+  // Um pedido de esquecimento não pode disparar um novo login durante a saída.
+  if (encerramento) return Promise.resolve(null);
   if (promessa) return promessa;
 
-  promessa = (async () => {
+  const tentativa = (async () => {
     try {
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
@@ -83,7 +86,7 @@ export function garantirSessao(): Promise<Session | null> {
       const { data: nova, error: erroLogin } = await supabase.auth.signInAnonymously();
       if (erroLogin) throw erroLogin;
 
-      motivoSemSessao = null;
+      motivoSemSessao = nova.session ? null : 'A autenticação não retornou uma sessão.';
       return nova.session;
     } catch (err) {
       /*
@@ -102,8 +105,13 @@ export function garantirSessao(): Promise<Session | null> {
       return null;
     }
   })();
-
-  return promessa;
+  promessa = tentativa;
+  // Apenas a tentativa corrente pode liberar o slot: esquecerSessao pode ter
+  // invalidado uma tentativa enquanto uma nova já começou.
+  void tentativa.finally(() => {
+    if (promessa === tentativa) promessa = null;
+  });
+  return tentativa;
 }
 
 /**
@@ -115,11 +123,24 @@ export function garantirSessao(): Promise<Session | null> {
  * já gravados continuam lá, com o uid antigo — o que se perde é o vínculo,
  * inclusive a capacidade de apagar o próprio áudio depois.
  */
-export async function esquecerSessao(): Promise<void> {
-  try {
-    await supabase.auth.signOut();
-  } finally {
-    promessa = null;
-    motivoSemSessao = null;
-  }
+export function esquecerSessao(): Promise<void> {
+  if (encerramento) return encerramento;
+  const anterior = promessa;
+  const saida = (async () => {
+    try {
+      // Se uma criação já estava em curso, ela termina antes do signOut: uma
+      // resposta tardia não pode recriar a sessão depois do esquecimento.
+      if (anterior) await anterior;
+      await supabase.auth.signOut();
+    } finally {
+      promessa = null;
+      motivoSemSessao = null;
+    }
+  })();
+  encerramento = saida;
+  void saida.then(
+    () => { if (encerramento === saida) encerramento = null; },
+    () => { if (encerramento === saida) encerramento = null; },
+  );
+  return saida;
 }

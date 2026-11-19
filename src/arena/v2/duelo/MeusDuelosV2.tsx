@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DueloV2, MeuDueloV2, RecuperacaoV2 } from '../../../portas/dueloV2';
 import type { Compartilhamento } from '../../../portas/compartilhamento';
 import { criarEnderecoLocal, soltarEnderecoLocal } from '../../../plataforma/web/enderecoDeAudio';
+import { PlayerDeAudio } from '../PlayerDeAudio';
+import { ProximosPassosDuelo } from './ProximosPassosDuelo';
 import './dueloV2.css';
 
-interface Props { readonly duelo: DueloV2; readonly aoVoltar: () => void; readonly compartilhar?: Compartilhamento; readonly origem?: string }
+interface Props { readonly duelo: DueloV2; readonly aoVoltar: () => void; readonly compartilhar?: Compartilhamento; readonly origem?: string; readonly aoNovoDesafio?: () => void }
 type Lado = 'criador' | 'desafiante';
 
 const rotuloEstado: Record<MeuDueloV2['estado'], string> = {
@@ -15,7 +17,7 @@ const prazo = (data: string) => new Intl.DateTimeFormat('pt-BR', { dateStyle: 's
 const duracao = (ms: number) => `${(ms / 1000).toFixed(2).replace('.', ',')} s`;
 
 /** Tela isolada; usa apenas a identidade atual e nunca recupera o token do convite. */
-export function MeusDuelosV2({ duelo, aoVoltar, compartilhar, origem }: Props) {
+export function MeusDuelosV2({ duelo, aoVoltar, compartilhar, origem, aoNovoDesafio }: Props) {
   const [itens, setItens] = useState<readonly MeuDueloV2[]>([]);
   const [mais, setMais] = useState(false);
   const [lista, setLista] = useState<'carregando' | 'pronta' | 'falha'>('carregando');
@@ -182,10 +184,11 @@ export function MeusDuelosV2({ duelo, aoVoltar, compartilhar, origem }: Props) {
         <h3>RESULTADO PROVISÓRIO</h3><p>As medições são informadas pelos aparelhos e ainda não foram verificadas.</p>
         <dl><div><dt>Você</dt><dd>{duracao(resultado[proprio].duracaoMs)}</dd></div><div><dt>Adversário</dt><dd>{duracao(resultado[outro].duracaoMs)}</dd></div></dl>
         <p>{resultado.resultadoProvisorio === 'empate' ? 'Empate.' : resultado.resultadoProvisorio === proprio ? 'Você levou esta rodada.' : 'Seu adversário levou esta rodada.'}</p>
-        <button type="button" onClick={() => void ouvir(proprio)}>Ouvir minha tentativa</button><button type="button" onClick={() => void ouvir(outro)}>Ouvir adversário</button>
+        <button type="button" onClick={() => void ouvir(proprio)}>Abrir minha gravação</button><button type="button" onClick={() => void ouvir(outro)}>Abrir áudio do adversário</button>
+        {audio && endereco && <PlayerDeAudio endereco={endereco} rotulo={audio.lado === proprio ? 'Sua gravação' : 'Áudio do adversário'} />}
+        <ProximosPassosDuelo resultado={resultado} compartilhar={compartilhar} origem={origem} aoNovoDesafio={aoNovoDesafio} />
         {!denunciaAberta && <button type="button" disabled={ocupado} onClick={() => setDenunciaAberta(true)}>Denunciar áudio do adversário</button>}
         {denunciaAberta && <fieldset disabled={ocupado}><legend>Por que você quer denunciar este áudio?</legend><label><input type="radio" name="motivo-recuperado" value="ofensivo" checked={motivo === 'ofensivo'} onChange={() => setMotivo('ofensivo')} />Conteúdo ofensivo</label><label><input type="radio" name="motivo-recuperado" value="outro" checked={motivo === 'outro'} onChange={() => setMotivo('outro')} />Outro motivo</label><button type="button" disabled={!motivo} onClick={denunciar}>Enviar denúncia</button><button type="button" onClick={() => setDenunciaAberta(false)}>Cancelar denúncia</button></fieldset>}
-        {audio && endereco && <audio aria-label={audio.lado === proprio ? 'Sua gravação' : 'Áudio do adversário'} controls preload="metadata" src={endereco} />}
       </>}
       {recuperacao && <>{!confirmarExclusao ? <button type="button" disabled={ocupado} onClick={() => setConfirmarExclusao(true)}>Excluir minha gravação</button> : <><p>Excluir sua gravação impede o acesso a ela e pode tornar o desafio indisponível.</p><button type="button" disabled={ocupado} onClick={excluir}>Confirmar exclusão</button><button type="button" disabled={ocupado} onClick={() => setConfirmarExclusao(false)}>Cancelar exclusão</button></>}</>}
       {aviso && <p role="status">{aviso}</p>}

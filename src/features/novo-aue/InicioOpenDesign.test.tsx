@@ -146,25 +146,13 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    // Marca Auê — wordmark brutalista (AUÊ! expandido, A! compacto)
-    const brand = screen.getByLabelText('Auê, página inicial');
-    expect(brand).toBeTruthy();
-    expect(brand.querySelector('.brand-full')?.textContent).toBe('AUÊ!');
-    expect(brand.querySelector('.brand-compact')?.textContent).toBe('A!');
-
-    // Botão Soltar Arroto na sidebar
-    expect(screen.getByRole('button', { name: '+ Soltar um arroto' })).toBeTruthy();
-
-    // Hero de entrada da comunidade
-    expect(await screen.findByRole('heading', { level: 1, name: /Arrotar é um dom\.\s*Aqui, ele tem turma\./i })).toBeTruthy();
-    expect(screen.getByText(/Arrota, aprende ou só vem ouvir\./)).toBeTruthy();
-    expect(screen.queryByText('Auê!')).toBeNull();
-    expect(screen.queryByText('Você está só olhando. Entre para participar.')).toBeNull();
-    expect(screen.queryByRole('heading', { name: 'Conversas ativas' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Resenha' }).getAttribute('aria-pressed')).toBe('true');
+    // A entrada do mural usa navegação horizontal e deixa o áudio em foco.
+    expect(screen.getByRole('link', { name: 'Auê, ir para a Arena' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Mural.' })).toBeTruthy();
+    expect(screen.getByText('O som da galera, em ordem de chegada.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Tudo' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: 'Arrotos' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Links' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Conta sua resenha' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Publicar +' })).toBeTruthy();
 
     // Feed com tópico real carregado da porta
     expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
@@ -174,8 +162,6 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getByRole('button', { name: 'Curtir' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '🔥' })).toBeTruthy();
 
-    // Comunidades reais na sidebar e rightbar
-    expect(screen.getAllByText('Arena do Arroto').length).toBeGreaterThan(0);
   });
 
   it('mostra no feed uma prévia real da conversa sem exigir clique no balão', async () => {
@@ -265,7 +251,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     expect(await screen.findByRole('dialog')).toBeTruthy();
     expect(screen.getByPlaceholderText('Responder a Pessoa 1…')).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 1, name: /Arrotar é um dom\.\s*Aqui, ele tem turma\./i })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Mural.' })).toBeTruthy();
   });
 
   it('ordena a Resenha por publicação e filtra arrotos e links pelos anexos reais', async () => {
@@ -359,10 +345,10 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.queryByText('Resenha mais recente')).toBeNull();
     expect(screen.queryByText('Link do vídeo')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Links' }));
-    expect(screen.getByRole('button', { name: 'Links' }).getAttribute('aria-pressed')).toBe('true');
-    await waitFor(() => expect(screen.getByText('Link do vídeo')).toBeTruthy());
-    expect(screen.queryByText('Áudio do almoço')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Tudo' }));
+    expect(screen.getByRole('button', { name: 'Tudo' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByText('Link do vídeo')).toBeTruthy();
+    expect(screen.getByText('Áudio do almoço')).toBeTruthy();
   });
 
   it('chama a área das pessoas seguidas de Sua Tropa', async () => {
@@ -654,7 +640,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     await waitFor(() => expect(mockForum.explorarTopicos).toHaveBeenCalledWith({ limite: 30, ordem: 'recentes' }));
     expect(mockComunidade.listarFeed).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Resenha' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Tudo' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.queryByRole('button', { name: 'Quentes' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Top' })).toBeNull();
   });
@@ -673,6 +659,16 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     expect(await screen.findByText('Não deu para carregar as conversas agora.')).toBeTruthy();
     expect(screen.queryByText('Não tem conversa por aqui ainda. Puxa a primeira da roda.')).toBeNull();
+  });
+
+  it('não esconde uma falha ao buscar mídias do mural e permite tentar de novo', async () => {
+    const listarAnexosDoForum = vi.fn()
+      .mockResolvedValueOnce({ ok: false, motivo: 'falhou' })
+      .mockResolvedValue({ ok: true, valor: [] });
+    render(<MemoryRouter><InicioOpenDesign portaForum={{ ...mockForum, listarAnexosDoForum }} portaComunidade={mockComunidade} autenticado /></MemoryRouter>);
+    expect(await screen.findByText('Não deu para carregar as conversas agora.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
+    expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
   });
 
   it('abre o diálogo de gravação direta ao clicar em Soltar um arroto', async () => {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { Compartilhamento } from '../../../portas/compartilhamento';
 import type { DueloV2 } from '../../../portas/dueloV2';
 import { criarDueloV2 } from '../../../plataforma/web/dueloV2';
 import { lerTokenConviteDueloV2 } from '../../../plataforma/web/tokenConviteDueloV2';
@@ -11,11 +12,14 @@ export interface EntradaDueloV2Props {
   readonly aoVoltar: () => void;
   /** Dependências opcionais para testes e ambientes isolados. */
   readonly duelo?: DueloV2;
+  readonly compartilhar?: Compartilhamento;
+  readonly origem?: string;
+  readonly aoNovoDesafio?: () => void;
   readonly lerToken?: () => string | null;
 }
 
 /** A entrada não inicia captura nem envia áudio sem a ação da pessoa. */
-export function EntradaDueloV2({ tentativa, aoGravar, aoVoltar, duelo, lerToken = lerTokenConviteDueloV2 }: EntradaDueloV2Props) {
+export function EntradaDueloV2({ tentativa, aoGravar, aoVoltar, duelo, compartilhar, origem, aoNovoDesafio, lerToken = lerTokenConviteDueloV2 }: EntradaDueloV2Props) {
   const [token] = useState(() => lerToken());
   const [cliente] = useState(() => duelo ?? criarDueloV2());
   if (!token || !/^[0-9a-f]{64}$/.test(token)) {
@@ -25,5 +29,5 @@ export function EntradaDueloV2({ tentativa, aoGravar, aoVoltar, duelo, lerToken 
       <button type="button" onClick={aoVoltar}>Voltar</button>
     </section>;
   }
-  return <ResponderDueloV2 duelo={cliente} token={token} tentativa={tentativa} aoGravar={aoGravar} aoVoltar={aoVoltar} />;
+  return <ResponderDueloV2 duelo={cliente} token={token} tentativa={tentativa} compartilhar={compartilhar} origem={origem} aoNovoDesafio={aoNovoDesafio} aoGravar={aoGravar} aoVoltar={aoVoltar} />;
 }

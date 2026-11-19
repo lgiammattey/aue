@@ -4,10 +4,6 @@ import type { ComunidadeDoForum, NotificacaoDeMencao } from '../../portas/forum'
 import type { PerfilPublico } from '../../portas/perfil';
 import { SlotPatrocinado } from './SlotPatrocinadoDoFeed';
 
-function avatarDaComunidade(comunidade: ComunidadeDoForum): string | undefined {
-  return comunidade.avatarUrl ?? undefined;
-}
-
 interface Props {
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly aoAbrirComunidade: (slug: string) => void;
@@ -23,25 +19,17 @@ interface Props {
 }
 
 export const PainelDireito = memo(function PainelDireito({
-  comunidades,
-  aoAbrirComunidade,
-  comunidadesEntradas = {},
   viewAtual = 'feed',
   regrasDaComunidade = [],
   estaAutenticado = false,
   contaPerfil,
   notificacoesDeMencao = [],
   aoAbrirNotificacoes,
-  estadoDasComunidades = 'pronto',
-  aoTentarComunidades,
 }: Props) {
   const [notificacoesAbertas, setNotificacoesAbertas] = useState(false);
   const nomeDaConta = contaPerfil?.apelido ?? contaPerfil?.handle ?? 'Você';
   const iniciaisDaConta = nomeDaConta.slice(0, 2).toUpperCase();
   const naoLidas = notificacoesDeMencao.filter((notificacao) => notificacao.lidaEm === null).length;
-  const minhasComunidades = comunidades.filter((comunidade) => comunidadesEntradas[comunidade.slug] || comunidade.possoGerirMidia);
-  const comunidadesExibidas = (minhasComunidades.length > 0 ? minhasComunidades : comunidades).slice(0, 4);
-  const tituloDasComunidades = minhasComunidades.length > 0 ? 'Suas comunidades' : 'Comunidades abertas';
   const previaDaArena = <>
     <span className="rightbar-arena__eyebrow">ARENA · EM BREVE</span>
     <span className="rightbar-arena__stamp">SIMULAÇÃO</span>
@@ -114,29 +102,6 @@ export const PainelDireito = memo(function PainelDireito({
           {previaDaArena}
         </Link>
       ))}
-
-      <section className="rightbar-roads" aria-label={tituloDasComunidades}>
-        <div className="rightbar-roads__head">
-          <h2>{tituloDasComunidades}</h2>
-          <Link to="/comunidades">Ver comunidades</Link>
-        </div>
-        {estadoDasComunidades === 'carregando' ? (
-          <p className="rightbar-roads__state">Carregando comunidades…</p>
-        ) : estadoDasComunidades === 'erro' ? (
-          <p className="rightbar-roads__state">Não deu pra carregar as comunidades agora. {aoTentarComunidades && <button type="button" onClick={aoTentarComunidades}>Tentar de novo</button>}</p>
-        ) : comunidadesExibidas.length === 0 ? (
-          <p className="rightbar-roads__state">Nenhuma comunidade aberta agora.</p>
-        ) : (
-          <div className="rightbar-roads__list">
-            {comunidadesExibidas.map((comunidade) => (
-              <Link key={comunidade.id} className="rightbar-road" to={`/c/${comunidade.slug}`} onClick={() => aoAbrirComunidade(comunidade.slug)}>
-                {avatarDaComunidade(comunidade) ? <img src={avatarDaComunidade(comunidade)} alt="" /> : <span aria-hidden="true">{comunidade.icone ?? comunidade.nome.slice(0, 1).toUpperCase()}</span>}
-                <div><strong>{comunidade.nome}</strong><small>Comunidade</small></div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
 
       <SlotPatrocinado posicionamento="sidebar" />
 

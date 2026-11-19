@@ -146,7 +146,7 @@ describe('convite do duelo v2', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Enviar denúncia' }));
     expect(await screen.findByText('Denúncia registrada. O áudio ficará indisponível enquanto for analisado.')).toBeTruthy();
     expect(d.denunciar).toHaveBeenCalledExactlyOnceWith(token, 'criador', 'outro');
-    expect((screen.getByRole('button', { name: 'Ouvir adversário' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Abrir áudio do adversário' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it.each([
@@ -190,7 +190,7 @@ describe('convite do duelo v2', () => {
     render(<ResponderDueloV2 duelo={duelo} token={token} tentativa={tentativa} aoGravar={vi.fn()} aoVoltar={vi.fn()} />);
     fireEvent.click(await screen.findByRole('checkbox', { name: /Autorizo enviar minha gravação/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Confirmar resposta' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Ouvir adversário' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Abrir áudio do adversário' }));
     expect((await screen.findByRole('alert')).textContent).toBe('Não foi possível carregar esse áudio.');
   });
 
@@ -201,7 +201,7 @@ describe('convite do duelo v2', () => {
     render(<ResponderDueloV2 duelo={duelo} token={token} tentativa={tentativa} aoGravar={vi.fn()} aoVoltar={vi.fn()} />);
     fireEvent.click(await screen.findByRole('checkbox', { name: /Autorizo enviar minha gravação/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Confirmar resposta' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Ouvir adversário' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Abrir áudio do adversário' }));
     fireEvent.click(screen.getByRole('button', { name: 'Denunciar áudio do adversário' }));
     fireEvent.click(screen.getByLabelText('Conteúdo ofensivo'));
     fireEvent.click(screen.getByRole('button', { name: 'Enviar denúncia' }));

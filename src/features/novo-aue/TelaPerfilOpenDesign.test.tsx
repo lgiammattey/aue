@@ -130,7 +130,7 @@ describe('Tela de Perfil Open Design', () => {
     abrir({ ...outraPessoa, melhorNota: 87 });
     expect(await screen.findByRole('heading', { name: 'Melhor nota publicada' })).toBeTruthy();
     expect(screen.getAllByText('87').length).toBeGreaterThan(0);
-    expect(screen.getByText('Em comunidades')).toBeTruthy();
+    expect(screen.getByText('Em publicações')).toBeTruthy();
     expect(screen.getByText('Áudios deixados neste perfil. Eles não são resultados da Arena.')).toBeTruthy();
   });
 });

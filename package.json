@@ -29,7 +29,8 @@
     "qrcode-generator": "^2.0.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.2",
+    "wavesurfer.js": "8.1.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.16",

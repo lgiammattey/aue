@@ -1,0 +1,53 @@
+/* O perfil compartilha a linguagem da Arena sem interferir nas outras telas. */
+.app.app--perfil-arena {
+  --aue-bg: #f5f1e9; --aue-text: #171714; --aue-muted: #5e5c55;
+  --aue-subtle: #66645c; --aue-line: #cfcbc0; --aue-surface: #f5f1e9;
+  --aue-surface-2: #e8e3da; --aue-accent: #171714; --aue-accent-on: #f5f1e9;
+  --bg: #f5f1e9; --fg: #171714; --border: #cfcbc0; --border-strong: #77746b;
+  display: block; max-width: none; min-height: 100svh; background: var(--aue-bg); color: var(--aue-text);
+}
+.app--perfil-arena > .sidebar, .app--perfil-arena > .rightbar, .app--perfil-arena > main > .topbar { display: none; }
+.app--perfil-arena > main { width: 100%; min-height: 100svh; padding: 0 max(28px, env(safe-area-inset-right)) 80px max(28px, env(safe-area-inset-left)); }
+.app--perfil-arena .od-profile { width: 100%; max-width: 1360px; margin: 0 auto; }
+.perfil-arena-nav { display: flex; min-height: 76px; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--aue-line); }
+.perfil-arena-nav a { color: var(--aue-text); text-decoration: none; font-size: 13px; font-weight: 700; }
+.perfil-arena-nav a:hover { text-decoration: underline; }
+.perfil-arena-nav__marca { font: 32px/1 var(--font-display, sans-serif) !important; letter-spacing: -.035em; }
+.perfil-arena-nav > div { display: flex; align-items: center; gap: 24px; }
+.app--perfil-arena .od-profile__hero, .app--perfil-arena .od-profile__tabs-nav, .app--perfil-arena .od-profile__activity, .app--perfil-arena .od-profile__state { width: 100%; max-width: 1100px; box-sizing: border-box; margin-left: auto; margin-right: auto; }
+.app--perfil-arena .od-profile__state { margin-top: 70px; padding: 32px 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; text-align: left; }
+.app--perfil-arena .od-profile__state h1 { font: 400 clamp(42px, 6vw, 72px)/1.05 var(--font-display, sans-serif); text-transform: uppercase; }
+.app--perfil-arena .od-profile__athlete-label { padding: 18px 0; font: 700 11px/1.4 var(--font-mono, monospace); letter-spacing: .1em; }
+.app--perfil-arena .od-profile__athlete.od-profile__hero--plain .od-profile__body { padding: 46px 0 0; }
+.app--perfil-arena .od-profile__athlete .od-profile__identity-head { gap: 22px; }
+.app--perfil-arena .od-profile__athlete .od-profile__avatar-wrap, .app--perfil-arena .od-profile__athlete .od-profile__avatar { width: 96px; height: 96px; }
+.app--perfil-arena .od-profile__athlete .od-profile__avatar { border: 2px solid #171714; font: 36px/1 var(--font-display, sans-serif); background: #e8e3da; }
+.app--perfil-arena .od-profile__athlete .od-profile__name h1 { font: 400 clamp(42px, 6vw, 76px)/1.08 var(--font-display, sans-serif); letter-spacing: -.02em; overflow-wrap: anywhere; text-transform: uppercase; }
+.app--perfil-arena .od-profile__handle { font: 700 13px/1.4 var(--font-mono, monospace); }
+.app--perfil-arena .od-profile__athlete .od-profile__identity { padding-top: 20px; }
+.app--perfil-arena .od-profile__bio { max-width: 680px; font-size: 16px; line-height: 1.6; }
+.app--perfil-arena .od-profile__dashboard { margin-top: 24px; padding: 26px 0 30px; border: 0; border-top: 1px solid var(--aue-line); border-bottom: 1px solid var(--aue-line); border-radius: 0; background: transparent; }
+.app--perfil-arena .od-profile__dashboard-head h2 { font-size: clamp(32px, 4vw, 48px); text-transform: uppercase; }
+.app--perfil-arena .od-profile__dashboard-stats { margin-top: 18px; }
+.app--perfil-arena .od-profile__dashboard .od-profile__best-score, .app--perfil-arena .od-profile__dashboard .od-profile__best-empty { font-size: clamp(44px, 6vw, 66px); }
+.app--perfil-arena .od-profile__dashboard .od-profile__arena { min-height: 48px; border-radius: 0; background: #c6f500; color: #171714; }
+.app--perfil-arena .od-profile__actions .join { min-height: 44px; padding: 10px 22px; border-radius: 0; background: #171714; color: #f5f1e9; }
+.app--perfil-arena .od-profile .od-profile__tabs-nav { margin-top: 24px; }
+.app--perfil-arena .od-profile .od-profile__tab-btn { flex: 0 0 auto; padding: 12px 20px; }
+.app--perfil-arena .od-profile .od-profile__activity { margin-top: 0; padding: 32px 0; border: 0; border-radius: 0; background: transparent; }
+.app--perfil-arena .od-profile__activity-head h2 { font: 400 36px/1.1 var(--font-display, sans-serif); text-transform: uppercase; }
+.app--perfil-arena .od-profile__record-cta, .app--perfil-arena .od-profile__post { border-radius: 0; box-shadow: none; }
+.app--perfil-arena .od-profile__post { border-bottom: 1px solid var(--aue-line); }
+.app--perfil-arena .card-do-post { margin: 0; padding: 24px 0; border: 0; border-bottom: 1px solid var(--aue-line); border-radius: 0; background: transparent; }
+.app--perfil-arena .post-community-avatar { display: none; }
+.app--perfil-arena a:focus-visible, .app--perfil-arena button:focus-visible { outline: 3px solid #364700; outline-offset: 3px; }
+@media (max-width: 699px) {
+  .app--perfil-arena > main { padding: 0 max(20px, env(safe-area-inset-right)) 64px max(20px, env(safe-area-inset-left)); }
+  .perfil-arena-nav { min-height: 66px; }.perfil-arena-nav > div { gap: 14px; }
+  .app--perfil-arena .od-profile__athlete.od-profile__hero--plain .od-profile__body { padding-top: 32px; }
+  .app--perfil-arena .od-profile__athlete .od-profile__avatar-wrap, .app--perfil-arena .od-profile__athlete .od-profile__avatar { width: 68px; height: 68px; }
+  .app--perfil-arena .od-profile__athlete .od-profile__identity-head { gap: 14px; }
+  .app--perfil-arena .od-profile__athlete .od-profile__name h1 { font-size: clamp(34px, 9vw, 54px); }
+  .app--perfil-arena .od-profile__dashboard .od-profile__arena { padding: 8px 12px; }
+  .app--perfil-arena .od-profile .od-profile__tab-btn { padding: 10px 14px; }
+}

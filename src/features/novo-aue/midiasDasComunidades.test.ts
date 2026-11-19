@@ -11,7 +11,7 @@ describe('mídias das comunidades', () => {
     expect(inicio).toContain('return comunidade?.avatarUrl ?? undefined;');
     expect(inicio).toContain('return comunidade?.capaUrl ?? undefined;');
     expect(inicio).not.toContain("'/comunidades/");
-    expect(painel).toContain('return comunidade.avatarUrl ?? undefined;');
+    expect(painel).not.toContain('Comunidades abertas');
     expect(painel).not.toContain("'/comunidades/");
   });
 });

@@ -1,0 +1,20 @@
+/* Só altera o diretório público; os mesmos componentes também vivem no app. */
+.grupos-arena {
+  --bg: #f5f1e9;
+  --fg: #171714;
+  --surface: #f5f1e9;
+  --surface-2: #e8e3da;
+  --muted: #5e5c55;
+  --border: #cfcbc0;
+  --border-strong: #77746b;
+  --overlay-scrim: rgba(10, 10, 10, .7);
+  padding: 38px 0 10px;
+  border-top: 1px solid var(--border);
+}
+.grupos-arena h2 { font: 400 clamp(30px, 4vw, 44px)/1.1 var(--font-display) !important; letter-spacing: 0 !important; text-transform: uppercase; }
+.grupos-arena section > div:first-child > button { border-radius: 0 !important; }
+.grupos-arena article { border-radius: 0 !important; padding: 24px 0 !important; border-top: 1px solid var(--border) !important; }
+.grupos-arena article b { font: 400 26px/1.1 var(--font-display) !important; text-transform: uppercase; }
+.grupos-arena article a, .grupos-arena article button { border-radius: 0 !important; }
+.grupos-arena [role="dialog"] { color: var(--fg); }
+.grupos-arena a:focus-visible, .grupos-arena button:focus-visible, .grupos-arena input:focus-visible, .grupos-arena select:focus-visible, .grupos-arena textarea:focus-visible { outline: 3px solid #364700; outline-offset: 3px; }

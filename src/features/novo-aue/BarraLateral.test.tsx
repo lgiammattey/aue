@@ -30,8 +30,8 @@ describe('BarraLateral mobile', () => {
     expect(abrirGravador).toHaveBeenCalledOnce();
     expect(navegacaoMobile.queryByRole('button', { name: /Desafios X1/i })).toBeNull();
 
-    fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Comunidades' }));
-    expect(screen.getByTestId('caminho-atual').textContent).toBe('/comunidades');
+    fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Grupos WhatsApp' }));
+    expect(screen.getByTestId('caminho-atual').textContent).toBe('/grupos');
 
     fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Minha Tropa' }));
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/seguindo');
@@ -39,13 +39,15 @@ describe('BarraLateral mobile', () => {
     fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Meu perfil' }));
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/perfil');
 
-    fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Feed de resenhas' }));
+    fireEvent.click(navegacaoMobile.getByRole('button', { name: 'Mural' }));
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/feed');
 
     const desktop = within(screen.getByRole('navigation', { name: 'Menu principal' }));
+    fireEvent.click(desktop.getByRole('button', { name: 'Grupos WhatsApp' }));
+    expect(screen.getByTestId('caminho-atual').textContent).toBe('/grupos');
     fireEvent.click(desktop.getByRole('button', { name: 'Arena' }));
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/arena');
-    fireEvent.click(desktop.getByRole('button', { name: 'Feed' }));
+    fireEvent.click(desktop.getByRole('button', { name: 'Mural' }));
     expect(screen.getByTestId('caminho-atual').textContent).toBe('/feed');
   });
 });

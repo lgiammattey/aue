@@ -34,6 +34,7 @@ import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
 import { rotasDoForum } from './features/forum/rotas';
 import { RastreadorDePaginas } from './features/telemetria/RastreadorDePaginas';
+import { ConteudoDaHome } from './arena/v2/ConteudoDaHome';
 
 /** Leva ao login guardando a página atual, para a pessoa voltar a ela depois de entrar. */
 function useIrParaLogin() {
@@ -90,7 +91,7 @@ function EntradaInicial() {
 
 function EntradaRaiz() {
   const { pathname, search } = useLocation();
-  return FLAGS.arenaV2 && abreArenaV2(pathname, search) ? <EntradaDaArena /> : <EntradaInicial />;
+  return <div className="pagina-inicial">{FLAGS.arenaV2 && abreArenaV2(pathname, search) ? <EntradaDaArena /> : <EntradaInicial />}<ConteudoDaHome /></div>;
 }
 
 function EntradaDaArena() {

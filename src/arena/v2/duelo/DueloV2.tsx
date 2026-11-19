@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Compartilhamento } from '../../../portas/compartilhamento';
 import type { DueloV2, EnvioGravacaoV2, EstadoCancelamentoV2, RevelacaoV2 } from '../../../portas/dueloV2';
 import { criarEnderecoLocal, soltarEnderecoLocal } from '../../../plataforma/web/enderecoDeAudio';
+import { PlayerDeAudio } from '../PlayerDeAudio';
+import { ProximosPassosDuelo } from './ProximosPassosDuelo';
 import './dueloV2.css';
 
 /** Áudio já revisado e com uma medição experimental disponível. */
@@ -161,12 +163,12 @@ export function CriarDueloV2({ duelo, compartilhar, origem, tentativa, aoVoltar 
 
   return <section className="duelo-v2" aria-labelledby="criar-duelo-titulo">
     <h2 id="criar-duelo-titulo">CHAME PARA O X1</h2>
-    {estado === 'pronto' && <><p>Seu adversário grava antes de ouvir sua tentativa ou ver sua marca.</p><label><input type="checkbox" checked={consentiu} onChange={(evento) => setConsentiu(evento.target.checked)} /> Autorizo enviar minha gravação para o Auê e permitir que meu adversário a ouça após responder.</label><button type="button" disabled={!consentiu} onClick={() => void enviar()}>Criar desafio</button><button type="button" onClick={aoVoltar}>Voltar</button></>}
+    {estado === 'pronto' && <><p>Seu adversário grava antes de ouvir sua tentativa ou ver sua marca.</p><label><input type="checkbox" checked={consentiu} onChange={(evento) => setConsentiu(evento.target.checked)} /> Autorizo enviar minha gravação para o Auê e permitir que meu adversário a ouça após responder.</label><button type="button" className="duelo-v2__principal" disabled={!consentiu} onClick={() => void enviar()}>Criar desafio</button><button type="button" onClick={aoVoltar}>Voltar</button></>}
     {(estado === 'enviando' || estado === 'criando' || estado === 'descarte') && <p role="status">{estado === 'descarte' ? 'Solicitando exclusão…' : 'Preparando o desafio…'}</p>}
     {estado === 'enviando' && <button type="button" onClick={() => void cancelarEnvio()}>Cancelar envio</button>}
     {estado === 'falhou_descarte' && <button type="button" onClick={() => void descartar()}>Tentar excluir novamente</button>}
     {(estado === 'falhou_envio' || estado === 'falhou_criacao') && <><button type="button" onClick={() => void enviar()}>Tentar novamente</button><button type="button" onClick={() => void descartar()}>Desistir e excluir</button></>}
-    {estado === 'convite' && <><p>Convite pronto. Só compartilhe com quem você quer desafiar.</p><label>Link do desafio<input readOnly value={link} /></label><button type="button" onClick={() => void mandar()}>Compartilhar convite</button><button type="button" onClick={() => void copiar()}>Copiar link</button><button type="button" onClick={() => void descartar()}>Excluir minha gravação</button></>}
+    {estado === 'convite' && <><p>Convite pronto. Só compartilhe com quem você quer desafiar.</p><label>Link do desafio<input readOnly value={link} /></label><button type="button" className="duelo-v2__principal" onClick={() => void mandar()}>Compartilhar convite</button><button type="button" onClick={() => void copiar()}>Copiar link</button><button type="button" onClick={() => void descartar()}>Excluir minha gravação</button></>}
     {estado === 'encerrado' && <button type="button" onClick={aoVoltar}>Voltar</button>}
     {mensagem && <p role="status">{mensagem}</p>}
   </section>;
@@ -179,12 +181,15 @@ interface ResponderProps {
   readonly tentativa: TentativaDoDuelo | null;
   readonly aoGravar: () => void;
   readonly aoVoltar: () => void;
+  readonly compartilhar?: Compartilhamento;
+  readonly origem?: string;
+  readonly aoNovoDesafio?: () => void;
 }
 
 type EstadoResposta = 'abrindo' | 'aberto' | 'enviando' | 'falhou_envio' | 'respondendo' | 'falhou_resposta' | 'revelando' | 'falhou_revelacao' | 'revelado' | 'indisponivel' | 'descarte' | 'falhou_descarte';
 
 /** O convite não lê o áudio do criador antes de uma resposta confirmada. */
-export function ResponderDueloV2({ duelo, token, tentativa, aoGravar, aoVoltar }: ResponderProps) {
+export function ResponderDueloV2({ duelo, token, tentativa, aoGravar, aoVoltar, compartilhar, origem, aoNovoDesafio }: ResponderProps) {
   const [estado, setEstado] = useState<EstadoResposta>('abrindo');
   const [mensagem, setMensagem] = useState('');
   const [resultado, setResultado] = useState<RevelacaoV2 | null>(null);
@@ -305,20 +310,20 @@ export function ResponderDueloV2({ duelo, token, tentativa, aoGravar, aoVoltar }
   };
 
   return <section className="duelo-v2" aria-labelledby="responder-duelo-titulo">
-    <h2 id="responder-duelo-titulo">VOCÊ FOI DESAFIADO</h2>
-    {estado === 'aberto' && <><p>Grave sua resposta para revelar o confronto.</p>{tentativa ? <><label><input type="checkbox" checked={consentiu} onChange={(evento) => setConsentiu(evento.target.checked)} /> Autorizo enviar minha gravação para o Auê e permitir que quem criou o desafio a ouça após minha resposta.</label><button type="button" disabled={!consentiu} onClick={() => void responder()}>Confirmar resposta</button></> : <button type="button" onClick={aoGravar}>Aceitar e gravar</button>}<button type="button" onClick={aoVoltar}>Voltar</button></>}
+    <h2 id="responder-duelo-titulo">{estado === 'revelado' ? 'PLACAR DO DESAFIO' : 'VOCÊ FOI DESAFIADO'}</h2>
+    {estado === 'aberto' && <><p>Grave sua resposta para revelar o confronto.</p>{tentativa ? <><label><input type="checkbox" checked={consentiu} onChange={(evento) => setConsentiu(evento.target.checked)} /> Autorizo enviar minha gravação para o Auê e permitir que quem criou o desafio a ouça após minha resposta.</label><button type="button" className="duelo-v2__principal" disabled={!consentiu} onClick={() => void responder()}>Confirmar resposta</button></> : <button type="button" className="duelo-v2__principal" onClick={aoGravar}>Aceitar e gravar</button>}<button type="button" onClick={aoVoltar}>Voltar</button></>}
     {(estado === 'abrindo' || estado === 'enviando' || estado === 'respondendo' || estado === 'revelando' || estado === 'descarte') && <p role="status">{estado === 'descarte' ? 'Solicitando exclusão…' : 'Um instante…'}</p>}
     {estado === 'enviando' && <button type="button" onClick={() => void cancelarEnvio()}>Cancelar envio</button>}
     {estado === 'falhou_descarte' && <button type="button" onClick={() => void desistir()}>Tentar excluir novamente</button>}
     {(estado === 'falhou_envio' || estado === 'falhou_resposta') && <><button type="button" onClick={() => void responder()}>Tentar novamente</button><button type="button" onClick={() => void desistir()}>Desistir e excluir</button></>}
     {estado === 'falhou_revelacao' && <button type="button" onClick={() => void revelar()}>Tentar abrir resultado</button>}
-    {estado === 'revelado' && resultado && <ResultadoDoDuelo duelo={duelo} token={token} resultado={resultado} neutro={resultadoNeutro} aoVoltar={aoVoltar} />}
+    {estado === 'revelado' && resultado && <ResultadoDoDuelo duelo={duelo} token={token} resultado={resultado} neutro={resultadoNeutro} aoVoltar={aoVoltar} compartilhar={compartilhar} origem={origem} aoNovoDesafio={aoNovoDesafio} />}
     {estado === 'indisponivel' && <>{gravacao.current && <button type="button" onClick={() => void desistir()}>Excluir minha gravação</button>}{!gravacao.current && <button type="button" onClick={() => void abrir()}>Tentar novamente</button>}<button type="button" onClick={aoVoltar}>Voltar</button></>}
     {mensagem && <p role="status">{mensagem}</p>}
   </section>;
 }
 
-function ResultadoDoDuelo({ duelo, token, resultado, neutro, aoVoltar }: { duelo: DueloV2; token: string; resultado: RevelacaoV2; neutro: boolean; aoVoltar: () => void }) {
+function ResultadoDoDuelo({ duelo, token, resultado, neutro, aoVoltar, compartilhar, origem, aoNovoDesafio }: { duelo: DueloV2; token: string; resultado: RevelacaoV2; neutro: boolean; aoVoltar: () => void; compartilhar?: Compartilhamento; origem?: string; aoNovoDesafio?: () => void }) {
   const [audio, setAudio] = useState<{ lado: 'criador' | 'desafiante'; dados: Blob } | null>(null);
   const [endereco, setEndereco] = useState<string | null>(null);
   const [erro, setErro] = useState('');
@@ -362,8 +367,8 @@ function ResultadoDoDuelo({ duelo, token, resultado, neutro, aoVoltar }: { duelo
     <h3>RESULTADO PROVISÓRIO</h3><p>As medições são informadas pelos aparelhos e ainda não foram verificadas.</p>
     <dl><div><dt>{neutro ? 'Quem criou' : resultado.ladoSessao === 'criador' ? 'Você' : 'Adversário'}</dt><dd>{duracao(resultado.criador.duracaoMs)}</dd></div><div><dt>{neutro ? 'Quem respondeu' : resultado.ladoSessao === 'criador' ? 'Adversário' : 'Você'}</dt><dd>{duracao(resultado.desafiante.duracaoMs)}</dd></div></dl>
     <p>{resultado.resultadoProvisorio === 'empate' ? 'Empate.' : neutro ? (resultado.resultadoProvisorio === 'criador' ? 'Quem criou levou esta rodada.' : 'Quem respondeu levou esta rodada.') : resultado.resultadoProvisorio === (resultado.ladoSessao ?? 'desafiante') ? 'Você levou esta rodada.' : 'Seu adversário levou esta rodada.'}</p>
-    <button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao !== 'criador'} onClick={() => void ouvir('criador')}>{neutro ? 'Ouvir quem criou' : resultado.ladoSessao === 'criador' ? 'Ouvir minha tentativa' : 'Ouvir adversário'}</button><button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao === 'criador'} onClick={() => void ouvir('desafiante')}>{neutro ? 'Ouvir quem respondeu' : resultado.ladoSessao === 'criador' ? 'Ouvir adversário' : 'Ouvir minha tentativa'}</button>
-    {audio && endereco && <audio aria-label={neutro ? (audio.lado === 'criador' ? 'Áudio de quem criou' : 'Áudio de quem respondeu') : (audio.lado === (resultado.ladoSessao ?? 'desafiante') ? 'Sua gravação' : 'Áudio do adversário')} controls preload="metadata" src={endereco} />}
+    <button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao !== 'criador'} onClick={() => void ouvir('criador')}>{neutro ? 'Abrir áudio de quem criou' : resultado.ladoSessao === 'criador' ? 'Abrir minha gravação' : 'Abrir áudio do adversário'}</button><button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao === 'criador'} onClick={() => void ouvir('desafiante')}>{neutro ? 'Abrir áudio de quem respondeu' : resultado.ladoSessao === 'criador' ? 'Abrir áudio do adversário' : 'Abrir minha gravação'}</button>
+    {audio && endereco && <PlayerDeAudio endereco={endereco} rotulo={neutro ? (audio.lado === 'criador' ? 'Áudio de quem criou' : 'Áudio de quem respondeu') : (audio.lado === (resultado.ladoSessao ?? 'desafiante') ? 'Sua gravação' : 'Áudio do adversário')} />}
     {erro && <p role="alert">{erro}</p>}
     {!neutro && !denunciaAberta && <button type="button" onClick={() => setDenunciaAberta(true)}>Denunciar áudio do adversário</button>}
     {denunciaAberta && <section aria-label="Denunciar áudio do adversário">
@@ -380,6 +385,7 @@ function ResultadoDoDuelo({ duelo, token, resultado, neutro, aoVoltar }: { duelo
       {denuncia === 'indisponivel' && <p role="status">Não foi possível denunciar este áudio porque ele está indisponível.</p>}
       {denuncia === 'falha' && <p role="alert">Não foi possível confirmar o envio da denúncia. Tente novamente.</p>}
     </section>}
+    <ProximosPassosDuelo resultado={resultado} compartilhar={compartilhar} origem={origem} aoNovoDesafio={aoNovoDesafio} />
     <button type="button" onClick={aoVoltar}>Voltar</button>
   </div>;
 }

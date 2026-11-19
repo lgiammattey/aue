@@ -24,8 +24,8 @@ describe('casca das páginas públicas', () => {
   it('usa a mesma navegação da rede', () => {
     const navegacao = montar();
 
-    expect(navegacao.textContent).toContain('Feed');
-    expect(navegacao.textContent).toContain('Comunidades');
+    expect(navegacao.textContent).toContain('Mural');
+    expect(navegacao.textContent).toContain('Grupos WhatsApp');
     expect(navegacao.textContent).toContain('Tropa');
     expect(navegacao.textContent).toContain('Arena');
     expect(navegacao.textContent).toContain('Eu');

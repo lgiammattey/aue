@@ -1,9 +1,47 @@
-.duelo-v2 { width: min(100%, 440px); margin: 0 auto; padding: 24px; border: 1px solid #3a3a37; background: transparent; color: #f4f3ed; text-align: left; }
-.duelo-v2 h2, .duelo-v2 h3 { margin: 0 0 16px; font-family: var(--font-display); }
-.duelo-v2 p { line-height: 1.5; }
-.duelo-v2 button { min-height: 44px; margin: 8px 8px 0 0; padding: 10px 14px; border: 1px solid #f4f3ed; color: #f4f3ed; font-weight: 700; }
-.duelo-v2 button:focus-visible, .duelo-v2 input:focus-visible { outline: 3px solid #c6ff00; outline-offset: 4px; }
-.duelo-v2 label, .duelo-v2 input, .duelo-v2 audio { display: block; width: 100%; }
-.duelo-v2 input { margin-top: 8px; padding: 10px; border: 1px solid #777; color: #f4f3ed; background: #0a0a0a; }
-.duelo-v2 dl div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #3a3a37; padding: 8px 0; }
-.duelo-v2 dd { margin: 0; }
+.duelo-v2__pagina { box-sizing: border-box; width: 100%; min-height: 100svh; padding: env(safe-area-inset-top) max(28px, env(safe-area-inset-right)) 48px max(28px, env(safe-area-inset-left)); background: #f5f1e9; color: #171714; }
+.duelo-v2__pagina[hidden] { display: none; }
+.duelo-v2__cabecalho { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 76px; max-width: 1360px; margin: 0 auto; border-bottom: 1px solid #cfcbc0; }
+.duelo-v2__cabecalho a { color: #171714; font: 32px/1 var(--font-display); text-decoration: none; }
+.duelo-v2__cabecalho span { color: #5e5c55; font: 700 11px var(--font-mono); letter-spacing: .08em; }
+.duelo-v2 { box-sizing: border-box; width: min(100%, 650px); margin: 0 auto; padding: clamp(40px, 7vw, 85px) 0; color: #171714; text-align: left; }
+.duelo-v2 h2 { max-width: 650px; margin: 0 0 20px; font: 400 clamp(44px, 7vw, 76px)/1.1 var(--font-display); letter-spacing: -.02em; }
+.duelo-v2 h3 { margin: 32px 0 12px; font: 400 clamp(30px, 4vw, 45px)/1.1 var(--font-display); }
+.duelo-v2 p { color: #55534c; line-height: 1.5; }
+.duelo-v2 button { box-sizing: border-box; min-height: 44px; margin: 10px 8px 0 0; padding: 10px 16px; border: 1px solid #171714; background: transparent; color: #171714; font-weight: 700; cursor: pointer; }
+.duelo-v2 button:hover:not(:disabled) { background: #e8e3d8; }
+.duelo-v2 button:disabled { border-color: #b8b5ac; color: #747168; cursor: not-allowed; }
+.duelo-v2 button:focus-visible, .duelo-v2 input:focus-visible, .duelo-v2__cabecalho a:focus-visible { outline: 3px solid #364700; outline-offset: 3px; }
+.duelo-v2 label { display: block; line-height: 1.5; }
+.duelo-v2 input:not([type=checkbox]):not([type=radio]) { box-sizing: border-box; display: block; width: 100%; min-height: 44px; margin-top: 8px; padding: 10px; border: 1px solid #9c998e; background: #fffdf8; color: #171714; }
+.duelo-v2 input[type=checkbox], .duelo-v2 input[type=radio] { box-sizing: border-box; flex: 0 0 22px; width: 22px; height: 22px; margin: 0 10px 0 0; vertical-align: middle; accent-color: #526800; }
+.duelo-v2 label:has(input[type=checkbox]), .duelo-v2 label:has(input[type=radio]) { display: flex; align-items: flex-start; padding: 12px 0; cursor: pointer; }
+.duelo-v2 audio { display: block; width: 100%; margin-top: 16px; }
+.duelo-v2 .arena-player audio { margin: 0; }
+.duelo-v2 .arena-player audio.arena-player__audio--oculto { display: none; }
+.duelo-v2 .arena-player .arena-player__faixa input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; }
+.duelo-v2 fieldset { margin: 20px 0; padding: 16px; border: 1px solid #cfcbc0; }
+.duelo-v2 dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: 24px 0; border-top: 1px solid #cfcbc0; border-bottom: 1px solid #cfcbc0; }
+.duelo-v2 dl div { min-width: 0; padding: 20px 16px 20px 0; }
+.duelo-v2 dl div + div { padding-left: 20px; border-left: 1px solid #cfcbc0; }
+.duelo-v2 dt { color: #5e5c55; font-size: 13px; }
+.duelo-v2 dd { margin: 8px 0 0; font: 400 clamp(32px, 5vw, 56px)/1 var(--font-display); white-space: nowrap; }
+.duelo-v2__proximos { margin: 30px 0 12px; padding-top: 24px; border-top: 1px solid #cfcbc0; }
+.duelo-v2 .duelo-v2__principal { display: block; width: 100%; min-height: 52px; margin: 0; border: 0; background: #c6f500; color: #171714; }
+.duelo-v2 .duelo-v2__principal:hover:not(:disabled) { background: #b5df00; }
+.duelo-v2 .duelo-v2__principal:disabled { background: #d8d4ca; color: #57564e; }
+.duelo-v2__proximos > p { margin: 8px 0; font-size: 13px; }
+.duelo-v2__previa { margin-top: 12px; padding: 16px; border: 1px solid #cfcbc0; background: #ece8de; overflow-wrap: anywhere; }
+.duelo-v2__previa p { margin: 0 0 10px; }
+.duelo-v2 ol { padding-left: 22px; }
+@media (max-width: 699px) {
+  .duelo-v2__pagina { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+  .duelo-v2__cabecalho { min-height: 66px; }
+  .duelo-v2 { padding-top: 40px; }
+  .duelo-v2 h2 { font-size: clamp(40px, 11vw, 60px); }
+  .duelo-v2 dd { font-size: clamp(28px, 9vw, 45px); }
+}
+@media (max-width: 420px) {
+  .arena-v2__cabecalho { flex-wrap: wrap; padding: 8px 0; }
+  .arena-v2__cabecalho nav { gap: 10px; }
+  .arena-v2__cabecalho nav a, .arena-v2__cabecalho nav button { font-size: 12px; }
+}

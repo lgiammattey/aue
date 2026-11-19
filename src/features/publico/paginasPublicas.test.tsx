@@ -28,20 +28,19 @@ describe('/como-jogar com a moldura pública', () => {
 
   it('explica a comunidade e a Arena disponível sem prometer nota ou X1', () => {
     const html = montar(ComoJogar);
-    expect(html).toContain('pode gravar seu arroto na Arena');
+    expect(html).toContain('Toque pra gravar');
     expect(html).toContain('a medição de duração e potência relativa é experimental');
     expect(html).not.toContain('A Arena está sendo preparada');
     expect(html).not.toContain('placar e revanche');
     expect(html).toContain('sem baixar um aplicativo');
     expect(html).not.toContain('burp game');
-    expect(html).toContain('Os grupos de WhatsApp e Telegram são outra coisa');
+    expect(html).toContain('Os grupos de WhatsApp ficam fora do Auê');
   });
 
-  it('usa a casca OpenDesign compartilhada, não uma própria', () => {
+  it('usa a navegação da Arena', () => {
     const html = montar(ComoJogar);
-    expect(html).toContain('app od-informativo');
-    expect(html).toContain('Navegação do Auê');
-    expect(html).toContain('Painel complementar');
+    expect(html).toContain('guia-arena');
+    expect(html).toContain('Navegação principal');
   });
 
   it('leva pra política de privacidade e de volta pro jogo', () => {
@@ -53,7 +52,7 @@ describe('/como-jogar com a moldura pública', () => {
   it('o rodapé atual mantém os links institucionais', () => {
     const html = montar(ComoJogar);
     expect(html).toContain('href="/como-jogar"');
-    expect(html).toContain('href="/ranking-de-arrotos"');
+    expect(html).toContain('href="/como-arrotar"');
     expect(html).toContain('href="/privacidade"');
     expect(html).toContain('href="/termos"');
   });
@@ -66,24 +65,19 @@ describe('/como-arrotar com a moldura pública', () => {
     expect(html).toMatch(/<h1>[\s\S]*Como arrotar/);
   });
 
-  it('tem as cinco técnicas, o framing dos dois tipos e o desvio pro médico', () => {
+  it('explica o arroto sem prometer técnica garantida e orienta a buscar ajuda quando necessário', () => {
     const html = montar(ComoArrotar);
-    expect(html).toContain('Engole ar, devolve ar');
-    expect(html).toContain('trapaça');
-    expect(html).toContain('O corpo ajuda, se você deixar');
-    expect(html).toContain('Arroto renovado');
-    expect(html).toContain('Arrotar alto');
-    expect(html).toContain('Arroto de ar');
-    expect(html).toContain('Arroto de estômago');
-    expect(html).toContain('assunto de médico');
-    expect(html).toContain('não de brincadeira');
+    expect(html).toContain('nem técnica garantida');
+    expect(html).toContain('procure orientação médica');
+    expect(html).toContain('niddk.nih.gov');
+    expect(html).toContain('nhs.uk');
+    expect(html).not.toContain('A Arena está sendo preparada');
   });
 
-  it('usa a casca OpenDesign compartilhada, não uma própria', () => {
+  it('usa a navegação da Arena', () => {
     const html = montar(ComoArrotar);
-    expect(html).toContain('app od-informativo');
-    expect(html).toContain('Navegação do Auê');
-    expect(html).toContain('Painel complementar');
+    expect(html).toContain('guia-arena');
+    expect(html).toContain('Navegação principal');
   });
 
   it('leva de volta pro jogo e pra como jogar', () => {
@@ -191,14 +185,14 @@ describe('voz das páginas públicas', () => {
   it('a faixa final convida pra participar, sem falar em competição', () => {
     const html = montar(ComoArrotar);
 
-    expect(html).toContain('Arrota, aprende ou só vem ouvir. O importante é participar da resenha.');
+    expect(html).toContain('Bora fazer barulho?');
     expect(html).not.toContain('entra na competição');
   });
 
   it('a navegação móvel atual tem o atalho para comunidades', () => {
     const html = montar(ComoJogar);
 
-    expect(html).toContain('aria-label="Comunidades"');
-    expect(html).toContain('mobile-bottom-nav');
+    expect(html).toContain('aria-label="Navegação principal"');
+    expect(html).toContain('href="/feed"');
   });
 });

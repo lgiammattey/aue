@@ -1,56 +1,81 @@
-html:has(.fluxo-arena-v2) { background: #0a0a0a; }
+/* A Arena usa uma superfície clara; o fluxo de duelo mantém o próprio fundo. */
 .fluxo-arena-v2 { width: 100%; min-height: 100svh; background: #0a0a0a; color: #f4f3ed; }
 .arena-v2 {
-  --v2-bg: #0a0a0a;
-  --v2-paper: #f4f3ed;
-  --v2-quiet: #b6b6ae;
-  --v2-line: #3a3a37;
-  --v2-volt: #c6ff00;
-  width: 100%; min-height: 100svh; color: var(--v2-paper); background: var(--v2-bg);
-  padding: env(safe-area-inset-top) max(24px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(24px, env(safe-area-inset-left));
-  font-family: var(--font-body); display: flex; flex-direction: column;
+  --v2-bg: #f5f1e9;
+  --v2-paper: #171714;
+  --v2-quiet: #5e5c55;
+  --v2-line: #cfcbc0;
+  --v2-volt: #c6f500;
+  box-sizing: border-box; width: 100%; min-height: 100svh;
+  padding: env(safe-area-inset-top) max(28px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(28px, env(safe-area-inset-left));
+  color: var(--v2-paper); background: var(--v2-bg); font-family: var(--font-body); display: flex; flex-direction: column;
 }
-.arena-v2__cabecalho, .arena-v2__rodape { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1100px; width: 100%; margin: 0 auto; }
+.arena-v2__cabecalho, .arena-v2__rodape { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1360px; width: 100%; margin: 0 auto; }
 .arena-v2__cabecalho { min-height: 76px; border-bottom: 1px solid var(--v2-line); }
 .arena-v2__marca { font: 32px/1 var(--font-display); letter-spacing: -.035em; }
-.arena-v2__marca span { color: var(--v2-volt); }
 .arena-v2__cabecalho nav, .arena-v2__rodape { display: flex; gap: 24px; }
 .arena-v2 a { color: var(--v2-paper); text-decoration: none; font-size: 13px; font-weight: 700; padding: 14px 0; }
+.arena-v2__cabecalho nav button { min-height: 44px; padding: 8px 0; color: var(--v2-paper); font-size: 13px; font-weight: 700; }
 .arena-v2 a:hover { text-decoration: underline; }
-.arena-v2 :focus-visible { outline: 3px solid var(--v2-volt); outline-offset: 4px; }
-.arena-v2__conteudo { width: 100%; max-width: 1100px; margin: 0 auto; flex: 1; }
+.arena-v2 :focus-visible { outline: 3px solid #364700; outline-offset: 4px; }
+.arena-v2__conteudo { width: 100%; max-width: 1360px; margin: 0 auto; flex: 1; }
 .arena-v2__desafio { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--v2-line); font: 700 11px/1.3 var(--font-mono); letter-spacing: .08em; }
 .arena-v2__desafio span { color: var(--v2-quiet); }
-.arena-v2__desafio strong { color: var(--v2-paper); text-align: right; }
-.arena-v2__palco { min-height: 540px; padding: 48px 0 64px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.arena-v2__identificador { color: var(--v2-quiet); font: 700 10px/1.4 var(--font-mono); letter-spacing: .14em; margin: 0 0 22px; }
-.arena-v2__identificador span { color: var(--v2-volt); }
-.arena-v2 h1 { margin: 0; font: 400 clamp(54px, 9vw, 92px)/.95 var(--font-display); letter-spacing: -.02em; }
-.arena-v2 h1 em { font-style: normal; color: var(--v2-volt); }
-.arena-v2__instrucao { margin: 18px 0 30px; color: var(--v2-quiet); font-size: 14px; line-height: 1.5; }
-.arena-v2__gatilho { display: flex; flex-direction: column; align-items: center; gap: 18px; color: var(--v2-paper); font-weight: 800; min-width: 200px; min-height: 44px; }
+.arena-v2__desafio strong { text-align: right; }
+.arena-v2__palco { position: relative; min-height: 530px; padding: 60px 165px 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.arena-v2__arte { position: absolute; width: clamp(85px, 12vw, 150px); color: #25241f; pointer-events: none; }
+.arena-v2__arte svg { display: block; width: 100%; }
+.arena-v2__arte--lata { left: 2%; top: 26%; transform: rotate(-8deg); }
+.arena-v2__arte--flamula { right: 2%; top: 30%; transform: rotate(7deg); }
+.arena-v2__identificador { color: var(--v2-quiet); font: 700 10px/1.4 var(--font-mono); letter-spacing: .14em; margin: 0 0 20px; }
+.arena-v2 h1 { max-width: 700px; margin: 0; font: 400 clamp(48px, 7.5vw, 100px)/1.12 var(--font-display); letter-spacing: -.025em; }
+.arena-v2__instrucao { margin: 18px 0 26px; color: var(--v2-quiet); font-size: 14px; line-height: 1.5; }
+.arena-v2__gatilho { display: inline-flex; flex-direction: row; justify-content: center; align-items: center; gap: 12px; min-width: 245px; min-height: 60px; padding: 14px 22px; border: 0; border-radius: 0; background: var(--v2-volt); color: #171714; font-weight: 800; font-size: 16px; cursor: pointer; }
+.arena-v2__gatilho:hover { background: #b5df00; }
 .arena-v2__gatilho:disabled { cursor: wait; opacity: .65; }
-.arena-v2__circulo { display: grid; place-items: center; width: 142px; height: 142px; border-radius: 50%; color: #090909; background: var(--v2-volt); border: 8px solid #333e08; font-size: 36px; }
-.arena-v2__circulo svg { width: 42px; height: 42px; }
-.arena-v2__privacidade { color: var(--v2-quiet); font-size: 12px; margin: 26px 0 0; }
-.arena-v2__medidor { width: min(100%, 320px); margin: 24px auto 0; font: 700 12px/1.4 var(--font-mono); }
-.arena-v2__medidor time { margin-left: 16px; color: var(--v2-volt); }
-.arena-v2__onda { height: 4px; background: #353535; margin-top: 12px; }
-.arena-v2__onda span { display: block; width: 100%; height: 100%; background: var(--v2-volt); transform-origin: left; }
+.arena-v2__circulo { display: grid; place-items: center; width: 28px; height: 28px; flex: none; }
+.arena-v2__circulo svg { width: 25px; height: 25px; }
+.arena-v2__privacidade { max-width: 460px; color: var(--v2-quiet); font-size: 12px; line-height: 1.5; margin: 22px 0 0; }
+.arena-v2__duelo-dica { margin: 18px 0 0; color: var(--v2-paper); font-size: 13px; font-weight: 700; line-height: 1.4; }
+.arena-v2__medidor { position: relative; order: -1; box-sizing: border-box; width: min(100%, 270px); aspect-ratio: 1; margin: 0 auto 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font: 700 12px/1.4 var(--font-mono); letter-spacing: .08em; }
+.arena-v2__medidor time { display: block; margin: 10px 0 0; color: var(--v2-paper); font: 400 clamp(48px, 8vw, 78px)/1 var(--font-display); letter-spacing: -.02em; }
+.arena-v2__onda { position: absolute; inset: 0; border-radius: 50%; background: repeating-conic-gradient(#769500 0deg 2deg, transparent 2deg 5deg); -webkit-mask: radial-gradient(transparent 64%, #000 65% 71%, transparent 72%); mask: radial-gradient(transparent 64%, #000 65% 71%, transparent 72%); pointer-events: none; }
 .arena-v2__medidor p { color: var(--v2-paper); }
-.arena-v2__erro { max-width: 420px; color: #ffd5d5; line-height: 1.5; }
-.arena-v2__revisao { width: min(100%, 360px); padding: 20px; border: 1px solid var(--v2-line); }
-.arena-v2__revisao h2 { margin: 0; font: 24px/1.1 var(--font-display); }
+.arena-v2--gravando h1 { font-size: clamp(28px, 4vw, 42px); margin-bottom: 22px; }
+.arena-v2--gravando .arena-v2__identificador { display: none; }
+.arena-v2__erro { max-width: 420px; color: #9b2525; line-height: 1.5; }
+.arena-v2__revisao { width: min(100%, 560px); box-sizing: border-box; margin-top: 28px; padding: 24px 0; border-top: 1px solid var(--v2-line); text-align: left; }
+.arena-v2__revisao h2 { margin: 0; font: 28px/1.1 var(--font-display); }
 .arena-v2__revisao p { color: var(--v2-quiet); line-height: 1.5; font-size: 14px; }
 .arena-v2__revisao audio { width: 100%; }
-.arena-v2__secundario { min-height: 44px; padding: 10px 16px; margin-top: 16px; border: 1px solid var(--v2-paper); border-radius: 4px; color: var(--v2-paper); font-weight: 700; }
+.arena-v2__secundario { min-height: 44px; padding: 10px 16px; margin: 16px 8px 0 0; border: 1px solid var(--v2-paper); border-radius: 0; color: var(--v2-paper); background: transparent; font-weight: 700; cursor: pointer; }
+.arena-v2__secundario:hover { background: #e8e3d8; }
+.arena-v2__desafiar { display: block; box-sizing: border-box; width: 100%; min-height: 52px; padding: 12px 18px; margin-top: 20px; border: 0; background: var(--v2-volt); color: #171714; font-weight: 800; cursor: pointer; }
+.arena-v2__desafiar:hover:not(:disabled) { background: #b5df00; }
+.arena-v2__desafiar:disabled { background: #d8d4ca; color: #57564e; cursor: not-allowed; }
+.arena-v2__revisao .arena-v2__duelo-aviso { margin: 8px 0 0; color: var(--v2-quiet); }
 .arena-v2__rodape { justify-content: center; border-top: 1px solid var(--v2-line); flex-wrap: wrap; }
 .arena-v2__rodape a { color: var(--v2-quiet); }
-@media (max-width: 420px) { .arena-v2 { padding-left: 16px; padding-right: 16px; } .arena-v2__cabecalho nav { gap: 14px; } .arena-v2__palco { padding-top: 42px; } .arena-v2__circulo { width: 128px; height: 128px; } }
-@media (prefers-reduced-motion: reduce) { .arena-v2__onda span { transition: none; } }
 .arena-v2__laudo { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--v2-line); text-align: left; }
 .arena-v2__laudo h3 { font: 700 11px/1.4 var(--font-mono); letter-spacing: .08em; }
 .arena-v2__laudo dl { margin: 0; }
 .arena-v2__laudo dl div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--v2-line); }
 .arena-v2__laudo dt { color: var(--v2-quiet); font-size: 13px; }
 .arena-v2__laudo dd { margin: 0; font: 700 14px/1.4 var(--font-mono); }
+.arena-v2__laudo dl .arena-v2__duracao { display: block; padding: 10px 0 18px; }
+.arena-v2__laudo .arena-v2__duracao dd { margin-top: 5px; font: 400 clamp(44px, 7vw, 70px)/1 var(--font-display); }
+@media (max-width: 699px) {
+  .arena-v2 { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+  .arena-v2__cabecalho { min-height: 66px; }
+  .arena-v2__cabecalho nav { gap: 14px; }
+  .arena-v2__palco { min-height: 500px; padding: 42px 0 50px; }
+  .arena-v2__arte { width: 62px; opacity: .65; }
+  .arena-v2__arte--lata { left: 0; top: 12px; }
+  .arena-v2__arte--flamula { right: 0; top: 12px; }
+  .arena-v2__identificador { margin-top: 72px; }
+  .arena-v2 h1 { font-size: clamp(42px, 11vw, 64px); }
+  .arena-v2__medidor { margin-top: 75px; }
+  .arena-v2--gravando h1 { font-size: 30px; }
+  .arena-v2__revisao { margin-top: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .arena-v2__onda { transition: none; } }

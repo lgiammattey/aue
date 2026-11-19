@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { LayoutLegal, QuemResponde, RodapeLegal, Secao } from './LayoutLegal';
+import { FLAGS } from '../../shared/flags';
 
 /**
  * Termos de uso — a segunda página exigida pelo Contrato MVP1 §3.10
@@ -67,7 +68,7 @@ export const TermosDeUso: React.FC = () => (
     <Secao titulo="A gravação continua sua">
       <p>
         O áudio é seu. O que você dá ao Auê é permissão para guardá-lo e tocá-lo
-        dentro do app para quem abrir a batalha em que você gravou — que é o
+        dentro do app conforme a modalidade em que você gravou — que é o
         mínimo para o produto funcionar. Para o arroto aparecer numa Roda, você
         precisa publicar e marcar a autorização na hora; ao fazer isso, você
         permite que qualquer pessoa o ouça e comente.
@@ -83,10 +84,11 @@ export const TermosDeUso: React.FC = () => (
 
     <Secao titulo="Moderação">
       <p>
-        Toda gravação tem botão de denúncia. Com três denúncias de pessoas
-        diferentes, ela é escondida automaticamente e para de tocar para todo
+        Nas batalhas antigas, com três denúncias de pessoas
+        diferentes, a gravação é escondida automaticamente e para de tocar para todo
         mundo. Gravação escondida à mão não volta por falta de denúncia nova.
       </p>
+      {FLAGS.dueloV2 && <p>No desafio por convite, uma denúncia pode deixar o áudio indisponível para análise.</p>}
       <p>
         Resenhas, comentários e perfis também podem ser denunciados e escondidos. A
         moderação age primeiro sobre o conteúdo. Quem abusar repetidamente pode

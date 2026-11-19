@@ -7,3 +7,8 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/painel-administrativo/deno.json"
 entrypoint = "./functions/painel-administrativo/index.ts"
+
+[functions.duelo-audio-v2]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/duelo-audio-v2/index.ts"

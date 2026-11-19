@@ -13,6 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { PoliticaDePrivacidade } from './PoliticaDePrivacidade';
 import { TermosDeUso } from './TermosDeUso';
+import { FLAGS } from '../../shared/flags';
 
 function montar(componente: FC): string {
   return renderToStaticMarkup(createElement(MemoryRouter, null, createElement(componente)));
@@ -67,6 +68,17 @@ describe('política de privacidade', () => {
     expect(html).not.toContain('Não existe login');
   });
 
+  it('distingue desafio privado e explica pedido pendente quando habilitado', () => {
+    const anterior = FLAGS.dueloV2;
+    try {
+      FLAGS.dueloV2 = true;
+      const html = montar(PoliticaDePrivacidade);
+      expect(html).toContain('Áudio nos desafios por convite');
+      expect(html).toContain('pode ficar pendente de confirmação');
+      expect(html).toContain('batalhas antigas');
+    } finally { FLAGS.dueloV2 = anterior; }
+  });
+
   it('aponta para os termos de uso', () => {
     expect(montar(PoliticaDePrivacidade)).toContain('href="/termos"');
   });
@@ -95,6 +107,16 @@ describe('termos de uso', () => {
     expect(html).toContain('não existe cobrança');
     expect(html).toContain('conta, com e-mail e senha, é opcional');
     expect(html).toContain('Não existe verificação de idade');
+  });
+
+  it('explica a moderação do desafio sem alterar a regra antiga', () => {
+    const anterior = FLAGS.dueloV2;
+    try {
+      FLAGS.dueloV2 = true;
+      const html = montar(TermosDeUso);
+      expect(html).toContain('No desafio por convite, uma denúncia');
+      expect(html).toContain('Nas batalhas antigas');
+    } finally { FLAGS.dueloV2 = anterior; }
   });
 
   it('aponta para a política de privacidade', () => {

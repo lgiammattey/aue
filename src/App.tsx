@@ -5,6 +5,7 @@ import { criarArmazenamentoWeb } from './plataforma/web/armazenamento';
 import { criarTelemetriaWeb } from './plataforma/web/telemetria';
 
 const ArenaV2 = lazy(() => import('./arena/v2/EntradaArenaLocalV2').then((m) => ({ default: m.EntradaArenaLocalV2 })));
+const EntradaDueloIntegrado = lazy(() => import('./arena/v2/EntradaDueloIntegrado').then((m) => ({ default: m.EntradaDueloIntegrado })));
 const ChallengeView = lazy(() => import('./features/audio/ChallengeView').then((m) => ({ default: m.ChallengeView })));
 const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePrivacidade').then((m) => ({ default: m.PoliticaDePrivacidade })));
 const TermosDeUso = lazy(() => import('./features/legal/TermosDeUso').then((m) => ({ default: m.TermosDeUso })));
@@ -89,7 +90,15 @@ function EntradaInicial() {
 
 function EntradaRaiz() {
   const { pathname, search } = useLocation();
-  return FLAGS.arenaV2 && abreArenaV2(pathname, search) ? <ArenaV2 /> : <EntradaInicial />;
+  return FLAGS.arenaV2 && abreArenaV2(pathname, search) ? <EntradaDaArena /> : <EntradaInicial />;
+}
+
+function EntradaDaArena() {
+  return FLAGS.dueloV2 ? <EntradaDueloIntegrado modo="criar" /> : <ArenaV2 />;
+}
+
+function DueloIndisponivel() {
+  return <main><h1>Desafio indisponível.</h1><p>Este desafio ainda não está disponível neste ambiente.</p><a href="/">Voltar para a Arena</a></main>;
 }
 
 function EntradaHistoria() {
@@ -146,7 +155,7 @@ export function App() {
 
           {/* Arena de Arrotos */}
           <Route path="/arena/em-breve" element={<TelaArenaEmBreveOpenDesign />} />
-          <Route path="/arena" element={FLAGS.arenaV2 ? <ArenaV2 /> : <TelaArenaEmBreveOpenDesign />} />
+          <Route path="/arena" element={FLAGS.arenaV2 ? <EntradaDaArena /> : <TelaArenaEmBreveOpenDesign />} />
 
           {/* Comunidades (Open Design 1:1) */}
           <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />
@@ -167,6 +176,7 @@ export function App() {
           <Route path="/x1/:code" element={<EntradaPorLink />} />
           <Route path="/b/:code" element={<EntradaPorLink />} />
           <Route path="/d/:id" element={<ChallengeView />} />
+          <Route path="/duelo" element={FLAGS.arenaV2 && FLAGS.dueloV2 ? <EntradaDueloIntegrado modo="responder" /> : <DueloIndisponivel />} />
 
           {/* Perfil e Conta */}
           <Route path="/perfil" element={<EntradaPerfil />} />

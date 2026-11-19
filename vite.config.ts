@@ -35,6 +35,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: entrada('index.html'),
+        duelo: entrada('duelo.html'),
         privacidade: entrada('privacidade.html'),
         termos: entrada('termos.html'),
         comoJogar: entrada('como-jogar.html'),
@@ -69,9 +70,9 @@ export default defineConfig({
           "hoje não pega" não é decisão: acrescentar `json` ao glob amanhã
           reabriria isto sem ninguém perceber. A regra fica escrita.
         */
-        globIgnores: ['**/modelos/**'],
+        globIgnores: ['**/modelos/**', 'duelo.html'],
         /*
-          Sitemap e robots são arquivos técnicos, não rotas da SPA.
+          Sitemap, robots e o convite do duelo não usam a casca da home.
 
           Se o navegador já tiver o service worker instalado, abrir
           `/sitemap.xml` como navegação não pode cair no `index.html`: além de
@@ -79,7 +80,7 @@ export default defineConfig({
           manual da entrega que o Google deve ler. Esses dois arquivos sempre
           seguem para a rede.
         */
-        navigateFallbackDenylist: [/^\/(?:sitemap\.xml|robots\.txt)$/],
+        navigateFallbackDenylist: [/^\/(?:sitemap\.xml|robots\.txt)$/, /^\/duelo(?:\.html|\/)?(?:\?|$)/],
         /*
           ÁUDIO ASSINADO NUNCA É CACHEADO.
 

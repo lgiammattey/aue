@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { CapturaDeAudio } from '../../portas/captura';
 import type { CapturaPcmV2 } from '../../portas/capturaPcmV2';
 import type { Compartilhamento } from '../../portas/compartilhamento';
@@ -19,10 +19,11 @@ export interface FluxoArenaV2Props {
   readonly capturaSemLaudo?: CapturaDeAudio;
   readonly aoVoltar?: () => void;
   readonly telemetria?: TelemetriaArenaV2;
+  readonly conteudoDoRepouso?: ReactNode;
 }
 
 /** Composição local: dependências explícitas evitam conexão acidental com produção. */
-export function FluxoArenaV2({ modo, duelo, compartilhar, origem, lerToken, captura, capturaSemLaudo, aoVoltar, telemetria }: FluxoArenaV2Props) {
+export function FluxoArenaV2({ modo, duelo, compartilhar, origem, lerToken, captura, capturaSemLaudo, aoVoltar, telemetria, conteudoDoRepouso }: FluxoArenaV2Props) {
   const [tela, setTela] = useState<'arena' | 'duelo' | 'meus' | 'encerrado'>(modo === 'criar' ? 'arena' : 'duelo');
   const [modoAtual, setModoAtual] = useState(modo);
   const [novaArena, setNovaArena] = useState(0);
@@ -34,7 +35,7 @@ export function FluxoArenaV2({ modo, duelo, compartilhar, origem, lerToken, capt
 
   return <div className="fluxo-arena-v2">
     {tela !== 'encerrado' && tela !== 'meus' && <div hidden={tela !== 'arena'}>
-      <ArenaV2 key={novaArena} telemetria={telemetria} captura={captura} capturaSemLaudo={capturaSemLaudo} aoUsarTentativa={habilitado ? usar : undefined}
+      <ArenaV2 key={novaArena} conteudoDoRepouso={tela === 'arena' ? conteudoDoRepouso : undefined} telemetria={telemetria} captura={captura} capturaSemLaudo={capturaSemLaudo} aoUsarTentativa={habilitado ? usar : undefined}
         rotuloUsarTentativa={modoAtual === 'criar' ? 'Criar desafio' : 'Usar esta gravação'}
         aoAbrirMeusDesafios={habilitado && modoAtual === 'criar' ? () => setTela('meus') : undefined}
         aoVoltar={modoAtual === 'responder' ? () => setTela('duelo') : aoVoltar ? sair : undefined} />

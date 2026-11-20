@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject, type ReactNode } from 'react';
 import type { CapturaPcmV2, FalhaCapturaPcmV2 } from '../../portas/capturaPcmV2';
 import type { CapturaDeAudio } from '../../portas/captura';
 import type { CompartilhamentoDeAudio } from '../../portas/compartilhamentoDeAudio';
@@ -28,6 +28,8 @@ interface Props {
   rotuloUsarTentativa?: string;
   aoVoltar?: () => void;
   aoAbrirMeusDesafios?: () => void;
+  /** Conteúdo da home; desmontado enquanto a Arena está em uso. */
+  conteudoDoRepouso?: ReactNode;
 }
 
 function Player({ audio, player }: { audio: Blob; player: RefObject<HTMLAudioElement | null> }) {
@@ -64,7 +66,7 @@ function falaDoLaudoInconclusivo(motivo: MotivoDeLaudoInconclusivo): string {
 }
 
 /** Primeira versão local: a gravação e o laudo ainda não são publicados. */
-export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, telemetria, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar, aoAbrirMeusDesafios }: Props) {
+export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, telemetria, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar, aoAbrirMeusDesafios, conteudoDoRepouso }: Props) {
   const [compartilhamento] = useState(() => compartilhamentoInjetado ?? criarCompartilhamentoDeAudioWeb());
   const [compartilhando, setCompartilhando] = useState(false);
   const compartilhamentoAtivo = useRef<number | null>(null);
@@ -362,6 +364,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
           {estado === 'calibrando' && <p role="status">Calibrando o ambiente. Um instante de silêncio.</p>}
           {estado === 'finalizando' && <p role="status">Preparando sua gravação.</p>}
         </section>
+        {estado === 'pronto' && conteudoDoRepouso}
       </div>
       <footer className="arena-v2__rodape"><a href="/como-jogar">Como jogar</a><a href="/privacidade">Privacidade</a><a href="/termos">Termos</a></footer>
     </main>

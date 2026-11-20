@@ -1,0 +1,35 @@
+name: Avaliar arrotos publicados
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Nunca executar código de PR ou branch com acesso à chave do worker. O job
+# processa concessões uma a uma; execuções atrasadas não apagam a fila no banco.
+concurrency:
+  group: notas-publicadas
+  cancel-in-progress: false
+
+jobs:
+  avaliar:
+    if: github.repository == 'lgiammattey/aue' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Avaliar lote
+        env:
+          AUE_WORKER_SECRET: ${{ secrets.AUE_WORKER_SECRET }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: node scripts/nota-automatica/executar.mjs

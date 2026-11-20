@@ -551,7 +551,7 @@ export function InicioOpenDesign({
         const audio = audioPorTopico.get(topico.id) ?? topico.audio;
         const fonteAtual = anexo?.tipo === 'audio' ? 'anexo' : audio?.caminhoDoAudioDaCasa ? 'casa' : null;
         const avaliada = nota?.fonte === fonteAtual && (fonteAtual === 'anexo' ? Boolean(url) : item.temAudio);
-        return { ...item, nota: fonteAtual === 'anexo' ? (avaliada ? nota?.nota : undefined) : item.nota ?? (avaliada ? nota?.nota : undefined), notaRetrospectiva: Boolean(avaliada && nota?.versao !== 'publicacao-acustica-legado-v1' && (fonteAtual === 'anexo' || item.nota === undefined)) };
+        return { ...item, nota: fonteAtual === 'anexo' ? (avaliada ? nota?.nota : undefined) : item.nota ?? (avaliada ? nota?.nota : undefined), notaRetrospectiva: Boolean(avaliada && nota?.versao === 'retrospectiva-acustica-legado-v1' && (fonteAtual === 'anexo' || item.nota === undefined)) };
       }));
       if (!ativo) return;
       setTopicosDaComunidadeDoPerfil(itens);
@@ -600,7 +600,7 @@ export function InicioOpenDesign({
         const item = paraItemDePublicacaoPessoal(publicacao, anexo, url);
         const nota = notas.get(publicacao.id);
         return nota?.fonte === 'anexo' && anexo?.tipo === 'audio' && url
-          ? { ...item, nota: nota.nota, notaRetrospectiva: nota.versao !== 'publicacao-acustica-legado-v1' }
+          ? { ...item, nota: nota.nota, notaRetrospectiva: nota.versao === 'retrospectiva-acustica-legado-v1' }
           : item;
       }));
       if (!ativo) return;
@@ -664,7 +664,7 @@ export function InicioOpenDesign({
         setEstadoArrotosDoPerfil('pronto');
         if (forum.listarNotasRetrospectivas) {
           void forum.listarNotasRetrospectivas([], [], lista.map((arroto) => arroto.id)).then((res) => {
-            if (ativo && res.ok) setNotasDosArrotos(new Map(res.valor.filter((nota) => nota.tipo === 'perfil' && nota.fonte === 'perfil').map((nota) => [nota.id, { nota: nota.nota, retrospectiva: nota.versao !== 'publicacao-acustica-legado-v1' }])));
+            if (ativo && res.ok) setNotasDosArrotos(new Map(res.valor.filter((nota) => nota.tipo === 'perfil' && nota.fonte === 'perfil').map((nota) => [nota.id, { nota: nota.nota, retrospectiva: nota.versao === 'retrospectiva-acustica-legado-v1' }])));
           }).catch(() => {});
         }
       },
@@ -961,7 +961,7 @@ export function InicioOpenDesign({
           if (entrada.tipo === 'pessoal') {
             const nota = notasRetrospectivas.get(item.id);
             const avaliada = nota?.fonte === 'anexo' && anexo?.tipo === 'audio' && Boolean(url);
-            itens.push({ ...paraItemDePublicacaoPessoal(entrada.valor, anexo, url), ...(avaliada ? { nota: nota.nota, notaRetrospectiva: nota.versao !== 'publicacao-acustica-legado-v1' } : {}) });
+            itens.push({ ...paraItemDePublicacaoPessoal(entrada.valor, anexo, url), ...(avaliada ? { nota: nota.nota, notaRetrospectiva: nota.versao === 'retrospectiva-acustica-legado-v1' } : {}) });
           } else {
             const t = entrada.valor;
             const audio = audioDoTopico(audioPorTopico.get(t.id) ?? t.audio, forum);
@@ -974,7 +974,7 @@ export function InicioOpenDesign({
               autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo', autorHandle: t.autor.handle ?? undefined,
               autorAvatarUrl: t.autor.avatarUrl ?? undefined, criadoEm: t.criadoEm, respostasTotal: t.respostasTotal,
               temAudio: anexo?.tipo === 'audio' || audio.temAudio, enderecoDoAudio: audio.enderecoDoAudio,
-              nota: anexoDeAudio ? (avaliada ? nota?.nota : undefined) : audio.nota ?? (avaliada ? nota?.nota : undefined), notaRetrospectiva: Boolean(avaliada && nota?.versao !== 'publicacao-acustica-legado-v1'), duracaoSegundos: anexoDeAudio ? undefined : audio.duracaoSegundos,
+              nota: anexoDeAudio ? (avaliada ? nota?.nota : undefined) : audio.nota ?? (avaliada ? nota?.nota : undefined), notaRetrospectiva: Boolean(avaliada && nota?.versao === 'retrospectiva-acustica-legado-v1'), duracaoSegundos: anexoDeAudio ? undefined : audio.duracaoSegundos,
               anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined });
           }
         }
@@ -1371,7 +1371,7 @@ export function InicioOpenDesign({
         paiId: resposta.paiId,
         nivel: resposta.nivel,
         notaRetrospectiva: anexo?.tipo === 'audio' && url ? notas.get(resposta.id)?.nota : undefined,
-        notaAvaliadaDepois: notas.get(resposta.id)?.versao !== 'publicacao-acustica-legado-v1',
+        notaAvaliadaDepois: notas.get(resposta.id)?.versao === 'retrospectiva-acustica-legado-v1',
         anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
       };
     }));
@@ -1566,7 +1566,9 @@ export function InicioOpenDesign({
       setItensFeed(incrementar);
       setTopicosDaComunidade(incrementar);
       setEntradasDaPauta(incrementar);
-      exibirToast('Comentário publicado na roda!');
+      exibirToast(dados.anexo?.tipo === 'audio' && postComentariosAtivo.tipo === 'topico'
+        ? 'Comentário publicado! O áudio será analisado; a nota pode demorar alguns minutos.'
+        : 'Comentário publicado na roda!');
       return true;
     } catch (erro) {
       exibirToast(erro instanceof ErroDePublicacaoDoAnexo ? erro.message : 'Não foi possível enviar o comentário agora.');
@@ -1623,7 +1625,9 @@ export function InicioOpenDesign({
       return false;
     }
 
-    exibirToast(ePostPessoal ? 'Publicado no seu perfil e no feed.' : 'Publicado com sucesso.');
+    exibirToast(dados.anexo?.tipo === 'audio'
+      ? 'Publicado! O áudio será analisado; a nota pode demorar alguns minutos.'
+      : ePostPessoal ? 'Publicado no seu perfil e no feed.' : 'Publicado com sucesso.');
 
     const novoItem: ItemDoFeed = {
       id: postCriadoId,
@@ -2113,15 +2117,15 @@ export function InicioOpenDesign({
           navigate('/feed');
         } else {
           fecharGravacaoDireta();
-          exibirToast('O arroto ficou salvo na aba Arrotos, mas não entrou no feed.');
+          exibirToast('O arroto ficou no perfil, mas não entrou no feed. A nota será analisada.');
         }
         return;
       }
       const { preparo } = await publicarAudioNoPerfil(audioDireto, destino);
       exibirToast(
         destino.tipo === 'perfil-marcado'
-          ? `Arroto enviado para @${preparo.perfilDestinoHandle}.`
-          : 'Arroto guardado no seu perfil.',
+          ? `Arroto enviado para @${preparo.perfilDestinoHandle}. A nota será analisada.`
+          : 'Arroto guardado no seu perfil. A nota pode demorar alguns minutos.',
       );
       fecharGravacaoDireta();
       if (destino.tipo === 'perfil-marcado') {

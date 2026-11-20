@@ -192,6 +192,17 @@ export interface NotaRetrospectiva {
   readonly versao: string;
 }
 
+/** Um áudio público e avaliado por pessoa; nunca inclui caminho do objeto. */
+export interface ArrotadorDoTop {
+  readonly handle: string;
+  readonly apelido: string | null;
+  readonly avatarUrl: string | null;
+  readonly nota: number;
+  readonly alvoTipo: 'topico' | 'resposta';
+  readonly alvoId: string;
+  readonly fonte: 'anexo' | 'arena';
+}
+
 /** Apenas publicações visíveis com nota; ausência de nota não vale zero. */
 export interface ResumoDasNotasPublicadas {
   readonly melhorNota: number | null;
@@ -553,6 +564,7 @@ export interface PortaDeForum {
 
   /** Projeção única para uma página; o servidor aplica consentimento e visibilidade. */
   listarAudioDosTopicos?(topicoIds: readonly string[]): Promise<ResultadoDaLeitura<readonly AudioDeTopico[]>>;
+  listarTopArrotadores?(): Promise<ResultadoDaLeitura<readonly ArrotadorDoTop[]>>;
   listarNotasRetrospectivas?(topicoIds: readonly string[], respostaIds?: readonly string[], arrotoIds?: readonly string[]): Promise<ResultadoDaLeitura<readonly NotaRetrospectiva[]>>;
   obterResumoDasNotasPublicadas?(perfilId: string): Promise<ResultadoDaLeitura<ResumoDasNotasPublicadas>>;
 

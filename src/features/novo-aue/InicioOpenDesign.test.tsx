@@ -556,7 +556,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
         resultadoId: null, nota: null, duracao: null, subtipoDeOrigem: null,
         caminhoDoAudio: null, caminhoDoAudioDaCasa: 'burpzilla/a.m4a',
       } }] })),
-      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'casa' as const, nota: 73, versao: 'v1' }] })),
+      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'casa' as const, nota: 73, versao: 'retrospectiva-acustica-legado-v1' }] })),
       enderecoDoAudioDaCasa: () => 'https://cdn.aue.test/a.m4a',
     };
     render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
@@ -573,7 +573,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       } }] })),
       listarAnexosDoForum: vi.fn(async () => ({ ok: true as const, valor: [{ alvo: 'topico' as const, alvoId: 'topico-1', tipo: 'audio' as const, caminho: 'x.webm', mime: 'audio/webm', tamanhoBytes: 1, duracaoMs: 1000, urlVideo: null }] })),
       assinarAnexoDoForum: vi.fn(async () => ({ ok: true as const, valor: 'https://cdn.aue.test/x.webm' })),
-      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'casa' as const, nota: 73, versao: 'v1' }] })),
+      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'casa' as const, nota: 73, versao: 'retrospectiva-acustica-legado-v1' }] })),
       enderecoDoAudioDaCasa: () => 'https://cdn.aue.test/a.m4a',
     };
     render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
@@ -591,7 +591,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       listarAnexosDoForum: vi.fn(async () => ({ ok: true as const, valor: [{ alvo: 'topico' as const, alvoId: 'topico-1', tipo: 'audio' as const, caminho: 'x.webm', mime: 'audio/webm', tamanhoBytes: 1, duracaoMs: 1000, urlVideo: null }] })),
       assinarAnexoDoForum: vi.fn(async () => ({ ok: true as const, valor: 'https://cdn.aue.test/x.webm' })),
       assinarAudioDoResultado: vi.fn(async () => 'https://cdn.aue.test/resultado.webm'),
-      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'anexo' as const, nota: 73, versao: 'v1' }] })),
+      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'anexo' as const, nota: 73, versao: 'retrospectiva-acustica-legado-v1' }] })),
     };
     render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
     expect(await screen.findByTitle('Avaliado depois: 73/100')).toBeTruthy();
@@ -681,7 +681,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     for (const [pedido] of enviarAnexo.mock.calls) expect(pedido.arquivo).toBe(audio);
     expect(criarPublicacao).toHaveBeenCalledWith({ corpo: 'Post com a gravação', anexo: anexoConfirmado });
     expect(registrarOuGuardarNotaPublicada).not.toHaveBeenCalled();
-    expect(await screen.findByText('Publicado no seu perfil e no feed.')).toBeTruthy();
+    expect(await screen.findByText('Publicado! O áudio será analisado; a nota pode demorar alguns minutos.')).toBeTruthy();
   });
 
   it('carrega a Resenha por data de publicação, sem usar o feed legado', async () => {

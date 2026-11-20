@@ -1,0 +1,17 @@
+.top-arrotadores-home { padding: 64px max(28px, env(safe-area-inset-left)); background: #171714; color: #f5f1e9; font-family: var(--font-body); }
+.top-arrotadores-home > .top-arrotadores, .top-arrotadores-home > p { max-width: 1120px; margin: 0 auto; }
+.top-arrotadores__heading > span { font: 700 11px/1.5 var(--font-mono); color: #b9b7ab; letter-spacing: .12em; }
+.top-arrotadores__heading h2 { margin: 12px 0 22px; font: 400 clamp(36px, 5vw, 62px)/1.05 var(--font-display); text-transform: uppercase; }
+.top-arrotadores p { color: #d2d0c7; font-size: 16px; }
+.top-arrotadores p button { border: 0; color: inherit; background: transparent; text-decoration: underline; cursor: pointer; }
+.top-arrotadores__lista { list-style: none; padding: 0; margin: 0; border-top: 1px solid #53534b; }
+.top-arrotadores__lista li { min-height: 70px; display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid #53534b; }
+.top-arrotadores__posicao { color: #b9b7ab; font: 700 13px/1 var(--font-mono); }
+.top-arrotadores__pessoa { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; color: inherit; text-decoration: none; }
+.top-arrotadores__pessoa:hover strong { text-decoration: underline; }
+.top-arrotadores__pessoa img, .top-arrotadores__pessoa > span { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 50%; background: #53534b; object-fit: cover; font-weight: 700; }
+.top-arrotadores__pessoa strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-arrotadores__lista b { font: 400 26px/1 var(--font-display); }
+.top-arrotadores__lista button { min-width: 44px; min-height: 44px; color: #171714; background: #f5f1e9; border: 0; border-radius: 50%; cursor: pointer; }
+.top-arrotadores a:focus-visible, .top-arrotadores button:focus-visible { outline: 3px solid #c6f500; outline-offset: 3px; }
+@media (max-width: 699px) { .top-arrotadores-home { padding: 48px 20px; } .top-arrotadores__lista li { gap: 10px; } }

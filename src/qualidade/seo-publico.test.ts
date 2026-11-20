@@ -497,16 +497,16 @@ describe('SEO público — Arena e mural de arrotos', () => {
       texto só existisse no React, um rastreador que não renderiza veria uma
       página vazia — e URL vazia no sitemap é pior que URL nenhuma.
 
-      O aviso de que dor e azia são assunto de médico é obrigatório aqui: a
-      página fala do corpo de quem lê, e um jogo de arroto não dá conselho de
-      saúde.
+      A versão sem JavaScript acompanha a copy aprovada e apresenta as
+      modalidades, sem recuperar orientações antigas contraditórias.
     */
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(
       ler('../como-arrotar.html').toLowerCase(),
     )?.[1];
 
     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
-    for (const termo of ['engole ar', 'gás', 'médica', 'arena', 'não existe técnica garantida']) {
+    expect(ler('../como-arrotar.html')).not.toContain('\"@type\": \"HowTo\"');
+    for (const termo of ['arroto alto', 'arroto longo', 'arroto explosivo', 'arroto grave', 'arrotar em público', 'gravar meu arroto']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
   });

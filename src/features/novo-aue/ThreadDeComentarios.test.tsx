@@ -36,6 +36,12 @@ describe('ThreadDeComentarios (Padrão Twitter / Fora do Card)', () => {
     },
   ];
 
+  it('identifica a avaliação posterior de uma resposta com áudio', () => {
+    const comentario: ItemComentario = { ...comentariosExemplo[0], notaRetrospectiva: 72, anexo: { tipo: 'audio', url: 'https://example.test/audio.webm' } };
+    render(<MemoryRouter><ThreadDeComentarios post={postExemplo} comentarios={[comentario]} carregando={false} enviando={false} aoVoltar={vi.fn()} aoEnviarComentario={vi.fn(async () => true)} /></MemoryRouter>);
+    expect(screen.getByTitle('Avaliado depois: 72/100')).toBeTruthy();
+  });
+
   it('exibe o post original no topo, a lista de respostas e o compositor com áudio de 1 clique fora do card', () => {
     const aoEnviar = vi.fn(async () => true);
     const aoVoltar = vi.fn();

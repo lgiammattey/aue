@@ -74,6 +74,16 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(comunidade.textContent).toBe('A');
   });
 
+  it('identifica a nota calculada depois da publicação', () => {
+    render(
+      <MemoryRouter>
+        <CardDoPost post={{ ...postExemplo, nota: 73, notaRetrospectiva: true }} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('AVALIADO DEPOIS')).toBeTruthy();
+    expect(screen.getByTitle('Avaliado depois: 73/100')).toBeTruthy();
+  });
+
   it('omite somente o fallback de mídia em post pessoal sem texto e preserva título autoral', () => {
     const postDeMidia: ItemDoFeed = {
       ...postExemplo,

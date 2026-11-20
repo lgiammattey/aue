@@ -184,6 +184,21 @@ export interface AudioDeTopico {
   readonly audio: AnexoDeAudioDoTopico;
 }
 
+export interface NotaRetrospectiva {
+  readonly tipo: 'topico' | 'resposta' | 'perfil';
+  readonly id: string;
+  readonly fonte: 'anexo' | 'casa' | 'perfil';
+  readonly nota: number;
+  readonly versao: string;
+}
+
+/** Apenas publicações visíveis com nota; ausência de nota não vale zero. */
+export interface ResumoDasNotasPublicadas {
+  readonly melhorNota: number | null;
+  readonly media: number | null;
+  readonly total: number;
+}
+
 /** Mídia livre de uma conversa. `caminho` não é URL: a plataforma o assina. */
 export type AnexoDoForum =
   | {
@@ -538,6 +553,8 @@ export interface PortaDeForum {
 
   /** Projeção única para uma página; o servidor aplica consentimento e visibilidade. */
   listarAudioDosTopicos?(topicoIds: readonly string[]): Promise<ResultadoDaLeitura<readonly AudioDeTopico[]>>;
+  listarNotasRetrospectivas?(topicoIds: readonly string[], respostaIds?: readonly string[], arrotoIds?: readonly string[]): Promise<ResultadoDaLeitura<readonly NotaRetrospectiva[]>>;
+  obterResumoDasNotasPublicadas?(perfilId: string): Promise<ResultadoDaLeitura<ResumoDasNotasPublicadas>>;
 
   listarRespostasDoAutor(
     handle: string,
@@ -587,7 +604,7 @@ export interface PortaDeForum {
   criarTopico(pedido: PedidoDeNovoTopico): Promise<ResultadoDaEscrita<TopicoCriado>>;
   /** Não pertence a nenhuma roda; o banco encontra as marcações no corpo. */
   criarPublicacaoPessoal?(
-    pedido: Omit<PedidoDeNovoTopico, 'comunidadeSlug'>,
+    pedido: Omit<PedidoDeNovoTopico, 'comunidadeSlug'> & { readonly arrotoEspelhadoId?: string },
   ): Promise<ResultadoDaEscrita<TopicoCriado>>;
   responderTopico(pedido: PedidoDeResposta): Promise<ResultadoDaEscrita<RespostaCriada>>;
   /** Envia o JPEG normalizado e só então o referencia pela RPC segura. */

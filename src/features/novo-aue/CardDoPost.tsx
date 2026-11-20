@@ -223,8 +223,8 @@ export const CardDoPost = memo(function CardDoPost({
         </header>
 
         {post.nota !== undefined && post.nota !== null && (
-          <span className="badge-nota" title={`Nota do arroto: ${post.nota}/100`}>
-            <span className="badge-nota__label">NOTA</span>
+          <span className={`badge-nota${post.notaRetrospectiva ? ' badge-nota--retrospectiva' : ''}`} title={`${post.notaRetrospectiva ? 'Avaliado depois' : 'Nota do arroto'}: ${post.nota}/100`}>
+            <span className="badge-nota__label">{post.notaRetrospectiva ? 'AVALIADO DEPOIS' : 'NOTA'}</span>
             <span className="badge-nota__value">{post.nota}</span>
           </span>
         )}

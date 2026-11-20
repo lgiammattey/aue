@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PortaDeComunidade } from '../../portas/comunidade';
@@ -22,6 +22,7 @@ const outraPessoa: PerfilPublico = {
 };
 
 const paginaVazia = { ok: true as const, valor: { itens: [], proximo: null } };
+const resumoDasNotas = vi.fn(async (_perfilId: string): Promise<import('../../portas/forum').ResultadoDaLeitura<import('../../portas/forum').ResumoDasNotasPublicadas>> => ({ ok: true, valor: { melhorNota: null, media: null, total: 0 } }));
 
 const forum = {
   listarComunidadesDoForum: vi.fn(async () => ({ ok: true as const, valor: [] })),
@@ -31,6 +32,7 @@ const forum = {
   listarPublicacoesPessoais: vi.fn(async () => paginaVazia),
   listarPublicacoesPessoaisDoAutor: vi.fn(async () => paginaVazia),
   listarPublicacoesMarcadas: vi.fn(async () => paginaVazia),
+  obterResumoDasNotasPublicadas: resumoDasNotas,
 } as unknown as PortaDeForum;
 
 const comunidade: PortaDeComunidade = {
@@ -70,6 +72,7 @@ function abrir(perfil: PerfilPublico) {
 describe('Tela de Perfil Open Design', () => {
   afterEach(() => {
     cleanup();
+    resumoDasNotas.mockReset().mockResolvedValue({ ok: true, valor: { melhorNota: null, media: null, total: 0 } });
     document.body.removeAttribute('style');
   });
 
@@ -126,11 +129,23 @@ describe('Tela de Perfil Open Design', () => {
     expect(screen.queryByRole('link', { name: 'Ir pra Arena' })).toBeNull();
   });
 
-  it('identifica a nota publicada sem tratar áudios do perfil como recordes da Arena', async () => {
-    abrir({ ...outraPessoa, melhorNota: 87 });
-    expect(await screen.findByRole('heading', { name: 'Melhor nota publicada' })).toBeTruthy();
-    expect(screen.getAllByText('87').length).toBeGreaterThan(0);
-    expect(screen.getByText('Em publicações')).toBeTruthy();
+  it('mostra a melhor e a média das notas publicadas do perfil consultado', async () => {
+    resumoDasNotas.mockResolvedValue({ ok: true, valor: { melhorNota: 87, media: 72.5, total: 2 } });
+    abrir(outraPessoa);
+    const melhor = await screen.findByRole('heading', { name: 'Melhor nota publicada' });
+    const placar = melhor.closest('section');
+    expect(placar).toBeTruthy();
+    expect(await within(placar!).findByText('87')).toBeTruthy();
+    expect(await within(placar!).findByText('72,5')).toBeTruthy();
+    expect(screen.getAllByText('Em publicações')).toHaveLength(2);
+    expect(resumoDasNotas).toHaveBeenCalledWith('user-douglas');
     expect(screen.getByText('Áudios deixados neste perfil. Eles não são resultados da Arena.')).toBeTruthy();
+  });
+
+  it('mostra indisponibilidade quando não consegue consultar o resumo', async () => {
+    resumoDasNotas.mockResolvedValue({ ok: false, motivo: 'falhou' });
+    abrir(outraPessoa);
+    expect(await screen.findAllByText('Não foi possível carregar')).toHaveLength(2);
+    expect(screen.queryByText('Ainda não há nota publicada')).toBeNull();
   });
 });

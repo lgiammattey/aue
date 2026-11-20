@@ -25,6 +25,8 @@ export interface ItemDoFeed {
   readonly temAudio?: boolean;
   readonly enderecoDoAudio?: string | (() => Promise<string | null>);
   readonly nota?: number;
+  /** Identifica uma avaliação do áudio feita depois da publicação. */
+  readonly notaRetrospectiva?: boolean;
   /** Duração real do áudio, quando a porta informa; o player nunca inventa uma. */
   readonly duracaoSegundos?: number;
   readonly videoUrl?: string;
@@ -48,6 +50,8 @@ export interface ItemComentario {
   readonly criadoEm: string;
   readonly paiId?: string | null;
   readonly nivel?: 0 | 1 | 2;
+  readonly notaRetrospectiva?: number;
+  readonly notaAvaliadaDepois?: boolean;
   readonly anexo?: {
     readonly tipo: 'imagem' | 'audio' | 'videoExterno';
     readonly url?: string;

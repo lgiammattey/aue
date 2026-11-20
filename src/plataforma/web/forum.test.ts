@@ -25,6 +25,22 @@ vi.mock('../../db/supabase', () => ({
 
 import { criarForumWeb } from './forum';
 
+describe('resumo de notas publicadas', () => {
+  it('traduz melhor nota e média sem inventar nota ausente', async () => {
+    rpc.mockResolvedValueOnce({ data: [{ melhor_nota: 87, media: 72.5, total: 2 }], error: null });
+    expect(await criarForumWeb().obterResumoDasNotasPublicadas?.('11111111-1111-4111-8111-111111111111')).toEqual({ ok: true, valor: { melhorNota: 87, media: 72.5, total: 2 } });
+    rpc.mockResolvedValueOnce({ data: [{ melhor_nota: null, media: null, total: 0 }], error: null });
+    expect(await criarForumWeb().obterResumoDasNotasPublicadas?.('11111111-1111-4111-8111-111111111111')).toEqual({ ok: true, valor: { melhorNota: null, media: null, total: 0 } });
+  });
+
+  it('rejeita um resumo vazio incoerente', async () => {
+    const erro = vi.spyOn(console, 'error').mockImplementation(() => {});
+    rpc.mockResolvedValueOnce({ data: [{ melhor_nota: 0, media: 0, total: 0 }], error: null });
+    expect(await criarForumWeb().obterResumoDasNotasPublicadas?.('11111111-1111-4111-8111-111111111111')).toEqual({ ok: false, motivo: 'falhou' });
+    erro.mockRestore();
+  });
+});
+
 vi.stubEnv('VITE_SUPABASE_URL', 'https://projeto-real.supabase.co');
 vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'chave-real-de-teste');
 
@@ -763,6 +779,13 @@ describe('escritas: sucesso e o que vai ao servidor', () => {
       p_anexo_tipo: 'video_externo',
       p_url_video: 'https://youtu.be/abcDEF12345',
     }));
+  });
+
+  it('cria post espelhado no perfil pela operação atômica', async () => {
+    rpc.mockResolvedValue({ data: { id: ID_A, criado_em: '2026-10-22T10:00:00Z' }, error: null });
+    await criarForumWeb().criarPublicacaoPessoal?.({ corpo: '', arrotoEspelhadoId: ID_B,
+      anexo: { tipo: 'audio', caminho: 'eu/forum/som.webm', mime: 'audio/webm', tamanhoBytes: 4, duracaoMs: 1000 } });
+    expect(rpc).toHaveBeenCalledWith('criar_publicacao_pessoal_espelho', expect.objectContaining({ p_arroto_id: ID_B, p_anexo_tipo: 'audio' }));
   });
 
   it('responderTopico manda o pai quando há e null quando não há', async () => {

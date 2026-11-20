@@ -10,6 +10,13 @@ import type { PortaDeConta } from '../../portas/conta';
 import type { PortaDePerfil } from '../../portas/perfil';
 import type { PortaDePautas } from '../../portas/pautas';
 import { InicioOpenDesign } from './InicioOpenDesign';
+import { registrarOuGuardarNotaPublicada } from '../../plataforma/web/notaDoAudioPublicado';
+
+vi.mock('../../plataforma/web/notaDoAudioPublicado', () => ({
+  analisarNotaDoAudioPublicado: vi.fn(async () => ({ ok: true, nota: 73 })),
+  registrarOuGuardarNotaPublicada: vi.fn(async () => true),
+  retentarNotasPublicadasPendentes: vi.fn(async () => {}),
+}));
 
 describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
   afterEach(() => {
@@ -542,6 +549,55 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(forumComAudioNoFeed.enderecoDoAudioDaCasa).toHaveBeenCalledWith('burpzilla/topico-casa.m4a');
   });
 
+  it('mostra avaliação posterior só quando ela pertence ao áudio que será tocado', async () => {
+    const forum: PortaDeForum = {
+      ...mockForum,
+      listarAudioDosTopicos: vi.fn(async () => ({ ok: true as const, valor: [{ topicoId: 'topico-1', audio: {
+        resultadoId: null, nota: null, duracao: null, subtipoDeOrigem: null,
+        caminhoDoAudio: null, caminhoDoAudioDaCasa: 'burpzilla/a.m4a',
+      } }] })),
+      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'casa' as const, nota: 73, versao: 'v1' }] })),
+      enderecoDoAudioDaCasa: () => 'https://cdn.aue.test/a.m4a',
+    };
+    render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
+    expect(await screen.findByTitle('Avaliado depois: 73/100')).toBeTruthy();
+    expect(forum.listarNotasRetrospectivas).toHaveBeenCalledWith(['topico-1']);
+  });
+
+  it('não cola a avaliação do áudio da casa em um anexo diferente', async () => {
+    const forum: PortaDeForum = {
+      ...mockForum,
+      listarAudioDosTopicos: vi.fn(async () => ({ ok: true as const, valor: [{ topicoId: 'topico-1', audio: {
+        resultadoId: null, nota: null, duracao: null, subtipoDeOrigem: null,
+        caminhoDoAudio: null, caminhoDoAudioDaCasa: 'burpzilla/a.m4a',
+      } }] })),
+      listarAnexosDoForum: vi.fn(async () => ({ ok: true as const, valor: [{ alvo: 'topico' as const, alvoId: 'topico-1', tipo: 'audio' as const, caminho: 'x.webm', mime: 'audio/webm', tamanhoBytes: 1, duracaoMs: 1000, urlVideo: null }] })),
+      assinarAnexoDoForum: vi.fn(async () => ({ ok: true as const, valor: 'https://cdn.aue.test/x.webm' })),
+      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'casa' as const, nota: 73, versao: 'v1' }] })),
+      enderecoDoAudioDaCasa: () => 'https://cdn.aue.test/a.m4a',
+    };
+    render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
+    expect(await screen.findByRole('button', { name: 'Ouvir áudio' })).toBeTruthy();
+    expect(screen.queryByText('AVALIADO DEPOIS')).toBeNull();
+  });
+
+  it('mostra a nota do anexo tocado, não a nota de outro resultado associado ao tópico', async () => {
+    const forum: PortaDeForum = {
+      ...mockForum,
+      listarAudioDosTopicos: vi.fn(async () => ({ ok: true as const, valor: [{ topicoId: 'topico-1', audio: {
+        resultadoId: 'resultado-1', nota: 91, duracao: 2, subtipoDeOrigem: null,
+        caminhoDoAudio: 'resultado.webm', caminhoDoAudioDaCasa: null,
+      } }] })),
+      listarAnexosDoForum: vi.fn(async () => ({ ok: true as const, valor: [{ alvo: 'topico' as const, alvoId: 'topico-1', tipo: 'audio' as const, caminho: 'x.webm', mime: 'audio/webm', tamanhoBytes: 1, duracaoMs: 1000, urlVideo: null }] })),
+      assinarAnexoDoForum: vi.fn(async () => ({ ok: true as const, valor: 'https://cdn.aue.test/x.webm' })),
+      assinarAudioDoResultado: vi.fn(async () => 'https://cdn.aue.test/resultado.webm'),
+      listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'anexo' as const, nota: 73, versao: 'v1' }] })),
+    };
+    render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
+    expect(await screen.findByTitle('Avaliado depois: 73/100')).toBeTruthy();
+    expect(screen.queryByTitle('Nota do arroto: 91/100')).toBeNull();
+  });
+
   it('não anuncia publicação quando o upload de áudio é recusado por falta de conta', async () => {
     const forumComUploadRecusado: PortaDeForum = {
       ...mockForum,
@@ -624,6 +680,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(enviarAnexo).toHaveBeenCalledTimes(2);
     for (const [pedido] of enviarAnexo.mock.calls) expect(pedido.arquivo).toBe(audio);
     expect(criarPublicacao).toHaveBeenCalledWith({ corpo: 'Post com a gravação', anexo: anexoConfirmado });
+    expect(registrarOuGuardarNotaPublicada).not.toHaveBeenCalled();
     expect(await screen.findByText('Publicado no seu perfil e no feed.')).toBeTruthy();
   });
 

@@ -256,6 +256,8 @@
   white-space: nowrap;
 }
 
+.card-do-post .badge-nota--retrospectiva { margin-right: 6px; }
+
 /*
   Anel de foco do nome, do @handle e do r/roda: só em volta da linha de texto
   (24px de altura, centrada na linha de --cab-linha), não na caixa de 44px.

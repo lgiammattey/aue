@@ -8,6 +8,7 @@ import { CardDoPost } from '../src/features/novo-aue/CardDoPost';
 import { ThreadDeComentarios } from '../src/features/novo-aue/ThreadDeComentarios';
 import { PautaAbertaDaComunidade } from '../src/features/novo-aue/PautaDaComunidade';
 import { TelaAdministracao } from '../src/features/administracao/TelaAdministracao';
+import { HarnessPerfilResumo } from './HarnessPerfilResumo';
 import { criarControleDeDialogoWeb } from '../src/plataforma/web/controleDeDialogo';
 import { criarGravacaoLivreDoForum } from '../src/plataforma/web/gravacaoLivreDoForum';
 import type { ItemDoFeed } from '../src/features/novo-aue/tipos';
@@ -15,6 +16,7 @@ import type { PortaDeAdministracao, ResumoAdministrativo } from '../src/portas/a
 import '../src/index.css';
 import '../src/features/novo-aue/casca.css';
 import '../src/features/novo-aue/InicioOpenDesign.css';
+import '../src/features/novo-aue/muralArena.css';
 
 const controle = criarControleDeDialogoWeb();
 const postDeMidia: ItemDoFeed = { id: 'post-e2e-midia', tipo: 'causo', origem: 'pessoal', comunidadeSlug: 'perfil', titulo: 'Mídia no perfil', corpo: '', autorNome: 'Bia', autorHandle: 'bia_do_grave', criadoEm: '2026-10-21T00:00:00Z', respostasTotal: 1, anexo: { tipo: 'imagem', url: '/pwa-512x512.png' } };
@@ -115,5 +117,5 @@ function HarnessAdministracao() {
 
 const parametrosDoHarness = new URLSearchParams(window.location.search);
 createRoot(document.getElementById('root')!).render(
-  parametrosDoHarness.has('microfone') ? <HarnessMicrofoneCompositor /> : parametrosDoHarness.has('admin') ? <HarnessAdministracao /> : parametrosDoHarness.has('pauta') ? <HarnessPauta /> : parametrosDoHarness.has('quebras') ? <HarnessQuebras /> : <Harness />,
+  parametrosDoHarness.has('perfil-resumo') ? <HarnessPerfilResumo /> : parametrosDoHarness.has('nota-retrospectiva') ? <BrowserRouter><div className="app app--mural"><main><section aria-label="Feed principal"><div className="mural-hero"><h1>Mural.</h1><p>Prévia local com nota de exemplo.</p></div><div className="feed"><CardDoPost post={{ ...postComTituloAutoral, tipo: 'topico', corpo: 'Um arroto publicado antes da Arena.', nota: 73, notaRetrospectiva: true, temAudio: true, anexo: undefined }} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} /></div></section></main></div></BrowserRouter> : parametrosDoHarness.has('microfone') ? <HarnessMicrofoneCompositor /> : parametrosDoHarness.has('admin') ? <HarnessAdministracao /> : parametrosDoHarness.has('pauta') ? <HarnessPauta /> : parametrosDoHarness.has('quebras') ? <HarnessQuebras /> : <Harness />,
 );

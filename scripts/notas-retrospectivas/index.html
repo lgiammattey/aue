@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Teste local de notas retrospectivas</title></head>
+<body>
+  <main>
+    <h1>Teste local de notas retrospectivas</h1>
+    <p>Os arquivos ficam neste navegador. Nenhuma nota é publicada ou salva no Auê.</p>
+    <p>Esta ferramenta usa as medidas da régua antiga da Arena, não o laudo experimental atual. Mostra uma nota acústica retrospectiva de 0 a 100, calculada sem origem: é uma régua diferente, não a nota oficial da Arena. A faixa mostra as notas possíveis na régua antiga, conforme a origem desconhecida. A análise pode falhar ou identificar o áudio como algo diferente de arroto.</p>
+    <label>Áudios para analisar <input id="arquivos" type="file" accept="audio/*" multiple></label>
+    <button id="iniciar" type="button">Analisar</button>
+    <button id="baixar" type="button" disabled>Baixar relatório JSON</button>
+    <p id="progresso" role="status"></p>
+    <pre id="resultado"></pre>
+  </main>
+  <script type="module" src="/src/ferramentas/notasRetrospectivas/main.ts"></script>
+</body></html>

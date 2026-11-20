@@ -312,6 +312,7 @@ export function ModalComentarios({
                     </div>
 
                     {c.conteudo && <p className="comment-text">{c.conteudo}</p>}
+                    {c.notaRetrospectiva !== undefined && c.anexo?.tipo === 'audio' && c.anexo.url && <span className="badge-nota" title={`${c.notaAvaliadaDepois === false ? 'Nota' : 'Avaliado depois'}: ${c.notaRetrospectiva}/100`}><span className="badge-nota__label">{c.notaAvaliadaDepois === false ? 'NOTA' : 'AVALIADO DEPOIS'}</span><span className="badge-nota__value">{c.notaRetrospectiva}</span></span>}
 
                     {c.anexo?.tipo === 'imagem' && c.anexo.url && (
                       <img

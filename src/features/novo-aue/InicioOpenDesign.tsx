@@ -277,8 +277,11 @@ export function InicioOpenDesign({
   const [estadoPublicacoesPessoais, setEstadoPublicacoesPessoais] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
   const [estadoMarcadasDoPerfil, setEstadoMarcadasDoPerfil] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro'>('ocioso');
   const [arrotosDoPerfil, setArrotosDoPerfil] = useState<readonly ArrotoDoPerfil[]>([]);
+  const [notasDosArrotos, setNotasDosArrotos] = useState<ReadonlyMap<string, { nota: number; retrospectiva: boolean }>>(() => new Map());
   const [estadoArrotosDoPerfil, setEstadoArrotosDoPerfil] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
   const [handleDosArrotos, setHandleDosArrotos] = useState<string | null>(null);
+  const [resumoDasNotas, setResumoDasNotas] = useState<{ perfilId: string; estado: 'carregando' | 'erro' | 'pronto'; melhorNota: number | null; media: number | null }>({ perfilId: '', estado: 'carregando', melhorNota: null, media: null });
+  const [revisaoDasNotas, setRevisaoDasNotas] = useState(0);
   const [estadoPerfil, setEstadoPerfil] = useState<'carregando' | 'pronto' | 'pendente' | 'inexistente' | 'erro'>('carregando');
   const [fichaSocialPendente, setFichaSocialPendente] = useState(false);
   const [estadoDaFicha, setEstadoDaFicha] = useState<'ocioso' | 'carregando' | 'pronto' | 'erro' | 'salvando'>('ocioso');
@@ -523,6 +526,7 @@ export function InicioOpenDesign({
       const topicos = resultado.valor.itens;
       const anexosPorTopico = new Map<string, AnexoDoForum>();
       const audioPorTopico = new Map<string, AnexoDeAudioDoTopico>();
+      const notasPorTopico = new Map<string, import('../../portas/forum').NotaRetrospectiva>();
       if (forum.listarAnexosDoForum) {
         const leituraAnexos = await forum.listarAnexosDoForum({ topicoIds: topicos.map((topico) => topico.id) });
         if (leituraAnexos.ok) leituraAnexos.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
@@ -531,6 +535,10 @@ export function InicioOpenDesign({
         const leituraAudio = await forum.listarAudioDosTopicos(topicos.map((topico) => topico.id));
         if (leituraAudio.ok) leituraAudio.valor.forEach(({ topicoId, audio }) => audioPorTopico.set(topicoId, audio));
       }
+      if (forum.listarNotasRetrospectivas) {
+        const leitura = await forum.listarNotasRetrospectivas(topicos.map((topico) => topico.id));
+        if (leitura.ok) leitura.valor.forEach((nota) => notasPorTopico.set(nota.id, nota));
+      }
       if (!ativo) return;
 
       const itens = await Promise.all(topicos.map(async (topico) => {
@@ -538,7 +546,12 @@ export function InicioOpenDesign({
         const url = anexo?.caminho && forum.assinarAnexoDoForum
           ? await forum.assinarAnexoDoForum(anexo.caminho).then((leitura) => leitura.ok ? leitura.valor : undefined)
           : anexo?.urlVideo ?? undefined;
-        return paraItemDeTopicoDoPerfil(topico, alvo, forum, anexo, url, audioPorTopico.get(topico.id));
+        const item = paraItemDeTopicoDoPerfil(topico, alvo, forum, anexo, url, audioPorTopico.get(topico.id));
+        const nota = notasPorTopico.get(topico.id);
+        const audio = audioPorTopico.get(topico.id) ?? topico.audio;
+        const fonteAtual = anexo?.tipo === 'audio' ? 'anexo' : audio?.caminhoDoAudioDaCasa ? 'casa' : null;
+        const avaliada = nota?.fonte === fonteAtual && (fonteAtual === 'anexo' ? Boolean(url) : item.temAudio);
+        return { ...item, nota: fonteAtual === 'anexo' ? (avaliada ? nota?.nota : undefined) : item.nota ?? (avaliada ? nota?.nota : undefined), notaRetrospectiva: Boolean(avaliada && nota?.versao !== 'publicacao-acustica-legado-v1' && (fonteAtual === 'anexo' || item.nota === undefined)) };
       }));
       if (!ativo) return;
       setTopicosDaComunidadeDoPerfil(itens);
@@ -560,14 +573,38 @@ export function InicioOpenDesign({
     const alvo = perfilAtivo ?? meuPerfil;
     if (!alvo?.handle || !forum.listarPublicacoesPessoaisDoAutor) return;
     setEstadoPublicacoesPessoais('carregando');
-    void forum.listarPublicacoesPessoaisDoAutor(alvo.handle, { limite: 50 }).then((resultado) => {
+    void forum.listarPublicacoesPessoaisDoAutor(alvo.handle, { limite: 50 }).then(async (resultado) => {
       if (!ativo) return;
       if (!resultado.ok) {
         setPublicacoesPessoaisDoPerfil([]);
         setEstadoPublicacoesPessoais('erro');
         return;
       }
-      setPublicacoesPessoaisDoPerfil(resultado.valor.itens.map((publicacao) => paraItemDePublicacaoPessoal(publicacao)));
+      const publicacoes = resultado.valor.itens;
+      const ids = publicacoes.map((publicacao) => publicacao.id);
+      const anexos = new Map<string, AnexoDoForum>();
+      const notas = new Map<string, import('../../portas/forum').NotaRetrospectiva>();
+      if (forum.listarAnexosDoForum) {
+        const leitura = await forum.listarAnexosDoForum({ topicoIds: ids });
+        if (leitura.ok) leitura.valor.forEach((anexo) => anexos.set(anexo.alvoId, anexo));
+      }
+      if (forum.listarNotasRetrospectivas) {
+        const leitura = await forum.listarNotasRetrospectivas(ids);
+        if (leitura.ok) leitura.valor.forEach((nota) => notas.set(nota.id, nota));
+      }
+      const itens = await Promise.all(publicacoes.map(async (publicacao) => {
+        const anexo = anexos.get(publicacao.id);
+        const url = anexo?.caminho && forum.assinarAnexoDoForum
+          ? await forum.assinarAnexoDoForum(anexo.caminho).then((leitura) => leitura.ok ? leitura.valor : undefined)
+          : anexo?.urlVideo ?? undefined;
+        const item = paraItemDePublicacaoPessoal(publicacao, anexo, url);
+        const nota = notas.get(publicacao.id);
+        return nota?.fonte === 'anexo' && anexo?.tipo === 'audio' && url
+          ? { ...item, nota: nota.nota, notaRetrospectiva: nota.versao !== 'publicacao-acustica-legado-v1' }
+          : item;
+      }));
+      if (!ativo) return;
+      setPublicacoesPessoaisDoPerfil(itens);
       setEstadoPublicacoesPessoais('pronto');
     }).catch(() => {
       if (!ativo) return;
@@ -618,12 +655,18 @@ export function InicioOpenDesign({
     const alvo = perfilAtivo ?? meuPerfil;
     if (!alvo) return;
     setEstadoArrotosDoPerfil('carregando');
+    setNotasDosArrotos(new Map());
     setHandleDosArrotos(alvo.handle);
     arrotosPort.listarArrotos(alvo.handle).then(
       (lista) => {
         if (!ativo) return;
         setArrotosDoPerfil(lista);
         setEstadoArrotosDoPerfil('pronto');
+        if (forum.listarNotasRetrospectivas) {
+          void forum.listarNotasRetrospectivas([], [], lista.map((arroto) => arroto.id)).then((res) => {
+            if (ativo && res.ok) setNotasDosArrotos(new Map(res.valor.filter((nota) => nota.tipo === 'perfil' && nota.fonte === 'perfil').map((nota) => [nota.id, { nota: nota.nota, retrospectiva: nota.versao !== 'publicacao-acustica-legado-v1' }])));
+          }).catch(() => {});
+        }
       },
       () => {
         if (!ativo) return;
@@ -634,7 +677,27 @@ export function InicioOpenDesign({
     return () => {
       ativo = false;
     };
-  }, [perfilAtivo, meuPerfil, arrotosPort]);
+  }, [perfilAtivo, meuPerfil, arrotosPort, forum]);
+
+  useEffect(() => {
+    let ativo = true;
+    const perfilId = (perfilAtivo ?? meuPerfil)?.id;
+    if (!perfilId) return;
+    setResumoDasNotas({ perfilId, estado: 'carregando', melhorNota: null, media: null });
+    if (!forum.obterResumoDasNotasPublicadas) {
+      setResumoDasNotas({ perfilId, estado: 'erro', melhorNota: null, media: null });
+      return;
+    }
+    void forum.obterResumoDasNotasPublicadas(perfilId).then((resumo) => {
+      if (!ativo) return;
+      setResumoDasNotas(resumo.ok
+        ? { perfilId, estado: 'pronto', melhorNota: resumo.valor.melhorNota, media: resumo.valor.media }
+        : { perfilId, estado: 'erro', melhorNota: null, media: null });
+    }).catch(() => {
+      if (ativo) setResumoDasNotas({ perfilId, estado: 'erro', melhorNota: null, media: null });
+    });
+    return () => { ativo = false; };
+  }, [perfilAtivo, meuPerfil, forum, revisaoDasNotas]);
 
   useEffect(() => () => capturaDoArroto.soltar(), [capturaDoArroto]);
 
@@ -855,6 +918,7 @@ export function InicioOpenDesign({
         const pessoais = pagina.entradas.flatMap((entrada) => entrada.tipo === 'pessoal' ? [entrada.valor] : []);
         const anexosPorTopico = new Map<string, AnexoDoForum>();
         const audioPorTopico = new Map<string, AnexoDeAudioDoTopico>();
+        const notasRetrospectivas = new Map<string, import('../../portas/forum').NotaRetrospectiva>();
         const corpos = new Map<string, string>();
         const removidos = new Set<string>();
         if (forum.listarAnexosDoForum) {
@@ -866,6 +930,10 @@ export function InicioOpenDesign({
           const leitura = await forum.listarAudioDosTopicos(topicos.map((t) => t.id));
           if (!leitura.ok) throw new Error('Não foi possível carregar os áudios.');
           leitura.valor.forEach(({ topicoId, audio }) => audioPorTopico.set(topicoId, audio));
+        }
+        if (forum.listarNotasRetrospectivas) {
+          const leitura = await forum.listarNotasRetrospectivas(pagina.entradas.map((entrada) => entrada.valor.id));
+          if (leitura.ok) leitura.valor.forEach((nota) => notasRetrospectivas.set(nota.id, nota));
         }
         // A projeção da lista não possui corpo; consulta pública em lotes evita disparar 30 de uma vez.
         for (let i = 0; i < topicos.length; i += 6) {
@@ -891,16 +959,22 @@ export function InicioOpenDesign({
             url = assinatura.valor;
           }
           if (entrada.tipo === 'pessoal') {
-            itens.push(paraItemDePublicacaoPessoal(entrada.valor, anexo, url));
+            const nota = notasRetrospectivas.get(item.id);
+            const avaliada = nota?.fonte === 'anexo' && anexo?.tipo === 'audio' && Boolean(url);
+            itens.push({ ...paraItemDePublicacaoPessoal(entrada.valor, anexo, url), ...(avaliada ? { nota: nota.nota, notaRetrospectiva: nota.versao !== 'publicacao-acustica-legado-v1' } : {}) });
           } else {
             const t = entrada.valor;
             const audio = audioDoTopico(audioPorTopico.get(t.id) ?? t.audio, forum);
+            const nota = notasRetrospectivas.get(t.id);
+            const anexoDeAudio = anexo?.tipo === 'audio';
+            const fonteAtual = anexoDeAudio ? 'anexo' : (audioPorTopico.get(t.id) ?? t.audio)?.caminhoDoAudioDaCasa ? 'casa' : null;
+            const avaliada = (anexoDeAudio || audio.nota === undefined) && nota?.fonte === fonteAtual && (fonteAtual === 'anexo' ? Boolean(url) : audio.temAudio);
             itens.push({ id: `topico-${t.id}`, tipo: 'topico', comunidadeSlug: t.comunidade.slug,
               comunidadeAvatarUrl: avatares.get(t.comunidade.slug), titulo: t.titulo, corpo: corpos.get(t.id) ?? '',
               autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo', autorHandle: t.autor.handle ?? undefined,
               autorAvatarUrl: t.autor.avatarUrl ?? undefined, criadoEm: t.criadoEm, respostasTotal: t.respostasTotal,
               temAudio: anexo?.tipo === 'audio' || audio.temAudio, enderecoDoAudio: audio.enderecoDoAudio,
-              nota: audio.nota, duracaoSegundos: audio.duracaoSegundos,
+              nota: anexoDeAudio ? (avaliada ? nota?.nota : undefined) : audio.nota ?? (avaliada ? nota?.nota : undefined), notaRetrospectiva: Boolean(avaliada && nota?.versao !== 'publicacao-acustica-legado-v1'), duracaoSegundos: anexoDeAudio ? undefined : audio.duracaoSegundos,
               anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined });
           }
         }
@@ -1277,6 +1351,10 @@ export function InicioOpenDesign({
       ? await forum.listarAnexosDoForum({ respostaIds: respostas.map((resposta) => resposta.id) })
       : null;
     const anexosPorResposta = new Map((anexos?.ok ? anexos.valor : []).map((anexo) => [anexo.alvoId, anexo]));
+    const leituraNotas = forum.listarNotasRetrospectivas
+      ? await forum.listarNotasRetrospectivas([], respostas.map((resposta) => resposta.id)).catch(() => null)
+      : null;
+    const notas = new Map((leituraNotas?.ok ? leituraNotas.valor : []).filter((nota) => nota.tipo === 'resposta' && nota.fonte === 'anexo').map((nota) => [nota.id, nota]));
 
     return Promise.all(respostas.map(async (resposta) => {
       const anexo = anexosPorResposta.get(resposta.id);
@@ -1292,6 +1370,8 @@ export function InicioOpenDesign({
         criadoEm: resposta.criadoEm,
         paiId: resposta.paiId,
         nivel: resposta.nivel,
+        notaRetrospectiva: anexo?.tipo === 'audio' && url ? notas.get(resposta.id)?.nota : undefined,
+        notaAvaliadaDepois: notas.get(resposta.id)?.versao !== 'publicacao-acustica-legado-v1',
         anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
       };
     }));
@@ -1508,6 +1588,8 @@ export function InicioOpenDesign({
   const publicarPost = async (
     dados: { titulo?: string; corpo: string; comunidadeSlug?: string; anexo: AnexoRascunho | null },
     destino: 'pessoal' | 'comunidade' = destinoDoCompositor,
+    _notaPrecalculada?: number | null,
+    arrotoEspelhadoId?: string,
   ): Promise<boolean> => {
     const meuNome = meuPerfil?.apelido ?? 'Você';
     const meuHandle = meuPerfil?.handle;
@@ -1517,7 +1599,7 @@ export function InicioOpenDesign({
     try {
       const anexo = await prepararAnexo(dados.anexo);
       const resForum = ePostPessoal
-        ? await forum.criarPublicacaoPessoal?.({ corpo: dados.corpo, anexo })
+        ? await forum.criarPublicacaoPessoal?.({ corpo: dados.corpo, anexo, ...(arrotoEspelhadoId ? { arrotoEspelhadoId } : {}) })
         : await forum.criarTopico?.({ comunidadeSlug: dados.comunidadeSlug ?? '', titulo: dados.titulo ?? '', corpo: dados.corpo, anexo });
       if (resForum && resForum.ok) {
         postCriadoId = `topico-${resForum.valor.id}`;
@@ -1999,6 +2081,7 @@ export function InicioOpenDesign({
     setArrotosDoPerfil((anteriores) => (
       perfilExibido?.id === publicado.arroto.perfilId ? [publicado.arroto, ...anteriores] : anteriores
     ));
+    setRevisaoDasNotas((atual) => atual + 1);
     return { publicado: publicado.arroto, preparo: preparo.rascunho };
   };
 
@@ -2010,7 +2093,7 @@ export function InicioOpenDesign({
     setEnviandoArrotoDireto(true);
     try {
       if (publicarArrotoDiretoNoFeed && destino.tipo === 'perfil-proprio') {
-        await publicarAudioNoPerfil(audioDireto, destino);
+        const noPerfil = await publicarAudioNoPerfil(audioDireto, destino);
         const publicadoNoFeed = await publicarPost(
           {
             corpo: '',
@@ -2021,6 +2104,8 @@ export function InicioOpenDesign({
             },
           },
           'pessoal',
+          undefined,
+          noPerfil.publicado.id,
         );
         if (publicadoNoFeed) {
           fecharGravacaoDireta();
@@ -2056,6 +2141,7 @@ export function InicioOpenDesign({
     .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
 
   const perfilExibido = perfilAtivo ?? meuPerfil;
+  const notasExibidas = resumoDasNotas.perfilId === perfilExibido?.id ? resumoDasNotas : null;
   const estadoDosArrotosExibidos = handleDosArrotos === perfilExibido?.handle ? estadoArrotosDoPerfil : 'carregando';
   const donoDoPerfil = Boolean(perfilExibido?.souEu);
   const postsDoPerfil = useMemo(
@@ -2732,21 +2818,23 @@ export function InicioOpenDesign({
 
                     <section className="od-profile__dashboard" aria-labelledby="perfilPlacar">
                       <div className="od-profile__dashboard-head">
-                        <div><p>O JOGO ATÉ AQUI</p><h2 id="perfilPlacar">{donoDoPerfil ? 'Seu placar' : 'Placar'}</h2></div>
+                        <div><p>ARROTOS PUBLICADOS</p><h2 id="perfilPlacar">{donoDoPerfil ? 'Seu placar' : 'Placar'}</h2></div>
                         {donoDoPerfil && <Link className="join od-profile__button od-profile__arena" to="/arena">Ir pra Arena <span aria-hidden="true">↗</span></Link>}
                       </div>
                       <div className="od-profile__dashboard-stats">
                         <div className="od-profile__best">
                           <h3 id="perfilMelhorNota">Melhor nota publicada</h3>
-                          {perfilExibido.melhorNota !== undefined
-                            ? <p className="od-profile__best-score">{perfilExibido.melhorNota}<span> pts</span></p>
+                          {notasExibidas?.estado === 'pronto' && notasExibidas.melhorNota !== null
+                            ? <p className="od-profile__best-score">{Math.round(notasExibidas.melhorNota)}<span> pts</span></p>
                             : <p className="od-profile__best-empty">—</p>}
-                          <p className="od-profile__best-caption">{perfilExibido.melhorNota !== undefined ? 'Em publicações' : 'Ainda não há nota publicada'}</p>
+                          <p className="od-profile__best-caption">{notasExibidas?.estado === 'erro' ? 'Não foi possível carregar' : !notasExibidas || notasExibidas.estado === 'carregando' ? 'Carregando…' : notasExibidas.melhorNota === null ? 'Ainda não há nota publicada' : 'Em publicações'}</p>
                         </div>
                         <div className="od-profile__best">
-                          <h3>Áudios no perfil</h3>
-                          <p className="od-profile__best-score">{estadoDosArrotosExibidos === 'pronto' ? arrotosDoPerfil.length : '—'}</p>
-                          <p className="od-profile__best-caption">{estadoDosArrotosExibidos === 'erro' ? 'Não foi possível carregar' : estadoDosArrotosExibidos === 'carregando' ? 'Carregando…' : 'Áudios deixados aqui'}</p>
+                          <h3>Média</h3>
+                          {notasExibidas?.estado === 'pronto' && notasExibidas.media !== null
+                            ? <p className="od-profile__best-score">{notasExibidas.media.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}<span> pts</span></p>
+                            : <p className="od-profile__best-empty">—</p>}
+                          <p className="od-profile__best-caption">{notasExibidas?.estado === 'erro' ? 'Não foi possível carregar' : !notasExibidas || notasExibidas.estado === 'carregando' ? 'Carregando…' : notasExibidas.media === null ? 'Ainda não há nota publicada' : 'Em publicações'}</p>
                         </div>
                       </div>
                     </section>
@@ -2891,13 +2979,14 @@ export function InicioOpenDesign({
                       <article key={arroto.id} className="od-profile__post">
                         <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
                         <h3 style={{ margin: '7px 0', fontSize: 16 }}>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
+                        {notasDosArrotos.has(arroto.id) && <span className="badge-nota" title={`${notasDosArrotos.get(arroto.id)?.retrospectiva ? 'Avaliado depois' : 'Nota'}: ${notasDosArrotos.get(arroto.id)?.nota}/100`}><span className="badge-nota__label">{notasDosArrotos.get(arroto.id)?.retrospectiva ? 'AVALIADO DEPOIS' : 'NOTA'}</span><span className="badge-nota__value">{notasDosArrotos.get(arroto.id)?.nota}</span></span>}
                         <PlayerDoArroto
                           tocando={audioTocandoId === arroto.id}
                           tempoAtualSegundos={audioSelecionadoId === arroto.id ? tempoAtualDoAudio : 0}
                           duracaoSegundos={audioSelecionadoId === arroto.id ? duracaoDoAudio : arroto.duracaoSegundos}
                           aoAlternar={() => void alternarAudio(arroto.enderecoDoAudio, arroto.id)}
                         />
-                        {arroto.possoOcultar && <button type="button" className="tab" style={{ marginTop: 8 }} onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); })}>Ocultar</button>}
+                        {arroto.possoOcultar && <button type="button" className="tab" style={{ marginTop: 8 }} onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) { setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); setRevisaoDasNotas((atual) => atual + 1); } })}>Ocultar</button>}
                       </article>
                     ))}
                   </section>

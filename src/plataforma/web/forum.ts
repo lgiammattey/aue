@@ -4,6 +4,7 @@ import type {
   AnexoDoForum,
   AnexoDeAudioDoTopico,
   AudioDeTopico,
+  NotaRetrospectiva,
   AnexoParaPublicar,
   AutorDoForum,
   ComunidadeDoForum,
@@ -836,6 +837,43 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       return ler('audio_de_topicos', { p_ids: ids }, (linhas) => linhas.map(paraAudioDeTopico));
     },
 
+    listarNotasRetrospectivas(topicoIds, respostaIds = [], arrotoIds = []) {
+      const ids = [...new Set(topicoIds)].filter((id) => UUID.test(id)).slice(0, 100);
+      const respostas = [...new Set(respostaIds)].filter((id) => UUID.test(id)).slice(0, 100);
+      const arrotos = [...new Set(arrotoIds)].filter((id) => UUID.test(id)).slice(0, 100);
+      if (ids.length === 0 && respostas.length === 0 && arrotos.length === 0) {
+        return usaServidor()
+          ? Promise.resolve({ ok: true as const, valor: [] as readonly NotaRetrospectiva[] })
+          : Promise.resolve({ ok: false as const, motivo: 'semServidor' as const });
+      }
+      return ler('listar_notas_retrospectivas', { p_topico_ids: ids, p_resposta_ids: respostas, p_arroto_ids: arrotos }, (linhas) => linhas.flatMap((l): NotaRetrospectiva[] => {
+        const tipo = textoOuNulo(l, 'tipo');
+        const fonte = textoOuNulo(l, 'fonte');
+        const id = textoOuNulo(l, 'id');
+        const nota = numeroOuNulo(l, 'nota');
+        const versao = textoOuNulo(l, 'versao');
+        if (!((tipo === 'topico' && (fonte === 'anexo' || fonte === 'casa')) || (tipo === 'resposta' && fonte === 'anexo') || (tipo === 'perfil' && fonte === 'perfil')) || !id || !UUID.test(id) || nota === null || !Number.isFinite(nota) || nota < 0 || nota > 100 || !versao) return [];
+        return [{ tipo, id, fonte, nota, versao }];
+      }));
+    },
+
+    obterResumoDasNotasPublicadas(perfilId) {
+      if (!UUID.test(perfilId)) return Promise.resolve({ ok: false as const, motivo: 'falhou' as const });
+      return ler('resumo_notas_publicadas', { p_perfil_id: perfilId }, (linhas) => {
+        if (linhas.length !== 1) malformada('resumo_notas_publicadas');
+        const linha = linhas[0];
+        const melhorNota = numeroOuNulo(linha, 'melhor_nota');
+        const media = numeroOuNulo(linha, 'media');
+        const total = numeroOuNulo(linha, 'total');
+        if (total === null || !Number.isSafeInteger(total) || total < 0 ||
+            (total === 0 ? melhorNota !== null || media !== null :
+              melhorNota === null || media === null || melhorNota < 0 || melhorNota > 100 || media < 0 || media > 100)) {
+          malformada('resumo_notas_publicadas');
+        }
+        return { melhorNota, media, total };
+      });
+    },
+
     listarRespostasDoAutor(handle, op = {}) {
       const limite = limiteEfetivo(op.limite, LIMITE_PADRAO_DO_AUTOR, LIMITE_MAXIMO_DO_AUTOR);
       return ler(
@@ -965,8 +1003,9 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
 
     criarPublicacaoPessoal(pedido) {
       return escrever(
-        'criar_publicacao_pessoal_com_anexo',
+        pedido.arrotoEspelhadoId ? 'criar_publicacao_pessoal_espelho' : 'criar_publicacao_pessoal_com_anexo',
         {
+          ...(pedido.arrotoEspelhadoId ? { p_arroto_id: pedido.arrotoEspelhadoId } : {}),
           p_titulo: pedido.titulo ?? '',
           p_corpo: pedido.corpo,
           ...parametrosDoAnexo(pedido.anexo),

@@ -68,6 +68,20 @@ jobs:
         if: ${{ !cancelled() }}
         run: npm run test
 
+      - name: Testes do processamento de áudio
+        if: ${{ !cancelled() }}
+        run: node --test scripts/nota-automatica/processar.test.mjs
+
+      - name: Preparar codecs e Chromium do motor
+        if: ${{ !cancelled() }}
+        run: |
+          command -v ffmpeg >/dev/null || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+          npx playwright install --with-deps chromium
+
+      - name: Testar MP4, WebM e YAMNet no Chromium
+        if: ${{ !cancelled() }}
+        run: node --test scripts/nota-automatica/navegador.test.mjs
+
       - name: Build
         if: ${{ !cancelled() }}
         run: npm run build

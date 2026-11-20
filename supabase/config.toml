@@ -12,3 +12,9 @@ entrypoint = "./functions/painel-administrativo/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/duelo-audio-v2/index.ts"
+
+[functions.notas-worker]
+enabled = true
+# Autenticação é feita pelo segredo exclusivo no handler, antes de qualquer acesso.
+verify_jwt = false
+entrypoint = "./functions/notas-worker/index.ts"

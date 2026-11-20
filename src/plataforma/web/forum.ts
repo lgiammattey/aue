@@ -2,6 +2,7 @@ import { assinarUrlDoAudio, configuracaoAusente, supabase } from '../../db/supab
 import { criarGravacaoLivreDoForum } from './gravacaoLivreDoForum';
 import type {
   AnexoDoForum,
+  ArrotadorDoTop,
   AnexoDeAudioDoTopico,
   AudioDeTopico,
   NotaRetrospectiva,
@@ -835,6 +836,18 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
           : Promise.resolve({ ok: false as const, motivo: 'semServidor' as const });
       }
       return ler('audio_de_topicos', { p_ids: ids }, (linhas) => linhas.map(paraAudioDeTopico));
+    },
+
+    listarTopArrotadores() {
+      return ler('top_cinco_arrotadores', {}, (linhas) => linhas.flatMap((l): ArrotadorDoTop[] => {
+        const handle = texto(l, 'handle');
+        const alvoId = texto(l, 'alvo_id');
+        const alvoTipo = texto(l, 'alvo_tipo');
+        const fonte = texto(l, 'fonte');
+        const nota = Number(l.nota);
+        if (!handle || !UUID.test(alvoId) || (fonte !== 'anexo' && fonte !== 'arena') || (fonte === 'arena' && alvoTipo !== 'topico') || (alvoTipo !== 'topico' && alvoTipo !== 'resposta') || !Number.isFinite(nota) || nota < 0 || nota > 100) return [];
+        return [{ handle, apelido: textoOuNulo(l, 'apelido'), avatarUrl: textoOuNulo(l, 'avatar_url'), nota, alvoTipo, alvoId, fonte }];
+      }));
     },
 
     listarNotasRetrospectivas(topicoIds, respostaIds = [], arrotoIds = []) {

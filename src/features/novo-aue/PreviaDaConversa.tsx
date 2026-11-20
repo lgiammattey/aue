@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import { VideoDaResposta } from './VideoDaResposta';
+import './PlayerDoArroto.css';
 
 interface Props {
   readonly post: ItemDoFeed;
@@ -79,10 +80,10 @@ export function PreviaDaConversa({
                   <time dateTime={comentario.criadoEm}>{formatarTempoRelativo(comentario.criadoEm)}</time>
                 </div>
                 <p>{comentario.conteudo}</p>
-                {comentario.notaRetrospectiva !== undefined && comentario.anexo?.tipo === 'audio' && comentario.anexo.url && <span className="badge-nota" title={`${comentario.notaAvaliadaDepois === false ? 'Nota' : 'Avaliado depois'}: ${comentario.notaRetrospectiva}/100`}><span className="badge-nota__label">{comentario.notaAvaliadaDepois === false ? 'NOTA' : 'AVALIADO DEPOIS'}</span><span className="badge-nota__value">{comentario.notaRetrospectiva}</span></span>}
                 {comentario.anexo?.tipo === 'audio' && comentario.anexo.url && (
-                  <div className="comment-audio conversation-preview__audio">
-                    <audio controls src={comentario.anexo.url} preload="metadata" />
+                  <div className="comment-audio conversation-preview__audio audio-com-nota">
+                    <div className="audio-com-nota__player"><audio aria-label={`Áudio de ${comentario.autorNome}`} controls src={comentario.anexo.url} preload="metadata" /></div>
+                    {comentario.notaRetrospectiva !== undefined && <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${comentario.notaRetrospectiva} de 100`}>{comentario.notaRetrospectiva}</span>}
                   </div>
                 )}
                 <VideoDaResposta

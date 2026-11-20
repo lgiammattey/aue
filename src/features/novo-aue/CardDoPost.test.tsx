@@ -29,7 +29,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     render(
       <MemoryRouter>
         <CardDoPost
-          post={postExemplo}
+          post={{ ...postExemplo, temAudio: true }}
           salvo={false}
           audioTocando={false}
           tempoAtualDoAudio={0}
@@ -51,8 +51,8 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     const comunidade = screen.getByRole('link', { name: 'Abrir comunidade r/arena-do-arroto' });
     expect(comunidade.getAttribute('href')).toBe('/c/arena-do-arroto');
     expect(comunidade.querySelector('img')?.getAttribute('src')).toBe('https://cdn.test/arena.jpg');
-    expect(screen.getByText('NOTA')).toBeTruthy();
-    expect(screen.getByText('88')).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'Nota: 88 de 100' })).toBeTruthy();
+    expect(screen.queryByText('NOTA')).toBeNull();
     expect(screen.getByText('O arroto que ecoou no estádio')).toBeTruthy();
     expect(screen.getByText('Estava 0x0 quando soltei o trovão e a torcida calou.')).toBeTruthy();
   });
@@ -74,14 +74,14 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     expect(comunidade.textContent).toBe('A');
   });
 
-  it('identifica a nota calculada depois da publicação', () => {
+  it('mostra só a nota junto ao player, sem distinção visual pela data de avaliação', () => {
     render(
       <MemoryRouter>
-        <CardDoPost post={{ ...postExemplo, nota: 73, notaRetrospectiva: true }} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} />
+        <CardDoPost post={{ ...postExemplo, nota: 73, notaRetrospectiva: true, temAudio: true }} audioTocando={false} tempoAtualDoAudio={0} duracaoDoAudio={null} />
       </MemoryRouter>,
     );
-    expect(screen.getByText('AVALIADO DEPOIS')).toBeTruthy();
-    expect(screen.getByTitle('Avaliado depois: 73/100')).toBeTruthy();
+    expect(screen.queryByText('AVALIADO DEPOIS')).toBeNull();
+    expect(screen.getByRole('img', { name: 'Nota: 73 de 100' }).closest('.post-audio-wrapper')?.querySelector('[aria-label="Player do arroto"]')).toBeTruthy();
   });
 
   it('omite somente o fallback de mídia em post pessoal sem texto e preserva título autoral', () => {

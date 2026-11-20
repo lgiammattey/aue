@@ -7,7 +7,7 @@ for (const viewport of [{ name: 'mobile', width: 390, height: 844 }, { name: 'de
     await page.setViewportSize(viewport);
     await page.goto(`${base}?nota-retrospectiva`);
     await page.evaluate(() => document.fonts.ready);
-    const badge = page.getByTitle('Avaliado depois: 73/100');
+    const badge = page.getByRole('img', { name: 'Nota: 73 de 100' });
     await expect(badge).toBeVisible();
     const caixa = await badge.boundingBox();
     expect(caixa && caixa.x >= 0 && caixa.x + caixa.width <= viewport.width).toBeTruthy();

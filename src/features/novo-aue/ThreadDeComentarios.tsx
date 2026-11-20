@@ -15,6 +15,7 @@ import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
 import { LIMITE_RESPOSTA as LIMITE_RESPOSTA_FORUM } from '../../nucleo/comunidade/limites';
 import { CardDoPost } from './CardDoPost';
 import { VideoDaResposta } from './VideoDaResposta';
+import './PlayerDoArroto.css';
 import { useCicloDeGravacaoLivre } from './useCicloDeGravacaoLivre';
 
 export interface ThreadDeComentariosProps {
@@ -577,7 +578,6 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
                   </div>
 
                   {c.conteudo && <p className="thread-reply-text">{c.conteudo}</p>}
-                  {c.notaRetrospectiva !== undefined && c.anexo?.tipo === 'audio' && c.anexo.url && <span className="badge-nota" title={`${c.notaAvaliadaDepois === false ? 'Nota' : 'Avaliado depois'}: ${c.notaRetrospectiva}/100`}><span className="badge-nota__label">{c.notaAvaliadaDepois === false ? 'NOTA' : 'AVALIADO DEPOIS'}</span><span className="badge-nota__value">{c.notaRetrospectiva}</span></span>}
 
                   {c.anexo?.tipo === 'imagem' && c.anexo.url && (
                     <img
@@ -589,8 +589,9 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
                   )}
 
                   {c.anexo?.tipo === 'audio' && c.anexo.url && (
-                    <div className="comment-audio">
-                      <audio controls src={c.anexo.url} preload="metadata" />
+                    <div className="comment-audio audio-com-nota">
+                      <div className="audio-com-nota__player"><audio aria-label={`Áudio de ${c.autorNome}`} controls src={c.anexo.url} preload="metadata" /></div>
+                      {c.notaRetrospectiva !== undefined && <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${c.notaRetrospectiva} de 100`}>{c.notaRetrospectiva}</span>}
                     </div>
                   )}
 

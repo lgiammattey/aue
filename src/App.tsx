@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { criarContaWeb } from './plataforma/web/conta';
 import { criarArmazenamentoWeb } from './plataforma/web/armazenamento';
@@ -93,11 +93,11 @@ function EntradaInicial() {
 function EntradaRaiz() {
   const { pathname, search } = useLocation();
   const arenaNaHome = FLAGS.arenaV2 && abreArenaV2(pathname, search);
-  return <div className={`pagina-inicial${arenaNaHome ? ' pagina-inicial--arena' : ''}`}>{arenaNaHome ? <EntradaDaArena /> : <EntradaInicial />}<TopArrotadoresDaHome /><ConteudoDaHome /></div>;
+  return <div className={`pagina-inicial${arenaNaHome ? ' pagina-inicial--arena' : ''}`}>{arenaNaHome ? <EntradaDaArena conteudoDoRepouso={<TopArrotadoresDaHome />} /> : <><EntradaInicial /><TopArrotadoresDaHome /></>}<ConteudoDaHome /></div>;
 }
 
-function EntradaDaArena() {
-  return FLAGS.dueloV2 ? <EntradaDueloIntegrado modo="criar" /> : <ArenaV2 />;
+function EntradaDaArena({ conteudoDoRepouso }: { conteudoDoRepouso?: ReactNode } = {}) {
+  return FLAGS.dueloV2 ? <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} /> : <ArenaV2 conteudoDoRepouso={conteudoDoRepouso} />;
 }
 
 function DueloIndisponivel() {

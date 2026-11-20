@@ -10,8 +10,8 @@ interface Props {
 }
 
 export function TopArrotadores({ estado, pessoas, audioTocandoId, aoOuvir, aoTentar }: Props) {
-  return <section className="top-arrotadores" aria-label="Top 5 arrotadores">
-    <div className="top-arrotadores__heading"><span>OS MELHORES ARROTOS</span><h2>Top 5 arrotadores</h2></div>
+  return <section className="top-arrotadores" aria-label="Top arrotadores">
+    <div className="top-arrotadores__heading"><span>OS MELHORES ARROTOS</span><h2>Top arrotadores</h2></div>
     {estado === 'carregando' && <p>Carregando o ranking…</p>}
     {estado === 'erro' && <p>Não deu para carregar o ranking. <button type="button" onClick={aoTentar}>Tentar de novo</button></p>}
     {estado === 'pronto' && pessoas.length === 0 && <p>Ainda não há arrotos públicos com nota no ranking.</p>}

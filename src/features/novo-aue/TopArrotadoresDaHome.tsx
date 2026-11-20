@@ -36,10 +36,14 @@ export function TopArrotadoresDaHome({ porta: fornecida }: { readonly porta?: Po
     setTocando(null);
     try {
       let endereco: string | null = null;
-      if (pessoa.fonte === 'arena') {
+      if (pessoa.fonte === 'arena' || pessoa.fonte === 'casa') {
         const audios = await porta.listarAudioDosTopicos?.([pessoa.alvoId]);
-        const caminho = audios?.ok ? audios.valor.find((a) => a.topicoId === pessoa.alvoId)?.audio.caminhoDoAudio : null;
-        if (caminho && porta.assinarAudioDoResultado) endereco = await porta.assinarAudioDoResultado(caminho);
+        const audio = audios?.ok ? audios.valor.find((a) => a.topicoId === pessoa.alvoId)?.audio : null;
+        if (pessoa.fonte === 'arena' && audio?.caminhoDoAudio && porta.assinarAudioDoResultado) {
+          endereco = await porta.assinarAudioDoResultado(audio.caminhoDoAudio);
+        } else if (pessoa.fonte === 'casa' && audio?.caminhoDoAudioDaCasa && porta.enderecoDoAudioDaCasa) {
+          endereco = porta.enderecoDoAudioDaCasa(audio.caminhoDoAudioDaCasa);
+        }
       } else {
         const anexos = await porta.listarAnexosDoForum?.(pessoa.alvoTipo === 'topico'
           ? { topicoIds: [pessoa.alvoId] } : { respostaIds: [pessoa.alvoId] });

@@ -22,12 +22,27 @@ describe('Top de arrotadores na home', () => {
     const api = porta();
     render(<MemoryRouter><TopArrotadoresDaHome porta={api} /></MemoryRouter>);
     expect((await screen.findByRole('link', { name: 'Bia' })).getAttribute('href')).toBe('/u/bia');
+    expect(screen.getByRole('heading', { name: 'Top arrotadores' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Top arrotadores' })).toBeTruthy();
     expect(screen.getByText('81')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Ouvir arroto de Bia' }));
     await waitFor(() => expect(tocar).toHaveBeenCalledWith('https://exemplo.test/assinada'));
     expect(api.listarAnexosDoForum).toHaveBeenCalledWith({ topicoIds: [pessoa.alvoId] });
     expect(api.assinarAnexoDoForum).toHaveBeenCalledWith('protegido');
   });
+  it('ouve o áudio público real de uma conta da casa pela projeção autorizada', async () => {
+    const api = porta({
+      listarTopArrotadores: vi.fn().mockResolvedValue({ ok: true, valor: [{ ...pessoa, handle: 'giam', apelido: 'Giam', fonte: 'casa' }] }),
+      listarAudioDosTopicos: vi.fn().mockResolvedValue({ ok: true, valor: [{ topicoId: pessoa.alvoId, audio: { caminhoDoAudioDaCasa: 'som-publico' } }] }),
+      enderecoDoAudioDaCasa: vi.fn().mockReturnValue('https://exemplo.test/som-publico'),
+    });
+    render(<MemoryRouter><TopArrotadoresDaHome porta={api} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: 'Ouvir arroto de Giam' }));
+    await waitFor(() => expect(tocar).toHaveBeenCalledWith('https://exemplo.test/som-publico'));
+    expect(api.listarAudioDosTopicos).toHaveBeenCalledWith([pessoa.alvoId]);
+    expect(api.listarAnexosDoForum).not.toHaveBeenCalled();
+  });
+
   it('mostra ausência real e erro sem inventar pessoas ou notas', async () => {
     const api = porta({ listarTopArrotadores: vi.fn().mockResolvedValue({ ok: true, valor: [] }) });
     render(<MemoryRouter><TopArrotadoresDaHome porta={api} /></MemoryRouter>);

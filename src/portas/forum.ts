@@ -200,7 +200,7 @@ export interface ArrotadorDoTop {
   readonly nota: number;
   readonly alvoTipo: 'topico' | 'resposta';
   readonly alvoId: string;
-  readonly fonte: 'anexo' | 'arena';
+  readonly fonte: 'anexo' | 'arena' | 'casa';
 }
 
 /** Apenas publicações visíveis com nota; ausência de nota não vale zero. */

@@ -92,7 +92,8 @@ function EntradaInicial() {
 
 function EntradaRaiz() {
   const { pathname, search } = useLocation();
-  return <div className="pagina-inicial">{FLAGS.arenaV2 && abreArenaV2(pathname, search) ? <EntradaDaArena /> : <EntradaInicial />}<TopArrotadoresDaHome /><ConteudoDaHome /></div>;
+  const arenaNaHome = FLAGS.arenaV2 && abreArenaV2(pathname, search);
+  return <div className={`pagina-inicial${arenaNaHome ? ' pagina-inicial--arena' : ''}`}>{arenaNaHome ? <EntradaDaArena /> : <EntradaInicial />}<TopArrotadoresDaHome /><ConteudoDaHome /></div>;
 }
 
 function EntradaDaArena() {

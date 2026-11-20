@@ -845,7 +845,7 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
         const alvoTipo = texto(l, 'alvo_tipo');
         const fonte = texto(l, 'fonte');
         const nota = Number(l.nota);
-        if (!handle || !UUID.test(alvoId) || (fonte !== 'anexo' && fonte !== 'arena') || (fonte === 'arena' && alvoTipo !== 'topico') || (alvoTipo !== 'topico' && alvoTipo !== 'resposta') || !Number.isFinite(nota) || nota < 0 || nota > 100) return [];
+        if (!handle || !UUID.test(alvoId) || (fonte !== 'anexo' && fonte !== 'arena' && fonte !== 'casa') || (fonte !== 'anexo' && alvoTipo !== 'topico') || (alvoTipo !== 'topico' && alvoTipo !== 'resposta') || !Number.isFinite(nota) || nota < 0 || nota > 100) return [];
         return [{ handle, apelido: textoOuNulo(l, 'apelido'), avatarUrl: textoOuNulo(l, 'avatar_url'), nota, alvoTipo, alvoId, fonte }];
       }));
     },

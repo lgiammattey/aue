@@ -2892,7 +2892,7 @@ export function InicioOpenDesign({
                 </div>
 
                 {abaPerfil === 'posts' && (
-                  <section className="od-profile__activity" aria-labelledby="profileActivity">
+                  <section className="od-profile__activity od-profile__activity--posts" aria-labelledby="profileActivity">
                     <div className="od-profile__activity-head">
                       <div className="od-profile__activity-title"><h2 id="profileActivity">Posts</h2><span>{postsDoPerfil.length}</span></div>
                       {donoDoPerfil && (
@@ -2913,6 +2913,7 @@ export function InicioOpenDesign({
                     {postsDoPerfil.map((post) => (
                       <CardDoPost
                         key={post.id}
+                        variante="perfil"
                         post={post}
                         {...propsDeEngajamento(post)}
                         {...propsDeModeracao(post)}
@@ -2931,7 +2932,7 @@ export function InicioOpenDesign({
                 )}
 
                 {abaPerfil === 'marcados' && (
-                  <section className="od-profile__activity" aria-labelledby="profileMarked">
+                  <section className="od-profile__activity od-profile__activity--posts" aria-labelledby="profileMarked">
                     <div className="od-profile__activity-head"><h2 id="profileMarked">Marcados</h2><span>{publicacoesMarcadasDoPerfil.length}</span></div>
                     {estadoMarcadasDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando marcações…</p>}
                     {estadoMarcadasDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar as marcações agora.</p>}
@@ -2939,6 +2940,7 @@ export function InicioOpenDesign({
                     {publicacoesMarcadasDoPerfil.map((post) => (
                       <CardDoPost
                         key={post.id}
+                        variante="perfil"
                         post={post}
                         {...propsDeEngajamento(post)}
                         {...propsDeModeracao(post)}
@@ -2983,13 +2985,13 @@ export function InicioOpenDesign({
                       <article key={arroto.id} className="od-profile__post">
                         <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
                         <h3 style={{ margin: '7px 0', fontSize: 16 }}>Arroto direto · {Math.ceil(arroto.duracaoSegundos)}s</h3>
-                        {notasDosArrotos.has(arroto.id) && <span className="badge-nota" title={`${notasDosArrotos.get(arroto.id)?.retrospectiva ? 'Avaliado depois' : 'Nota'}: ${notasDosArrotos.get(arroto.id)?.nota}/100`}><span className="badge-nota__label">{notasDosArrotos.get(arroto.id)?.retrospectiva ? 'AVALIADO DEPOIS' : 'NOTA'}</span><span className="badge-nota__value">{notasDosArrotos.get(arroto.id)?.nota}</span></span>}
-                        <PlayerDoArroto
+                        <div className="audio-com-nota od-profile__audio-com-nota"><div className="audio-com-nota__player"><PlayerDoArroto
                           tocando={audioTocandoId === arroto.id}
                           tempoAtualSegundos={audioSelecionadoId === arroto.id ? tempoAtualDoAudio : 0}
                           duracaoSegundos={audioSelecionadoId === arroto.id ? duracaoDoAudio : arroto.duracaoSegundos}
                           aoAlternar={() => void alternarAudio(arroto.enderecoDoAudio, arroto.id)}
-                        />
+                        /></div>
+                        {notasDosArrotos.has(arroto.id) && <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${notasDosArrotos.get(arroto.id)?.nota} de 100`}>{notasDosArrotos.get(arroto.id)?.nota}</span>}</div>
                         {arroto.possoOcultar && <button type="button" className="tab" style={{ marginTop: 8 }} onClick={() => void arrotosPort.ocultarArroto(arroto.id).then((ocultou) => { if (ocultou) { setArrotosDoPerfil((atuais) => atuais.filter((item) => item.id !== arroto.id)); setRevisaoDasNotas((atual) => atual + 1); } })}>Ocultar</button>}
                       </article>
                     ))}

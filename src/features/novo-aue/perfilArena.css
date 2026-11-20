@@ -51,3 +51,10 @@
   .app--perfil-arena .od-profile__dashboard .od-profile__arena { padding: 8px 12px; }
   .app--perfil-arena .od-profile .od-profile__tab-btn { padding: 10px 14px; }
 }
+
+/* Os posts usam uma coluna de leitura e não esticam o player na tela larga. */
+.app--perfil-arena .od-profile .od-profile__activity--posts { max-width: 760px; }
+.app--perfil-arena .od-profile__activity .card-do-post--perfil { margin: 12px 0; padding: 16px 10px 8px; border: 1px solid var(--aue-line); border-radius: 14px; background: var(--aue-surface); box-shadow: none; }
+.app--perfil-arena .od-profile__activity .card-do-post--perfil:hover { background: var(--aue-surface-2); }
+
+.app--perfil-arena .card-do-post--perfil .post-avatar-col::after { bottom: 0; }

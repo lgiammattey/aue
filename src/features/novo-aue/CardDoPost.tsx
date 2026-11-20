@@ -18,6 +18,7 @@ import './CardDoPost.css';
 
 interface Props {
   readonly post: ItemDoFeed;
+  readonly variante?: 'perfil' | 'feed';
   /** Só é exibido quando a rota fornece persistência real. */
   readonly salvo?: boolean;
   readonly reacoes?: Pick<EngajamentoDoPost, 'like' | 'fogo' | 'nojo' | 'trofeu'>;
@@ -66,6 +67,7 @@ function formatarTempoRelativo(isoOuData: string): string {
 
 export const CardDoPost = memo(function CardDoPost({
   post,
+  variante = 'feed',
   salvo,
   reacoes,
   minhas = [],
@@ -133,7 +135,7 @@ export const CardDoPost = memo(function CardDoPost({
 
   return (
     <article
-      className={`feed-post card-do-post${post.tipo === 'topico' && post.respostasTotal > 0 ? ' card-do-post--thread' : ''}`}
+      className={`feed-post card-do-post${variante === 'perfil' ? ' card-do-post--perfil' : ''}${post.tipo === 'topico' && post.respostasTotal > 0 ? ' card-do-post--thread' : ''}`}
       id={`post-${post.id}`}
     >
       {/* Coluna do Avatar (Estilo Twitter) */}
@@ -220,14 +222,8 @@ export const CardDoPost = memo(function CardDoPost({
               <span aria-hidden="true">{comunidadeInicial}</span>
             )}
           </Link>}
+          {variante === 'perfil' && <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />}
         </header>
-
-        {post.nota !== undefined && post.nota !== null && (
-          <span className={`badge-nota${post.notaRetrospectiva ? ' badge-nota--retrospectiva' : ''}`} title={`${post.notaRetrospectiva ? 'Avaliado depois' : 'Nota do arroto'}: ${post.nota}/100`}>
-            <span className="badge-nota__label">{post.notaRetrospectiva ? 'AVALIADO DEPOIS' : 'NOTA'}</span>
-            <span className="badge-nota__value">{post.nota}</span>
-          </span>
-        )}
 
         {/* Tag de Tópico (só quando há título distinto do corpo do post) */}
         {post.corpo && tituloExibivel && tituloExibivel.trim() !== post.corpo.trim() && !post.corpo.startsWith(tituloExibivel) && (
@@ -243,15 +239,16 @@ export const CardDoPost = memo(function CardDoPost({
 
         {/* Player de Áudio integrado */}
         {(post.temAudio || post.enderecoDoAudio || (post.anexo?.tipo === 'audio' && post.anexo.url)) && (
-          <div className="post-audio-wrapper">
-            <PlayerDoArroto
+          <div className="post-audio-wrapper audio-com-nota">
+            <div className="audio-com-nota__player"><PlayerDoArroto
               tocando={audioTocando}
               tempoAtualSegundos={tempoAtualDoAudio}
               duracaoSegundos={duracaoDoAudio}
               aoAlternar={() =>
                 aoTocarAudio?.(post.anexo?.tipo === 'audio' ? post.anexo.url : post.enderecoDoAudio)
               }
-            />
+            /></div>
+            {post.nota !== undefined && post.nota !== null && <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${post.nota} de 100`}>{post.nota}</span>}
           </div>
         )}
 
@@ -411,7 +408,7 @@ export const CardDoPost = memo(function CardDoPost({
             <span className="sr-only">Compartilhar</span>
           </button>
 
-          <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />
+          {variante !== 'perfil' && <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />}
         </div>
       </div>
     </article>

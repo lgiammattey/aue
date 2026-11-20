@@ -459,3 +459,6 @@
     animation: none;
   }
 }
+
+/* O player e sua nota dividem a mesma linha, no feed e no perfil. */
+.card-do-post .post-audio-wrapper.audio-com-nota { display: flex; max-width: 420px; }

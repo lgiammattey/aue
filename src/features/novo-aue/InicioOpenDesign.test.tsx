@@ -560,7 +560,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       enderecoDoAudioDaCasa: () => 'https://cdn.aue.test/a.m4a',
     };
     render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
-    expect(await screen.findByTitle('Avaliado depois: 73/100')).toBeTruthy();
+    expect(await screen.findByRole('img', { name: 'Nota: 73 de 100' })).toBeTruthy();
     expect(forum.listarNotasRetrospectivas).toHaveBeenCalledWith(['topico-1']);
   });
 
@@ -594,8 +594,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       listarNotasRetrospectivas: vi.fn(async () => ({ ok: true as const, valor: [{ tipo: 'topico' as const, id: 'topico-1', fonte: 'anexo' as const, nota: 73, versao: 'retrospectiva-acustica-legado-v1' }] })),
     };
     render(<MemoryRouter><InicioOpenDesign portaForum={forum} portaComunidade={mockComunidade} autenticado={false} /></MemoryRouter>);
-    expect(await screen.findByTitle('Avaliado depois: 73/100')).toBeTruthy();
-    expect(screen.queryByTitle('Nota do arroto: 91/100')).toBeNull();
+    expect(await screen.findByRole('img', { name: 'Nota: 73 de 100' })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: 'Nota: 91 de 100' })).toBeNull();
   });
 
   it('não anuncia publicação quando o upload de áudio é recusado por falta de conta', async () => {

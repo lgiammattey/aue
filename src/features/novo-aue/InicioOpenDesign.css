@@ -2304,3 +2304,11 @@
 .od-profile__metric-btn:hover { text-decoration: underline; }
 
 .profile-form__ajuda { margin: -4px 0 12px; font-size: 12px; opacity: 0.7; }
+
+/* No perfil, a leitura dos posts acompanha uma coluna confortável. */
+.od-profile .od-profile__activity--posts { max-width: 760px; margin-left: auto; margin-right: auto; }
+.od-profile__activity .card-do-post--perfil { margin: 12px 0; padding: 16px 16px 8px; border: 1px solid var(--aue-line); border-radius: 14px; box-shadow: none; }
+.od-profile__activity .card-do-post--perfil .post-audio-wrapper,
+.od-profile__activity .od-profile__audio-com-nota { max-width: 420px; }
+.od-profile__activity .card-do-post--perfil .post-actions--twitter { width: calc(100% + var(--card-recuo)); max-width: 440px; margin-left: calc(-1 * var(--card-recuo)); gap: 0; justify-content: space-between; }
+.od-profile__activity .card-do-post--perfil .action-btn { padding: 0 4px; }

@@ -93,3 +93,9 @@
   display: block;
   color: var(--aue-muted);
 }
+
+/* Nota e player formam uma linha; a nota não depende do estado da reprodução. */
+.audio-com-nota { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.audio-com-nota__player { flex: 1 1 auto; min-width: 0; }
+.audio-com-nota__player audio { display: block; width: 100%; max-width: 100%; }
+.audio-com-nota__nota { flex: none; min-width: 2ch; color: var(--aue-text); font: 400 24px/1 var(--font-display, 'Anton', sans-serif); text-align: center; font-variant-numeric: tabular-nums; }

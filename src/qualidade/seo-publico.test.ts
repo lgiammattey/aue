@@ -44,20 +44,20 @@ function ler(caminhoRelativo: string): string {
  */
 const ENTRADAS: ReadonlyArray<{ caminho: string; arquivo: string; temOpenGraph: boolean }> = [
   { caminho: '/', arquivo: '../index.html', temOpenGraph: true },
-  { caminho: '/como-jogar', arquivo: '../como-jogar.html', temOpenGraph: true },
-  { caminho: '/como-arrotar', arquivo: '../como-arrotar.html', temOpenGraph: true },
-  { caminho: '/tipos-de-arroto', arquivo: '../tipos-de-arroto.html', temOpenGraph: true },
-  { caminho: '/ranking-de-arrotos', arquivo: '../ranking-de-arrotos.html', temOpenGraph: true },
-  { caminho: '/comunidades', arquivo: '../comunidades.html', temOpenGraph: true },
-  { caminho: '/grupos', arquivo: '../grupos.html', temOpenGraph: true },
+  { caminho: '/como-jogar', arquivo: '../paginas/como-jogar.html', temOpenGraph: true },
+  { caminho: '/como-arrotar', arquivo: '../paginas/como-arrotar.html', temOpenGraph: true },
+  { caminho: '/tipos-de-arroto', arquivo: '../paginas/tipos-de-arroto.html', temOpenGraph: true },
+  { caminho: '/ranking-de-arrotos', arquivo: '../paginas/ranking-de-arrotos.html', temOpenGraph: true },
+  { caminho: '/comunidades', arquivo: '../paginas/comunidades.html', temOpenGraph: true },
+  { caminho: '/grupos', arquivo: '../paginas/grupos.html', temOpenGraph: true },
   /*
     As duas legais ficam SEM Open Graph, e é decisão, não esquecimento: ninguém
     compartilha termo de uso no grupo do WhatsApp. Cada bloco `og:` a mais é
     mais um lugar onde o endereço envelhece calado. Se um dia precisarem, viram
     `true` aqui e o teste abaixo passa a cobrá-las.
   */
-  { caminho: '/privacidade', arquivo: '../privacidade.html', temOpenGraph: false },
-  { caminho: '/termos', arquivo: '../termos.html', temOpenGraph: false },
+  { caminho: '/privacidade', arquivo: '../paginas/privacidade.html', temOpenGraph: false },
+  { caminho: '/termos', arquivo: '../paginas/termos.html', temOpenGraph: false },
 ];
 
 /** O valor de uma meta `og:*` ou `twitter:*` da página, ou `null`. */
@@ -183,14 +183,14 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     // canonical mentindo de novo.
     for (const arquivo of [
       '../index.html',
-      '../como-jogar.html',
-      '../como-arrotar.html',
-      '../tipos-de-arroto.html',
-      '../ranking-de-arrotos.html',
-      '../comunidades.html',
-      '../grupos.html',
-      '../privacidade.html',
-      '../termos.html',
+      '../paginas/como-jogar.html',
+      '../paginas/como-arrotar.html',
+      '../paginas/tipos-de-arroto.html',
+      '../paginas/ranking-de-arrotos.html',
+      '../paginas/comunidades.html',
+      '../paginas/grupos.html',
+      '../paginas/privacidade.html',
+      '../paginas/termos.html',
       '../public/sitemap.xml',
       '../public/robots.txt',
     ]) {
@@ -218,14 +218,14 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     // <noscript> é o que impede a URL de ser, para um rastreador que não
     // renderiza, uma página em branco.
     for (const arquivo of [
-      '../como-jogar.html',
-      '../como-arrotar.html',
-      '../tipos-de-arroto.html',
-      '../ranking-de-arrotos.html',
-      '../comunidades.html',
-      '../grupos.html',
-      '../privacidade.html',
-      '../termos.html',
+      '../paginas/como-jogar.html',
+      '../paginas/como-arrotar.html',
+      '../paginas/tipos-de-arroto.html',
+      '../paginas/ranking-de-arrotos.html',
+      '../paginas/comunidades.html',
+      '../paginas/grupos.html',
+      '../paginas/privacidade.html',
+      '../paginas/termos.html',
     ]) {
       const html = ler(arquivo);
       expect(html, `${arquivo} sem <noscript>`).toContain('<noscript>');
@@ -308,7 +308,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     // existe.
     const config = ler('../vite.config.ts');
     for (const { caminho } of ENTRADAS) {
-      const arquivo = caminho === '/' ? 'index.html' : `${caminho.slice(1)}.html`;
+      const arquivo = caminho === '/' ? 'index.html' : `paginas/${caminho.slice(1)}.html`;
       expect(config, `${arquivo} não é entrada de build`).toContain(`entrada('${arquivo}')`);
     }
   });
@@ -338,7 +338,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
 /** Mural e Arena: os metadados descrevem o que a pessoa encontra no Auê. */
 describe('SEO público — Arena e mural de arrotos', () => {
   const home = () => ler('../index.html');
-  const comoJogar = () => ler('../como-jogar.html');
+  const comoJogar = () => ler('../paginas/como-jogar.html');
 
   it('o título e a descrição da home apresentam Arena e mural', () => {
     const html = home();
@@ -421,7 +421,7 @@ describe('SEO público — Arena e mural de arrotos', () => {
   });
 
   it('o diretório de grupos deixa claro que são grupos externos, não as comunidades do Auê', () => {
-    const html = ler('../grupos.html');
+    const html = ler('../paginas/grupos.html');
     const titulo = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? '';
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
 
@@ -477,7 +477,7 @@ describe('SEO público — Arena e mural de arrotos', () => {
   });
 
   it('as duas páginas legais continuam de pé e indexáveis', () => {
-    for (const arquivo of ['../privacidade.html', '../termos.html']) {
+    for (const arquivo of ['../paginas/privacidade.html', '../paginas/termos.html']) {
       const html = ler(arquivo);
       expect(html).toMatch(/<meta name="robots" content="index, follow"/);
       expect(html).toContain('<link rel="canonical"');
@@ -501,18 +501,18 @@ describe('SEO público — Arena e mural de arrotos', () => {
       modalidades, sem recuperar orientações antigas contraditórias.
     */
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(
-      ler('../como-arrotar.html').toLowerCase(),
+      ler('../paginas/como-arrotar.html').toLowerCase(),
     )?.[1];
 
     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
-    expect(ler('../como-arrotar.html')).not.toContain('\"@type\": \"HowTo\"');
+    expect(ler('../paginas/como-arrotar.html')).not.toContain('\"@type\": \"HowTo\"');
     for (const termo of ['arroto alto', 'arroto longo', 'arroto explosivo', 'arroto grave', 'arrotar em público', 'gravar meu arroto']) {
       expect(noscript, `sumiu do texto sem JavaScript: ${termo}`).toContain(termo);
     }
   });
 
   it('a página de tipos de arroto cataloga os estilos e explica as notas, sem JavaScript', () => {
-    const html = ler('../tipos-de-arroto.html');
+    const html = ler('../paginas/tipos-de-arroto.html');
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
 
     expect(noscript, 'tipos-de-arroto.html sem <noscript>').toBeTruthy();
@@ -525,7 +525,7 @@ describe('SEO público — Arena e mural de arrotos', () => {
   });
 
   it('a página de ranking descreve a Arena atual sem prometer ranking ou nota geral', () => {
-    const html = ler('../ranking-de-arrotos.html');
+    const html = ler('../paginas/ranking-de-arrotos.html');
     const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html.toLowerCase())?.[1];
 
     expect(noscript, 'ranking-de-arrotos.html sem <noscript>').toBeTruthy();
@@ -548,7 +548,7 @@ describe('SEO público — Arena e mural de arrotos', () => {
   });
 
   it('o diretório de grupos declara CollectionPage em JSON-LD', () => {
-    const html = ler('../grupos.html');
+    const html = ler('../paginas/grupos.html');
     expect(html).toContain('"@type": "CollectionPage"');
     expect(html).toContain('"url": "https://aue.web.app/grupos"');
   });

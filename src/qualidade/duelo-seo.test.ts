@@ -11,7 +11,7 @@ const hosting = JSON.parse(ler('firebase.json')).hosting as {
 
 describe('prévia pública genérica do convite de duelo', () => {
   it('entrega metadados sem dados do convite e pede para não indexar', () => {
-    const html = ler('duelo.html');
+    const html = ler('paginas/duelo.html');
     expect(html).toContain('<meta name="robots" content="noindex, nofollow"');
     expect(html).toContain('<meta name="referrer" content="no-referrer"');
     expect(html).toContain('<meta property="og:url" content="https://aue.web.app/duelo"');
@@ -47,7 +47,7 @@ describe('prévia pública genérica do convite de duelo', () => {
     }
     expect(ler('public/robots.txt')).toContain('Allow: /duelo');
     const config = ler('vite.config.ts');
-    expect(config).toContain("duelo: entrada('duelo.html')");
+    expect(config).toContain("duelo: entrada('paginas/duelo.html')");
     expect(config).toContain("'duelo.html'");
     expect(config).toContain('/^\\/duelo(?:\\.html|\\/)?(?:\\?|$)/');
   });

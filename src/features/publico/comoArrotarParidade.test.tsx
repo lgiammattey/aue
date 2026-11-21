@@ -7,7 +7,7 @@ import { ComoArrotar } from './ComoArrotar';
 
 describe('conteúdo indexável de como arrotar', () => {
   it('mantém os mesmos títulos e parágrafos com e sem JavaScript', () => {
-    const entrada = readFileSync('como-arrotar.html', 'utf8');
+    const entrada = readFileSync('paginas/como-arrotar.html', 'utf8');
     const fallback = /<noscript>([\s\S]*?)<\/noscript>/.exec(entrada)?.[1];
     expect(fallback).toBeTruthy();
     const semJs = new DOMParser().parseFromString(fallback!, 'text/html');

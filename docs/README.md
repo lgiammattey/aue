@@ -13,15 +13,15 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 1. [`../AGENTS.md`](../AGENTS.md) — **a autoridade única**: squad, governança, precedência, escopo e regras.
 2. [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md) — o que foi conferido no `aue.web.app`, com data e limite da prova.
 3. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: a Tropa, comunidades, Arena e X1.
-3. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop em 6 fases da experiência.
-4. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
-5. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da máquina da Arena.
-6. [`design/README.md`](design/README.md) e [`design/prototipo/`](design/prototipo/) — **os protótipos interativos canônicos**.
-7. [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) — **o mapa de páginas, rotas e componentes canônicos** (guia anti-confusão).
-8. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
-9. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
-10. [`technical/README.md`](technical/README.md) — arquitetura, ADRs, áudio, dados e operação.
-11. [`jogo/VOZ.md`](jogo/VOZ.md) — o tom de voz autêntico, zoeiro e direto.
+4. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop em 6 fases da experiência.
+5. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
+6. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da máquina da Arena.
+7. [`design/README.md`](design/README.md) e [`design/prototipo/`](design/prototipo/) — **os protótipos interativos canônicos**.
+8. [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) — **o mapa de páginas, rotas e componentes canônicos** (guia anti-confusão).
+9. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
+10. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
+11. [`technical/README.md`](technical/README.md) — arquitetura, ADRs, áudio, dados e operação.
+12. [`jogo/VOZ.md`](jogo/VOZ.md) — o tom de voz autêntico, zoeiro e direto.
 
 ---
 
@@ -80,8 +80,7 @@ docs/
 ├── escopo/      ESCOPO_ATUAL · BACKLOG
 ├── technical/   README · arquitetura · adr/ · audio/ · dados/ · operacao/
 ├── schema/      nomenclatura · banco_de_dados
-├── pesquisa/    análise competitiva de mercado
-└── _arquivo/    histórico, versões anteriores, protótipos e pacotes legados
+└── pesquisa/    análise competitiva de mercado
 ```
 
 ---

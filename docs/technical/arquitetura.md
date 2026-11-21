@@ -6,7 +6,7 @@ visual alvo. Este documento continua descrevendo a arquitetura implementada:
 nenhum detalhe de produto ou de arte aqui cria backend, rota ou estado por si só.
 
 **Status:** descrição da arquitetura implementada e publicada
-**Revisado em:** 2026-10-20 (produção conferida em `aue.web.app`)
+**Revisado em:** 2026-11-21 (estrutura conferida no repositório)
 
 > Este arquivo explica a arquitetura **como ela é hoje**. Ele não amplia escopo:
 > o que pertence ao produto está em
@@ -32,10 +32,10 @@ combina a adrenalina da **Arena** (máquina de captura, julgamento acústico YAM
 
 A arquitetura do frontend é dividida em módulos com responsabilidades bem definidas:
 
-1. **`src/arena/` (A Arena):** Superfície única contínua de 10 estados (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`). Não são rotas separadas, mas transições reativas com captura Web Audio e animação da bolha.
-2. **`src/features/novo-aue/` (OpenDesign Canônico da Tropa e Comunidades):** Implementação ativa da rede social (`InicioOpenDesign`, `CardDoPost`, `ThreadDeComentarios`, `ModalCompositor`, `TelaComunidadeOpenDesign`, `TelaPerfilOpenDesign`). A home publicada mostra conversas de comunidades e a Tropa reúne as contribuições das pessoas seguidas; a migração para tópico e resposta é uma decisão aceita, ainda não uma declaração de entrega.
+1. **`src/arena/v2/` e `src/arena/` (A Arena):** Superfície única contínua de captura, julgamento acústico YAMNet e Auê Score (`ArenaV2`, `EntradaArenaLocalV2`, `EntradaDueloIntegrado`), mantendo `src/arena/Arena.tsx` apenas para links legados (`/x1/:code`, `/b/:code`).
+2. **`src/features/novo-aue/` (OpenDesign Canônico da Tropa e Mural):** Implementação ativa da rede social e casca unificada (`InicioOpenDesign`, `CardDoPost`, `ThreadDeComentarios`, `ModalCompositor`, `TelaPerfilOpenDesign`, `TelaArenaEmBreveOpenDesign`).
 3. **`src/features/publico/` e `src/features/legal/`:** Páginas institucionais, SEO e legais com tema claro fixo (`ComoJogar`, `ComoArrotar`, `TiposDeArroto`, `RankingDeArrotos`, `TermosDeUso`, `PoliticaDePrivacidade`).
-4. **`src/features/comunidade/` (Camada Legada / Compatibilidade):** Casca anterior mantida temporariamente para compatibilidade de rotas secundárias (`/feed`, `/desafios`) e testes legados. Novas funcionalidades de feed e postagens são desenvolvidas exclusivamente em `novo-aue` (ver [`MAPA_DE_PAGINAS_E_FLUXOS.md`](../design/MAPA_DE_PAGINAS_E_FLUXOS.md)).
+4. **`src/features/comunidade/` (Camada Legada + Telas Auxiliares):** Abriga telas auxiliares ainda ativas (`TelaLanding`, `TelaHistoria`, `TelaVersoesWebapp`, `TelaRedefinirSenha`) e a `TelaComunidade` legada usada apenas em `/desafios`. Novas funcionalidades de feed e postagens são desenvolvidas exclusivamente em `novo-aue` (ver [`MAPA_DE_PAGINAS_E_FLUXOS.md`](../design/MAPA_DE_PAGINAS_E_FLUXOS.md)).
 5. **`src/nucleo/` (Lógica Pura):** Regras de negócio, cálculo de Auê Score, limites e formatação em TypeScript puro, sem acoplamento com React ou DOM.
 6. **`src/plataforma/web/` e `src/portas/`:** Fronteira obrigatória com o navegador (`AudioContext`, `MediaRecorder`, `localStorage`) e cliente Supabase. Todo acesso externo passa pelas portas.
 

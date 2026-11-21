@@ -274,5 +274,4 @@ comentários, grupos, moderação de comunidade, ligas, temporadas, notificaçõ
 integrações, Auê+ e app nativo — além das issues de UX escritas em cima do gate
 sequencial e da sequência de páginas.
 
-Registro completo em
-[`../_arquivo/inventarios/reposicionamento-2026-08.md`](../_arquivo/inventarios/reposicionamento-2026-08.md).
+Registro completo arquivado no histórico do Git (`reposicionamento-2026-08.md`).

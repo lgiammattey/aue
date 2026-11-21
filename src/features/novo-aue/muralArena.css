@@ -25,7 +25,7 @@
 .mural-publicar { min-height: 48px; padding: 12px 22px; color: #171714; background: #c6f500; font-weight: 800; }
 .mural-publicar:hover { background: #b5df00; }
 .app--mural .feed { max-width: 920px; margin: 0 auto; }
-.app--mural .card-do-post { margin: 0; padding: 28px 0 18px; border: 0; border-bottom: 1px solid var(--aue-line); border-radius: 0; background: transparent; }
+.app--mural .card-do-post { margin: 14px 0; padding: 20px 18px 14px; border: 1px solid var(--aue-line); border-radius: 14px; background: #fbf8f2; }
 .app--mural .post-community-avatar { display: none; }
 .app--mural .card-do-post .post-body { font-size: 16px; line-height: 1.6; }
 .app--mural .card-do-post .post-audio-wrapper { margin: 18px 0; }
@@ -37,6 +37,10 @@
 .app--mural .player-arroto__tempo { font-family: var(--font-mono); font-weight: 700; }
 .app--mural .conversation-preview { box-shadow: none; }
 .app--mural a:focus-visible, .app--mural button:focus-visible { outline: 3px solid #364700; outline-offset: 3px; }
+.action-btn--challenge { border: 1px solid #c6f500; border-radius: 999px; padding: 4px 10px; font-weight: 800; background: rgba(198, 245, 0, 0.14); color: var(--aue-text, #171714); }
+.action-btn--challenge:hover { background: #c6f500; color: #171714; }
+.od-profile__button--challenge { background: #c6f500; color: #171714; border-color: #c6f500; font-weight: 800; }
+.od-profile__button--challenge:hover { background: #b5df00; }
 @media (max-width: 699px) {
   .app--mural > main { padding: 0 max(20px, env(safe-area-inset-right)) 64px max(20px, env(safe-area-inset-left)); }
   .mural-nav { min-height: 66px; }.mural-nav > div { gap: 14px; }

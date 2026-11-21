@@ -20,6 +20,12 @@ export type AnexoRascunho =
   | { readonly tipo: 'audio'; readonly arquivo: Blob; readonly duracaoMs: number }
   | { readonly tipo: 'videoExterno'; readonly url: string };
 
+export interface DesafioAlvoDoCompositor {
+  readonly handle: string;
+  readonly nome: string;
+  readonly notaAlvo?: number;
+}
+
 interface Props {
   readonly aberto: boolean;
   readonly controleDeDialogo?: ControleDeDialogo;
@@ -27,6 +33,7 @@ interface Props {
   readonly comunidades: readonly ComunidadeDoForum[];
   readonly comunidadePadraoSlug?: string;
   readonly autor?: { readonly nome: string; readonly avatarUrl?: string };
+  readonly desafioAlvo?: DesafioAlvoDoCompositor | null;
   readonly aoFechar: () => void;
   readonly criarGravacao?: () => GravacaoLivreDoForum;
   readonly aoPublicar: (dados: {
@@ -46,6 +53,7 @@ export function ModalCompositor({
   comunidades,
   comunidadePadraoSlug,
   autor,
+  desafioAlvo = null,
   aoFechar,
   criarGravacao,
   aoPublicar,
@@ -74,6 +82,14 @@ export function ModalCompositor({
   useEffect(() => {
     if (comunidadePadraoSlug) setComunidadeSlug(comunidadePadraoSlug);
   }, [comunidadePadraoSlug]);
+
+  useEffect(() => {
+    if (!aberto || !desafioAlvo) return;
+    const chamada = desafioAlvo.notaAlvo !== undefined
+      ? `Desafio @${desafioAlvo.handle} a bater essa nota (${desafioAlvo.notaAlvo}/100)! Solta o arroto:`
+      : `Desafio @${desafioAlvo.handle} no mano a mano! Supera esse arroto:`;
+    setCorpo(chamada);
+  }, [aberto, desafioAlvo]);
 
   useEffect(() => () => {
     if (timerGravacao.current) window.clearInterval(timerGravacao.current);
@@ -248,9 +264,16 @@ export function ModalCompositor({
     setErro(null);
 
     try {
+      const textoLimpo = corpo.trim();
+      const mencaoExata = desafioAlvo
+        ? new RegExp(`(^|[^a-z0-9_])@${desafioAlvo.handle}(?![a-z0-9_])`, 'i').test(textoLimpo)
+        : true;
+      const corpoFinal = desafioAlvo && !mencaoExata
+        ? `@${desafioAlvo.handle}${textoLimpo ? ` ${textoLimpo}` : ''}`
+        : textoLimpo;
       const publicado = await aoPublicar({
         ...(destino === 'comunidade' ? { titulo: titulo.trim() } : {}),
-        corpo: corpo.trim(),
+        corpo: corpoFinal,
         ...(destino === 'comunidade' ? { comunidadeSlug } : {}),
         anexo,
       });
@@ -286,7 +309,7 @@ export function ModalCompositor({
         <header className="comments-sheet-header">
           <div className="comments-sheet-title-wrap">
             <h2 id="dialogComposerTitle" className="comments-sheet-title">
-              {destino === 'pessoal' ? 'Novo post' : 'Novo tópico'}
+              {desafioAlvo ? `Desafiar @${desafioAlvo.handle}` : destino === 'pessoal' ? 'Novo post' : 'Novo tópico'}
             </h2>
           </div>
           <button
@@ -301,6 +324,17 @@ export function ModalCompositor({
         </header>
 
         <form onSubmit={enviar} className="composer-clean-form">
+          {desafioAlvo && (
+            <div className="composer-attachment-pill" role="note">
+              <span>⚔️ Intimando <strong>{desafioAlvo.nome}</strong> (@{desafioAlvo.handle}) no Mural e no Perfil</span>
+              <a
+                className="action-pill-btn"
+                href={`/arena?desafiar=${encodeURIComponent(desafioAlvo.handle)}`}
+              >
+                Arena X1 ↗
+              </a>
+            </div>
+          )}
           {destino === 'comunidade' && (
             <label className="composer-topic-title">
               <span>Assunto</span>

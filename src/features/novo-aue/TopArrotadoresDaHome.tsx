@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { analyticsArenaV2 } from '../../plataforma/web/analyticsArenaV2';
 import { criarForumWeb } from '../../plataforma/web/forum';
 import { criarReprodutorDoTop } from '../../plataforma/web/reprodutorDoTop';
 import type { ArrotadorDoTop, PortaDeForum } from '../../portas/forum';
@@ -57,7 +58,10 @@ export function TopArrotadoresDaHome({ porta: fornecida }: { readonly porta?: Po
       if (atual !== pedido.current) return;
       reprodutor.current ??= criarReprodutorDoTop(() => setTocando(null));
       await reprodutor.current.tocar(endereco);
-      if (atual === pedido.current) setTocando(chave);
+      if (atual === pedido.current) {
+        setTocando(chave);
+        analyticsArenaV2.registrar('ouviu_arroto');
+      }
     } catch { if (atual === pedido.current) setErroAudio(true); }
   }
   return <div className="top-arrotadores-home">

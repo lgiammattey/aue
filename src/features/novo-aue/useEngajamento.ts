@@ -1,9 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CausoPostado, PortaDeComunidade } from '../../portas/comunidade';
 import type { PortaDeForum, ReacaoDoTopico } from '../../portas/forum';
-import type { EngajamentoDoPost, ItemDoFeed } from './tipos';
+import type { EngajamentoDoPost, ItemDoFeed, ReacaoDeAtitude } from './tipos';
 
-const ZERO: EngajamentoDoPost = { like: 0, fogo: 0, nojo: 0, trofeu: 0, minhas: [] };
+const ZERO: EngajamentoDoPost = {
+  like: 0,
+  dislike: 0,
+  dedo: 0,
+  hangloose: 0,
+  rock: 0,
+  cerveja: 0,
+  refrigerante: 0,
+  fogo: 0,
+  nojo: 0,
+  trofeu: 0,
+  minhas: [],
+};
 
 /** Causo já traz contagens e as marcas da conta; aqui só se traduz. */
 export function engajamentoDoCauso(c: CausoPostado): EngajamentoDoPost {
@@ -116,7 +128,7 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
   }, [estaAutenticado, forum]);
 
   const reagir = useCallback(async (post: ItemDoFeed, tipo: ReacaoDoTopico) => {
-    if (!estaAutenticado) {
+    if (post.tipo === 'causo' && !estaAutenticado) {
       aoPedirEntrada('Entre na sua conta para reagir.');
       return;
     }
@@ -128,12 +140,14 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
       if (post.tipo === 'topico') {
         const r = await forum.alternarReacaoDoTopico?.(id, tipo);
         if (!r?.ok) {
+          if (r?.motivo === 'precisaEntrar') {
+            aoPedirEntrada('Entre na sua conta para reagir.');
+            return;
+          }
           exibirToast(
-            r?.motivo === 'precisaEntrar'
-              ? 'Entre com sua conta para reagir.'
-              : r?.motivo === 'limiteDeFrequencia'
-                ? 'Muita reação de uma vez. Tenta daqui a pouco.'
-                : 'Não deu para registrar sua reação agora.',
+            r?.motivo === 'limiteDeFrequencia'
+              ? 'Muita reação de uma vez. Tenta daqui a pouco.'
+              : 'Não deu para registrar sua reação agora.',
           );
           return;
         }
@@ -143,11 +157,20 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
           setEngajamento((atual) => ({ ...atual, [post.id]: dado ? { ...dado.total, minhas: dado.minhas } : ZERO }));
         }
       } else {
-        const r = tipo === 'like'
-          ? await comunidadePort.alternarCurtida(id)
-          : await comunidadePort.alternarReacao(id, tipo);
-        if (!r.ok) {
-          exibirToast('Não deu para registrar sua reação agora.');
+        if (tipo === 'like') {
+          const r = await comunidadePort.alternarCurtida(id);
+          if (!r.ok) {
+            exibirToast('Não deu para registrar sua reação agora.');
+            return;
+          }
+        } else if (tipo === 'fogo' || tipo === 'nojo' || tipo === 'trofeu') {
+          const r = await comunidadePort.alternarReacao(id, tipo);
+          if (!r.ok) {
+            exibirToast('Não deu para registrar sua reação agora.');
+            return;
+          }
+        } else {
+          exibirToast('Reação indisponível neste item antigo.');
           return;
         }
         const atualizado = await comunidadePort.obterCauso(id);
@@ -208,7 +231,7 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
       minhas: atual?.minhas,
       salvo: salvos.has(chaveDeSalvo(post)),
       aoCurtir: podeReagir ? () => void reagir(post, 'like') : undefined,
-      aoReagir: podeReagir ? (tipo: 'fogo' | 'nojo' | 'trofeu') => void reagir(post, tipo) : undefined,
+      aoReagir: podeReagir ? (tipo: ReacaoDeAtitude) => void reagir(post, tipo) : undefined,
       aoAlternarSalvar: forum.alternarSalvo ? () => void alternarSalvo(post) : undefined,
     };
   };

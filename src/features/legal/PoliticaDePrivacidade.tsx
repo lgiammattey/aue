@@ -276,7 +276,7 @@ export const PoliticaDePrivacidade: React.FC = () => {
         {FLAGS.anunciosAdsterra && (
           <p>
             O Auê pode exibir anúncios e links de parceiros da <strong>Adsterra</strong>
-            {' '}no mural.
+            {' '}no mural e nas páginas públicas.
           </p>
         )}
         {!ANUNCIOS_ATIVOS && !FLAGS.anunciosAdsterra && (

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const rpc = vi.fn();
 const getSession = vi.fn();
+const signInAnonymously = vi.fn();
 const upload = vi.fn();
 const remove = vi.fn();
 const createSignedUrl = vi.fn();
@@ -13,7 +14,10 @@ vi.mock('../../db/supabase', () => ({
   assinarUrlDoAudio: (...a: unknown[]) => assinarUrlDoAudio(...a),
   supabase: {
     rpc: (...a: unknown[]) => rpc(...a),
-    auth: { getSession: (...a: unknown[]) => getSession(...a) },
+    auth: {
+      getSession: (...a: unknown[]) => getSession(...a),
+      signInAnonymously: (...a: unknown[]) => signInAnonymously(...a),
+    },
     storage: { from: () => ({
       upload: (...a: unknown[]) => upload(...a),
       remove: (...a: unknown[]) => remove(...a),
@@ -136,6 +140,7 @@ function comoMembro() {
 beforeEach(() => {
   rpc.mockReset();
   getSession.mockReset();
+  signInAnonymously.mockReset();
   upload.mockReset();
   remove.mockReset();
   createSignedUrl.mockReset();
@@ -348,28 +353,51 @@ describe('cursor com microssegundo', () => {
     rpc.mockResolvedValue({
       data: [
         { topico_id: ID_A, tipo: 'like', total: 3, minha: true },
-        { topico_id: ID_A, tipo: 'fogo', total: 1, minha: false },
-        { topico_id: ID_B, tipo: 'trofeu', total: 2, minha: false },
+        { topico_id: ID_A, tipo: 'rock', total: 1, minha: false },
+        { topico_id: ID_B, tipo: 'cerveja', total: 2, minha: false },
       ],
       error: null,
     });
     const r = await criarForumWeb().contarReacoesDosTopicos!([ID_A, ID_B, 'nao-uuid']);
     expect(rpc).toHaveBeenCalledWith('contar_reacoes_dos_topicos', { p_topicos: [ID_A, ID_B] });
-    expect(r.ok && r.valor[ID_A]).toEqual({ total: { like: 3, fogo: 1, nojo: 0, trofeu: 0 }, minhas: ['like'] });
-    expect(r.ok && r.valor[ID_B]?.total.trofeu).toBe(2);
+    expect(r.ok && r.valor[ID_A]).toEqual({
+      total: {
+        like: 3,
+        dislike: 0,
+        dedo: 0,
+        hangloose: 0,
+        rock: 1,
+        cerveja: 0,
+        refrigerante: 0,
+        fogo: 0,
+        nojo: 0,
+        trofeu: 0,
+      },
+      minhas: ['like'],
+    });
+    expect(r.ok && r.valor[ID_B]?.total.cerveja).toBe(2);
     rpc.mockResolvedValue({ data: [{ topico_id: ID_A, tipo: 'repost', total: 1, minha: false }], error: null });
     expect(await criarForumWeb().contarReacoesDosTopicos!([ID_A])).toEqual({ ok: false, motivo: 'falhou' });
   });
 
-  it('alternarReacaoDoTopico e alternarSalvo só aceitam booleano do servidor', async () => {
+  it('alternarReacaoDoTopico funciona sem login criando sessão anônima e só aceita booleano do servidor', async () => {
     const f = criarForumWeb();
     rpc.mockResolvedValue({ data: 'sim', error: null });
     expect((await f.alternarSalvo!('topico', ID_A)).ok).toBe(false);
     rpc.mockResolvedValue({ data: true, error: null });
     expect(await f.alternarSalvo!('topico', ID_A)).toEqual({ ok: true, valor: true });
     expect(rpc).toHaveBeenLastCalledWith('alternar_salvo', { p_tipo: 'topico', p_item_id: ID_A });
-    expect(await f.alternarReacaoDoTopico!(ID_A, 'fogo')).toEqual({ ok: true, valor: true });
-    expect(rpc).toHaveBeenLastCalledWith('alternar_reacao_do_topico', { p_topico_id: ID_A, p_tipo: 'fogo' });
+    expect(await f.alternarReacaoDoTopico!(ID_A, 'rock')).toEqual({ ok: true, valor: true });
+    expect(rpc).toHaveBeenLastCalledWith('alternar_reacao_do_topico', { p_topico_id: ID_A, p_tipo: 'rock' });
+
+    getSession.mockResolvedValueOnce({ data: { session: null }, error: null });
+    signInAnonymously.mockResolvedValueOnce({
+      data: { session: { user: { id: 'anon-1', is_anonymous: true } } },
+      error: null,
+    });
+    expect(await f.alternarReacaoDoTopico!(ID_A, 'cerveja')).toEqual({ ok: true, valor: true });
+    expect(signInAnonymously).toHaveBeenCalledOnce();
+    expect(rpc).toHaveBeenLastCalledWith('alternar_reacao_do_topico', { p_topico_id: ID_A, p_tipo: 'cerveja' });
   });
 
   it('listarMeusSalvos pede uma linha a mais para saber se há próxima página', async () => {

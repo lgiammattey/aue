@@ -9,7 +9,7 @@
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MenuDoPost } from './MenuDoPost';
-import type { EngajamentoDoPost, ItemComentario, ItemDoFeed } from './tipos';
+import type { EngajamentoDoPost, ItemComentario, ItemDoFeed, ReacaoDeAtitude } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { PlayerDoArroto } from './PlayerDoArroto';
@@ -21,7 +21,7 @@ interface Props {
   readonly variante?: 'perfil' | 'feed';
   /** Só é exibido quando a rota fornece persistência real. */
   readonly salvo?: boolean;
-  readonly reacoes?: Pick<EngajamentoDoPost, 'like' | 'fogo' | 'nojo' | 'trofeu'>;
+  readonly reacoes?: Partial<Omit<EngajamentoDoPost, 'minhas'>>;
   readonly minhas?: readonly string[];
   readonly audioTocando: boolean;
   readonly tempoAtualDoAudio: number;
@@ -37,7 +37,8 @@ interface Props {
     anexo: AnexoRascunho | null;
   }) => Promise<boolean>;
   readonly aoCurtir?: () => void;
-  readonly aoReagir?: (tipo: 'fogo' | 'nojo' | 'trofeu') => void;
+  readonly aoReagir?: (tipo: ReacaoDeAtitude) => void;
+  readonly aoDesafiar?: () => void;
   readonly aoAlternarSalvar?: () => void;
   /** Só chega em post de outra pessoa. */
   readonly aoDenunciar?: () => void;
@@ -77,6 +78,7 @@ export const CardDoPost = memo(function CardDoPost({
   threadAberta = false,
   aoCurtir,
   aoReagir,
+  aoDesafiar,
   aoAlternarSalvar,
   aoDenunciar,
   aoApagar,
@@ -308,7 +310,7 @@ export const CardDoPost = memo(function CardDoPost({
             <span className="sr-only">comentários</span>
           </button>
 
-          {/* Curtir */}
+          {/* Like */}
           <button
             type="button"
             className={`action-btn action-btn--like ${minhas.includes('like') ? 'is-active' : ''}`}
@@ -316,29 +318,20 @@ export const CardDoPost = memo(function CardDoPost({
             disabled={!aoCurtir}
             aria-pressed={minhas.includes('like')}
             aria-label="Curtir"
-            title={aoCurtir ? (minhas.includes('like') ? 'Tirar a curtida' : 'Curtir') : 'Curtir não está disponível aqui'}
+            title={aoCurtir ? (minhas.includes('like') ? 'Tirar o like' : 'Dar like') : 'Like não está disponível aqui'}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill={minhas.includes('like') ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.8-8 11-8 11z" />
-            </svg>
-            {reacoes && reacoes.like > 0 && <span className="action-btn__count">{reacoes.like}</span>}
+            <span aria-hidden="true">👍</span>
+            {reacoes && (reacoes.like ?? 0) > 0 && <span className="action-btn__count">{reacoes.like}</span>}
             <span className="sr-only">Curtir</span>
           </button>
 
           {([
-            ['fogo', '🔥', 'Pegou fogo', 'fogo'],
-            ['nojo', '🤢', 'Nojento demais', 'nojo'],
-            ['trofeu', '🏆', 'Respeito / Troféu', 'Troféu'],
+            ['dislike', '👎', 'Dislike', 'Dislike'],
+            ['dedo', '🖕', 'Dedo do meio', 'Dedo do meio'],
+            ['hangloose', '🤙', 'Hangloose', 'Hangloose'],
+            ['rock', '🤘', 'Sinal do rock', 'Rock'],
+            ['cerveja', '🍺', 'Cerveja', 'Cerveja'],
+            ['refrigerante', '🥤', 'Refrigerante', 'Refrigerante'],
           ] as const).map(([tipo, emoji, titulo, nome]) => (
             <button
               key={tipo}
@@ -355,6 +348,19 @@ export const CardDoPost = memo(function CardDoPost({
               <span className="sr-only">{nome}</span>
             </button>
           ))}
+
+          {aoDesafiar && (
+            <button
+              type="button"
+              className="action-btn action-btn--challenge"
+              onClick={aoDesafiar}
+              aria-label={post.autorHandle ? `Desafiar @${post.autorHandle}` : 'Desafiar'}
+              title={post.autorHandle ? `Desafiar @${post.autorHandle}` : 'Desafiar'}
+            >
+              <span aria-hidden="true">⚔️</span>
+              <span className="action-btn__count">Desafiar</span>
+            </button>
+          )}
 
           {/* Sem porta de salvos, o controle continua visível mas indisponível. */}
           {salvo !== undefined && <button

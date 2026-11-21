@@ -126,7 +126,17 @@ export interface ComunidadeDoForum extends ReferenciaDeComunidade {
   readonly possoGerirMidia?: boolean;
 }
 
-export type ReacaoDoTopico = 'like' | 'fogo' | 'nojo' | 'trofeu';
+export type ReacaoDoTopico =
+  | 'like'
+  | 'dislike'
+  | 'dedo'
+  | 'hangloose'
+  | 'rock'
+  | 'cerveja'
+  | 'refrigerante'
+  | 'fogo'
+  | 'nojo'
+  | 'trofeu';
 
 /** Contagem pública e o que a conta atual já marcou. */
 export interface ReacoesDoTopico {

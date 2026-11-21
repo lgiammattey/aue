@@ -167,7 +167,12 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getByRole('link', { name: 'Abrir perfil de u/ze_do_eco' }).getAttribute('href')).toBe('/u/ze_do_eco');
     expect(screen.queryByLabelText('Votar positivo')).toBeNull();
     expect(screen.getByRole('button', { name: 'Curtir' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '🔥' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '👎' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '🖕' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '🤙' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '🤘' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '🍺' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '🥤' })).toBeTruthy();
 
   });
 
@@ -467,7 +472,12 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     const alternarReacaoDoTopico = vi.fn(async () => ({ ok: true as const, valor: true }));
     const contarReacoesDosTopicos = vi.fn(async () => ({
       ok: true as const,
-      valor: { 'post-original': { total: { like: 1, fogo: 0, nojo: 0, trofeu: 0 }, minhas: ['like' as const] } },
+      valor: {
+        'post-original': {
+          total: { like: 1, dislike: 0, dedo: 0, hangloose: 0, rock: 0, cerveja: 0, refrigerante: 0, fogo: 0, nojo: 0, trofeu: 0 },
+          minhas: ['like' as const],
+        },
+      },
     }));
     const listarRespostasDoTopico = vi.fn(async (topicoId: string) => ({
       ok: true as const,
@@ -682,6 +692,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(criarPublicacao).toHaveBeenCalledWith({ corpo: 'Post com a gravação', anexo: anexoConfirmado });
     expect(registrarOuGuardarNotaPublicada).not.toHaveBeenCalled();
     expect(await screen.findByText('Publicado! O áudio será analisado; a nota pode demorar alguns minutos.')).toBeTruthy();
+    expect(await screen.findByRole('img', { name: 'Nota: 73 de 100' })).toBeTruthy();
   });
 
   it('carrega a Resenha por data de publicação, sem usar o feed legado', async () => {
@@ -874,6 +885,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       );
     });
     expect(await screen.findByText('Arroto direto · 2s')).toBeTruthy();
+    expect(await screen.findByRole('img', { name: 'Nota: 73 de 100' })).toBeTruthy();
   });
 
   it('não mostra o atalho de arroto ao visitar o perfil de outra pessoa', async () => {
@@ -1171,5 +1183,201 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect((await screen.findByRole('status')).textContent).toContain('Entre na sua conta para participar da comunidade.');
     expect(pedirEntrada).toHaveBeenCalledOnce();
     expect(comunidadeDoVisitante.entrarComunidade).not.toHaveBeenCalled();
+  });
+
+  it('assina áudio e exibe nota nas respostas em prévia e ao enviar resposta com áudio', async () => {
+    const audioResposta = new Blob(['arroto-resposta'], { type: 'audio/webm' });
+    const listarNotasRetrospectivas = vi.fn(async (_topicos: readonly string[], respostas?: readonly string[]) => ({
+      ok: true as const,
+      valor: respostas?.includes('resposta-audio-1')
+        ? [{ tipo: 'resposta' as const, id: 'resposta-audio-1', fonte: 'anexo' as const, nota: 84, versao: 'publicacao-acustica-servidor-v1' }]
+        : [],
+    }));
+    const assinarAnexoDoForum = vi.fn(async () => ({ ok: true as const, valor: 'https://cdn.aue.test/resposta-audio-1.webm' }));
+    const listarPreviaRespostasDosTopicos = vi.fn(async () => ({
+      ok: true as const,
+      valor: [{
+        topicoId: 'topico-1',
+        resposta: {
+          id: 'resposta-audio-1',
+          topicoId: 'topico-1',
+          paiId: null,
+          nivel: 0 as const,
+          autor: { id: 'autor-2', handle: 'pedro_som', apelido: 'Pedro Som', avatarUrl: null },
+          corpo: 'Toma a resposta.',
+          status: 'visivel' as const,
+          criadoEm: '2026-10-19T11:00:00Z',
+          editadoEm: null,
+          souAutor: false,
+        },
+        anexo: {
+          alvo: 'resposta' as const,
+          alvoId: 'resposta-audio-1',
+          tipo: 'audio' as const,
+          caminho: 'autor-2/forum/resposta.webm',
+          mime: 'audio/webm',
+          tamanhoBytes: 320,
+          duracaoMs: 1500,
+          urlVideo: null,
+        },
+      }],
+    }));
+    const forumComPreviaDeAudio: PortaDeForum = {
+      ...mockForum,
+      listarPreviaRespostasDosTopicos,
+      assinarAnexoDoForum,
+      listarNotasRetrospectivas,
+      enviarAnexoDoForum: vi.fn(async () => ({
+        ok: true as const,
+        valor: { tipo: 'audio' as const, caminho: 'eu/forum/resp.webm', mime: 'audio/webm', tamanhoBytes: 200, duracaoMs: 1100 },
+      })),
+      responderTopico: vi.fn(async () => ({ ok: true as const, valor: { id: 'nova-resp', topicoId: 'topico-1', paiId: null, nivel: 0 as const, criadoEm: '2026-10-19T11:05:00Z' } })),
+      criarGravacaoLivreDoForum: vi.fn(() => ({
+        iniciar: vi.fn(async () => ({
+          ok: true as const,
+          conclusao: Promise.resolve({
+            ok: true as const,
+            encerramento: 'manual' as const,
+            audio: { dados: audioResposta, formato: 'audio/webm', mimeParaEnvio: 'audio/webm', duracaoMs: 1100 },
+          }),
+        })),
+        parar: vi.fn(),
+        cancelar: vi.fn(),
+        estaGravando: vi.fn(() => false),
+      })),
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComPreviaDeAudio} portaComunidade={mockComunidade} autenticado />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Toma a resposta.')).toBeTruthy();
+    expect(assinarAnexoDoForum).toHaveBeenCalledWith('autor-2/forum/resposta.webm');
+    expect(listarNotasRetrospectivas).toHaveBeenCalledWith([], ['resposta-audio-1']);
+    expect(await screen.findByRole('img', { name: 'Nota: 84 de 100' })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /12 comentários/i }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Gravar áudio' }));
+    await screen.findByText(/Áudio de 2s anexado/);
+    fireEvent.click(screen.getByRole('button', { name: 'Responder' }));
+
+    expect(await screen.findByRole('img', { name: 'Nota: 73 de 100' })).toBeTruthy();
+  });
+
+  it('permite desafiar outro arrotador direto por um post no Mural e publicar a intimação', async () => {
+    const criarPublicacaoPessoal = vi.fn(async () => ({ ok: true as const, valor: { id: 'desafio-1', criadoEm: '2026-10-20T12:00:00Z' } }));
+    const forumComDesafio: PortaDeForum = {
+      ...mockForum,
+      criarPublicacaoPessoal,
+    };
+
+    render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComDesafio} portaComunidade={mockComunidade} autenticado />
+      </MemoryRouter>,
+    );
+
+    const botaoDesafiar = await screen.findByRole('button', { name: 'Desafiar @ze_do_eco' });
+    fireEvent.click(botaoDesafiar);
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Desafiar @ze_do_eco' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /Arena X1/ }).getAttribute('href')).toBe('/arena?desafiar=ze_do_eco');
+    const campo = screen.getByRole('textbox', { name: 'Texto da publicação' }) as HTMLTextAreaElement;
+    expect(campo.value).toContain('@ze_do_eco');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(criarPublicacaoPessoal).toHaveBeenCalledWith(expect.objectContaining({
+      corpo: expect.stringContaining('@ze_do_eco'),
+    })));
+    expect(await screen.findByText('Desafio enviado para @ze_do_eco!')).toBeTruthy();
+  });
+
+  it('permite desafiar a partir do Perfil de outro arrotador e envia áudio também para o perfil desafiado', async () => {
+    const outraPessoa = {
+      id: 'bia', handle: 'bia', apelido: 'Bia', fundador: false, daCasa: false,
+      criadoEm: '2026-10-20T12:00:00Z', totalCausos: 0, totalSeguidores: 0,
+      totalSeguindo: 0, euSigo: false, souEu: false,
+    };
+    const conta: PortaDeConta = {
+      estado: vi.fn(async () => ({ temSessao: true, anonima: false, perfilSocialPendente: false })),
+      cadastrar: vi.fn(), entrar: vi.fn(), enviarLinkDeRedefinicao: vi.fn(), redefinirSenha: vi.fn(), sair: vi.fn(),
+    };
+    const perfil = {
+      obterMeuPerfil: vi.fn(async () => ({ ...outraPessoa, id: 'eu', handle: 'gio', apelido: 'Gio', souEu: true })),
+      obterPerfil: vi.fn(async () => outraPessoa),
+    } as unknown as PortaDePerfil;
+    const audio = new Blob(['arroto-desafio'], { type: 'audio/webm' });
+    const criarPublicacaoPessoal = vi.fn(async () => ({ ok: true as const, valor: { id: 'desafio-perfil-1', criadoEm: '2026-10-20T12:00:00Z' } }));
+    const arrotos: PortaDeArrotosDoPerfil = {
+      prepararArquivoDeAudio: vi.fn(),
+      prepararArroto: vi.fn(async () => ({
+        ok: true as const,
+        rascunho: { id: 'arr-bia-1', caminhoDoAudio: 'eu/arr-bia-1', perfilDestinoId: 'bia', perfilDestinoHandle: 'bia', perfilDestinoApelido: 'Bia' },
+      })),
+      publicarArroto: vi.fn(async () => ({
+        ok: true as const,
+        arroto: {
+          id: 'arr-bia-1', perfilId: 'bia', autorId: 'eu', autorHandle: 'gio', autorApelido: 'Gio',
+          duracaoSegundos: 1.5, criadoEm: '2026-10-20T12:00:00Z', meu: true, possoOcultar: true,
+          enderecoDoAudio: vi.fn(async () => 'https://audio.test/arr-bia-1'),
+        },
+      })),
+      listarArrotos: vi.fn(async () => []),
+      ocultarArroto: vi.fn(async () => true),
+    };
+    const forumComPerfilDesafio: PortaDeForum = {
+      ...mockForum,
+      criarPublicacaoPessoal,
+      enviarAnexoDoForum: vi.fn(async () => ({
+        ok: true as const,
+        valor: { tipo: 'audio' as const, caminho: 'eu/forum/desafio.webm', mime: 'audio/webm', tamanhoBytes: audio.size, duracaoMs: 1500 },
+      })),
+      criarGravacaoLivreDoForum: vi.fn(() => ({
+        iniciar: vi.fn(async () => ({
+          ok: true as const,
+          conclusao: Promise.resolve({
+            ok: true as const,
+            encerramento: 'manual' as const,
+            audio: { dados: audio, formato: 'audio/webm', mimeParaEnvio: 'audio/webm', duracaoMs: 1500 },
+          }),
+        })),
+        parar: vi.fn(),
+        cancelar: vi.fn(),
+        estaGravando: vi.fn(() => false),
+      })),
+      obterResumoDasNotasPublicadas: vi.fn(async () => ({ ok: true as const, valor: { melhorNota: 91, media: 85, total: 2 } })),
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/u/bia']}>
+        <InicioOpenDesign
+          portaForum={forumComPerfilDesafio}
+          portaComunidade={mockComunidade}
+          portaConta={conta}
+          portaPerfil={perfil}
+          portaArrotosDoPerfil={arrotos}
+          viewInicial="perfil"
+          handleInicial="bia"
+        />
+      </MemoryRouter>,
+    );
+
+    const botaoDesafiar = await screen.findByRole('button', { name: 'Desafiar @bia' });
+    fireEvent.click(botaoDesafiar);
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Desafiar @bia' })).toBeTruthy();
+    const campo = screen.getByRole('textbox', { name: 'Texto da publicação' }) as HTMLTextAreaElement;
+    expect(campo.value).toContain('@bia');
+    expect(campo.value).toContain('91/100');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar áudio' }));
+    await screen.findByRole('button', { name: 'Ouvir áudio gravado' });
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+
+    await waitFor(() => expect(criarPublicacaoPessoal).toHaveBeenCalled());
+    await waitFor(() => expect(arrotos.prepararArroto).toHaveBeenCalledWith('bia'));
+    await waitFor(() => expect(arrotos.publicarArroto).toHaveBeenCalledWith(expect.objectContaining({ perfilDestinoHandle: 'bia' }), audio, 1.5));
   });
 });

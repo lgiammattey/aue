@@ -4,13 +4,45 @@ import { telemetriaBloqueada } from './exclusaoTelemetria';
 
 const ID_MEDICAO = 'G-43GWYNCCMD';
 const LOCAL_CANONICO = 'https://aue.web.app/';
-const EVENTOS: readonly EventoArenaV2[] = ['abriu_arena_v2', 'iniciou_gravacao', 'concluiu_gravacao', 'laudo_disponivel', 'laudo_indisponivel', 'abriu_compartilhamento_audio', 'solicitou_download_audio'];
+const EVENTOS: readonly EventoArenaV2[] = [
+  'abriu_arena_v2',
+  'iniciou_gravacao',
+  'concluiu_gravacao',
+  'laudo_disponivel',
+  'laudo_indisponivel',
+  'abriu_compartilhamento_audio',
+  'solicitou_download_audio',
+  'confirmou_maioridade',
+  'ouviu_arroto',
+  'clicou_anuncio',
+];
 const CATEGORIAS: readonly PaginaMonitorada[] = ['feed', 'comunidades', 'comunidade', 'topico', 'explorar', 'arena', 'perfil', 'entrada', 'publica'];
+const ROTAS_SEGURAS = new Set([
+  '/',
+  '/arena',
+  '/feed',
+  '/como-arrotar',
+  '/como-jogar',
+  '/tipos-de-arroto',
+  '/ranking-de-arrotos',
+  '/grupos',
+  '/login',
+  '/privacidade',
+  '/termos',
+]);
+
 type JanelaAnalytics = Window & { dataLayer?: unknown[]; gtag?: (...args: unknown[]) => void; [key: `ga-disable-${string}`]: boolean | undefined };
 let configurada = false;
 
 function segura(): boolean {
-  return typeof window !== 'undefined' && window.location.hostname === 'aue.web.app' && !telemetriaBloqueada() && (window.location.pathname === '/' || window.location.pathname === '/arena') && !window.location.search && !window.location.hash;
+  return (
+    typeof window !== 'undefined'
+    && window.location.hostname === 'aue.web.app'
+    && !telemetriaBloqueada()
+    && ROTAS_SEGURAS.has(window.location.pathname)
+    && !window.location.search
+    && !window.location.hash
+  );
 }
 
 function pronta(): JanelaAnalytics | null {
@@ -43,7 +75,7 @@ export const analyticsArenaV2: TelemetriaArenaV2 = {
   },
 };
 
-/** Também desativa a coleta ao navegar para fora da Arena ou abrir URL sensível. */
+/** Também desativa a coleta ao navegar para fora das rotas públicas ou abrir URL sensível. */
 export function registrarPaginaAnalytics(pagina: PaginaMonitorada | null): void {
   try {
     if (!segura()) { pronta(); return; }

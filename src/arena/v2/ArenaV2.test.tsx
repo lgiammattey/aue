@@ -103,6 +103,8 @@ describe('Arena v2', () => {
     expect(duble.captura.parar).toHaveBeenCalledOnce();
     expect(screen.getByText(/ela não foi publicada no Auê/)).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Laudo experimental' })).toBeTruthy();
+    expect(screen.getByText('Nota do arroto')).toBeTruthy();
+    expect(screen.getByRole('img', { name: /Nota: \d+ de 100/ })).toBeTruthy();
     expect(screen.getByText('Duração detectada')).toBeTruthy();
     expect(screen.getByText('Potência relativa')).toBeTruthy();
     expect(screen.getByText('Indisponível')).toBeTruthy();
@@ -153,6 +155,7 @@ describe('Arena v2', () => {
     expect(await screen.findByText(/Não foi possível medir o ambiente/)).toBeTruthy();
     expect(await screen.findByLabelText('Sua gravação')).toBeTruthy();
     expect(screen.queryByText('Potência relativa')).toBeNull();
+    expect(screen.queryByText('Nota do arroto')).toBeNull();
   });
 
   it('oferece gravação sem laudo após falha da medição e não abre dois microfones', async () => {
@@ -366,6 +369,12 @@ describe('Arena v2', () => {
     await act(async () => concluir('aberto'));
     expect(screen.queryByText('Opções de compartilhamento abertas.')).toBeNull();
     expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+  });
+
+  it('mostra o @ do adversário na faixa de desafio quando recebido por parâmetro', () => {
+    const { captura } = aparelho();
+    render(<ArenaV2 captura={captura} adversarioHandle="@pedro_som" />);
+    expect(screen.getByText('CONTRA @PEDRO_SOM')).toBeTruthy();
   });
 
 });

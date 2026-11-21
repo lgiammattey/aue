@@ -25,6 +25,9 @@ describe('laudo experimental', () => {
     expect(laudo.deltaRmsDb).toBeCloseTo(20, 0);
     expect(laudo.potenciaRelativa).toBeGreaterThanOrEqual(65);
     expect(laudo.potenciaRelativa).toBeLessThanOrEqual(68);
+    expect(laudo.nota).toBeGreaterThanOrEqual(0);
+    expect(laudo.nota).toBeLessThanOrEqual(100);
+    expect(laudo.nota).toBeGreaterThan(40);
   });
 
   it('descarta silêncio e emissão sem diferença suficiente sobre o ambiente', () => {
@@ -88,5 +91,7 @@ describe('laudo experimental', () => {
     if (baixo.estado !== 'medido' || alto.estado !== 'medido') throw new Error('deveria medir');
     expect(baixo.potenciaRelativa).toBe(100);
     expect(alto.potenciaRelativa).toBeLessThan(baixo.potenciaRelativa);
+    expect(baixo.nota).toBeLessThanOrEqual(100);
+    expect(alto.nota).toBeLessThan(baixo.nota);
   });
 });

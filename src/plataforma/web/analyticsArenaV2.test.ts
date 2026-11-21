@@ -57,4 +57,17 @@ describe('Analytics da Arena', () => {
     expect(filas).toHaveLength(antes);
     expect((window as unknown as Record<string, unknown>)['ga-disable-G-43GWYNCCMD']).toBe(true);
   });
+  it.each([
+    ['/feed', 'feed', 'ouviu_arroto'],
+    ['/como-arrotar', 'publica', 'confirmou_maioridade'],
+    ['/grupos', 'publica', 'clicou_anuncio'],
+  ] as const)('coleta page_view e eventos no mural e nas páginas públicas (%s)', async (rota, categoria, evento) => {
+    window.history.replaceState(null, '', rota);
+    const a = await import('./analyticsArenaV2');
+    a.registrarPaginaAnalytics(categoria);
+    a.analyticsArenaV2.registrar(evento);
+    const filas = (window as unknown as { dataLayer: unknown[][] }).dataLayer.map((item) => Array.from(item));
+    expect(filas).toContainEqual(['event', 'page_view', expect.objectContaining({ pagina: categoria })]);
+    expect(filas).toContainEqual(['event', evento, expect.objectContaining({ page_location: 'https://aue.web.app/' })]);
+  });
 });

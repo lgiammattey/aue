@@ -343,20 +343,8 @@ export function ModalGravarArroto({
                 />
               </label>
             )}
-            <label className="destino-arroto__opcao">
-              <input type="radio" name="destino-arroto" checked={destino === 'comunidade'} onChange={() => setDestino('comunidade')} disabled={!permitirComunidade || comunidades.length === 0} />
-              <span><strong>Feed de uma comunidade</strong><small>{permitirComunidade && comunidades.length ? 'Escolha uma roda abaixo.' : 'Publicação em comunidade chega depois.'}</small></span>
-            </label>
-            {destino === 'comunidade' && permitirComunidade && comunidades.length > 0 && (
-              <label className="destino-arroto__campo">
-                Comunidade
-                <select value={comunidadeSlug} onChange={(evento) => setComunidadeSlug(evento.target.value)} aria-label="Comunidade para receber o arroto">
-                  {comunidades.map((comunidade) => <option key={comunidade.slug} value={comunidade.slug}>r/{comunidade.slug} — {comunidade.nome}</option>)}
-                </select>
-              </label>
-            )}
             <p className="destino-arroto__aviso">
-              Ao enviar, o áudio fica visível no grupo Arrotos do perfil escolhido para pessoas autenticadas que abrirem esse perfil.
+              Ao enviar, o áudio fica visível no perfil escolhido para pessoas autenticadas que abrirem esse perfil.
             </p>
           </fieldset>
         )}

@@ -1,38 +1,23 @@
 /*
-  A base visual clara das telas públicas: páginas de conteúdo, landing, login
-  e documentos legais. Medida em `docs/design/prototipo/Páginas Públicas.dc.html`
-  e `Landing.dc.html`.
-
-  TEMA CLARO FIXO: os tokens abaixo valem só dentro de `.publico-site`. O resto
-  do app continua com os tokens de `src/index.css` e o tema que a pessoa
-  escolheu. Componentes de outras features que entram aqui (cartão de grupo,
-  card de vídeo) leem `--bg`, `--surface`, `--fg` etc. e herdam a paleta clara
-  sem saber disso.
-
-  O VERDE: o elétrico (`--accent`) sobre fundo claro some — 1,07:1 no creme. Aqui
-  ele só aparece dentro da faixa escura do fim. Número de lista e o "!" da
-  marca usam `--publico-verde`, que passa de 7:1 sobre `--bg`.
-
-  Tipografia: Archivo em tudo, pesos 800 e 900 nos títulos. Anton fica pra
-  Arena e pra nota.
+  Tokens base das telas públicas e de apoio (páginas de conteúdo, landing e
+  documentos legais), unificados no Design System Dark Carbono + Laranja Elétrico.
 */
 .publico-site {
-  --bg: #f7f8f5;
-  --surface: #eef4e7;
-  --surface-2: #e2ebd8;
-  --fg: #202824;
-  --muted: #5c675d;
-  --border: #e7ebe3;
-  --border-strong: #c9d1c4;
-  /* Fixos aqui: o tema claro do app redefine `--accent` pra preto, e a faixa escura ficaria sem texto. */
-  --accent: #c6ff00;
-  --accent-on: #000000;
-  --danger: #c4161a;
-  --publico-verde: #2f5d0a;
-  --publico-faixa: #17221c;
-  --publico-faixa-fg: #f7f8f5;
+  --bg: #0a0b0e;
+  --surface: #151820;
+  --surface-2: #1d212c;
+  --fg: #f3f4f6;
+  --muted: #8b92a3;
+  --border: #232834;
+  --border-strong: #3b4254;
+  --accent: #ff5500;
+  --accent-on: #0a0b0e;
+  --danger: #ff5a5f;
+  --publico-verde: #ff5500;
+  --publico-faixa: #151820;
+  --publico-faixa-fg: #f3f4f6;
 
-  color-scheme: light;
+  color-scheme: dark;
   width: 100%;
   min-height: 100svh;
   background: var(--bg);

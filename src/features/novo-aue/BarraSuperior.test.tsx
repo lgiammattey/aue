@@ -13,21 +13,25 @@ const montar = (extra: Partial<React.ComponentProps<typeof BarraSuperior>> = {})
     </MemoryRouter>,
   );
 
-describe('BarraSuperior', () => {
-  it('campo de busca com o texto do print e sem botão de chat', () => {
+describe('BarraSuperior mobile enxuta', () => {
+  it('renderiza marca mobile, atalhos diretos para Ranking e Grupos, e sem busca ou chat', () => {
     montar();
-    expect(screen.getByPlaceholderText('Buscar pessoas, comunidades e publicações…')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Auê mobile' }).getAttribute('href')).toBe('/');
+    expect(screen.getByRole('link', { name: 'Ranking' }).getAttribute('href')).toBe('/ranking-de-arrotos');
+    expect(screen.getByRole('link', { name: 'Grupos' }).getAttribute('href')).toBe('/grupos');
+    expect(screen.queryByRole('search')).toBeNull();
+    expect(screen.queryByLabelText('Campo de busca')).toBeNull();
     expect(screen.queryByRole('button', { name: /chat|mensagem/i })).toBeNull();
-    expect(screen.getByRole('link', { name: 'Auê mobile' })).toBeTruthy();
   });
 
-  it('digitar chama aoBuscar; sem busca (Explorar) o campo nem existe', () => {
-    const aoBuscar = vi.fn();
-    montar({ aoBuscar });
-    fireEvent.change(screen.getByLabelText('Campo de busca'), { target: { value: 'giamz' } });
-    expect(aoBuscar).toHaveBeenCalledWith('giamz');
+  it('mostra Entrar para visitante e dispara aoEntrar; mostra Perfil quando autenticado', () => {
+    const aoEntrar = vi.fn();
+    montar({ estaAutenticado: false, aoEntrar });
+    fireEvent.click(screen.getByRole('button', { name: 'Fazer login' }));
+    expect(aoEntrar).toHaveBeenCalledOnce();
+
     cleanup();
-    montar({ mostrarBusca: false });
-    expect(screen.queryByLabelText('Campo de busca')).toBeNull();
+    montar({ estaAutenticado: true });
+    expect(screen.getByRole('link', { name: 'Abrir meu perfil' }).getAttribute('href')).toBe('/perfil');
   });
 });

@@ -6,7 +6,7 @@
  * Orquestra o layout de 3 colunas (desktop) e webapp mobile (o mesmo componente, responsivo).
  * Gerencia as views centrais: 'feed', 'seguindo', 'comunidade', 'comunidades', 'perfil' e 'auth'.
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { criarComunidadeWeb } from '../../plataforma/web/comunidade';
 import { criarContaWeb } from '../../plataforma/web/conta';
@@ -46,11 +46,13 @@ import { DialogoDoPost } from './DialogoDoPost';
 import { ModalConexoes, type EstadoDasConexoes } from './ModalConexoes';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
+import { TopArrotadoresDaHome } from './TopArrotadoresDaHome';
 import { erroDeEnvio } from '../../nucleo/forum/escrita';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
 import { engajamentoDoCauso, useEngajamento } from './useEngajamento';
 import type { ItemComentario, ItemDoFeed } from './tipos';
 import './casca.css';
+import '../../styles/appShell.css';
 import './InicioOpenDesign.css';
 import './diretorioArena.css';
 import { criarPaginacaoDoMural } from './paginacaoDoMural';
@@ -73,6 +75,8 @@ interface Props {
   readonly topicoIdInicial?: string;
   readonly abrirCompositor?: boolean;
   readonly aoEntrar?: () => void;
+  readonly slotArena?: ReactNode;
+  readonly aoFocarArena?: () => void;
 }
 
 class ErroDePublicacaoDoAnexo extends Error {}
@@ -297,6 +301,8 @@ export function InicioOpenDesign({
   topicoIdInicial,
   abrirCompositor = false,
   aoEntrar,
+  slotArena,
+  aoFocarArena,
 }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -2361,16 +2367,22 @@ export function InicioOpenDesign({
           setViewAtual(v);
           if (s) setComunidadeSlug(s);
         }}
-        aoAbrirGravadorRapido={() => abrirGravacaoDireta({
-          destinoFixo: 'perfil-proprio',
-          publicarNoFeed: true,
-          iniciarImediatamente: true,
-        })}
+        aoAbrirGravadorRapido={() => {
+          if (viewAtual === 'feed' && slotArena && aoFocarArena) {
+            aoFocarArena();
+            return;
+          }
+          abrirGravacaoDireta({
+            destinoFixo: 'perfil-proprio',
+            publicarNoFeed: true,
+            iniciarImediatamente: true,
+          });
+        }}
         aoSair={async () => {
           await contaPort.sair();
           setEstaAutenticado(false);
           setMeuPerfil(null);
-          navigate('/feed');
+          navigate('/');
         }}
         aoEntrar={aoEntrar ?? (() => setViewAtual('auth'))}
       />}
@@ -2406,7 +2418,7 @@ export function InicioOpenDesign({
               setPautaAberta(null);
               setEntradasDaPauta([]);
               setEstadoDaPauta('ocioso');
-              navigate(`/c/${comunidadeSlug}`);
+              navigate('/');
             }}
             entradas={entradasDaPauta.map((post) => (
               <div key={post.id} id={pautaAberta?.entradaEmFocoId === post.id.replace('topico-', '') ? 'entrada-em-foco' : undefined}>
@@ -2448,7 +2460,7 @@ export function InicioOpenDesign({
               setComentarioInicialParaResponder(null);
               setListaComentarios([]);
               if (topicoIdParam) {
-                navigate(`/c/${comunidadeSlug}`);
+                navigate('/');
               }
             }}
             aoEnviarComentario={enviarComentario}
@@ -2460,24 +2472,61 @@ export function InicioOpenDesign({
           />
         ) : (
           <>
-            {/* ==================== VIEW: FEED PRINCIPAL ==================== */}
+            {/* ==================== VIEW: HUB UNIFICADO (ARENA + MURAL) ==================== */}
             {viewAtual === 'feed' && (
           <section aria-label="Feed principal">
-            <nav className="mural-nav" aria-label="Navegação principal">
-              <Link className="mural-nav__marca" to="/" aria-label="Auê, ir para a Arena">AUÊ!</Link>
-              <div><Link to="/">Arena</Link><Link to="/grupos">Grupos</Link><Link to="/perfil">Perfil</Link></div>
-            </nav>
-            <div className="mural-hero">
-              <span>LINHA DO TEMPO</span>
-              <h1>Mural.</h1>
-              <p>O som da galera, em ordem de chegada.</p>
+            {slotArena}
+            {!slotArena && (
+              <section className="arena-v2 arena-v2--embutida" aria-label="Atalho de gravação">
+                <div className="arena-v2__palco">
+                  <div className="arena-v2__cabecalho-modulo">
+                    <p className="arena-v2__identificador">
+                      <span className="arena-v2__pulso" aria-hidden="true" />
+                      ARENA
+                    </p>
+                  </div>
+                  <div className="arena-v2__linha-topo is-compacta">
+                    <div className="arena-v2__chamada">
+                      <h2>SOLTA O ARROTO.</h2>
+                    </div>
+                    <button
+                      type="button"
+                      className="arena-v2__gatilho"
+                      onClick={() => abrirGravacaoDireta({
+                        destinoFixo: 'perfil-proprio',
+                        publicarNoFeed: true,
+                        iniciarImediatamente: true,
+                      })}
+                    >
+                      Gravar agora
+                    </button>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            <div className="hub-mobile-ranking">
+              <TopArrotadoresDaHome variante="faixa-mobile" />
             </div>
+
+            <div className="mural-cabecalho">
+              <div className="mural-cabecalho__titulo-grupo">
+                <h1>Mural</h1>
+              </div>
+              <button
+                type="button"
+                className="mural-publicar"
+                onClick={() => { setDesafioAlvo(null); setDestinoDoCompositor('pessoal'); setModalCompositorAberto(true); }}
+              >
+                + Postar
+              </button>
+            </div>
+
             <div className="mural-controles">
               <div className="feed-filters" role="group" aria-label="Filtrar publicações">
                 <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'resenha'} onClick={() => setFiltroDoFeed('resenha')}>Tudo</button>
                 <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'arrotos'} onClick={() => setFiltroDoFeed('arrotos')}>Arrotos</button>
               </div>
-              <button type="button" className="mural-publicar" onClick={() => { setDesafioAlvo(null); setDestinoDoCompositor('pessoal'); setModalCompositorAberto(true); }}>Publicar +</button>
             </div>
 
             <div className="feed">
@@ -2497,10 +2546,10 @@ export function InicioOpenDesign({
               {estadoFeed === 'pronto' && itensDoFeedFiltrados.length === 0 && (
                 <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--aue-muted)' }}>
                   <p>{filtroDoFeed === 'arrotos'
-                    ? temMaisFeed ? 'Buscando mais publicações com áudio…' : 'Ainda não tem arrotos publicados.'
+                    ? temMaisFeed ? 'Buscando mais publicações com áudio…' : 'Nenhum arroto aqui ainda.'
                     : filtroDoFeed === 'links'
-                      ? 'Ainda não tem links publicados.'
-                      : 'O mural está vazio. Que tal publicar o primeiro arroto?'}
+                      ? 'Nenhum link aqui ainda.'
+                      : 'Mural vazio. Manda o primeiro.'}
                   </p>
                 </div>
               )}
@@ -2543,7 +2592,7 @@ export function InicioOpenDesign({
               </div>}
             </div>
 
-            <footer style={{ marginTop: 32, borderTop: '1px solid var(--aue-line)', paddingTop: 16 }}>
+            <footer className="mural-rodape-acoes">
               <button
                 type="button"
                 className="tab"
@@ -2559,15 +2608,15 @@ export function InicioOpenDesign({
           <section aria-label="Feed de quem você segue">
             <div className="hero">
               <span className="eyebrow">Pessoas que você acompanha</span>
-              <h1>Sua Tropa</h1>
+              <h1>Seguindo</h1>
               <p>Posts das pessoas que você escolheu acompanhar.</p>
             </div>
             {estadoSeguindo === 'semConta' && (
-              <section className="od-profile__state"><h2>Entre para ver sua Tropa.</h2><p>Você precisa de uma conta para acompanhar outros arrotadores.</p><button className="tab" type="button" onClick={aoEntrar ?? (() => setViewAtual('auth'))}>Entrar</button></section>
+              <section className="od-profile__state"><h2>Entre para ver quem você segue.</h2><p>Você precisa de uma conta para acompanhar outros arrotadores.</p><button className="tab" type="button" onClick={aoEntrar ?? (() => setViewAtual('auth'))}>Entrar</button></section>
             )}
-            {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando sua Tropa…</p>}
-            {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir sua Tropa.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Sua Tropa ainda está quieta.</h2><p>Siga alguns perfis para ver os posts deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/explorar'); }}>Explorar pessoas</button></section>}
+            {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu feed…</p>}
+            {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu feed agora.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Quem você segue ainda está quieto.</h2><p>Siga alguns perfis pelo Mural para ver os posts deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Ir para o Mural</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post, indice) => <div key={post.id}><CardDoPost post={post} {...propsDeEngajamento(post)} {...propsDeModeracao(post)} {...propsDeDesafio(post)} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} /><PreviaDaConversa post={post} comentarios={previasDasConversas.get(post.id) ?? []} carregando={previasEmCarregamento.has(post.id)} expandida={conversasExpandidas.has(post.id)} carregandoMais={respostasEmExpansao.has(post.id)} temMais={conversasExpandidas.has(post.id) ? cursoresDasConversas.get(post.id) !== null : (previasDasConversas.get(post.id)?.length ?? 0) < post.respostasTotal} aoCarregarMais={() => void carregarMaisRespostasNaPrevia(post)} aoResponder={(comentario) => void abrirComentarios(post, comentario)} />{((indice + 1) % 3 === 0 || (postsSeguindo.length < 3 && indice === postsSeguindo.length - 1)) && <SlotPatrocinadoDoFeed indiceDoSlot={(indice + 1) % 3 === 0 ? Math.floor((indice + 1) / 3) - 1 : 0} />}</div>)}</div>}
           </section>
         )}
@@ -2644,7 +2693,7 @@ export function InicioOpenDesign({
                       }}
                     >
                       {!(fonteDoAvatarDaComunidade(comunidadeAtiva) ?? comunidadeAtiva?.icone) && (
-                        <span style={{ fontFamily: 'var(--font-display, Anton)', fontSize: 32, lineHeight: 1, color: 'var(--aue-accent, #c6ff00)' }}>
+                        <span style={{ fontFamily: 'var(--font-display, Anton)', fontSize: 32, lineHeight: 1, color: 'var(--aue-accent, #ff5500)' }}>
                           {comunidadeAtiva?.nome ? comunidadeAtiva.nome.slice(0, 1).toUpperCase() : comunidadeSlug.slice(0, 1).toUpperCase()}
                         </span>
                       )}
@@ -2871,10 +2920,6 @@ export function InicioOpenDesign({
         {/* ==================== VIEW: PERFIL ==================== */}
         {viewAtual === 'perfil' && (
           <section className="od-profile" aria-label="Perfil do usuário">
-            <nav className="perfil-arena-nav" aria-label="Navegação principal">
-              <Link className="perfil-arena-nav__marca" to="/" aria-label="Auê, ir para a Arena">AUÊ!</Link>
-              <div><Link to="/">Arena</Link><Link to="/feed">Mural</Link><Link to="/grupos">Grupos</Link></div>
-            </nav>
             {estadoPerfil === 'carregando' && (
               <section className="od-profile__state" aria-live="polite">
                 <h1>Abrindo perfil…</h1><p>Buscando a ficha desta pessoa.</p>
@@ -2900,9 +2945,9 @@ export function InicioOpenDesign({
             {estadoPerfil === 'pendente' && (
               fichaSocialPendente ? (
                 <section className="od-profile__state od-profile__onboarding" aria-live="polite">
-                  <p className="od-profile__eyebrow">Primeira chegada</p>
-                  <h1>Termina sua ficha.</h1>
-                  <p>Seu apelido e @ liberam a Tropa. Bio, cidade e redes são opcionais.</p>
+                  <p className="od-profile__eyebrow">PASSO 1</p>
+                  <h1>Fecha a ficha.</h1>
+                  <p>Escolhe apelido e @. O resto é opcional.</p>
                   {estadoDaFicha === 'carregando' && <p>Buscando o que você já preencheu…</p>}
                   {estadoDaFicha === 'erro' && <><p>Não deu para carregar sua ficha agora.</p><button type="button" className="tab od-profile__button" onClick={() => setTentativaDoPerfil((n) => n + 1)}>Tentar novamente</button></>}
                   {(estadoDaFicha === 'pronto' || estadoDaFicha === 'salvando') && (
@@ -2934,7 +2979,7 @@ export function InicioOpenDesign({
             {estadoPerfil === 'pronto' && perfilExibido && (
               <>
                 <article className="od-profile__hero od-profile__hero--plain od-profile__athlete">
-                  <div className="od-profile__athlete-label">PERFIL DE ARROTADOR <span>AUÊ!</span></div>
+                  <div className="od-profile__athlete-label">FICHA <span>AUÊ!</span></div>
                   <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'capa')} />
                   <div className="od-profile__body">
                     <div className="od-profile__topline">
@@ -2972,7 +3017,7 @@ export function InicioOpenDesign({
                             }
                             aria-label={`Desafiar @${perfilExibido.handle}`}
                           >
-                            <span aria-hidden="true">⚔️</span> Desafiar
+                            <span aria-hidden="true">⚔️</span> Puxar X1
                           </button>
                         </div>
                       )}
@@ -3000,23 +3045,39 @@ export function InicioOpenDesign({
 
                     <section className="od-profile__dashboard" aria-labelledby="perfilPlacar">
                       <div className="od-profile__dashboard-head">
-                        <div><p>ARROTOS PUBLICADOS</p><h2 id="perfilPlacar">{donoDoPerfil ? 'Seu placar' : 'Placar'}</h2></div>
+                        <div><h2 id="perfilPlacar">{donoDoPerfil ? 'Seu placar' : 'Placar'}</h2></div>
                         {donoDoPerfil && <Link className="join od-profile__button od-profile__arena" to="/arena">Ir pra Arena <span aria-hidden="true">↗</span></Link>}
                       </div>
                       <div className="od-profile__dashboard-stats">
                         <div className="od-profile__best">
-                          <h3 id="perfilMelhorNota">Melhor nota publicada</h3>
+                          <h3 id="perfilMelhorNota">Melhor nota</h3>
                           {notasExibidas?.estado === 'pronto' && notasExibidas.melhorNota !== null
                             ? <p className="od-profile__best-score">{Math.round(notasExibidas.melhorNota)}<span> pts</span></p>
                             : <p className="od-profile__best-empty">—</p>}
-                          <p className="od-profile__best-caption">{notasExibidas?.estado === 'erro' ? 'Não foi possível carregar' : !notasExibidas || notasExibidas.estado === 'carregando' ? 'Carregando…' : notasExibidas.melhorNota === null ? 'Ainda não há nota publicada' : 'Em publicações'}</p>
+                          {(notasExibidas?.estado === 'erro' || !notasExibidas || notasExibidas.estado === 'carregando' || notasExibidas.melhorNota === null) && (
+                            <p className="od-profile__best-caption">
+                              {notasExibidas?.estado === 'erro'
+                                ? 'Não foi possível carregar'
+                                : !notasExibidas || notasExibidas.estado === 'carregando'
+                                  ? 'Carregando…'
+                                  : 'Sem nota ainda'}
+                            </p>
+                          )}
                         </div>
                         <div className="od-profile__best">
                           <h3>Média</h3>
                           {notasExibidas?.estado === 'pronto' && notasExibidas.media !== null
                             ? <p className="od-profile__best-score">{notasExibidas.media.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}<span> pts</span></p>
                             : <p className="od-profile__best-empty">—</p>}
-                          <p className="od-profile__best-caption">{notasExibidas?.estado === 'erro' ? 'Não foi possível carregar' : !notasExibidas || notasExibidas.estado === 'carregando' ? 'Carregando…' : notasExibidas.media === null ? 'Ainda não há nota publicada' : 'Em publicações'}</p>
+                          {(notasExibidas?.estado === 'erro' || !notasExibidas || notasExibidas.estado === 'carregando' || notasExibidas.media === null) && (
+                            <p className="od-profile__best-caption">
+                              {notasExibidas?.estado === 'erro'
+                                ? 'Não foi possível carregar'
+                                : !notasExibidas || notasExibidas.estado === 'carregando'
+                                  ? 'Carregando…'
+                                  : 'Sem nota ainda'}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </section>
@@ -3109,7 +3170,7 @@ export function InicioOpenDesign({
                       </div>
                     ))}
                     {estadoTopicosDoPerfil === 'pronto' && estadoPublicacoesPessoais === 'pronto' && postsDoPerfil.length === 0 && (
-                      <div className="od-profile__empty"><h3>Nenhum post publicado ainda.</h3><p>{donoDoPerfil ? 'Quando soltar um, ele aparece aqui.' : 'Quando esta pessoa publicar, aparece aqui.'}</p></div>
+                      <div className="od-profile__empty"><h3>Nenhum post ainda.</h3></div>
                     )}
                   </section>
                 )}
@@ -3119,7 +3180,7 @@ export function InicioOpenDesign({
                     <div className="od-profile__activity-head"><h2 id="profileMarked">Marcados</h2><span>{publicacoesMarcadasDoPerfil.length}</span></div>
                     {estadoMarcadasDoPerfil === 'carregando' && <p className="od-profile__muted">Carregando marcações…</p>}
                     {estadoMarcadasDoPerfil === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar as marcações agora.</p>}
-                    {estadoMarcadasDoPerfil === 'pronto' && publicacoesMarcadasDoPerfil.length === 0 && <div className="od-profile__empty"><h3>Ninguém marcou este perfil ainda.</h3><p>Quando alguém citar @{perfilExibido.handle} num post, ele aparece aqui.</p></div>}
+                    {estadoMarcadasDoPerfil === 'pronto' && publicacoesMarcadasDoPerfil.length === 0 && <div className="od-profile__empty"><h3>Nenhuma marcação ainda.</h3></div>}
                     {publicacoesMarcadasDoPerfil.map((post) => (
                       <CardDoPost
                         key={post.id}
@@ -3141,8 +3202,7 @@ export function InicioOpenDesign({
 
                 {abaPerfil === 'arrotos' && (
                   <section className="od-profile__activity" aria-labelledby="profileArrotos">
-                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Áudios do perfil</h2>{estadoDosArrotosExibidos === 'pronto' && <span>{arrotosDoPerfil.length}</span>}</div>
-                    <p className="od-profile__best-caption">Áudios deixados neste perfil. Eles não são resultados da Arena.</p>
+                    <div className="od-profile__activity-head"><h2 id="profileArrotos">Arrotos</h2>{estadoDosArrotosExibidos === 'pronto' && <span>{arrotosDoPerfil.length}</span>}</div>
                     {donoDoPerfil && (
                       <div className="od-profile__record-cta">
                         <button
@@ -3157,14 +3217,14 @@ export function InicioOpenDesign({
                           </svg>
                         </button>
                         <div>
-                          <p className="od-profile__record-eyebrow">ARROTO DIRETO</p>
-                          <h3>Gravar áudio para o perfil</h3>
+                          <p className="od-profile__record-eyebrow">DIRETO</p>
+                          <h3>Gravar arroto</h3>
                         </div>
                       </div>
                     )}
                     {estadoDosArrotosExibidos === 'carregando' && <p className="od-profile__muted">Carregando arrotos…</p>}
                     {estadoDosArrotosExibidos === 'erro' && <p className="od-profile__error" role="alert">Não deu para carregar os arrotos agora.</p>}
-                    {estadoDosArrotosExibidos === 'pronto' && arrotosDoPerfil.length === 0 && <div className="od-profile__empty"><h3>Ainda não tem arroto neste perfil.</h3><p>Os áudios publicados no perfil aparecem aqui.</p></div>}
+                    {estadoDosArrotosExibidos === 'pronto' && arrotosDoPerfil.length === 0 && <div className="od-profile__empty"><h3>Nenhum arroto ainda.</h3></div>}
                     {estadoDosArrotosExibidos === 'pronto' && arrotosDoPerfil.map((arroto) => (
                       <article key={arroto.id} className="od-profile__post">
                         <span>{arroto.autorId === perfilExibido.id ? 'Gravado por esta pessoa' : `Enviado por @${arroto.autorHandle}`}</span>
@@ -3194,21 +3254,16 @@ export function InicioOpenDesign({
         {viewAtual === 'auth' && (
           <section className="auth-shell">
             <header className="auth-header">
-              <Link to="/" className="auth-brand" aria-label="Auê, página inicial">AUÊ!</Link>
-              <nav aria-label="Navegação principal"><Link to="/">Arena</Link><Link to="/feed">Mural</Link><Link to="/grupos">Grupos</Link></nav>
+              <Link to="/" className="auth-brand" aria-label="Auê, página inicial">AUÊ<span>!</span></Link>
+              <nav aria-label="Navegação principal"><Link to="/">Início</Link><Link to="/ranking-de-arrotos">Ranking</Link><Link to="/grupos">Grupos</Link></nav>
             </header>
-            <div className="auth-arena__placar"><span>ÁREA DO ARROTADOR</span><span>SUA VEZ DE ENTRAR</span></div>
             <div className="auth-arena__conteudo">
               <div className="auth-arena__manifesto" aria-hidden="true">
-                <p>AO SEU COMANDO</p><div>SEU SOM.<br />SUA HISTÓRIA.</div>
-                <svg viewBox="0 0 120 155" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M30 42 42 30h38l12 12 3 76c0 10-15 16-35 16s-35-6-35-16z"/><ellipse cx="61" cy="42" rx="31" ry="8"/><path d="M49 39c1-6 5-9 12-9s11 3 12 9M32 82c25 2 38-18 60-17M30 96c22 2 40-17 63-17"/><circle cx="81" cy="14" r="5"/><circle cx="98" cy="27" r="3"/><circle cx="61" cy="12" r="2"/></svg>
+                <p>SEM FRESCURA</p><div>ARROTA.<br />PONTUA.<br />COBRA X1.</div>
               </div>
             {painelAuth === 'login' && (
               <form onSubmit={submeterLogin} className="dialog">
-                <h1>Entra em campo</h1>
-                <p style={{ color: 'var(--aue-muted)', marginBottom: 16 }}>
-                  Entre para soltar arrotos e participar da resenha.
-                </p>
+                <h1>Entrar</h1>
 
                 <label style={{ display: 'grid', gap: 6, marginBottom: 12 }}>
                   E-mail
@@ -3233,7 +3288,7 @@ export function InicioOpenDesign({
                 </label>
 
                 <button type="submit" className="submit" style={{ width: '100%', float: 'none' }}>
-                  {authEnviando ? 'Entrando…' : 'Entrar no Auê'}
+                  {authEnviando ? 'Entrando…' : 'Entrar'}
                 </button>
 
                 <div className="auth-divider" aria-hidden="true"><span>ou entre por</span></div>
@@ -3283,7 +3338,7 @@ export function InicioOpenDesign({
               <form onSubmit={submeterRecuperacao} className="dialog">
                 <h1>Recuperar senha</h1>
                 <p style={{ color: 'var(--aue-muted)', marginBottom: 16 }}>
-                  Digite seu e-mail para receber o link de recuperação.
+                  Manda o e-mail que o link chega.
                 </p>
                 <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
                   E-mail
@@ -3319,10 +3374,7 @@ export function InicioOpenDesign({
 
             {painelAuth === 'signup' && (
               <form onSubmit={submeterCadastro} className="dialog auth-signup">
-                <h1>Cria sua conta</h1>
-                <p style={{ color: 'var(--aue-muted)', marginBottom: 16 }}>
-                  Escolhe como a galera vai te chamar. Depois você completa seu perfil.
-                </p>
+                <h1>Criar conta</h1>
                 <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
                   Apelido
                   <input
@@ -3353,7 +3405,7 @@ export function InicioOpenDesign({
                     pattern="[a-z0-9_]{3,20}"
                     aria-label="@"
                   />
-                  <small className="auth-hint">3 a 20 caracteres: letras minúsculas, números ou _.</small>
+                  <small className="auth-hint">3–20 caracteres (a-z, 0-9, _).</small>
                 </label>
                 <label style={{ display: 'grid', gap: 6, marginBottom: 16 }}>
                   E-mail
@@ -3377,7 +3429,7 @@ export function InicioOpenDesign({
                     required
                     aria-label="Senha para cadastro"
                   />
-                  <small className="auth-hint">Pelo menos 8 caracteres.</small>
+                  <small className="auth-hint">Mínimo 8 caracteres.</small>
                 </label>
                 <button type="submit" className="submit" style={{ width: '100%', float: 'none' }} disabled={authEnviando}>
                   {authEnviando ? 'Criando…' : 'Criar conta'}

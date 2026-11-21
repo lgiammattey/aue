@@ -153,13 +153,13 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    // A entrada do mural usa navegação horizontal e deixa o áudio em foco.
-    expect(screen.getByRole('link', { name: 'Auê, ir para a Arena' })).toBeTruthy();
-    expect(await screen.findByRole('heading', { level: 1, name: 'Mural.' })).toBeTruthy();
-    expect(screen.getByText('O som da galera, em ordem de chegada.')).toBeTruthy();
+    // A entrada do mural usa a nova casca unificada (carbono + laranja).
+    expect(screen.getByRole('link', { name: 'Auê, página inicial' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Mural' })).toBeTruthy();
+    expect(screen.queryByText('FEED AO VIVO')).toBeNull();
     expect(screen.getByRole('button', { name: 'Tudo' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: 'Arrotos' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Publicar +' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '+ Postar' })).toBeTruthy();
 
     // Feed com tópico real carregado da porta
     expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
@@ -263,7 +263,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
 
     expect(await screen.findByRole('dialog')).toBeTruthy();
     expect(screen.getByPlaceholderText('Responder a Pessoa 1…')).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 1, name: 'Mural.' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Mural' })).toBeTruthy();
   });
 
   it('ordena a Resenha por publicação e filtra arrotos e links pelos anexos reais', async () => {
@@ -363,7 +363,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     expect(screen.getByText('Áudio do almoço')).toBeTruthy();
   });
 
-  it('chama a área das pessoas seguidas de Sua Tropa', async () => {
+  it('chama a área das pessoas seguidas de Seguindo', async () => {
     render(
       <MemoryRouter>
         <InicioOpenDesign
@@ -375,8 +375,8 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Sua Tropa' })).toBeTruthy();
-    expect(screen.getByText('Entre para ver sua Tropa.')).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Seguindo' })).toBeTruthy();
+    expect(screen.getByText('Entre para ver quem você segue.')).toBeTruthy();
   });
 
   it('reidrata o anexo de áudio do tópico no Início depois da leitura do feed', async () => {
@@ -735,11 +735,12 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       .mockResolvedValue({ ok: true, valor: [] });
     render(<MemoryRouter><InicioOpenDesign portaForum={{ ...mockForum, listarAnexosDoForum }} portaComunidade={mockComunidade} autenticado /></MemoryRouter>);
     expect(await screen.findByText('Não deu para carregar as conversas agora.')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
+    const botoes = screen.getAllByRole('button', { name: 'Tentar de novo' });
+    fireEvent.click(botoes[0]);
     expect(await screen.findByText('Arroto que quebrou a taça da sala')).toBeTruthy();
   });
 
-  it('abre o diálogo de gravação direta ao clicar em Soltar um arroto', async () => {
+  it('abre o diálogo de gravação direta ao clicar em ARROTAR', async () => {
     render(
       <MemoryRouter>
         <InicioOpenDesign
@@ -750,7 +751,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    const btnSoltar = screen.getByRole('button', { name: '+ Soltar um arroto' });
+    const btnSoltar = screen.getByRole('button', { name: 'ARROTAR' });
     fireEvent.click(btnSoltar);
 
     expect(screen.getByRole('dialog', { name: 'Gravar arroto para publicar no feed' })).toBeTruthy();
@@ -805,7 +806,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '+ Soltar um arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'ARROTAR' }));
     await waitFor(() => expect(captura.comecar).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByRole('button', { name: /Parar gravação/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Enviar' }));
@@ -986,7 +987,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     );
     fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'teste@example.com' } });
     fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'senha-de-teste' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar no Auê' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
     expect(await screen.findByText('Destino: /feed?gravar=1')).toBeTruthy();
   });
 
@@ -1012,12 +1013,12 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     );
 
     // Painel Login 1:1
-    expect(screen.getByRole('heading', { level: 1, name: 'Entra em campo' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Entrar' })).toBeTruthy();
     expect(screen.queryByLabelText('Navegação lateral')).toBeNull();
     expect(screen.queryByLabelText('Painel complementar')).toBeNull();
     expect(screen.getByLabelText('E-mail')).toBeTruthy();
     expect(screen.getByLabelText('Senha')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Entrar no Auê' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Entrar' })).toBeTruthy();
 
     // Alterna para Esqueci minha senha (recover)
     const btnEsqueci = screen.getByRole('button', { name: 'Esqueci minha senha' });
@@ -1029,7 +1030,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
     fireEvent.click(btnVoltar);
     const btnCriarConta = screen.getByRole('button', { name: 'Criar conta' });
     fireEvent.click(btnCriarConta);
-    expect(screen.getByRole('heading', { level: 1, name: 'Cria sua conta' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Criar conta' })).toBeTruthy();
     expect(screen.getByLabelText('Apelido')).toBeTruthy();
     expect(screen.getByLabelText('@')).toBeTruthy();
     expect(screen.getByLabelText('E-mail para cadastro')).toBeTruthy();
@@ -1057,7 +1058,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       } })),
     } as unknown as PortaDePerfil;
     render(<MemoryRouter><InicioOpenDesign portaForum={mockForum} portaComunidade={mockComunidade} portaConta={conta} portaPerfil={perfil} viewInicial="perfil" /></MemoryRouter>);
-    expect(await screen.findByRole('heading', { name: 'Termina sua ficha.' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Fecha a ficha.' })).toBeTruthy();
     expect(screen.getByDisplayValue('Luiz')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Entrar na Tropa' }));
     await waitFor(() => expect(perfil.concluirMeuPerfilSocial).toHaveBeenCalledWith(expect.objectContaining({ apelido: 'Luiz', handle: 'luiz' })));
@@ -1364,6 +1365,7 @@ describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
       </MemoryRouter>,
     );
 
+    await screen.findByText((_, el) => Boolean(el?.classList?.contains('od-profile__best-score') && el.textContent?.includes('91')));
     const botaoDesafiar = await screen.findByRole('button', { name: 'Desafiar @bia' });
     fireEvent.click(botaoDesafiar);
 

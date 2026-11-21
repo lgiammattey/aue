@@ -63,7 +63,7 @@ export const TelaLanding: React.FC<TelaLandingProps> = ({ onEntrarSemConta, onAr
         <span className="publico-marca" aria-label="Auê!">
           auê<span>!</span>
         </span>
-        <Link className="landing-olhada" to="/comunidades" onClick={() => onEntrarSemConta?.()}>
+        <Link className="landing-olhada" to="/" onClick={() => onEntrarSemConta?.()}>
           Só quero ouvir
         </Link>
       </header>

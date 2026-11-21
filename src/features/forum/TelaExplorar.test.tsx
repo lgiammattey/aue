@@ -29,7 +29,7 @@ describe('Explorar na casca OpenDesign', () => {
     await screen.findByRole('link', { name: 'Tópico 1' });
     expect(document.querySelector('.app')).toBeTruthy();
     expect(document.querySelector('.forum-shell')).toBeNull();
-    expect(screen.getAllByRole('button', { name: 'Mural' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: 'Início' }).length).toBeGreaterThan(0);
   });
 
   it('tem busca real e não oferece escrita de tópico ou resposta', async () => {

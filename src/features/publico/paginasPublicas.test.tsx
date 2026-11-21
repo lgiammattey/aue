@@ -122,11 +122,11 @@ describe('/ranking-de-arrotos com a moldura pública', () => {
     expect(html).toMatch(/<h1>[\s\S]*Ranking de arrotos no Auê/);
   });
 
-  it('explica o laudo experimental sem anunciar ranking ou nota geral', () => {
+  it('exibe o placar ao vivo e explica o laudo experimental sem promessas irreais', () => {
     const html = montar(RankingDeArrotos);
     expect(html).not.toContain('Guinness');
     expect(html).not.toContain('112,4 dB');
-    expect(html).toContain('Ainda não há ranking de arrotos.');
+    expect(html).toContain('Top arrotadores');
     expect(html).toContain('duração detectada');
     expect(html).toContain('relativo ao ruído do ambiente');
     expect(html).not.toContain('YAMNet');

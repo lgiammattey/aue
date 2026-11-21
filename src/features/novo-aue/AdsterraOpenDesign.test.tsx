@@ -28,7 +28,7 @@ describe('Adsterra no OpenDesign — placements ficam desligados até publicaç�
       </MemoryRouter>
     );
 
-    expect(screen.queryByText('Combustível Oficial 🍺')).toBeNull();
+    expect(screen.queryByText('Banca o servidor 🍺')).toBeNull();
   });
 
   it('exibe o card de parceiro com Smartlink quando a flag de publicação está ligada', async () => {
@@ -45,8 +45,8 @@ describe('Adsterra no OpenDesign — placements ficam desligados até publicaç�
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Combustível Oficial 🍺')).toBeTruthy();
-    const link = screen.getByRole('link', { name: /Conferir ofertas parceiras/i });
+    expect(screen.getByText('Banca o servidor 🍺')).toBeTruthy();
+    const link = screen.getByRole('link', { name: /Ver oferta/i });
     expect(link.getAttribute('href')).toContain('arwf.org');
   });
 });

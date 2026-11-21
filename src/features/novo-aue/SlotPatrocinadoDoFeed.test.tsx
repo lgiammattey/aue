@@ -83,7 +83,7 @@ describe('SlotPatrocinadoDoFeed', () => {
     expect(document.querySelector('[data-testid="adsterra-native-container"]')).toBeNull();
 
     rerender(<SlotPatrocinadoDoFeed indiceDoSlot={2} />);
-    expect(getByText('Combustível Oficial 🍺')).toBeTruthy();
+    expect(getByText('Banca o servidor 🍺')).toBeTruthy();
     expect(document.querySelector('[data-testid="adsterra-banner-300x250"]')).toBeNull();
   });
 
@@ -93,8 +93,8 @@ describe('SlotPatrocinadoDoFeed', () => {
 
     const { getByText, getByRole } = render(<SlotPatrocinado posicionamento="sidebar" />);
 
-    expect(getByText('Combustível Oficial 🍺')).toBeTruthy();
-    const link = getByRole('link', { name: /Conferir ofertas parceiras/i });
+    expect(getByText('Banca o servidor 🍺')).toBeTruthy();
+    const link = getByRole('link', { name: /Ver oferta/i });
     expect(link.getAttribute('href')).toContain('arwf.org');
   });
 });

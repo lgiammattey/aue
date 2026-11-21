@@ -24,11 +24,12 @@ describe('casca das páginas públicas', () => {
   it('usa a mesma navegação da rede', () => {
     const navegacao = montar();
 
-    expect(navegacao.textContent).toContain('Mural');
-    expect(navegacao.textContent).toContain('Grupos WhatsApp');
-    expect(navegacao.textContent).toContain('Tropa');
-    expect(navegacao.textContent).toContain('Arena');
-    expect(navegacao.textContent).toContain('Eu');
+    expect(navegacao.textContent).toContain('Início');
+    expect(navegacao.textContent).toContain('Ranking');
+    expect(navegacao.textContent).toContain('Grupos Zap');
+    expect(navegacao.textContent).toContain('Seguindo');
+    expect(navegacao.textContent).toContain('Perfil');
+    expect(navegacao.textContent).toContain('ARROTAR');
   });
 
   it('mantém o conteúdo no centro da casca OpenDesign', () => {

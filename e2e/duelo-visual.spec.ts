@@ -4,7 +4,7 @@ for (const viewport of [{ width: 320, height: 720 }, { width: 390, height: 844 }
   test(`convite e placar preservam contraste e cabem em ${viewport.width}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto(`${origem}?estado=criar`);
-    await expect(page.locator('.duelo-v2__pagina')).toHaveCSS('background-color', 'rgb(245, 241, 233)');
+    await expect(page.locator('.duelo-v2__pagina')).toHaveCSS('background-color', 'rgb(10, 11, 14)');
     const autorizar = page.getByRole('checkbox', { name: /Autorizo enviar/ });
     await expect(autorizar).toBeVisible();
     await expect(page.getByRole('button', { name: 'Criar desafio' })).toBeDisabled();

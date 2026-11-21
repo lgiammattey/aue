@@ -1,41 +1,43 @@
-/* Entrada e recuperação seguem a linguagem da Arena sem afetar outros diálogos. */
+/* Entrada e recuperação seguem o Design System Arena Carbono + Laranja Elétrico. */
 .app.app--auth, .auth-arena-reset {
-  --aue-bg: #f5f1e9; --aue-text: #171714; --aue-muted: #5e5c55;
-  --aue-line: #cfcbc0; --aue-surface: #f5f1e9; --aue-surface-2: #eee9df;
-  --aue-accent: #171714; --aue-accent-on: #f5f1e9;
-  width: 100%; min-height: 100svh; background: #f5f1e9; color: #171714;
+  --aue-bg: #0a0b0e; --aue-text: #f3f4f6; --aue-muted: #8b92a3;
+  --aue-line: #232834; --aue-surface: #151820; --aue-surface-2: #1d212c;
+  --aue-accent: #ff5500; --aue-accent-on: #0a0b0e;
+  width: 100%; min-height: 100svh; background: var(--bg, #0a0b0e); color: var(--fg, #f3f4f6);
 }
 .app--auth .auth-main, .auth-arena-reset { display: block; padding: 0 max(28px, env(safe-area-inset-right)) 64px max(28px, env(safe-area-inset-left)); box-sizing: border-box; }
 .app--auth .auth-shell, .auth-arena-reset .auth-shell { width: 100%; max-width: 1360px; margin: 0 auto !important; }
-.auth-shell .auth-header { min-height: 76px; margin: 0; border-bottom: 1px solid #cfcbc0; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
-.auth-shell .auth-header nav { display: flex; gap: 24px; }
-.auth-shell .auth-header nav a { color: #171714; text-decoration: none; font-size: 13px; font-weight: 700; padding: 14px 0; }
-.auth-shell .auth-header nav a:hover { text-decoration: underline; }
-.auth-shell .auth-brand { color: #171714; font: 32px/1 var(--font-display, sans-serif); letter-spacing: -.035em; }
-.auth-arena__placar { padding: 18px 0; border-bottom: 1px solid #cfcbc0; display: flex; justify-content: space-between; gap: 12px; font: 700 11px/1.4 var(--font-mono, monospace); letter-spacing: .08em; }
-.auth-arena__placar span:first-child { color: #5e5c55; }
-.auth-arena__conteudo { max-width: 1100px; margin: 0 auto; padding: clamp(52px, 8vw, 110px) 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: clamp(40px, 7vw, 120px); align-items: start; }
-.auth-arena__manifesto { position: relative; min-height: 330px; padding-top: 12px; }
-.auth-arena__manifesto p { margin: 0 0 20px; color: #5e5c55; font: 700 11px/1.4 var(--font-mono, monospace); letter-spacing: .12em; }
-.auth-arena__manifesto div { font: 400 clamp(48px, 6vw, 84px)/1.05 var(--font-display, sans-serif); text-transform: uppercase; }
-.auth-arena__manifesto svg { width: 105px; margin: 34px 0 0 12px; transform: rotate(-8deg); }
-.app--auth .auth-shell .dialog, .auth-arena-reset .auth-arena__form { width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; box-sizing: border-box; }
-.app--auth .auth-shell .dialog h1, .auth-arena-reset h1 { margin: 0 0 12px; font: 400 clamp(42px, 5vw, 62px)/1.05 var(--font-display, sans-serif); text-transform: uppercase; letter-spacing: -.02em; }
-.auth-shell .dialog > p, .auth-arena-reset .auth-arena__form > p { line-height: 1.5; }
-.auth-shell .dialog label { color: #171714; font-size: 14px; font-weight: 700; }
-.auth-shell .dialog input, .auth-arena-reset input { box-sizing: border-box; width: 100%; min-height: 52px; margin: 0; padding: 12px 14px; border: 1px solid #a9a59a; border-radius: 0; background: #f5f1e9; color: #171714; font: 16px var(--font-body, sans-serif); }
-.auth-shell .dialog input:focus-visible, .auth-arena-reset input:focus-visible, .auth-shell a:focus-visible, .auth-shell button:focus-visible { outline: 3px solid #364700; outline-offset: 3px; }
-.auth-shell .dialog .submit, .auth-arena-reset .auth-arena__submit { min-height: 54px; border: 0; border-radius: 0; background: #c6f500; color: #171714; font-weight: 800; cursor: pointer; }
-.auth-shell .dialog .submit:hover:not(:disabled), .auth-arena-reset .auth-arena__submit:hover:not(:disabled) { background: #b5df00; }
-.auth-shell .dialog .tab { padding: 8px 0; border: 0; border-radius: 0; background: transparent; color: #171714; text-decoration: underline; text-underline-offset: 4px; }
-.auth-shell .dialog .tab:hover:not(:disabled) { background: transparent; }
-.auth-shell .auth-social-soon__button { border-radius: 0; }
+.auth-shell .auth-header { min-height: 76px; margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.auth-shell .auth-header nav { display: flex; gap: 20px; }
+.auth-shell .auth-header nav a { color: var(--muted, #8b92a3); text-decoration: none; font-size: 13px; font-weight: 700; padding: 14px 0; }
+.auth-shell .auth-header nav a:hover { color: var(--fg, #f3f4f6); text-decoration: underline; }
+.auth-shell .auth-brand { color: var(--fg, #f3f4f6); font: 32px/1 var(--font-display, 'Anton', sans-serif); letter-spacing: -.02em; }
+.auth-shell .auth-brand span { color: var(--accent, #ff5500); }
+.auth-arena__placar { padding: 12px 0; display: flex; justify-content: space-between; gap: 12px; font: 700 11px/1.4 var(--font-mono, monospace); letter-spacing: .08em; color: var(--muted, #8b92a3); }
+.auth-arena__placar span:first-child { color: var(--accent, #ff5500); }
+.auth-arena__conteudo { max-width: 1100px; margin: 0 auto; padding: clamp(40px, 7vw, 92px) 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: clamp(40px, 7vw, 100px); align-items: start; }
+.auth-arena__manifesto { position: relative; min-height: 240px; padding-top: 12px; }
+.auth-arena__manifesto p { margin: 0 0 18px; color: var(--accent, #ff5500); font: 700 11px/1.4 var(--font-mono, monospace); letter-spacing: .12em; }
+.auth-arena__manifesto div { font: 400 clamp(48px, 6vw, 84px)/1.02 var(--font-display, 'Anton', sans-serif); text-transform: uppercase; color: var(--fg, #f3f4f6); }
+.auth-arena__manifesto svg { display: none; }
+.app--auth .auth-shell .dialog, .auth-arena-reset .auth-arena__form { width: 100%; padding: 28px; border: 1px solid var(--border, #232834); border-radius: var(--radius-md, 6px); background: var(--surface, #151820); box-shadow: none; box-sizing: border-box; }
+.app--auth .auth-shell .dialog h1, .auth-arena-reset h1 { margin: 0 0 12px; font: 400 clamp(38px, 4.6vw, 54px)/1.05 var(--font-display, 'Anton', sans-serif); text-transform: uppercase; letter-spacing: -.01em; color: var(--fg, #f3f4f6); }
+.auth-shell .dialog > p, .auth-arena-reset .auth-arena__form > p { line-height: 1.5; color: var(--fg-secondary, #c8cdd8); }
+.auth-shell .dialog label { color: var(--fg, #f3f4f6); font-size: 14px; font-weight: 700; }
+.auth-shell .dialog input, .auth-arena-reset input { box-sizing: border-box; width: 100%; min-height: 48px; margin: 0; padding: 12px 14px; border: 1px solid var(--border-strong, #3b4254); border-radius: var(--radius-sm, 4px); background: var(--bg-elevated, #111318); color: var(--fg, #f3f4f6); font: 16px var(--font-body, 'Archivo', sans-serif); }
+.auth-shell .dialog input:focus-visible, .auth-arena-reset input:focus-visible, .auth-shell a:focus-visible, .auth-shell button:focus-visible, .auth-arena-reset a:focus-visible, .auth-arena-reset button:focus-visible { outline: 3px solid var(--accent, #ff5500); outline-offset: 3px; }
+.auth-shell .dialog .submit, .auth-arena-reset .auth-arena__submit { min-height: 48px; border: 0; border-radius: var(--radius-sm, 4px); background: var(--accent, #ff5500); color: var(--accent-on, #0a0b0e); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+.auth-shell .dialog .submit:hover:not(:disabled), .auth-arena-reset .auth-arena__submit:hover:not(:disabled) { background: var(--accent-hover, #ff6d24); }
+.auth-shell .dialog .tab { padding: 8px 0; border: 0; border-radius: 0; background: transparent; color: var(--fg-secondary, #c8cdd8); text-decoration: underline; text-underline-offset: 4px; }
+.auth-shell .dialog .tab:hover:not(:disabled) { background: transparent; color: var(--accent, #ff5500); }
+.auth-shell .auth-social-soon__button { border-radius: var(--radius-sm, 4px); border-color: var(--border-strong, #3b4254); background: var(--bg-elevated, #111318); color: var(--fg, #f3f4f6); }
 .auth-arena-reset .auth-arena__form form { display: grid; gap: 12px; }
-.auth-arena-reset .auth-arena__erro { color: #9b2525; font-size: 14px; }
+.auth-arena-reset .auth-arena__erro { color: var(--danger, #ff5a5f); font-size: 14px; }
 @media (max-width: 699px) {
-  .app--auth .auth-main, .auth-arena-reset { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
-  .auth-shell .auth-header { min-height: 66px; }.auth-shell .auth-header nav { gap: 14px; }
-  .auth-arena__conteudo { grid-template-columns: 1fr; gap: 28px; padding: 48px 0 40px; }
+  .app--auth .auth-main, .auth-arena-reset { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  .auth-shell .auth-header { min-height: 60px; }.auth-shell .auth-header nav { gap: 14px; }
+  .auth-arena__conteudo { grid-template-columns: 1fr; gap: 24px; padding: 32px 0 36px; }
   .auth-arena__manifesto { min-height: 0; padding: 0; }.auth-arena__manifesto p { margin-bottom: 10px; }
-  .auth-arena__manifesto div { font-size: clamp(36px, 10vw, 48px); }.auth-arena__manifesto svg { display: none; }
+  .auth-arena__manifesto div { font-size: clamp(36px, 10vw, 48px); }
+  .app--auth .auth-shell .dialog, .auth-arena-reset .auth-arena__form { padding: 20px; }
 }

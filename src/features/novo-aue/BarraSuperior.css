@@ -1,119 +1,142 @@
 /*
-  Barra superior. Do 700px para cima nada muda: o <label> some do desenho
-  (display: contents) e o campo segue como filho direto da barra.
-
-  Celular, como no print do perfil: logo e campo de busca ocupando o resto da
-  linha. Sem botão "Buscar" (o Enter do teclado envia) e sem o mini-perfil
-  (o Perfil está na barra de baixo). Antes, esses dois estouravam a largura e a
-  página ganhava rolagem horizontal em qualquer aparelho. Respeita o topo
-  seguro do iPhone quando o app roda em tela cheia.
+  Barra superior mobile (< 700px) — topo enxuto e sem Bottom Nav.
+  Desktop (>= 700px) oculta esta barra porque a sidebar e o rail direito assumem.
 */
-.topbar-search {
-  display: contents;
-}
-
-.topbar-search__lupa {
+header.topbar {
   display: none;
 }
 
 @media (max-width: 699px) {
   header.topbar {
-    min-height: calc(44px + env(safe-area-inset-top, 0px));
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: 0;
-    padding-right: max(14px, env(safe-area-inset-right, 0px));
-    padding-left: max(14px, env(safe-area-inset-left, 0px));
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: calc(52px + env(safe-area-inset-top, 0px));
+    margin: 0 calc(-1 * max(14px, env(safe-area-inset-left, 0px))) 14px;
+    padding: env(safe-area-inset-top, 0px) max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));
+    background: var(--bg-elevated, #111318);
+    border-bottom: 1px solid var(--aue-line, #232834);
   }
 
-  /* Logo em Anton 32px com 36px de linha; a caixa de toque é de 44px. */
   header.topbar .topbar-brand-mobile {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-    font-size: 32px;
-    line-height: 36px;
-  }
-
-  /* O <label> inteiro (44px) é o alvo: tocar em qualquer ponto dele foca o campo. */
-  /* No perfil o topo não tem linha de baixo, como no print; nas outras telas ela fica. */
-  main:has(.od-profile) header.topbar {
-    border-bottom: 0;
-  }
-
-  /* Com sessão ativa o "Entrar" não faz sentido (e cortava a barra): o Perfil está na barra de baixo. */
-  header.topbar[data-sessao='ativa'] .top-actions {
-    display: none;
-  }
-
-  .topbar-search {
-    position: relative;
-    display: block;
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 44px;
-    padding: 4px 0;
-    box-sizing: border-box;
-  }
-
-  .topbar-search__lupa {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    display: block;
-    color: var(--aue-muted);
-    pointer-events: none;
-    transform: translateY(-50%);
-  }
-
-  .topbar .search {
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    height: 36px;
-    padding: 0 8px 0 34px;
-    text-overflow: ellipsis;
-    border-radius: 12px;
-    font-size: 16px; /* 16px evita o zoom automático do Safari ao focar */
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  /* O texto do campo segue em 16px (Safari não dá zoom); só o placeholder é menor, para caber inteiro em 320 e 360. */
-  .topbar .search::placeholder {
-    font-size: 14px;
-    text-overflow: ellipsis;
-  }
-
-  .topbar button.icon-btn[type='submit'],
-  .topbar .profile-mini {
-    display: none;
-  }
-
-  .topbar .top-actions {
+    font-family: var(--font-display, 'Anton', sans-serif);
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--aue-text, #f3f4f6);
     flex: none;
   }
 
-  /*
-    "Entrar" do visitante: o .icon-btn global tem 44px de largura, feito para
-    ícone. O texto (uns 50px) vazava da caixa e alargava a página em 3 a 4px
-    abaixo de 360px. Aqui a caixa acompanha o texto e a altura de 44px fica.
-  */
-  .topbar .top-actions .icon-btn {
-    width: auto;
+  header.topbar .topbar-brand-mobile__bang {
+    color: var(--aue-accent, #ff5500);
+  }
+
+  header.topbar .topbar-mobile-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  header.topbar .topbar-nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     padding: 0 10px;
-    font-size: 14px;
-    font-weight: 700;
+    border-radius: var(--radius-sm, 4px);
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--aue-muted, #8b92a3);
+    white-space: nowrap;
+  }
+
+  header.topbar .topbar-nav-link:hover {
+    color: var(--aue-text, #f3f4f6);
+    background: var(--aue-surface, #151820);
+  }
+
+  header.topbar .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    flex: none;
+  }
+
+  header.topbar .top-actions .icon-btn.topbar-login {
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--aue-accent, #ff5500);
+    border-radius: var(--radius-sm, 4px);
+    background: transparent;
+    color: var(--aue-accent, #ff5500);
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  header.topbar .top-actions .icon-btn.topbar-login:hover {
+    background: var(--aue-accent, #ff5500);
+    color: var(--aue-accent-on, #0a0b0e);
+  }
+
+  header.topbar .topbar-notifications__button {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid var(--aue-line, #232834);
+    background: var(--aue-surface, #151820);
+  }
+
+  header.topbar .profile-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 8px 0 4px;
+    border: 1px solid var(--aue-line, #232834);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--aue-surface, #151820);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  header.topbar .profile-mini__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-xs, 2px);
+    font-size: 11px;
   }
 }
 
 @media (max-width: 359px) {
   header.topbar {
-    gap: 8px;
+    gap: 4px;
     padding-right: max(10px, env(safe-area-inset-right, 0px));
     padding-left: max(10px, env(safe-area-inset-left, 0px));
   }
 
-  .topbar .search::placeholder {
+  header.topbar .topbar-brand-mobile {
+    font-size: 24px;
+  }
+
+  header.topbar .topbar-nav-link {
+    padding: 0 6px;
+    font-size: 12px;
+  }
+
+  header.topbar .top-actions .icon-btn.topbar-login {
+    padding: 0 10px;
     font-size: 12px;
   }
 }

@@ -197,7 +197,7 @@ export const AbaComunidades: React.FC<AbaComunidadesProps> = ({
           style={{
             height: '48px',
             borderRadius: '999px',
-            background: 'var(--accent, #c6ff00)',
+            background: 'var(--accent, #ff5500)',
             color: 'var(--accent-on, #000)',
             fontWeight: 800,
             fontSize: '15px',

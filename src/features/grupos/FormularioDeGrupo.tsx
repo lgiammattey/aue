@@ -140,7 +140,7 @@ export const FormularioDeGrupo: React.FC<FormularioDeGrupoProps> = ({ aberto, po
         style={{
           width: '100%',
           maxWidth: 560,
-          maxHeight: '92dvh',
+          maxHeight: '92svh',
           overflowY: 'auto',
           background: 'var(--surface)',
           border: '1px solid var(--border-strong)',

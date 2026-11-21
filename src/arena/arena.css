@@ -97,7 +97,7 @@
   Bolha no modo `julgando` e a segunda fala depois de 1,8s — não isto.
 */
 .arena[data-dim='1'] {
-  background: color-mix(in oklch, var(--bg) 88%, black);
+  background: color-mix(in srgb, var(--bg) 88%, black);
 }
 
 /*
@@ -454,7 +454,7 @@
 }
 
 .bolha {
-  fill: color-mix(in oklch, var(--accent) 8%, var(--surface-2));
+  fill: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
   stroke: var(--border);
   stroke-width: 1.5;
   transition:
@@ -476,18 +476,18 @@
   muda de cor, muda de tanto que se mexe.
 */
 .bolha-wrap[data-modo='segurando'] .bolha {
-  fill: color-mix(in oklch, var(--accent) 40%, var(--bg));
+  fill: color-mix(in srgb, var(--accent) 40%, var(--bg));
   stroke: var(--border);
 }
 
 .bolha-wrap[data-modo='julgando'] .bolha {
-  fill: color-mix(in oklch, var(--accent) 26%, var(--bg));
+  fill: color-mix(in srgb, var(--accent) 26%, var(--bg));
   stroke: var(--border);
 }
 
 .bolha-wrap[data-modo='entregando'] .bolha {
-  fill: color-mix(in oklch, var(--accent) 13%, var(--surface-2));
-  stroke: color-mix(in oklch, var(--accent) 30%, var(--border));
+  fill: color-mix(in srgb, var(--accent) 13%, var(--surface-2));
+  stroke: color-mix(in srgb, var(--accent) 30%, var(--border));
 }
 
 /* ───────────────────────── REAÇÃO ───────────────────────── */
@@ -861,7 +861,7 @@
 @media (min-width: 560px) {
   .arena {
     min-height: 0;
-    height: min(880px, calc(100dvh - 64px));
+    height: min(880px, calc(100svh - 64px));
     border-radius: 32px;
     border: 1px solid var(--border);
     margin-block: var(--space-6);
@@ -1141,7 +1141,7 @@
   display: grid;
   place-items: center;
   padding: var(--space-5);
-  background: color-mix(in oklch, var(--bg) 82%, transparent);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(6px);
 }
 

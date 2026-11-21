@@ -7,7 +7,19 @@ import { origemDoConviteV2 } from '../../plataforma/web/origemDoConviteV2';
 import { FluxoArenaV2 } from './FluxoArenaV2';
 
 /** Apenas montada com a flag de duelo ligada para o ambiente escolhido. */
-export function EntradaDueloIntegrado({ modo, conteudoDoRepouso, adversarioHandle }: { modo: 'criar' | 'responder'; conteudoDoRepouso?: ReactNode; adversarioHandle?: string | null }) {
+export function EntradaDueloIntegrado({
+  modo,
+  conteudoDoRepouso,
+  adversarioHandle,
+  modoEmbutido = false,
+  aoPublicarAudio,
+}: {
+  modo: 'criar' | 'responder';
+  conteudoDoRepouso?: ReactNode;
+  adversarioHandle?: string | null;
+  modoEmbutido?: boolean;
+  aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
+}) {
   const navigate = useNavigate();
   const { search } = useLocation();
   const adversario = adversarioHandle ?? new URLSearchParams(search).get('desafiar');
@@ -16,5 +28,16 @@ export function EntradaDueloIntegrado({ modo, conteudoDoRepouso, adversarioHandl
     compartilhar: criarCompartilhamentoWeb(),
     origem: origemDoConviteV2(),
   }));
-  return <FluxoArenaV2 modo={modo} conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversario} {...portas} telemetria={analyticsArenaV2} aoVoltar={modo === 'responder' ? () => navigate('/') : undefined} />;
+  return (
+    <FluxoArenaV2
+      modo={modo}
+      conteudoDoRepouso={conteudoDoRepouso}
+      adversarioHandle={adversario}
+      modoEmbutido={modoEmbutido}
+      aoPublicarAudio={aoPublicarAudio}
+      {...portas}
+      telemetria={analyticsArenaV2}
+      aoVoltar={modo === 'responder' ? () => navigate('/') : undefined}
+    />
+  );
 }

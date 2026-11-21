@@ -1,20 +1,21 @@
-/* Só altera o diretório público; os mesmos componentes também vivem no app. */
+/* Diretório público de grupos no Design System Dark Carbono + Laranja Elétrico. */
 .grupos-arena {
-  --bg: #f5f1e9;
-  --fg: #171714;
-  --surface: #f5f1e9;
-  --surface-2: #e8e3da;
-  --muted: #5e5c55;
-  --border: #cfcbc0;
-  --border-strong: #77746b;
-  --overlay-scrim: rgba(10, 10, 10, .7);
-  padding: 38px 0 10px;
-  border-top: 1px solid var(--border);
+  --bg: #0a0b0e;
+  --fg: #f3f4f6;
+  --surface: #151820;
+  --surface-2: #1d212c;
+  --muted: #8b92a3;
+  --border: #232834;
+  --border-strong: #3b4254;
+  --accent: #ff5500;
+  --accent-on: #0a0b0e;
+  --overlay-scrim: rgba(5, 6, 8, .82);
+  padding: 28px 0 10px;
 }
-.grupos-arena h2 { font: 400 clamp(30px, 4vw, 44px)/1.1 var(--font-display) !important; letter-spacing: 0 !important; text-transform: uppercase; }
-.grupos-arena section > div:first-child > button { border-radius: 0 !important; }
-.grupos-arena article { border-radius: 0 !important; padding: 24px 0 !important; border-top: 1px solid var(--border) !important; }
-.grupos-arena article b { font: 400 26px/1.1 var(--font-display) !important; text-transform: uppercase; }
-.grupos-arena article a, .grupos-arena article button { border-radius: 0 !important; }
+.grupos-arena h2 { font: 400 clamp(28px, 3.6vw, 40px)/1.1 var(--font-display) !important; letter-spacing: 0 !important; text-transform: uppercase; }
+.grupos-arena section > div:first-child > button { border-radius: var(--radius-sm, 4px) !important; }
+.grupos-arena article { border-radius: var(--radius-md, 6px) !important; padding: 18px !important; border: 1px solid var(--border) !important; background: var(--surface) !important; }
+.grupos-arena article b { font: 400 24px/1.1 var(--font-display) !important; text-transform: uppercase; color: var(--fg); }
+.grupos-arena article a, .grupos-arena article button { border-radius: var(--radius-sm, 4px) !important; }
 .grupos-arena [role="dialog"] { color: var(--fg); }
-.grupos-arena a:focus-visible, .grupos-arena button:focus-visible, .grupos-arena input:focus-visible, .grupos-arena select:focus-visible, .grupos-arena textarea:focus-visible { outline: 3px solid #364700; outline-offset: 3px; }
+.grupos-arena a:focus-visible, .grupos-arena button:focus-visible, .grupos-arena input:focus-visible, .grupos-arena select:focus-visible, .grupos-arena textarea:focus-visible { outline: 3px solid var(--accent, #ff5500); outline-offset: 3px; }

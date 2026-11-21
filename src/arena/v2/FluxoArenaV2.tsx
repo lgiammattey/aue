@@ -21,10 +21,26 @@ export interface FluxoArenaV2Props {
   readonly telemetria?: TelemetriaArenaV2;
   readonly conteudoDoRepouso?: ReactNode;
   readonly adversarioHandle?: string | null;
+  readonly modoEmbutido?: boolean;
+  readonly aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
 }
 
 /** Composição local: dependências explícitas evitam conexão acidental com produção. */
-export function FluxoArenaV2({ modo, duelo, compartilhar, origem, lerToken, captura, capturaSemLaudo, aoVoltar, telemetria, conteudoDoRepouso, adversarioHandle }: FluxoArenaV2Props) {
+export function FluxoArenaV2({
+  modo,
+  duelo,
+  compartilhar,
+  origem,
+  lerToken,
+  captura,
+  capturaSemLaudo,
+  aoVoltar,
+  telemetria,
+  conteudoDoRepouso,
+  adversarioHandle,
+  modoEmbutido = false,
+  aoPublicarAudio,
+}: FluxoArenaV2Props) {
   const [tela, setTela] = useState<'arena' | 'duelo' | 'meus' | 'encerrado'>(modo === 'criar' ? 'arena' : 'duelo');
   const [modoAtual, setModoAtual] = useState(modo);
   const [novaArena, setNovaArena] = useState(0);
@@ -34,21 +50,78 @@ export function FluxoArenaV2({ modo, duelo, compartilhar, origem, lerToken, capt
   const usar = (nova: TentativaDoDuelo) => { setTentativa(nova); setTela('duelo'); };
   const novoDesafio = compartilhar && origem ? () => { setTentativa(null); setModoAtual('criar'); setNovaArena((valor) => valor + 1); setTela('arena'); } : undefined;
 
-  return <div className="fluxo-arena-v2">
-    {tela !== 'encerrado' && tela !== 'meus' && <div hidden={tela !== 'arena'}>
-      <ArenaV2 key={novaArena} conteudoDoRepouso={tela === 'arena' ? conteudoDoRepouso : undefined} adversarioHandle={adversarioHandle} telemetria={telemetria} captura={captura} capturaSemLaudo={capturaSemLaudo} aoUsarTentativa={habilitado ? usar : undefined}
-        rotuloUsarTentativa={modoAtual === 'criar' ? 'Criar desafio' : 'Usar esta gravação'}
-        aoAbrirMeusDesafios={habilitado && modoAtual === 'criar' ? () => setTela('meus') : undefined}
-        aoVoltar={modoAtual === 'responder' ? () => setTela('duelo') : aoVoltar ? sair : undefined} />
-      {!habilitado && <p role="status">O duelo não está disponível neste ambiente. Sua gravação continua local.</p>}
-    </div>}
-    <div className="duelo-v2__pagina" hidden={tela !== 'duelo'}>
-      <header className="duelo-v2__cabecalho"><a href="/">AUÊ!</a><span>ARENA · DESAFIO</span></header>
-      {tela !== 'encerrado' && habilitado && duelo && modoAtual === 'responder' && <EntradaDueloV2 duelo={duelo} lerToken={lerToken} tentativa={tentativa} compartilhar={compartilhar} origem={origem} aoNovoDesafio={novoDesafio} aoGravar={() => { setTentativa(null); setTela('arena'); }} aoVoltar={sair} />}
-      {habilitado && duelo && modoAtual === 'criar' && tentativa && compartilhar && origem && tela === 'duelo' && <CriarDueloV2 duelo={duelo} compartilhar={compartilhar} origem={origem} tentativa={tentativa} aoVoltar={() => setTela('arena')} />}
-      {!habilitado && <section><p role="status">O duelo não está disponível neste ambiente.</p><button type="button" onClick={sair}>Voltar</button></section>}
+  return (
+    <div className={`fluxo-arena-v2${modoEmbutido ? ' fluxo-arena-v2--embutida' : ''}`}>
+      {tela !== 'encerrado' && tela !== 'meus' && (
+        <div hidden={tela !== 'arena'}>
+          <ArenaV2
+            key={novaArena}
+            conteudoDoRepouso={tela === 'arena' ? conteudoDoRepouso : undefined}
+            adversarioHandle={adversarioHandle}
+            modoEmbutido={modoEmbutido}
+            aoPublicarAudio={aoPublicarAudio}
+            telemetria={telemetria}
+            captura={captura}
+            capturaSemLaudo={capturaSemLaudo}
+            aoUsarTentativa={habilitado ? usar : undefined}
+            rotuloUsarTentativa={modoAtual === 'criar' ? 'Criar desafio' : 'Usar esta gravação'}
+            aoAbrirMeusDesafios={habilitado && modoAtual === 'criar' ? () => setTela('meus') : undefined}
+            aoVoltar={modoAtual === 'responder' ? () => setTela('duelo') : aoVoltar ? sair : undefined}
+          />
+          {!habilitado && !modoEmbutido && (
+            <p role="status">O duelo não está disponível neste ambiente. Sua gravação continua local.</p>
+          )}
+        </div>
+      )}
+      <div className="duelo-v2__pagina" hidden={tela !== 'duelo'}>
+        <header className="duelo-v2__cabecalho">
+          <a href="/">AUÊ<span>!</span></a>
+          <span>ARENA · DESAFIO</span>
+        </header>
+        {tela !== 'encerrado' && habilitado && duelo && modoAtual === 'responder' && (
+          <EntradaDueloV2
+            duelo={duelo}
+            lerToken={lerToken}
+            tentativa={tentativa}
+            compartilhar={compartilhar}
+            origem={origem}
+            aoNovoDesafio={novoDesafio}
+            aoGravar={() => { setTentativa(null); setTela('arena'); }}
+            aoVoltar={sair}
+          />
+        )}
+        {habilitado && duelo && modoAtual === 'criar' && tentativa && compartilhar && origem && tela === 'duelo' && (
+          <CriarDueloV2
+            duelo={duelo}
+            compartilhar={compartilhar}
+            origem={origem}
+            tentativa={tentativa}
+            aoVoltar={() => setTela('arena')}
+          />
+        )}
+        {!habilitado && (
+          <section>
+            <p role="status">O duelo não está disponível neste ambiente.</p>
+            <button type="button" onClick={sair}>Voltar</button>
+          </section>
+        )}
+      </div>
+      {tela === 'meus' && duelo && compartilhar && origem && (
+        <div className="duelo-v2__pagina">
+          <header className="duelo-v2__cabecalho">
+            <a href="/">AUÊ<span>!</span></a>
+            <span>ARENA · DESAFIOS</span>
+          </header>
+          <MeusDuelosV2
+            duelo={duelo}
+            compartilhar={compartilhar}
+            origem={origem}
+            aoNovoDesafio={novoDesafio}
+            aoVoltar={() => setTela('arena')}
+          />
+        </div>
+      )}
+      {tela === 'encerrado' && <p>Fluxo encerrado.</p>}
     </div>
-    {tela === 'meus' && duelo && compartilhar && origem && <div className="duelo-v2__pagina"><header className="duelo-v2__cabecalho"><a href="/">AUÊ!</a><span>ARENA · DESAFIOS</span></header><MeusDuelosV2 duelo={duelo} compartilhar={compartilhar} origem={origem} aoNovoDesafio={novoDesafio} aoVoltar={() => setTela('arena')} /></div>}
-    {tela === 'encerrado' && <p>Fluxo encerrado.</p>}
-  </div>;
+  );
 }

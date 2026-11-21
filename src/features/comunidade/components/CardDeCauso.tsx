@@ -377,7 +377,7 @@ export const CardDeCauso: React.FC<CardDeCausoProps> = ({
                     background: 'none',
                     border: 'none',
                     padding: 0,
-                    color: 'var(--accent, #c6ff00)',
+                    color: 'var(--accent, #ff5500)',
                     fontWeight: 700,
                     fontSize: '14px',
                     cursor: 'pointer',

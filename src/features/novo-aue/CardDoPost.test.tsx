@@ -25,7 +25,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     nota: 88,
   };
 
-  it('renderiza o post com avatar lateral em imagem, autor com handle, tempo e badge de nota', () => {
+  it('renderiza o post com avatar lateral em imagem, autor com handle, tempo e placa de nota sem comunidade', () => {
     render(
       <MemoryRouter>
         <CardDoPost
@@ -48,30 +48,11 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     const metadadosDoAutor = document.querySelector('.post-meta-details');
     expect(metadadosDoAutor?.querySelector('.post-meta-handle')?.textContent).toBe('@mestre_eco');
     expect(metadadosDoAutor?.querySelector('time')).toBeTruthy();
-    const comunidade = screen.getByRole('link', { name: 'Abrir comunidade r/arena-do-arroto' });
-    expect(comunidade.getAttribute('href')).toBe('/c/arena-do-arroto');
-    expect(comunidade.querySelector('img')?.getAttribute('src')).toBe('https://cdn.test/arena.jpg');
+    expect(screen.queryByRole('link', { name: /Abrir comunidade/ })).toBeNull();
     expect(screen.getByRole('img', { name: 'Nota: 88 de 100' })).toBeTruthy();
-    expect(screen.queryByText('NOTA')).toBeNull();
+    expect(screen.getByText('NOTA')).toBeTruthy();
     expect(screen.getByText('O arroto que ecoou no estádio')).toBeTruthy();
     expect(screen.getByText('Estava 0x0 quando soltei o trovão e a torcida calou.')).toBeTruthy();
-  });
-
-  it('troca a imagem quebrada da comunidade pela inicial da roda', () => {
-    render(
-      <MemoryRouter>
-        <CardDoPost
-          post={postExemplo}
-          audioTocando={false}
-          tempoAtualDoAudio={0}
-          duracaoDoAudio={null}
-        />
-      </MemoryRouter>,
-    );
-
-    const comunidade = screen.getByRole('link', { name: 'Abrir comunidade r/arena-do-arroto' });
-    fireEvent.error(comunidade.querySelector('img')!);
-    expect(comunidade.textContent).toBe('A');
   });
 
   it('mostra só a nota junto ao player, sem distinção visual pela data de avaliação', () => {
@@ -190,12 +171,12 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
       </MemoryRouter>,
     );
 
-  it('compartilhar copia o link real do tópico (/c/:slug/t/:id), não uma rota que não existe', async () => {
+  it('compartilhar copia o link do post no perfil (/u/:handle#post-...)', async () => {
     const writeText = vi.fn(async () => undefined);
     Object.assign(navigator, { clipboard: { writeText }, share: undefined });
     mostrar();
     fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/c/arena-do-arroto/t/1`));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/u/mestre_eco#post-topico-1`));
     expect(await screen.findByText('Copiado!')).toBeTruthy();
   });
 
@@ -212,7 +193,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     const prompt = vi.spyOn(window, 'prompt').mockReturnValue(null);
     mostrar();
     fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
-    await waitFor(() => expect(prompt).toHaveBeenCalledWith('Copie o link:', `${window.location.origin}/c/arena-do-arroto/t/1`));
+    await waitFor(() => expect(prompt).toHaveBeenCalledWith('Copie o link:', `${window.location.origin}/u/mestre_eco#post-topico-1`));
     expect(screen.queryByText('Copiado!')).toBeNull();
     prompt.mockRestore();
   });
@@ -222,7 +203,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     Object.assign(navigator, { share });
     mostrar();
     fireEvent.click(screen.getByRole('button', { name: /Compartilhar/i }));
-    await waitFor(() => expect(share).toHaveBeenCalledWith({ title: postExemplo.titulo, url: `${window.location.origin}/c/arena-do-arroto/t/1` }));
+    await waitFor(() => expect(share).toHaveBeenCalledWith({ title: postExemplo.titulo, url: `${window.location.origin}/u/mestre_eco#post-topico-1` }));
     Object.assign(navigator, { share: undefined });
   });
 
@@ -235,15 +216,17 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     }
   });
 
-  it('mantém todas as ações do card na toolbar canônica', () => {
+  it('organiza reações competitivas e ações da jogada nas 2 faixas da ficha', () => {
     mostrar({ salvo: false, aoCurtir: vi.fn(), aoReagir: vi.fn(), aoAlternarSalvar: vi.fn() });
+    const reacoesBar = screen.getByRole('group', { name: 'Reações competitivas' });
     const toolbar = screen.getByRole('toolbar', { name: 'Ações do post' });
 
     for (const nome of [/7 comentários/i, 'Curtir', '👎', '🖕', '🤙', '🤘', '🍺', '🥤', 'Salvar', 'Compartilhar']) {
       expect(screen.getByRole('button', { name: nome })).toBeTruthy();
     }
 
-    expect(toolbar.querySelectorAll('button')).toHaveLength(10);
+    expect(reacoesBar.querySelectorAll('button')).toHaveLength(7);
+    expect(toolbar.querySelectorAll('button')).toHaveLength(3);
   });
 
   it('exibe botão Desafiar quando aoDesafiar é informado e dispara ao clicar', () => {

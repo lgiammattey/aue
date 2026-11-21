@@ -1,10 +1,11 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { criarContaWeb } from './plataforma/web/conta';
 import { criarArmazenamentoWeb } from './plataforma/web/armazenamento';
 import { criarTelemetriaWeb } from './plataforma/web/telemetria';
 
-const ArenaV2 = lazy(() => import('./arena/v2/EntradaArenaLocalV2').then((m) => ({ default: m.EntradaArenaLocalV2 })));
+const ArenaV2 = lazy(() => import('./arena/v2/ArenaV2').then((m) => ({ default: m.ArenaV2 })));
+const EntradaArenaLocalV2 = lazy(() => import('./arena/v2/EntradaArenaLocalV2').then((m) => ({ default: m.EntradaArenaLocalV2 })));
 const EntradaDueloIntegrado = lazy(() => import('./arena/v2/EntradaDueloIntegrado').then((m) => ({ default: m.EntradaDueloIntegrado })));
 const ChallengeView = lazy(() => import('./features/audio/ChallengeView').then((m) => ({ default: m.ChallengeView })));
 const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePrivacidade').then((m) => ({ default: m.PoliticaDePrivacidade })));
@@ -18,26 +19,19 @@ const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then(
 const TelaNaoEncontrada = lazy(() => import('./features/publico/TelaNaoEncontrada').then((m) => ({ default: m.TelaNaoEncontrada })));
 const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
 const InicioOpenDesign = lazy(() => import('./features/novo-aue/InicioOpenDesign').then((m) => ({ default: m.InicioOpenDesign })));
-const TelaComunidadeOpenDesign = lazy(() => import('./features/novo-aue/TelaComunidadeOpenDesign').then((m) => ({ default: m.TelaComunidadeOpenDesign })));
-const TelaDiretorioOpenDesign = lazy(() => import('./features/novo-aue/TelaDiretorioOpenDesign').then((m) => ({ default: m.TelaDiretorioOpenDesign })));
 const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOpenDesign').then((m) => ({ default: m.TelaPerfilOpenDesign })));
-const TelaExplorarOpenDesign = lazy(() => import('./features/novo-aue/TelaExplorarOpenDesign').then((m) => ({ default: m.TelaExplorarOpenDesign })));
 const TelaArenaEmBreveOpenDesign = lazy(() => import('./features/novo-aue/TelaArenaEmBreveOpenDesign').then((m) => ({ default: m.TelaArenaEmBreveOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
 import { FLAGS } from './shared/flags';
-import { abreArenaV2 } from './nucleo/arena/entradaV2';
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { AvisoMaioridade } from './shared/components/AvisoMaioridade';
 import { carregarSocialBar } from './plataforma/web/adsterra';
 import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
-import { rotasDoForum } from './features/forum/rotas';
 import { RastreadorDePaginas } from './features/telemetria/RastreadorDePaginas';
-import { ConteudoDaHome } from './arena/v2/ConteudoDaHome';
-import { TopArrotadoresDaHome } from './features/novo-aue/TopArrotadoresDaHome';
 
 /** Leva ao login guardando a página atual, para a pessoa voltar a ela depois de entrar. */
 function useIrParaLogin() {
@@ -55,11 +49,12 @@ function EntradaPorLink() {
   return <Arena codigoDoDesafio={code} />;
 }
 
-function EntradaInicial() {
+function EntradaInicial({ incluirArenaNoTopo = false }: { readonly incluirArenaNoTopo?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [destino, setDestino] = useState<'inicio' | 'perfil' | null>(null);
   const [autenticado, setAutenticado] = useState(false);
+  const arenaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -80,6 +75,14 @@ function EntradaInicial() {
     };
   }, []);
 
+  const focarArena = useCallback(() => {
+    const container = arenaRef.current;
+    if (!container) return;
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const botao = container.querySelector<HTMLButtonElement>('.arena-v2__gatilho');
+    botao?.focus({ preventScroll: true });
+  }, []);
+
   if (destino === null) {
     return null;
   }
@@ -89,20 +92,37 @@ function EntradaInicial() {
   }
 
   const volta = new URLSearchParams(location.search).get('gravar') === '1' ? '/feed?gravar=1' : '/feed';
-  return <InicioOpenDesign autenticado={autenticado} aoEntrar={() => navigate(enderecoDoLoginComVolta(volta, 'entrar'))} />;
+  const exibeArena = incluirArenaNoTopo && FLAGS.arenaV2;
+  const slotArena = exibeArena ? (
+    <div ref={arenaRef}>
+      <Suspense fallback={null}>
+        <EntradaDaArena modoEmbutido />
+      </Suspense>
+    </div>
+  ) : undefined;
+
+  return (
+    <InicioOpenDesign
+      autenticado={autenticado}
+      aoEntrar={() => navigate(enderecoDoLoginComVolta(volta, 'entrar'))}
+      slotArena={slotArena}
+      aoFocarArena={exibeArena ? focarArena : undefined}
+    />
+  );
 }
 
 function EntradaRaiz() {
-  const { pathname, search } = useLocation();
-  const arenaNaHome = FLAGS.arenaV2 && abreArenaV2(pathname, search);
-  return <div className={`pagina-inicial${arenaNaHome ? ' pagina-inicial--arena' : ''}`}>{arenaNaHome ? <EntradaDaArena conteudoDoRepouso={<TopArrotadoresDaHome />} /> : <><EntradaInicial /><TopArrotadoresDaHome /></>}<ConteudoDaHome /></div>;
+  return <EntradaInicial incluirArenaNoTopo />;
 }
 
-function EntradaDaArena({ conteudoDoRepouso }: { conteudoDoRepouso?: ReactNode } = {}) {
+function EntradaDaArena({ conteudoDoRepouso, modoEmbutido = false }: { conteudoDoRepouso?: ReactNode; modoEmbutido?: boolean } = {}) {
   const { search } = useLocation();
   const adversarioHandle = new URLSearchParams(search).get('desafiar');
-  return FLAGS.dueloV2
-    ? <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />
+  if (FLAGS.dueloV2) {
+    return <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} modoEmbutido={modoEmbutido} />;
+  }
+  return modoEmbutido
+    ? <EntradaArenaLocalV2 modoEmbutido conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />
     : <ArenaV2 conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />;
 }
 
@@ -138,13 +158,6 @@ function EntradaSeguindo() {
   return <InicioOpenDesign viewInicial="seguindo" />;
 }
 
-/** Mantém links antigos de comunidades vivos, levando-os ao endereço novo equivalente. */
-function AliasDeComunidade() {
-  const { slug } = useParams<{ slug: string }>();
-  const location = useLocation();
-  return <Navigate to={`/c/${slug}${location.search}`} replace />;
-}
-
 export function App() {
   const [telemetriaDeNavegacao] = useState(() => criarTelemetriaWeb(criarArmazenamentoWeb()));
 
@@ -160,30 +173,29 @@ export function App() {
         <RastreadorDePaginas telemetria={telemetriaDeNavegacao} />
         <Suspense fallback={null}>
         <Routes>
-          {/* Feed e Entrada Inteligente */}
+          {/* Hub unificado (Arena + Mural) */}
           <Route path="/" element={<EntradaRaiz />} />
-          {/* /feed ainda circula em links antigos; ele usa a mesma casca canônica da raiz. */}
-          <Route path="/feed" element={<EntradaInicial />} />
-          <Route path="/em-alta" element={<Navigate to="/explorar" replace />} />
+          <Route path="/feed" element={<EntradaInicial incluirArenaNoTopo />} />
+          <Route path="/em-alta" element={<Navigate to="/" replace />} />
           <Route path="/seguindo" element={<EntradaSeguindo />} />
 
-          {/* Arena de Arrotos */}
+          {/* Arena de Arrotos (modo foco) */}
           <Route path="/arena/em-breve" element={<TelaArenaEmBreveOpenDesign />} />
           <Route path="/arena" element={FLAGS.arenaV2 ? <EntradaDaArena /> : <TelaArenaEmBreveOpenDesign />} />
 
-          {/* Comunidades (Open Design 1:1) */}
-          <Route path="/comunidade" element={<Navigate to="/comunidades" replace />} />
-          <Route path="/bondes" element={<Navigate to="/comunidades" replace />} />
-          <Route path="/comm" element={<Navigate to="/comunidades" replace />} />
-          <Route path="/comunidades" element={<TelaDiretorioOpenDesign />} />
-          <Route path="/explorar" element={<TelaExplorarOpenDesign />} />
-          <Route path="/c/:slug" element={<TelaComunidadeOpenDesign />} />
-          <Route path="/c/:slug/novo" element={<TelaComunidadeOpenDesign abrirCompositor />} />
-          <Route path="/c/:slug/t/:id" element={<TelaComunidadeOpenDesign />} />
-          {/* Sub-rotas legadas do fórum que ainda não ganharam a casca OpenDesign. */}
-          {rotasDoForum({ incluirRaizesDaComunidade: false, incluirTopico: false })}
-          <Route path="/comunidade/:slug" element={<AliasDeComunidade />} />
-          <Route path="/comunidades/:slug" element={<AliasDeComunidade />} />
+          {/* Comunidades descontinuadas — tudo vai para o Mural unificado em / */}
+          <Route path="/comunidade" element={<Navigate to="/" replace />} />
+          <Route path="/bondes" element={<Navigate to="/" replace />} />
+          <Route path="/comm" element={<Navigate to="/" replace />} />
+          <Route path="/comunidades" element={<Navigate to="/" replace />} />
+          <Route path="/explorar" element={<Navigate to="/" replace />} />
+          <Route path="/c/:slug" element={<Navigate to="/" replace />} />
+          <Route path="/c/:slug/novo" element={<Navigate to="/" replace />} />
+          <Route path="/c/:slug/t/:id" element={<Navigate to="/" replace />} />
+          <Route path="/comunidade/:slug" element={<Navigate to="/" replace />} />
+          <Route path="/comunidades/:slug" element={<Navigate to="/" replace />} />
+          <Route path="/topico/:id" element={<Navigate to="/" replace />} />
+          <Route path="/t/:id" element={<Navigate to="/" replace />} />
 
           {/* Desafios e Duelos X1 */}
           <Route path="/desafios" element={<EntradaDesafios />} />
@@ -200,7 +212,7 @@ export function App() {
           <Route path="/entrar" element={<Navigate to="/login" replace />} />
           <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />
 
-          {/* Administração: a autorização real fica na RPC; esta rota não entra na navegação pública. */}
+          {/* Administração */}
           <Route path="/admin" element={<TelaAdministracao />} />
 
           {/* Resenhas e Histórias */}
@@ -214,8 +226,8 @@ export function App() {
           <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
           <Route path="/ranking-de-arrotos" element={<RankingDeArrotos />} />
           <Route path="/ranking" element={<Navigate to="/ranking-de-arrotos" replace />} />
-          <Route path="/videos-de-arroto" element={<Navigate to="/c/arrotos-youtube" replace />} />
-          <Route path="/videos" element={<Navigate to="/c/arrotos-youtube" replace />} />
+          <Route path="/videos-de-arroto" element={<Navigate to="/" replace />} />
+          <Route path="/videos" element={<Navigate to="/" replace />} />
           <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
           <Route path="/termos" element={<TermosDeUso />} />
           <Route path="/grupos" element={<TelaGrupos />} />

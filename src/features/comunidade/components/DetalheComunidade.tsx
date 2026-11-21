@@ -203,7 +203,7 @@ export const DetalheComunidade: React.FC<DetalheComunidadeProps> = ({
             marginTop: '8px',
             height: '44px',
             borderRadius: '999px',
-            background: 'var(--accent, #c6ff00)',
+            background: 'var(--accent, #ff5500)',
             color: 'var(--accent-on, #000)',
             fontWeight: 800,
             fontSize: '14px',

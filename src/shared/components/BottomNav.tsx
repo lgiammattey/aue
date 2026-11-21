@@ -48,7 +48,7 @@ const navStyle: React.CSSProperties = {
   alignItems: 'flex-end',
   justifyContent: 'space-around',
   padding: '10px 16px calc(14px + env(safe-area-inset-bottom))',
-  background: 'color-mix(in oklch, var(--bg) 92%, transparent)',
+  background: 'color-mix(in srgb, var(--bg) 92%, transparent)',
   backdropFilter: 'blur(14px)',
   borderTop: '1px solid var(--border)',
   zIndex: 50,

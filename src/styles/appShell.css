@@ -1,0 +1,544 @@
+/*
+  App Shell Unificado — Auê! (Desktop 3 colunas + Tablet 2 colunas + Mobile sem Bottom Nav)
+  Replaces the old editorial .app--mural hiding rules.
+*/
+@layer shell {
+  .app {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) 320px;
+    max-inline-size: none;
+    inline-size: 100%;
+    min-block-size: 100svh;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+  }
+
+  .app > * {
+    min-inline-size: 0;
+  }
+
+  .app > main {
+    min-inline-size: 0;
+    inline-size: 100%;
+    padding: 20px clamp(20px, 3vw, 40px) 80px;
+    border-inline: 0;
+    background-color: var(--bg);
+  }
+
+  .sidebar {
+    position: sticky;
+    inset-block-start: 0;
+    block-size: 100svh;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 16px;
+    background-color: var(--bg);
+    border-right: 0;
+  }
+
+  .rightbar {
+    position: sticky;
+    inset-block-start: 0;
+    block-size: 100svh;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 16px;
+    background-color: var(--bg);
+    border-left: 0;
+  }
+
+  /* Marca na sidebar */
+  .sidebar .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-block-size: 44px;
+    padding: 4px 10px 10px;
+    border-bottom: 0;
+    margin-bottom: 4px;
+    font-family: var(--font-display);
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+
+  .sidebar .brand-bang {
+    color: var(--accent);
+  }
+
+  .sidebar-desktop-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 0;
+  }
+
+  .sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    inline-size: 100%;
+    min-block-size: 44px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+    transition: background-color var(--duration-fast) var(--easing-standard),
+      color var(--duration-fast) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard);
+  }
+
+  .sidebar .nav-item:hover {
+    background-color: var(--surface);
+    color: var(--fg);
+  }
+
+  .sidebar .nav-item.active,
+  .sidebar .nav-item[aria-current='page'] {
+    background-color: var(--surface);
+    border-color: var(--border-strong);
+    color: var(--fg);
+    font-weight: 800;
+  }
+
+  .sidebar .nav-item .ico {
+    display: grid;
+    place-items: center;
+    inline-size: 22px;
+    block-size: 22px;
+    flex: none;
+    color: currentColor;
+  }
+
+  .sidebar .nav-item .ico svg {
+    inline-size: 20px;
+    block-size: 20px;
+  }
+
+  .sidebar .nav-item.active .ico,
+  .sidebar .nav-item[aria-current='page'] .ico {
+    color: var(--accent);
+  }
+
+  .sidebar .create-side {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    inline-size: 100%;
+    min-block-size: 46px;
+    margin: 14px 0 8px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background-color: var(--accent);
+    color: var(--accent-on);
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: background-color var(--duration-fast) var(--easing-standard);
+  }
+
+  .sidebar .create-side:hover {
+    background-color: var(--accent-hover);
+    filter: none;
+    transform: none;
+  }
+
+  .sidebar .create-side:active {
+    background-color: var(--accent-strong);
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .sidebar-account-action {
+    inline-size: 100%;
+    min-block-size: 44px;
+    padding: 8px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .sidebar-account-action--enter {
+    background-color: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .sidebar-account-action--enter:hover {
+    background-color: var(--accent);
+    color: var(--accent-on);
+    filter: none;
+  }
+
+  .sidebar-account-action--leave {
+    background-color: var(--surface);
+    color: var(--fg-secondary);
+  }
+
+  .sidebar-account-action--leave:hover {
+    background-color: var(--surface-2);
+    color: var(--fg);
+  }
+
+  .sidebar-legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .sidebar-legal-links a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 36px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .sidebar-legal-links a:hover {
+    color: var(--fg);
+    text-decoration: underline;
+  }
+
+  /* Barra superior mobile: oculta no desktop */
+  header.topbar {
+    display: none;
+  }
+
+  /* Faixa compacta do Top 5 no miolo (só visível abaixo de 1024px) */
+  .hub-mobile-ranking {
+    display: none;
+  }
+
+  /* Controles do Mural na Home unificada */
+  .mural-cabecalho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+    padding: 8px 0 6px;
+    border-top: 0;
+    border-bottom: 0;
+  }
+
+  .mural-cabecalho__titulo-grupo {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .mural-cabecalho__kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .mural-cabecalho h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3.6vw, 36px);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .mural-controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 4px 0 8px;
+    border-bottom: 0;
+    margin-bottom: 14px;
+  }
+
+  .mural-controles .feed-filters {
+    display: inline-flex;
+    gap: 4px;
+    inline-size: auto;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    box-shadow: none;
+  }
+
+  .mural-controles .feed-filter {
+    min-block-size: 38px;
+    padding: 6px 14px;
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .mural-controles .feed-filter[aria-pressed='true'] {
+    background: var(--surface-2);
+    color: var(--fg);
+    border: 1px solid var(--border-strong);
+    box-shadow: none;
+  }
+
+  .mural-publicar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-block-size: 44px;
+    padding: 8px 16px;
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--fg);
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .mural-publicar:hover {
+    background: var(--accent);
+    color: var(--accent-on);
+    border-color: var(--accent);
+  }
+
+  .mural-rodape-acoes {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  /* Painel direito técnico */
+  .rightbar-bloco {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .rightbar-bloco__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .rightbar-bloco__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .rightbar-bloco h2 {
+    margin: 4px 0 0;
+    font-family: var(--font-display);
+    font-size: 20px;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .rightbar-bloco__link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 36px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .rightbar-bloco__link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  /* Grupos de WhatsApp dentro do rail direito */
+  .rightbar-bloco .grupos-home ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .rightbar-bloco .grupos-home li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rightbar-bloco .grupos-home li > div {
+    min-width: 0;
+  }
+
+  .rightbar-bloco .grupos-home li a {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .rightbar-bloco .grupos-home h3 {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: none;
+    color: var(--fg);
+  }
+
+  .rightbar-bloco .grupos-home li p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  .rightbar-bloco .grupos-home li a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 36px;
+    padding: 4px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fg);
+    background: var(--bg-elevated);
+  }
+
+  .rightbar-bloco .grupos-home li a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .rightbar-bloco .grupos-home .grupos-home__nota {
+    margin: 8px 0 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .rightbar-bloco .grupos-home > a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 36px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .rightbar-bloco .grupos-home > a:hover {
+    text-decoration: underline;
+  }
+
+  /* Tablet (700px a 1023px): 2 colunas */
+  @media (max-width: 1023px) {
+    .app {
+      grid-template-columns: 220px minmax(0, 1fr);
+    }
+
+    .rightbar {
+      display: none;
+    }
+
+    .app > main {
+      border-right: 0;
+    }
+
+    .hub-mobile-ranking {
+      display: block;
+      margin: 14px 0 4px;
+    }
+  }
+
+  /* Mobile (< 700px): SEM Bottom Nav, topo enxuto + conteúdo em largura total */
+  @media (max-width: 699px) {
+    .app {
+      display: block;
+      min-block-size: 100svh;
+    }
+
+    .sidebar {
+      display: none;
+    }
+
+    .app > main {
+      padding: 0 max(14px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+      border-inline: 0;
+    }
+
+    header.topbar {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-block-size: calc(52px + env(safe-area-inset-top, 0px));
+      margin: 0 calc(-1 * max(14px, env(safe-area-inset-left, 0px))) 14px;
+      padding: env(safe-area-inset-top, 0px) max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));
+      background-color: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hub-mobile-ranking {
+      display: block;
+      margin: 12px 0 4px;
+    }
+
+    .mural-cabecalho {
+      margin-top: 14px;
+      padding: 12px 0;
+    }
+  }
+}

@@ -39,28 +39,29 @@ for (const viewport of VIEWPORTS) {
     await aguardarPinturaFinal(page);
     const login = page.locator('.app.app--auth');
     await expect(login).toBeVisible();
-    await expect(login.getByRole('heading', { name: 'Entra na roda' })).toBeVisible();
-    expect(await login.getByRole('heading', { name: 'Entra na roda' }).evaluate((titulo) => getComputedStyle(titulo).fontFamily)).toContain('Anton');
+    await expect(login.getByRole('heading', { name: 'Entrar' })).toBeVisible();
+    expect(await login.getByRole('heading', { name: 'Entrar' }).evaluate((titulo) => getComputedStyle(titulo).fontFamily)).toContain('Anton');
     expect(await login.locator('.auth-brand').evaluate((marca) => getComputedStyle(marca).fontFamily)).toContain('Anton');
     expect((await coresDaCasca(page, '.app.app--auth')).fundo).toBe(await corDoToken(page, '--aue-bg'));
     expect((await coresDaCasca(page, '.app--auth .dialog')).fundo).toBe(await corDoToken(page, '--aue-surface'));
     expect(await page.locator('html').getAttribute('data-theme')).not.toBe('light');
 
-    await page.goto('/como-jogar');
+    await page.goto('/tipos-de-arroto');
     await aguardarPinturaFinal(page);
     const informativo = page.locator('.app.od-informativo');
     await expect(informativo).toBeVisible();
     await expect(informativo.locator('.sidebar')).toHaveCount(1);
     await expect(informativo.locator('.topbar')).toHaveCount(1);
     await expect(informativo.locator('.rightbar')).toHaveCount(1);
+    await expect(informativo.locator('.mobile-bottom-nav')).toHaveCount(0);
     await expect(informativo.locator('.publico-cabecalho')).toHaveCount(0);
-    expect((await coresDaCasca(page, '.app.od-informativo')).fundo).toBe(await corDoToken(page, '--aue-bg'));
-    expect((await coresDaCasca(page, '.od-informativo__content')).fundo).toBe(await corDoToken(page, '--aue-bg'));
-    expect((await coresDaCasca(page, '.od-informativo__content')).texto).toBe(await corDoToken(page, '--aue-text'));
+    expect((await coresDaCasca(page, '.app.od-informativo')).fundo).toBe('rgb(10, 11, 14)');
+    expect((await coresDaCasca(page, '.od-informativo__content')).fundo).toBe('rgb(10, 11, 14)');
+    expect((await coresDaCasca(page, '.od-informativo__content')).texto).toBe('rgb(243, 244, 246)');
     expect(await informativo.locator('.publico-hero h1').evaluate((titulo) => getComputedStyle(titulo).fontFamily)).toContain('Anton');
 
-    // A navegação entre as duas cascas e o feed não pode trocar o tema global.
-    await page.getByRole('button', { name: 'Fazer login' }).click();
+    // A navegação entre as duas cascas e o feed mantém o tema escuro carbono.
+    await page.getByRole('button', { name: viewport.width < 700 ? 'Fazer login' : 'Entrar' }).click();
     await expect(page).toHaveURL(/\/login/);
     await expect(page.locator('.app.app--auth')).toBeVisible();
     await page.getByRole('link', { name: 'Auê, página inicial' }).click();
@@ -69,32 +70,13 @@ for (const viewport of VIEWPORTS) {
     expect(await page.locator('html').getAttribute('data-theme')).not.toBe('light');
   });
 
-  test(`login e guia herdam o tema global claro em ${viewport.nome}`, async ({ page }) => {
+  test(`como-jogar e landing seguem o Design System dark carbono em ${viewport.nome}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto('/como-jogar');
     await aguardarPinturaFinal(page);
-    // O seletor global é aplicado depois da montagem para validar a herança
-    // CSS da casca. Persistir a preferência no bootstrap não é requisito
-    // desta página nem autorização para criar uma regra de produto nova.
-    await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    expect((await coresDaCasca(page, '.app.od-informativo')).fundo).toBe(await corDoToken(page, '--aue-bg'));
-    expect((await coresDaCasca(page, '.od-informativo__content')).fundo).toBe(await corDoToken(page, '--aue-bg'));
-    expect((await coresDaCasca(page, '.od-informativo__content')).texto).toBe(await corDoToken(page, '--aue-text'));
+    await expect(page.locator('.guia-arena')).toBeVisible();
+    expect((await coresDaCasca(page, '.guia-arena')).fundo).toBe('rgb(10, 11, 14)');
 
-    await page.getByRole('button', { name: 'Fazer login' }).click();
-    await expect(page).toHaveURL(/\/login/);
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    expect((await coresDaCasca(page, '.app.app--auth')).fundo).toBe(await corDoToken(page, '--aue-bg'));
-    expect((await coresDaCasca(page, '.app--auth .dialog')).fundo).toBe(await corDoToken(page, '--aue-surface'));
-
-    await page.getByRole('link', { name: 'Auê, página inicial' }).click();
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  });
-
-  test(`landing mantém a superfície clara de apoio e títulos Archivo em ${viewport.nome}`, async ({ page }) => {
-    await page.setViewportSize(viewport);
     await page.goto('/landing');
     await aguardarPinturaFinal(page);
 
@@ -102,8 +84,8 @@ for (const viewport of VIEWPORTS) {
     await expect(landing).toBeVisible();
     await expect(landing.locator('.landing-texto h1')).toBeVisible();
     expect(await landing.locator('.landing-texto h1').evaluate((titulo) => getComputedStyle(titulo).fontFamily)).toContain('Archivo');
-    expect(await landing.evaluate((elemento) => getComputedStyle(elemento).colorScheme)).toBe('light');
-    expect(await landing.evaluate((elemento) => getComputedStyle(elemento).backgroundColor)).toBe('rgb(247, 248, 245)');
+    expect(await landing.evaluate((elemento) => getComputedStyle(elemento).colorScheme)).toBe('dark');
+    expect(await landing.evaluate((elemento) => getComputedStyle(elemento).backgroundColor)).toBe('rgb(10, 11, 14)');
   });
 }
 

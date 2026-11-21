@@ -10,16 +10,17 @@ vi.mock('../../plataforma/web/conta', () => ({ criarContaWeb: () => ({ estado: v
 beforeEach(() => { FLAGS.arenaV2 = true; FLAGS.dueloV2 = false; });
 afterEach(() => { cleanup(); FLAGS.arenaV2 = false; FLAGS.dueloV2 = false; });
 describe('Ranking integrado às rotas', () => {
-  it('está dentro da Arena na home', async () => {
+  it('está dentro da Home unificada', async () => {
     window.history.pushState({}, '', '/');
     render(<App />);
-    const top = await screen.findByText('TOP TESTE');
-    expect(top.closest('main')?.classList.contains('arena-v2')).toBe(true);
+    const tops = await screen.findAllByText('TOP TESTE');
+    expect(tops.length).toBeGreaterThanOrEqual(1);
+    expect(tops[0].closest('.app')).toBeTruthy();
   });
   it('não aparece na rota isolada da Arena', async () => {
     window.history.pushState({}, '', '/arena');
     render(<App />);
-    await screen.findByRole('button', { name: 'Gravar meu arroto' });
+    await screen.findByRole('button', { name: 'Gravar agora' });
     expect(screen.queryByText('TOP TESTE')).toBeNull();
   });
   it('não aparece no fluxo de convite', async () => {

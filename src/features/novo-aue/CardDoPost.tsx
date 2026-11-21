@@ -1,10 +1,6 @@
 /**
- * CANÔNICO ATIVO — Card de Post da Tropa do Arroto (OpenDesign)
- * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
- * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
- * 
+ * CANÔNICO ATIVO — Card de Post "Ficha de Jogada" (Carbono + Laranja Elétrico)
  * NUNCA altere o CardDeCauso legado para novos comportamentos de feed.
- * Toda melhoria no card de post (ações, avatar, player, notas) deve ser feita aqui.
  */
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -86,10 +82,8 @@ export const CardDoPost = memo(function CardDoPost({
   aoAbrirComentarios,
 }: Props) {
   const [copiado, setCopiado] = useState(false);
-  const [falhouAvatarDaComunidade, setFalhouAvatarDaComunidade] = useState(false);
 
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
-  const comunidadeInicial = post.comunidadeSlug.charAt(0).toUpperCase();
   const ePessoal = post.origem === 'pessoal';
   const temAnexoOuVideo = Boolean(post.anexo) || Boolean(post.videoUrl);
   const tituloAutomaticoDeMidia = ePessoal
@@ -98,8 +92,6 @@ export const CardDoPost = memo(function CardDoPost({
     && post.titulo.trim() === 'Mídia no perfil';
   const tituloExibivel = tituloAutomaticoDeMidia ? '' : post.titulo;
 
-  // Vídeos antigos (ex.: r/arrotos-youtube) foram espelhados como tópico com o link
-  // dentro do texto e sem anexo; sem este último recurso ficariam só como texto.
   const video = post.videoUrl
     ? detectarLinkDeVideo(post.videoUrl)
     : post.anexo?.tipo === 'videoExterno' && post.anexo.url
@@ -110,11 +102,9 @@ export const CardDoPost = memo(function CardDoPost({
 
   const aoCompartilhar = async () => {
     const id = post.id.replace(/^(topico|causo)-/, '');
-    const caminho = ePessoal && post.autorHandle
-      ? `/u/${encodeURIComponent(post.autorHandle)}#post-${encodeURIComponent(post.id)}`
-      : post.tipo === 'topico'
-      ? `/c/${encodeURIComponent(post.comunidadeSlug)}/t/${encodeURIComponent(id)}`
-      : `/historia/${encodeURIComponent(id)}`;
+    const caminho = post.tipo === 'causo' || !post.autorHandle
+      ? `/historia/${encodeURIComponent(id)}`
+      : `/u/${encodeURIComponent(post.autorHandle)}#post-${encodeURIComponent(post.id)}`;
     const url = `${window.location.origin}${caminho}`;
     try {
       if (typeof navigator.share === 'function') {
@@ -126,7 +116,6 @@ export const CardDoPost = memo(function CardDoPost({
       setTimeout(() => setCopiado(false), 2000);
     } catch (erro) {
       if ((erro as { name?: string }).name === 'AbortError') return;
-      // Sem permissão de área de transferência: entrega o link para a pessoa copiar na mão.
       window.prompt('Copie o link:', url);
     }
   };
@@ -135,12 +124,17 @@ export const CardDoPost = memo(function CardDoPost({
     aoCurtir?.();
   };
 
+  const temAudio = Boolean(
+    post.temAudio || post.enderecoDoAudio || (post.anexo?.tipo === 'audio' && post.anexo.url),
+  );
+  const temNota = post.nota !== undefined && post.nota !== null;
+  const notaOuro = temNota && Number(post.nota) >= 80;
+
   return (
     <article
-      className={`feed-post card-do-post${variante === 'perfil' ? ' card-do-post--perfil' : ''}${post.tipo === 'topico' && post.respostasTotal > 0 ? ' card-do-post--thread' : ''}`}
+      className={`feed-post card-do-post${variante === 'perfil' ? ' card-do-post--perfil' : ''}${post.tipo === 'topico' && post.respostasTotal > 0 ? ' card-do-post--thread' : ''}${audioTocando ? ' card-do-post--tocando' : ''}`}
       id={`post-${post.id}`}
     >
-      {/* Coluna do Avatar (Estilo Twitter) */}
       <div className="post-avatar-col">
         {post.autorHandle ? (
           <Link
@@ -176,9 +170,7 @@ export const CardDoPost = memo(function CardDoPost({
         )}
       </div>
 
-      {/* Conteúdo Principal do Post */}
       <div className="post-main-content">
-        {/* Cabeçalho de Metadados: Nome, @handle, tempo e badges */}
         <header className="post-meta-header">
           <div className="post-meta-ident">
             {post.autorHandle ? (
@@ -212,49 +204,51 @@ export const CardDoPost = memo(function CardDoPost({
             </div>
           </div>
 
-          {!ePessoal && <Link
-            to={`/c/${post.comunidadeSlug}`}
-            className="post-community-avatar"
-            aria-label={`Abrir comunidade r/${post.comunidadeSlug}`}
-            title={`Ir para r/${post.comunidadeSlug}`}
-          >
-            {post.comunidadeAvatarUrl && !falhouAvatarDaComunidade ? (
-              <img src={post.comunidadeAvatarUrl} alt="" onError={() => setFalhouAvatarDaComunidade(true)} />
-            ) : (
-              <span aria-hidden="true">{comunidadeInicial}</span>
-            )}
-          </Link>}
-          {variante === 'perfil' && <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />}
+          <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />
         </header>
 
-        {/* Tag de Tópico (só quando há título distinto do corpo do post) */}
         {post.corpo && tituloExibivel && tituloExibivel.trim() !== post.corpo.trim() && !post.corpo.startsWith(tituloExibivel) && (
           <div className="post-topic-tag">
             <span className="post-topic-tag__label">{tituloExibivel}</span>
           </div>
         )}
 
-        {/* Corpo do Texto */}
         {(post.corpo || tituloExibivel) && (
           <p className="post-body">{post.corpo || tituloExibivel}</p>
         )}
 
-        {/* Player de Áudio integrado */}
-        {(post.temAudio || post.enderecoDoAudio || (post.anexo?.tipo === 'audio' && post.anexo.url)) && (
-          <div className="post-audio-wrapper audio-com-nota">
-            <div className="audio-com-nota__player"><PlayerDoArroto
-              tocando={audioTocando}
-              tempoAtualSegundos={tempoAtualDoAudio}
-              duracaoSegundos={duracaoDoAudio}
-              aoAlternar={() =>
-                aoTocarAudio?.(post.anexo?.tipo === 'audio' ? post.anexo.url : post.enderecoDoAudio)
-              }
-            /></div>
-            {post.nota !== undefined && post.nota !== null && <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${post.nota} de 100`}>{post.nota}</span>}
+        {temAudio && (
+          <div className={`post-audio-wrapper audio-com-nota${temNota ? ' audio-com-nota--com-placar' : ''}`}>
+            <div className="audio-com-nota__player">
+              <PlayerDoArroto
+                tocando={audioTocando}
+                tempoAtualSegundos={tempoAtualDoAudio}
+                duracaoSegundos={duracaoDoAudio}
+                aoAlternar={() =>
+                  aoTocarAudio?.(post.anexo?.tipo === 'audio' ? post.anexo.url : post.enderecoDoAudio)
+                }
+              />
+            </div>
+            {temNota && (
+              <div className={`audio-com-nota__placar${notaOuro ? ' is-ouro' : ''}`}>
+                <span className="audio-com-nota__rotulo">NOTA</span>
+                <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${post.nota} de 100`}>
+                  {post.nota}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Imagem em anexo */}
+        {!temAudio && temNota && (
+          <div className={`post-nota-isolada${notaOuro ? ' is-ouro' : ''}`}>
+            <span className="audio-com-nota__rotulo">NOTA</span>
+            <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${post.nota} de 100`}>
+              {post.nota}
+            </span>
+          </div>
+        )}
+
         {post.anexo?.tipo === 'imagem' && post.anexo.url && (
           <div className="post-media-image">
             <img
@@ -266,7 +260,6 @@ export const CardDoPost = memo(function CardDoPost({
           </div>
         )}
 
-        {/* Vídeo embutido (YouTube ou TikTok) */}
         {video && (
           <div className="post-media-video">
             <iframe
@@ -280,142 +273,112 @@ export const CardDoPost = memo(function CardDoPost({
           </div>
         )}
 
-        {/* Barra de Ações (Estilo Twitter/X: Ícones vetoriais enxutos com contadores numéricos) */}
-        <div className="post-actions--twitter" role="toolbar" aria-label="Ações do post">
-          {/* Responder / Comentários */}
-          <button
-            type="button"
-            className={`action-btn action-btn--reply ${threadAberta ? 'is-active' : ''}`}
-            onClick={aoAbrirComentarios}
-            aria-label={`${post.respostasTotal} comentários`}
-            title={threadAberta ? 'Recolher respostas' : 'Ver respostas'}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M20 4.5H4a2 2 0 00-2 2v9a2 2 0 002 2h9l5 3.5v-3.5h2a2 2 0 002-2v-9a2 2 0 00-2-2z" />
-              <path d="M8 11h.01M12 11h.01M16 11h.01" strokeWidth="2.4" />
-            </svg>
-            {post.respostasTotal > 0 && (
-              <span className="action-btn__count">{post.respostasTotal}</span>
-            )}
-            <span className="sr-only">comentários</span>
-          </button>
+        <footer className="post-footer-ficha" aria-label="Interações da jogada">
+          {variante !== 'perfil' && (
+            <div className="post-reactions-bar" role="group" aria-label="Reações competitivas">
+              <button
+                type="button"
+                className={`reaction-chip action-btn action-btn--like${minhas.includes('like') ? ' is-active' : ''}`}
+                onClick={aoDispararCurtir}
+                disabled={!aoCurtir}
+                aria-pressed={minhas.includes('like')}
+                aria-label="Curtir"
+                title={aoCurtir ? (minhas.includes('like') ? 'Tirar o like' : 'Dar like') : 'Like não está disponível aqui'}
+              >
+                <span aria-hidden="true">👍</span>
+                {reacoes && (reacoes.like ?? 0) > 0 && <span className="action-btn__count">{reacoes.like}</span>}
+                <span className="sr-only">Curtir</span>
+              </button>
 
-          {/* Like */}
-          <button
-            type="button"
-            className={`action-btn action-btn--like ${minhas.includes('like') ? 'is-active' : ''}`}
-            onClick={aoDispararCurtir}
-            disabled={!aoCurtir}
-            aria-pressed={minhas.includes('like')}
-            aria-label="Curtir"
-            title={aoCurtir ? (minhas.includes('like') ? 'Tirar o like' : 'Dar like') : 'Like não está disponível aqui'}
-          >
-            <span aria-hidden="true">👍</span>
-            {reacoes && (reacoes.like ?? 0) > 0 && <span className="action-btn__count">{reacoes.like}</span>}
-            <span className="sr-only">Curtir</span>
-          </button>
-
-          {([
-            ['dislike', '👎', 'Dislike', 'Dislike'],
-            ['dedo', '🖕', 'Dedo do meio', 'Dedo do meio'],
-            ['hangloose', '🤙', 'Hangloose', 'Hangloose'],
-            ['rock', '🤘', 'Sinal do rock', 'Rock'],
-            ['cerveja', '🍺', 'Cerveja', 'Cerveja'],
-            ['refrigerante', '🥤', 'Refrigerante', 'Refrigerante'],
-          ] as const).map(([tipo, emoji, titulo, nome]) => (
-            <button
-              key={tipo}
-              type="button"
-              className={`action-btn action-btn--emoji ${minhas.includes(tipo) ? 'is-active' : ''}`}
-              onClick={() => aoReagir?.(tipo)}
-              disabled={!aoReagir}
-              aria-pressed={minhas.includes(tipo)}
-              aria-label={emoji}
-              title={aoReagir ? titulo : 'Reagir não está disponível aqui'}
-            >
-              <span aria-hidden="true">{emoji}</span>
-              {(reacoes?.[tipo] ?? 0) > 0 && <span className="action-btn__count">{reacoes?.[tipo]}</span>}
-              <span className="sr-only">{nome}</span>
-            </button>
-          ))}
-
-          {aoDesafiar && (
-            <button
-              type="button"
-              className="action-btn action-btn--challenge"
-              onClick={aoDesafiar}
-              aria-label={post.autorHandle ? `Desafiar @${post.autorHandle}` : 'Desafiar'}
-              title={post.autorHandle ? `Desafiar @${post.autorHandle}` : 'Desafiar'}
-            >
-              <span aria-hidden="true">⚔️</span>
-              <span className="action-btn__count">Desafiar</span>
-            </button>
+              {([
+                ['dislike', '👎', 'Dislike', 'Dislike'],
+                ['dedo', '🖕', 'Dedo do meio', 'Dedo do meio'],
+                ['hangloose', '🤙', 'Hangloose', 'Hangloose'],
+                ['rock', '🤘', 'Sinal do rock', 'Rock'],
+                ['cerveja', '🍺', 'Cerveja', 'Cerveja'],
+                ['refrigerante', '🥤', 'Refrigerante', 'Refrigerante'],
+              ] as const).map(([tipo, emoji, titulo, nome]) => (
+                <button
+                  key={tipo}
+                  type="button"
+                  className={`reaction-chip action-btn action-btn--emoji${minhas.includes(tipo) ? ' is-active' : ''}`}
+                  onClick={() => aoReagir?.(tipo)}
+                  disabled={!aoReagir}
+                  aria-pressed={minhas.includes(tipo)}
+                  aria-label={emoji}
+                  title={aoReagir ? titulo : 'Reagir não está disponível aqui'}
+                >
+                  <span aria-hidden="true">{emoji}</span>
+                  {(reacoes?.[tipo] ?? 0) > 0 && <span className="action-btn__count">{reacoes?.[tipo]}</span>}
+                  <span className="sr-only">{nome}</span>
+                </button>
+              ))}
+            </div>
           )}
 
-          {/* Sem porta de salvos, o controle continua visível mas indisponível. */}
-          {salvo !== undefined && <button
-            type="button"
-            className={`action-btn action-btn--save ${salvo ? 'is-saved' : ''}`}
-            onClick={aoAlternarSalvar}
-            disabled={!aoAlternarSalvar}
-            aria-pressed={Boolean(salvo)}
-            aria-label={salvo ? 'Salvo' : 'Salvar'}
-            title={aoAlternarSalvar ? (salvo ? 'Remover dos salvos' : 'Salvar') : 'Salvar não está disponível aqui'}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill={salvo ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+          <div className="post-actions-bar post-actions--twitter" role="toolbar" aria-label="Ações do post">
+            <button
+              type="button"
+              className={`action-btn action-btn--reply${threadAberta ? ' is-active' : ''}`}
+              onClick={aoAbrirComentarios}
+              aria-label={`${post.respostasTotal} comentários`}
+              title={threadAberta ? 'Recolher respostas' : 'Ver respostas'}
             >
-              <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
-            </svg>
-            <span className="sr-only">{salvo ? 'Salvo' : 'Salvar'}</span>
-          </button>
-          }
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 4.5H4a2 2 0 00-2 2v9a2 2 0 002 2h9l5 3.5v-3.5h2a2 2 0 002-2v-9a2 2 0 00-2-2z" />
+                <path d="M8 11h.01M12 11h.01M16 11h.01" strokeWidth="2.4" />
+              </svg>
+              {post.respostasTotal > 0 && (
+                <span className="action-btn__count">{post.respostasTotal}</span>
+              )}
+              <span className="sr-only">comentários</span>
+            </button>
 
-          {/* Compartilhar */}
-          <button
-            type="button"
-            className="action-btn action-btn--share"
-            onClick={() => void aoCompartilhar()}
-            aria-label="Compartilhar"
-            title="Compartilhar o link"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+            {salvo !== undefined && (
+              <button
+                type="button"
+                className={`action-btn action-btn--save${salvo ? ' is-saved' : ''}`}
+                onClick={aoAlternarSalvar}
+                disabled={!aoAlternarSalvar}
+                aria-pressed={Boolean(salvo)}
+                aria-label={salvo ? 'Salvo' : 'Salvar'}
+                title={aoAlternarSalvar ? (salvo ? 'Remover dos salvos' : 'Salvar') : 'Salvar não está disponível aqui'}
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill={salvo ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+                </svg>
+                <span className="sr-only">{salvo ? 'Salvo' : 'Salvar'}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="action-btn action-btn--share"
+              onClick={() => void aoCompartilhar()}
+              aria-label="Compartilhar"
+              title="Compartilhar o link"
             >
-              <path d="M12 3v13M7 8l5-5 5 5M5 14v6h14v-6" />
-            </svg>
-            {copiado && <span className="action-btn__feedback">Copiado!</span>}
-            <span className="sr-only">Compartilhar</span>
-          </button>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3v13M7 8l5-5 5 5M5 14v6h14v-6" />
+              </svg>
+              {copiado && <span className="action-btn__feedback">Copiado!</span>}
+              <span className="sr-only">Compartilhar</span>
+            </button>
 
-          {variante !== 'perfil' && <MenuDoPost aoDenunciar={aoDenunciar} aoApagar={aoApagar} />}
-        </div>
+            {aoDesafiar && (
+              <button
+                type="button"
+                className="action-btn action-btn--challenge"
+                onClick={aoDesafiar}
+                aria-label={post.autorHandle ? `Desafiar @${post.autorHandle}` : 'Desafiar'}
+                title={post.autorHandle ? `Desafiar @${post.autorHandle}` : 'Desafiar'}
+              >
+                <span aria-hidden="true">⚔️</span>
+                <span className="action-btn__count">Puxar X1</span>
+              </button>
+            )}
+          </div>
+        </footer>
       </div>
     </article>
   );

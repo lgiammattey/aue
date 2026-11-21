@@ -1,4 +1,5 @@
-/* A casca pública entra no CSS inicial mesmo quando a rota React é lazy. */
+/* A casca pública e o novo Design System entram no CSS inicial. */
+@import './styles/designSystem.css';
 @import './features/publico/LayoutPublico.css';
 
 /*
@@ -26,25 +27,25 @@
 }
 
 :root {
-  --bg: #000000;
-  --surface: #121212;
-  --surface-2: #1c1c1e;
-  --fg: #ffffff;
-  --muted: #8e8e93;
-  --border: #222222;
-  --accent: #c6ff00;
-  --accent-strong: #a8d900;
-  --accent-on: #000000;
-  --gold: #f4c430;
-  --gold-strong: #d9ac1c;
-  --danger: #ff3d3f;
-  --danger-strong: #e11a1c;
+  --bg: #0a0b0e;
+  --surface: #151820;
+  --surface-2: #1d212c;
+  --fg: #f3f4f6;
+  --muted: #8b92a3;
+  --border: #232834;
+  --accent: #ff5500;
+  --accent-strong: #e04800;
+  --accent-on: #0a0b0e;
+  --gold: #f5b82e;
+  --gold-strong: #d9a01f;
+  --danger: #ff3b47;
+  --danger-strong: #d92632;
   --silver: #c7cad1;
-  --bronze: #c98a4b;
+  --bronze: #d18a4e;
 
-  --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
-  --fg-soft: color-mix(in oklch, var(--fg) 6%, transparent);
-  --page-bg: #000000;
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, transparent);
+  --fg-soft: color-mix(in oklab, var(--fg) 6%, transparent);
+  --page-bg: #0a0b0e;
 
   --font-display: 'Anton', 'Archivo Black', Impact, system-ui, sans-serif;
   /* UI em Archivo: grotesca esportiva, ombro reto. Inter só sobra
@@ -53,9 +54,9 @@
     'Archivo', 'Archivo Narrow', 'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
   --font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
 
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 24px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
   --radius-full: 999px;
 
   --space-1: 4px;
@@ -67,17 +68,6 @@
   --space-7: 40px;
   --space-8: 48px;
 
-  /*
-    MOVIMENTO — tokens do design system (§13.1), medidos no protótipo
-    `docs/design/prototipo-arena/arena.html`.
-
-    Estavam faltando aqui e cada componente escolhia a própria duração no olho.
-    Com eles, "rápido" quer dizer a mesma coisa na Arena inteira, e mudar o
-    ritmo do jogo é mexer em cinco linhas em vez de caçar `0.2s` pelo CSS.
-
-    `--duration-reveal` é a revelação da nota: a única espera longa que o jogo
-    tem direito de ter, porque ali a espera É a piada.
-  */
   --duration-instant: 100ms;
   --duration-fast: 160ms;
   --duration-base: 240ms;
@@ -89,18 +79,6 @@
   --easing-emphasize: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   color-scheme: dark;
-}
-
-[data-theme='light'] {
-  --bg: #ffffff;
-  --surface: #f7f7f8;
-  --surface-2: #ededf0;
-  --fg: #000000;
-  --muted: #666666;
-  --border: #e5e5e8;
-  --accent-on: #000000;
-  --page-bg: #ffffff;
-  color-scheme: light;
 }
 
 *, *::before, *::after {
@@ -147,9 +125,9 @@ h1, h2, h3, p {
   margin: 0;
 }
 
-*:focus-visible {
+:where(a:any-link, button, input, textarea, select, [tabindex]):focus-visible {
   outline: 3px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 /* App Shell Mobile-first Container */

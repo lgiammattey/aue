@@ -14,7 +14,7 @@ export function AvisoMaioridade() {
       <div className="aviso-maioridade__miolo">
         <p className="aviso-maioridade__texto">
           <span className="aviso-maioridade__selo">+18</span>
-          <span>Ambiente para maiores de 18 anos. Arrotos sem filtro, humor pesado e anúncios irrestritos.</span>
+          <span>Só pra maiores. Humor pesado e zero filtro.</span>
         </p>
         <button
           type="button"
@@ -25,7 +25,7 @@ export function AvisoMaioridade() {
             setVisivel(false);
           }}
         >
-          Tenho 18+ · Liberar
+          Tenho 18+
         </button>
       </div>
     </aside>

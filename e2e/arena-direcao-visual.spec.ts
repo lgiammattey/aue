@@ -7,9 +7,9 @@ for (const viewport of [{ width: 320, height: 720 }, { width: 390, height: 844 }
     await page.setViewportSize(viewport);
     await page.goto('/arena');
     const arena = page.locator('.arena-v2');
-    await expect(arena).toHaveCSS('background-color', 'rgb(245, 241, 233)');
-    await expect(page.getByRole('heading', { name: 'PRONTO PRA SOLTAR O AUÊ?' })).toBeVisible();
-    const iniciar = page.getByRole('button', { name: 'Gravar meu arroto' });
+    await expect(arena).toHaveCSS('background-color', 'rgb(10, 11, 14)');
+    await expect(page.getByRole('heading', { name: 'SOLTA O ARROTO.' })).toBeVisible();
+    const iniciar = page.getByRole('button', { name: 'Gravar agora' });
     await expect(iniciar).toBeVisible();
     const caixa = await iniciar.boundingBox();
     expect(caixa?.height).toBeGreaterThanOrEqual(44);

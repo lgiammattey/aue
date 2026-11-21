@@ -247,7 +247,7 @@ export const ComposerCauso: React.FC<ComposerCausoProps> = ({
               padding: '0 20px',
               border: 0,
               borderRadius: '999px',
-              background: 'var(--accent, #c6ff00)',
+              background: 'var(--accent, #ff5500)',
               color: 'var(--accent-on, #000)',
               fontWeight: 700,
               fontSize: '15px',

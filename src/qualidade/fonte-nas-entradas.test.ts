@@ -52,10 +52,10 @@ describe('a fonte chega igual em toda entrada HTML', () => {
     // achar as entradas, os testes abaixo passariam varrendo array vazio.
     const entradas = entradasDoBuild();
     expect(entradas).toContain('index.html');
-    expect(entradas).toContain('como-jogar.html');
-    expect(entradas).toContain('como-arrotar.html');
-    expect(entradas).toContain('privacidade.html');
-    expect(entradas).toContain('termos.html');
+    expect(entradas).toContain('paginas/como-jogar.html');
+    expect(entradas).toContain('paginas/como-arrotar.html');
+    expect(entradas).toContain('paginas/privacidade.html');
+    expect(entradas).toContain('paginas/termos.html');
   });
 
   it('toda entrada pré-carrega as duas fontes locais, e nenhuma fica para trás', () => {

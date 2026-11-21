@@ -35,19 +35,35 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: entrada('index.html'),
-        duelo: entrada('duelo.html'),
-        privacidade: entrada('privacidade.html'),
-        termos: entrada('termos.html'),
-        comoJogar: entrada('como-jogar.html'),
-        comoArrotar: entrada('como-arrotar.html'),
-        tiposDeArroto: entrada('tipos-de-arroto.html'),
-        rankingDeArrotos: entrada('ranking-de-arrotos.html'),
-        comunidades: entrada('comunidades.html'),
-        grupos: entrada('grupos.html'),
+        duelo: entrada('paginas/duelo.html'),
+        privacidade: entrada('paginas/privacidade.html'),
+        termos: entrada('paginas/termos.html'),
+        comoJogar: entrada('paginas/como-jogar.html'),
+        comoArrotar: entrada('paginas/como-arrotar.html'),
+        tiposDeArroto: entrada('paginas/tipos-de-arroto.html'),
+        rankingDeArrotos: entrada('paginas/ranking-de-arrotos.html'),
+        comunidades: entrada('paginas/comunidades.html'),
+        grupos: entrada('paginas/grupos.html'),
       },
     },
   },
   plugins: [
+    {
+      name: 'achatar-entradas-html',
+      enforce: 'post',
+      generateBundle(_options, bundle) {
+        for (const [chave, saida] of Object.entries(bundle)) {
+          if (chave.startsWith('paginas/') && chave.endsWith('.html') && saida.type === 'asset') {
+            this.emitFile({
+              type: 'asset',
+              fileName: chave.slice('paginas/'.length),
+              source: saida.source,
+            });
+            delete bundle[chave];
+          }
+        }
+      },
+    },
     react(),
     VitePWA({
       registerType: 'autoUpdate',

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import '../../shared/publico/tema-claro.css';
 import './TelaLanding.css';
-import { useEntrarNaConta } from './useEntrarNaConta';
+import { useEntrarNaConta } from '../conta/useEntrarNaConta';
 import type { PortaDeConta } from '../../portas/conta';
 
 /**

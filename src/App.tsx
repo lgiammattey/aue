@@ -15,13 +15,13 @@ const ComoArrotar = lazy(() => import('./features/publico/ComoArrotar').then((m)
 const TiposDeArroto = lazy(() => import('./features/publico/TiposDeArroto').then((m) => ({ default: m.TiposDeArroto })));
 const RankingDeArrotos = lazy(() => import('./features/publico/RankingDeArrotos').then((m) => ({ default: m.RankingDeArrotos })));
 const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade').then((m) => ({ default: m.TelaComunidade })));
-const TelaLanding = lazy(() => import('./features/comunidade/TelaLanding').then((m) => ({ default: m.TelaLanding })));
+const TelaLanding = lazy(() => import('./features/publico/TelaLanding').then((m) => ({ default: m.TelaLanding })));
 const TelaNaoEncontrada = lazy(() => import('./features/publico/TelaNaoEncontrada').then((m) => ({ default: m.TelaNaoEncontrada })));
-const TelaVersoesWebapp = lazy(() => import('./features/comunidade/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
+const TelaVersoesWebapp = lazy(() => import('./features/publico/TelaVersoesWebapp').then((m) => ({ default: m.TelaVersoesWebapp })));
 const InicioOpenDesign = lazy(() => import('./features/novo-aue/InicioOpenDesign').then((m) => ({ default: m.InicioOpenDesign })));
 const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOpenDesign').then((m) => ({ default: m.TelaPerfilOpenDesign })));
 const TelaArenaEmBreveOpenDesign = lazy(() => import('./features/novo-aue/TelaArenaEmBreveOpenDesign').then((m) => ({ default: m.TelaArenaEmBreveOpenDesign })));
-const TelaRedefinirSenha = lazy(() => import('./features/comunidade/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
+const TelaRedefinirSenha = lazy(() => import('./features/conta/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));

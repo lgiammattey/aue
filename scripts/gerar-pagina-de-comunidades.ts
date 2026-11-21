@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import {
   MARCADOR_DAS_COMUNIDADES,
   montarListaEstaticaDasComunidades,
-} from '../src/nucleo/comunidades/paginaEstatica.ts';
+} from '../src/nucleo/comunidade/paginaEstatica.ts';
 import { credenciaisDoBuild } from './grupos-do-supabase.ts';
 import { lerComunidadesPublicas } from './comunidades-do-supabase.ts';
 

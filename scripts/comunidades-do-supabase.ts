@@ -1,4 +1,4 @@
-import type { ComunidadeParaPaginaEstatica } from '../src/nucleo/comunidades/paginaEstatica.ts';
+import type { ComunidadeParaPaginaEstatica } from '../src/nucleo/comunidade/paginaEstatica.ts';
 
 interface LinhaDaComunidade {
   slug: string;

@@ -6,37 +6,20 @@
 :root {
   --font-display: 'Anton', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Archivo', 'Google Sans Flex', -apple-system, BlinkMacSystemFont, sans-serif;
-  --bg: #000000;
-  --surface: #121212;
-  --surface-2: #1c1c1e;
-  --fg: #ffffff;
-  --fg-soft: rgba(255, 255, 255, 0.05);
-  --muted: #8e8e93;
-  --border: #222222;
-  --border-strong: #3a3a3c;
-  --accent: #c6ff00;
-  --accent-on: #000000;
-  --accent-strong: #a6d900;
-  --ind: #c6ff00;
-  --danger: #ff4d4f;
-  --overlay-scrim: rgba(0, 0, 0, 0.92);
-}
-
-[data-theme='light'] {
-  --bg: #ffffff;
-  --surface: #f7f7f8;
-  --surface-2: #ededf0;
-  --fg: #000000;
-  --fg-soft: rgba(0, 0, 0, 0.04);
-  --muted: #666666;
-  --border: #e5e5e8;
-  --border-strong: #888888;
-  --accent: #c6ff00;
-  --accent-on: #000000;
-  --accent-strong: #a6d900;
-  --ind: #000000;
-  --danger: #c4161a;
-  --overlay-scrim: rgba(255, 255, 255, 0.94);
+  --bg: #0a0b0e;
+  --surface: #151820;
+  --surface-2: #1d212c;
+  --fg: #f3f4f6;
+  --fg-soft: rgba(243, 244, 246, 0.05);
+  --muted: #8b92a3;
+  --border: #232834;
+  --border-strong: #3b4254;
+  --accent: #ff5500;
+  --accent-on: #0a0b0e;
+  --accent-strong: #e04800;
+  --ind: #ff5500;
+  --danger: #ff5a5f;
+  --overlay-scrim: rgba(5, 6, 8, 0.92);
 }
 
 /* Animações Canônicas */

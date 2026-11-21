@@ -42,8 +42,8 @@ function gravadorSimples(pedido: Promise<PedidoDeMicrofone> = Promise.resolve({ 
 }
 
 async function iniciar(duble: ReturnType<typeof aparelho>) {
-  fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
-  await screen.findByText(/Calibrando o ambiente/);
+  fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
+  await screen.findByText(/Calibrando\. Fica quieto 1s\./);
   act(() => { duble.eventos().aoCalibrar(); });
   await screen.findByRole('button', { name: 'Finalizar gravação' });
 }
@@ -91,7 +91,7 @@ describe('Arena v2', () => {
     render(<ArenaV2 captura={captura} />);
     expect(captura.iniciar).not.toHaveBeenCalled();
     expect(screen.getByRole('link', { name: 'Mural' }).getAttribute('href')).toBe('/feed');
-    expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
   });
 
   it('calibra, grava após a referência e mostra leitura experimental sem publicar', async () => {
@@ -110,7 +110,7 @@ describe('Arena v2', () => {
     expect(screen.getByText('Indisponível')).toBeTruthy();
     expect(await screen.findByLabelText('Sua gravação')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Descartar e gravar outra' }));
-    expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
   });
 
   it('reproduz só o PCM da emissão, sem áudio da calibração ou arquivo original', async () => {
@@ -162,7 +162,7 @@ describe('Arena v2', () => {
     const duble = aparelho(Promise.resolve({ ok: false, motivo: 'pcm_indisponivel' }));
     const simples = gravadorSimples();
     render(<ArenaV2 captura={duble.captura} capturaSemLaudo={simples} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     const fallback = await screen.findByRole('button', { name: 'Gravar sem laudo' });
     expect(simples.pedir).not.toHaveBeenCalled();
     fireEvent.click(fallback);
@@ -179,20 +179,20 @@ describe('Arena v2', () => {
     const duble = aparelho(Promise.resolve({ ok: false, motivo: 'pcm_indisponivel' }));
     const simples = gravadorSimples(new Promise((resolve) => { resolver = resolve; }));
     render(<ArenaV2 captura={duble.captura} capturaSemLaudo={simples} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Gravar sem laudo' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar pedido' }));
     await act(async () => { resolver({ ok: true }); });
     expect(simples.soltar).toHaveBeenCalled();
     expect(simples.comecar).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
   });
 
   it('interrompe o fallback ao sair da página', async () => {
     const duble = aparelho(Promise.resolve({ ok: false, motivo: 'pcm_indisponivel' }));
     const simples = gravadorSimples();
     render(<ArenaV2 captura={duble.captura} capturaSemLaudo={simples} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Gravar sem laudo' }));
     await screen.findByRole('button', { name: 'Finalizar gravação' });
     fireEvent(window, new Event('pagehide'));
@@ -203,7 +203,7 @@ describe('Arena v2', () => {
   it('informa permissão negada e permite tentar novamente', async () => {
     const { captura } = aparelho(Promise.resolve({ ok: false, motivo: 'permissao_negada' }));
     render(<ArenaV2 captura={captura} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     expect((await screen.findByRole('alert')).textContent).toContain('microfone está bloqueado');
     expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeTruthy();
   });
@@ -212,7 +212,7 @@ describe('Arena v2', () => {
     let resolver!: (resposta: InicioCapturaPcmV2) => void;
     const duble = aparelho(new Promise((resolve) => { resolver = resolve; }));
     render(<ArenaV2 captura={duble.captura} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     fireEvent(window, new Event('pagehide'));
     await act(async () => { resolver({ ok: true }); duble.eventos().aoCalibrar(); });
     expect(duble.captura.cancelar).toHaveBeenCalled();
@@ -224,23 +224,23 @@ describe('Arena v2', () => {
     let resolver!: (resposta: InicioCapturaPcmV2) => void;
     const duble = aparelho(new Promise((resolve) => { resolver = resolve; }));
     render(<ArenaV2 captura={duble.captura} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
-    expect(screen.getByRole('status').textContent).toContain('Aguardando permissão');
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
+    expect(screen.getByRole('status').textContent).toContain('Libera o mic');
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar pedido' }));
     await act(async () => { resolver({ ok: true }); duble.eventos().aoCalibrar(); });
     expect(duble.captura.cancelar).toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
     expect(screen.queryByText('GRAVANDO')).toBeNull();
   });
 
   it('permite cancelar durante a calibração e ignora callback tardio', async () => {
     const duble = aparelho();
     render(<ArenaV2 captura={duble.captura} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
-    await screen.findByText(/Calibrando o ambiente/);
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
+    await screen.findByText(/Calibrando\. Fica quieto 1s\./);
     fireEvent.click(screen.getByRole('button', { name: 'Cancelar gravação' }));
     act(() => { duble.eventos().aoCalibrar(); });
-    expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
     expect(duble.captura.cancelar).toHaveBeenCalled();
   });
 
@@ -248,8 +248,8 @@ describe('Arena v2', () => {
     vi.useFakeTimers();
     const duble = aparelho();
     render(<ArenaV2 captura={duble.captura} />);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' })); });
-    expect(screen.getByText(/Calibrando o ambiente/)).toBeTruthy();
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' })); });
+    expect(screen.getByText(/Calibrando\. Fica quieto 1s\./)).toBeTruthy();
     await act(async () => { vi.advanceTimersByTime(5000); });
     expect(screen.getByRole('alert').textContent).toContain('Não recebemos áudio suficiente');
     expect(duble.captura.cancelar).toHaveBeenCalled();
@@ -271,7 +271,7 @@ describe('Arena v2', () => {
     let resolver!: (resposta: InicioCapturaPcmV2) => void;
     const duble = aparelho(new Promise((resolve) => { resolver = resolve; }));
     render(<ArenaV2 captura={duble.captura} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     act(() => { duble.eventos().aoCalibrar(); });
     await act(async () => { resolver({ ok: true }); });
     expect(screen.getByRole('button', { name: 'Finalizar gravação' })).toBeTruthy();
@@ -289,7 +289,7 @@ describe('Arena v2', () => {
     vi.useFakeTimers();
     const duble = aparelho();
     render(<ArenaV2 captura={duble.captura} />);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' })); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' })); });
     act(() => { duble.eventos().aoCalibrar(); });
     duble.captura.estaGravando.mockReturnValue(false);
     await act(async () => { vi.advanceTimersByTime(100); });
@@ -349,7 +349,7 @@ describe('Arena v2', () => {
     simples.parar.mockResolvedValueOnce({ dados: new Blob(['som'], { type: 'audio/webm' }), formato: 'audio/webm', duracaoMs: 1000, resumo: { rms: .1, pico: .3 } });
     const compartilhar = vi.fn(async (_audio: Blob) => 'aberto' as const);
     render(<ArenaV2 captura={duble.captura} capturaSemLaudo={simples} compartilhamentoDeAudio={{ compartilhar, baixar: () => true }} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Gravar sem laudo' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Finalizar gravação' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Compartilhar áudio' }));
@@ -368,7 +368,7 @@ describe('Arena v2', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Descartar e gravar outra' }));
     await act(async () => concluir('aberto'));
     expect(screen.queryByText('Opções de compartilhamento abertas.')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Gravar meu arroto' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
   });
 
   it('mostra o @ do adversário na faixa de desafio quando recebido por parâmetro', () => {

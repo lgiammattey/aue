@@ -10,17 +10,16 @@
 */
 
 .forum-shell {
-  /* Escuro: DESIGN.md v5. */
-  --bg: #0a0a08;
-  --surface: #171712;
-  --surface-2: #1f1f18;
-  --fg: #f5f3ea;
-  --muted: #93917f;
-  --border: #2b2a22;
-  --border-strong: #74725f;
-  --accent: #c6ff00;
-  --accent-on: #0a0a08;
-  --danger: #ff3d3f;
+  --bg: #0a0b0e;
+  --surface: #151820;
+  --surface-2: #1d212c;
+  --fg: #f3f4f6;
+  --muted: #8b92a3;
+  --border: #232834;
+  --border-strong: #3b4254;
+  --accent: #ff5500;
+  --accent-on: #0a0b0e;
+  --danger: #ff5a5f;
   --fg-soft: color-mix(in srgb, var(--fg) 6%, transparent);
   --fg-soft-forte: color-mix(in srgb, var(--fg) 11%, transparent);
   --gut: 16px;

@@ -24,7 +24,7 @@ describe('AvisoMaioridade', () => {
     expect(screen.getByLabelText('Aviso de conteúdo para maiores de 18 anos')).toBeTruthy();
     expect(screen.getByText('+18')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Tenho 18+ · Liberar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tenho 18+' }));
 
     expect(screen.queryByLabelText('Aviso de conteúdo para maiores de 18 anos')).toBeNull();
     expect(window.localStorage.getItem('aue.maioridade.v1')).toBe('1');

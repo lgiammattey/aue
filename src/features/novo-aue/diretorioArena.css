@@ -1,13 +1,13 @@
-/* O diretório é uma entrada própria, sem alterar a casca das comunidades. */
+/* Diretório legado preservado no Design System Dark Carbono + Laranja Elétrico. */
 .app.app--diretorio {
-  --aue-bg: #f5f1e9;
-  --aue-text: #171714;
-  --aue-muted: #5e5c55;
-  --aue-subtle: #66645c;
-  --aue-line: #cfcbc0;
-  --aue-surface: #f5f1e9;
-  --aue-surface-2: #e5e0d5;
-  --aue-accent: #171714;
+  --aue-bg: #0a0b0e;
+  --aue-text: #f3f4f6;
+  --aue-muted: #8b92a3;
+  --aue-subtle: #8b92a3;
+  --aue-line: #232834;
+  --aue-surface: #151820;
+  --aue-surface-2: #1d212c;
+  --aue-accent: #ff5500;
   display: block;
   max-width: none;
   min-height: 100svh;
@@ -17,27 +17,27 @@
 .app--diretorio > .sidebar, .app--diretorio > .rightbar, .app--diretorio > main > .topbar { display: none; }
 .app--diretorio > main { width: 100%; min-height: 100svh; padding: 0 max(28px, env(safe-area-inset-right)) 80px max(28px, env(safe-area-inset-left)); }
 .app--diretorio .od-groups { width: 100%; max-width: 1360px; padding: 0; }
-.diretorio-nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 76px; border-bottom: 1px solid #cfcbc0; }
-.diretorio-nav a { color: #171714; text-decoration: none; font-size: 13px; font-weight: 700; }
-.diretorio-nav a:hover { text-decoration: underline; }
-.diretorio-nav a:focus-visible, .app--diretorio .od-groups__join:focus-visible, .app--diretorio .od-groups__card-link:focus-visible { outline: 3px solid #364700; outline-offset: 4px; }
-.diretorio-nav__marca { font: 32px/1 var(--font-display) !important; letter-spacing: -.035em; }
+.diretorio-nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 76px; }
+.diretorio-nav a { color: var(--aue-muted); text-decoration: none; font-size: 13px; font-weight: 700; }
+.diretorio-nav a:hover { color: var(--aue-text); text-decoration: underline; }
+.diretorio-nav a:focus-visible, .app--diretorio .od-groups__join:focus-visible, .app--diretorio .od-groups__card-link:focus-visible { outline: 3px solid var(--aue-accent); outline-offset: 4px; }
+.diretorio-nav__marca { font: 32px/1 var(--font-display) !important; letter-spacing: -.035em; color: var(--aue-text) !important; }
 .diretorio-nav > div { display: flex; align-items: center; gap: 24px; }
-.app--diretorio .od-groups__head { padding: 78px 0 64px; border-radius: 0; box-shadow: none; }
+.app--diretorio .od-groups__head { padding: 56px 0 44px; border-radius: 0; box-shadow: none; background: transparent; }
 .app--diretorio .od-groups__head::after { display: none; }
-.app--diretorio .od-groups__eyebrow, .app--diretorio .od-groups__total { font: 700 11px/1.4 var(--font-mono); letter-spacing: .12em; }
+.app--diretorio .od-groups__eyebrow, .app--diretorio .od-groups__total { font: 700 11px/1.4 var(--font-mono); letter-spacing: .12em; color: var(--aue-accent); }
 .app--diretorio .od-groups__head h1 { max-width: 920px; margin: 18px 0; font: 400 clamp(54px, 8vw, 104px)/1 var(--font-display); letter-spacing: -.025em; }
-.app--diretorio .od-groups__head p { max-width: 560px; font-size: 16px; }
+.app--diretorio .od-groups__head p { max-width: 560px; font-size: 16px; color: var(--aue-muted); }
 .app--diretorio .od-groups__total { padding: 0; margin-top: 26px; border-radius: 0; background: none; }
-.app--diretorio .od-groups__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 36px; margin: 0; border-top: 1px solid #cfcbc0; }
-.app--diretorio .od-groups__card { padding: 28px 0; border-bottom: 1px solid #cfcbc0; border-radius: 0; background: transparent; box-shadow: none; }
+.app--diretorio .od-groups__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0; border-top: 0; }
+.app--diretorio .od-groups__card { padding: 20px; border: 1px solid var(--aue-line); border-radius: var(--radius-md, 6px); background: var(--aue-surface); box-shadow: none; }
 .app--diretorio .od-groups__thumbnail { height: 140px; }
 .app--diretorio .od-groups__card-content { padding: 20px 0 0; }
-.app--diretorio .od-groups__identity h2 { overflow: visible; color: #171714; font: 400 clamp(24px, 3vw, 36px)/1.1 var(--font-display); text-transform: uppercase; white-space: normal; }
-.app--diretorio .od-groups__identity p { margin-top: 8px; font-size: 14px; line-height: 1.5; }
-.app--diretorio .od-groups__avatar { border-radius: 0; }
-.app--diretorio .od-groups__join { width: fit-content; min-width: 124px; min-height: 44px; margin: 20px 0 0; padding: 10px 20px; border: 1px solid #171714; border-radius: 0; background: transparent; color: #171714; }
-.app--diretorio .od-groups__join:hover:not(:disabled) { color: #171714; background: #c6f500; border-color: #171714; }
+.app--diretorio .od-groups__identity h2 { overflow: visible; color: var(--aue-text); font: 400 clamp(24px, 3vw, 36px)/1.1 var(--font-display); text-transform: uppercase; white-space: normal; }
+.app--diretorio .od-groups__identity p { margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--aue-muted); }
+.app--diretorio .od-groups__avatar { border-radius: var(--radius-sm, 4px); }
+.app--diretorio .od-groups__join { width: fit-content; min-width: 124px; min-height: 44px; margin: 20px 0 0; padding: 10px 20px; border: 1px solid var(--border-strong, #3b4254); border-radius: var(--radius-sm, 4px); background: var(--aue-surface-2); color: var(--aue-text); }
+.app--diretorio .od-groups__join:hover:not(:disabled) { color: #0a0b0e; background: var(--aue-accent); border-color: var(--aue-accent); }
 .app--diretorio .od-groups__empty { padding: 32px 0; text-align: left; border-radius: 0; background: none; }
 @media (max-width: 699px) {
   .app--diretorio > main { padding: 0 max(20px, env(safe-area-inset-right)) 64px max(20px, env(safe-area-inset-left)); }

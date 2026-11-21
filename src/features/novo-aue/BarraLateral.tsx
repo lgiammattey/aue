@@ -10,44 +10,52 @@ interface Props {
   readonly aoEntrar?: () => void;
 }
 
-type IconeDaNavegacao = 'feed' | 'grupos' | 'tropa' | 'arena' | 'eu';
+type IconeDaNavegacao = 'inicio' | 'ranking' | 'grupos' | 'seguindo' | 'perfil';
 
 function IconeDaNavegacao({ tipo }: { readonly tipo: IconeDaNavegacao }) {
   return (
     <span className="ico" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        {tipo === 'feed' && <>
-          <rect x="4" y="3.5" width="16" height="17" rx="3" />
-          <path d="M8 8h8M8 12h8M8 16h5" />
-          <circle cx="6.5" cy="8" r=".5" fill="currentColor" stroke="none" />
-          <circle cx="6.5" cy="12" r=".5" fill="currentColor" stroke="none" />
-          <circle cx="6.5" cy="16" r=".5" fill="currentColor" stroke="none" />
-        </>}
-        {tipo === 'grupos' && <>
-          <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
-          <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
-          <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
-          <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
-        </>}
-        {tipo === 'tropa' && <>
-          <circle cx="8.5" cy="8" r="3" />
-          <circle cx="16.5" cy="9" r="2.5" />
-          <path d="M3.5 20v-1a5 5 0 0 1 10 0v1" />
-          <path d="M14 16.5a4.5 4.5 0 0 1 6.5 4" />
-        </>}
-        {tipo === 'arena' && <>
-          <rect x="9" y="3" width="6" height="11" rx="3" />
-          <path d="M6 10a6 6 0 0 0 12 0M12 16v5M8.5 21h7" />
-        </>}
-        {tipo === 'eu' && <>
-          <circle cx="12" cy="8" r="3.5" />
-          <path d="M4.5 20v-1.5a7.5 7.5 0 0 1 15 0V20" />
-        </>}
+        {tipo === 'inicio' && (
+          <>
+            <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />
+          </>
+        )}
+        {tipo === 'ranking' && (
+          <>
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+            <path d="M4 22h16" />
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+          </>
+        )}
+        {tipo === 'grupos' && (
+          <>
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+          </>
+        )}
+        {tipo === 'seguindo' && (
+          <>
+            <circle cx="8.5" cy="8" r="3" />
+            <circle cx="16.5" cy="9" r="2.5" />
+            <path d="M3.5 20v-1a5 5 0 0 1 10 0v1" />
+            <path d="M14 16.5a4.5 4.5 0 0 1 6.5 4" />
+          </>
+        )}
+        {tipo === 'perfil' && (
+          <>
+            <circle cx="12" cy="8" r="3.5" />
+            <path d="M4.5 20v-1.5a7.5 7.5 0 0 1 15 0V20" />
+          </>
+        )}
       </svg>
     </span>
   );
 }
 
+/** Sidebar fixa do App Shell desktop/tablet. No mobile o componente é ocultado via CSS (sem Bottom Nav). */
 export const BarraLateral = memo(function BarraLateral({
   viewAtual,
   estaAutenticado,
@@ -58,45 +66,51 @@ export const BarraLateral = memo(function BarraLateral({
 }: Props) {
   const navigate = useNavigate();
 
-  const isFeedAtivo = viewAtual === 'feed' || viewAtual === 'seguindo';
-  const isTropaAtivo = viewAtual === 'seguindo';
+  const isInicioAtivo = viewAtual === 'feed';
+  const isSeguindoAtivo = viewAtual === 'seguindo';
   const isPerfilAtivo = viewAtual === 'perfil';
 
   return (
     <aside className="sidebar" aria-label="Navegação do Auê">
-      {/* Brand Desktop */}
       <Link
         to="/"
         className="brand"
         aria-label="Auê, página inicial"
         onClick={() => aoMudarView('feed')}
       >
-        <span className="brand-full">AUÊ!</span>
-        <span className="brand-compact" aria-hidden="true">A!</span>
+        <span className="brand-full">
+          AUÊ<span className="brand-bang">!</span>
+        </span>
       </Link>
 
-      {/* Navegação Desktop (>= 700px) */}
       <nav className="sidebar-desktop-nav" aria-label="Menu principal">
         <button
-          className={`nav-item ${viewAtual === 'feed' ? 'active' : ''}`}
+          className={`nav-item ${isInicioAtivo ? 'active' : ''}`}
           type="button"
+          aria-current={isInicioAtivo ? 'page' : undefined}
           onClick={() => {
             aoMudarView('feed');
-            navigate('/feed');
+            navigate('/');
           }}
         >
-          <IconeDaNavegacao tipo="feed" />Mural
+          <IconeDaNavegacao tipo="inicio" />
+          Início
         </button>
+
+        <Link className="nav-item" to="/ranking-de-arrotos">
+          <IconeDaNavegacao tipo="ranking" />
+          Ranking
+        </Link>
+
+        <Link className="nav-item" to="/grupos">
+          <IconeDaNavegacao tipo="grupos" />
+          Grupos Zap
+        </Link>
+
         <button
-          className="nav-item"
+          className={`nav-item ${isSeguindoAtivo ? 'active' : ''}`}
           type="button"
-          onClick={() => navigate('/grupos')}
-        >
-          <IconeDaNavegacao tipo="grupos" />Grupos WhatsApp
-        </button>
-        <button
-          className={`nav-item ${viewAtual === 'seguindo' ? 'active' : ''}`}
-          type="button"
+          aria-current={isSeguindoAtivo ? 'page' : undefined}
           onClick={() => {
             if (!estaAutenticado) {
               aoEntrar?.();
@@ -106,21 +120,14 @@ export const BarraLateral = memo(function BarraLateral({
             }
           }}
         >
-          <IconeDaNavegacao tipo="tropa" />Tropa
+          <IconeDaNavegacao tipo="seguindo" />
+          Seguindo
         </button>
+
         <button
-          className={`nav-item ${viewAtual === 'arena' ? 'active' : ''}`}
+          className={`nav-item ${isPerfilAtivo ? 'active' : ''}`}
           type="button"
-          onClick={() => {
-            aoMudarView('arena');
-            navigate('/arena');
-          }}
-        >
-          <IconeDaNavegacao tipo="arena" />Arena
-        </button>
-        <button
-          className={`nav-item ${viewAtual === 'perfil' ? 'active' : ''}`}
-          type="button"
+          aria-current={isPerfilAtivo ? 'page' : undefined}
           onClick={() => {
             if (!estaAutenticado) {
               aoEntrar?.();
@@ -130,7 +137,8 @@ export const BarraLateral = memo(function BarraLateral({
             }
           }}
         >
-          <IconeDaNavegacao tipo="eu" />Eu
+          <IconeDaNavegacao tipo="perfil" />
+          Perfil
         </button>
 
         <button
@@ -138,106 +146,10 @@ export const BarraLateral = memo(function BarraLateral({
           type="button"
           onClick={aoAbrirGravadorRapido}
         >
-          + Soltar um arroto
-        </button>
-
-      </nav>
-
-      {/* Navegação Inferior Mobile (Zona do Polegar: Feed, Comunidades, ARROTAR, Tropa e Perfil) */}
-      <nav className="mobile-bottom-nav" aria-label="Navegação móvel inferior">
-        {/* 1. Feed */}
-        <button
-          type="button"
-          className={`mobile-nav-item ${isFeedAtivo ? 'active' : ''}`}
-          onClick={() => {
-            aoMudarView('feed');
-            navigate('/feed');
-          }}
-          aria-label="Mural"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1V11z" />
-          </svg>
-          <span>Mural</span>
-        </button>
-
-        {/* 2. Grupos externos */}
-        <button
-          type="button"
-          className="mobile-nav-item"
-          onClick={() => navigate('/grupos')}
-          aria-label="Grupos WhatsApp"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 00-3-3.87" />
-            <path d="M16 3.13a4 4 0 010 7.75" />
-          </svg>
-          <span>Grupos</span>
-        </button>
-
-        {/* 3. Botão Central de Arroto (O Botão de Ouro) */}
-        <button
-          type="button"
-          className="mobile-nav-item mobile-nav-item--arrotar"
-          onClick={aoAbrirGravadorRapido}
-          aria-label="Gravar um arroto para publicar"
-          title="Gravar arroto agora"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2a4 4 0 00-4 4v6a4 4 0 008 0V6a4 4 0 00-4-4z" />
-            <path d="M19 10v2a7 7 0 01-14 0v-2H3v2a9 9 0 008 8.94V23h2v-2.06A9 9 0 0021 12v-2h-2z" />
-          </svg>
-          <span className="arrotar-label">ARROTAR</span>
-        </button>
-
-        {/* 4. Tropa */}
-        <button
-          type="button"
-          className={`mobile-nav-item ${isTropaAtivo ? 'active' : ''}`}
-          onClick={() => {
-            if (!estaAutenticado) {
-              aoEntrar?.();
-              return;
-            }
-            aoMudarView('seguindo');
-            navigate('/seguindo');
-          }}
-          aria-label="Minha Tropa"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="8.5" cy="8" r="3" />
-            <circle cx="16.5" cy="9" r="2.5" />
-            <path d="M3.5 20v-1a5 5 0 0 1 10 0v1" />
-            <path d="M14 16.5a4.5 4.5 0 0 1 6.5 4" />
-          </svg>
-          <span>Tropa</span>
-        </button>
-
-        {/* 5. Perfil */}
-        <button
-          type="button"
-          className={`mobile-nav-item ${isPerfilAtivo ? 'active' : ''}`}
-          onClick={() => {
-            if (!estaAutenticado) {
-              aoEntrar?.();
-            } else {
-              aoMudarView('perfil');
-              navigate('/perfil');
-            }
-          }}
-          aria-label="Meu perfil"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-          <span>Perfil</span>
+          ARROTAR
         </button>
       </nav>
 
-      {/* Footer Desktop */}
       <div className="sidebar-footer">
         {estaAutenticado ? (
           <button className="sidebar-account-action sidebar-account-action--leave" type="button" onClick={aoSair}>
@@ -248,6 +160,11 @@ export const BarraLateral = memo(function BarraLateral({
             Entrar
           </button>
         )}
+        <div className="sidebar-legal-links">
+          <Link to="/como-jogar">Como jogar</Link>
+          <Link to="/termos">Termos</Link>
+          <Link to="/privacidade">Privacidade</Link>
+        </div>
       </div>
     </aside>
   );

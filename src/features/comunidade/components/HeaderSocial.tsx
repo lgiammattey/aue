@@ -90,7 +90,7 @@ export const HeaderSocial: React.FC<HeaderSocialProps> = ({
               type="button"
               onClick={aoAbrirArena}
               style={{
-                background: 'var(--accent, #c6ff00)',
+                background: 'var(--accent, #ff5500)',
                 color: 'var(--accent-on, #000)',
                 border: 0,
                 borderRadius: '999px',

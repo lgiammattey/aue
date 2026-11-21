@@ -59,15 +59,14 @@ export const TelaRedefinirSenha: React.FC<TelaRedefinirSenhaProps> = ({ portaCon
     <main className="auth-arena-reset">
       <div className="auth-shell">
         <header className="auth-header">
-          <Link to="/" className="auth-brand" aria-label="Auê, página inicial">AUÊ!</Link>
-          <nav aria-label="Navegação principal"><Link to="/">Arena</Link><Link to="/feed">Mural</Link><Link to="/grupos">Grupos</Link></nav>
+          <Link to="/" className="auth-brand" aria-label="Auê, página inicial">AUÊ<span>!</span></Link>
+          <nav aria-label="Navegação principal"><Link to="/">Início</Link><Link to="/ranking-de-arrotos">Ranking</Link><Link to="/grupos">Grupos</Link></nav>
         </header>
-        <div className="auth-arena__placar"><span>ÁREA DO ARROTADOR</span><span>ACESSO À CONTA</span></div>
         <div className="auth-arena__conteudo">
-          <div className="auth-arena__manifesto" aria-hidden="true"><p>DE VOLTA AO JOGO</p><div>SEU SOM.<br />SUA HISTÓRIA.</div></div>
+          <div className="auth-arena__manifesto" aria-hidden="true"><p>SEM FRESCURA</p><div>ARROTA.<br />PONTUA.<br />COBRA X1.</div></div>
           <div className="auth-arena__form">
             <h1>Nova senha</h1>
-            {feito && <p role="status">Senha trocada. Te levando de volta pro jogo.</p>}
+            {feito && <p role="status">Senha trocada. Voltando pro Auê.</p>}
             {!feito && !pronto && !venceu && <p role="status">Conferindo o link…</p>}
             {!feito && !pronto && venceu && (
               <p role="alert">Esse link não vale mais ou já foi usado. <Link to="/login">Pede outro na tela de entrar</Link>.</p>

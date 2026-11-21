@@ -31,7 +31,7 @@ describe('Ranking dentro da Arena', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Ouvir arroto de Bia' }));
     await waitFor(() => expect(audio.tocar).toHaveBeenCalledWith('https://exemplo.test/audio'));
     expect(screen.getByRole('button', { name: 'Pausar arroto de Bia' })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     await waitFor(() => expect(audio.soltar).toHaveBeenCalledOnce());
     expect(screen.queryByRole('region', { name: 'Top arrotadores' })).toBeNull();
     expect(captura.iniciar).toHaveBeenCalledOnce();
@@ -45,7 +45,7 @@ describe('Ranking dentro da Arena', () => {
     render(<MemoryRouter><ArenaV2 captura={captura} conteudoDoRepouso={<TopArrotadoresDaHome porta={portaLenta} />} /></MemoryRouter>);
     fireEvent.click(await screen.findByRole('button', { name: 'Ouvir arroto de Bia' }));
     await waitFor(() => expect(assinar).toHaveBeenCalledOnce());
-    fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     await act(async () => { resolver({ ok: true, valor: 'https://exemplo.test/audio' }); await assinatura; });
     expect(audio.tocar).not.toHaveBeenCalled();
   });

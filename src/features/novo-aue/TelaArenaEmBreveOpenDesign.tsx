@@ -1,36 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { criarContaWeb } from '../../plataforma/web/conta';
-import { criarForumWeb } from '../../plataforma/web/forum';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
-import type { ComunidadeDoForum } from '../../portas/forum';
 import type { PerfilPublico } from '../../portas/perfil';
 import { BarraLateral } from './BarraLateral';
 import { BarraSuperior } from './BarraSuperior';
 import { PainelDireito } from './PainelDireito';
 import './casca.css';
+import '../../styles/appShell.css';
 import './TelaArenaEmBreveOpenDesign.css';
 
 /** Explica a Arena sem se passar por uma partida disponível. */
 export function TelaArenaEmBreveOpenDesign() {
   const navigate = useNavigate();
-  const [comunidades, setComunidades] = useState<readonly ComunidadeDoForum[]>([]);
-  const [estadoDasComunidades, setEstadoDasComunidades] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
   const [autenticado, setAutenticado] = useState(false);
   const [meuPerfil, setMeuPerfil] = useState<PerfilPublico | null>(null);
-  const [tentativa, setTentativa] = useState(0);
-
-  useEffect(() => {
-    let ativo = true;
-    const forum = criarForumWeb();
-    void forum.listarComunidadesDoForum().then((resultado) => {
-      if (!ativo) return;
-      if (!resultado.ok) { setEstadoDasComunidades('erro'); return; }
-      setComunidades(resultado.valor);
-      setEstadoDasComunidades('pronto');
-    }).catch(() => { if (ativo) setEstadoDasComunidades('erro'); });
-    return () => { ativo = false; };
-  }, [tentativa]);
 
   useEffect(() => {
     let ativo = true;
@@ -90,7 +74,7 @@ export function TelaArenaEmBreveOpenDesign() {
           </footer>
         </section>
       </main>
-      <PainelDireito comunidades={comunidades} viewAtual="arena" estaAutenticado={autenticado} contaPerfil={meuPerfil} estadoDasComunidades={estadoDasComunidades} aoTentarComunidades={() => setTentativa((atual) => atual + 1)} aoAbrirComunidade={() => undefined} />
+      <PainelDireito viewAtual="arena" estaAutenticado={autenticado} contaPerfil={meuPerfil} />
     </div>
   );
 }

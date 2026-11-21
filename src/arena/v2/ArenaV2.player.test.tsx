@@ -18,8 +18,8 @@ async function abrirRevisao() {
     cancelar: vi.fn(), nivelAtual: () => 0, estaGravando: () => true,
   };
   render(<ArenaV2 captura={captura} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Gravar meu arroto' }));
-  await screen.findByText(/Calibrando o ambiente/);
+  fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
+  await screen.findByText(/Calibrando\. Fica quieto 1s\./);
   act(() => eventos.aoCalibrar());
   fireEvent.click(await screen.findByRole('button', { name: 'Finalizar gravação' }));
   await screen.findByRole('heading', { name: 'SUA GRAVAÇÃO' });

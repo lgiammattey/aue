@@ -74,5 +74,5 @@ export function carregarSocialBar(): HTMLScriptElement | null {
  * sem colisão de variável global na mesma página.
  */
 export function srcDocBanner300x250(): string {
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;overflow:hidden;background:transparent;display:flex;justify-content:center;align-items:center;}</style></head><body><script>atOptions={'key':'${ADSTERRA_CONFIG.banner300x250Key}','format':'iframe','height':${ADSTERRA_CONFIG.banner300x250Height},'width':${ADSTERRA_CONFIG.banner300x250Width},'params':{}};</script><script src="${ADSTERRA_CONFIG.banner300x250Script}"></script></body></html>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="color-scheme" content="dark"><style>html,body{margin:0;padding:0;overflow:hidden;background:#111318;color:#8b92a3;display:flex;justify-content:center;align-items:center;}</style></head><body><script>atOptions={'key':'${ADSTERRA_CONFIG.banner300x250Key}','format':'iframe','height':${ADSTERRA_CONFIG.banner300x250Height},'width':${ADSTERRA_CONFIG.banner300x250Width},'params':{}};</script><script src="${ADSTERRA_CONFIG.banner300x250Script}"></script></body></html>`;
 }

@@ -276,7 +276,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
               type="button"
               onClick={onArrotar || (() => navigate('/arena'))}
               style={{
-                background: 'var(--accent, #c6ff00)',
+                background: 'var(--accent, #ff5500)',
                 color: 'var(--accent-on, #000)',
                 border: 0,
                 borderRadius: '999px',
@@ -403,7 +403,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                       style={{
                         fontFamily: 'var(--font-display, Anton)',
                         fontSize: '26px',
-                        background: 'var(--accent, #c6ff00)',
+                        background: 'var(--accent, #ff5500)',
                         color: 'var(--accent-on, #000)',
                         borderRadius: '12px',
                         padding: '4px 10px',
@@ -461,7 +461,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                   style={{
                     background: 'none',
                     border: 0,
-                    color: copiado ? 'var(--accent, #c6ff00)' : 'var(--muted)',
+                    color: copiado ? 'var(--accent, #ff5500)' : 'var(--muted)',
                     fontSize: '15px',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -552,7 +552,7 @@ export const TelaHistoria: React.FC<TelaHistoriaProps> = ({ onArrotar, porta: po
                       type="submit"
                       disabled={!textoResposta.trim() || !cabeNoLimite(textoResposta, LIMITE_COMENTARIO) || envioDoComentario.enviando}
                       style={{
-                        background: 'var(--accent, #c6ff00)',
+                        background: 'var(--accent, #ff5500)',
                         color: 'var(--accent-on, #000)',
                         border: 0,
                         borderRadius: '999px',

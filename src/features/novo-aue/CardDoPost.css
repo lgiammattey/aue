@@ -1,32 +1,28 @@
 /*
-  Card do post — um card só para feed, Seguindo, comunidade, thread e perfil.
-  Medidas do protótipo `Bonde do Arroto.dc.html` (.pf-post). Mobile primeiro.
-
-  Todo seletor começa em `.card-do-post` (0,2,0 ou mais), então ganha do bloco
-  legado `.post-body` e do `.badge-nota` do casca.css sem depender da ordem de
-  import e sem `!important`. O `.post-body` global NÃO é editado: o CardDeCauso
-  legado ainda o usa.
-
-  Variante `perfil` (`.card-do-post--perfil`): sem verde. O verde do perfil é
-  da aba ativa e do ARROTAR (opção A, 21/10/2026). A nota e as reações emoji
-  nem entram no DOM dessa variante; aqui só ficam as cores neutras do que sobra.
+  Card do post — "Ficha de Jogada" (Carbono + Laranja Elétrico · Esports Técnico).
+  Sem !important, com alvos de toque >= 44px para ações e links de perfil.
 */
-
 .card-do-post {
-  --card-recuo: 52px; /* coluna do avatar (40) + vão (12) */
-  --cab-linha: 24px; /* nome e @ ficam juntos; os links preservam alvos tocáveis de 44px */
+  --card-recuo: 52px;
+  --cab-linha: 24px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
   column-gap: 12px;
-  margin: 0 0 8px;
-  padding: 12px 12px 0;
-  border: 1px solid color-mix(in srgb, var(--aue-line) 60%, transparent);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--aue-text);
+  margin: 0 0 12px;
+  padding: 14px 14px 10px;
+  border: 1px solid var(--border, #232834);
+  border-radius: var(--radius-md, 6px);
+  background: var(--surface, #151820);
+  color: var(--aue-text, #f3f4f6);
   font-family: var(--font-body, 'Archivo', system-ui, sans-serif);
   -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--duration-fast, 160ms) ease;
+}
+
+.card-do-post--tocando {
+  border-color: var(--accent-border, rgba(255, 85, 0, 0.42));
+  border-left: 3px solid var(--accent, #ff5500);
 }
 
 .card-do-post button,
@@ -47,25 +43,21 @@
   box-sizing: border-box;
   width: 40px;
   height: 40px;
-  border: 0;
-  border-radius: 50%;
+  border: 1px solid var(--border-strong, #3b4254);
+  border-radius: var(--radius-sm, 4px);
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: var(--aue-surface-2);
-  color: var(--aue-text);
+  background: var(--aue-surface-2, #1d212c);
+  color: var(--aue-text, #f3f4f6);
   font-family: var(--font-display, 'Anton', sans-serif);
-  font-size: 14px;
+  font-size: 16px;
   text-decoration: none;
 }
 
-/*
-  O link do avatar chega a 44px de área de toque por um pseudo-elemento (2px de
-  cada lado, dentro do vão de 12px até o texto, sem tocar nos vizinhos). O
-  recorte redondo fica no que está dentro do link.
-*/
 .card-do-post .post-avatar-link {
   overflow: visible;
+  border: 0;
   background: none;
 }
 
@@ -77,10 +69,9 @@
 
 .card-do-post .post-avatar-link .post-avatar-img,
 .card-do-post .post-avatar-link .post-avatar-fallback {
-  border-radius: 50%;
+  border-radius: var(--radius-sm, 4px);
 }
 
-/* O link do avatar é o mesmo destino do nome: sem moldura dupla dentro do link. */
 .card-do-post .post-avatar-link .post-avatar-fallback {
   width: 100%;
   height: 100%;
@@ -98,17 +89,10 @@
   min-width: 0;
 }
 
-/*
-  Linha 1: quem. Linha 2: @handle · tempo. Comunidade fica no canto.
-  Cada linha tem --cab-linha de altura (fixa, não depende de dado: sem pulo).
-  Nome, @handle e r/roda têm a PRÓPRIA caixa de link com 44px de toque,
-  sem pseudo-elemento: o
-  overflow:hidden do link, que faz a reticência, cortaria um ::after.
-*/
 .card-do-post .post-meta-header {
   display: flex;
   align-items: flex-start;
-  gap: 4px;
+  gap: 8px;
 }
 
 .card-do-post .post-meta-ident {
@@ -117,9 +101,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  height: calc(var(--cab-linha) * 2 + 12px);
+  height: calc(var(--cab-linha) * 2);
   font: 400 13px/20px var(--font-body, 'Archivo', system-ui, sans-serif);
-  color: var(--aue-muted);
+  color: var(--aue-muted, #8b92a3);
 }
 
 .card-do-post .post-meta-details {
@@ -133,9 +117,9 @@
   white-space: nowrap;
 }
 
-/* Nome e @ são links: caixa de 44px (12px de padding em cima), texto na linha de cima. */
 .card-do-post .author-profile-link,
 .card-do-post .post-meta-handle {
+  position: relative;
   align-self: flex-start;
   box-sizing: border-box;
   min-width: 44px;
@@ -148,16 +132,16 @@
 .card-do-post .author-profile-link,
 .card-do-post .author-name {
   flex: none;
-  max-width: 45%;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--aue-text);
+  color: var(--aue-text, #f3f4f6);
   font: 400 17px/var(--cab-linha) var(--font-display, 'Anton', sans-serif);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 .card-do-post .author-profile-link {
-  margin: -12px 0 -8px -3px; /* a caixa de 44px cobre as duas linhas, mas o @ continua junto do nome */
+  margin: -12px 0 -8px -3px;
 }
 
 .card-do-post .author-name {
@@ -175,28 +159,29 @@
   line-height: var(--cab-linha);
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--aue-muted);
-  font-size: 13px;
+  color: var(--aue-muted, #8b92a3);
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
 .card-do-post .post-meta-dot {
   flex: none;
-  margin: 0 4px;
+  margin: 0 5px;
   line-height: var(--cab-linha);
-  color: var(--aue-muted);
+  color: var(--aue-muted, #8b92a3);
 }
 
 .card-do-post .post-meta-time {
   flex: none;
   line-height: var(--cab-linha);
-  color: var(--aue-muted);
-  font-size: 13px;
+  color: var(--aue-muted, #8b92a3);
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
-/* ⋯: caixa de 44px, centrada na linha de cima (--cab-linha), sem aumentar o cabeçalho. */
 .card-do-post .menu-do-post {
   flex: none;
-  margin: calc(-12px + (var(--cab-linha) - 20px) / 2) -12px -12px 0;
+  margin: calc(-12px + (var(--cab-linha) - 20px) / 2) -10px -10px 0;
 }
 
 .card-do-post .menu-do-post__botao {
@@ -206,91 +191,36 @@
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-sm, 4px);
   background: none;
-  color: var(--aue-muted);
+  color: var(--aue-muted, #8b92a3);
   cursor: pointer;
 }
 
 .card-do-post .menu-do-post__botao:focus-visible {
-  outline: 2px solid var(--aue-text);
+  outline: 2px solid var(--accent, #ff5500);
   outline-offset: -4px;
 }
 
-/* Linha 2: r/comunidade, e a nota no feed. A linha tem --cab-linha; o link sobe ao topo dela. */
-.card-do-post .post-meta-badges {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  min-width: 0;
-  height: var(--cab-linha);
-}
-
-.card-do-post .badge-comunidade {
-  position: relative;
-  z-index: 1;
-  display: block;
-  box-sizing: border-box;
-  flex: 0 1 auto;
-  min-width: 0;
-  max-width: calc(100% - 44px);
-  height: var(--hit-target-min, 44px);
-  margin: 0 0 -20px -3px; /* os 20px de baixo entram na linha seguinte; o z-index acima garante o toque sobre o player e as ações */
-  padding-inline: 3px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font: 700 14px/var(--cab-linha) var(--font-body, 'Archivo', system-ui, sans-serif);
-  color: var(--aue-muted);
-  text-decoration: none;
-}
-
-/* A nota (só no feed) fica na linha da roda, sem inchar a linha. */
-.card-do-post .badge-nota {
-  flex: none;
-  align-self: center;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  line-height: 18px;
-  white-space: nowrap;
-}
-
-.card-do-post .badge-nota--retrospectiva { margin-right: 6px; }
-
-/*
-  Anel de foco do nome, do @handle e do r/roda: só em volta da linha de texto
-  (24px de altura, centrada na linha de --cab-linha), não na caixa de 44px.
-  Fica dentro do link, então o overflow:hidden não corta. 2px em --aue-text,
-  nunca verde (a aba ativa e o ARROTAR já gastam os verdes do estado).
-*/
-.card-do-post .author-profile-link,
-.card-do-post .post-meta-handle {
-  position: relative;
-}
-
 .card-do-post .author-profile-link:focus-visible,
-.card-do-post .post-meta-handle:focus-visible,
-.card-do-post .badge-comunidade:focus-visible {
+.card-do-post .post-meta-handle:focus-visible {
   outline: 0;
 }
 
 .card-do-post .author-profile-link:focus-visible::before,
-.card-do-post .post-meta-handle:focus-visible::before,
-.card-do-post .badge-comunidade:focus-visible::before {
+.card-do-post .post-meta-handle:focus-visible::before {
   content: '';
   position: absolute;
   right: 0;
   left: 0;
   box-sizing: border-box;
   height: 24px;
-  border: 2px solid var(--aue-text);
-  border-radius: 8px;
+  border: 2px solid var(--accent, #ff5500);
+  border-radius: 4px;
   pointer-events: none;
 }
 
-.card-do-post .author-profile-link:focus-visible::before,
-.card-do-post .post-meta-handle:focus-visible::before {
+.card-do-post .author-profile-link:focus-visible::before {
   top: calc(12px + (var(--cab-linha) - 24px) / 2);
 }
 
@@ -298,160 +228,277 @@
   top: calc(10px + (var(--cab-linha) - 24px) / 2);
 }
 
-.card-do-post .badge-comunidade:focus-visible::before {
-  top: calc((var(--cab-linha) - 24px) / 2);
-}
-
 /* ---------- texto, tag, mídia ---------- */
 .card-do-post .post-body {
   white-space: pre-wrap;
-  margin: 0 0 6px;
+  margin: 6px 0 8px;
   padding: 0;
-  font: 400 15px/21px var(--font-body, 'Archivo', system-ui, sans-serif);
-  color: var(--aue-text);
+  font: 400 15px/1.5 var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--fg-secondary, #c8cdd8);
   overflow-wrap: anywhere;
 }
 
 .card-do-post .post-topic-tag {
-  margin: 2px 0 4px;
+  margin: 6px 0 4px;
   max-width: 100%;
 }
 
 .card-do-post .post-topic-tag__label {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--border-strong, #3b4254);
+  border-radius: var(--radius-xs, 2px);
+  background: var(--bg-elevated, #111318);
+  color: var(--aue-text, #f3f4f6);
+  font-size: 12px;
+  font-weight: 700;
   overflow-wrap: anywhere;
 }
 
-.card-do-post .post-audio-wrapper {
-  margin: 0;
-  display: block;
+/* ---------- Bloco de Jogada: Player + Placar de Nota ---------- */
+.card-do-post .post-audio-wrapper.audio-com-nota {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  margin: 10px 0 8px;
+  border: 1px solid var(--border-strong, #3b4254);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-elevated, #111318);
+  overflow: hidden;
+}
+
+.card-do-post .post-audio-wrapper.audio-com-nota--com-placar {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.card-do-post .audio-com-nota__player {
+  min-width: 0;
+}
+
+.card-do-post .audio-com-nota__placar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 6px 12px;
+  border-left: 1px solid var(--border, #232834);
+  background: var(--surface-2, #1d212c);
+}
+
+.card-do-post .audio-com-nota__rotulo {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--aue-muted, #8b92a3);
+}
+
+.card-do-post .audio-com-nota__nota {
+  min-width: 2ch;
+  color: var(--aue-text, #f3f4f6);
+  font: 400 30px/1 var(--font-display, 'Anton', sans-serif);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-do-post .audio-com-nota__placar.is-ouro .audio-com-nota__nota,
+.card-do-post .post-nota-isolada.is-ouro .audio-com-nota__nota {
+  color: var(--gold, #f5b82e);
+}
+
+.card-do-post .post-nota-isolada {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong, #3b4254);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-elevated, #111318);
 }
 
 .card-do-post .post-media-image {
-  margin: 4px 0 8px;
+  margin: 8px 0;
 }
 
 .card-do-post .post-media-video {
-  margin: 0 0 8px;
+  margin: 8px 0;
 }
 
 .card-do-post .post-video {
   margin-top: 4px;
 }
 
-/* ---------- barra de ações ---------- */
-.card-do-post .post-actions--twitter {
+/* ---------- Rodapé em 2 faixas ---------- */
+.card-do-post .post-footer-ficha {
+  margin-top: 10px;
+}
+
+.card-do-post .post-reactions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 10px;
+}
+
+.card-do-post .reaction-chip {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 40px;
+  min-height: 36px;
+  padding: 4px 9px;
+  border: 1px solid var(--border, #232834);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-elevated, #111318);
+  color: var(--aue-muted, #8b92a3);
+  font: 600 12px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .card-do-post .reaction-chip {
+    min-height: 40px;
+    padding: 4px 10px;
+  }
+}
+
+.card-do-post .reaction-chip.is-active {
+  border-color: var(--accent-border, rgba(255, 85, 0, 0.42));
+  background: var(--accent-soft, rgba(255, 85, 0, 0.14));
+  color: var(--aue-text, #f3f4f6);
+}
+
+.card-do-post .post-actions-bar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0 20px;
-  max-width: none;
-  margin: -4px 0 -4px;
-  padding: 0;
-  border: 0;
+  gap: 6px 10px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border, #232834);
 }
 
-.card-do-post .action-btn {
+.card-do-post .post-actions-bar .action-btn {
   position: relative;
   box-sizing: border-box;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
-  padding: 0;
-  justify-content: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
-  border-radius: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm, 4px);
   background: none;
-  color: var(--aue-muted);
-  font: 500 14px/1 var(--font-body, 'Archivo', system-ui, sans-serif);
+  color: var(--aue-muted, #8b92a3);
+  font: 600 13px/1 var(--font-mono);
   font-variant-numeric: tabular-nums;
-  touch-action: manipulation;
+}
+
+.card-do-post .post-actions-bar .action-btn.action-btn--challenge {
+  margin-inline-start: auto;
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent-border, rgba(255, 85, 0, 0.42));
+  background: var(--accent-soft, rgba(255, 85, 0, 0.14));
+  color: var(--aue-text, #f3f4f6);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .card-do-post .action-btn svg {
   flex: none;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
-/* Número com largura reservada: não pula quando a contagem do servidor chega. */
 .card-do-post .action-btn__count {
   min-width: 1ch;
   font: inherit;
 }
 
 .card-do-post .action-btn:focus-visible {
-  outline: 2px solid var(--aue-text);
-  outline-offset: -4px;
+  outline: 2px solid var(--accent, #ff5500);
+  outline-offset: 2px;
 }
 
-/* Feedback de "Copiado!" flutua: não alarga o botão nem empurra a linha. */
 .card-do-post .action-btn__feedback {
   position: absolute;
   right: 0;
-  bottom: calc(100% - 8px);
-  padding: 2px 8px;
-  border-radius: 8px;
-  background: var(--aue-surface-2);
-  color: var(--aue-text);
+  bottom: calc(100% + 4px);
+  padding: 3px 8px;
+  border: 1px solid var(--accent-border, rgba(255, 85, 0, 0.42));
+  border-radius: var(--radius-xs, 2px);
+  background: var(--surface-2, #1d212c);
+  color: var(--accent, #ff5500);
   font-size: 11px;
   white-space: nowrap;
   pointer-events: none;
 }
 
-/* Feed: as reações emoji e o salvar ficam, então a barra ocupa a largura toda do card. */
-.card-do-post:not(.card-do-post--perfil) .post-actions--twitter {
-  width: calc(100% + var(--card-recuo));
-  max-width: 440px;
-  margin-left: calc(-1 * var(--card-recuo));
-  gap: 0;
-  justify-content: space-between;
-}
-
-.card-do-post:not(.card-do-post--perfil) .action-btn {
-  padding: 0 4px;
-}
-
-/* ---------- hover só onde existe ponteiro de verdade ---------- */
 @media (hover: hover) and (pointer: fine) {
+  .card-do-post:hover {
+    border-color: var(--border-strong, #3b4254);
+  }
+
   .card-do-post .author-profile-link:hover,
-  .card-do-post .badge-comunidade:hover,
   .card-do-post .post-meta-handle:hover {
-    color: var(--aue-text);
+    color: var(--aue-text, #f3f4f6);
     text-decoration: underline;
   }
 
-  .card-do-post .action-btn:hover:not(:disabled),
+  .card-do-post .reaction-chip:hover:not(:disabled) {
+    border-color: var(--border-strong, #3b4254);
+    color: var(--aue-text, #f3f4f6);
+  }
+
+  .card-do-post .post-actions-bar .action-btn:hover:not(:disabled),
   .card-do-post .menu-do-post__botao:hover {
-    background: none;
-    color: var(--aue-text);
+    color: var(--aue-text, #f3f4f6);
+    background: var(--surface-2, #1d212c);
+  }
+
+  .card-do-post .post-actions-bar .action-btn.action-btn--challenge:hover:not(:disabled) {
+    background: var(--accent, #ff5500);
+    border-color: var(--accent, #ff5500);
+    color: var(--accent-on, #0a0b0e);
   }
 }
 
-/*
-  ---------- variante feed: o verde de ativo, salvo e feedback, com peso explícito ----------
-  O verde do feed vinha do InicioOpenDesign.css e só vencia pela ordem de
-  import (mesmo peso). Aqui o peso é 0,4,0 e a regra não depende de ordem.
-*/
 .card-do-post:not(.card-do-post--perfil) .action-btn.is-active,
 .card-do-post:not(.card-do-post--perfil) .action-btn--save.is-saved,
-.card-do-post:not(.card-do-post--perfil) .action-btn--save:hover:not(:disabled),
-.card-do-post:not(.card-do-post--perfil) .action-btn__feedback {
-  color: var(--aue-accent);
-}
-
-/* ---------- variante perfil: nenhum verde ---------- */
-.card-do-post--perfil .post-topic-tag__label {
-  color: var(--aue-text);
-  background: transparent;
-  border-color: var(--border-strong, var(--aue-line));
+.card-do-post:not(.card-do-post--perfil) .action-btn--save:hover:not(:disabled) {
+  color: var(--accent, #ff5500);
 }
 
 .card-do-post--perfil .action-btn.is-active,
 .card-do-post--perfil .action-btn__feedback {
-  color: var(--aue-text);
+  color: var(--aue-text, #f3f4f6);
 }
 
-/* ---------- movimento reduzido ---------- */
+@media (max-width: 520px) {
+  .card-do-post {
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 10px;
+    padding: 12px 12px 8px;
+  }
+
+  .card-do-post .post-avatar-link,
+  .card-do-post .post-avatar-static,
+  .card-do-post .post-avatar-fallback {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card-do-post,
   .card-do-post * {
@@ -459,6 +506,3 @@
     animation: none;
   }
 }
-
-/* O player e sua nota dividem a mesma linha, no feed e no perfil. */
-.card-do-post .post-audio-wrapper.audio-com-nota { display: flex; max-width: 420px; }

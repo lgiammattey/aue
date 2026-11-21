@@ -3,19 +3,12 @@ import { describe, expect, it } from 'vitest';
 
 const ler = (arquivo: string) => readFileSync(new URL(arquivo, import.meta.url), 'utf8');
 
-describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
+describe('estilos do perfil, barra superior e ficha de jogada', () => {
   it('a folha de foto trava a rolagem do fundo só enquanto existe, sem tocar nos outros modais', () => {
     const css = ler('./FolhaDaFoto.css');
     expect(css).toMatch(/html:has\(\.folha-da-foto\),\s*body:has\(\.folha-da-foto\)\s*\{[^}]*overflow:\s*hidden/);
     expect(css).toMatch(/\.folha-da-foto\s*\{[^}]*overscroll-behavior:\s*contain/);
     expect(ler('./casca.css')).not.toContain('folha-da-foto');
-  });
-
-  it('a busca do celular cabe em 320 e 360 sem cortar a copy: placeholder menor, campo em 16px', () => {
-    const css = ler('./BarraSuperior.css');
-    expect(css).toMatch(/\.topbar \.search\s*\{[^}]*font-size:\s*16px/);
-    expect(css).toMatch(/\.topbar \.search::placeholder\s*\{[^}]*font-size:\s*14px/);
-    expect(css).toMatch(/max-width:\s*359px[\s\S]*::placeholder\s*\{[^}]*font-size:\s*12px/);
   });
 
   it('o avatar do card chega a 44px de área de toque por pseudo-elemento, sem !important', () => {
@@ -30,53 +23,25 @@ describe('estilos do perfil que não têm como ser vistos no jsdom', () => {
     expect(css).toMatch(/padding-bottom:\s*calc\(24px \+ env\(safe-area-inset-bottom/);
   });
 
-  it('barra superior do celular: 44px + topo seguro, logo em 32px/36px, sem linha de baixo só no perfil', () => {
-    const css = ler('./BarraSuperior.css');
-    expect(css).toMatch(/header\.topbar\s*\{[^}]*min-height:\s*calc\(44px \+ env\(safe-area-inset-top/);
-    expect(css).toMatch(/header\.topbar \.topbar-brand-mobile\s*\{[^}]*font-size:\s*32px[^}]*line-height:\s*36px/);
-    expect(css).toMatch(/main:has\(\.od-profile\) header\.topbar\s*\{[^}]*border-bottom:\s*0/);
-    expect(css).toMatch(/\.topbar \.search\s*\{[^}]*height:\s*36px/);
-    expect(css).toMatch(/data-sessao='ativa'\]\s*\.top-actions\s*\{[^}]*display:\s*none/);
-  });
-
-  it('"Entrar" do visitante: a caixa acompanha o texto no mobile, sem esconder o estouro', () => {
+  it('barra superior do celular: 52px + topo seguro, links com 44px de toque e sem overflow-x/!important', () => {
     const css = ler('./BarraSuperior.css');
     const sem = css.replace(/\/\*[\s\S]*?\*\//g, '');
-    const mobile = sem.slice(sem.indexOf('@media (max-width: 699px)'), sem.indexOf('@media (max-width: 359px)'));
-    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*width:\s*auto/);
-    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*padding:\s*0 10px/);
-    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*font-size:\s*14px/);
-    expect(mobile).toMatch(/\.topbar \.top-actions \.icon-btn\s*\{[^}]*font-weight:\s*700/);
-    expect(mobile).not.toMatch(/\.icon-btn\s*\{[^}]*font:/);
+    expect(sem).toMatch(/header\.topbar\s*\{[^}]*min-height:\s*calc\(52px \+ env\(safe-area-inset-top/);
+    expect(sem).toMatch(/\.topbar-nav-link\s*\{[^}]*min-height:\s*44px/);
+    expect(sem).toMatch(/\.topbar \.top-actions \.icon-btn\.topbar-login\s*\{[^}]*min-height:\s*44px/);
     expect(sem).not.toContain('overflow-x');
     expect(sem).not.toContain('!important');
-    expect(ler('../../index.css')).toMatch(/\.icon-btn\s*\{[^}]*width:\s*44px/);
   });
 
-  it('cabeçalho do card: nome e @ ficam em linhas distintas, ambos com toque de 44px', () => {
+  it('cabeçalho do card Ficha de Jogada: nome e @ ficam em linhas distintas, ambos com toque de 44px e foco laranja', () => {
     const css = ler('./CardDoPost.css').replace(/\/\*[\s\S]*?\*\//g, '');
-    expect(css.match(/--cab-linha:\s*24px/g)).toHaveLength(1);
     expect(css).toMatch(/\.card-do-post\s*\{[^}]*--cab-linha:\s*24px/);
-    const alvoMinimo = /height:\s*var\(--hit-target-min, 44px\)/;
-    expect(css).toMatch(new RegExp(`\\.card-do-post \\.author-profile-link,\\s*\\.card-do-post \\.post-meta-handle\\s*\\{[^}]*${alvoMinimo.source}[^}]*margin:\\s*-12px 0 0[^}]*padding:\\s*12px 3px 0`));
-    expect(css).toMatch(new RegExp(`\\.card-do-post \\.badge-comunidade\\s*\\{[^}]*z-index:\\s*1;[^}]*${alvoMinimo.source}[^}]*margin:\\s*0 0 -20px -3px`));
-    expect(css).toMatch(/\.card-do-post \.post-meta-ident\s*\{[^}]*flex-direction:\s*column[^}]*height:\s*calc\(var\(--cab-linha\) \* 2 \+ 12px\)/);
-    expect(css).toMatch(/\.card-do-post \.post-meta-details\s*\{[^}]*display:\s*flex[^}]*height:\s*var\(--cab-linha\)[^}]*margin-top:\s*0/);
-    expect(css).toMatch(/\.card-do-post \.post-meta-handle\s*\{[^}]*height:\s*var\(--hit-target-min, 44px\)[^}]*margin:\s*-10px 0 -10px -3px[^}]*padding:\s*10px 3px/);
-    expect(css).toMatch(/\.card-do-post \.post-meta-badges\s*\{[^}]*align-items:\s*flex-start[^}]*height:\s*var\(--cab-linha\)/);
-    expect(css).toMatch(/\.card-do-post \.menu-do-post\s*\{[^}]*margin:\s*calc\(-12px \+ \(var\(--cab-linha\) - 20px\) \/ 2\) -12px -12px 0/);
-    expect(css).toMatch(/\.card-do-post \.badge-nota\s*\{[^}]*align-self:\s*center/);
-    expect(css).not.toMatch(/min-height:\s*44px;\s*margin:\s*-12px 0/);
+    expect(css).toMatch(/\.card-do-post \.author-profile-link,\s*\.card-do-post \.post-meta-handle\s*\{[^}]*height:\s*var\(--hit-target-min, 44px\)/);
+    expect(css).toMatch(/\.card-do-post \.post-meta-ident\s*\{[^}]*flex-direction:\s*column[^}]*height:\s*calc\(var\(--cab-linha\) \* 2\)/);
+    expect(css).toMatch(/\.card-do-post \.post-meta-details\s*\{[^}]*display:\s*flex[^}]*height:\s*var\(--cab-linha\)/);
+    expect(css).toMatch(/\.card-do-post \.post-meta-handle\s*\{[^}]*height:\s*var\(--hit-target-min, 44px\)/);
+    expect(css).toMatch(/:focus-visible::before\s*\{[^}]*height:\s*24px[^}]*border:\s*2px solid var\(--accent,\s*#ff5500\)/);
     expect(css).not.toContain('!important');
-  });
-
-  it('anel de foco do card: ::before de 24px em volta do texto, --aue-text, parametrizado pela linha, nunca verde', () => {
-    const css = ler('./CardDoPost.css').replace(/\/\*[\s\S]*?\*\//g, '');
-    expect(css).toMatch(/\.card-do-post \.author-profile-link:focus-visible,[^{]*\.badge-comunidade:focus-visible\s*\{\s*outline:\s*0;/);
-    expect(css).toMatch(/:focus-visible::before\s*\{[^}]*height:\s*24px[^}]*border:\s*2px solid var\(--aue-text\)[^}]*border-radius:\s*8px[^}]*pointer-events:\s*none/);
-    expect(css).toMatch(/\.post-meta-handle:focus-visible::before\s*\{\s*top:\s*calc\(10px \+ \(var\(--cab-linha\) - 24px\) \/ 2\)/);
-    expect(css).toMatch(/\.badge-comunidade:focus-visible::before\s*\{\s*top:\s*calc\(\(var\(--cab-linha\) - 24px\) \/ 2\)/);
-    expect(css).not.toMatch(/focus-visible[^{]*\{[^}]*accent/);
   });
 
   it('título do estado de perfil usa a fonte de display do produto', () => {

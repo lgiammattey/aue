@@ -21,20 +21,21 @@ function PainelLateralAdsterra() {
     <aside className="panel adsterra-smartlink-panel" aria-label="Conteúdo patrocinado">
       <span
         style={{
-          fontSize: '11px',
+          fontSize: '10px',
+          fontFamily: 'var(--font-mono)',
           textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          color: 'var(--aue-accent, #c6ff00)',
+          letterSpacing: '0.1em',
+          color: 'var(--aue-accent, #ff5500)',
           fontWeight: 700,
         }}
       >
-        Parceiro da Tropa
+        PATROCINADO
       </span>
       <h2 style={{ marginTop: 4, fontFamily: "var(--font-display, 'Anton', sans-serif)", fontSize: 18, letterSpacing: '-0.02em' }}>
-        Combustível Oficial 🍺
+        Banca o servidor 🍺
       </h2>
       <p style={{ fontSize: 13, color: 'var(--aue-muted)', margin: '6px 0 12px', lineHeight: 1.45 }}>
-        Mantenha o gás e a pressão em dia. Acesse ofertas parceiras e apoie o Auê!
+        Dá um clique e ajuda a manter o Auê no ar.
       </p>
       <a
         href={ADSTERRA_CONFIG.smartlinkUrl}
@@ -50,7 +51,7 @@ function PainelLateralAdsterra() {
           boxSizing: 'border-box',
         }}
       >
-        Conferir ofertas parceiras ↗
+        Ver oferta ↗
       </a>
     </aside>
   );

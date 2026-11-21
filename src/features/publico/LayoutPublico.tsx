@@ -9,7 +9,7 @@ export const MolduraPublica: React.FC<{ children: React.ReactNode }> = ({ childr
 };
 
 export const LayoutPublico: React.FC<{ eyebrow: string; titulo: string; resumo: string; children: React.ReactNode }> = ({ eyebrow, titulo, resumo, children }) => (
-  <MolduraPublica><section className="publico-shell"><section className="publico-hero"><span className="publico-eyebrow">{eyebrow}</span><h1>{titulo}</h1><p>{resumo}</p></section>{children}<section className="publico-cta"><span className="publico-eyebrow">Quer participar?</span><h2>Chega mais.</h2><p>Arrota, aprende ou só vem ouvir. O importante é participar da resenha.</p><Link className="publico-pilula publico-pilula-accent publico-pilula-grande" to="/">Ir pro Auê</Link></section></section></MolduraPublica>
+  <MolduraPublica><section className="publico-shell"><section className="publico-hero"><span className="publico-eyebrow">{eyebrow}</span><h1>{titulo}</h1><p>{resumo}</p></section>{children}<section className="publico-cta"><h2>Chega de ler.</h2><p>Abre o mic e manda o seu.</p><Link className="publico-pilula publico-pilula-accent publico-pilula-grande" to="/">Ir pra Arena</Link></section></section></MolduraPublica>
 );
 
 export const SecaoPublica: React.FC<{ eyebrow: string; titulo: string; children: React.ReactNode }> = ({ eyebrow, titulo, children }) => <section className="publico-secao"><div className="publico-secao-cabeca"><span className="publico-eyebrow">{eyebrow}</span><h2>{titulo}</h2></div><div className="publico-secao-corpo">{children}</div></section>;

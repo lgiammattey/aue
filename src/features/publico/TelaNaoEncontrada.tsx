@@ -9,16 +9,16 @@ export function TelaNaoEncontrada() {
 
   return (
     <MolduraPublica>
-      <main className="publico-shell">
+      <section className="publico-shell">
         <section className="publico-hero">
-          <span className="publico-eyebrow">Erro 404</span>
+          <span className="publico-eyebrow">404</span>
           <h1>Página não encontrada.</h1>
-          <p>Esse endereço não existe no Auê, ou o conteúdo foi removido.</p>
+          <p>Esse link não existe ou sumiu.</p>
           <p>
-            <Link to="/">Voltar ao início</Link> · <Link to="/comunidades">Ver comunidades</Link>
+            <Link to="/">Voltar ao início</Link> · <Link to="/ranking-de-arrotos">Ver ranking</Link>
           </p>
         </section>
-      </main>
+      </section>
     </MolduraPublica>
   );
 }

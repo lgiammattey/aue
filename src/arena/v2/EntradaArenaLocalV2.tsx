@@ -3,6 +3,26 @@ import { ArenaV2 } from './ArenaV2';
 import { analyticsArenaV2 } from '../../plataforma/web/analyticsArenaV2';
 
 /** Entrada isolada da Arena: não monta cliente de duelo nem depende de sessão. */
-export function EntradaArenaLocalV2({ conteudoDoRepouso, adversarioHandle }: { conteudoDoRepouso?: ReactNode; adversarioHandle?: string | null } = {}) {
-  return <div className="fluxo-arena-v2"><ArenaV2 conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} telemetria={analyticsArenaV2} /></div>;
+export function EntradaArenaLocalV2({
+  conteudoDoRepouso,
+  adversarioHandle,
+  modoEmbutido = false,
+  aoPublicarAudio,
+}: {
+  conteudoDoRepouso?: ReactNode;
+  adversarioHandle?: string | null;
+  modoEmbutido?: boolean;
+  aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
+} = {}) {
+  return (
+    <div className={`fluxo-arena-v2${modoEmbutido ? ' fluxo-arena-v2--embutida' : ''}`}>
+      <ArenaV2
+        conteudoDoRepouso={conteudoDoRepouso}
+        adversarioHandle={adversarioHandle}
+        modoEmbutido={modoEmbutido}
+        aoPublicarAudio={aoPublicarAudio}
+        telemetria={analyticsArenaV2}
+      />
+    </div>
+  );
 }

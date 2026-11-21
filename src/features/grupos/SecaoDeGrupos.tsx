@@ -56,11 +56,13 @@ export const SecaoDeGrupos: React.FC<SecaoDeGruposProps> = ({
             minHeight: 44,
             padding: '0 20px',
             border: 0,
-            borderRadius: 999,
-            background: 'var(--fg)',
-            color: 'var(--bg)',
-            fontWeight: 700,
-            fontSize: 15,
+            borderRadius: 4,
+            background: 'var(--accent)',
+            color: 'var(--accent-on)',
+            fontWeight: 800,
+            fontSize: 14,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
             cursor: 'pointer',
           }}
         >
@@ -68,8 +70,7 @@ export const SecaoDeGrupos: React.FC<SecaoDeGruposProps> = ({
         </button>
       </div>
       <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14, lineHeight: 1.45 }}>
-        Grupos de WhatsApp, Telegram e TikTok que a galera cadastrou. O Auê só abre o convite: não sabe quantos
-        membros tem nem se o grupo ainda está de pé.
+        WhatsApp, Telegram e TikTok. Link externo — se caiu, caiu.
       </p>
 
       {aviso && (

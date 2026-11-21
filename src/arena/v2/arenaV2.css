@@ -1,84 +1,599 @@
-/* A Arena usa uma superfície clara; o fluxo de duelo mantém o próprio fundo. */
-.fluxo-arena-v2 { width: 100%; min-height: 100svh; background: #0a0a0a; color: #f4f3ed; }
+/* ArenaV2 — Carbono + Laranja Elétrico (Esports Técnico), modo foco e módulo embutido na Home */
+.fluxo-arena-v2 {
+  width: 100%;
+  min-height: 100svh;
+  background: var(--bg, #0a0b0e);
+  color: var(--fg, #f3f4f6);
+}
+
+.fluxo-arena-v2--embutida {
+  min-height: 0;
+  background: transparent;
+}
+
 .arena-v2 {
-  --v2-bg: #f5f1e9;
-  --v2-paper: #171714;
-  --v2-quiet: #5e5c55;
-  --v2-line: #cfcbc0;
-  --v2-volt: #c6f500;
-  box-sizing: border-box; width: 100%; min-height: 100svh;
-  padding: env(safe-area-inset-top) max(28px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(28px, env(safe-area-inset-left));
-  color: var(--v2-paper); background: var(--v2-bg); font-family: var(--font-body); display: flex; flex-direction: column;
+  --v2-bg: var(--bg, #0a0b0e);
+  --v2-surface: var(--surface, #151820);
+  --v2-surface-2: var(--surface-2, #1d212c);
+  --v2-paper: var(--fg, #f3f4f6);
+  --v2-quiet: var(--muted, #8b92a3);
+  --v2-line: var(--border, #232834);
+  --v2-line-strong: var(--border-strong, #3b4254);
+  --v2-volt: var(--accent, #ff5500);
+  --v2-volt-hover: var(--accent-hover, #ff6d24);
+  --v2-volt-on: var(--accent-on, #0a0b0e);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100svh;
+  padding: env(safe-area-inset-top) max(24px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(24px, env(safe-area-inset-left));
+  color: var(--v2-paper);
+  background: var(--v2-bg);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
 }
-.arena-v2__cabecalho, .arena-v2__rodape { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1360px; width: 100%; margin: 0 auto; }
-.arena-v2__cabecalho { min-height: 76px; border-bottom: 1px solid var(--v2-line); }
-.arena-v2__marca { font: 32px/1 var(--font-display); letter-spacing: -.035em; }
-.arena-v2__cabecalho nav, .arena-v2__rodape { display: flex; gap: 24px; }
-.arena-v2 a { color: var(--v2-paper); text-decoration: none; font-size: 13px; font-weight: 700; padding: 14px 0; }
-.arena-v2__cabecalho nav button { min-height: 44px; padding: 8px 0; color: var(--v2-paper); font-size: 13px; font-weight: 700; }
-.arena-v2 a:hover { text-decoration: underline; }
-.arena-v2 :focus-visible { outline: 3px solid #364700; outline-offset: 4px; }
-.arena-v2__conteudo { width: 100%; max-width: 1360px; margin: 0 auto; flex: 1; }
-.arena-v2__desafio { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--v2-line); font: 700 11px/1.3 var(--font-mono); letter-spacing: .08em; }
-.arena-v2__desafio span { color: var(--v2-quiet); }
-.arena-v2__desafio strong { text-align: right; }
-.arena-v2__palco { position: relative; min-height: 530px; padding: 60px 165px 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.arena-v2__arte { position: absolute; width: clamp(85px, 12vw, 150px); color: #25241f; pointer-events: none; }
-.arena-v2__arte svg { display: block; width: 100%; }
-.arena-v2__arte--lata { left: 2%; top: 26%; transform: rotate(-8deg); }
-.arena-v2__arte--flamula { right: 2%; top: 30%; transform: rotate(7deg); }
-.arena-v2__identificador { color: var(--v2-quiet); font: 700 10px/1.4 var(--font-mono); letter-spacing: .14em; margin: 0 0 20px; }
-.arena-v2 h1 { max-width: 700px; margin: 0; font: 400 clamp(48px, 7.5vw, 100px)/1.12 var(--font-display); letter-spacing: -.025em; }
-.arena-v2__instrucao { margin: 18px 0 26px; color: var(--v2-quiet); font-size: 14px; line-height: 1.5; }
-.arena-v2__gatilho { display: inline-flex; flex-direction: row; justify-content: center; align-items: center; gap: 12px; min-width: 245px; min-height: 60px; padding: 14px 22px; border: 0; border-radius: 0; background: var(--v2-volt); color: #171714; font-weight: 800; font-size: 16px; cursor: pointer; }
-.arena-v2__gatilho:hover { background: #b5df00; }
-.arena-v2__gatilho:disabled { cursor: wait; opacity: .65; }
-.arena-v2__circulo { display: grid; place-items: center; width: 28px; height: 28px; flex: none; }
-.arena-v2__circulo svg { width: 25px; height: 25px; }
-.arena-v2__privacidade { max-width: 460px; color: var(--v2-quiet); font-size: 12px; line-height: 1.5; margin: 22px 0 0; }
-.arena-v2__duelo-dica { margin: 18px 0 0; color: var(--v2-paper); font-size: 13px; font-weight: 700; line-height: 1.4; }
-.arena-v2__medidor { position: relative; order: -1; box-sizing: border-box; width: min(100%, 270px); aspect-ratio: 1; margin: 0 auto 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font: 700 12px/1.4 var(--font-mono); letter-spacing: .08em; }
-.arena-v2__medidor time { display: block; margin: 10px 0 0; color: var(--v2-paper); font: 400 clamp(48px, 8vw, 78px)/1 var(--font-display); letter-spacing: -.02em; }
-.arena-v2__onda { position: absolute; inset: 0; border-radius: 50%; background: repeating-conic-gradient(#769500 0deg 2deg, transparent 2deg 5deg); -webkit-mask: radial-gradient(transparent 64%, #000 65% 71%, transparent 72%); mask: radial-gradient(transparent 64%, #000 65% 71%, transparent 72%); pointer-events: none; }
-.arena-v2__medidor p { color: var(--v2-paper); }
-.arena-v2--gravando h1 { font-size: clamp(28px, 4vw, 42px); margin-bottom: 22px; }
-.arena-v2--gravando .arena-v2__identificador { display: none; }
-.arena-v2__erro { max-width: 420px; color: #9b2525; line-height: 1.5; }
-.arena-v2__revisao { width: min(100%, 560px); box-sizing: border-box; margin-top: 28px; padding: 24px 0; border-top: 1px solid var(--v2-line); text-align: left; }
-.arena-v2__revisao h2 { margin: 0; font: 28px/1.1 var(--font-display); }
-.arena-v2__revisao p { color: var(--v2-quiet); line-height: 1.5; font-size: 14px; }
-.arena-v2__revisao audio { width: 100%; }
-.arena-v2__secundario { min-height: 44px; padding: 10px 16px; margin: 16px 8px 0 0; border: 1px solid var(--v2-paper); border-radius: 0; color: var(--v2-paper); background: transparent; font-weight: 700; cursor: pointer; }
-.arena-v2__secundario:hover { background: #e8e3d8; }
-.arena-v2__desafiar { display: block; box-sizing: border-box; width: 100%; min-height: 52px; padding: 12px 18px; margin-top: 20px; border: 0; background: var(--v2-volt); color: #171714; font-weight: 800; cursor: pointer; }
-.arena-v2__desafiar:hover:not(:disabled) { background: #b5df00; }
-.arena-v2__desafiar:disabled { background: #d8d4ca; color: #57564e; cursor: not-allowed; }
-.arena-v2__revisao .arena-v2__duelo-aviso { margin: 8px 0 0; color: var(--v2-quiet); }
-.arena-v2__rodape { justify-content: center; border-top: 1px solid var(--v2-line); flex-wrap: wrap; }
-.arena-v2__rodape a { color: var(--v2-quiet); }
-.arena-v2__laudo { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--v2-line); text-align: left; }
-.arena-v2__laudo h3 { font: 700 11px/1.4 var(--font-mono); letter-spacing: .08em; }
-.arena-v2__laudo dl { margin: 0; }
-.arena-v2__laudo dl div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--v2-line); }
-.arena-v2__laudo dt { color: var(--v2-quiet); font-size: 13px; }
-.arena-v2__laudo dd { margin: 0; font: 700 14px/1.4 var(--font-mono); }
-.arena-v2__laudo dl .arena-v2__duracao { display: block; padding: 10px 0 18px; }
-.arena-v2__laudo .arena-v2__duracao dd { margin-top: 5px; font: 400 clamp(44px, 7vw, 70px)/1 var(--font-display); }
-.arena-v2__laudo dl .arena-v2__nota { display: flex; align-items: baseline; justify-content: space-between; padding: 14px 0; }
-.arena-v2__laudo .arena-v2__nota dd { display: inline-flex; align-items: baseline; gap: 4px; font-variant-numeric: tabular-nums; }
-.arena-v2__laudo .arena-v2__nota .audio-com-nota__nota { font: 400 clamp(44px, 7vw, 70px)/1 var(--font-display); color: var(--v2-paper); }
+
+.arena-v2--embutida {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.arena-v2__cabecalho,
+.arena-v2__rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.arena-v2__cabecalho {
+  min-height: 68px;
+  border-bottom: 1px solid var(--v2-line);
+}
+
+.arena-v2__marca {
+  font: 400 32px/1 var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--v2-paper);
+  text-decoration: none;
+}
+
+.arena-v2__marca span {
+  color: var(--v2-volt);
+}
+
+.arena-v2__cabecalho nav,
+.arena-v2__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.arena-v2 a {
+  color: var(--v2-paper);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 0;
+}
+
+.arena-v2__cabecalho nav button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--v2-line-strong);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--v2-paper);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.arena-v2__cabecalho nav button:hover {
+  border-color: var(--v2-volt);
+  color: var(--v2-volt);
+}
+
+.arena-v2 a:hover {
+  color: var(--v2-volt);
+  text-decoration: underline;
+}
+
+.arena-v2 :focus-visible {
+  outline: 3px solid var(--v2-volt);
+  outline-offset: 3px;
+}
+
+.arena-v2__conteudo {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex: 1;
+}
+
+.arena-v2__desafio {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--v2-line);
+  font: 700 11px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.arena-v2__desafio span {
+  color: var(--v2-quiet);
+}
+
+.arena-v2__desafio strong {
+  text-align: right;
+  color: var(--v2-volt);
+}
+
+/* Palco (modo foco) e Módulo Compacto (embutido na Home) */
+.arena-v2__palco {
+  position: relative;
+  min-height: 460px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.arena-v2--embutida .arena-v2__palco {
+  min-height: 0;
+  padding: 16px;
+  border: 1px solid var(--v2-line-strong);
+  border-left: 3px solid var(--v2-volt);
+  border-radius: var(--radius-md, 6px);
+  background: var(--v2-surface);
+  align-items: stretch;
+  text-align: left;
+}
+
+.arena-v2__cabecalho-modulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.arena-v2:not(.arena-v2--embutida) .arena-v2__cabecalho-modulo {
+  justify-content: center;
+}
+
+.arena-v2__identificador {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--v2-quiet);
+  font: 700 10px/1.4 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.arena-v2--embutida .arena-v2__identificador {
+  margin: 0;
+  color: var(--v2-volt);
+}
+
+.arena-v2__pulso {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--v2-volt);
+}
+
+.arena-v2__atalhos-modulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arena-v2__link-tatico {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--v2-line-strong);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-elevated, #111318);
+  color: var(--v2-quiet);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.arena-v2 a.arena-v2__link-tatico {
+  padding: 4px 10px;
+}
+
+.arena-v2__link-tatico:hover {
+  color: var(--v2-paper);
+  border-color: var(--v2-volt);
+  text-decoration: none;
+}
+
+.arena-v2__linha-topo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.arena-v2--embutida .arena-v2__linha-topo.is-compacta {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.arena-v2--embutida .arena-v2__linha-topo:not(.is-compacta) {
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.arena-v2__chamada {
+  min-width: 0;
+}
+
+.arena-v2 h1 {
+  max-width: 700px;
+  margin: 0;
+  font: 400 clamp(44px, 7vw, 88px)/1.04 var(--font-display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.arena-v2--embutida h2 {
+  margin: 0;
+  font: 400 clamp(26px, 3.6vw, 34px)/1 var(--font-display);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--v2-paper);
+}
+
+.arena-v2__instrucao {
+  margin: 12px 0 0;
+  color: var(--v2-quiet);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.arena-v2--embutida .arena-v2__instrucao {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.arena-v2__gatilho {
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  min-width: 220px;
+  min-height: 52px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--v2-volt);
+  color: var(--v2-volt-on);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background-color var(--duration-fast, 160ms) ease;
+}
+
+.arena-v2__gatilho:hover:not(:disabled) {
+  background: var(--v2-volt-hover);
+}
+
+.arena-v2__gatilho:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.arena-v2__circulo {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+
+.arena-v2__circulo svg {
+  width: 22px;
+  height: 22px;
+}
+
+.arena-v2__privacidade {
+  max-width: 520px;
+  color: var(--v2-quiet);
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 14px 0 0;
+}
+
+.arena-v2--embutida .arena-v2__privacidade {
+  max-width: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--v2-line);
+}
+
+.arena-v2__duelo-dica {
+  margin: 14px 0 0;
+  color: var(--v2-paper);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.arena-v2__medidor {
+  position: relative;
+  box-sizing: border-box;
+  width: min(100%, 220px);
+  aspect-ratio: 1;
+  margin: 18px auto 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font: 700 12px/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+  color: var(--v2-volt);
+}
+
+.arena-v2__medidor time {
+  display: block;
+  margin: 6px 0 0;
+  color: var(--v2-paper);
+  font: 400 clamp(44px, 7vw, 68px)/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.arena-v2__onda {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(var(--v2-volt) 0deg 2deg, transparent 2deg 5deg);
+  -webkit-mask: radial-gradient(transparent 64%, #000 65% 71%, transparent 72%);
+  mask: radial-gradient(transparent 64%, #000 65% 71%, transparent 72%);
+  pointer-events: none;
+}
+
+.arena-v2__medidor p {
+  color: var(--danger, #ff3b47);
+  margin-top: 6px;
+}
+
+.arena-v2--gravando .arena-v2__identificador {
+  color: var(--danger, #ff3b47);
+}
+
+.arena-v2__erro {
+  max-width: 520px;
+  margin-top: 12px;
+  color: var(--danger, #ff3b47);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.arena-v2__status-texto {
+  margin-top: 12px;
+  color: var(--v2-quiet);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.arena-v2__revisao {
+  width: min(100%, 620px);
+  box-sizing: border-box;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--v2-line);
+  text-align: left;
+}
+
+.arena-v2__revisao-cabeca h3 {
+  margin: 0;
+  font: 400 22px/1.1 var(--font-display);
+  text-transform: uppercase;
+}
+
+.arena-v2__revisao p {
+  margin: 6px 0 0;
+  color: var(--v2-quiet);
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.arena-v2__revisao audio {
+  width: 100%;
+}
+
+.arena-v2__acoes-revisao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.arena-v2__secundario {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--v2-line-strong);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--v2-paper);
+  background: var(--bg-elevated, #111318);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.arena-v2__secundario:hover:not(:disabled) {
+  border-color: var(--v2-volt);
+  background: var(--v2-surface-2);
+}
+
+.arena-v2__secundario--destaque {
+  border-color: var(--v2-volt);
+  color: var(--v2-volt);
+}
+
+.arena-v2__desafiar {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 18px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--v2-volt);
+  color: var(--v2-volt-on);
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.arena-v2__desafiar:hover:not(:disabled) {
+  background: var(--v2-volt-hover);
+}
+
+.arena-v2__desafiar:disabled {
+  background: var(--v2-surface-2);
+  color: var(--v2-quiet);
+  cursor: not-allowed;
+}
+
+.arena-v2__revisao .arena-v2__duelo-aviso {
+  margin: 8px 0 0;
+  color: var(--v2-quiet);
+}
+
+.arena-v2__rodape {
+  justify-content: center;
+  border-top: 1px solid var(--v2-line);
+  flex-wrap: wrap;
+}
+
+.arena-v2__rodape a {
+  color: var(--v2-quiet);
+}
+
+.arena-v2__laudo {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--v2-line);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-elevated, #111318);
+  text-align: left;
+}
+
+.arena-v2__laudo h3 {
+  margin: 0 0 10px;
+  color: var(--v2-volt);
+  font: 700 10px/1.4 var(--font-mono);
+  letter-spacing: 0.12em;
+}
+
+.arena-v2__laudo dl {
+  margin: 0;
+}
+
+.arena-v2__laudo dl div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--v2-line);
+}
+
+.arena-v2__laudo dt {
+  color: var(--v2-quiet);
+  font-size: 13px;
+}
+
+.arena-v2__laudo dd {
+  margin: 0;
+  font: 700 14px/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.arena-v2__laudo dl .arena-v2__nota {
+  padding: 10px 0;
+}
+
+.arena-v2__laudo .arena-v2__nota dd {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.arena-v2__laudo .arena-v2__nota .audio-com-nota__nota {
+  font: 400 clamp(40px, 6vw, 56px)/1 var(--font-display);
+  color: var(--v2-volt);
+}
+
+.arena-v2__laudo dl .arena-v2__duracao dd {
+  font: 400 clamp(24px, 4vw, 32px)/1 var(--font-display);
+}
+
 @media (max-width: 699px) {
-  .arena-v2 { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
-  .arena-v2__cabecalho { min-height: 66px; }
-  .arena-v2__cabecalho nav { gap: 14px; }
-  .arena-v2__palco { min-height: 500px; padding: 42px 0 50px; }
-  .arena-v2__arte { width: 62px; opacity: .65; }
-  .arena-v2__arte--lata { left: 0; top: 12px; }
-  .arena-v2__arte--flamula { right: 0; top: 12px; }
-  .arena-v2__identificador { margin-top: 72px; }
-  .arena-v2 h1 { font-size: clamp(42px, 11vw, 64px); }
-  .arena-v2__medidor { margin-top: 75px; }
-  .arena-v2--gravando h1 { font-size: 30px; }
-  .arena-v2__revisao { margin-top: 18px; }
+  .arena-v2:not(.arena-v2--embutida) {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .arena-v2__cabecalho {
+    min-height: 58px;
+  }
+
+  .arena-v2__cabecalho nav {
+    gap: 12px;
+  }
+
+  .arena-v2:not(.arena-v2--embutida) .arena-v2__palco {
+    min-height: 400px;
+    padding: 32px 0;
+  }
+
+  .arena-v2--embutida .arena-v2__linha-topo.is-compacta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .arena-v2--embutida .arena-v2__gatilho {
+    width: 100%;
+    min-width: 0;
+  }
 }
-@media (prefers-reduced-motion: reduce) { .arena-v2__onda { transition: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .arena-v2__onda {
+    transition: none;
+  }
+}

@@ -1,51 +1,41 @@
-/* O mural usa a mesma linguagem da Arena; os demais destinos mantêm sua casca. */
-.app.app--mural {
-  --aue-bg: #f5f1e9; --aue-text: #171714; --aue-muted: #5e5c55;
-  --aue-subtle: #66645c; --aue-line: #cfcbc0; --aue-surface: #f5f1e9;
-  --aue-surface-2: #e8e3da; --aue-accent: #171714; --aue-accent-on: #f5f1e9;
-  --bg: #f5f1e9; --fg: #171714; --border-strong: #b8b4aa;
-  display: block; max-width: none; min-height: 100svh; background: var(--aue-bg); color: var(--aue-text);
+/*
+  Mural / Home Unificada — Carbono + Laranja Elétrico (Esports Técnico).
+  Usa o App Shell de 3 colunas do appShell.css sem esconder sidebar nem rightbar.
+*/
+.action-btn--challenge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-block-size: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent-border, rgba(255, 85, 0, 0.42));
+  border-radius: var(--radius-sm, 4px);
+  background: var(--accent-soft, rgba(255, 85, 0, 0.14));
+  color: var(--fg, #f3f4f6);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background-color var(--duration-fast, 160ms) ease,
+    color var(--duration-fast, 160ms) ease,
+    border-color var(--duration-fast, 160ms) ease;
 }
-.app--mural > .sidebar, .app--mural > .rightbar, .app--mural > main > .topbar { display: none; }
-.app--mural > main { width: 100%; min-height: 100svh; padding: 0 max(28px, env(safe-area-inset-right)) 80px max(28px, env(safe-area-inset-left)); }
-.app--mural [aria-label="Feed principal"] { max-width: 1360px; margin: 0 auto; }
-.mural-nav { display: flex; min-height: 76px; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--aue-line); }
-.mural-nav a { color: var(--aue-text); text-decoration: none; font-size: 13px; font-weight: 700; }
-.mural-nav a:hover { text-decoration: underline; }
-.mural-nav__marca { font: 32px/1 var(--font-display) !important; letter-spacing: -.035em; }
-.mural-nav > div { display: flex; align-items: center; gap: 24px; }
-.mural-hero { padding: 64px 0 42px; }
-.mural-hero > span { font: 700 11px/1.4 var(--font-mono); letter-spacing: .12em; color: var(--aue-muted); }
-.mural-hero h1 { margin: 14px 0 10px; color: var(--aue-text); font: 400 clamp(58px, 8vw, 104px)/1 var(--font-display); text-transform: uppercase; letter-spacing: -.025em; }
-.mural-hero p { margin: 0; color: var(--aue-muted); font-size: 16px; line-height: 1.5; }
-.mural-controles { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--aue-line); padding-bottom: 14px; }
-.app--mural .feed-filters { display: flex; width: auto; gap: 4px; padding: 0; background: none; border-radius: 0; box-shadow: none; }
-.app--mural .feed-filter { padding: 10px 16px; border-radius: 0; color: var(--aue-muted); }
-.app--mural .feed-filter[aria-pressed='true'] { color: var(--aue-text); background: var(--aue-surface-2); box-shadow: none; }
-.mural-publicar { min-height: 48px; padding: 12px 22px; color: #171714; background: #c6f500; font-weight: 800; }
-.mural-publicar:hover { background: #b5df00; }
-.app--mural .feed { max-width: 920px; margin: 0 auto; }
-.app--mural .card-do-post { margin: 14px 0; padding: 20px 18px 14px; border: 1px solid var(--aue-line); border-radius: 14px; background: #fbf8f2; }
-.app--mural .post-community-avatar { display: none; }
-.app--mural .card-do-post .post-body { font-size: 16px; line-height: 1.6; }
-.app--mural .card-do-post .post-audio-wrapper { margin: 18px 0; }
-.app--mural .player-arroto { min-height: 70px; height: auto; padding: 10px 18px 10px 10px; background: #ebe6dc; border: 1px solid #cfcbc0; border-radius: 12px; }
-.app--mural .player-arroto__play { width: 52px; height: 52px; }
-.app--mural .player-arroto__play::before { width: 46px; height: 46px; }
-.app--mural .player-arroto__onda { height: 32px; }
-.app--mural .player-arroto__onda i { max-width: 3px; opacity: .85; }
-.app--mural .player-arroto__tempo { font-family: var(--font-mono); font-weight: 700; }
-.app--mural .conversation-preview { box-shadow: none; }
-.app--mural a:focus-visible, .app--mural button:focus-visible { outline: 3px solid #364700; outline-offset: 3px; }
-.action-btn--challenge { border: 1px solid #c6f500; border-radius: 999px; padding: 4px 10px; font-weight: 800; background: rgba(198, 245, 0, 0.14); color: var(--aue-text, #171714); }
-.action-btn--challenge:hover { background: #c6f500; color: #171714; }
-.od-profile__button--challenge { background: #c6f500; color: #171714; border-color: #c6f500; font-weight: 800; }
-.od-profile__button--challenge:hover { background: #b5df00; }
-@media (max-width: 699px) {
-  .app--mural > main { padding: 0 max(20px, env(safe-area-inset-right)) 64px max(20px, env(safe-area-inset-left)); }
-  .mural-nav { min-height: 66px; }.mural-nav > div { gap: 14px; }
-  .mural-hero { padding: 48px 0 32px; }.mural-hero h1 { font-size: clamp(56px, 13vw, 76px); }
-  .mural-controles { gap: 8px; }.mural-publicar { padding: 10px 14px; }
-  .app--mural .card-do-post { grid-template-columns: 36px minmax(0,1fr); gap: 10px; }
-  .app--mural .card-do-post .post-avatar-link, .app--mural .card-do-post .post-avatar-static { width: 36px; height: 36px; }
+
+.action-btn--challenge:hover:not(:disabled) {
+  background: var(--accent, #ff5500);
+  border-color: var(--accent, #ff5500);
+  color: var(--accent-on, #0a0b0e);
+}
+
+.od-profile__button--challenge {
+  background: var(--accent, #ff5500);
+  color: var(--accent-on, #0a0b0e);
+  border-color: var(--accent, #ff5500);
+  font-weight: 800;
+}
+
+.od-profile__button--challenge:hover {
+  background: var(--accent-hover, #ff6d24);
 }

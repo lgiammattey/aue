@@ -6,7 +6,7 @@ for (const view of [{ name: 'mobile', width: 390, height: 844 }, { name: 'deskto
     await page.goto(`${base}?perfil-resumo`);
     await page.evaluate(() => document.fonts.ready);
     const dashboard = page.locator('.od-profile__dashboard');
-    await expect(dashboard.getByRole('heading', { name: 'Melhor nota publicada' })).toBeVisible();
+    await expect(dashboard.getByRole('heading', { name: 'Melhor nota' })).toBeVisible();
     await expect(dashboard.getByRole('heading', { name: 'Média' })).toBeVisible();
     await expect(dashboard).toContainText('87');
     await expect(dashboard).toContainText('72,5');

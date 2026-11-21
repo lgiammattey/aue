@@ -99,7 +99,7 @@ describe('Tela de Perfil Open Design', () => {
     expect(screen.getByRole('tab', { name: 'Salvos' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: /Arrotos/ }).getAttribute('aria-selected')).toBe('true');
     expect(screen.getByRole('link', { name: 'Ir pra Arena' }).getAttribute('href')).toBe('/arena');
-    expect(screen.getByRole('heading', { name: 'Melhor nota publicada' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Melhor nota' })).toBeTruthy();
     fireEvent.click(screen.getByRole('tab', { name: /Posts/ }));
     expect(screen.getByRole('button', { name: 'Criar novo post' }).textContent).toContain('Alguma merda');
   });
@@ -132,20 +132,20 @@ describe('Tela de Perfil Open Design', () => {
   it('mostra a melhor e a média das notas publicadas do perfil consultado', async () => {
     resumoDasNotas.mockResolvedValue({ ok: true, valor: { melhorNota: 87, media: 72.5, total: 2 } });
     abrir(outraPessoa);
-    const melhor = await screen.findByRole('heading', { name: 'Melhor nota publicada' });
+    const melhor = await screen.findByRole('heading', { name: 'Melhor nota' });
     const placar = melhor.closest('section');
     expect(placar).toBeTruthy();
     expect(await within(placar!).findByText('87')).toBeTruthy();
     expect(await within(placar!).findByText('72,5')).toBeTruthy();
-    expect(screen.getAllByText('Em publicações')).toHaveLength(2);
+    expect(screen.queryByText('Em publicações')).toBeNull();
     expect(resumoDasNotas).toHaveBeenCalledWith('user-douglas');
-    expect(screen.getByText('Áudios deixados neste perfil. Eles não são resultados da Arena.')).toBeTruthy();
+    expect(screen.queryByText(/Eles não são resultados da Arena/)).toBeNull();
   });
 
   it('mostra indisponibilidade quando não consegue consultar o resumo', async () => {
     resumoDasNotas.mockResolvedValue({ ok: false, motivo: 'falhou' });
     abrir(outraPessoa);
     expect(await screen.findAllByText('Não foi possível carregar')).toHaveLength(2);
-    expect(screen.queryByText('Ainda não há nota publicada')).toBeNull();
+    expect(screen.queryByText('Sem nota ainda')).toBeNull();
   });
 });

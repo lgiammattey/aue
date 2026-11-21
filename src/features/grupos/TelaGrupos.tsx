@@ -7,9 +7,9 @@ import './TelaGrupos.css';
 /** Diretório público: ver convites e cadastrar grupos não exige conta no Auê. */
 export const TelaGrupos: React.FC<{ porta?: PortaDeGrupos }> = ({ porta }) => (
   <LayoutArenaPublica
-    eyebrow="A tropa no zap e além"
+    eyebrow="NO ZAP"
     titulo="Grupos de arroto"
-    resumo="Tem arroto que merece uma plateia. Encontre os grupos que a galera cadastrou e entre na resenha."
+    resumo="Cola num grupo ou bota o seu na lista."
   >
     <div className="grupos-arena">
       <SecaoDeGrupos porta={porta} titulo="Grupos da galera" variante="publica" />

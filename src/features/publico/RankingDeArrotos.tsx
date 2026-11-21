@@ -1,37 +1,38 @@
 import React from 'react';
 
+import { TopArrotadoresDaHome } from '../novo-aue/TopArrotadoresDaHome';
 import { LayoutPublico, LinksPublicos, SecaoPublica } from './LayoutPublico';
 
-/** `/ranking-de-arrotos` explica a Arena atual sem apresentar um ranking que não existe. */
+/** `/ranking-de-arrotos` mostra o placar ao vivo dos melhores áudios avaliados e explica o laudo. */
 export const RankingDeArrotos: React.FC = () => (
   <LayoutPublico
-    eyebrow="Arena experimental"
+    eyebrow="PLACAR"
     titulo="Ranking de arrotos no Auê"
-    resumo="A Arena já permite gravar e ouvir sua tentativa. O ranking ainda não está disponível."
+    resumo="Os mais pesados da casa. Aperta o play."
   >
-    <SecaoPublica eyebrow="Laudo experimental" titulo="O que a Arena mede?">
+    <SecaoPublica eyebrow="TOP 5" titulo="Top arrotadores">
+      <TopArrotadoresDaHome variante="painel" ocultarCabecalho />
+    </SecaoPublica>
+
+    <SecaoPublica eyebrow="LAUDO" titulo="Como sai a nota">
       <p>
-        Quando a medição funciona, o laudo mostra a duração detectada e um índice de potência
-        relativo ao ruído do ambiente. A leitura depende do aparelho e do lugar onde você gravou.
+        Mede a duração detectada e a potência relativo ao ruído do ambiente — varia com o aparelho e o lugar,
+        não é decibel.
       </p>
       <p>
-        Esse índice não mede volume físico em decibéis. A frequência ainda aparece como
-        indisponível, e uma gravação também pode ficar sem laudo.
+        Frequência ainda indisponível. Se o áudio falhar, sai sem nota.
       </p>
     </SecaoPublica>
 
-    <SecaoPublica eyebrow="O que vem depois" titulo="O Auê tem ranking de arrotos?">
+    <SecaoPublica eyebrow="ENTRA AÍ" titulo="Quer subir no placar?">
       <p>
-        Ainda não há ranking de arrotos. A Arena oferece gravação e laudo experimental no navegador.
-      </p>
-      <p>
-        A gravação fica na sua tela até você escolher compartilhá-la ou baixá-la.
+        Grava na Arena ou manda no Mural. Só vai pro ar se você quiser.
       </p>
       <LinksPublicos
         links={[
-          { para: '/arena', rotulo: 'Conhecer a Arena' },
-          { para: '/como-jogar', rotulo: 'Como funciona o Auê' },
-          { para: '/tipos-de-arroto', rotulo: 'Conhecer os tipos de arroto' },
+          { para: '/arena', rotulo: 'Arena' },
+          { para: '/como-jogar', rotulo: 'Como funciona' },
+          { para: '/tipos-de-arroto', rotulo: 'Tipos de arroto' },
         ]}
       />
     </SecaoPublica>

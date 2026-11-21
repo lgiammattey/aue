@@ -86,8 +86,8 @@ export function ModalCompositor({
   useEffect(() => {
     if (!aberto || !desafioAlvo) return;
     const chamada = desafioAlvo.notaAlvo !== undefined
-      ? `Desafio @${desafioAlvo.handle} a bater essa nota (${desafioAlvo.notaAlvo}/100)! Solta o arroto:`
-      : `Desafio @${desafioAlvo.handle} no mano a mano! Supera esse arroto:`;
+      ? `@${desafioAlvo.handle}, bate esse ${desafioAlvo.notaAlvo}/100 aí:`
+      : `@${desafioAlvo.handle}, bora no X1:`;
     setCorpo(chamada);
   }, [aberto, desafioAlvo]);
 
@@ -326,7 +326,7 @@ export function ModalCompositor({
         <form onSubmit={enviar} className="composer-clean-form">
           {desafioAlvo && (
             <div className="composer-attachment-pill" role="note">
-              <span>⚔️ Intimando <strong>{desafioAlvo.nome}</strong> (@{desafioAlvo.handle}) no Mural e no Perfil</span>
+              <span>⚔️ X1 contra <strong>@{desafioAlvo.handle}</strong></span>
               <a
                 className="action-pill-btn"
                 href={`/arena?desafiar=${encodeURIComponent(desafioAlvo.handle)}`}

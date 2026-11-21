@@ -22,21 +22,19 @@ for (const viewport of VIEWPORTS) {
   test(`mantém a casca pública estável em ${viewport.nome}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await instalarSondaDeLayoutShift(page);
-    await page.goto('/como-jogar');
+    await page.goto('/tipos-de-arroto');
     await aguardarQuadroEstavel(page);
 
     await esperarSemOverflowHorizontal(page);
 
     if (viewport.width < 700) {
       const topo = page.locator('.topbar');
-      const navegacao = page.locator('.mobile-bottom-nav');
+      await expect(page.locator('.mobile-bottom-nav')).toHaveCount(0);
       const antesDoTopo = await caixaDo(topo);
-      const antesDaNavegacao = await caixaDo(navegacao);
 
       await page.evaluate(() => window.scrollTo(0, 420));
       await aguardarQuadroEstavel(page);
       esperarCaixaEstavel(antesDoTopo, await caixaDo(topo));
-      esperarCaixaEstavel(antesDaNavegacao, await caixaDo(navegacao));
     } else {
       const lateral = page.locator('.sidebar');
       const antesDaLateral = await caixaDo(lateral);

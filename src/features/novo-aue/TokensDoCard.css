@@ -1,24 +1,11 @@
 /*
-  Tokens do DESIGN.md que o app só declara em outras rotas, declarados UMA vez
-  para tudo o que o card e o perfil desenham: perfil, card, player e folha de
-  foto. Assim a borda é a mesma no feed e no perfil.
-
-  Valores do DESIGN.md: --border-strong #74725f (escuro) e #85836f (claro);
-  --ind é o verde no escuro e o preto no claro.
-  Não mexe em casca.css nem em Comunidade.css.
+  Tokens compartilhados entre perfil, card de post, player e folha de foto.
+  Alinhados ao Design System Carbono + Laranja Elétrico (dark-only).
 */
 .od-profile,
 .card-do-post,
 .player-arroto,
 .folha-da-foto {
-  --border-strong: #74725f;
-  --ind: var(--aue-accent, #c6ff00);
-}
-
-[data-theme='light'] .od-profile,
-[data-theme='light'] .card-do-post,
-[data-theme='light'] .player-arroto,
-[data-theme='light'] .folha-da-foto {
-  --border-strong: #85836f;
-  --ind: #0a0a08;
+  --border-strong: var(--aue-line-strong, #3b4254);
+  --ind: var(--aue-accent, #ff5500);
 }

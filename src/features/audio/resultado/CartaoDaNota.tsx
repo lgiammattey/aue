@@ -191,7 +191,7 @@ export const CartaoDaNota: React.FC<CartaoDaNotaProps> = ({
             viewBox={VIEWBOX_DA_MARCA}
             style={{ display: 'block', flex: 'none' }}
           >
-            <path fill="#c6ff00" fillRule="evenodd" d={CAMINHO_DA_MARCA} />
+            <path fill="#ff5500" fillRule="evenodd" d={CAMINHO_DA_MARCA} />
           </svg>
           <span
             style={{

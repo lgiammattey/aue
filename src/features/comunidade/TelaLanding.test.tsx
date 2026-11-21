@@ -38,7 +38,7 @@ describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Arrotar é um dom. Aqui, ele tem turma.' }),
     ).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Só quero ouvir' }).getAttribute('href')).toBe('/comunidades');
+    expect(screen.getByRole('link', { name: 'Só quero ouvir' }).getAttribute('href')).toBe('/');
     expect(screen.getByRole('link', { name: 'Conhecer a Arena' }).getAttribute('href')).toBe('/arena');
   });
 

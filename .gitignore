@@ -84,3 +84,7 @@ banco-de-arroto/
 
 # Estado temporário gerado pelo Supabase CLI local
 supabase/.temp/
+
+# Acervo bruto de áudios para scripts locais (elenco:preparar / squad:rodada)
+audios/solo-eructos/*
+!audios/solo-eructos/LEIAME.md

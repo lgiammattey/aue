@@ -1,10 +1,20 @@
+import type { ReacaoDoTopico } from '../../portas/forum';
+
+export type ReacaoDeAtitude = Exclude<ReacaoDoTopico, 'like'>;
+
 /** Contagens e o que a conta atual marcou. Vem do servidor, nunca é inventado na tela. */
 export interface EngajamentoDoPost {
   readonly like: number;
+  readonly dislike?: number;
+  readonly dedo?: number;
+  readonly hangloose?: number;
+  readonly rock?: number;
+  readonly cerveja?: number;
+  readonly refrigerante?: number;
   readonly fogo: number;
   readonly nojo: number;
   readonly trofeu: number;
-  readonly minhas: readonly ('like' | 'fogo' | 'nojo' | 'trofeu')[];
+  readonly minhas: readonly ReacaoDoTopico[];
 }
 
 export interface ItemDoFeed {

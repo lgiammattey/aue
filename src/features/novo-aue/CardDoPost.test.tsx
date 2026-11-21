@@ -228,7 +228,7 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
 
   it('botão sem ação fica desabilitado e explica, em vez de não fazer nada', () => {
     mostrar({ aoCurtir: undefined, aoReagir: undefined, aoAlternarSalvar: undefined, salvo: false });
-    for (const nome of ['Curtir', '🔥', '🤢', '🏆', 'Salvar']) {
+    for (const nome of ['Curtir', '👎', '🖕', '🤙', '🤘', '🍺', '🥤', 'Salvar']) {
       const botao = screen.getByRole('button', { name: nome });
       expect(botao.hasAttribute('disabled'), nome).toBe(true);
       expect(botao.getAttribute('title'), nome).toMatch(/não está disponível/);
@@ -239,11 +239,19 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     mostrar({ salvo: false, aoCurtir: vi.fn(), aoReagir: vi.fn(), aoAlternarSalvar: vi.fn() });
     const toolbar = screen.getByRole('toolbar', { name: 'Ações do post' });
 
-    for (const nome of [/7 comentários/i, 'Curtir', '🔥', '🤢', '🏆', 'Salvar', 'Compartilhar']) {
+    for (const nome of [/7 comentários/i, 'Curtir', '👎', '🖕', '🤙', '🤘', '🍺', '🥤', 'Salvar', 'Compartilhar']) {
       expect(screen.getByRole('button', { name: nome })).toBeTruthy();
     }
 
-    expect(toolbar.querySelectorAll('button')).toHaveLength(7);
+    expect(toolbar.querySelectorAll('button')).toHaveLength(10);
+  });
+
+  it('exibe botão Desafiar quando aoDesafiar é informado e dispara ao clicar', () => {
+    const aoDesafiar = vi.fn();
+    mostrar({ aoDesafiar });
+    const botao = screen.getByRole('button', { name: 'Desafiar @mestre_eco' });
+    fireEvent.click(botao);
+    expect(aoDesafiar).toHaveBeenCalledOnce();
   });
 
   it('mostra contagens e marca o que a conta já fez; os cliques chegam aos handlers', () => {
@@ -251,24 +259,29 @@ describe('CardDoPost (Formato Twitter / OpenDesign)', () => {
     const aoReagir = vi.fn();
     const aoAlternarSalvar = vi.fn();
     mostrar({
-      reacoes: { like: 3, fogo: 2, nojo: 0, trofeu: 1 },
-      minhas: ['like', 'fogo'],
+      reacoes: { like: 3, dislike: 2, dedo: 0, hangloose: 1, rock: 4, cerveja: 5, refrigerante: 0, fogo: 0, nojo: 0, trofeu: 0 },
+      minhas: ['like', 'dislike', 'rock'],
       salvo: true,
       aoCurtir,
       aoReagir,
       aoAlternarSalvar,
     });
     expect(screen.getByRole('button', { name: 'Curtir' }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByRole('button', { name: '🔥' }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByRole('button', { name: '🤢' }).getAttribute('aria-pressed')).toBe('false');
-    expect(screen.getByRole('button', { name: '🔥' }).textContent).toContain('2');
-    expect(screen.getByRole('button', { name: '🏆' }).textContent).toContain('1');
+    expect(screen.getByRole('button', { name: '👎' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: '🖕' }).getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: '👎' }).textContent).toContain('2');
+    expect(screen.getByRole('button', { name: '🤙' }).textContent).toContain('1');
+    expect(screen.getByRole('button', { name: '🤘' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: '🤘' }).textContent).toContain('4');
+    expect(screen.getByRole('button', { name: '🍺' }).textContent).toContain('5');
     expect(screen.getByRole('button', { name: 'Salvo' }).getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(screen.getByRole('button', { name: 'Curtir' }));
-    fireEvent.click(screen.getByRole('button', { name: '🤢' }));
+    fireEvent.click(screen.getByRole('button', { name: '🖕' }));
+    fireEvent.click(screen.getByRole('button', { name: '🥤' }));
     fireEvent.click(screen.getByRole('button', { name: 'Salvo' }));
     expect(aoCurtir).toHaveBeenCalledOnce();
-    expect(aoReagir).toHaveBeenCalledWith('nojo');
+    expect(aoReagir).toHaveBeenNthCalledWith(1, 'dedo');
+    expect(aoReagir).toHaveBeenNthCalledWith(2, 'refrigerante');
     expect(aoAlternarSalvar).toHaveBeenCalledOnce();
   });
 

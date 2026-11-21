@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ADSTERRA_CONFIG, anunciosAdsterraHabilitados } from '../../plataforma/web/adsterra';
+import { analyticsArenaV2 } from '../../plataforma/web/analyticsArenaV2';
+import { AdsterraBanner300x250 } from '../../shared/components/AdsterraBanner300x250';
 import { ADSENSE_CONFIGURADO, AdBanner, type EstadoDoAdSense } from '../../shared/components/AdBanner';
 import { AdsterraNativeBanner } from './AdsterraNativeBanner';
 import { VitrineDeApps } from './VitrineDeApps';
@@ -39,6 +41,7 @@ function PainelLateralAdsterra() {
         target="_blank"
         rel="noopener noreferrer"
         className="join"
+        onClick={() => analyticsArenaV2.registrar('clicou_anuncio')}
         style={{
           display: 'inline-block',
           textAlign: 'center',
@@ -72,14 +75,26 @@ function SlotAdSenseOuVitrine({ posicionamento }: { readonly posicionamento: Pos
 /**
  * A propaganda externa ou da casa ocupa o slot patrocinado.
  *
- * Quando a Adsterra está habilitada, ela ocupa diretamente os slots do feed (banner nativo)
- * e da lateral direita (smartlink de ofertas parceiras).
+ * Quando a Adsterra está habilitada, intercala o Native Banner (slot 0), o
+ * Banner 300x250 isolado (slots ímpares) e o card de ofertas Smartlink (slots pares e lateral).
  * Sem Adsterra, prioriza o AdSense caso configurado, caindo na vitrine da casa se vazio.
  */
-export function SlotPatrocinado({ posicionamento }: { readonly posicionamento: PosicionamentoDoSlot }) {
+export function SlotPatrocinado({
+  posicionamento,
+  indiceDoSlot = 0,
+}: {
+  readonly posicionamento: PosicionamentoDoSlot;
+  readonly indiceDoSlot?: number;
+}) {
   if (anunciosAdsterraHabilitados) {
-    if (posicionamento === 'feed') {
+    if (posicionamento === 'sidebar') {
+      return <PainelLateralAdsterra />;
+    }
+    if (indiceDoSlot === 0) {
       return <AdsterraNativeBanner />;
+    }
+    if (indiceDoSlot % 2 === 1) {
+      return <AdsterraBanner300x250 />;
     }
     return <PainelLateralAdsterra />;
   }
@@ -87,6 +102,6 @@ export function SlotPatrocinado({ posicionamento }: { readonly posicionamento: P
   return <SlotAdSenseOuVitrine posicionamento={posicionamento} />;
 }
 
-export function SlotPatrocinadoDoFeed() {
-  return <SlotPatrocinado posicionamento="feed" />;
+export function SlotPatrocinadoDoFeed({ indiceDoSlot = 0 }: { readonly indiceDoSlot?: number }) {
+  return <SlotPatrocinado posicionamento="feed" indiceDoSlot={indiceDoSlot} />;
 }

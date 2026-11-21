@@ -55,6 +55,34 @@ import type {
 const TEMPO_DA_LEITURA_MS = 6000;
 const TEMPO_DA_ESCRITA_MS = 20000;
 
+const TIPOS_DE_REACAO_DO_TOPICO: readonly ReacaoDoTopico[] = [
+  'like',
+  'dislike',
+  'dedo',
+  'hangloose',
+  'rock',
+  'cerveja',
+  'refrigerante',
+  'fogo',
+  'nojo',
+  'trofeu',
+];
+
+function criarTotalDeReacoes(): Record<ReacaoDoTopico, number> {
+  return {
+    like: 0,
+    dislike: 0,
+    dedo: 0,
+    hangloose: 0,
+    rock: 0,
+    cerveja: 0,
+    refrigerante: 0,
+    fogo: 0,
+    nojo: 0,
+    trofeu: 0,
+  };
+}
+
 const LIMITE_PADRAO_DE_TOPICOS = 30;
 const LIMITE_MAXIMO_DE_TOPICOS = 100;
 const LIMITE_PADRAO_DE_RESPOSTAS = 50;
@@ -587,15 +615,31 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
     }
   }
 
-  async function escrever<T>(
+  async function garantirSessaoDeReacao(): Promise<boolean | 'erro'> {
+    try {
+      const { data, error } = await comTempo(supabase.auth.getSession(), TEMPO_DA_LEITURA_MS, 'sessão');
+      if (error) {
+        const nome = (error as { name?: string }).name ?? '';
+        return nome === 'AuthRetryableFetchError' || nome === 'AuthUnknownError' || !nome.startsWith('Auth')
+          ? 'erro'
+          : false;
+      }
+      if (data.session?.user) return true;
+      if (typeof supabase.auth.signInAnonymously === 'function') {
+        const anon = await comTempo(supabase.auth.signInAnonymously(), TEMPO_DA_LEITURA_MS, 'sessão anônima');
+        if (!anon.error && anon.data?.session?.user) return true;
+      }
+      return false;
+    } catch {
+      return 'erro';
+    }
+  }
+
+  async function executarEscrita<T>(
     rpc: string,
     args: Record<string, unknown>,
     tratar: (dados: unknown) => T,
   ): Promise<ResultadoDaEscrita<T>> {
-    if (!usaServidor()) return { ok: false, motivo: 'semServidor' };
-    const conta = await temConta();
-    if (conta === 'erro') return { ok: false, motivo: 'falhou' };
-    if (!conta) return { ok: false, motivo: 'precisaEntrar' };
     try {
       const { data, error } = await comTempo(supabase.rpc(rpc, args), TEMPO_DA_ESCRITA_MS, rpc);
       if (error) {
@@ -609,6 +653,18 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
       console.error(`Falha em ${rpc}`, erro);
       return { ok: false, motivo: 'semConfirmacao' };
     }
+  }
+
+  async function escrever<T>(
+    rpc: string,
+    args: Record<string, unknown>,
+    tratar: (dados: unknown) => T,
+  ): Promise<ResultadoDaEscrita<T>> {
+    if (!usaServidor()) return { ok: false, motivo: 'semServidor' };
+    const conta = await temConta();
+    if (conta === 'erro') return { ok: false, motivo: 'falhou' };
+    if (!conta) return { ok: false, motivo: 'precisaEntrar' };
+    return executarEscrita(rpc, args, tratar);
   }
 
   /** O servidor devolve `true` em apagar e denunciar; qualquer outra coisa não é confirmação. */
@@ -736,20 +792,24 @@ export function criarForumWeb(opcoes: { forcarOffline?: boolean } = {}): PortaDe
         const mapa: Record<string, { total: Record<ReacaoDoTopico, number>; minhas: ReacaoDoTopico[] }> = {};
         for (const l of linhas) {
           const tipo = texto(l, 'tipo');
-          if (tipo !== 'like' && tipo !== 'fogo' && tipo !== 'nojo' && tipo !== 'trofeu') malformada('tipo');
+          if (!TIPOS_DE_REACAO_DO_TOPICO.includes(tipo as ReacaoDoTopico)) malformada('tipo');
           const total = Number(l.total);
           if (!Number.isInteger(total) || total < 0) malformada('total');
           const id = texto(l, 'topico_id');
-          const item = (mapa[id] ??= { total: { like: 0, fogo: 0, nojo: 0, trofeu: 0 }, minhas: [] });
-          item.total[tipo] = total;
-          if (l.minha === true) item.minhas.push(tipo);
+          const item = (mapa[id] ??= { total: criarTotalDeReacoes(), minhas: [] });
+          item.total[tipo as ReacaoDoTopico] = total;
+          if (l.minha === true) item.minhas.push(tipo as ReacaoDoTopico);
         }
         return mapa as Record<string, ReacoesDoTopico>;
       });
     },
 
-    alternarReacaoDoTopico(topicoId, tipo) {
-      return escrever('alternar_reacao_do_topico', { p_topico_id: topicoId, p_tipo: tipo }, (dados) => {
+    async alternarReacaoDoTopico(topicoId, tipo) {
+      if (!usaServidor()) return { ok: false, motivo: 'semServidor' };
+      const sessao = await garantirSessaoDeReacao();
+      if (sessao === 'erro') return { ok: false, motivo: 'falhou' };
+      if (!sessao) return { ok: false, motivo: 'precisaEntrar' };
+      return executarEscrita('alternar_reacao_do_topico', { p_topico_id: topicoId, p_tipo: tipo }, (dados) => {
         if (typeof dados !== 'boolean') malformada('retorno');
         return dados;
       });

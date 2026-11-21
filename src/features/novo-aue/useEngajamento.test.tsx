@@ -16,7 +16,19 @@ const topico: ItemDoFeed = {
 const causoItem: ItemDoFeed = { ...topico, id: `causo-${ID}`, tipo: 'causo' };
 
 const reacoes = (like: number, minhas: ReacoesDoTopico['minhas'] = []): ReacoesDoTopico => ({
-  total: { like, fogo: 0, nojo: 0, trofeu: 0 }, minhas,
+  total: {
+    like,
+    dislike: 0,
+    dedo: 0,
+    hangloose: 0,
+    rock: 0,
+    cerveja: 0,
+    refrigerante: 0,
+    fogo: 0,
+    nojo: 0,
+    trofeu: 0,
+  },
+  minhas,
 });
 
 function montar(forum: Partial<PortaDeForum>, opcoes: { auth?: boolean; comunidade?: Partial<PortaDeComunidade> } = {}) {
@@ -72,9 +84,9 @@ describe('useEngajamento', () => {
       alternarReacaoDoTopico: vi.fn(async () => ({ ok: false as const, motivo: 'semConfirmacao' as const })),
     });
     await waitFor(() => expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(2));
-    await act(async () => result.current.propsDeEngajamento(topico).aoReagir?.('fogo'));
+    await act(async () => result.current.propsDeEngajamento(topico).aoReagir?.('dislike'));
     expect(exibirToast).toHaveBeenCalledWith('Não deu para registrar sua reação agora.');
-    expect(result.current.propsDeEngajamento(topico).reacoes?.fogo).toBe(0);
+    expect(result.current.propsDeEngajamento(topico).reacoes?.dislike).toBe(0);
     expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(2);
   });
 
@@ -93,19 +105,28 @@ describe('useEngajamento', () => {
     expect(result.current.propsDeEngajamento(topico).reacoes?.like).toBe(2);
   });
 
-  it('visitante é levado a entrar e nada vai ao servidor', async () => {
-    const alternar = vi.fn();
+  it('visitante reage no mural sem login (mas salvar ainda pede conta e falha sem sessão anônima também pede)', async () => {
+    const alternar = vi.fn()
+      .mockResolvedValueOnce({ ok: true as const, valor: true })
+      .mockResolvedValueOnce({ ok: true as const, valor: true })
+      .mockResolvedValueOnce({ ok: false as const, motivo: 'precisaEntrar' as const });
     const alternarSalvo = vi.fn();
     const { result, aoPedirEntrada } = montar(
       { contarReacoesDosTopicos: vi.fn(async () => ({ ok: true as const, valor: {} })), alternarReacaoDoTopico: alternar, alternarSalvo },
       { auth: false },
     );
     await act(async () => result.current.propsDeEngajamento(topico).aoCurtir?.());
+    await act(async () => result.current.propsDeEngajamento(topico).aoReagir?.('rock'));
+    expect(alternar).toHaveBeenNthCalledWith(1, ID, 'like');
+    expect(alternar).toHaveBeenNthCalledWith(2, ID, 'rock');
+    expect(aoPedirEntrada).not.toHaveBeenCalled();
+
     await act(async () => result.current.propsDeEngajamento(topico).aoAlternarSalvar?.());
-    expect(aoPedirEntrada).toHaveBeenNthCalledWith(1, 'Entre na sua conta para reagir.');
-    expect(aoPedirEntrada).toHaveBeenNthCalledWith(2, 'Entre na sua conta para salvar.');
-    expect(alternar).not.toHaveBeenCalled();
+    expect(aoPedirEntrada).toHaveBeenNthCalledWith(1, 'Entre na sua conta para salvar.');
     expect(alternarSalvo).not.toHaveBeenCalled();
+
+    await act(async () => result.current.propsDeEngajamento(topico).aoReagir?.('cerveja'));
+    expect(aoPedirEntrada).toHaveBeenNthCalledWith(2, 'Entre na sua conta para reagir.');
   });
 
   it('salvar: parte do que o servidor guardou, alterna pela resposta e avisa', async () => {

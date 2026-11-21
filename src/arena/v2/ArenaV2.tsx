@@ -10,6 +10,7 @@ import { wavDaEmissao } from '../../plataforma/web/wavDaEmissao';
 import { criarCicloDeVidaWeb } from '../../plataforma/web/cicloDeVida';
 import { criarEnderecoLocal, soltarEnderecoLocal } from '../../plataforma/web/enderecoDeAudio';
 import { PlayerDeAudio } from './PlayerDeAudio';
+import { AdsterraBanner300x250 } from '../../shared/components/AdsterraBanner300x250';
 import { AVISO_A_PARTIR_DE_MS, TETO_DE_GRAVACAO_MS, formatarCronometro } from '../../nucleo/gravacao/regras';
 import { calcularLaudoExperimental, type LaudoExperimental, type MotivoDeLaudoInconclusivo } from '../../nucleo/julgamento/laudoExperimental';
 import './arenaV2.css';
@@ -30,6 +31,7 @@ interface Props {
   aoAbrirMeusDesafios?: () => void;
   /** Conteúdo da home; desmontado enquanto a Arena está em uso. */
   conteudoDoRepouso?: ReactNode;
+  readonly adversarioHandle?: string | null;
 }
 
 function Player({ audio, player }: { audio: Blob; player: RefObject<HTMLAudioElement | null> }) {
@@ -66,7 +68,8 @@ function falaDoLaudoInconclusivo(motivo: MotivoDeLaudoInconclusivo): string {
 }
 
 /** Primeira versão local: a gravação e o laudo ainda não são publicados. */
-export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, telemetria, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar, aoAbrirMeusDesafios, conteudoDoRepouso }: Props) {
+export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemLaudoInjetada, compartilhamentoDeAudio: compartilhamentoInjetado, telemetria, aoUsarTentativa, rotuloUsarTentativa = 'Continuar', aoVoltar, aoAbrirMeusDesafios, conteudoDoRepouso, adversarioHandle }: Props) {
+  const adversarioLimpo = adversarioHandle?.trim().replace(/^@/, '') ?? '';
   const [compartilhamento] = useState(() => compartilhamentoInjetado ?? criarCompartilhamentoDeAudioWeb());
   const [compartilhando, setCompartilhando] = useState(false);
   const compartilhamentoAtivo = useRef<number | null>(null);
@@ -329,7 +332,7 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
       </header>
       <div className="arena-v2__conteudo">
         <section className="arena-v2__desafio" aria-label="Seu desafio">
-          <span>SEU DESAFIO</span><strong>CAPRICHE NO FÔLEGO</strong>
+          <span>SEU DESAFIO</span><strong>{adversarioLimpo ? `CONTRA @${adversarioLimpo.toUpperCase()}` : 'CAPRICHE NO FÔLEGO'}</strong>
         </section>
         <section className="arena-v2__palco" aria-labelledby="arena-v2-titulo">
           <div className="arena-v2__arte arena-v2__arte--lata" aria-hidden="true">
@@ -349,12 +352,13 @@ export function ArenaV2({ captura: capturaInjetada, capturaSemLaudo: capturaSemL
           )}
           {estado === 'gravando' && <div className="arena-v2__medidor"><span>GRAVANDO</span><time>{formatarCronometro(decorrido)}</time><div className="arena-v2__onda" aria-hidden="true" style={{ opacity: 0.45 + Math.min(1, Math.max(0, nivel)) * 0.55 }} />{decorrido >= AVISO_A_PARTIR_DE_MS && <p>Tempo quase esgotado.</p>}</div>}
           {estado === 'revisao' && audio && <div className="arena-v2__revisao"><h2>SUA GRAVAÇÃO</h2><p>Ouça sua tentativa. Você decide se quer compartilhar; ela não foi publicada no Auê.{!gravadoSemLaudo && ' A calibração não está neste áudio.'}</p><Player audio={audio} player={player} />
-            {laudo?.estado === 'medido' ? <section className="arena-v2__laudo" aria-label="Laudo experimental"><h3>LAUDO EXPERIMENTAL</h3><dl><div className="arena-v2__duracao"><dt>Duração detectada</dt><dd>{laudo.duracaoAtivaSegundos.toFixed(2).replace('.', ',')} s</dd></div><div><dt>Potência relativa</dt><dd>{laudo.potenciaRelativa}/100</dd></div><div><dt>Frequência</dt><dd>Indisponível</dd></div></dl><p>Leitura experimental: aparelho e ambiente alteram os resultados. Potência não é volume físico.</p></section> : <p role="status">{gravadoSemLaudo ? 'Esta gravação não tem laudo nem nota.' : laudo?.estado === 'inconclusivo' ? falaDoLaudoInconclusivo(laudo.motivo) : 'Não foi possível medir esta tentativa.'}</p>}
+            {laudo?.estado === 'medido' ? <section className="arena-v2__laudo" aria-label="Laudo experimental"><h3>LAUDO EXPERIMENTAL</h3><dl><div className="arena-v2__nota"><dt>Nota do arroto</dt><dd><span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${laudo.nota} de 100`}>{laudo.nota}</span><span>/100</span></dd></div><div className="arena-v2__duracao"><dt>Duração detectada</dt><dd>{laudo.duracaoAtivaSegundos.toFixed(2).replace('.', ',')} s</dd></div><div><dt>Potência relativa</dt><dd>{laudo.potenciaRelativa}/100</dd></div><div><dt>Frequência</dt><dd>Indisponível</dd></div></dl><p>Leitura experimental: aparelho e ambiente alteram os resultados. Potência não é volume físico.</p></section> : <p role="status">{gravadoSemLaudo ? 'Esta gravação não tem laudo nem nota.' : laudo?.estado === 'inconclusivo' ? falaDoLaudoInconclusivo(laudo.motivo) : 'Não foi possível medir esta tentativa.'}</p>}
             {aoUsarTentativa && <><button type="button" className="arena-v2__desafiar" disabled={laudo?.estado !== 'medido'} onClick={() => { if (laudo?.estado !== 'medido') return; if (player.current && !player.current.paused) player.current.pause(); aoUsarTentativa({ audio, duracaoMs: Math.round(laudo.duracaoAtivaSegundos * 1000) }); }}>{rotuloUsarTentativa}</button>{laudo?.estado !== 'medido' && <p className="arena-v2__duelo-aviso">Para continuar o desafio, grave outra tentativa com medição disponível.</p>}</>}
             <button type="button" className="arena-v2__secundario" disabled={compartilhando} onClick={() => void compartilharAudio()}>{compartilhando ? 'Abrindo compartilhamento…' : 'Compartilhar áudio'}</button>
             <button type="button" className="arena-v2__secundario" onClick={baixarAudio}>Baixar áudio</button>
             {mensagemCompartilhamento && <p role="status">{mensagemCompartilhamento}</p>}
-            <button type="button" className="arena-v2__secundario" onClick={descartar}>Descartar e gravar outra</button></div>}
+            <button type="button" className="arena-v2__secundario" onClick={descartar}>Descartar e gravar outra</button>
+            <AdsterraBanner300x250 /></div>}
           {aoVoltar && <button type="button" className="arena-v2__secundario" onClick={() => { descartar(); aoVoltar(); }}>Voltar</button>}
           {mensagem && <p role="alert" className="arena-v2__erro">{mensagem}</p>}
           {estado === 'erro' && oferecerSemLaudo && <button type="button" className="arena-v2__secundario" onClick={() => void iniciarSemLaudo()}>Gravar sem laudo</button>}

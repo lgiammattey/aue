@@ -26,6 +26,7 @@ const DIFERENCA_MINIMA_DB = 6;
 const AMPLITUDE_DE_CLIPPING = 0.995;
 const FRACAO_DE_CLIPPING_MAXIMA = 0.01;
 const DELTA_PARA_SCORE_MAXIMO_DB = 30;
+const DURACAO_PARA_SCORE_MAXIMO_S = 2.5;
 
 export type MotivoDeLaudoInconclusivo =
   | 'amostras_invalidas'
@@ -51,6 +52,8 @@ export type LaudoExperimental =
       readonly deltaRmsDb: number;
       /** Régua provisória de 0 a 100, não volume físico nem comparação entre celulares. */
       readonly potenciaRelativa: number;
+      /** Nota consolidada de 0 a 100 combinando fôlego e potência do trecho ativo. */
+      readonly nota: number;
     };
 
 function inconclusivo(motivo: MotivoDeLaudoInconclusivo): LaudoExperimental {
@@ -140,11 +143,15 @@ export function calcularLaudoExperimental(
   const quadrosAtivos = quadros.slice(melhorInicio, melhorFim).filter((_, i) => ativos[melhorInicio + i]);
   const sinal = percentile(quadrosAtivos, 0.75);
   const deltaRmsDb = 20 * Math.log10(sinal / ruido);
+  const potenciaRelativa = Math.round(Math.min(100, Math.max(0, deltaRmsDb / DELTA_PARA_SCORE_MAXIMO_DB * 100)));
+  const folegoRelativo = Math.min(100, Math.max(0, ((duracao - MINIMO_DE_EMISSAO_S) / (DURACAO_PARA_SCORE_MAXIMO_S - MINIMO_DE_EMISSAO_S)) * 100));
+  const nota = Math.round(Math.min(100, Math.max(0, folegoRelativo * 0.45 + potenciaRelativa * 0.55)));
   return {
     versao: VERSAO_DO_LAUDO_EXPERIMENTAL,
     estado: 'medido',
     duracaoAtivaSegundos: duracao,
     deltaRmsDb,
-    potenciaRelativa: Math.round(Math.min(100, Math.max(0, deltaRmsDb / DELTA_PARA_SCORE_MAXIMO_DB * 100))),
+    potenciaRelativa,
+    nota,
   };
 }

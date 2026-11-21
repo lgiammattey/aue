@@ -8,7 +8,7 @@
  */
 import { memo, useRef, useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
-import type { EngajamentoDoPost, ItemComentario, ItemDoFeed } from './tipos';
+import type { EngajamentoDoPost, ItemComentario, ItemDoFeed, ReacaoDeAtitude } from './tipos';
 import type { AnexoRascunho } from './ModalCompositor';
 import type { GravacaoLivreDoForum } from '../../portas/forum';
 import { detectarLinkDeVideo } from '../../nucleo/midia/embeds';
@@ -33,10 +33,11 @@ export interface ThreadDeComentariosProps {
     anexo: AnexoRascunho | null;
   }) => Promise<boolean>;
   /** Contagens e marcas do post-raiz, como o card as recebe nas outras telas. */
-  reacoes?: Pick<EngajamentoDoPost, 'like' | 'fogo' | 'nojo' | 'trofeu'>;
+  reacoes?: Partial<Omit<EngajamentoDoPost, 'minhas'>>;
   minhas?: readonly string[];
   aoCurtir?: () => void;
-  aoReagir?: (tipo: 'fogo' | 'nojo' | 'trofeu') => void;
+  aoReagir?: (tipo: ReacaoDeAtitude) => void;
+  aoDesafiar?: () => void;
   aoAlternarSalvar?: () => void;
   /** Só chega em post de outra pessoa. */
   aoDenunciar?: () => void;
@@ -81,6 +82,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
   minhas,
   aoCurtir,
   aoReagir,
+  aoDesafiar,
   aoAlternarSalvar,
   aoDenunciar,
   aoApagar,
@@ -304,6 +306,7 @@ export const ThreadDeComentarios = memo(function ThreadDeComentarios({
           duracaoDoAudio={duracaoDoAudio}
           aoCurtir={aoCurtir}
           aoReagir={aoReagir}
+          aoDesafiar={aoDesafiar}
           aoAlternarSalvar={aoAlternarSalvar}
           aoDenunciar={aoDenunciar}
           aoApagar={aoApagar}

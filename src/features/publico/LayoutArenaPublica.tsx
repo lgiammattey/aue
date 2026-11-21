@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { AdsterraBanner300x250 } from '../../shared/components/AdsterraBanner300x250';
 import './LayoutArenaPublica.css';
 
 export function LayoutArenaPublica({ eyebrow, titulo, resumo, children, mostrarCta = true }: { eyebrow: string; titulo: string; resumo: ReactNode; children: ReactNode; mostrarCta?: boolean }) {
@@ -8,6 +9,7 @@ export function LayoutArenaPublica({ eyebrow, titulo, resumo, children, mostrarC
     <div className="guia-arena__miolo"><div className="guia-arena__placar"><span>GUIA DO AUÊ</span><span>SEM CERIMÔNIA</span></div>
       <div className="guia-arena__hero"><span>{eyebrow}</span><h1>{titulo}</h1><p>{resumo}</p></div>
       <div className="guia-arena__secoes">{children}</div>
+      <AdsterraBanner300x250 />
       {mostrarCta && <section className="guia-arena__cta"><span>CHEGA DE TEORIA</span><h2>Bora fazer barulho?</h2><p>A Arena está aberta. O próximo arroto é seu.</p><Link to="/">Gravar meu arroto ↗</Link></section>}
     </div>
     <footer className="guia-arena__rodape"><Link to="/como-arrotar">Como arrotar</Link><Link to="/como-jogar">Como jogar</Link><Link to="/privacidade">Privacidade</Link><Link to="/termos">Termos</Link></footer>

@@ -71,6 +71,22 @@ describe('SlotPatrocinadoDoFeed', () => {
     expect(document.querySelector('[data-testid="adsterra-native-container"]')).toBeTruthy();
   });
 
+  it('alterna Banner 300x250 e Smartlink nos espaços seguintes do feed para não gerar caixa vazia', async () => {
+    vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
+    const { SlotPatrocinadoDoFeed } = await import('./SlotPatrocinadoDoFeed');
+
+    const { getByText, rerender } = render(<SlotPatrocinadoDoFeed indiceDoSlot={1} />);
+    const containerBanner = document.querySelector('[data-testid="adsterra-banner-300x250"]');
+    expect(containerBanner).toBeTruthy();
+    const iframe = containerBanner?.querySelector('iframe');
+    expect(iframe?.getAttribute('srcdoc')).toContain('228f60177e45ec5b79116ace2c420d5b');
+    expect(document.querySelector('[data-testid="adsterra-native-container"]')).toBeNull();
+
+    rerender(<SlotPatrocinadoDoFeed indiceDoSlot={2} />);
+    expect(getByText('Combustível Oficial 🍺')).toBeTruthy();
+    expect(document.querySelector('[data-testid="adsterra-banner-300x250"]')).toBeNull();
+  });
+
   it('renderiza o card de parceiro da Adsterra na lateral quando a flag está ligada', async () => {
     vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
     const { SlotPatrocinado } = await import('./SlotPatrocinadoDoFeed');

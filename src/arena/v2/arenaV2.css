@@ -64,6 +64,9 @@
 .arena-v2__laudo dd { margin: 0; font: 700 14px/1.4 var(--font-mono); }
 .arena-v2__laudo dl .arena-v2__duracao { display: block; padding: 10px 0 18px; }
 .arena-v2__laudo .arena-v2__duracao dd { margin-top: 5px; font: 400 clamp(44px, 7vw, 70px)/1 var(--font-display); }
+.arena-v2__laudo dl .arena-v2__nota { display: flex; align-items: baseline; justify-content: space-between; padding: 14px 0; }
+.arena-v2__laudo .arena-v2__nota dd { display: inline-flex; align-items: baseline; gap: 4px; font-variant-numeric: tabular-nums; }
+.arena-v2__laudo .arena-v2__nota .audio-com-nota__nota { font: 400 clamp(44px, 7vw, 70px)/1 var(--font-display); color: var(--v2-paper); }
 @media (max-width: 699px) {
   .arena-v2 { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
   .arena-v2__cabecalho { min-height: 66px; }

@@ -30,6 +30,8 @@ const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').the
 import { FLAGS } from './shared/flags';
 import { abreArenaV2 } from './nucleo/arena/entradaV2';
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
+import { AvisoMaioridade } from './shared/components/AvisoMaioridade';
+import { carregarSocialBar } from './plataforma/web/adsterra';
 import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
 import { rotasDoForum } from './features/forum/rotas';
@@ -97,7 +99,11 @@ function EntradaRaiz() {
 }
 
 function EntradaDaArena({ conteudoDoRepouso }: { conteudoDoRepouso?: ReactNode } = {}) {
-  return FLAGS.dueloV2 ? <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} /> : <ArenaV2 conteudoDoRepouso={conteudoDoRepouso} />;
+  const { search } = useLocation();
+  const adversarioHandle = new URLSearchParams(search).get('desafiar');
+  return FLAGS.dueloV2
+    ? <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />
+    : <ArenaV2 conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />;
 }
 
 function DueloIndisponivel() {
@@ -142,9 +148,14 @@ function AliasDeComunidade() {
 export function App() {
   const [telemetriaDeNavegacao] = useState(() => criarTelemetriaWeb(criarArmazenamentoWeb()));
 
+  useEffect(() => {
+    carregarSocialBar();
+  }, []);
+
   return (
     <>
       <AvisoDeOffline />
+      <AvisoMaioridade />
       <Router>
         <RastreadorDePaginas telemetria={telemetriaDeNavegacao} />
         <Suspense fallback={null}>

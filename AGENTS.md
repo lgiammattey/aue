@@ -73,7 +73,7 @@ Não duplique regra. Leia a fonte certa.
 8. **`docs/design/AUÊ!.md`** — consolida direção artística, motion, áudio-reatividade e composição; não pode contradizer os protótipos nem o design system.
 9. **Demais documentos** — contexto. História dá origem, voz orienta linguagem. Nenhum dos dois abre escopo sozinho.
 
-Documentos em [`docs/_arquivo/`](docs/_arquivo/) **não têm autoridade nenhuma**. São registro da visão anterior. Não use um deles como argumento.
+Documentos antigos removidos de `docs/_arquivo/` (disponíveis apenas no histórico do Git) **não têm autoridade nenhuma**. São registro da visão anterior. Não use um deles como argumento.
 
 ---
 

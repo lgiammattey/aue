@@ -132,8 +132,7 @@ São duas coisas separadas, e confundir as duas gera deploy duplicado.
 | **Validar** | [`.github/workflows/validacao.yml`](../../../.github/workflows/validacao.yml) | toda PR para a `main`, e todo push na `main` |
 
 O Firebase é a única publicação deste repositório. A regra de hospedagem está no
-[ADR 0006](../adr/0006-hospedagem-somente-firebase.md); referência à Vercel abaixo
-de `docs/_arquivo/` é histórico, não instrução operacional.
+[ADR 0006](../adr/0006-hospedagem-somente-firebase.md); referências à Vercel no histórico do Git são apenas registro anterior, não instrução operacional.
 
 ### O workflow de validação não tem segredo nenhum
 

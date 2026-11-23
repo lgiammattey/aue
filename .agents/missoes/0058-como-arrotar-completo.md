@@ -29,11 +29,11 @@
 1. A home mantém só o básico para o SEO.
 2. O guia completo é a `/como-arrotar`, com várias técnicas. Sem URL nova, sem página por tipo.
 
-**Abertas:**
-3. **Quais técnicas entram.** O Tiago propõe partir das duas formas que a `/tipos-de-arroto` já descreve (ar engolido e fermentação) e dos cinco estilos da Arena. O Luiz diz se quer outras técnicas conhecidas (por exemplo ar inalado, ar com a língua, com bebida gaseificada) e quais ficam de fora.
-4. **Conteúdo de saúde.** O passo a passo mexe com engolir ar e forçar o corpo. O guia precisa de um aviso curto e honesto (parar se doer, não forçar, não é orientação médica). O Luiz confirma o tom, sem virar texto jurídico.
-5. **Ilustrações.** `public/ilustracoes/` tem três imagens do `/como-arrotar`. Mais técnicas pedem imagens novas no mesmo estilo (cartoon editorial flat, sem rosto reconhecível). Quem produz? Sem imagem nova, o guia cresce em texto e usa as três existentes.
-6. **Quem escreve.** O Tiago e o Rian rascunham pela `VOZ.md` e o Luiz revisa a parte técnica de como cada técnica funciona. Sem travessão na copy.
+**Fechadas depois (23/11/2026):**
+3. **Técnicas:** o Luiz pediu pesquisa, principalmente sobre as de clickbait. A pesquisa mostrou que o método do ar engolido é o único que se repete em guia de saúde; os virais (ponto na perna, sacudir o corpo) só têm relato de quem postou, sem teste. Entraram oito técnicas e uma seção que separa verdade de lenda, dizendo onde não achamos prova.
+4. **Aviso de saúde:** sim. Aviso curto no começo, seção "Quando parar e falar com um médico" e "não é orientação médica", sem texto jurídico.
+5. **Ilustrações:** o Luiz delegou a mim. **Não gerei imagem nova.** O guia reaproveita as três ilustrações existentes. Imagem gerada por IA arrisca quebrar a regra de estilo do `AGENTS.md` (sem aparência genérica de IA, estilo único na página), então ficou como pendência, ver §6.
+6. **Escrita:** tom da página principal, rascunhada pelo Tiago e pelo Rian (aqui, por quem implementou), para o Luiz revisar a parte técnica.
 
 ## 4. Comportamento, Plataformas e Risco
 
@@ -55,7 +55,11 @@
 
 ## 6. Encerramento e Parecer Final
 
-- **Arquivos/módulos alterados:**
+- **Arquivos/módulos alterados:** `ComoArrotar.tsx` e `ComoArrotar.css` (guia reescrito, sem card), `paginas/como-arrotar.html` (título, descrição e `noscript` iguais ao conteúdo renderizado), `paginasPublicas.test.tsx` (expectativas do novo conteúdo e teste de não cardificação). `HomeEn` continua usando as classes de passo e card, agora chapadas.
 - **Parecer do Marcelo:**
 - **Veredito Final do Tiago:**
-- **Pendências ou decisão necessária do Luiz:** fechar as decisões 3 a 6 do §3.
+- **Pendências ou decisão necessária do Luiz:**
+  1. Revisar a parte técnica de cada passo a passo e o texto das lendas.
+  2. Ilustrações novas por técnica, se quiser. Quem produz, no mesmo estilo das três atuais.
+  3. Home só com o básico: conferir se a home já aponta para `/como-arrotar` do jeito que você quer.
+  4. Marcelo e Rian ainda não auditaram esta entrega.

@@ -1,5 +1,7 @@
 # Backlog imediato — Auê
 
+> **Revisão de 23/11/2026:** este documento contém decisões e descrições anteriores que ainda precisam de reconciliação integral com a Arena v2 e o mural. Para o corte publicado, evidências e limites, consulte [Produção atual](../PRODUCAO_ATUAL.md). As rotas de comunidades e tópicos redirecionam no roteador; não trate texto histórico como prova de recurso ativo.
+
 O que está na fila. Espelho das issues abertas no GitHub.
 
 Se este arquivo divergir das issues, **as issues vencem**. Espelho velho é pior

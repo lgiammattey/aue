@@ -345,8 +345,8 @@ describe('SEO público — Arena e mural de arrotos', () => {
     const titulo = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? '';
     const descricao = /<meta name="description" content="([^"]+)"/.exec(html)?.[1] ?? '';
 
-    expect(titulo.toLowerCase()).toContain('mural de arrotos');
-    expect(titulo.toLowerCase()).toContain('arena');
+    expect(titulo.toLowerCase()).toContain('grave seu arroto');
+    expect(titulo.toLowerCase()).toContain('resenha');
     expect(descricao.toLowerCase()).toContain('mural');
     expect(descricao.toLowerCase()).toContain('medição experimental');
   });
@@ -355,8 +355,8 @@ describe('SEO público — Arena e mural de arrotos', () => {
     // O card é o que chega no grupo do WhatsApp. Se ele descrever só a
     // mecânica, o link continua parecendo qualquer coisa.
     const html = home();
-    expect(metaDe(html, 'og:title')?.toLowerCase()).toContain('mural');
-    expect(metaDe(html, 'twitter:title')?.toLowerCase()).toContain('mural');
+    expect(metaDe(html, 'og:title')?.toLowerCase()).toContain('arroto');
+    expect(metaDe(html, 'twitter:title')?.toLowerCase()).toContain('arroto');
     expect(metaDe(html, 'og:description')).toContain('Grave seu arroto na Arena');
     expect(metaDe(html, 'twitter:description')).toBe(metaDe(html, 'og:description'));
   });

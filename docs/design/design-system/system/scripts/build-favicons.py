@@ -34,7 +34,7 @@ except Exception:
     pass
 
 # ── Paleta registrada — DESIGN.md §1.1 / §1.2 ────────────────────────────────
-BG = (0x0A, 0x0A, 0x08)   # Preto Carvão
+BG = (0x0A, 0x0B, 0x0E)   # Fundo da marca atual
 FG = (0xC6, 0xFF, 0x00)   # Verde Ácido Elétrico
 
 SS = 8            # supersampling
@@ -334,8 +334,8 @@ POLY_EX_DOT = [
     (dx+55, 1), (dx+55, 299), (dx+413, 299), (dx+413, 1)
 ]
 
-FG_A = (0xF5, 0xF4, 0xEF)
-FG_EX = (0xC6, 0xFF, 0x00)
+FG_A = (0xF3, 0xF4, 0xF6)
+FG_EX = (0xFF, 0x55, 0x00)
 
 def render_brutalist(width, height, coverage=0.88, bg=BG, fg_a=FG_A, fg_ex=FG_EX, transparent=False):
     W, H = width * SS, height * SS
@@ -423,7 +423,7 @@ def build_conjunto():
     render_brutalist(1200, 630, 0.60).save(p('og-image.png'), optimize=True)
 
     # ── vetoriais ────────────────────────────────────────────────────────────
-    emit_brutalist_svg(p('favicon.svg'), coverage=0.88, bg='#0a0a08', fg_a='#f5f4ef', fg_ex='#c6ff00')
+    emit_brutalist_svg(p('favicon.svg'), coverage=0.88, bg='#0a0b0e', fg_a='#f3f4f6', fg_ex='#ff5500')
     emit_brutalist_svg(p('safari-pinned-tab.svg'), coverage=0.88, bg=None, fg_a='#000000', fg_ex='#000000')
 
     print('conjunto brutalista gerado com sucesso')

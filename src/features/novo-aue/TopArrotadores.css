@@ -243,22 +243,22 @@
   outline-offset: 2px;
 }
 
-/* LIGA integrada dentro do Hero, sem card */
+/* LIGA integrada dentro do Hero, na horizontal e sem card */
 .liga-hero {
   width: 100%;
-  margin-top: 24px;
+  margin-top: 28px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  text-align: left;
+  text-align: center;
 }
 
 .liga-hero__titulo {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 400;
   line-height: 1;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--accent, #ff5500);
 }
@@ -283,29 +283,29 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px 28px;
 }
 
 .liga-hero__lista li {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 44px;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.liga-hero__lista li:last-child {
-  border-bottom: 0;
+  gap: 10px;
+  padding: 6px 0;
 }
 
 .liga-hero__play {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
   border: 1px solid var(--border-strong, #3b4254);
   border-radius: var(--radius-sm, 4px);
   background: transparent;
   color: var(--fg, #f3f4f6);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -314,4 +314,23 @@
   border-color: var(--accent, #ff5500);
   background: var(--accent, #ff5500);
   color: var(--accent-on, #0a0b0e);
+}
+
+@media (max-width: 699px) {
+  .liga-hero__lista {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    gap: 18px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .liga-hero__lista::-webkit-scrollbar {
+    display: none;
+  }
+
+  .liga-hero__lista li {
+    flex-shrink: 0;
+  }
 }

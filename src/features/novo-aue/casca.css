@@ -711,33 +711,15 @@ main {
 }
 
 /* ==================== HERO / INTRO ==================== */
+/* Cabeçalho chapado (Missão 0057, DESIGN §4.1): texto sobre o fundo da página, filete embaixo. */
 .hero {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
   border: 0;
-  border-radius: var(--aue-radius);
-  background: var(--aue-surface);
-  box-shadow: 0 14px 32px rgb(0 0 0 / 18%);
-  padding: clamp(20px, 3.5vw, 36px);
+  border-bottom: 1px solid var(--aue-line);
+  border-radius: 0;
+  background: transparent;
+  padding: clamp(16px, 3vw, 28px) 0;
   margin-bottom: 20px;
-}
-
-.hero::after {
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  right: 0;
-  width: 52%;
-  height: 100%;
-  background-color: var(--aue-coral);
-  background-image: url('/og-image.png');
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-blend-mode: screen;
-  content: '';
-  opacity: .68;
 }
 
 .eyebrow {
@@ -749,7 +731,7 @@ main {
 }
 
 .hero h1 {
-  max-width: 64%;
+  max-width: 100%;
   margin: 8px 0 10px;
   font-family: var(--font-display, 'Anton', sans-serif);
   font-size: clamp(28px, 4.5vw, 48px);
@@ -841,12 +823,7 @@ main {
 }
 
 @media (max-width: 520px) {
-  .hero::after {
-    width: 68%;
-    opacity: .28;
-  }
-
-  .hero h1 { max-width: 80%; }
+  .hero h1 { max-width: 100%; }
 
   .hero__stamp {
     right: 14px;
@@ -899,19 +876,19 @@ main {
   display: inline-flex;
   gap: 4px;
   width: auto;
-  padding: 3px;
-  border: 1px solid var(--aue-line);
-  border-radius: var(--radius-sm, 4px);
-  background: var(--aue-bg-elevated, #111318);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
 }
 
 .feed-filter {
   min-width: 0;
-  min-height: 38px;
+  min-height: 44px;
   padding: 6px 14px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-xs, 2px);
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--aue-muted);
   cursor: pointer;
@@ -930,14 +907,15 @@ main {
 }
 
 .feed-filter:hover {
-  background: var(--aue-surface);
+  background: transparent;
   color: var(--aue-text);
 }
 
+/* Aba ativa com sublinhado, sem caixa (Missão 0057, DESIGN §4.1). */
 .feed-filter[aria-pressed='true'] {
-  background: var(--aue-surface-2);
-  border-color: var(--aue-line-strong);
-  box-shadow: none;
+  background: transparent;
+  border: 0;
+  box-shadow: inset 0 -2px var(--aue-text);
   color: var(--aue-text);
 }
 
@@ -1111,10 +1089,11 @@ main {
 /* ==================== ANÚNCIO NATIVO NO FEED (ADSTERRA) ==================== */
 .adsterra-native-card {
   margin: 12px 0;
-  padding: 8px 12px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--aue-line);
-  background: var(--aue-surface);
+  padding: 12px 0 10px;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid var(--aue-line);
+  background: transparent;
   overflow: hidden;
   box-sizing: border-box;
   max-width: 100%;
@@ -2160,8 +2139,7 @@ main {
 
   .adsterra-native-card {
     margin: 8px 0;
-    padding: 6px 10px 8px;
-    border-radius: 6px;
+    padding: 10px 0 8px;
   }
 
   .adsterra-native-header {

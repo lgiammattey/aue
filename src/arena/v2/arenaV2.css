@@ -150,11 +150,10 @@
 
 .arena-v2--embutida .arena-v2__palco {
   min-height: 0;
-  padding: 16px;
-  border: 1px solid var(--v2-line-strong);
-  border-left: 3px solid var(--v2-volt);
-  border-radius: var(--radius-md, 6px);
-  background: var(--v2-surface);
+  padding: 16px 0 20px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   align-items: stretch;
   text-align: left;
 }

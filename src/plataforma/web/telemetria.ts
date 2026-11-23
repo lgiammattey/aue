@@ -1,5 +1,6 @@
 import { supabase } from '../../db/supabase';
 import { telemetriaBloqueada } from './exclusaoTelemetria';
+import { registrarEventoDeFunilNoAnalytics } from './analyticsArenaV2';
 import type { ArmazenamentoLocal } from '../../portas/armazenamento';
 import {
   EVENTOS_DE_TELEMETRIA,
@@ -212,6 +213,8 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
         if (eventosPendentes.has(chavePendente)) return;
         eventosPendentes.add(chavePendente);
       }
+
+      registrarEventoDeFunilNoAnalytics(evento);
 
       const pagina = evento === 'visitou_pagina' ? detalhe!.pagina! : null;
       enviar(

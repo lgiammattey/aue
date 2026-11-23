@@ -7,7 +7,7 @@
 .perfil-arena-nav { display: none; }
 .app--perfil-arena .od-profile { width: 100%; margin: 0 auto; }
 .app--perfil-arena .od-profile__hero, .app--perfil-arena .od-profile__tabs-nav, .app--perfil-arena .od-profile__activity, .app--perfil-arena .od-profile__state { width: 100%; box-sizing: border-box; margin-left: auto; margin-right: auto; }
-.app--perfil-arena .od-profile__state { margin-top: 40px; padding: 28px; border: 1px solid var(--border, #232834); border-radius: var(--radius-md, 6px); background: var(--surface, #151820); box-shadow: none; text-align: left; }
+.app--perfil-arena .od-profile__state { margin-top: 40px; padding: 28px 0 0; border: 0; border-top: 1px solid var(--border, #232834); border-radius: 0; background: transparent; box-shadow: none; text-align: left; }
 .app--perfil-arena .od-profile__state h1 { font: 400 clamp(32px, 5vw, 52px)/1.05 var(--font-display, 'Anton', sans-serif); text-transform: uppercase; }
 .app--perfil-arena .od-profile__athlete-label { padding: 0 0 12px; color: var(--accent, #ff5500); font: 700 11px/1.4 var(--font-mono, monospace); letter-spacing: .1em; }
 .app--perfil-arena .od-profile__athlete.od-profile__hero--plain .od-profile__body { padding: 20px 0 0; }

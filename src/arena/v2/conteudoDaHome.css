@@ -165,10 +165,11 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 10px 14px 12px;
-  border: 1px solid var(--border, #232834);
-  border-radius: var(--radius-md, 6px);
-  background: var(--surface, #151820);
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--border, #232834);
+  border-radius: 0;
+  background: transparent;
   color: var(--fg, #f3f4f6);
   box-sizing: border-box;
   overflow: hidden;

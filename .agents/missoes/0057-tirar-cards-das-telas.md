@@ -36,7 +36,7 @@ Inventário em [`docs/escopo/inventario-cards-0057.md`](../../docs/escopo/invent
 9. **`/desafios` e `/resenha/:id` (legadas)**: sem resposta do Luiz. Ficam **fora** da missão até ele decidir.
 10. **Mapa de telas**: autorizado corrigir (rotas que redirecionam, perfil morto, landing escura). Feito.
 
-**Execução:** fatia 1 (coluna direita da casca) feita em 23/11/2026. Ordem das próximas segue o inventário: informativas, ranking, admin, feed/seguindo, perfil, comunidades/compositor, landing, login, Arena/X1.
+**Execução (23/11/2026):** fatia 1 coluna direita da casca; fatia 2 informativas, ranking e grupos; fatia 3 `/admin`; fatia 4 `/feed` e `/seguindo` (palco da Arena, filtros em abas de 44px, hero, estados, anúncio nativo), mais o envio dos eventos de funil ao GA4. Ordem das próximas segue o inventário: informativas, ranking, admin, feed/seguindo, perfil, comunidades/compositor, landing, login, Arena/X1.
 
 ## 3. Fases
 

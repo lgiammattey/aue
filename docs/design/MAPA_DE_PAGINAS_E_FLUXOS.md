@@ -143,11 +143,13 @@ Pedidos de copy, testes ou toque não abrem mudança de tema, tipografia ou mold
    - O verde elétrico (`--accent: #c6ff00`) é de alto contraste e deve ter no máximo **2 aparições por tela/estado** para não poluir a visão.
    - Sem gradientes falsos: fundos são sólidos e contrastantes.
 3. **Ergonomia Mobile Webapp:**
+   - Página travada na largura da tela: só rola na vertical. Listas horizontais rolam dentro do próprio container (`min-width: 0` na cadeia). Ver `DESIGN.md` §6.1.
    - Alvos de toque (touch targets) de no mínimo `44px × 44px`.
    - Respeito obrigatório a `env(safe-area-inset-bottom)` e `env(safe-area-inset-top)`.
-4. **Verdade de Dados:**
+4. **Sem cardificação:** card só para item repetível (post, X1, comunidade em grade) e moldura funcional (modal, sheet). Seção, ranking, filtro, métrica e formulário ficam chapados na superfície, separados por espaço e filete. Nada de card dentro de card. Ver `DESIGN.md` §4.1.
+5. **Verdade de Dados:**
    - Proibido injetar números fictícios de seguidores, membros de grupo ou arrotos inventados.
-5. **Imagens, Ilustrações e Ativos Estáticos (`public/`):**
+6. **Imagens, Ilustrações e Ativos Estáticos (`public/`):**
    - **Ilustrações editoriais (`public/ilustracoes/`):** usadas em guias como `/como-arrotar` (`como-arrotar-comando-codex.png`, `como-arrotar-gas-codex.png`, `como-arrotar-postura-codex.png`). Devem seguir o mesmo estilo visual entre si (ilustração cartoon editorial flat, traço limpo, integrada ao fundo escuro `#0d0f14`), sem cara de foto genérica de IA, sem rostos reconhecíveis de pessoas reais e sem misturar estilos diferentes na mesma página.
    - **Comunidades (`public/comunidades/`):** ícones e capas das comunidades (`eu-arroto-e-dai`, `arrotos-do-youtube`, `grupos-whatsapp`) seguem identidade própria de cada hub.
    - **Ecossistema (`public/ecossistema/`):** selos dos projetos parceiros (`lagcheck`, `linka`, `signallq`) usados no rodapé/seção de ecossistema.

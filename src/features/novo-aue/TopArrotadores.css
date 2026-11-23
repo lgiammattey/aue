@@ -244,8 +244,21 @@
 }
 
 /* LIGA integrada dentro do Hero, na horizontal e sem card */
+/*
+  A lista horizontal rola DENTRO da Liga. `min-width: 0` na cadeia é o que impede
+  o `nowrap` de empurrar o palco (flex coluna, min-width automático) para além da
+  tela e fazer o documento inteiro andar de lado no celular.
+*/
+.top-arrotadores-home--liga-hero {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .liga-hero {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   margin-top: 28px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -321,6 +334,7 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     gap: 18px;
     padding-bottom: 4px;
     scrollbar-width: none;

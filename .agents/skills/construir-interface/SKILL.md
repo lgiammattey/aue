@@ -15,6 +15,7 @@ Procedimento do **Kayky** para construir interfaces e componentes do Auê! em Re
    - Todo componente consome as variáveis CSS canônicas (`var(--bg)`, `var(--surface)`, `var(--surface-2)`, `var(--fg)`, `var(--muted)`, `var(--border)`, `var(--border-strong)`, `var(--accent)`, `var(--accent-on)`, `var(--gold)`, `var(--danger)`).
    - Suporte nativo a tema escuro e claro: alternância via atributo de tema no elemento raiz e persistência em `bda-theme`.
    - Fundo chapado: nunca usar gradientes em cards ou fundos de tela.
+   - Sem cardificação: não embrulhar seção, lista, ranking, filtro ou formulário em caixa com borda, fundo e raio. Card só para item repetível e moldura funcional (`DESIGN.md` §4.1).
    - Orçamento do verde ácido: no máximo 2 usos simultâneos de `--accent` por estado.
 
 2. **Tipografia e Classes:**

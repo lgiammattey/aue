@@ -23,6 +23,7 @@ Procedimento do **Kayky**, **Camillo** e **Marcelo** para o Auê! rodar com flui
 ## 2. No Webapp Mobile (iOS Safari & Android Chrome)
 
 - **Unidades Dinâmicas:** Uso estrito de `100dvh` / `100svh` para evitar pulos de layout com o recolhimento da barra de navegação do browser móvel.
+- **Trava Lateral:** a página só rola na vertical. `html, body { overflow-x: clip }` como rede de segurança e `min-width: 0` na cadeia de flex/grid de qualquer lista horizontal, que rola dentro do próprio container. Marcelo confere `documentElement.scrollWidth === innerWidth` em 390px com a lista cheia (`DESIGN.md` §6.1).
 - **Safe Area Insets:** Respeito absoluto a `--safe-top`, `--safe-bottom`, `--safe-left` e `--safe-right` derivados de `env(safe-area-inset-*)`. O menu inferior (56px) soma o padding inferior.
 - **Piso de Alvo Tocável:** Piso de 44px (`--hit-target-min`) para qualquer botão, ícone ou elemento acionável por toque.
 - **Desbloqueio de Áudio:** O `AudioContext` só é iniciado após gesto do usuário (`user interaction`).

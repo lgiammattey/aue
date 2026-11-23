@@ -12,7 +12,7 @@ arquivo continua assim e a carga continua travada.
 
 Referências: [`audios/solo-eructos/LEIAME.md`](../../../audios/solo-eructos/LEIAME.md)
 e o item "Autorização dos áudios" do
-[cartão de missão](cartao-de-missao-seed.md).
+cartão de missão do seed.
 
 ## Declaração do Luiz (18/10/2026)
 

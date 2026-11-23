@@ -1,11 +1,11 @@
 ---
 name: construir-interface
-description: Diretrizes do Kayky para construir componentes e telas do Auê!, Bonde do Arroto e Arena em React 19 com fidelidade 1:1.
+description: Diretrizes do Diego para construir componentes e telas do Auê!, Bonde do Arroto e Arena em React 19 com fidelidade 1:1.
 ---
 
 # Skill: construir-interface
 
-Procedimento do **Kayky** para construir interfaces e componentes do Auê! em React 19 com fidelidade visual 1:1 aos protótipos em `docs/design/prototipo/` e ao Design System v5 (`DESIGN.md`).
+Procedimento do **Diego** para construir interfaces e componentes do Auê! em React 19 com fidelidade visual 1:1 aos protótipos em `docs/design/prototipo/` e ao Design System v5 (`DESIGN.md`).
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 name: design-ux
-description: Procedimento do Rian para desenhar a UX do Auê!, Bonde do Arroto e Arena em 6 fases de jornada para desktop e webapp.
+description: Procedimento do Diego para desenhar a UX do Auê!, Bonde do Arroto e Arena em 6 fases de jornada para desktop e webapp.
 ---
 
 # Skill: design-ux
 
-Procedimento do **Rian** para desenhar a experiência do usuário do Auê! baseada nas **6 fases canônicas da Jornada** (`Jornada.dc.html`), integrando o Bonde do Arroto (feed social estilo Twitter/X), comunidades e a Arena de arrotos.
+Procedimento do **Diego** para desenhar a experiência do usuário do Auê! baseada nas **6 fases canônicas da Jornada** (`Jornada.dc.html`), integrando o Bonde do Arroto (feed social estilo Twitter/X), comunidades e a Arena de arrotos.
 
 ---
 
@@ -64,7 +64,7 @@ A experiência do Auê não é um conjunto de telas estáticas nem um emaranhado
 
 ---
 
-## 3. As 4 Trava-Regras de UX do Rian
+## 3. As 4 Trava-Regras de UX do Diego
 
 1. **O áudio toca num clique só:** Sem redirects nem telas intermediárias para escutar o causo do colega.
 2. **Da abertura ao arroto em menos de 10 segundos:** Zero atrito para quem quer arrotar na hora.

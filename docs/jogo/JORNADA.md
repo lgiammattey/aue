@@ -1,155 +1,18 @@
-# Tropa do Arroto · Jornada do Jogador
+# Jornada do jogador
 
-## Jornada observada e implementada, 23/11/2026
+Definição do produto: [`AUE.md`](AUE.md). O que está publicado e conferido: [`../PRODUCAO_ATUAL.md`](../PRODUCAO_ATUAL.md).
 
-Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+## O primeiro minuto
 
-A página inicial no navegador mostrou Arena, ação de gravar, acesso ao mural, ranking, grupos e aviso 18+. O código implementa permissão, calibração, gravação, revisão e tratamento de falhas. Depois de uma medição válida, a tentativa pode ser usada para criar ou responder um duelo; há fluxos separados para publicação e compartilhamento. Não foi concedido acesso ao microfone nem executada uma partida ponta a ponta nesta revisão.
+A pessoa entra e vê uma coisa: gravar o arroto e mandar. Nada explica o produto antes.
 
-A sequência de seis fases abaixo é uma referência histórica de desenho. Não representa literalmente a ordem da home, os estados da Arena v2 nem uma garantia de comunidades, placar ou revanche no fluxo novo.
+## As fases
 
-## Registro anterior preservado
+1. **Entrada.** Home com a Arena, o botão de gravar, o ranking e o acesso ao mural. Aviso 18+. Sem conta.
+2. **Arena.** Permissão do microfone, calibração, gravação e revisão da tentativa.
+3. **Resiliência.** Microfone negado, silêncio e falha de rede aparecem como erro claro, com saída para tentar de novo. A tela nunca finge que deu certo.
+4. **Depois da nota.** A nota do juiz, o que ela mede e três caminhos: desafiar no X1, tentar de novo, ir ao mural.
+5. **X1.** Link de desafio, resposta de quem recebe e resultado provisório. A revanche leva de volta à Arena.
+6. **Mural e perfil.** Os arrotos publicados, o perfil e o ranking. Publicar exige autorização explícita.
 
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
-
-> **Fluxo de referência canônico para produto, design e engenharia.**  
-> Cada caixa representa uma tela ou estado; as ramificações mostram as decisões do usuário.  
-> O loop de revanche nunca termina em "pronto".
-
-Fonte visual viva: [`docs/design/prototipo/Jornada.dc.html`](../design/prototipo/Jornada.dc.html)
-
----
-
-## O Loop Contínuo
-
-```text
-DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
-    ▲                                                                   │
-    └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
-```
-
----
-
-## Fase 1: Descoberta
-**Objetivo:** Chegar e entender o jogo em segundos.
-
-1. **Landing Desktop (`Landing.dc.html`):**
-   - Headline: *"Tá rolando agora / Entra na Tropa hoje"*.
-   - Explica o jogo em segundos e manda para o celular ou webapp. Nunca tenta ser a Arena no desktop de forma capenga.
-   - Opções de login social (Google, Apple) e criação de conta.
-   - Botão direto: *"Arrotar sem conta"* (vai direto para `Arena.dc.html`).
-2. **Decisão de Dispositivo:**
-   - Celular segue direto na experiência otimizada de Webapp.
-   - Desktop consome o produto em layout de 3 colunas completas ou direciona via QR / link para o celular.
-3. **Login / Cadastro (`Login.dc.html`):**
-   - Entrar ou criar conta sem burocracia ou questionários longos.
-   - Campos: Apelido (`@voce_arrota`), E-mail e Senha.
-   - Suporte a Convidado: *"Não quer conta agora? Arrota como convidado. Pra postar no feed e salvar placar, precisa de conta."*
-
----
-
-## Fase 2: Tropa (Pessoas, Feed & Comunidades)
-**Objetivo:** Ver o que está rolando na comunidade e escolher a próxima ação.
-
-1. **Feed Central (`Tropa do Arroto.dc.html`):**
-   - A Tropa reúne resenhas em texto, áudio ou mídia das pessoas seguidas, sempre identificadas pela comunidade de origem.
-   - A descoberta continua nas comunidades e na busca; Tropa não cria uma publicação paralela.
-   - Ações visíveis: comentário, reações, salvar e compartilhar. Participação pede entrada.
-2. **Decisão de Ação:**
-   - Publicar uma resenha na comunidade, quando a participação estiver disponível;
-   - Explorar comunidades temáticas;
-   - Visualizar e aceitar desafios X1;
-   - Acessar o perfil com histórico;
-   - Ir diretamente para a **Arena** arrotar.
-3. **Comunidades (`Comunidades.dc.html`):**
-   - A comunidade de origem aparece em cada resenha publicada.
-   - Contagens, entrada/saída, moderação e páginas específicas precisam de prova própria antes de serem prometidas.
-4. **Perfil do Jogador:**
-   - Melhores marcas históricas (maior Auê Score).
-   - Cartel de X1 (ex: *7V · 3D no X1*).
-   - Comunidades participantes.
-   - Upload de foto de perfil e capa diretamente no navegador.
-
----
-
-## Fase 3: Arena de Arroto
-**Objetivo:** Arrotar e receber a nota. O núcleo acústico do jogo.
-
-1. **Estado `IDLE`:**
-   - Bolha Auê em repouso com pulso calmo.
-   - Título: *"Bora?"* / Subtítulo: *"Solta o primeiro e vê quanto dá."*
-   - Uma única ação dominante: botão / gatilho de microfone *"Arrotar"*.
-2. **Estado `RECORDING`:**
-   - Bolha viva e pulsante, áudio-reativa aos decibéis reais do jogador.
-   - Cronômetro ativo com limite máximo de 9 segundos.
-   - Botão de contorno: *"Parar"*.
-3. **Estado `VALIDATING`:**
-   - Conferência rápida com inteligência (YAMNet) se o áudio capturado foi realmente um arroto humano ou apenas conversa/ruído de fundo.
-   - Feedback: *"Conferindo..."*.
-4. **Estado `JUDGING`:**
-   - A espera é o suspense e parte da piada.
-   - Frase típica do juiz em `Anton`: *"Tô julgando essa porra."*.
-5. **Estado `RESULT_REVEAL`:**
-   - Impacto visual: revelação do **Auê Score** (0 a 100) com overshoot de animação.
-   - Fala do juiz proporcional à nota:
-     - `>= 85`: *"Tá maluco."*
-     - `60 a 84`: *"Caralho, veio forte."*
-     - `< 60`: *"Foi isso?"*
-6. **Estado `RESULT`:**
-   - Auê Score cravado na tela.
-   - Player de áudio com waveform do arroto para escutar o próprio feito.
-   - Três métricas avaliadas: **Força**, **Fôlego** e **Grave**.
-   - Pílula de escolha de origem do arroto (Cerveja, Refri, Almoço, etc.).
-
----
-
-## Fase 4: Resiliência
-**Objetivo:** Falar a verdade primeiro quando algo falhar, sem inventar sucesso falso e sem culpar a pessoa.
-
-1. **`MIC_ERROR`:**
-   - Microfone bloqueado ou sem permissão.
-   - Explicação transparente e amigável de como liberar permissão no navegador ou sistema, com botão de tentar novamente.
-2. **`NO_SOUND`:**
-   - Nenhum som detectado pelo microfone.
-   - Mensagem: *"Não ouvi nada"*, convidando a tentar de novo sem penalizar a nota nem gerar frustração.
-3. **Falha no Envio / Rede:**
-   - Mensagem direta: *"Deu ruim no envio. Desafio não criado. Tenta de novo."*.
-   - Zero simulação de sucesso quando a rede falha.
-
----
-
-## Fase 5: Depois da Nota
-**Objetivo:** Transformar o resultado em resenha social, duelo ou nova tentativa.
-
-1. **Decisão:**
-   - Publicar na comunidade;
-   - Chamar alguém pro X1;
-   - Compartilhar card;
-   - Arrotar de novo (*"Mandar outro"*).
-2. **Publicar na comunidade:**
-   - Exige escolha consciente e consentimento explícito.
-   - A integração da Arena com uma resenha publicada só pode ser chamada de pronta depois de prova de ponta a ponta.
-3. **Compartilhar Card (PNG 9:12):**
-   - Geração de cartão vertical padronizado: marca `AUÊ!`, nota gigante, fala do juiz e link `aue.app/x1/[code]`.
-   - Compatível com WhatsApp, Instagram Stories e downloads de imagem.
-
----
-
-## Fase 6: X1 (Duelo de Arrotadores)
-**Objetivo:** Duelo 1 contra 1 por link na internet ou presencial.
-
-1. **`CHALLENGE_CREATED`:**
-   - Link único do X1 gerado (ex: `aue.gg/x1/9f2a`).
-   - Botão de copiar link e botão principal: *"Mandar pro infeliz"*.
-2. **`WAITING_OPPONENT`:**
-   - Sala de espera: cronômetro e aviso de espera pelo oponente arrotar e responder.
-3. **`SCOREBOARD`:**
-   - Placar versus lado a lado: jogador vs oponente.
-   - Mostra o nome, a nota de cada um e player para ouvir os dois arrotos.
-4. **Decisão de Resultado (Vitória, Derrota ou Empate):**
-   - **Vitória:** Destaque com cor `--gold` / `--accent`.
-   - **Empate (`DRAW`):** Frase de impacto *"Ninguém ganhou."* em `Anton`.
-   - **Derrota:** **Nunca usa vermelho** para a pontuação ou card do perdedor; preserva dignidade em tom neutro `--muted`. Vermelho é exclusivo de erro técnico.
-5. **`REMATCH` (Loop Infinito da Revanche):**
-   - Botão *"Revanche"* aciona uma contagem regressiva visceral `3, 2, 1`.
-   - Volta imediatamente para a Arena `IDLE` / gravação com o mesmo oponente, reiniciando o ciclo de rivalidade.
+Referência visual: [`../design/prototipo/Jornada.dc.html`](../design/prototipo/Jornada.dc.html). Os estados reais da Arena estão em [`ARENA.md`](ARENA.md).

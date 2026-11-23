@@ -100,7 +100,7 @@ As regras de trabalho e papéis da squad estão em [`AGENTS.md`](AGENTS.md) — 
 
 Comece por [`docs/README.md`](docs/README.md).
 
-- Visão do produto: [`docs/jogo/VISAO.md`](docs/jogo/VISAO.md)
+- O que o Auê é: [`docs/jogo/AUE.md`](docs/jogo/AUE.md)
 - Loop do jogador: [`docs/jogo/LOOP.md`](docs/jogo/LOOP.md)
 - Jornada em 6 fases: [`docs/jogo/JORNADA.md`](docs/jogo/JORNADA.md)
 - Estados da Arena: [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md)

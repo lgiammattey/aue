@@ -1,11 +1,11 @@
 ---
 name: modelar-dados-e-api
-description: Guia para Camillo e Lucas desenharem contratos, tabelas, feeds e motor de áudio do Auê.
+description: Guia para Camillo desenhar contratos, tabelas, feeds e motor de áudio do Auê.
 ---
 
 # Skill: modelar-dados-e-api
 
-Procedimento do **Camillo** (Arquiteto de Sistemas) e **Lucas** (Áudio & Backend) para desenhar contratos, APIs, tabelas e módulos da rede social de arrotadores e da Arena.
+Procedimento do **Camillo** (Áudio, Backend e Arquitetura) para desenhar contratos, APIs, tabelas e módulos da rede social de arrotadores e da Arena.
 
 ---
 
@@ -35,5 +35,5 @@ Ao fechar um módulo antes do código:
 1. Definir o modelo de dados / schema (Postgres / Supabase);
 2. Escrever os contratos de TypeScript (`interfaces` / `types`);
 3. Especificar os estados de falha e offline;
-4. Definir como o Marcelo vai auditar (testes unitários e de integração);
-5. Submeter ao Iury para alocação de tarefas.
+4. Definir como o Diego vai auditar (testes unitários e de integração);
+5. Submeter ao Tiago para alocação.

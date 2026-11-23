@@ -11,18 +11,9 @@ Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e c�
 - O histórico do projeto Supabase `Auê` tem 117 versões de migração, iguais às 117 versões presentes na pasta na conferência. Isso não prova conteúdo de objetos, configuração, políticas atuais nem execução ponta a ponta.
 - O CI do commit falhou no teste de fronteira: `ConteudoDaHome.tsx` importa `AdsterraNativeBanner` de `features/novo-aue`. Tipos, lint e build passaram nessa execução; a falha arquitetural não foi corrigida por esta revisão documental. Corrigido depois, em 23/11/2026, pela [#370](https://github.com/lgiammattey/aue/pull/370): o componente foi para `src/shared/components/` e a suíte completa, o typecheck e o build passam na `main` atual.
 
-As seções anteriores a seguir descrevem principalmente a arquitetura e os contratos legados. Confira o código antes de usar os nomes de rotas, regras e flags ali como estado atual.
+As seções a seguir descrevem arquitetura e contratos, e parte deles é legado. Confira o código antes de usar nomes de rotas, regras e flags como estado atual.
 
-## Registro anterior preservado
-
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
-
-> **Revisão de 23/11/2026:** este documento contém decisões e descrições anteriores que ainda precisam de reconciliação integral com a Arena v2 e o mural. Para o corte publicado, evidências e limites, consulte [Produção atual](../PRODUCAO_ATUAL.md). As rotas de comunidades e tópicos redirecionam no roteador; não trate texto histórico como prova de recurso ativo.
-
-O GDD [`../jogo/AUÊ!-2.md`](../jogo/AUÊ!-2.md) e o Art Bible
-[`../design/AUÊ!.md`](../design/AUÊ!.md) descrevem o comportamento e a direção
-visual alvo. Este documento continua descrevendo a arquitetura implementada:
-nenhum detalhe de produto ou de arte aqui cria backend, rota ou estado por si só.
+O Art Bible [`../design/AUÊ!.md`](../design/AUÊ!.md) descreve a direção visual. Este documento descreve a arquitetura implementada: nenhum detalhe de produto ou de arte aqui cria backend, rota ou estado por si só.
 
 **Status:** descrição da arquitetura implementada e publicada
 **Revisado em:** 2026-11-21 (estrutura conferida no repositório)

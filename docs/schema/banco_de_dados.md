@@ -6,10 +6,6 @@ Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e c�
 
 As 117 versões locais correspondem às 117 registradas no histórico do projeto `Auê`. O inventário abaixo pode conter nomes, tabelas e relações históricas; migrações mais recentes e inspeção do banco prevalecem. Presença no histórico não confirma funcionamento, políticas efetivas ou conteúdo dos objetos.
 
-## Registro anterior preservado
-
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
-
 **Status:** guia de leitura do banco versionado  
 **Fonte de verdade do schema:** `supabase/migrations/`
 

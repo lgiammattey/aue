@@ -1,12 +1,8 @@
 # Voz e personalidade do Auê
 
-O GDD [`AUÊ!-2.md`](AUÊ!-2.md) traz exemplos de copy de botões, reações e
-momentos. Este arquivo continua definindo os critérios de voz; exemplos novos
-precisam passar por eles e não podem inventar capacidade.
+Exemplos novos de copy precisam passar pelos critérios deste arquivo e não podem inventar capacidade.
 
 Fonte canônica de **como o Auê fala e se comporta**.
-
-Derivado de [`HISTORIA.md`](./HISTORIA.md).
 
 Escopo não mora aqui. Para saber o que pertence ao jogo agora, leia
 [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md).
@@ -391,9 +387,8 @@ Se parece campanha de agência tentando ser descolada, faz de novo.
 
 ## Relacionados
 
-- **O que o jogo é:** [`VISAO.md`](./VISAO.md)
+- **O que o jogo é:** [`AUE.md`](./AUE.md)
 - **O que pertence ao jogo agora:** [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md)
-- **Origem dos três primos:** [`HISTORIA.md`](./HISTORIA.md)
 - **Os estados da Arena:** [`ARENA.md`](./ARENA.md)
 - **Referência visual:** [`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html)
 - **Filtro de copy:** [`../../.agents/skills/filtro-anti-ia/SKILL.md`](../../.agents/skills/filtro-anti-ia/SKILL.md)

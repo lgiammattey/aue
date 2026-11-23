@@ -1,11 +1,11 @@
 ---
 name: google-search-console
-description: Procedimento do Rodrigo para gerenciar Google Search Console, SEO técnico, indexação, sitemaps e Core Web Vitals do Auê!.
+description: Procedimento do Camillo (SEO técnico) para gerenciar Google Search Console, SEO técnico, indexação, sitemaps e Core Web Vitals do Auê!.
 ---
 
 # Skill: google-search-console
 
-Procedimento do **Rodrigo (Especialista em Google Search Console & SEO Técnico)** para garantir indexação rápida, integridade de domínio, monitoramento de rastreamento e máxima visibilidade orgânica do Auê! no Google.
+Procedimento do **Camillo (SEO técnico e Google Search Console)** para garantir indexação rápida, integridade de domínio, monitoramento de rastreamento e máxima visibilidade orgânica do Auê! no Google.
 
 ---
 
@@ -32,7 +32,7 @@ Procedimento do **Rodrigo (Especialista em Google Search Console & SEO Técnico)
 
 4. **Experiência na Página & Core Web Vitals:**
    - Acompanhar relatórios de LCP (Largest Contentful Paint), INP (Interaction to Next Paint) e CLS (Cumulative Layout Shift) reportados pelo Search Console.
-   - Alertar imediatamente o **Kayky** e o **Camillo** se qualquer asset de áudio, fonte ou script causar lentidão na renderização da landing ou feed.
+   - Alertar imediatamente o **Diego** e o **Camillo** se qualquer asset de áudio, fonte ou script causar lentidão na renderização da landing ou feed.
 
 5. **Erros de Cobertura e Indexação:**
    - Auditar relatórios de erros 404, falhas de redirecionamento, URLs bloqueadas por robots.txt e páginas rastreadas mas não indexadas.
@@ -40,8 +40,8 @@ Procedimento do **Rodrigo (Especialista em Google Search Console & SEO Técnico)
 
 ---
 
-## 2. As Regras de Ouro do Rodrigo
+## 2. As Regras de Ouro do SEO
 
 - **SEO não justifica texto de robô:** Nada de empilhar palavras-chave repetitivas que cheiram a IA. O conteúdo precisa ser autêntico, divertido e útil para o jogador real.
 - **Link do zap não é link indexável:** URLs de duelos privados (X1) pertencem aos duelistas e não devem ser indexadas no Google.
-- **`src/seo-publico.test.ts` é sagrado:** Nenhuma alteração de rota, sitemap ou tag canônica é feita sem atualizar e passar o teste de paridade do Marcelo.
+- **`src/seo-publico.test.ts` é sagrado:** Nenhuma alteração de rota, sitemap ou tag canônica é feita sem atualizar e passar o teste de paridade.

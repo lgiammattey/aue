@@ -16,13 +16,7 @@ Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e c�
 | `/comunidades`, `/c/:slug`, `/c/:slug/t/:id`, `/topico/:id` | Redirecionam para `/` no React; Hosting pode responder antes do React |
 | `/x1/:code`, `/b/:code`, `/d/:id` | Fluxos de compatibilidade distintos do duelo v2 |
 
-O mapa anterior abaixo pode conter rotas e componentes históricos. Para confirmar uma alteração, confira `src/App.tsx`, `firebase.json` e o navegador; protótipo não prova publicação.
-
-## Registro anterior preservado
-
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
-
-> **Revisão de 23/11/2026:** este documento contém decisões e descrições anteriores que ainda precisam de reconciliação integral com a Arena v2 e o mural. Para o corte publicado, evidências e limites, consulte [Produção atual](../PRODUCAO_ATUAL.md). As rotas de comunidades e tópicos redirecionam no roteador; não trate texto histórico como prova de recurso ativo.
+Para confirmar uma alteração, confira `src/App.tsx`, `firebase.json` e o navegador; protótipo não prova publicação.
 
 > **Documento Canônico de Orientação de Telas e Componentes**  
 > Autoridade: [`../../AGENTS.md`](../../AGENTS.md) | Design System: [`design-system/system/DESIGN.md`](design-system/system/DESIGN.md)
@@ -40,7 +34,6 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 | **Tropa & Cards de Post** | [`src/features/novo-aue/CardDoPost.tsx`](../../src/features/novo-aue/CardDoPost.tsx) (com `CardDoPost.css` e `TokensDoCard.css`; variante `feed` ou `perfil`)<br>[`src/features/novo-aue/PlayerDoArroto.tsx`](../../src/features/novo-aue/PlayerDoArroto.tsx) (com `PlayerDoArroto.css`)<br>[`src/features/novo-aue/MenuDoPost.tsx`](../../src/features/novo-aue/MenuDoPost.tsx)<br>[`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx) | `src/features/comunidade/components/CardDeCauso.tsx`<br>`src/features/comunidade/components/HeaderSocial.tsx` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
 | **Comentários & Thread de Conversa** | [`src/features/novo-aue/ThreadDeComentarios.tsx`](../../src/features/novo-aue/ThreadDeComentarios.tsx)<br>[`src/features/novo-aue/ModalComentarios.tsx`](../../src/features/novo-aue/ModalComentarios.tsx) | Não embutir árvore de comentários dentro de `CardDoPost` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
 | **Compositor de Post / Gravação Rápida** | [`src/features/novo-aue/ModalCompositor.tsx`](../../src/features/novo-aue/ModalCompositor.tsx)<br>[`src/features/novo-aue/ModalGravarArroto.tsx`](../../src/features/novo-aue/ModalGravarArroto.tsx) | `src/features/comunidade/components/ComposerCauso.tsx`<br>`src/features/comunidade/ModalNovoCauso.tsx` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
-| **Hub de Comunidades** | [`src/features/novo-aue/TelaComunidadeOpenDesign.tsx`](../../src/features/novo-aue/TelaComunidadeOpenDesign.tsx)<br>[`src/features/novo-aue/TelaDiretorioOpenDesign.tsx`](../../src/features/novo-aue/TelaDiretorioOpenDesign.tsx) | `src/features/comunidade/components/AbaComunidades.tsx`<br>`src/features/comunidade/TelaComunidade.tsx` | [`Comunidades.dc.html`](prototipo/Comunidades.dc.html) |
 | **Perfil de Jogador** | A tela é a view `perfil` de [`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx), com o cabeçalho e as abas definidos dentro de `InicioOpenDesign` e `casca.css`, [`FolhaDaFoto.tsx`](../../src/features/novo-aue/FolhaDaFoto.tsx) (troca de foto pelo avatar, `FolhaDaFoto.css`), [`BarraSuperior.tsx`](../../src/features/novo-aue/BarraSuperior.tsx) (`BarraSuperior.css`), `CardDoPost` (variante `perfil`) e `PlayerDoArroto`. [`TelaPerfilOpenDesign.tsx`](../../src/features/novo-aue/TelaPerfilOpenDesign.tsx) é só um invólucro de 32 linhas | `src/features/novo-aue/PerfilConectado.tsx` e `PerfilDoUsuario.tsx` com seus CSS (código morto: ninguém os importa nas rotas, conferido por `grep` em 23/11/2026). Não criar telas desconexas em `/perfil` | [`Tropa do Arroto.dc.html`](prototipo/Bonde%20do%20Arroto.dc.html) |
 | **Arena de Arroto (10 Estados)** | [`src/arena/Arena.tsx`](../../src/arena/Arena.tsx)<br>Faixas em [`src/arena/faixas/`](../../src/arena/faixas/)<br>Bolha em [`src/arena/bolha/`](../../src/arena/bolha/) | Telas avulsas de fluxo antigo em `src/features/audio/fluxo/` | [`Arena.dc.html`](prototipo/Arena.dc.html) |
 | **Páginas Públicas Institucionais & SEO** | [`src/features/publico/ComoJogar.tsx`](../../src/features/publico/ComoJogar.tsx)<br>[`src/features/publico/ComoArrotar.tsx`](../../src/features/publico/ComoArrotar.tsx)<br>[`src/features/publico/TiposDeArroto.tsx`](../../src/features/publico/TiposDeArroto.tsx)<br>[`src/features/publico/RankingDeArrotos.tsx`](../../src/features/publico/RankingDeArrotos.tsx)<br>[`src/features/grupos/TelaGrupos.tsx`](../../src/features/grupos/TelaGrupos.tsx) | Não substituir `MolduraPublica` → `CascaInformativaOpenDesign` por outra moldura ou impor tema claro fixo sem pedido explícito do Luiz | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
@@ -90,57 +83,6 @@ O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)
 | `/admin` | `TelaAdministracao` | **CANÔNICO RESTRITO** | - | Painel interno seguro para aprovações e moderação (RPC autorizada). |
 | `/landing` | `TelaLanding` | **CANÔNICO APOIO** | [`Landing.dc.html`](prototipo/Landing.dc.html) | Mostruário da landing page. Hoje é **escura** (`contrato-visual.spec.ts` exige fundo `rgb(10, 11, 14)` e `color-scheme: dark`). |
 | `/versoes` | `TelaVersoesWebapp` | **CANÔNICO APOIO** | [`Versões Webapp.dc.html`](prototipo/Vers%C3%B5es%20Webapp.dc.html) | Painel de visualização responsiva de breakpoints do webapp. |
-
----
-
-## 3. Os 6 Fluxos da Jornada do Jogador
-
-A jornada do Auê se organiza em 6 fases contínuas (ver [`docs/jogo/LOOP.md`](../jogo/LOOP.md) e [`docs/jogo/JORNADA.md`](../jogo/JORNADA.md)):
-
-```text
-DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
-    ▲                                                                   │
-    └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
-```
-
-### Fase 1: Descoberta & Entrada
-- **Páginas:** `/`, `/como-jogar`, `/landing`, `/grupos`
-- **Comportamento:** O visitante pode navegar pelo feed e ouvir arrotos sem conta obrigatória. Ao tentar postar, desafiar ou curtir, abre-se o fluxo de identificação ágil.
-- **Visual:** No desktop, 3 colunas (menu, feed central e painel direito). No mobile, cabeçalho limpo com wordmark `AUÊ!` e navegação inferior.
-
-### Fase 2: Tropa (Pessoas, Feed & Comunidades publicadas)
-- **Componentes:** `InicioOpenDesign.tsx`, `CardDoPost.tsx`, `ThreadDeComentarios.tsx`, `ModalCompositor.tsx`
-- **Comportamento:**
-  - A produção mostra resenhas por comunidade, autor, comentários, reações, salvar e compartilhar; pode haver áudio ou mídia externa conforme o post.
-  - Visitante lê o feed; as ações de participação pedem entrada.
-  - A direção de conversa por tópico está aceita no ADR 0010, mas continua marcada como migração até ganhar evidência de publicação.
-
-### Fase 3: Arena de Arroto
-- **Componentes:** `src/arena/Arena.tsx`, faixas em `src/arena/faixas/`
-- **Comportamento:**
-  - Máquina de 10 estados contínua: `IDLE` → `RECORDING` → `ORIGIN` → `JUDGING` → `RESULT` → `CHALLENGE` → `VERSUS` → `SCOREBOARD` → `REMATCH` → `ERROR`.
-  - Microfone pedido apenas sob ação voluntária do usuário.
-  - Classificação acústica real via modelo YAMNet local (`src/features/audio/juiz/yamnet.ts`). Não-arrotos são rejeitados de verdade.
-
-### Fase 4: Resiliência e Erros Transparentes
-- **Componentes:** `src/arena/faixas/` e avisos em `src/shared/components/`
-- **Comportamento:**
-  - Erro real é comunicado com clareza: microfone bloqueado (`MIC_ERROR`), silêncio detectado (`NO_SOUND`), falha de rede ou desafio expirado.
-  - Nunca simular sucesso ou mascarar timeout de API.
-
-### Fase 5: Depois da Nota & Postagem
-- **Componentes:** `ResultadoScreen.tsx`, `ModalGravarArroto.tsx`, `ModalCardCompartilhamento.tsx`
-- **Comportamento:**
-  - Auê Score revelado de 0 a 100 com teatralidade controlada.
-  - Card de compartilhamento em formato 9:12.
-  - **Consentimento explícito:** O arroto gravado para duelo ou teste NUNCA vai para o feed público sem que a pessoa clique deliberadamente em "Publicar na roda" e selecione uma comunidade.
-
-### Fase 6: X1 (Duelo) e Revanche
-- **Componentes:** `src/arena/faixas/LinkDoDesafio.tsx`, `src/arena/faixas/PlacarDoX1.tsx`, `/x1/:code`
-- **Comportamento:**
-  - Link de desafio com validade real de 7 dias lida do backend.
-  - O desafiado ouve o arroto do oponente antes de gravar o seu.
-  - Placar mostra os dois scores confrontados e permite engatar revanches em rounds sucessivos.
 
 ---
 

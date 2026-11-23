@@ -38,4 +38,4 @@ Ele puxa o freio em três situações:
 Os dois fecham acordo antes do código existir:
 - Tiago defende a diversão, o engajamento e a simplicidade do produto;
 - Camillo defende a sustentabilidade técnica, a performance do feed e a integridade da arquitetura.
-- Se não convergirem, Tiago e Iury levam as opções claras para o Luiz bater o martelo.
+- Se não convergirem, Tiago leva as opções claras para o Luiz bater o martelo.

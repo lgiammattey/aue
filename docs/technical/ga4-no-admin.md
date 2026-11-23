@@ -1,6 +1,6 @@
 # GA4 no painel admin: conexão preparada, PENDENTE
 
-> Status em 23/11/2026: **pendente**. Existe o contrato e um adaptador que declara "pendente". Nenhum dado do GA4 chega ao painel, e o painel não estima nada no lugar. Missão de origem: [0057](../../.agents/missoes/0057-tirar-cards-das-telas.md) (fatia 3 e 5).
+> Status em 23/11/2026: **pendente**. Existe o contrato e um adaptador que declara "pendente". Nenhum dado do GA4 chega ao painel, e o painel não estima nada no lugar. Missão de origem: 0057 (fatia 3 e 5).
 
 ## O que já está pronto
 

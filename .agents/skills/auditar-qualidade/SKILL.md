@@ -1,13 +1,13 @@
 ---
 name: auditar-qualidade
-description: Procedimento do Marcelo para validar testes, build, RLS, microfone, resiliência e fidelidade 1:1 em Desktop e Webapp.
+description: Procedimento da auditoria cruzada (Camillo ou Diego) para validar testes, build, RLS, microfone, resiliência e fidelidade 1:1 em Desktop e Webapp.
 ---
 
 # Skill: auditar-qualidade
 
-Runbook do **Marcelo (Qualidade & Caça-Bugs)** antes de certificar qualquer entrega da squad para o **Tiago**.
+Runbook de quem audita (Camillo ou Diego, nunca quem escreveu o código) antes de certificar qualquer entrega da squad para o **Tiago**.
 
-Marcelo atesta a qualidade e busca quebrar a aplicação com rigor. O **aceite final** contra os requisitos é do **Tiago**.
+O auditor atesta a qualidade e busca quebrar a aplicação com rigor. O **aceite final** contra os requisitos é do **Tiago**.
 
 ---
 
@@ -49,7 +49,7 @@ Verificação contra as 6 fases de [`JORNADA.md`](../../../docs/jogo/JORNADA.md)
 
 ---
 
-## 4. Pareceres Formais do Marcelo
+## 4. Pareceres Formais do Auditor
 
 - `SEM ACHADOS MATERIAIS`: Tudo aprovado com evidência real.
 - `AJUSTA`: Pequena aresta corrigível antes do veredito do Tiago.

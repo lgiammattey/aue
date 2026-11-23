@@ -8,9 +8,9 @@ Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e c�
 
 Os dez estados e a máquina detalhados abaixo descrevem a Arena anterior; não são os nomes nem uma prova de comportamento da v2. Os fluxos legados continuam no repositório e têm contratos próprios.
 
-## Registro anterior preservado
+## Máquina de dez estados (Arena legada, em `src/arena/Arena.tsx`)
 
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+O teste `arena-md.paridade.test.ts` amarra este texto ao código. Só mude os dois juntos.
 
 O GDD [`AUÊ!-2.md`](AUÊ!-2.md) e a prancha visual de telas recebida descrevem
 momentos e variações visuais do jogo. Eles não alteram a máquina abaixo: os dez

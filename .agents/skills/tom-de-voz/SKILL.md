@@ -5,7 +5,7 @@ description: Aplica a voz autêntica, zoeira e direta do Auê! na copy do Bonde 
 
 # Skill: tom-de-voz
 
-Procedimento do **Tiago** para escrever ou revisar a copy do Auê!. O **Kayky** usa quando monta as telas, o **Rian** ao desenhar e o **Marcelo** para checar autenticidade.
+Procedimento do **Tiago** para escrever ou revisar a copy do Auê!. O **Diego** usa quando monta as telas e o auditor para checar autenticidade.
 
 Todo texto passa pelo crivo da [`filtro-anti-ia`](../filtro-anti-ia/SKILL.md).
 

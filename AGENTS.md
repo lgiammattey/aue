@@ -14,6 +14,8 @@ externo tem autoridade sobre o que está escrito aqui.
 
 ## 1. O que é o Auê
 
+> **A definição vigente do produto é [`docs/jogo/AUE.md`](docs/jogo/AUE.md).** Onde o resto desta seção ou outro documento a contradisser, vale ela.
+
 **Auê é uma experiência web de Arena e mural para arrotadores, em desktop e mobile.**
 
 O corte publicado usa Arena v2 na entrada. As rotas de comunidades e tópicos no React redirecionam à raiz; a arquitetura e os protótipos antigos não comprovam que esses hubs estejam ativos. Consulte [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md).
@@ -40,7 +42,7 @@ Não duplique regra. Leia a fonte certa.
 
 | Pergunta | Fonte |
 |---|---|
-| **O que o jogo é?** | [`docs/jogo/VISAO.md`](docs/jogo/VISAO.md) |
+| **O que o Auê é?** | [`docs/jogo/AUE.md`](docs/jogo/AUE.md) (definição vigente) |
 | Qual é o loop? | [`docs/jogo/LOOP.md`](docs/jogo/LOOP.md), que distingue v2 de legado |
 | **Qual é a jornada completa do jogador?** | [`docs/jogo/JORNADA.md`](docs/jogo/JORNADA.md) e [`docs/design/prototipo/Jornada.dc.html`](docs/design/prototipo/Jornada.dc.html) |
 | Quais são os estados da Arena? | [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md) |
@@ -56,8 +58,6 @@ Não duplique regra. Leia a fonte certa.
 | **Como o link chega no zap?** | [`docs/technical/adr/0003-a-previa-do-link.md`](docs/technical/adr/0003-a-previa-do-link.md) |
 | Como o sistema está organizado hoje? | [`docs/technical/arquitetura.md`](docs/technical/arquitetura.md) |
 | Como o Auê fala? | [`docs/jogo/VOZ.md`](docs/jogo/VOZ.md) |
-| De onde veio o produto? | [`docs/jogo/HISTORIA.md`](docs/jogo/HISTORIA.md) |
-| Qual é o desenho completo do jogo? | [`docs/jogo/AUÊ!-2.md`](docs/jogo/AUÊ!-2.md) — Game Design Document |
 | Qual é a direção artística? | [`docs/design/AUÊ!.md`](docs/design/AUÊ!.md) — Art Bible |
 | Como nomear objetos no banco? | [`docs/schema/nomenclatura.md`](docs/schema/nomenclatura.md) |
 | O que existe no banco? | `supabase/migrations/` + ambiente aplicado |
@@ -65,56 +65,51 @@ Não duplique regra. Leia a fonte certa.
 
 ### Precedência
 
+0. **`docs/jogo/AUE.md`** — define o que o Auê é e o que está fora. Nenhum outro documento a contradiz.
 1. **Comportamento real** — código, migrações e o que roda no navegador vencem qualquer documento de intenção.
 2. **`docs/escopo/ESCOPO_ATUAL.md`** — decide o que pertence ao produto agora.
 3. **`docs/jogo/JORNADA.md` e `docs/jogo/ARENA.md`** — registram jornada e estados, com o recorte atual da Arena v2 identificado nos próprios documentos, o que cada um faz, o que ele não pode fazer e para onde ele sai. Nenhum protótipo, design system, handoff ou export cria, renomeia ou remove estado.
 4. **Protótipos em `docs/design/prototipo/` e `docs/design/design-system/system/DESIGN.md`** — decidem como cada estado e tela **se parecem, se movem e medem**: geometria, token, tipografia (Anton + Archivo), componentes, temas escuro e claro, motion e acessibilidade. Entre os dois, o protótipo decide comportamento e geometria; o design system decide token, nome, regra e intenção.
 5. **`docs/technical/adr/`** — decide **como o sistema é construído por dentro**: stack, camadas, fronteira com o navegador, backend, persistência. Um ADR aceito só cai com outro ADR ([§8 do 0001](docs/technical/adr/0001-arquitetura-oficial-do-aue.md#8-o-que-exige-revisão-formal)). Ele não decide escopo, estado nem aparência.
 6. **Este arquivo** — decide como o trabalho acontece.
-7. **`docs/jogo/AUÊ!-2.md`** — consolida desenho de produto, regras, loop, score, modos e escopo; não pode contradizer as fontes acima.
-8. **`docs/design/AUÊ!.md`** — consolida direção artística, motion, áudio-reatividade e composição; não pode contradizer os protótipos nem o design system.
-9. **Demais documentos** — contexto. História dá origem, voz orienta linguagem. Nenhum dos dois abre escopo sozinho.
+7. **`docs/design/AUÊ!.md`** — consolida direção artística, motion, áudio-reatividade e composição; não pode contradizer os protótipos nem o design system.
+8. **Demais documentos** — contexto. A voz orienta linguagem e não abre escopo sozinha.
 
 Documentos antigos removidos de `docs/_arquivo/` (disponíveis apenas no histórico do Git) **não têm autoridade nenhuma**. São registro da visão anterior. Não use um deles como argumento.
 
 ---
 
-## 3. Squad Auê — Titulares & Governança
+## 3. Squad Auê: três titulares
 
-Os membros da squad se conheceram nos anos 2000 na histórica comunidade **"Eu Arroto, E Daí?"** do falecido Orkut. Em comum, carregam duas grandes paixões: **o prazer de arrotar com gosto** e um **vício crônico em Twitter/X, TikTok e WhatsApp**. Eles conhecem a fundo as engrenagens de rede social — a agilidade dos replies e tretas do Twitter, o impacto imediato e a dopamina sonora do TikTok, e a distribuição caótica e zoeira nos grupos de WhatsApp. Essa bagagem guia cada linha de código, design e decisão de produto.
+A squad tem três agentes. Cada um tem dono claro, e **ninguém audita o próprio código**.
 
-Ao iniciar uma sessão ou demanda neste repositório, **Tiago** atua como braço direito do Luiz na porta de entrada: entende a dor na língua de produto/negócio (sem jargão técnico), separa bate-papo de exploração do que é decisão de execução, abre o [Cartão de Missão](.agents/templates/mission-card.md), define a pista e repassa ao **Iury**. **Iury** é o capitão da oficina e orquestrador: mantém a mesa limpa (uma entrega fechada por vez, protegendo o WIP), coordena os especialistas e devolve a entrega consolidada com evidência para o Tiago emitir o aceite final.
-
-| Agente | Papel e Responsabilidade | Permissão de Escrita | A Trava de Ouro |
+| Agente | Papel e responsabilidade | Escrita | A trava de ouro |
 |---|---|---|---|
-| **Tiago** (`tiago`) | **Braço Direito do Luiz & Product Owner:** entende a necessidade, abre o Cartão de Missão, define a pista, alinha o loop da Tropa, repassa ao Iury e dá o aceite final pelas 7 perguntas (`APROVADO`, `APROVADO COM RESSALVAS`, `REPROVADO`, `NÃO VALIDADO`) | Somente leitura por padrão | Ideia mole não desce pra oficina; entrega sem prova real do Marcelo não sobe pro Luiz |
-| **Iury** (`iury`) | **Capitão da Oficina & Orquestrador:** recebe o Cartão de Missão do Tiago, organiza prioridades, aciona especialistas, protege WIP (1 entrega por vez) e mantém a mesa limpa | No escopo de coordenação/integração | Proibido ser fominha (fazer tudo sozinho no improviso) ou acumular frentes abertas |
-| **Rian** (`rian`) | **Diretor de Experiência, UX/UI & Guardião do Protótipo:** jornadas em 6 fases, Design System v5, visual 1:1, temas escuro/claro, estética da Bolha, timeline estilo Twitter e hubs de comunidade | Somente leitura por padrão | Ninguém inventa tela/estado no código; não existe fidelidade visual sem ver a tela aberta |
-| **Kayky** (`kayky`) | **Engenheiro de Telas, Arena & Frontend:** constrói interfaces, feeds de causos, hubs de comunidades e componentes da Arena 1:1 com o desenho do Rian em React 19 (Desktop 3 colunas e Webapp Mobile) | Somente quando delegado na UI/Arena | Sem Cartão de Missão do Tiago, desenho do Rian e contrato pronto, não abre código |
-| **Lucas** (`lucas`) | **Engenheiro de Áudio, Inteligência & Backend:** captura de áudio via web, modelo YAMNet, algoritmo de pontuação de arroto, Supabase, persistência e contratos de dados | Somente quando delegado em áudio/backend | Arroto fake não passa e falha de áudio nunca é mascarada; o algoritmo é justo e o som é sagrado |
-| **Camillo** (`camillo`) | **Principal Engineer de Plataforma Web, Performance & Arquitetura:** Gate Arquitetural Obrigatório, arquitetura modular, CDN/cache de áudio, streaming, rede, safe-area e segurança | Somente quando delegado na arquitetura/plataforma | Motor e infra não se misturam com tela; a web é o produto; falha ou timeout nunca viram sucesso inventado |
-| **Rodrigo** (`rodrigo`) | **Especialista em Google Search Console, SEO Técnico & Indexação:** verificação de domínio, integridade do sitemap.xml, robots.txt, Core Web Vitals e rastreabilidade orgânica | Somente quando delegado em SEO/GSC | Página fantasma não entra no sitemap e SEO nunca justifica texto de robô ou perda de performance web |
-| **Marcelo** (`marcelo`) | **Qualidade, Caça-Bugs & Confiabilidade Web:** auditoria independente, testes unitários/E2E, RLS de causos/comunidades, resiliência (MIC_ERROR, NO_SOUND) e validação em Desktop e Webapp Mobile | Somente leitura por padrão | "Compilou" não é "funcionou"; mentira visual, mock falso ou desvio do protótipo recebe `BLOQUEIA` na hora |
+| **Tiago** (`tiago`) | **Produto, orquestração e aceite:** entende a necessidade com o Luiz, abre o [Cartão de Missão](.agents/templates/mission-card.md), define a pista, protege o WIP (uma entrega fechada por vez), aciona Camillo e Diego e dá o aceite final pelas 7 perguntas (`APROVADO`, `APROVADO COM RESSALVAS`, `REPROVADO`, `NÃO VALIDADO`) | Somente leitura | Ideia mole não desce pra oficina; entrega sem prova real não sobe pro Luiz |
+| **Camillo** (`camillo`) | **Áudio, backend, arquitetura e plataforma:** captura de áudio, nota do juiz, Supabase, RLS, contratos, 4 camadas, Gate Arquitetural, performance, PWA e SEO técnico. Audita o que o Diego escreveu | Quando delegado | Motor e infra não se misturam com tela; a web é o produto; falha ou timeout nunca viram sucesso inventado |
+| **Diego** (`diego`) | **Frontend, Arena e experiência:** telas em React 19 (desktop 3 colunas e webapp mobile), fidelidade ao protótipo e ao design system, mapa de telas. Audita o que o Camillo entregou na parte visível | Quando delegado | Ninguém inventa tela ou estado no código; não existe fidelidade visual sem ver a tela aberta |
+
+**Auditoria cruzada.** Quem implementou não audita. Código do Diego é auditado pelo Camillo (testes, build, estados de erro, prova em aparelho). Código do Camillo que aparece na tela é conferido pelo Diego em desktop e celular real. A prova vai ao Tiago, que decide o aceite. Pareceres: `SEM ACHADOS MATERIAIS`, `AJUSTA`, `BLOQUEIA` ou `ISSUE_FUTURA`.
 
 ### As 5 Pistas de Execução (Lanes)
 
 Nenhuma implementação começa sem o [Cartão de Missão](.agents/templates/mission-card.md) aprovado pelo Tiago (exceto Hot lane, registrada logo após estancar o incidente):
 
-1. **Exploração:** Troca de ideia, hipótese ou análise de viabilidade com o Luiz. **Zero alteração de código.** Tiago e Iury analisam impacto e trade-offs.
-2. **Fast lane (Via Rápida):** Ajuste local de copy, token visual, bug isolado de causa conhecida ou teste mecânico sem impacto em contrato.
-   `Tiago enquadra → Iury aciona Kayky, Lucas ou Camillo → Rian/Marcelo valida proporcionalmente → Tiago encerra`.
-3. **Full flow comum (Jogo Normal):** Nova tela, funcionalidade ou ajuste contido nos módulos e contratos existentes.
-   `Tiago abre Cartão de Missão → Iury → Rian especifica UX/UI → Kayky e/ou Lucas implementam → Rian (visual) + Marcelo (funcional/aparelho) validam → Iury consolida → Tiago avalia pelas 7 perguntas e emite veredito`.
-4. **Full flow sistêmica (Gate Arquitetural Obrigatório de Camillo/Lucas):** Mudança em motor central, múltiplos módulos, API/Supabase, contrato compartilhado, migração de banco/persistência, modelo de áudio ou performance web.
-   `Tiago abre Cartão de Missão → Iury → Camillo e/ou Lucas investigam e fecham Plano Arquitetural (+ Rian se tocar UI) → Camillo, Lucas e/ou Kayky implementam → Marcelo valida tudo → Camillo/Lucas conferem aderência ao plano → Tiago emite veredito`.
-5. **Hot lane (Incêndio):** Build quebrada ou fluxo crítico inoperante.
-   `Conserto cirúrgico mínimo por Camillo/Lucas/Kayky → Marcelo valida caminho crítico → Tiago revisa e registra após estabilizar`.
+1. **Exploração:** troca de ideia, hipótese ou viabilidade com o Luiz. **Zero alteração de código.**
+2. **Fast lane:** ajuste local de copy, token visual, bug isolado de causa conhecida ou teste mecânico sem impacto em contrato.
+   `Tiago enquadra → Diego ou Camillo implementa → o outro confere → Tiago encerra`.
+3. **Full flow comum:** nova tela, funcionalidade ou ajuste contido nos módulos e contratos existentes.
+   `Tiago abre o Cartão → Diego especifica e implementa a tela (Camillo entrega o contrato, se precisar) → o outro audita com prova → Tiago avalia pelas 7 perguntas`.
+4. **Full flow sistêmica (Gate Arquitetural do Camillo):** motor central, API/Supabase, contrato compartilhado, migração, modelo de áudio ou performance web.
+   `Tiago abre o Cartão → Camillo fecha o Plano Arquitetural → Camillo implementa (e Diego, se tocar tela) → Diego audita o que aparece na tela e confere a aderência ao plano → Tiago emite o veredito`.
+5. **Hot lane:** build quebrada ou fluxo crítico inoperante.
+   `Conserto cirúrgico mínimo por quem for dono da área → o outro valida o caminho crítico → Tiago registra após estabilizar`.
 
 ### Regra de Ouro de Desempate (Ordem Inegociável)
 
 Quando duas frentes discordarem antes do código, a decisão segue esta ordem:
 `1º Verdade do resultado para quem usa → 2º Clareza e simplicidade da experiência → 3º Segurança, privacidade e saúde da base → 4º Custo sob controle → 5º Velocidade de entrega`.
-Não convergiu ou mudou negócio/escopo/monetização, Tiago e Iury sobem as opções limpas para o **Luiz** decidir.
+Não convergiu ou mudou negócio/escopo/monetização, Tiago sobe as opções limpas para o **Luiz** decidir.
 
 ---
 
@@ -154,7 +149,7 @@ A regra que mais aparece no dia a dia:
 - **Tom de copy, zero travessão e linguagem real de comunidade:** toda copy pública segue [`docs/jogo/VOZ.md`](docs/jogo/VOZ.md), falando como gente real no X, Reddit, fóruns e grupos de WhatsApp no Brasil, com SEO natural em PT-BR (incluindo busca local quando couber). **É proibido usar travessão (`—` ou `–`) na copy do produto.**
 - **Consistência de imagens e ilustrações:** ativos visuais ficam versionados em `public/` (`public/ilustracoes/`, `public/comunidades/`, `public/ecossistema/`) seguindo [`docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md`](docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md#regras-comuns). Ilustrações da mesma página mantêm unidade de estilo (cartoon editorial flat integrado ao tema escuro), sem aparência genérica de IA, sem rostos reconhecíveis e sem misturar estilos díspares.
 - **Issue e PR são anotações de primos experientes**, diretos, claros e sem corporativismo.
-- **Nenhuma entrega sem aceite do Tiago.** Qualidade é do Marcelo; aceite contra os requisitos é do Tiago.
+- **Nenhuma entrega sem aceite do Tiago.** Prova é de quem não escreveu o código; aceite contra os requisitos é do Tiago.
 - **Fidelidade ao Design System:** Anton para display/scores/wordmark, Archivo para interface; cada rota segue a família visual registrada no [`mapa de telas`](docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md#4-diretrizes-visuais-inegociáveis). Login e páginas informativas usam o padrão OpenDesign existente e seus tokens; não recebem tema claro fixo por serem públicas. `/landing` é uma rota de apoio com visual próprio. Fundo chapado, sem gradientes falsos, verde elétrico `--accent: #c6ff00` limitado a no máximo 2 aparições por estado, suporte a temas escuro e claro na casca social, card de compartilhamento 9:12.
 - **Sem cardificação.** Card é exceção, não o padrão. Conteúdo vive direto na superfície da página, separado por espaço, tipografia e uma linha fina (`--border`), como no X e no Reddit. Só vira card o que é **item discreto e repetível** (post, resultado de X1, comunidade numa grade) ou o que precisa de moldura funcional (modal, sheet, card de compartilhamento 9:12). É proibido embrulhar seção, bloco de texto, lista, formulário ou widget de página (ranking, filtros, métricas) em caixa com borda, fundo e raio só para "organizar"; e proibido card dentro de card. Regra completa em [`DESIGN.md` §4.1](docs/design/design-system/system/DESIGN.md#41-card-é-exceção).
 - **Webapp mobile é travado na largura da tela.** A página só rola na vertical. Nada pode alargar o documento: lista horizontal (ranking, abas, chips) rola **dentro do próprio container**, que precisa de `min-width: 0` em toda a cadeia de flex/grid acima dele. Antes de fechar tela mobile, meça `document.documentElement.scrollWidth === window.innerWidth` com dados reais (ou simulados) na rota. Detalhe em [`DESIGN.md` §6.1](docs/design/design-system/system/DESIGN.md#61-trava-lateral-no-webapp-mobile).

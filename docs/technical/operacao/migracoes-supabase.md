@@ -6,10 +6,6 @@ Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e c�
 
 O histórico do projeto identificado como produção e a pasta versionada contêm as mesmas 117 versões. A comparação usou identificadores de versão, não hashes ou inspeção completa do schema. Não concluir que cada objeto ou policy corresponde ao SQL e não aplicar migrações novamente sem verificar o estado atual. Staging e produção continuam ambientes distintos.
 
-## Registro anterior preservado
-
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
-
 Quem aplica é a **integração do Supabase com o GitHub** (painel do projeto →
 Project Settings → Integrations → GitHub). Não existe workflow nem segredo no
 GitHub para isso.

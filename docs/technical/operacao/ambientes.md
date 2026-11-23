@@ -8,10 +8,6 @@ O conector listou `Auê` como ativo e saudável e `aue-staging` como ativo. A co
 
 O histórico sobre SQL Editor, credenciais e CLI é datado e não deve ser tratado como único procedimento atual. Consulte o estado do ambiente antes de aplicar qualquer mudança.
 
-## Registro anterior preservado
-
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
-
 Onde o Auê realmente roda, e como uma migração chega ao banco. Nada disto dá
 para descobrir lendo o repositório, e foi por isso que este arquivo existe.
 

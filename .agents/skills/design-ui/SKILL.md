@@ -1,11 +1,11 @@
 ---
 name: design-ui
-description: Procedimento do Rian para especificar a UI do Auê!, Bonde do Arroto e Arena com fidelidade 1:1 ao Design System v5.
+description: Procedimento do Diego para especificar a UI do Auê!, Bonde do Arroto e Arena com fidelidade 1:1 ao Design System v5.
 ---
 
 # Skill: design-ui
 
-Procedimento do **Rian** para transformar os fluxos do Bonde do Arroto e da Arena em **especificação visual 1:1** com o Design System v5 para o **Kayky** construir em React 19.
+Procedimento do **Diego** para transformar os fluxos da Tropa e da Arena em **especificação visual 1:1** com o Design System v5 para ele mesmo construir em React 19.
 
 ---
 

@@ -20,7 +20,7 @@
 .auth-arena__manifesto p { margin: 0 0 18px; color: var(--accent, #ff5500); font: 700 11px/1.4 var(--font-mono, monospace); letter-spacing: .12em; }
 .auth-arena__manifesto div { font: 400 clamp(48px, 6vw, 84px)/1.02 var(--font-display, 'Anton', sans-serif); text-transform: uppercase; color: var(--fg, #f3f4f6); }
 .auth-arena__manifesto svg { display: none; }
-.app--auth .auth-shell .dialog, .auth-arena-reset .auth-arena__form { width: 100%; padding: 28px; border: 1px solid var(--border, #232834); border-radius: var(--radius-md, 6px); background: var(--surface, #151820); box-shadow: none; box-sizing: border-box; }
+.app--auth .auth-shell .dialog, .auth-arena-reset .auth-arena__form { width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; box-sizing: border-box; }
 .app--auth .auth-shell .dialog h1, .auth-arena-reset h1 { margin: 0 0 12px; font: 400 clamp(38px, 4.6vw, 54px)/1.05 var(--font-display, 'Anton', sans-serif); text-transform: uppercase; letter-spacing: -.01em; color: var(--fg, #f3f4f6); }
 .auth-shell .dialog > p, .auth-arena-reset .auth-arena__form > p { line-height: 1.5; color: var(--fg-secondary, #c8cdd8); }
 .auth-shell .dialog label { color: var(--fg, #f3f4f6); font-size: 14px; font-weight: 700; }

@@ -17,11 +17,10 @@ type Estado =
   | { tipo: 'pronto'; grupos: readonly GrupoExterno[] }
   | { tipo: 'erro'; semServidor: boolean };
 
+// Aviso chapado (Missão 0057): texto com filete, sem caixa.
 const caixa: React.CSSProperties = {
-  background: 'var(--surface)',
-  border: '1px solid var(--border)',
-  borderRadius: 20,
-  padding: 20,
+  borderTop: '1px solid var(--border)',
+  padding: '20px 0',
   color: 'var(--muted)',
   fontSize: 15,
   lineHeight: 1.5,

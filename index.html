@@ -2,7 +2,8 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+    <link rel="alternate icon" href="/favicon.ico?v=2" />
     <!--
       O `.ico` NÃO é redundância do `.svg` de cima.
 
@@ -28,7 +29,7 @@
       A home apresenta tanto a comunidade quanto a Arena. A medição disponível
       é experimental e não deve ser descrita como nota validada.
     -->
-    <title>Auê! — Arena e mural de arrotos</title>
+    <title>Auê! Grave seu arroto e entre na resenha</title>
 
     <meta name="theme-color" content="#0a0b0e" />
 
@@ -117,6 +118,9 @@
     <meta name="description" content="Grave seu arroto no microfone direto no navegador, veja a medição experimental, aprenda como arrotar, conheça os tipos de arroto, acompanhe o mural e mande nos grupos." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://aue.web.app/" />
+    <link rel="alternate" hreflang="pt-BR" href="https://aue.web.app/" />
+    <link rel="alternate" hreflang="en" href="https://aue.web.app/en" />
+    <link rel="alternate" hreflang="x-default" href="https://aue.web.app/" />
 
     <!--
       Open Graph ESTÁTICO: este é o card de quem compartilha a home ou um link
@@ -141,8 +145,9 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Auê" />
     <meta property="og:locale" content="pt_BR" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:url" content="https://aue.web.app/" />
-    <meta property="og:title" content="Auê! — Arena e mural de arrotos" />
+    <meta property="og:title" content="Auê! Grave seu arroto e entre na resenha" />
     <meta property="og:description" content="Grave seu arroto na Arena e confira os áudios e publicações da galera no mural do Auê." />
     <meta property="og:image" content="https://aue.web.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -150,7 +155,7 @@
     <meta property="og:image:alt" content="Símbolo do Auê: uma bolha verde-limão com um ponto de exclamação vazado." />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Auê! — Arena e mural de arrotos" />
+    <meta name="twitter:title" content="Auê! Grave seu arroto e entre na resenha" />
     <meta name="twitter:description" content="Grave seu arroto na Arena e confira os áudios e publicações da galera no mural do Auê." />
     <meta name="twitter:image" content="https://aue.web.app/og-image.png" />
 
@@ -194,7 +199,7 @@
       verdade, mas ela depende do React ter montado.
     -->
     <noscript>
-      <h1>Auê! — Arena e mural de arrotos</h1>
+      <h1>Auê! Grave seu arroto e entre na resenha</h1>
       <p>
         Grave seu arroto no microfone direto no navegador, confira a medição experimental e compartilhe nos grupos de WhatsApp.
       </p>
@@ -219,7 +224,8 @@
         <a href="/como-jogar">Como funciona</a> ·
         <a href="/como-arrotar">Como arrotar</a> ·
         <a href="/tipos-de-arroto">Tipos de arroto</a> ·
-        <a href="/ranking-de-arrotos">Ranking de arrotos</a>
+        <a href="/ranking-de-arrotos">Ranking de arrotos</a> ·
+        <a href="/en" hreflang="en" lang="en">English</a>
       </p>
       <p>Para usar o Auê é preciso ativar o JavaScript no navegador.</p>
     </noscript>

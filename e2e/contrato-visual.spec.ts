@@ -43,7 +43,8 @@ for (const viewport of VIEWPORTS) {
     expect(await login.getByRole('heading', { name: 'Entrar' }).evaluate((titulo) => getComputedStyle(titulo).fontFamily)).toContain('Anton');
     expect(await login.locator('.auth-brand').evaluate((marca) => getComputedStyle(marca).fontFamily)).toContain('Anton');
     expect((await coresDaCasca(page, '.app.app--auth')).fundo).toBe(await corDoToken(page, '--aue-bg'));
-    expect((await coresDaCasca(page, '.app--auth .dialog')).fundo).toBe(await corDoToken(page, '--aue-surface'));
+    // Formulário chapado (Missão 0057, DESIGN §4.1): sem caixa, o fundo é o da página.
+    expect((await coresDaCasca(page, '.app--auth .dialog')).fundo).toBe('rgba(0, 0, 0, 0)');
     expect(await page.locator('html').getAttribute('data-theme')).not.toBe('light');
 
     await page.goto('/tipos-de-arroto');

@@ -34,4 +34,14 @@ describe('AvisoMaioridade', () => {
     render(<AvisoMaioridade />);
     expect(screen.queryByLabelText('Aviso de conteúdo para maiores de 18 anos')).toBeNull();
   });
+
+  it('fala inglês quando a página está em inglês', async () => {
+    const { AvisoMaioridade } = await import('./AvisoMaioridade');
+
+    render(<AvisoMaioridade idioma="en" />);
+    expect(screen.getByLabelText('Notice: content for adults 18 and over')).toBeTruthy();
+    expect(screen.getByText('Adults only. Crude humor, no filter.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: "I'm 18+" }));
+    expect(window.localStorage.getItem('aue.maioridade.v1')).toBe('1');
+  });
 });

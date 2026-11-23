@@ -3,10 +3,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FLAGS } from '../../shared/flags';
 import { ModeracaoDueloV2 } from './ModeracaoDueloV2';
 import { criarAdministracaoWeb } from '../../plataforma/web/administracao';
+import { criarAnalyticsAdministrativoWeb } from '../../plataforma/web/analyticsAdministrativo';
+import { ConexaoComOAnalyticsPendente, type PortaDeAnalyticsAdministrativo, type ResumoDoAnalytics } from '../../portas/analyticsAdministrativo';
 import type { EventosDiariosDoPainel, MonetizacaoAdministrativa, PortaDeAdministracao, ResumoAdministrativo } from '../../portas/administracao';
 import './TelaAdministracao.css';
 
-interface Props { readonly porta?: PortaDeAdministracao; }
+interface Props { readonly porta?: PortaDeAdministracao; readonly analytics?: PortaDeAnalyticsAdministrativo; }
 
 const PERIODOS = [7, 30, 90] as const;
 const NOMES_DAS_PAGINAS: Readonly<Record<string, string>> = {
@@ -68,8 +70,21 @@ function AcessosPorPagina({ resumo }: { readonly resumo: ResumoAdministrativo })
   return <ol className="admin-ranking">{resumo.acessosPorPagina.map((item) => <li key={item.pagina}><span>{NOMES_DAS_PAGINAS[item.pagina] ?? item.pagina}</span><div aria-hidden="true"><i style={{ width: `${Math.max(4, (item.acessos / maior) * 100)}%` }} /></div><strong>{numero(item.acessos)}</strong></li>)}</ol>;
 }
 
-export function TelaAdministracao({ porta }: Props) {
+type EstadoDoAnalytics = { readonly tipo: 'carregando' | 'pendente' | 'indisponivel' } | { readonly tipo: 'pronto'; readonly resumo: ResumoDoAnalytics };
+
+function BlocoDoAnalytics({ estado }: { readonly estado: EstadoDoAnalytics }) {
+  return <section className="admin__grade admin__grade--unico" aria-label="Origem, dispositivo e retenção"><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Origem e retorno</p><h2>GA4</h2></div><span>agregado do Google Analytics</span></div>
+    {estado.tipo === 'carregando' && <p className="admin__empty">Consultando o GA4…</p>}
+    {estado.tipo === 'pendente' && <p className="admin__empty">Conexão com o GA4 pendente. Origem do tráfego, dispositivo e retorno em 1 e 7 dias aparecem aqui quando ela for feita. Nenhum número é estimado enquanto isso.</p>}
+    {estado.tipo === 'indisponivel' && <p className="admin__empty">GA4 indisponível agora.</p>}
+    {estado.tipo === 'pronto' && <div className="admin__grade admin__grade--final"><dl className="admin-base admin-base--monetizacao">{estado.resumo.origens.map((f) => <div key={`o-${f.nome}`}><dt>Origem: {f.nome}</dt><dd>{numero(f.sessoes)}</dd></div>)}</dl><dl className="admin-base admin-base--monetizacao">{estado.resumo.dispositivos.map((f) => <div key={`d-${f.nome}`}><dt>Dispositivo: {f.nome}</dt><dd>{numero(f.sessoes)}</dd></div>)}<div><dt>Volta em 1 dia</dt><dd>{estado.resumo.retornoEmUmDia === null ? '—' : `${Math.round(estado.resumo.retornoEmUmDia * 100)}%`}</dd></div><div><dt>Volta em 7 dias</dt><dd>{estado.resumo.retornoEmSeteDias === null ? '—' : `${Math.round(estado.resumo.retornoEmSeteDias * 100)}%`}</dd></div></dl></div>}
+  </article></section>;
+}
+
+export function TelaAdministracao({ porta, analytics }: Props) {
   const [portaDeAdministracao] = useState(() => porta ?? criarAdministracaoWeb());
+  const [portaDoAnalytics] = useState(() => analytics ?? criarAnalyticsAdministrativoWeb());
+  const [estadoDoAnalytics, setEstadoDoAnalytics] = useState<EstadoDoAnalytics>({ tipo: 'carregando' });
   const [resumo, setResumo] = useState<ResumoAdministrativo | null>(null);
   const [monetizacao, setMonetizacao] = useState<MonetizacaoAdministrativa | null>(null);
   const [estadoDaMonetizacao, setEstadoDaMonetizacao] = useState<'carregando' | 'pronto' | 'indisponivel'>('carregando');
@@ -83,7 +98,11 @@ export function TelaAdministracao({ porta }: Props) {
       const faixa = intervalo(dias);
       const proximoResumo = await portaDeAdministracao.obterResumo(faixa.inicio, faixa.fim);
       if (consulta !== consultaAtual.current) return;
-      setResumo(proximoResumo); setEstado('pronto'); setEstadoDaMonetizacao('carregando');
+      setResumo(proximoResumo); setEstado('pronto'); setEstadoDaMonetizacao('carregando'); setEstadoDoAnalytics({ tipo: 'carregando' });
+      portaDoAnalytics.obterResumo(faixa.inicio, faixa.fim).then(
+        (analiticoPronto) => { if (consulta === consultaAtual.current) setEstadoDoAnalytics({ tipo: 'pronto', resumo: analiticoPronto }); },
+        (erro: unknown) => { if (consulta === consultaAtual.current) setEstadoDoAnalytics({ tipo: erro instanceof ConexaoComOAnalyticsPendente ? 'pendente' : 'indisponivel' }); },
+      );
       try {
         const proximaMonetizacao = await portaDeAdministracao.obterMonetizacao();
         if (consulta !== consultaAtual.current) return;
@@ -96,7 +115,7 @@ export function TelaAdministracao({ porta }: Props) {
       if (consulta !== consultaAtual.current) return;
       setResumo(null); setEstado('indisponivel');
     }
-  }, [portaDeAdministracao]);
+  }, [portaDeAdministracao, portaDoAnalytics]);
   useEffect(() => { void carregar(30); }, [carregar]);
   const selecionarPeriodo = (dias: (typeof PERIODOS)[number]) => { setPeriodo(dias); void carregar(dias); };
 
@@ -113,6 +132,7 @@ export function TelaAdministracao({ porta }: Props) {
     <section className="admin__grade admin__grade--movimento" aria-label="Atividade e páginas"><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Movimento</p><h2>Atividade no período</h2></div><span>alcance + conversa</span></div><GraficoDeAtividade dias={resumo.eventosPorDia} /></article><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Alcance</p><h2>Páginas acessadas</h2></div><span>por sessão</span></div><AcessosPorPagina resumo={resumo} /></article></section>
     <section className="admin__grade" aria-label="Arena e base"><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Arena</p><h2>Funil de arroto</h2></div><span>eventos recebidos</span></div><div className="admin-funil" role="img" aria-label={`Funil da Arena: ${abriuArena} aberturas, ${recebeuNota} notas e ${x1} movimentos em X1`}><div><span>Abriu a Arena</span><strong>{numero(abriuArena)}</strong><i className="admin-funil__barra" style={{ width: larguraDoFunil(abriuArena) }} /><em>base</em></div><div><span>Recebeu nota</span><strong>{numero(recebeuNota)}</strong><i className="admin-funil__barra" style={{ width: larguraDoFunil(recebeuNota) }} /><em>{percentual(recebeuNota, abriuArena)} da abertura</em></div><div><span>Movimento em X1</span><strong>{numero(x1)}</strong><i className="admin-funil__barra" style={{ width: larguraDoFunil(x1) }} /><em>{percentual(x1, recebeuNota)} das notas</em></div></div><p className="admin__note">Telemetria anônima e best-effort. Não mede pessoas únicas nem retenção.</p></article><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Base</p><h2>Contas e perfis</h2></div><span>agora</span></div><dl className="admin-base admin-base--cinco"><div><dt>Contas de e-mail</dt><dd>{numero(resumo.totalContasDeEmailAtual)}</dd></div><div><dt>Ativas no período</dt><dd>{numero(resumo.contasAtivasNoPeriodo)}</dd></div><div><dt>Anônimas agora</dt><dd>{numero(resumo.contasAnonimasAtuais)}</dd></div><div><dt>Concluídos no período</dt><dd>{numero(resumo.perfisConcluidosNoPeriodo)}</dd></div><div><dt>Ficha pendente</dt><dd>{numero(resumo.perfisPendentesAtuais)}</dd></div></dl><p className="admin__note">Ativa = entrou ou participou no período. Anônima = identidade atual sem cadastro.</p></article></section>
     <section className="admin__grade admin__grade--final" aria-label="Monetização e entradas recentes"><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Monetização</p><h2>Anúncios</h2></div><span>últimos 30 dias</span></div>{estadoDaMonetizacao === 'carregando' && <p className="admin__empty">Carregando métricas de monetização…</p>}{estadoDaMonetizacao === 'indisponivel' && <p className="admin__empty">Métricas de monetização indisponíveis agora.</p>}{estadoDaMonetizacao === 'pronto' && monetizacao && <dl className="admin-base admin-base--monetizacao"><div><dt>Receita estimada</dt><dd>$ {monetizacao.receitaTotal.toFixed(2)}</dd></div><div><dt>Impressões</dt><dd>{numero(monetizacao.totalImpressoes)}</dd></div><div><dt>Cliques</dt><dd>{numero(monetizacao.totalCliques)}</dd></div></dl>}</article><article className="admin__bloco"><div className="admin__section-head"><div><p className="admin__eyebrow">Entradas recentes</p><h2>Gente chegando</h2></div><span>sem e-mail ou ID</span></div>{resumo.pessoas.length === 0 ? <p className="admin__empty">Ainda não há cadastros para mostrar.</p> : <ul className="admin__pessoas">{resumo.pessoas.slice(0, 5).map((pessoa, indice) => <li key={`${pessoa.handle ?? pessoa.apelido ?? 'conta'}-${pessoa.criadoEm}-${indice}`}><div><strong>{pessoa.apelido ?? 'Sem apelido'}</strong>{pessoa.handle && <span>@{pessoa.handle}</span>}</div><time dateTime={pessoa.criadoEm}>{dataCurta(pessoa.criadoEm)}</time><em>{pessoa.estado === 'perfil_pronto' ? 'Perfil pronto' : 'Ficha pendente'}</em></li>)}</ul>}</article></section>
+    <BlocoDoAnalytics estado={estadoDoAnalytics} />
     {FLAGS.dueloV2 && <ModeracaoDueloV2 />}
   </main>;
 }

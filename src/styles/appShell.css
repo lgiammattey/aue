@@ -289,17 +289,18 @@
     display: inline-flex;
     gap: 4px;
     inline-size: auto;
-    padding: 3px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--bg-elevated);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
     box-shadow: none;
   }
 
   .mural-controles .feed-filter {
-    min-block-size: 38px;
+    min-block-size: 44px;
     padding: 6px 14px;
-    border-radius: var(--radius-xs);
+    border: 0;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -307,10 +308,10 @@
   }
 
   .mural-controles .feed-filter[aria-pressed='true'] {
-    background: var(--surface-2);
+    background: transparent;
     color: var(--fg);
-    border: 1px solid var(--border-strong);
-    box-shadow: none;
+    border: 0;
+    box-shadow: inset 0 -2px var(--fg);
   }
 
   .mural-publicar {
@@ -348,11 +349,13 @@
   }
 
   /* Painel direito técnico */
+  /* Widget lateral chapado (Missão 0057, DESIGN §4.1): título + conteúdo + filete, sem caixa. */
   .rightbar-bloco {
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
+    padding: 16px 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
   }
 
   .rightbar-bloco__head {

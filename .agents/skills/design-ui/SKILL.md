@@ -12,6 +12,7 @@ Procedimento do **Rian** para transformar os fluxos do Bonde do Arroto e da Aren
 ## 1. Princípios Visuais Inegociáveis
 
 1. **Fundo Chapado:** `--bg` puro (`#0a0a08` no dark, `#f5f3ea` no light). Sem cards flutuantes genéricos com bordas gradientes ou blur exagerado. A interface respira na solidez dos tons.
+1b. **Card é exceção:** só item repetível (post, X1, comunidade em grade) e moldura funcional (modal, sheet). Seção, ranking, filtro, métrica e formulário ficam chapados, separados por espaço e filete de 1px. Proibido card dentro de card. Regra em `DESIGN.md` §4.1.
 2. **Orçamento do Verde Ácido (`--accent: #c6ff00`):** No máximo **2 aparições simultâneas por estado**. Prioridade: (1) Bolha em gravação/pico; (2) Auê Score em revelação/resultado; (3) CTA primário ativo. Proibido pintar badges secundárias ou textos corridos de verde.
 3. **Temas Escuro e Claro:** Suporte nativo oficial com persistência via `localStorage ('bda-theme')`.
    - Dark: `--bg: #0a0a08`, `--surface: #171712`, `--surface-2: #1f1f18`, `--fg: #f5f3ea`, `--muted: #93917f`, `--border: #2b2a22`, `--border-strong: #74725f`, `--ind: #c6ff00`.

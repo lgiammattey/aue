@@ -1,5 +1,5 @@
 import './conteudoDaHome.css';
-import { AdsterraNativeBanner } from '../../features/novo-aue/AdsterraNativeBanner';
+import { AdsterraNativeBanner } from '../../shared/components/AdsterraNativeBanner';
 import { GruposNaHome } from './GruposNaHome';
 
 const TIPOS_DE_ARROTO = [
@@ -151,6 +151,7 @@ export function ConteudoDaHome() {
                 Abrir Mural <span aria-hidden="true">↗</span>
               </a>
               <a href="/grupos">Ver todos os grupos</a>
+              <a href="/en" hrefLang="en" lang="en">English</a>
             </div>
           </div>
         </section>

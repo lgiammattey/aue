@@ -148,6 +148,23 @@ Base no grid de 8px:
   - `--radius-shell`: `32px` — Moldura no desktop quando aplicável.
   - `--radius-full`: `999px` — Pílulas de link, botões circulares, avatares e barras de métrica.
 
+### 4.1 Card é exceção
+
+Fundo chapado vale para a página inteira, não só para o `body`. A tela é uma superfície contínua; a hierarquia vem de espaço, tamanho, peso e, no máximo, uma linha de 1px (`--border`) entre blocos.
+
+**Pode ser card** (borda + `--surface` + raio):
+- item discreto e repetível de uma lista: post/resenha, resultado de X1, comunidade numa grade;
+- moldura funcional: modal, sheet, popover, toast;
+- o card de compartilhamento 9:12, que é uma imagem de exportação.
+
+**Não pode ser card:**
+- seção de página, bloco explicativo, lista de links, ranking, filtros, métricas, formulário, cabeçalho de perfil;
+- widget lateral no desktop (usa título + linhas separadas por filete);
+- qualquer coisa dentro de um card (nada de card dentro de card);
+- "para dar respiro" ou "para destacar". Destaque é tipografia e posição, não caixa.
+
+**Teste rápido antes de criar uma caixa:** se eu tirar a borda e o fundo, a informação continua legível e agrupada? Se sim, tira. Mudar seção existente de card para chapado só com pedido do Luiz; não é gatilho para redesenhar tela que ele já aprovou.
+
 ---
 
 ## 5. Componentes Oficiais
@@ -208,3 +225,12 @@ O Auê roda exclusivamente no navegador com excelência em 3 cenários:
    - **Barra de navegação inferior fixa (56px):** 4 a 5 ícones com alvos de toque >= 44px (`--hit-target-min`).
    - Botão flutuante de ação (FAB) circular verde `--accent` para novo post/arroto.
    - Respeito a safe areas: `--safe-top`, `--safe-bottom`.
+
+### 6.1 Trava lateral no webapp mobile
+
+No celular a página é uma coluna do tamanho da tela: rola só na vertical, nunca de lado.
+
+- `html` e `body` têm `overflow-x: clip` (não `hidden`, para não quebrar `position: sticky` do topo e da barra inferior). É rede de segurança, não desculpa.
+- Lista horizontal de verdade (Liga/ranking, abas, chips) usa `overflow-x: auto` **no próprio container**, com `overscroll-behavior-x: contain`.
+- Em flex ou grid, o item com conteúdo `nowrap` precisa de `min-width: 0` (e `max-width: 100%`) em **toda** a cadeia de ancestrais até a coluna. Sem isso o `min-width: auto` do flex empurra o documento para além da tela e a página "corre" como imagem. Foi o bug da Liga na home.
+- Aceite: na rota real, em 390px, `document.documentElement.scrollWidth` igual a `window.innerWidth`, com a lista cheia.

@@ -65,17 +65,27 @@ describe('/como-arrotar com a moldura pública', () => {
     expect(html).toMatch(/<h1>[\s\S]*Como arrotar/);
   });
 
-  it('apresenta técnicas práticas e modalidades sem incentivar forçar o corpo', () => {
+  it('apresenta técnicas passo a passo, lendas e aviso de saúde sem incentivar forçar o corpo', () => {
     const html = montar(ComoArrotar);
-    expect(html).toContain('Como arrotar de propósito (no comando)');
+    expect(html).toContain('Como arrotar de propósito: engolir ar no seco');
     expect(html).toContain('Bebida com gás: o combustível certo');
+    expect(html).toContain('Chiclete e bala: o ar que entra sem você ver');
     expect(html).toContain('Arroto alto: postura e garganta solta');
     expect(html).toContain('Arroto longo: segurar e dosar o ar');
     expect(html).toContain('Arroto explosivo: curto e grosso');
     expect(html).toContain('Arroto grave: o trovão de dentro');
-    expect(html).toContain('Truque clássico: como arrotar o alfabeto');
-    expect(html).toContain('A ideia é dar risada, não passar mal');
-    expect(html).toContain('sem forçar a voz pra não machucar');
+    expect(html).toContain('Como arrotar o alfabeto');
+    expect(html).toContain('Arrotar é pra dar risada, não pra se machucar');
+    expect(html).toContain('Os truques de clickbait: o que é verdade e o que é lenda');
+    expect(html).toContain('Quando parar e falar com um médico');
+    expect(html).toContain('não orientação médica');
+    expect(html).toContain('sem forçar a voz');
+  });
+
+  it('não usa card nem caixa em volta das técnicas', () => {
+    const html = montar(ComoArrotar);
+    expect(html).not.toContain('como-arrotar-card');
+    expect(html).not.toContain('como-arrotar-passo');
   });
 
   it('usa a navegação da Arena', () => {

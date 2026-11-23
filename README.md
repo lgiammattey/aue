@@ -10,9 +10,7 @@ DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA →
     └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
 ```
 
-O Auê junta a Arena, onde o arroto ganha nota, à comunidade de resenhas e
-áudios organizados por comunidade. A home publicada hoje é um feed social;
-o retrato datado dela está em [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md).
+O Auê reúne Arena, mural, perfis e desafios. O build de produção configura a Arena v2 como entrada principal; a situação verificada e seus limites estão em [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md).
 
 Feito por quem já fazia essa zoeira antes de existir qualquer linha de código.
 
@@ -24,7 +22,7 @@ A plataforma roda 100% na web moderna, adaptada tanto para telas grandes no **de
 
 1. **Tropa (Pessoas):** Acompanha as resenhas em texto, áudio e mídia das pessoas seguidas. Cada publicação continua ligada a uma comunidade, com comentários, reações, salvar e compartilhar.
 2. **Arena:** Máquina de estados contínua (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`) onde o áudio é gravado, validado pelo YAMNet e pontuado de 0 a 100 (Auê Score).
-3. **Comunidades Temáticas:** Hubs organizados por assunto, onde as resenhas e conversas acontecem.
+3. **Mural:** As antigas rotas de comunidades e tópicos redirecionam para a entrada principal no roteador. Consulte o retrato de produção antes de tratar hubs como ativos.
 4. **Desafios X1:** Duelos diretos entre amigos via link no zap com comparativo visual e revanche imediata.
 5. **Diretório de Grupos:** Diretório aberto de grupos externos no WhatsApp, Telegram e TikTok.
 6. **Perfis de Jogador:** Identidade de arrotador com apelido, handle `@` e histórico social.
@@ -60,7 +58,7 @@ O Auê vive **100% na web** (`https://aue.web.app`), hospedado no Firebase Hosti
 
 ## Como a Identidade Funciona
 
-- **Entrada instantânea:** Quem chega sem conta recebe uma sessão anônima do Supabase (`signInAnonymously`). Pode jogar na Arena, ouvir áudios e interagir imediatamente.
+- **Entrada instantânea:** Quem chega sem conta recebe uma sessão anônima do Supabase (`signInAnonymously`). A disponibilidade de cada ação depende do fluxo e das permissões; consulte o retrato de produção.
 - **Conta permanente e perfil:** A qualquer momento a pessoa pode vincular e-mail/senha ou Google, escolhendo seu apelido e handle `@` público.
 - Gravação para duelo ou teste não vira resenha pública sem autorização explícita na hora da postagem.
 

@@ -27,10 +27,19 @@ O Luiz quer outra coisa: o Mural serve para ver os arrotos que a galera mandou, 
   - Arroto da Arena herda a nota oficial pelo `result_id`, como no ADR 0004.
   - Arroto gravado direto no mural não nasce com nota. A nota chega depois, pelo trabalho assíncrono do ADR 0012. Enquanto não chega, ou se a avaliação der erro ou sinal inconclusivo, o card mostra o player sem nota. Nunca nota inventada, nunca nota vinda do navegador.
 - **Consentimento.** Segue o ADR 0004 §2: gravar não é autorizar publicar. O envio ao Mural continua sendo uma ação separada, com confirmação explícita.
-- **Comentário e reação.** Continuam como estão (ADR 0005 para níveis de comentário). O card passa a mostrar a contagem por reação e a prévia do último comentário. Isso muda o contrato da porta `feed`, e é o motivo do Gate.
+- **Comentário e reação.** Continuam como estão (ADR 0005 para níveis de comentário). O card passa a mostrar a contagem por reação e a prévia do último comentário. O Mural de hoje roda em tópicos (ADR 0010): `explorar_topicos` e `listar_publicacoes_pessoais`, juntados no cliente em `paginacaoDoMural.ts`. Esse caminho não devolve áudio, nota, reações nem último comentário. O Gate do Lucas propõe uma RPC nova, `listar_mural`, só aditiva, com rollback desligando o flag. A porta `feed` do ADR 0004 não alimenta o Mural.
+- **Nota só do servidor.** O card otimista hoje mostra nota calculada no navegador. Isso sai: `listar_mural` devolve nota nula quando não há nota de servidor nem de Arena.
 - **Composer.** Publicar no Mural exige áudio. O caminho de gravação é a Arena com destino "mural" ou o gravador do próprio modal. Texto sozinho não publica no Mural.
-- **Botão de ação do card.** "Bater X" quando há nota, "Revanche" em resultado de X1, "Levar pra Arena" quando não há nota. Todos levam à Arena.
+- **Botão de ação do card.** "Bater X" quando há nota, "Levar pra Arena" quando não há nota. Os dois levam à Arena. Resultado de X1 não vira post do Mural, porque o áudio de duelo é privado (ADR 0011).
 - **Dados existentes.** Nada é apagado. A consulta do Mural passa a exigir áudio. Onde o texto antigo continua visível (perfil, comunidade) é decidido no Plano Arquitetural do Gate.
+
+## Perguntas abertas ao Luiz, levantadas pelo Gate
+
+1. **Modelo.** O dado real do Mural é tópico, não causo. O texto deste ADR segue essa realidade, e o ADR 0004 continua descrevendo "causo" por histórico.
+2. **Post pessoal só de texto.** Hoje existe e some do Mural com esta decisão. Confirmar que é isso mesmo.
+3. **Um anexo por post.** É o que o banco impõe hoje. Confirmar.
+4. **Reação.** O banco guarda mais de uma por pessoa, mas a função impõe 1 polegar mais 1 emoji. O protótipo assume várias livres. Qual regra vale?
+5. **Origem X1.** Não tem como existir como post, pelo áudio de duelo ser privado. O protótipo tem um post de X1 que precisa sair, ou vira outra coisa.
 
 ## O que este ADR não decide
 

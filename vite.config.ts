@@ -38,6 +38,7 @@ export default defineConfig({
         duelo: entrada('paginas/duelo.html'),
         privacidade: entrada('paginas/privacidade.html'),
         termos: entrada('paginas/termos.html'),
+        en: entrada('paginas/en.html'),
         comoJogar: entrada('paginas/como-jogar.html'),
         comoArrotar: entrada('paginas/como-arrotar.html'),
         tiposDeArroto: entrada('paginas/tipos-de-arroto.html'),

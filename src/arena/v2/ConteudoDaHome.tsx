@@ -151,6 +151,7 @@ export function ConteudoDaHome() {
                 Abrir Mural <span aria-hidden="true">↗</span>
               </a>
               <a href="/grupos">Ver todos os grupos</a>
+              <a href="/en" hrefLang="en" lang="en">English</a>
             </div>
           </div>
         </section>

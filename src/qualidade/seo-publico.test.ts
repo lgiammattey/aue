@@ -44,6 +44,7 @@ function ler(caminhoRelativo: string): string {
  */
 const ENTRADAS: ReadonlyArray<{ caminho: string; arquivo: string; temOpenGraph: boolean }> = [
   { caminho: '/', arquivo: '../index.html', temOpenGraph: true },
+  { caminho: '/en', arquivo: '../paginas/en.html', temOpenGraph: true },
   { caminho: '/como-jogar', arquivo: '../paginas/como-jogar.html', temOpenGraph: true },
   { caminho: '/como-arrotar', arquivo: '../paginas/como-arrotar.html', temOpenGraph: true },
   { caminho: '/tipos-de-arroto', arquivo: '../paginas/tipos-de-arroto.html', temOpenGraph: true },
@@ -183,6 +184,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     // canonical mentindo de novo.
     for (const arquivo of [
       '../index.html',
+      '../paginas/en.html',
       '../paginas/como-jogar.html',
       '../paginas/como-arrotar.html',
       '../paginas/tipos-de-arroto.html',
@@ -553,4 +555,83 @@ describe('SEO público — Arena e mural de arrotos', () => {
     expect(html).toContain('"url": "https://aue.web.app/grupos"');
   });
 
+});
+
+describe('SEO público — home em inglês (/en)', () => {
+  const ORIGEM_PT = URL_CANONICA_DA_HOME;
+  const ORIGEM_EN = `${ORIGEM_CANONICA}/en`;
+
+  /** Os `<link rel="alternate" hreflang>` da página, como pares idioma → URL. */
+  function hreflangsDe(html: string): Record<string, string> {
+    const pares = [...html.matchAll(/<link\s+rel="alternate"\s+hreflang="([^"]+)"\s+href="([^"]+)"\s*\/?>/g)];
+    return Object.fromEntries(pares.map((m) => [m[1], m[2]]));
+  }
+
+  const PAR_ESPERADO = { 'pt-BR': ORIGEM_PT, en: ORIGEM_EN, 'x-default': ORIGEM_PT };
+
+  it('a página em inglês é inglês: lang, locale, descrição e JSON-LD', () => {
+    const html = ler('../paginas/en.html');
+    expect(html).toMatch(/<html lang="en">/);
+    expect(metaDe(html, 'og:locale')).toBe('en_US');
+    expect(html).toContain('"inLanguage": "en"');
+    expect(html).toContain('"priceCurrency": "USD"');
+    const descricao = /<meta\s+name="description"\s+content="([^"]+)"/.exec(html)?.[1] ?? '';
+    expect(descricao.length, 'description fora do tamanho que o Google exibe').toBeLessThanOrEqual(160);
+    expect(descricao.length).toBeGreaterThan(70);
+    const titulo = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? '';
+    expect(titulo.length, 'title longo demais, o Google corta').toBeLessThanOrEqual(60);
+  });
+
+  it('hreflang é recíproco: a home PT e a home EN declaram o mesmo trio', () => {
+    // Se um dos lados perde o par, o Google ignora os dois.
+    expect(hreflangsDe(ler('../index.html'))).toEqual(PAR_ESPERADO);
+    expect(hreflangsDe(ler('../paginas/en.html'))).toEqual(PAR_ESPERADO);
+  });
+
+  it('o sitemap lista /en com os mesmos alternates nos dois sentidos', () => {
+    const sitemap = ler('../public/sitemap.xml');
+    const bloco = (loc: string) => new RegExp(`<url><loc>${loc}</loc>.*?</url>`).exec(sitemap)?.[0] ?? '';
+    for (const loc of [ORIGEM_PT, ORIGEM_EN]) {
+      const url = bloco(loc);
+      expect(url, `${loc} sumiu do sitemap`).not.toBe('');
+      for (const [idioma, href] of Object.entries(PAR_ESPERADO)) {
+        expect(url, `${loc} sem alternate ${idioma}`).toContain(`hreflang="${idioma}" href="${href}"`);
+      }
+    }
+    // Nenhuma outra URL finge ter versão em inglês.
+    expect((sitemap.match(/hreflang="en"/g) ?? []).length).toBe(2);
+  });
+
+  it('o Firebase serve /en e /en/ com en.html, antes do catch-all', () => {
+    const { rewrites } = (JSON.parse(ler('../firebase.json')) as {
+      hosting: { rewrites: Array<{ source: string; destination: string }> };
+    }).hosting;
+    const fim = rewrites.findIndex((r) => r.source === '**');
+    for (const source of ['/en', '/en/']) {
+      const indice = rewrites.findIndex((r) => r.source === source);
+      expect(indice, `${source} sem rewrite`).toBeGreaterThan(-1);
+      expect(indice).toBeLessThan(fim);
+      expect(rewrites[indice].destination).toBe('/en.html');
+    }
+  });
+
+  it('a copy em inglês não vaza português, travessão nem "causo"', () => {
+    const html = ler('../paginas/en.html');
+    const corpo = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
+    expect(corpo.length).toBeGreaterThan(500);
+    expect(corpo).not.toMatch(/[—–]/);
+    expect(corpo).not.toMatch(/\bcauso\b/i);
+    // Palavras que só existem em português. Os nomes do site (Auê, Arena) e os
+    // links para as páginas legais em PT ficam de fora de propósito.
+    const semLinks = corpo.replace(/<a [^>]*>[^<]*<\/a>/g, '');
+    expect(semLinks).not.toMatch(/\b(arroto|arrotar|você|não|para|com)\b/i);
+  });
+
+  it('sem JavaScript o rastreador acha um H1 e os links para a Arena e para a versão PT', () => {
+    const html = ler('../paginas/en.html');
+    const corpo = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
+    expect((corpo.match(/<h1>/g) ?? []).length).toBe(1);
+    expect(corpo).toContain('<a href="/">Record my burp</a>');
+    expect(corpo).toContain('hreflang="pt-BR"');
+  });
 });

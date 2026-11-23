@@ -118,14 +118,13 @@ baralho da fala da nota — o mecanismo é o mesmo.
 [#138](https://github.com/gmmattey/aue/issues/138) entregou a landing e a página
 `/como-arrotar`. O que ficou:
 
-- **Versão em inglês** (`/en/`, `hreflang`, `x-default`). Existe pronta na
-  [PR #139](https://github.com/gmmattey/aue/pull/139), fechada sem merge, mas a
-  #138 não pede em lugar nenhum — a branch abriu por conta. A branch
-  `agent/desktop-landing` foi apagada em 13/08; o código continua lá dentro, e
-  se abrir a PR ele aparece igual. Dobra a superfície
-  de SEO pra manter e ninguém pediu público de fora do Brasil ainda. Se voltar,
-  volta como trabalho novo em cima da `main` de hoje: rebase daquela branch
-  reverteria o canônico da #137.
+- **Versão em inglês.** Saiu do adiamento em 23/11/2026 por pedido do Luiz
+  ([Missão 0056](../../.agents/missoes/0056-home-em-ingles.md)). A Fase 1 é a
+  home `/en`, com copy adaptada ao público de língua inglesa, `hreflang` e
+  sitemap. Ficam para a Fase 2, cada uma com decisão do Luiz: a Arena e o mural
+  em inglês (inclui as falas de nota), termos e privacidade em inglês (texto
+  jurídico), e páginas por intenção de busca (`/en/how-to-burp`,
+  `/en/types-of-burps`). A PR #139 antiga continua sem autoridade.
 - **`/arrotos-da-internet`.** A página depende de escolher vídeos reais de
   terceiros, e não existe lista curada nenhuma. Publicar com link inventado é
   interface fingindo que funciona. **A regra de uso já fica decidida aqui, e

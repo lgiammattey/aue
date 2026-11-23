@@ -1,0 +1,41 @@
+/*
+  Só o que a home em inglês precisa além de `ComoArrotar.css` e
+  `conteudoDaHome.css`: títulos de seção e de passo em h2/h3 (as páginas em PT
+  usam h2 em tudo) e a linha de aviso sob o botão. Mesmos tokens, mesma moldura.
+*/
+.home-en__titulo {
+  margin: 0 0 12px;
+  font: 400 clamp(28px, 3vw, 38px)/1.1 var(--font-display, 'Anton', sans-serif);
+  text-transform: uppercase;
+  color: var(--fg, #f3f4f6);
+}
+
+.home-en__intro {
+  margin: 0 0 18px;
+  max-width: 640px;
+  color: var(--fg-secondary, #c8cdd8);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.como-arrotar-passo__texto h3,
+.como-arrotar-card h3 {
+  margin: 0 0 10px;
+  font: 400 clamp(22px, 2.6vw, 28px)/1.1 var(--font-display, 'Anton', sans-serif);
+  text-transform: uppercase;
+  color: var(--fg, #f3f4f6);
+}
+
+.como-arrotar-hero__texto .home-en__aviso {
+  margin: 14px 0 0;
+  color: var(--muted, #8b92a3);
+  font-size: 13px;
+}
+
+.home-en .guia-arena__marca,
+.home-en .guia-arena__topo nav a,
+.home-en .guia-arena__rodape a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}

@@ -17,7 +17,8 @@
 - **Especificação e Auditoria Visual:** Rian, a partir de [`docs/design/propostas/mural-chapado.html`](../../design/propostas/mural-chapado.html)
 - **Gate Arquitetural (Camillo / Lucas):** pendente (contrato do feed e waveform)
 - **Auditoria e Prova Real:** Marcelo
-- **Decisão pendente do Luiz:** aprovar a abertura do ADR que tira o post só de texto do mural (muda o ADR 0004).
+- **ADR:** [0013, Mural: todo post tem arroto](../../technical/adr/0013-mural-todo-post-tem-arroto.md), aberto como proposto em 23/11/2026. Implementação só depois de aceito e com o Gate aprovado.
+- **Decisão pendente do Luiz:** aceitar o ADR 0013 depois do Gate do Camillo e do Lucas.
 
 ### Decisões já tomadas pelo Luiz em 23/11/2026
 
@@ -35,7 +36,7 @@ O `DESIGN.md` (§2) e o mapa de telas (§4) ainda descrevem verde `#c6ff00` sobr
 
 - **Plataformas afetadas:** Web Mobile (Safari iOS / Chrome Android) e Desktop
 - **Estados obrigatórios da Arena:** não aplicável, a Arena não muda
-- **Maior risco de quebra ou mentira visual:** nota exibida em post sem arroto julgado. Post gravado direto no mural não tem nota e não pode ganhar uma. Segundo risco: vários áudios carregando ao mesmo tempo no feed.
+- **Maior risco de quebra ou mentira visual:** nota exibida em post sem arroto julgado. Post gravado direto no mural não nasce com nota. A nota só aparece quando a avaliação assíncrona do ADR 0012 devolver, e nunca é provisória. Segundo risco: vários áudios carregando ao mesmo tempo no feed.
 - **Limite da promessa (o que o motor de áudio/API não mede):** a waveform é desenho da forma do som, não medida de qualidade. A nota só existe para arroto que passou pela Arena. Publicar no mural continua exigindo consentimento explícito.
 
 ### Regras de desenho da proposta
@@ -63,4 +64,4 @@ O `DESIGN.md` (§2) e o mapa de telas (§4) ainda descrevem verde `#c6ff00` sobr
 - **Arquivos/módulos alterados:** nenhum código nesta rodada. Entram só o protótipo e este cartão.
 - **Parecer do Marcelo:** pendente
 - **Veredito Final do Tiago:** pendente
-- **Pendências ou decisão necessária do Luiz:** aprovar a abertura do ADR que tira o post só de texto.
+- **Pendências ou decisão necessária do Luiz:** aceitar o ADR 0013 depois do Gate.

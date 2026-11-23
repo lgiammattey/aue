@@ -1,12 +1,12 @@
 # Produção atual — Auê
 
-**Referência:** commit `dc83657589294fb45e28f7b5753712044e709b08` na main.
-**Conferência:** 23/11/2026, por código, GitHub Actions, histórico de migrações e observação da página inicial em navegador desktop.
+**Referência:** commit `d541e3162e6f1e6a488f92f16d1cf17791b57cbf` na main.
+**Conferência:** 23/11/2026, por código, GitHub Actions, histórico de migrações e observação em navegador desktop da página inicial e de cinco rotas públicas.
 **Endereço configurado:** https://aue.web.app/
 
-A execução [Publicar no Firebase](https://github.com/lgiammattey/aue/actions/runs/45114720736) para esse commit terminou com sucesso no canal live. A execução independente [Validação](https://github.com/lgiammattey/aue/actions/runs/45114720565) do mesmo commit falhou. A publicação bem-sucedida não prova aprovação da validação, operação do banco ou funcionamento de cada jornada.
+A execução [Publicar no Firebase](https://github.com/lgiammattey/aue/actions/runs/45280078724) para esse commit terminou com sucesso no canal live, e a execução independente [Validação](https://github.com/lgiammattey/aue/actions/runs/45280078824) do mesmo commit também passou. Uma não substitui a outra: a publicação bem-sucedida não prova operação do banco nem funcionamento de cada jornada.
 
-A página inicial foi aberta em navegador desktop e mostrou aviso 18+, Arena com gravação, seção Liga em carregamento, links de mural, ranking e grupos. A verificação não acionou microfone, confirmação de idade, login ou gravação e não prova jornadas de ponta a ponta. As rotas abaixo descrevem o código; configuração efetiva, permissões e recursos no backend exigem testes próprios.
+A página inicial foi aberta em navegador desktop e mostrou aviso 18+, Arena com botão de gravar, seção Liga com cinco posições carregadas, links de mural, ranking, grupos e desafios, e as seções de guia de como arrotar e tipos de arroto na própria página. `/`, `/en`, `/como-arrotar`, `/tipos-de-arroto` e `/sitemap.xml` responderam 200, e `/en` abriu com título em inglês. A verificação não acionou microfone, confirmação de idade, login ou gravação e não prova jornadas de ponta a ponta. As rotas abaixo descrevem o código; configuração efetiva, permissões e recursos no backend exigem testes próprios.
 
 ## Corte do build publicado
 
@@ -24,6 +24,7 @@ O workflow `.github/workflows/publicar-firebase.yml` liga `VITE_FEATURE_ARENA_EX
 | `/perfil`, `/u/:handle`, `/login` | Perfil e autenticação. |
 | `/grupos` | Diretório de grupos externos. |
 | `/como-jogar`, `/como-arrotar`, `/tipos-de-arroto`, `/ranking-de-arrotos` | Páginas públicas. |
+| `/en` | Home em inglês, indexável, com `hreflang` recíproco com `/`. A Arena que ela linka continua em português. |
 | `/admin` | Entrada administrativa; acesso efetivo depende das autorizações do backend. |
 
 As rotas de comunidades e tópicos no roteador React redirecionam para `/`. O Firebase configura redirecionamentos próprios para `/comunidade`, `/videos` e `/videos-de-arroto`; a resposta final depende também da precedência de Hosting e deve ser verificada ao vivo. Não apresentar hubs de comunidades como navegação ativa sem prova.
@@ -38,7 +39,7 @@ O projeto Supabase `Auê` estava ativo e saudável. A listagem mostrou ativas as
 - Validar criação, resposta e revelação do duelo, incluindo acesso e retenção no backend. Não assumir que regras legadas valem para v2.
 - Verificar recursos de perfil, mural, ranking, grupos e anúncios no navegador e no Supabase.
 - O histórico do projeto `Auê` e a pasta local têm as mesmas 117 versões de migração. A comparação foi apenas de versões: conteúdo do schema, policies, configuração e execução real não foram verificados.
-- A validação falhou no teste de fronteira arquitetural: `src/arena/v2/ConteudoDaHome.tsx` importa `AdsterraNativeBanner` de `features/novo-aue`. Tipos, lint, processamento de áudio, teste Chromium e build passaram nessa execução. Corrigido depois, em 23/11/2026, pela [#370](https://github.com/lgiammattey/aue/pull/370): o componente foi para `src/shared/components/` e a suíte completa, o typecheck e o build passam na `main` atual.
+- A Validação do commit anterior (`dc83657`) falhou no teste de fronteira arquitetural, porque `src/arena/v2/ConteudoDaHome.tsx` importava `AdsterraNativeBanner` de `features/novo-aue`. A [#370](https://github.com/lgiammattey/aue/pull/370) moveu o componente para `src/shared/components/`, e a Validação passa na referência atual.
 - A conferência anterior de 22/10/2026 está no histórico Git; dados e impressões daquela data não descrevem o momento atual.
 
 Fontes: [roteador](../src/App.tsx), [flags](../src/shared/flags.ts), [workflow de publicação](../.github/workflows/publicar-firebase.yml) e [configuração do Hosting](../firebase.json). Planejamento e propostas não são evidência de entrega.

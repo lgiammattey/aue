@@ -4,11 +4,13 @@
   color: var(--fg, #f3f4f6);
 }
 
+/* Ranking chapado (Missão 0057, DESIGN §4.1): título + linhas + filete, sem caixa. */
 .top-arrotadores {
-  padding: 14px;
-  border: 1px solid var(--border, #232834);
-  border-radius: var(--radius-md, 6px);
-  background: var(--surface, #151820);
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--border, #232834);
+  border-radius: 0;
+  background: transparent;
 }
 
 .top-arrotadores__heading > span {
@@ -192,7 +194,7 @@
 
 /* Faixa compacta mobile/tablet */
 .top-arrotadores--faixa {
-  padding: 12px 14px;
+  padding: 12px 0;
 }
 
 .top-arrotadores__faixa-topo {
@@ -244,8 +246,21 @@
 }
 
 /* LIGA integrada dentro do Hero, na horizontal e sem card */
+/*
+  A lista horizontal rola DENTRO da Liga. `min-width: 0` na cadeia é o que impede
+  o `nowrap` de empurrar o palco (flex coluna, min-width automático) para além da
+  tela e fazer o documento inteiro andar de lado no celular.
+*/
+.top-arrotadores-home--liga-hero {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .liga-hero {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   margin-top: 28px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -321,6 +336,7 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     gap: 18px;
     padding-bottom: 4px;
     scrollbar-width: none;

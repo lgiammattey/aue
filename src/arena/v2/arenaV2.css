@@ -108,6 +108,7 @@
 
 .arena-v2__conteudo {
   width: 100%;
+  min-width: 0;
   max-width: 1200px;
   margin: 0 auto;
   flex: 1;
@@ -136,6 +137,8 @@
 /* Palco (modo foco) e Módulo Compacto (embutido na Home) */
 .arena-v2__palco {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
   min-height: 460px;
   padding: 48px 24px;
   display: flex;
@@ -147,11 +150,10 @@
 
 .arena-v2--embutida .arena-v2__palco {
   min-height: 0;
-  padding: 16px;
-  border: 1px solid var(--v2-line-strong);
-  border-left: 3px solid var(--v2-volt);
-  border-radius: var(--radius-md, 6px);
-  background: var(--v2-surface);
+  padding: 16px 0 20px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   align-items: stretch;
   text-align: left;
 }

@@ -89,6 +89,19 @@ html {
   scrollbar-gutter: stable;
 }
 
+/*
+  Trava lateral do webapp: a página só rola na vertical. Se algum filho largo
+  escapar, ele é cortado em vez de alargar o documento e fazer a tela "correr"
+  de lado como se fosse uma imagem. `clip` (e não `hidden`) não cria área de
+  rolagem, então o `position: sticky` do topo e da barra de baixo continuam.
+  Listas horizontais de verdade (Liga, abas) rolam dentro do próprio container.
+*/
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 body {
   margin: 0;
   background: var(--bg);

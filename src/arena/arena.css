@@ -862,8 +862,7 @@
   .arena {
     min-height: 0;
     height: min(880px, calc(100svh - 64px));
-    border-radius: 32px;
-    border: 1px solid var(--border);
+    /* Coluna centralizada sem moldura de celular (Missão 0057, decisão do Tiago). */
     margin-block: var(--space-6);
   }
 }

@@ -127,9 +127,7 @@
 
 .landing-audio {
   margin-top: 6px;
-  padding: 6px 8px;
-  border-radius: 999px;
-  background: var(--surface);
+  padding: 6px 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -175,10 +173,7 @@
 /* ---------- cartão de entrada ---------- */
 
 .landing-cartao {
-  padding: 28px 32px 32px;
-  border: 1px solid var(--border-strong);
-  border-radius: 24px;
-  background: var(--bg);
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -187,9 +182,7 @@
 }
 
 .landing-abas {
-  padding: 4px;
-  border-radius: 999px;
-  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   display: flex;
   gap: 4px;
 }
@@ -198,7 +191,7 @@
   flex: 1;
   min-height: var(--hit-target-min, 44px);
   border: 0;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
   font-family: inherit;
@@ -209,10 +202,10 @@
 }
 
 .landing-aba[aria-selected='true'] {
-  background: var(--bg);
+  background: transparent;
   color: var(--fg);
   font-weight: 700;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+  box-shadow: inset 0 -2px var(--fg);
 }
 
 .landing-aba:disabled {
@@ -261,7 +254,6 @@
 
 .landing-passos {
   border-block: 1px solid var(--border);
-  background: var(--surface);
 }
 
 .landing-passos-inner {
@@ -298,8 +290,8 @@
 }
 
 .landing-arena {
-  background: var(--publico-faixa);
-  color: var(--publico-faixa-fg);
+  border-top: 1px solid var(--border);
+  color: var(--fg);
 }
 
 .landing-arena-inner {
@@ -390,6 +382,6 @@
 
 @media (max-width: 640px) {
   .landing-cartao {
-    padding: 24px 20px 28px;
+    padding: 0;
   }
 }

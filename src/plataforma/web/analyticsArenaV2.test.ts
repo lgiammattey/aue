@@ -48,6 +48,30 @@ describe('Analytics da Arena', () => {
     ]);
     expect(document.querySelector('script[src*="googletagmanager.com/gtag/js"]')?.getAttribute('referrerpolicy')).toBe('no-referrer');
   });
+  it('espelha eventos de funil só com o nome, sem código de batalha nem caminho', async () => {
+    window.history.replaceState(null, '', '/arena');
+    const a = await import('./analyticsArenaV2');
+    a.registrarEventoDeFunilNoAnalytics('recebeu_nota');
+    a.registrarEventoDeFunilNoAnalytics('pediu_revanche');
+    a.registrarEventoDeFunilNoAnalytics('visitou_pagina');
+    const filas = (window as unknown as { dataLayer: unknown[][] }).dataLayer.map((item) => Array.from(item));
+    const eventos = filas.filter((item) => item[0] === 'event');
+    expect(eventos.map((item) => item[1])).toEqual(['recebeu_nota', 'pediu_revanche']);
+    expect(eventos.every((item) => Object.keys(item[2] as object).sort().join() === 'page_location,page_referrer,send_to')).toBe(true);
+  });
+  it.each(['/x1/abc123', '/arena?campaign=segredo', '/duelo#t=segredo'])('não espelha funil em %s', async (url) => {
+    window.history.replaceState(null, '', url);
+    const a = await import('./analyticsArenaV2');
+    a.registrarEventoDeFunilNoAnalytics('criou_x1');
+    expect(document.querySelector('script[src*="googletagmanager.com/gtag/js"]')).toBeNull();
+    expect((window as unknown as { dataLayer?: unknown[] }).dataLayer).toBeUndefined();
+  });
+  it('não espelha funil com exclusão ativada', async () => {
+    estado.bloqueada = true;
+    const a = await import('./analyticsArenaV2');
+    a.registrarEventoDeFunilNoAnalytics('abriu_arena');
+    expect((window as unknown as { dataLayer?: unknown[] }).dataLayer).toBeUndefined();
+  });
   it('não envia novas etapas se o bloqueio for ativado depois', async () => {
     const a = await import('./analyticsArenaV2');
     a.analyticsArenaV2.registrar('abriu_arena_v2');

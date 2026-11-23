@@ -1,0 +1,515 @@
+<title>Mural do Auê</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: casca de 3 colunas no desktop, trilho de ícones no tablet, coluna única com barra inferior no celular.
+   Dentro do post só existe uma superfície (o player). O resto é fundo, espaço, tipografia e um filete. */
+:root {
+  --bg: #0a0b0e;
+  --surface: #151820;
+  --surface-2: #1d212c;
+  --fg: #f3f4f6;
+  --fg-2: #c8cdd8;
+  --muted: #8b92a3;
+  --border: #232834;
+  --border-strong: #3b4254;
+  --accent: #ff5500;
+  --accent-on: #0a0b0e;
+  --gold: #f5b82e;
+  --fog: rgba(255, 255, 255, 0.08);
+  --scrim: rgba(0, 0, 0, 0.62);
+  --font-display: 'Anton', 'Archivo Black', Impact, system-ui, sans-serif;
+  --font-body: 'Archivo', 'Archivo Narrow', Inter, system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: clip; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/24px var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 30; }
+button { font: inherit; color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+svg { display: block; flex: none; }
+.pad { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* faixa de protótipo (fora do produto) */
+.proto { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding-block: 8px; background: var(--surface); border-bottom: 1px solid var(--border); font: 500 12px/16px var(--font-body); color: var(--muted); }
+.proto button { margin-left: auto; min-height: 32px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: transparent; color: var(--fg); font-weight: 700; cursor: pointer; }
+
+/* casca */
+.app { display: block; }
+.rail, .side { display: none; }
+.col { min-width: 0; padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+.stick { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); }
+
+/* header mobile */
+.top { height: 56px; display: flex; align-items: center; justify-content: space-between; }
+.wm { font: 400 26px/28px var(--font-display); letter-spacing: 0.01em; color: var(--fg); }
+.wm .ex { color: var(--accent); }
+.top-acoes { display: flex; align-items: center; margin-right: -10px; }
+.ib { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: var(--fg); cursor: pointer; border-radius: 6px; }
+.av { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 4px; background: var(--surface-2); color: var(--fg-2); font: 700 16px/1 var(--font-body); }
+.av--32 { width: 32px; height: 32px; font-size: 14px; }
+
+/* abas */
+.tabs { display: flex; gap: 24px; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; border-bottom: 1px solid var(--border); }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { position: relative; flex: none; height: 44px; padding: 0; border: 0; background: none; color: var(--muted); font: 700 13px/16px var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--fg); }
+
+/* post */
+.post { padding-top: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); position: relative; }
+.ph { display: flex; align-items: center; gap: 12px; min-height: 40px; }
+.pid { min-width: 0; flex: 1; }
+.l1 { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; min-width: 0; }
+.nome { padding: 0; border: 0; background: none; color: var(--fg); font: 700 16px/20px var(--font-body); cursor: pointer; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.l1 time { color: var(--muted); font: 400 13px/18px var(--font-body); font-variant-numeric: tabular-nums; flex: none; }
+.l2 { color: var(--muted); font: 400 13px/18px var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.origem { font: 700 11px/16px var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; }
+.mais { margin-right: -12px; color: var(--muted); }
+
+.player { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 10px 16px 10px 10px; background: var(--surface); border-radius: 6px; }
+.player--bare { padding-inline: 0; background: transparent; margin-top: 0; }
+.play { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 4px; background: var(--fg); color: var(--bg); cursor: pointer; }
+.play:not([aria-pressed="true"]) .i-pause, .play[aria-pressed="true"] .i-play { display: none; }
+.pmid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.onda { display: flex; align-items: center; justify-content: space-between; gap: 2px; height: 28px; overflow: hidden; }
+.onda i { flex: 1 1 0; min-width: 1px; max-width: 4px; border-radius: 1px; background: var(--border-strong); }
+.onda i.on { background: var(--fg); }
+.tempo { color: var(--muted); font: 500 12px/16px var(--font-body); font-variant-numeric: tabular-nums; }
+.nota { flex: none; width: 52px; display: flex; flex-direction: column; align-items: center; }
+.nota small { color: var(--muted); font: 700 10px/12px var(--font-body); letter-spacing: 0.12em; }
+.nota b { color: var(--fg); font: 400 38px/40px var(--font-display); font-variant-numeric: tabular-nums; }
+.nota.ouro b { color: var(--gold); }
+
+.legenda { margin: 12px 0 0; color: var(--fg); font: 400 16px/24px var(--font-body); overflow-wrap: anywhere; }
+.legenda b { font-weight: 600; }
+
+.x1 { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 12px; margin-top: 12px; }
+.x1 .lado { min-width: 0; display: flex; flex-direction: column; }
+.x1 .lado--b { align-items: flex-end; text-align: right; }
+.x1 .n { font: 400 56px/56px var(--font-display); font-variant-numeric: tabular-nums; color: var(--fg); }
+.x1 .perde .n, .x1 .perde .quem { color: var(--muted); }
+.x1 .quem { font: 600 14px/20px var(--font-body); color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.x1 .vs { padding-bottom: 12px; color: var(--muted); font: 700 16px/24px var(--font-body); }
+
+.rwrap { position: relative; margin-top: 8px; }
+.reacoes { display: flex; flex-wrap: wrap; gap: 4px; margin-left: -10px; }
+.chip, .ab { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; font: 700 13px/16px var(--font-body); font-variant-numeric: tabular-nums; }
+.chip::before, .ab::before { content: ""; position: absolute; inset: -4px -2px; }
+.chip { color: var(--fg-2); }
+.chip .e { font-size: 18px; line-height: 1; }
+.chip[aria-pressed="true"] { background: var(--fog); color: var(--fg); }
+.chip--add { color: var(--muted); padding: 0 8px; }
+.pop { position: absolute; left: -8px; bottom: calc(100% + 4px); z-index: 6; display: flex; flex-wrap: wrap; max-width: calc(100vw - 32px); gap: 2px; padding: 4px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 8px; }
+.pop button { width: 44px; height: 44px; border: 0; border-radius: 6px; background: transparent; font-size: 24px; line-height: 1; cursor: pointer; }
+.pop button[aria-pressed="true"] { background: var(--fog); }
+
+.acoes { display: flex; align-items: center; gap: 4px; margin-left: -10px; }
+.ab { color: var(--muted); }
+.ab[aria-pressed="true"] { color: var(--fg); }
+.ab[aria-pressed="true"] svg path { fill: currentColor; }
+.cta { position: relative; margin-left: auto; margin-right: -8px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 8px; border: 0; background: none; color: var(--fg); font: 800 12px/16px var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.cta::before { content: ""; position: absolute; inset: -4px 0; }
+@media (hover: hover) {
+  .chip:hover, .ab:hover, .pop button:hover, .ib:hover { background: var(--fog); }
+  .ab:hover { color: var(--fg); }
+  .tab:hover { color: var(--fg); }
+}
+
+.previa { display: block; width: 100%; margin-top: 8px; padding: 2px 0 2px 12px; border: 0; border-left: 2px solid var(--border-strong); background: none; text-align: left; color: inherit; font: 400 14px/20px var(--font-body); cursor: pointer; }
+.previa b { font-weight: 600; color: var(--fg); }
+.previa .t { color: var(--fg-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.previa .ver { display: block; margin-top: 4px; color: var(--muted); font: 600 13px/18px var(--font-body); }
+.fim { margin: 0; padding: 32px 16px 40px; text-align: center; color: var(--muted); font: 400 14px/20px var(--font-body); }
+
+/* barra inferior mobile */
+.bottom { position: fixed; z-index: 8; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); background: var(--bg); border-top: 1px solid var(--border); }
+.bn { height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: none; color: var(--muted); font: 600 11px/12px var(--font-body); cursor: pointer; }
+.bn[aria-current="page"] { color: var(--fg); }
+.fab { justify-self: center; width: 52px; height: 52px; display: grid; place-items: center; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-on); cursor: pointer; }
+
+/* sheet e toast */
+.scrim { position: fixed; inset: 0; z-index: 20; background: var(--scrim); }
+.sheet { position: fixed; z-index: 21; left: 0; right: 0; bottom: 0; max-height: 88dvh; display: flex; flex-direction: column; background: var(--surface); border-top: 1px solid var(--border-strong); border-radius: 8px 8px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.sh-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 4px 16px; }
+.sh-head h2 { margin: 0; font: 700 16px/24px var(--font-body); }
+.sh-head h2 span { color: var(--muted); font-weight: 500; margin-left: 6px; }
+.sh-body { overflow-y: auto; overscroll-behavior: contain; padding: 0 16px 8px; min-height: 0; }
+.cm { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border); }
+.cm .c1 { font: 600 14px/20px var(--font-body); }
+.cm .c1 span { margin-left: 6px; color: var(--muted); font-weight: 400; font-size: 13px; }
+.cm p { margin: 0; color: var(--fg-2); font: 400 15px/22px var(--font-body); overflow-wrap: anywhere; }
+.sh-form { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.sh-form input { flex: 1; min-width: 0; height: 44px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--bg); color: var(--fg); font: 400 16px/24px var(--font-body); }
+.sh-form button { height: 44px; padding: 0 12px; border: 0; background: none; color: var(--fg); font: 800 12px/16px var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.sh-form button:disabled { color: var(--muted); cursor: default; }
+.toast { position: fixed; z-index: 40; left: 50%; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100vw - 32px); padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 6px; font: 500 14px/20px var(--font-body); }
+
+/* medidas */
+.spec h3 { margin: 20px 0 8px; color: var(--muted); font: 700 12px/16px var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; }
+.spec p { margin: 0 0 8px; color: var(--fg-2); font: 400 14px/20px var(--font-body); }
+.spec .row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0; border-top: 1px solid var(--border); }
+.spec .row > :first-child { min-width: 0; }
+.spec .row > :last-child { flex: none; max-width: 52%; text-align: right; color: var(--muted); font: 500 12px/16px var(--font-mono); }
+.spec .sw { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.spec .sw span { display: inline-flex; align-items: center; gap: 8px; font: 500 12px/16px var(--font-mono); color: var(--fg-2); }
+.spec .sw i { width: 16px; height: 16px; border-radius: 3px; border: 1px solid var(--border-strong); }
+.spec .alerta { padding-left: 12px; border-left: 2px solid var(--gold); }
+
+/* tablet */
+@media (min-width: 700px) {
+  .app { display: grid; grid-template-columns: 76px minmax(0, 600px); justify-content: center; }
+  .rail { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100dvh; padding: 12px 0; align-items: center; }
+  .col { padding-bottom: 0; border-left: 1px solid var(--border); border-right: 1px solid var(--border); min-height: 100dvh; }
+  .top, .bottom { display: none; }
+  .stick { top: 0; }
+  .rail .wm { margin: 4px 0 12px; font-size: 24px; }
+  .rn { display: flex; align-items: center; gap: 16px; width: 52px; height: 52px; justify-content: center; border: 0; border-radius: 999px; background: none; color: var(--fg-2); font: 500 20px/24px var(--font-body); cursor: pointer; }
+  .rn[aria-current="page"] { color: var(--fg); font-weight: 700; }
+  .rn span { display: none; }
+  .rail .arrotar { width: 52px; height: 52px; margin-top: 12px; display: grid; place-items: center; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-on); cursor: pointer; }
+  .rail .arrotar span { display: none; }
+  .sheet { left: 50%; right: auto; bottom: auto; top: 8dvh; width: min(560px, calc(100% - 32px)); transform: translateX(-50%); border: 1px solid var(--border-strong); border-radius: 8px; max-height: 84dvh; padding-bottom: 0; }
+  .toast { bottom: 24px; }
+}
+/* desktop */
+@media (min-width: 1060px) {
+  .app { grid-template-columns: 275px 600px 320px; }
+  .rail { align-items: stretch; padding: 12px 16px; }
+  .rail .wm { font-size: 30px; line-height: 34px; padding-left: 12px; }
+  .rn { width: auto; justify-content: flex-start; padding: 0 12px; border-radius: 8px; }
+  .rn span { display: inline; }
+  .rail .arrotar { width: 100%; height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; font: 700 17px/24px var(--font-body); }
+  .rail .arrotar span { display: inline; }
+  .side { display: block; position: sticky; top: 0; align-self: start; height: 100dvh; overflow-y: auto; padding: 16px 16px 24px; }
+  .busca { width: 100%; height: 44px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: 6px; background: transparent; color: var(--fg); font: 400 15px/24px var(--font-body); }
+  .side h2 { margin: 28px 0 4px; color: var(--muted); font: 700 12px/16px var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; }
+  .lin { display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--border); }
+  .lin .pos { width: 18px; color: var(--muted); font: 600 13px/16px var(--font-mono); }
+  .lin .nm { flex: 1; min-width: 0; font: 600 15px/20px var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lin .pt { font: 400 24px/28px var(--font-display); font-variant-numeric: tabular-nums; }
+  .lin .tx { flex: 1; min-width: 0; color: var(--fg-2); font: 400 14px/20px var(--font-body); }
+  .lin .tx b { color: var(--fg); font-weight: 600; }
+  .lin button { border: 0; background: none; color: var(--fg); font: 800 12px/16px var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; min-height: 44px; cursor: pointer; }
+  .side .peq { margin: 28px 0 0; color: var(--muted); font: 400 12px/16px var(--font-body); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="proto pad">
+  <span>Proposta de mural chapado e só escuro</span>
+  <span>Dados de exemplo, sem áudio real</span>
+  <button type="button" data-act="spec">Medidas</button>
+</div>
+
+<div class="app">
+  <aside class="rail" id="rail" aria-label="Navegação principal"></aside>
+
+  <main class="col">
+    <div class="stick">
+      <header class="top pad">
+        <span class="wm" aria-label="Auê">AUÊ<span class="ex">!</span></span>
+        <div class="top-acoes">
+          <button class="ib" type="button" aria-label="Notificações" data-act="toast" data-msg="Protótipo: abre as notificações.">__bell__</button>
+          <button class="ib" type="button" aria-label="Seu perfil" data-act="toast" data-msg="Protótipo: abre o seu perfil."><span class="av av--32">G</span></button>
+        </div>
+      </header>
+      <div class="tabs pad" role="tablist" aria-label="Filtrar mural" id="tabs">
+        <button class="tab" role="tab" type="button" data-act="tab" data-aba="tudo" aria-selected="true">Tudo</button>
+        <button class="tab" role="tab" type="button" data-act="tab" data-aba="tropa" aria-selected="false">Tropa</button>
+        <button class="tab" role="tab" type="button" data-act="tab" data-aba="alta" aria-selected="false">Em alta</button>
+      </div>
+    </div>
+    <section id="feed" aria-label="Arrotos do mural"></section>
+    <p class="fim">Fim do mural por hoje. Bora arrotar?</p>
+  </main>
+
+  <aside class="side" id="side" aria-label="Ranking e desafios"></aside>
+</div>
+
+<nav class="bottom" id="bottom" aria-label="Navegação"></nav>
+<div id="overlay"></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function () {
+  var P = {
+    bell: 'M6 9a6 6 0 1 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7zM10 20a2 2 0 0 0 4 0',
+    home: 'M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z',
+    trophy: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M10 17h4',
+    users: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M16 4.3a3.5 3.5 0 0 1 0 6.4M18 14.2a6.5 6.5 0 0 1 3.5 5.8',
+    user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
+    mic: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3',
+    chat: 'M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4z',
+    share: 'M12 15V4M8 8l4-4 4 4M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6',
+    save: 'M6 4h12v17l-6-4-6 4z',
+    plus: 'M12 5v14M5 12h14',
+    bolt: 'M13 3L5 14h6l-1 7 8-11h-6z',
+    close: 'M6 6l12 12M18 6L6 18',
+    repeat: 'M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5'
+  };
+  function ic(n, s, extra) {
+    return '<svg width="' + (s || 24) + '" height="' + (s || 24) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '><path d="' + P[n] + '"/></svg>';
+  }
+  var MAIS = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+  var PLAY = '<svg class="i-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="i-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+
+  var REACOES = ['👍', '👎', '🖕', '🤙', '🤘', '🍺', '🥤'];
+  var posts = [
+    { id: 'p1', nome: 'giamz', handle: 'giamzinn_aue', quando: '2d', origem: 'arena', nota: 70, dur: 7, seed: 7, tropa: true,
+      legenda: '<b>@marcelo_aue</b>, bate esse 70/100 aí.',
+      r: { '🤙': 3, '🍺': 2, '🤘': 1 },
+      cm: [{ n: 'kayky_aue', t: '2d', x: 'Esse 70 foi no fôlego. Deixa de graça.' }, { n: 'lucas_aue', t: '2d', x: 'Grave bonito, mas faltou força no final.' }, { n: 'tiago_aue', t: '1d', x: 'Eu faço 75 sem esforço.' }, { n: 'marcelo_aue', t: '1d', x: '62 e chorando. Revanche amanhã, sem choro.' }] },
+    { id: 'p2', nome: 'marcelo_aue', handle: 'marcelo_aue', quando: '3h', origem: 'mural', nota: null, dur: 11, seed: 21, tropa: false,
+      legenda: 'Calor do caralho, coca trincando e o arroto veio assim.',
+      r: { '🥤': 5, '🍺': 4, '👍': 2 },
+      cm: [{ n: 'giamz', t: '2h', x: 'Isso aí passa fácil de 80.' }, { n: 'rian_aue', t: '1h', x: 'Manda pra Arena que eu quero ver a nota.' }, { n: 'lucas_aue', t: '40min', x: 'Coca trincando é doping.' }] },
+    { id: 'p3', nome: 'lucas_aue', handle: 'lucas_aue', quando: '5h', origem: 'x1', tipo: 'x1', dur: 9, seed: 33, tropa: true,
+      a: { n: 'lucas_aue', v: 82 }, b: { n: 'kayky_aue', v: 79 },
+      legenda: 'Ganhei por 3. Quem quer o próximo?',
+      r: { '🤘': 6, '👍': 3 },
+      cm: [{ n: 'kayky_aue', t: '4h', x: 'Foi sorte. Revanche já.' }, { n: 'giamz', t: '3h', x: 'Entra na fila que eu sou o próximo.' }] },
+    { id: 'p4', nome: 'tiago_aue', handle: 'tiago_aue', quando: '1d', origem: 'arena', nota: 91, dur: 8, seed: 45, tropa: false,
+      legenda: 'Primeira vez que passo dos 90. Sem gás, só técnica.',
+      r: { '🍺': 9, '🤘': 7, '👍': 4, '🤙': 2 },
+      cm: [{ n: 'lucas_aue', t: '1d', x: 'Mentira, foi o gás da Coca.' }, { n: 'rian_aue', t: '1d', x: 'Respeito.' }, { n: 'kayky_aue', t: '23h', x: 'Quero ver ao vivo.' }, { n: 'giamz', t: '22h', x: 'Bate o meu 70 agora.' }, { n: 'marcelo_aue', t: '20h', x: '91 é coisa de gente grande.' }] }
+  ];
+  var state = { aba: 'tudo', id: null, t: 0, mine: {}, saved: {}, last: null };
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function find(id) { return posts.filter(function (p) { return p.id === id; })[0]; }
+  function fmt(s) { s = Math.floor(s); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function nOf(p, e) { var m = state.mine[p.id] || {}; return (p.r[e] || 0) + (m[e] ? 1 : 0); }
+  function emojisOf(p) {
+    return REACOES.filter(function (e) { return nOf(p, e) > 0; }).sort(function (a, b) { return nOf(p, b) - nOf(p, a); });
+  }
+  function totalOf(p) { return REACOES.reduce(function (s, e) { return s + nOf(p, e); }, 0); }
+
+  function onda(seed) {
+    var s = seed, out = '', N = 40, i, x, e, r, h;
+    function rnd() { s = (s * 16807) % 2147483647; return s / 2147483647; }
+    for (i = 0; i < N; i++) {
+      x = i / (N - 1); e = 0.25 + 0.75 * Math.sin(Math.PI * Math.pow(x, 0.75)); r = rnd();
+      h = Math.round(5 + 23 * e * (0.35 + 0.65 * r));
+      out += '<i style="height:' + h + 'px"></i>';
+    }
+    return out;
+  }
+  function playerHTML(p, bare) {
+    var temNota = p.nota != null;
+    return '<div class="player' + (bare ? ' player--bare' : '') + '" data-id="' + p.id + '">' +
+      '<button class="play" type="button" data-act="play" data-id="' + p.id + '" aria-pressed="false" aria-label="Ouvir o arroto de ' + esc(p.nome) + '">' + PLAY + '</button>' +
+      '<div class="pmid"><div class="onda" aria-hidden="true">' + onda(p.seed) + '</div><span class="tempo">' + fmt(p.dur) + '</span></div>' +
+      (temNota ? '<div class="nota' + (p.nota >= 90 ? ' ouro' : '') + '"><small>NOTA</small><b aria-label="Nota ' + p.nota + '">' + p.nota + '</b></div>' : '') +
+      '</div>';
+  }
+  var ORIGEM = { arena: 'da Arena', mural: 'gravado no mural', x1: 'X1' };
+  function ctaOf(p) {
+    if (p.tipo === 'x1') return { t: 'Revanche', i: 'repeat' };
+    if (p.nota != null) return { t: 'Bater ' + p.nota, i: 'bolt' };
+    return { t: 'Levar pra Arena', i: 'mic' };
+  }
+  function postHTML(p) {
+    var m = state.mine[p.id] || {}, cta = ctaOf(p), ultimo = p.cm[p.cm.length - 1], miolo, chips = '';
+    emojisOf(p).forEach(function (e) {
+      chips += '<button class="chip" type="button" data-act="react" data-id="' + p.id + '" data-e="' + e + '" aria-pressed="' + (m[e] ? 'true' : 'false') + '" aria-label="' + e + ', ' + nOf(p, e) + ' reações"><span class="e">' + e + '</span>' + nOf(p, e) + '</button>';
+    });
+    if (p.tipo === 'x1') {
+      var aGanha = p.a.v >= p.b.v;
+      miolo = '<div class="x1"><div class="lado' + (aGanha ? '' : ' perde') + '"><span class="n">' + p.a.v + '</span><span class="quem">' + esc(p.a.n) + '</span></div>' +
+        '<span class="vs" aria-hidden="true">×</span>' +
+        '<div class="lado lado--b' + (aGanha ? ' perde' : '') + '"><span class="n">' + p.b.v + '</span><span class="quem">' + esc(p.b.n) + '</span></div></div>';
+    } else {
+      miolo = playerHTML(p, false);
+    }
+    return '<article class="post pad" data-post="' + p.id + '">' +
+      '<div class="ph"><span class="av" aria-hidden="true">' + esc(p.nome.charAt(0).toUpperCase()) + '</span>' +
+      '<div class="pid"><div class="l1"><button class="nome" type="button" data-act="toast" data-msg="Protótipo: abre o perfil de ' + esc(p.nome) + '.">' + esc(p.nome) + '</button><time>' + p.quando + '</time></div>' +
+      '<div class="l2">@' + esc(p.handle) + ' · <span class="origem">' + ORIGEM[p.origem] + '</span></div></div>' +
+      '<button class="ib mais" type="button" aria-label="Mais opções" data-act="toast" data-msg="Protótipo: menu do post (denunciar, apagar).">' + MAIS + '</button></div>' +
+      miolo +
+      '<p class="legenda">' + p.legenda + '</p>' +
+      '<div class="rwrap"><div class="reacoes">' + chips +
+      '<button class="chip chip--add" type="button" data-act="plus" data-id="' + p.id + '" aria-label="Adicionar reação" aria-expanded="false">' + ic('plus', 20) + '</button></div></div>' +
+      '<div class="acoes">' +
+      '<button class="ab" type="button" data-act="comment" data-id="' + p.id + '" aria-label="Comentários, ' + p.cm.length + '">' + ic('chat', 20) + p.cm.length + '</button>' +
+      '<button class="ab" type="button" data-act="share" aria-label="Compartilhar">' + ic('share', 20) + '</button>' +
+      '<button class="ab" type="button" data-act="save" data-id="' + p.id + '" aria-pressed="' + (state.saved[p.id] ? 'true' : 'false') + '" aria-label="Salvar">' + ic('save', 20) + '</button>' +
+      '<button class="cta" type="button" data-act="cta" data-id="' + p.id + '">' + ic(cta.i, 18) + cta.t + '</button></div>' +
+      '<button class="previa" type="button" data-act="comment" data-id="' + p.id + '"><b>' + esc(ultimo.n) + '</b> <span class="t">' + esc(ultimo.x) + '</span><span class="ver">Ver os ' + p.cm.length + ' comentários</span></button>' +
+      '</article>';
+  }
+  function renderFeed() {
+    var lista = posts.slice();
+    if (state.aba === 'tropa') lista = lista.filter(function (p) { return p.tropa; });
+    if (state.aba === 'alta') lista.sort(function (a, b) { return totalOf(b) - totalOf(a); });
+    $('#feed').innerHTML = lista.map(postHTML).join('');
+    sync();
+  }
+  function sync() {
+    $$('.player[data-id]').forEach(function (el) {
+      var id = el.getAttribute('data-id'), p = find(id), on = state.id === id, prog = on ? state.t / p.dur : 0;
+      var bars = $$('.onda i', el), k = Math.round(prog * bars.length);
+      bars.forEach(function (b, i) { b.classList.toggle('on', i < k); });
+      var btn = $('.play', el); btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.setAttribute('aria-label', (on ? 'Pausar' : 'Ouvir') + ' o arroto de ' + p.nome);
+      $('.tempo', el).textContent = on ? fmt(state.t) + ' / ' + fmt(p.dur) : fmt(p.dur);
+    });
+  }
+  setInterval(function () {
+    if (!state.id) return;
+    state.t += 0.1;
+    if (state.t >= find(state.id).dur) { state.id = null; state.t = 0; }
+    sync();
+  }, 100);
+
+  /* casca */
+  var NAV = [['mural', 'Mural', 'home'], ['ranking', 'Ranking', 'trophy'], ['grupos', 'Grupos', 'users'], ['notif', 'Notificações', 'bell'], ['perfil', 'Perfil', 'user']];
+  $('#rail').innerHTML = '<span class="wm">AUÊ<span class="ex">!</span></span>' + NAV.map(function (n, i) {
+    return '<button class="rn" type="button" data-act="toast" data-msg="Protótipo: abre ' + n[1] + '." aria-label="' + n[1] + '"' + (i === 0 ? ' aria-current="page"' : '') + '>' + ic(n[2], 26) + '<span>' + n[1] + '</span></button>';
+  }).join('') + '<button class="arrotar" type="button" data-act="toast" data-msg="Protótipo: abre a Arena." aria-label="Arrotar">' + ic('mic', 22) + '<span>Arrotar</span></button>';
+  var B = [['Mural', 'home', 1], ['Ranking', 'trophy'], null, ['Grupos', 'users'], ['Perfil', 'user']];
+  $('#bottom').innerHTML = B.map(function (n) {
+    if (!n) return '<button class="fab" type="button" data-act="toast" data-msg="Protótipo: abre a Arena." aria-label="Arrotar">' + ic('mic', 26) + '</button>';
+    return '<button class="bn" type="button" data-act="toast" data-msg="Protótipo: abre ' + n[0] + '."' + (n[2] ? ' aria-current="page"' : '') + '>' + ic(n[1], 24) + n[0] + '</button>';
+  }).join('');
+  $('#side').innerHTML = '<input class="busca" type="search" id="busca" placeholder="Buscar arrotador ou grupo" aria-label="Buscar arrotador ou grupo">' +
+    '<h2>Ranking da semana</h2>' +
+    [['1', 'tiago_aue', 91], ['2', 'lucas_aue', 88], ['3', 'kayky_aue', 82], ['4', 'giamz', 70]].map(function (r) {
+      return '<div class="lin"><span class="pos">' + r[0] + '</span><span class="av av--32" aria-hidden="true">' + r[1].charAt(0).toUpperCase() + '</span><span class="nm">' + r[1] + '</span><span class="pt">' + r[2] + '</span></div>';
+    }).join('') +
+    '<h2>X1 abertos</h2>' +
+    [['kayky_aue', 'quem aguenta 74?'], ['rian_aue', 'quer revanche do 68']].map(function (r) {
+      return '<div class="lin"><span class="tx"><b>' + r[0] + '</b> ' + r[1] + '</span><button type="button" data-act="toast" data-msg="Protótipo: aceita o desafio na Arena.">Aceitar</button></div>';
+    }).join('') +
+    '<p class="peq">Dados de exemplo.</p>';
+  $$('[data-act="toast"]').forEach(function () {});
+  $('.top-acoes button').innerHTML = ic('bell', 24);
+
+  /* toast, sheet */
+  var tt;
+  function toast(m) { var t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(function () { t.hidden = true; }, 2200); }
+  function closePop() { $$('.pop').forEach(function (e) { e.remove(); }); $$('[data-act="plus"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); }); }
+  function closeSheet() {
+    $('#overlay').innerHTML = ''; document.body.style.overflow = '';
+    if (state.last && document.contains(state.last)) state.last.focus();
+    renderFeed();
+  }
+  function openSheet(inner, label) {
+    state.last = document.activeElement;
+    $('#overlay').innerHTML = '<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="' + label + '">' + inner + '</div>';
+    document.body.style.overflow = 'hidden';
+    var c = $('.sheet [data-act="close"]'); if (c) c.focus();
+    sync();
+  }
+  function comentariosHTML(p) {
+    return p.cm.map(function (c) {
+      return '<div class="cm"><span class="av av--32" aria-hidden="true">' + esc(c.n.charAt(0).toUpperCase()) + '</span><div style="min-width:0"><div class="c1">' + esc(c.n) + '<span>' + esc(c.t) + '</span></div><p>' + esc(c.x) + '</p></div></div>';
+    }).join('');
+  }
+  function openComentarios(id) {
+    var p = find(id);
+    openSheet('<div class="sh-head"><h2>Comentários<span>' + p.cm.length + '</span></h2><button class="ib" type="button" data-act="close" aria-label="Fechar">' + ic('close', 22) + '</button></div>' +
+      '<div class="sh-body">' + (p.tipo === 'x1' ? '' : playerHTML(p, true)) + '<div id="lista">' + comentariosHTML(p) + '</div></div>' +
+      '<form class="sh-form" id="form" data-id="' + id + '"><input id="cm-input" type="text" placeholder="Comenta em cima do arroto" aria-label="Escrever comentário" autocomplete="off"><button type="submit" id="cm-send" disabled>Enviar</button></form>', 'Comentários de ' + p.nome);
+  }
+  function openSpec() {
+    var tipo = [
+      ['Wordmark AUÊ!', 'Anton 26/28 (rail 30/34)'], ['Nota', 'Anton 38/40, tabular'], ['Placar do X1', 'Anton 56/56, tabular'],
+      ['Nome', 'Archivo 700 16/20'], ['Handle e tempo', 'Archivo 400 13/18'], ['Origem', 'Archivo 700 11/16, +0.08em, caixa alta'],
+      ['Legenda', 'Archivo 400 16/24'], ['Contagem de reação', 'Archivo 700 13/16, tabular'], ['Aba', 'Archivo 700 13/16, +0.08em, caixa alta'],
+      ['Prévia de comentário', 'Archivo 400 14/20, nome 600'], ['Botão de ação', 'Archivo 800 12/16, +0.08em, caixa alta'], ['Rótulo da barra inferior', 'Archivo 600 11/12']
+    ];
+    var esp = [
+      ['Gutter lateral', '16px + safe area'], ['Topo do post', '16px'], ['Cabeçalho para player', '12px'], ['Player para legenda', '12px'],
+      ['Legenda para reações', '8px'], ['Reações para ações', '4px'], ['Ações para prévia', '8px'], ['Fundo do post até o filete', '12px'],
+      ['Alvo de toque', '44px (visual 36px + área estendida)'], ['Header mobile', '56px'], ['Abas', '44px'], ['Barra inferior', '56px + safe area']
+    ];
+    function rows(a) { return a.map(function (r) { return '<div class="row"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join(''); }
+    openSheet('<div class="sh-head"><h2>Medidas da proposta</h2><button class="ib" type="button" data-act="close" aria-label="Fechar">' + ic('close', 22) + '</button></div>' +
+      '<div class="sh-body spec">' +
+      '<h3>Tipografia</h3>' + rows(tipo) +
+      '<h3>Espaçamento</h3>' + rows(esp) +
+      '<h3>Molduras</h3><p>Uma superfície por post: o player. Nada dentro dele. Reação, ação e comentário ficam direto no fundo. Popover de reação e sheet de comentários são molduras funcionais.</p>' +
+      '<h3>Cor (código atual)</h3><div class="sw"><span><i style="background:#0a0b0e"></i>bg</span><span><i style="background:#151820"></i>surface</span><span><i style="background:#232834"></i>border</span><span><i style="background:#f3f4f6"></i>fg</span><span><i style="background:#8b92a3"></i>muted</span><span><i style="background:#ff5500"></i>accent</span><span><i style="background:#f5b82e"></i>gold</span></div>' +
+      '<p style="margin-top:8px">Accent em 2 lugares, sempre: o ponto de exclamação do logo e o botão de arrotar. Tocar um áudio não acende laranja.</p>' +
+      '<h3>Conflito para decidir</h3><p class="alerta">DESIGN.md e o mapa de telas pedem verde #c6ff00 sobre #0a0a08. O código que roda usa laranja #ff5500 sobre #0a0b0e. Esta proposta segue o código.</p>' +
+      '</div>', 'Medidas da proposta');
+  }
+
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-act]'), act, id, p, m, e;
+    if (!ev.target.closest('.pop, [data-act="plus"]')) closePop();
+    if (!el) return;
+    act = el.getAttribute('data-act'); id = el.getAttribute('data-id');
+    if (act === 'tab') {
+      state.aba = el.getAttribute('data-aba');
+      $$('.tab').forEach(function (t) { t.setAttribute('aria-selected', t === el ? 'true' : 'false'); });
+      renderFeed();
+    } else if (act === 'play') {
+      if (state.id === id) { state.id = null; } else { state.id = id; state.t = 0; }
+      sync();
+    } else if (act === 'react' || act === 'pick') {
+      e = el.getAttribute('data-e'); state.mine[id] = state.mine[id] || {};
+      state.mine[id][e] = !state.mine[id][e];
+      if (act === 'pick') closePop();
+      var keep = $('.sheet'); if (!keep) renderFeed();
+    } else if (act === 'plus') {
+      var jaAberto = el.getAttribute('aria-expanded') === 'true';
+      closePop();
+      if (!jaAberto) {
+        p = find(id); m = state.mine[id] || {};
+        var pop = document.createElement('div'); pop.className = 'pop'; pop.setAttribute('role', 'group'); pop.setAttribute('aria-label', 'Escolher reação');
+        pop.innerHTML = REACOES.map(function (r) { return '<button type="button" data-act="pick" data-id="' + id + '" data-e="' + r + '" aria-pressed="' + (m[r] ? 'true' : 'false') + '" aria-label="Reagir com ' + r + '">' + r + '</button>'; }).join('');
+        el.closest('.rwrap').appendChild(pop); el.setAttribute('aria-expanded', 'true');
+      }
+    } else if (act === 'comment') {
+      openComentarios(id);
+    } else if (act === 'save') {
+      state.saved[id] = !state.saved[id]; el.setAttribute('aria-pressed', state.saved[id] ? 'true' : 'false');
+      toast(state.saved[id] ? 'Salvo.' : 'Removido dos salvos.');
+    } else if (act === 'share') {
+      toast('Protótipo: abre o card de compartilhamento 9:12.');
+    } else if (act === 'cta') {
+      p = find(id); toast(p.tipo === 'x1' ? 'Protótipo: revanche com o mesmo oponente.' : p.nota != null ? 'Protótipo: Arena com o ' + p.nota + ' como alvo.' : 'Protótipo: leva esse arroto pra Arena julgar.');
+    } else if (act === 'toast') {
+      toast(el.getAttribute('data-msg'));
+    } else if (act === 'close') {
+      closeSheet();
+    } else if (act === 'spec') {
+      openSpec();
+    }
+  });
+  document.addEventListener('input', function (ev) {
+    if (ev.target.id === 'cm-input') $('#cm-send').disabled = !ev.target.value.trim();
+  });
+  document.addEventListener('submit', function (ev) {
+    var f = ev.target.closest('#form'); if (!f) return;
+    ev.preventDefault();
+    var i = $('#cm-input'), v = i.value.trim(); if (!v) return;
+    var p = find(f.getAttribute('data-id'));
+    p.cm.push({ n: 'giamz', t: 'agora', x: v });
+    $('#lista').innerHTML = comentariosHTML(p);
+    $('.sh-head h2 span').textContent = p.cm.length;
+    i.value = ''; $('#cm-send').disabled = true;
+    $('.sh-body').scrollTop = $('.sh-body').scrollHeight;
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') { if ($('.sheet')) closeSheet(); else closePop(); }
+  });
+
+  renderFeed();
+})();
+</script>

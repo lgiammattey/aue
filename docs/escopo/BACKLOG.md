@@ -4,7 +4,6 @@
 
 ## Pendências identificadas nesta revisão
 
-- Investigar a falha da [validação do commit publicado](https://github.com/lgiammattey/aue/actions/runs/45114720565): o teste de fronteira aponta importação de `AdsterraNativeBanner` por `src/arena/v2/ConteudoDaHome.tsx`.
 - Validar em aparelhos reais o caminho gravação, laudo, criação e resposta do duelo, publicação consentida e tratamento de erro. Conferir permissões e entrega de áudio no backend.
 - Conferir a seção Liga e especificar separadamente o que já existe e o que seria liga privada semanal; não presumir entrega a partir do nome visual.
 - Reavaliar issues antigas à luz da mudança de mural, comunidades e Arena v2. Achados de segurança antigos, como [#313](https://github.com/lgiammattey/aue/issues/313) e [#314](https://github.com/lgiammattey/aue/issues/314), exigem investigação atual; não são declaração de vulnerabilidade vigente nem de correção.

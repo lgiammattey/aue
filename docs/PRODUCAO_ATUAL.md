@@ -38,7 +38,7 @@ O projeto Supabase `Auê` estava ativo e saudável. A listagem mostrou ativas as
 - Validar criação, resposta e revelação do duelo, incluindo acesso e retenção no backend. Não assumir que regras legadas valem para v2.
 - Verificar recursos de perfil, mural, ranking, grupos e anúncios no navegador e no Supabase.
 - O histórico do projeto `Auê` e a pasta local têm as mesmas 117 versões de migração. A comparação foi apenas de versões: conteúdo do schema, policies, configuração e execução real não foram verificados.
-- A validação falhou no teste de fronteira arquitetural: `src/arena/v2/ConteudoDaHome.tsx` importa `AdsterraNativeBanner` de `features/novo-aue`. Tipos, lint, processamento de áudio, teste Chromium e build passaram nessa execução.
+- A validação falhou no teste de fronteira arquitetural: `src/arena/v2/ConteudoDaHome.tsx` importa `AdsterraNativeBanner` de `features/novo-aue`. Tipos, lint, processamento de áudio, teste Chromium e build passaram nessa execução. Corrigido depois, em 23/11/2026, pela [#370](https://github.com/lgiammattey/aue/pull/370): o componente foi para `src/shared/components/` e a suíte completa, o typecheck e o build passam na `main` atual.
 - A conferência anterior de 22/10/2026 está no histórico Git; dados e impressões daquela data não descrevem o momento atual.
 
 Fontes: [roteador](../src/App.tsx), [flags](../src/shared/flags.ts), [workflow de publicação](../.github/workflows/publicar-firebase.yml) e [configuração do Hosting](../firebase.json). Planejamento e propostas não são evidência de entrega.

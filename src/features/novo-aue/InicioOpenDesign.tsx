@@ -2625,17 +2625,17 @@ export function InicioOpenDesign({
         {viewAtual === 'comunidade' && (
           <section aria-label={`Comunidade ${comunidadeAtiva?.nome ?? comunidadeSlug}`}>
             {falhaTopico ? (
-              <div className="panel" style={{ padding: 24 }}>
+              <div className="estado-chapado">
                 <p>Deu ruim pra carregar o tópico.</p>
               </div>
             ) : comunidadeInexistente ? (
-              <div className="panel" style={{ padding: 24 }}>
+              <div className="estado-chapado">
                 <h2 style={{ margin: '0 0 8px' }}>Comunidade não encontrada.</h2>
                 <p style={{ margin: '0 0 16px' }}>Essa comunidade não existe no Auê, ou foi removida.</p>
                 <Link className="submit" style={{ float: 'none' }} to="/comunidades">Ver comunidades</Link>
               </div>
             ) : falhaComunidade ? (
-              <div className="panel" style={{ padding: 24 }}>
+              <div className="estado-chapado">
                 <p>Deu ruim pra carregar a comunidade.</p>
               </div>
             ) : (
@@ -2771,7 +2771,7 @@ export function InicioOpenDesign({
 
                 {secaoComunidade === 'causos' && (
                   <>
-                    <div className="panel" style={{ background: 'var(--aue-surface-2)', marginBottom: 16 }}>
+                    <div className="estado-chapado estado-chapado--aviso">
                       <strong style={{ fontSize: 13 }}>Antes de criar um tópico: leia as regras da comunidade.</strong>
                     </div>
 
@@ -2819,7 +2819,7 @@ export function InicioOpenDesign({
 
                 {secaoComunidade === 'sobre' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <div className="panel" style={{ padding: 20 }}>
+                    <div className="estado-chapado">
                       <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Regras rápidas</h2>
                       {regrasDaComunidade.length === 0 ? (
                         <p style={{ margin: 0, fontSize: 14, color: 'var(--aue-muted)' }}>Essa comunidade ainda não tem regras escritas.</p>
@@ -2831,7 +2831,7 @@ export function InicioOpenDesign({
                         </ol>
                       )}
                     </div>
-                    <div className="panel" style={{ padding: 20 }}>
+                    <div className="estado-chapado">
                       <h2 style={{ margin: '0 0 12px', fontSize: 18 }}>Moderadores</h2>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {moderadoresDaComunidade.length === 0 && (

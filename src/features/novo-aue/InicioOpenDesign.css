@@ -349,9 +349,10 @@
   margin: 0;
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--aue-line);
-  border-radius: 14px;
-  background: var(--aue-surface);
+  border: 0;
+  border-top: 1px solid var(--aue-line);
+  border-radius: 0;
+  background: transparent;
 }
 
 .community-topic-list__item + .community-topic-list__item {
@@ -1565,16 +1566,17 @@
   gap: 10px;
   min-height: 52px;
   margin: 8px 0 8px 52px;
-  padding: 8px 10px 8px 12px;
+  padding: 8px 0;
   overflow: hidden;
-  border: 1px solid var(--aue-line);
-  border-radius: 14px;
-  background: var(--aue-surface-2);
+  border: 0;
+  border-bottom: 1px solid var(--aue-line);
+  border-radius: 0;
+  background: transparent;
   animation: composerAudioArrive 180ms ease-out;
 }
 
 .composer-audio-strip--recording {
-  border-color: color-mix(in srgb, #ff3d5a 48%, var(--aue-line));
+  border-bottom-color: color-mix(in srgb, #ff3d5a 48%, var(--aue-line));
 }
 
 .composer-recording-dot {
@@ -1910,10 +1912,11 @@
 }
 
 .thread-composer-box {
-  background: var(--aue-surface);
-  border: 1px solid var(--aue-line);
-  border-radius: var(--radius-md, 8px);
-  padding: 14px 16px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--aue-line);
+  border-radius: 0;
+  padding: 14px 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1948,12 +1951,20 @@
 .thread-reply-item {
   display: flex;
   gap: 12px;
-  padding: 14px 16px;
-  background: var(--aue-surface);
-  border: 1px solid var(--aue-line);
-  border-radius: var(--radius-md, 8px);
+  padding: 14px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--aue-line);
+  border-radius: 0;
   position: relative;
 }
+
+/* Estado ou aviso de página sem caixa (Missão 0057, DESIGN §4.1): texto com filete. */
+.estado-chapado {
+  padding: 24px 0;
+  border-top: 1px solid var(--aue-line);
+}
+.estado-chapado--aviso { padding: 12px 0; margin-bottom: 16px; }
 
 .thread-reply-avatar {
   width: 36px;

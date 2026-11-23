@@ -17,7 +17,7 @@
 - **Especificação e Auditoria Visual:** Rian, a partir de [`docs/design/propostas/mural-chapado.html`](../../design/propostas/mural-chapado.html)
 - **Gate Arquitetural (Camillo / Lucas):** pendente (contrato do feed e waveform)
 - **Auditoria e Prova Real:** Marcelo
-- **Decisão pendente do Luiz:** paleta. O `DESIGN.md` e o mapa de telas pedem verde `#c6ff00` sobre `#0a0a08`. O código roda laranja `#ff5500` sobre `#0a0b0e`. A proposta usa o código. Confirmar qual é o visual aprovado antes de implementar.
+- **Decisão pendente do Luiz:** aprovar a abertura do ADR que tira o post só de texto do mural (muda o ADR 0004).
 
 ### Decisões já tomadas pelo Luiz em 23/11/2026
 
@@ -25,6 +25,11 @@
 2. Todo post tem arroto. O texto é legenda opcional.
 3. Botão "Bater X" entra nesta rodada.
 4. Barra inferior mobile entra, com o botão de arrotar no centro. O botão "+ Postar" e o título "MURAL" saem.
+5. Paleta: vale o que está implementado. Laranja `#ff5500` sobre `#0a0b0e`, como em `src/styles/designSystem.css`. O verde `#c6ff00` do `DESIGN.md` e do mapa de telas não vale para esta missão.
+
+### Divergência de documentação
+
+O `DESIGN.md` (§2) e o mapa de telas (§4) ainda descrevem verde `#c6ff00` sobre `#0a0a08` e raios de 12 a 24px. O código usa laranja, `#0a0b0e` e raios de 2 a 8px. Alinhar esses dois documentos ao código fica como missão própria, fora desta.
 
 ## 3. Comportamento, Plataformas e Risco
 
@@ -58,4 +63,4 @@
 - **Arquivos/módulos alterados:** nenhum código nesta rodada. Entram só o protótipo e este cartão.
 - **Parecer do Marcelo:** pendente
 - **Veredito Final do Tiago:** pendente
-- **Pendências ou decisão necessária do Luiz:** confirmar a paleta (laranja do código ou verde do `DESIGN.md`) e aprovar a abertura do ADR que tira o post só de texto.
+- **Pendências ou decisão necessária do Luiz:** aprovar a abertura do ADR que tira o post só de texto.

@@ -1,5 +1,5 @@
 import './conteudoDaHome.css';
-import { AdsterraNativeBanner } from '../../features/novo-aue/AdsterraNativeBanner';
+import { AdsterraNativeBanner } from '../../shared/components/AdsterraNativeBanner';
 import { GruposNaHome } from './GruposNaHome';
 
 const TIPOS_DE_ARROTO = [

@@ -90,7 +90,7 @@ Estado em 23/11/2026, ao fim da fatia 7. "Evidência de execução" é o que foi
   3. Telas legadas `/desafios` e `/resenha/:id`: fora da missão até decisão.
   4. Onde ficou chapado só pelo código, sem ver renderizado: perfil com posts, comunidades, thread, compositor, Arena com desafio real, admin com sessão real.
 - **Pendências ou decisão necessária do Luiz:**
-  1. ~~Remover ou manter `/como-arrotar` e `/tipos-de-arroto`~~ **Decidido em 23/11/2026: ficam.** O Luiz quer um guia especializado novo, com passo a passo por tipo, referenciado pela página principal. Missão [0058](0058-guia-de-arroto-por-tipo.md).
+  1. ~~Remover ou manter `/como-arrotar` e `/tipos-de-arroto`~~ **Decidido em 23/11/2026: ficam.** A `/como-arrotar` vai ser expandida num guia completo com várias técnicas, e a home mantém só o básico. Missão [0058](0058-como-arrotar-completo.md); os cards dela saem lá.
   2. Decidir `/desafios` e `/resenha/:id`.
   3. Medições do admin (funil completo, CTR/CPM, falha de áudio, dispositivo) e o que o admin do Signal Key lê no Firebase, para destravar a conexão com o GA4 (`docs/technical/ga4-no-admin.md`).
   4. Olhar um perfil, uma comunidade e uma Arena reais depois do deploy.

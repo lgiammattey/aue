@@ -54,22 +54,43 @@ Inventário em [`docs/escopo/inventario-cards-0057.md`](../../docs/escopo/invent
 
 ## 5. Matriz de Aceite e Evidência (Marcelo & Rian → Tiago)
 
+Estado em 23/11/2026, ao fim da fatia 7. "Evidência de execução" é o que foi medido por quem implementou; não substitui a auditoria do Marcelo.
+
 | Critério observável | Dono da prova | Ambiente exigido | Estado |
 |---|---|---|---|
-| Inventário de caixas por rota, com decisão `fica/sai/dúvida` | Rian | Navegador desktop e mobile | pendente |
-| Lista aprovada pelo Luiz antes de qualquer código | Tiago | Registro nesta missão | pendente |
-| Rota executada sem caixa em seção/lista/ranking/filtro/formulário e sem card dentro de card | Rian | Captura antes/depois, escuro e claro, 390px e 1440px | pendente |
-| Itens que ficam card seguem card (post, X1, comunidade em grade, modal, sheet) | Rian | Captura | pendente |
-| Alvos de toque >= 44px e foco visível preservados | Marcelo | Chrome Android / Safari iOS ou emulação | pendente |
-| `scrollWidth === innerWidth` em 390px (trava lateral, `DESIGN.md` §6.1) | Marcelo | Navegador mobile | pendente |
-| Tema, tipografia, moldura e layout de 3 colunas intactos | Rian + Marcelo | Contrato visual E2E | pendente |
-| `typecheck`, `lint`, `test`, `build` | Marcelo | CI | pendente |
+| Inventário de caixas por rota, com decisão `fica/sai/dúvida` | Rian | Navegador desktop e mobile | **feito** (`docs/escopo/inventario-cards-0057.md`; rotas sem sessão só pelo código, marcadas [C]) |
+| Lista aprovada pelo Luiz antes de qualquer código | Tiago | Registro nesta missão | **feito**, §2b. Item 9 (`/desafios`, `/resenha/:id`) ficou sem resposta e foi tratado como fora de escopo |
+| Rota executada sem caixa em seção/lista/ranking/filtro/formulário e sem card dentro de card | Rian | Captura antes/depois, 390px e 1440px | **parcial**. Medido por script (nenhuma caixa de conteúdo sobrando) e capturas "depois" em 390px e 1440px, tema escuro. Sem comparação antes/depois salva. Tema claro fora do escopo (decisão do Luiz). Perfil com posts, comunidades, thread, compositor e `/x1` com desafio real: só por código |
+| Itens que ficam card seguem card (post, X1, comunidade em grade, modal, sheet) | Rian | Captura | **parcial**. Confirmado por código e nas rotas abertas; modais e sheets não foram abertos |
+| Alvos de toque >= 44px e foco visível preservados | Marcelo | Chrome Android / Safari iOS ou emulação | **parcial**. Filtros do feed subiram de 38px para 44px (medido). O resto não foi remedido; foco visível não foi alterado |
+| `scrollWidth === innerWidth` em 390px (`DESIGN.md` §6.1) | Marcelo | Navegador mobile | **feito nas rotas abertas** (home, feed, seguindo, grupos, ranking, como-jogar, privacidade, landing, login, admin, `/x1`, perfil sem dados). Não medido em rota com sessão e dados |
+| Tema, tipografia, moldura e layout de 3 colunas intactos | Rian + Marcelo | Contrato visual E2E | **pendente do CI** (run 512). `contrato-visual.spec.ts:46` foi ajustado com autorização do Luiz; a moldura de celular da Arena no desktop saiu por decisão do Tiago |
+| `typecheck`, `lint`, `test`, `build` | Marcelo | CI | `typecheck` e `test` locais verdes até a fatia 6 (2572 testes); fatia 7 em verificação. CI verde nas runs 506, 509 e 511. `lint` rodado só nos arquivos tocados, não no repositório inteiro. **`build` e E2E: só pelo CI** |
 
 > Um nível de evidência nunca substitui o seguinte ("compilou" não é "funcionou na tela").
 
 ## 6. Encerramento e Parecer Final
 
-- **Arquivos/módulos alterados:**
-- **Parecer do Marcelo:**
-- **Veredito Final do Tiago:**
-- **Pendências ou decisão necessária do Luiz:** aprovar a lista da Fase 1.
+- **Arquivos/módulos alterados** (PR #373):
+  - Regras: `AGENTS.md`, `DESIGN.md` §4.1 e §6.1, `MAPA_DE_PAGINAS_E_FLUXOS.md` (corrigido contra `App.tsx`), skills `design-ui`, `construir-interface` e `garantir-web`.
+  - Trava lateral mobile: `index.css`, `TopArrotadores.css`, `arenaV2.css`.
+  - Fatia 1 (coluna direita): `appShell.css`, `casca.css`.
+  - Fatia 2 (informativas, ranking, grupos): `LayoutArenaPublica.css`, `LayoutPublico.css`, `TopArrotadores.css`, `ListaDeGrupos.tsx`.
+  - Fatia 3 (`/admin`): `TelaAdministracao.css`.
+  - Fatia 4 (feed e seguindo): `casca.css`, `appShell.css`, `arenaV2.css`, `conteudoDaHome.css`, `perfilArena.css`.
+  - Fatia 5 (perfil): `perfilArena.css`.
+  - Fatia 6 (comunidades e conversa): `InicioOpenDesign.css`, `InicioOpenDesign.tsx`.
+  - Fatia 7 (landing, login, Arena): `TelaLanding.css`, `authArena.css`, `arena.css`, `dueloV2.css`, `e2e/contrato-visual.spec.ts`.
+  - GA4: `analyticsArenaV2.ts` (espelha eventos de funil), `telemetria.ts`, porta e adaptador pendentes do admin (`analyticsAdministrativo.ts`), bloco no `TelaAdministracao.tsx`, `docs/technical/ga4-no-admin.md`.
+- **Parecer do Marcelo:** **não emitido.** O Marcelo não foi acionado nesta missão. A evidência acima é de quem implementou e não vale como auditoria independente. Antes do aceite: auditar contrato visual, toque de 44px e overflow em rota com sessão e dados.
+- **Veredito Final do Tiago:** **não emitido.** Proposta para o Tiago: `APROVADO COM RESSALVAS`, condicionada a CI verde na run 512 e a o Luiz olhar as telas com sessão em produção.
+- **Ressalvas conhecidas:**
+  1. Cards que ainda existem e deveriam seguir a regra: `.vitrine-apps--feed` (anúncio da vitrine dentro do feed, o Luiz decidiu "anúncio é widget"), `.guia-arena` da `/como-arrotar` e do `/tipos-de-arroto` (congeladas), `.gravador-direto` (precisa de microfone) e `.od-groups__card` (regra base e override divergem em raio e sombra).
+  2. Código morto que não foi tocado: `PerfilConectado.css`, `PerfilDoUsuario.css`, `forum.css`, `TelaLogin.css`.
+  3. Telas legadas `/desafios` e `/resenha/:id`: fora da missão até decisão.
+  4. Onde ficou chapado só pelo código, sem ver renderizado: perfil com posts, comunidades, thread, compositor, Arena com desafio real, admin com sessão real.
+- **Pendências ou decisão necessária do Luiz:**
+  1. Remover ou manter `/como-arrotar` e `/tipos-de-arroto` (estão no `sitemap.xml` e na `/en`; missão própria com o Rodrigo).
+  2. Decidir `/desafios` e `/resenha/:id`.
+  3. Medições do admin (funil completo, CTR/CPM, falha de áudio, dispositivo) e o que o admin do Signal Key lê no Firebase, para destravar a conexão com o GA4 (`docs/technical/ga4-no-admin.md`).
+  4. Olhar um perfil, uma comunidade e uma Arena reais depois do deploy.

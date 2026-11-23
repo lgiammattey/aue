@@ -11,7 +11,7 @@ Os titulares vivem em `.codex/agents/` e `.claude/agents/`:
 
 - **Tiago (`tiago`)**: produto, Cartão de Missão, WIP 1 e aceite final. Somente leitura.
 - **Camillo (`camillo`)**: áudio, nota do juiz, backend, Supabase, arquitetura, Gate Arquitetural, plataforma e SEO técnico. Escreve quando delegado e audita o Diego.
-- **Diego (`diego`)**: telas, Arena e experiência em React 19, fidelidade ao protótipo e ao design system. Escreve quando delegado e audita a parte visível do Camillo.
+- **Diego (`diego`)**: telas, Arena e experiência em React 19, fidelidade ao design system. Escreve quando delegado e audita a parte visível do Camillo.
 
 ## Antes de delegar
 

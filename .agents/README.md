@@ -10,7 +10,7 @@ A squad tem **três titulares**. Quem implementou não audita o próprio código
 
 - **Tiago**: produto, Cartão de Missão, WIP 1 e aceite final pelas 7 perguntas.
 - **Camillo**: áudio, nota do juiz, backend, Supabase, arquitetura, Gate Arquitetural, plataforma e SEO técnico. Audita o que o Diego escreveu.
-- **Diego**: telas, Arena e experiência em React 19, protótipo e design system. Audita a parte visível do que o Camillo entregou.
+- **Diego**: telas, Arena e experiência em React 19, design system. Audita a parte visível do que o Camillo entregou.
 
 O produto vive definido em [`docs/jogo/AUE.md`](../docs/jogo/AUE.md). As pistas e a ordem de atuação estão no [`AGENTS.md`](../AGENTS.md).
 

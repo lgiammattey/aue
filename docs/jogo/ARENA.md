@@ -27,17 +27,14 @@ estado da partida.
 > ## ESTE DOCUMENTO MANDA NA MÁQUINA DE ESTADOS
 >
 > **Quais estados existem, o que cada um faz, o que ele não pode fazer e para
-> onde ele sai: quem decide é este arquivo.** Nenhum protótipo, design system,
+> onde ele sai: quem decide é este arquivo.** Nenhum design system,
 > handoff ou export cria, renomeia ou remove estado da Arena.
 >
 > O que o material de design decide é o resto — e é bastante: como cada estado
 > **se parece, se move e mede**. Geometria, token, tipografia, componente,
 > motion e acessibilidade saem de
-> [`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html)
-> e de
 > [`../design/design-system/system/DESIGN.md`](../design/design-system/system/DESIGN.md).
-> Nesse terreno, quando este documento e o protótipo divergirem, **o protótipo
-> vence**.
+> Nesse terreno vale o design system.
 >
 > Quando qualquer um deles divergir em escopo, vale
 > [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md).
@@ -55,8 +52,8 @@ não existem aqui (`MIC_PENDING`, `VALIDATING`, `NOT_A_BURP`, `RESULT_REVEAL`,
   que dependa dele. Isso bate com o próprio design system (§12.4 e §20) e com
   [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md) §3, onde monetização
   está fora do escopo.
-- **`ORIGIN` continua sendo um estado**, como descrito abaixo. O handoff do
-  protótipo afirma que nada acontece entre o arroto e a nota; nesse ponto ele
+- **`ORIGIN` continua sendo um estado**, como descrito abaixo. O handoff
+  afirma que nada acontece entre o arroto e a nota; nesse ponto ele
   não vale.
 
 **Onde cada nome do material novo foi parar.** O comportamento útil que eles
@@ -347,7 +344,6 @@ motor não tem.
 
 ### `CHALLENGE`
 
-> No protótipo este estado se chama `X1`.
 
 **Entra quando:** desafia alguém. O nome é cobrado aqui, se ainda não existir.
 
@@ -367,7 +363,6 @@ já viu.
 
 ### `VERSUS`
 
-> No protótipo este estado se chama `INCOMING`.
 
 **Entra quando:** abre um link de desafio e tem um arroto do OUTRO esperando
 resposta. Abrir o próprio link, ou uma briga sem round aberto, é `SCOREBOARD`.

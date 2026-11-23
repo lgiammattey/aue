@@ -27,7 +27,7 @@ Antes de acionar a oficina:
 
 ## 2. Na Chegada (As 7 Perguntas de Aceite do Tiago)
 
-Com a evidência do auditor (funcional e testes) e a fidelidade visual 1:1 com `docs/design/prototipo/`), avalie:
+Com a evidência do auditor (funcional e testes) e a fidelidade visual ao design system, avalie:
 
 1. **Necessidade:** Resolve uma dor real da pessoa no Arena ou no mural sem adicionar fricção?
 2. **Valor:** Deixa o ato de arrotar, receber a nota, ouvir outros arrotos ou desafiar no X1 mais divertido?

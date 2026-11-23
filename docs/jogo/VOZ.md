@@ -7,9 +7,7 @@ Fonte canônica de **como o Auê fala e se comporta**.
 Escopo não mora aqui. Para saber o que pertence ao jogo agora, leia
 [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md).
 
-O protótipo [`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html)
-mostra esta voz funcionando: os pools de fala por estado e por faixa de nota, e a
-regra de que rótulo de botão nunca varia.
+Regra fixa: rótulo de botão nunca varia.
 
 ---
 
@@ -347,7 +345,7 @@ Conta a situação como alguém do grupo contaria.
 
 Explica a sensação e o comportamento esperado sem virar manual técnico.
 
-### No protótipo
+### Onde aparece
 
 Aponta as telas/fluxos relacionados.
 
@@ -390,5 +388,5 @@ Se parece campanha de agência tentando ser descolada, faz de novo.
 - **O que o jogo é:** [`AUE.md`](./AUE.md)
 - **O que pertence ao jogo agora:** [`../escopo/ESCOPO_ATUAL.md`](../escopo/ESCOPO_ATUAL.md)
 - **Os estados da Arena:** [`ARENA.md`](./ARENA.md)
-- **Referência visual:** [`../design/prototipo/Arena.dc.html`](../design/prototipo/Arena.dc.html)
+- **Referência visual:** 
 - **Filtro de copy:** [`../../.agents/skills/filtro-anti-ia/SKILL.md`](../../.agents/skills/filtro-anti-ia/SKILL.md)

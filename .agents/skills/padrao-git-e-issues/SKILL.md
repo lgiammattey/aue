@@ -43,9 +43,9 @@ ou o que não existe ainda.
 
 A sensação e o comportamento esperado. Sem virar manual.
 
-## No protótipo
+## Onde aparece
 
-Onde isso aparece funcionando: arquivo e estado.
+Onde isso aparece funcionando: rota e estado.
 
 ## Não viaja
 
@@ -84,9 +84,9 @@ necessários pra fazer** — não dominam a história da issue.
 > na cara: deu ruim, não foi criado, tenta de novo. E o botão de tentar de novo
 > tem que estar ali, não escondido.
 >
-> **No protótipo**
+> **Onde aparece**
 >
-> `arena.html`, estado `CHALLENGE`. O erro segue o padrão do `ERROR`.
+> Arena, estado `CHALLENGE`. O erro segue o padrão do `ERROR`.
 >
 > **Não viaja**
 >

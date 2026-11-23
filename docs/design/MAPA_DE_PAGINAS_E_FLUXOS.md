@@ -16,7 +16,7 @@ Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e c�
 | `/comunidades`, `/c/:slug`, `/c/:slug/t/:id`, `/topico/:id` | Redirecionam para `/` no React; Hosting pode responder antes do React |
 | `/x1/:code`, `/b/:code`, `/d/:id` | Fluxos de compatibilidade distintos do duelo v2 |
 
-Para confirmar uma alteração, confira `src/App.tsx`, `firebase.json` e o navegador; protótipo não prova publicação.
+Para confirmar uma alteração, confira `src/App.tsx`, `firebase.json` e o navegador.
 
 > **Documento Canônico de Orientação de Telas e Componentes**  
 > Autoridade: [`../../AGENTS.md`](../../AGENTS.md) | Design System: [`design-system/system/DESIGN.md`](design-system/system/DESIGN.md)
@@ -29,60 +29,60 @@ Este documento é a bússola oficial para evitar que qualquer desenvolvedor ou a
 
 O repositório passou pela evolução para a arquitetura **Auê 3.0 (OpenDesign)**. Para proteger a base de regressões, certos arquivos antigos foram preservados para compatibilidade de rotas e testes legados, mas **NÃO devem ser alterados para novas features**.
 
-| Frente de Trabalho | ONDE EDITAR (Canônico Ativo) | ONDE NÃO EDITAR (Legado / Confinado) | Protótipo de Referência |
-|---|---|---|---|
-| **Tropa & Cards de Post** | [`src/features/novo-aue/CardDoPost.tsx`](../../src/features/novo-aue/CardDoPost.tsx) (com `CardDoPost.css` e `TokensDoCard.css`; variante `feed` ou `perfil`)<br>[`src/features/novo-aue/PlayerDoArroto.tsx`](../../src/features/novo-aue/PlayerDoArroto.tsx) (com `PlayerDoArroto.css`)<br>[`src/features/novo-aue/MenuDoPost.tsx`](../../src/features/novo-aue/MenuDoPost.tsx)<br>[`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx) | `src/features/comunidade/components/CardDeCauso.tsx`<br>`src/features/comunidade/components/HeaderSocial.tsx` | sem protótipo (arquivado) |
-| **Comentários & Thread de Conversa** | [`src/features/novo-aue/ThreadDeComentarios.tsx`](../../src/features/novo-aue/ThreadDeComentarios.tsx)<br>[`src/features/novo-aue/ModalComentarios.tsx`](../../src/features/novo-aue/ModalComentarios.tsx) | Não embutir árvore de comentários dentro de `CardDoPost` | sem protótipo (arquivado) |
-| **Compositor de Post / Gravação Rápida** | [`src/features/novo-aue/ModalCompositor.tsx`](../../src/features/novo-aue/ModalCompositor.tsx)<br>[`src/features/novo-aue/ModalGravarArroto.tsx`](../../src/features/novo-aue/ModalGravarArroto.tsx) | `src/features/comunidade/components/ComposerCauso.tsx`<br>`src/features/comunidade/ModalNovoCauso.tsx` | sem protótipo (arquivado) |
-| **Perfil de Jogador** | A tela é a view `perfil` de [`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx), com o cabeçalho e as abas definidos dentro de `InicioOpenDesign` e `casca.css`, [`FolhaDaFoto.tsx`](../../src/features/novo-aue/FolhaDaFoto.tsx) (troca de foto pelo avatar, `FolhaDaFoto.css`), [`BarraSuperior.tsx`](../../src/features/novo-aue/BarraSuperior.tsx) (`BarraSuperior.css`), `CardDoPost` (variante `perfil`) e `PlayerDoArroto`. [`TelaPerfilOpenDesign.tsx`](../../src/features/novo-aue/TelaPerfilOpenDesign.tsx) é só um invólucro de 32 linhas | `src/features/novo-aue/PerfilConectado.tsx` e `PerfilDoUsuario.tsx` com seus CSS (código morto: ninguém os importa nas rotas, conferido por `grep` em 23/11/2026). Não criar telas desconexas em `/perfil` | sem protótipo (arquivado) |
-| **Arena de Arroto (10 Estados)** | [`src/arena/Arena.tsx`](../../src/arena/Arena.tsx)<br>Faixas em [`src/arena/faixas/`](../../src/arena/faixas/)<br>Bolha em [`src/arena/bolha/`](../../src/arena/bolha/) | Telas avulsas de fluxo antigo em `src/features/audio/fluxo/` | [`Arena.dc.html`](prototipo/Arena.dc.html) |
-| **Páginas Públicas Institucionais & SEO** | [`src/features/publico/ComoJogar.tsx`](../../src/features/publico/ComoJogar.tsx)<br>[`src/features/publico/ComoArrotar.tsx`](../../src/features/publico/ComoArrotar.tsx)<br>[`src/features/publico/TiposDeArroto.tsx`](../../src/features/publico/TiposDeArroto.tsx)<br>[`src/features/publico/RankingDeArrotos.tsx`](../../src/features/publico/RankingDeArrotos.tsx)<br>[`src/features/grupos/TelaGrupos.tsx`](../../src/features/grupos/TelaGrupos.tsx) | Não substituir `MolduraPublica` → `CascaInformativaOpenDesign` por outra moldura ou impor tema claro fixo sem pedido explícito do Luiz | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
-| **Páginas Legais (Termos & Privacidade)** | [`src/features/legal/TermosDeUso.tsx`](../../src/features/legal/TermosDeUso.tsx)<br>[`src/features/legal/PoliticaDePrivacidade.tsx`](../../src/features/legal/PoliticaDePrivacidade.tsx) | - | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) |
-| **Painel Administrativo** | [`src/features/administracao/TelaAdministracao.tsx`](../../src/features/administracao/TelaAdministracao.tsx) | Não expor na navegação lateral pública | - |
+| Frente de Trabalho | ONDE EDITAR (Canônico Ativo) | ONDE NÃO EDITAR (Legado / Confinado) |
+|---|---|---|
+| **Tropa & Cards de Post** | [`src/features/novo-aue/CardDoPost.tsx`](../../src/features/novo-aue/CardDoPost.tsx) (com `CardDoPost.css` e `TokensDoCard.css`; variante `feed` ou `perfil`)<br>[`src/features/novo-aue/PlayerDoArroto.tsx`](../../src/features/novo-aue/PlayerDoArroto.tsx) (com `PlayerDoArroto.css`)<br>[`src/features/novo-aue/MenuDoPost.tsx`](../../src/features/novo-aue/MenuDoPost.tsx)<br>[`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx) | `src/features/comunidade/components/CardDeCauso.tsx`<br>`src/features/comunidade/components/HeaderSocial.tsx` |
+| **Comentários & Thread de Conversa** | [`src/features/novo-aue/ThreadDeComentarios.tsx`](../../src/features/novo-aue/ThreadDeComentarios.tsx)<br>[`src/features/novo-aue/ModalComentarios.tsx`](../../src/features/novo-aue/ModalComentarios.tsx) | Não embutir árvore de comentários dentro de `CardDoPost` |
+| **Compositor de Post / Gravação Rápida** | [`src/features/novo-aue/ModalCompositor.tsx`](../../src/features/novo-aue/ModalCompositor.tsx)<br>[`src/features/novo-aue/ModalGravarArroto.tsx`](../../src/features/novo-aue/ModalGravarArroto.tsx) | `src/features/comunidade/components/ComposerCauso.tsx`<br>`src/features/comunidade/ModalNovoCauso.tsx` |
+| **Perfil de Jogador** | A tela é a view `perfil` de [`src/features/novo-aue/InicioOpenDesign.tsx`](../../src/features/novo-aue/InicioOpenDesign.tsx), com o cabeçalho e as abas definidos dentro de `InicioOpenDesign` e `casca.css`, [`FolhaDaFoto.tsx`](../../src/features/novo-aue/FolhaDaFoto.tsx) (troca de foto pelo avatar, `FolhaDaFoto.css`), [`BarraSuperior.tsx`](../../src/features/novo-aue/BarraSuperior.tsx) (`BarraSuperior.css`), `CardDoPost` (variante `perfil`) e `PlayerDoArroto`. [`TelaPerfilOpenDesign.tsx`](../../src/features/novo-aue/TelaPerfilOpenDesign.tsx) é só um invólucro de 32 linhas | `src/features/novo-aue/PerfilConectado.tsx` e `PerfilDoUsuario.tsx` com seus CSS (código morto: ninguém os importa nas rotas, conferido por `grep` em 23/11/2026). Não criar telas desconexas em `/perfil` |
+| **Arena de Arroto (10 Estados)** | [`src/arena/Arena.tsx`](../../src/arena/Arena.tsx)<br>Faixas em [`src/arena/faixas/`](../../src/arena/faixas/)<br>Bolha em [`src/arena/bolha/`](../../src/arena/bolha/) | Telas avulsas de fluxo antigo em `src/features/audio/fluxo/` |
+| **Páginas Públicas Institucionais & SEO** | [`src/features/publico/ComoJogar.tsx`](../../src/features/publico/ComoJogar.tsx)<br>[`src/features/publico/ComoArrotar.tsx`](../../src/features/publico/ComoArrotar.tsx)<br>[`src/features/publico/TiposDeArroto.tsx`](../../src/features/publico/TiposDeArroto.tsx)<br>[`src/features/publico/RankingDeArrotos.tsx`](../../src/features/publico/RankingDeArrotos.tsx)<br>[`src/features/grupos/TelaGrupos.tsx`](../../src/features/grupos/TelaGrupos.tsx) | Não substituir `MolduraPublica` → `CascaInformativaOpenDesign` por outra moldura ou impor tema claro fixo sem pedido explícito do Luiz |
+| **Páginas Legais (Termos & Privacidade)** | [`src/features/legal/TermosDeUso.tsx`](../../src/features/legal/TermosDeUso.tsx)<br>[`src/features/legal/PoliticaDePrivacidade.tsx`](../../src/features/legal/PoliticaDePrivacidade.tsx) | - |
+| **Painel Administrativo** | [`src/features/administracao/TelaAdministracao.tsx`](../../src/features/administracao/TelaAdministracao.tsx) | Não expor na navegação lateral pública |
 
 ---
 
 ## 2. Tabela Mestra de Rotas da Aplicação (`src/App.tsx`)
 
-| Rota URL | Componente Renderizado | Status / Papel | Protótipo Canônico | Descrição e Comportamento |
-|---|---|---|---|---|
-| `/` | `InicioOpenDesign` | **CANÔNICO ATIVO** | sem protótipo (arquivado) | Entrada da rede social (3 colunas desktop, webapp mobile). Mostra conversas em comunidades, busca e Rodas para explorar. |
-| `/feed` | `EntradaInicial` → `InicioOpenDesign` | **ALIAS ATIVO** | sem protótipo (arquivado) | Link antigo que usa a mesma entrada social canônica da raiz. |
-| `/em-alta` | redireciona para `/` | **ALIAS** | sem protótipo (arquivado) | Atalho antigo; cai na home. |
-| `/seguindo` | `InicioOpenDesign` (`view="seguindo"`) | **CANÔNICO ATIVO** | sem protótipo (arquivado) | Sua Tropa: feed exclusivo das pessoas seguidas por quem está conectado. |
-| `/arena` e `/arena/em-breve` | `TelaArenaEmBreveOpenDesign` | **CANÔNICO ATIVO — EM BREVE** | [`Arena.dc.html`](prototipo/Arena.dc.html) | A entrada mostra a indisponibilidade da Arena; não promete gravação, nota ou duelo ativos. |
-| `/comunidades` | redireciona para `/` | **ALIAS (comunidades descontinuadas como rota)** | sem protótipo (arquivado) | As views `comunidades` e `comunidade` existem dentro de `InicioOpenDesign` e só abrem por navegação interna; a URL não abre mais. Conferido em `App.tsx` em 23/11/2026. |
-| `/c/:slug` | redireciona para `/` | **ALIAS** | sem protótipo (arquivado) | Ver `/comunidades`. Não declarar a tela de tópicos como publicada sem evidência própria. |
-| `/c/:slug/novo` | redireciona para `/` | **ALIAS** | sem protótipo (arquivado) | Ver `/comunidades`. |
-| `/c/:slug/t/:id` | redireciona para `/` | **ALIAS** | sem protótipo (arquivado) | Ver `/comunidades`. |
-| `/explorar` | redireciona para `/` | **ALIAS** | sem protótipo (arquivado) | Ver `/comunidades`. `TelaExplorarOpenDesign` só abre por navegação interna. |
-| `/desafios` | `EntradaDesafios` | **LEGADO ATIVO** | sem protótipo (arquivado) | Renderiza telas da pasta `features/comunidade` (legadas). Não editar visual sem Cartão de Missão próprio; fora da missão 0057. |
-| `/x1/:code` | `EntradaPorLink` (`Arena`) | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Desafio X1 direto por código curto. Abre a Arena pronta para ouvir e responder. |
-| `/b/:code` | `EntradaPorLink` (`Arena`) | **ALIAS** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Atalho alternativo para desafio X1. |
-| `/d/:id` | `ChallengeView` | **CANÔNICO ATIVO** | [`Arena.dc.html`](prototipo/Arena.dc.html) | Visualização legada/direta de desafio por UUID longo. |
-| `/perfil` | `EntradaPerfil` → `InicioOpenDesign` (view `perfil`) | **CANÔNICO ATIVO** | sem protótipo (arquivado) | Perfil próprio da pessoa conectada (arrotos postados, nota média, vitórias no X1). |
-| `/u/:handle` | `EntradaPerfilHandle` → `InicioOpenDesign` (view `perfil`) | **CANÔNICO ATIVO** | sem protótipo (arquivado) | Perfil público de qualquer participante pelo `@handle`. |
-| `/perfil/:handle` | `EntradaPerfilHandle` | **ALIAS ATIVO** | sem protótipo (arquivado) | Compatibilidade para o perfil público por handle. |
-| `/login` | `InicioOpenDesign` (`view="auth"`) | **CANÔNICO ATIVO** | [`Login.dc.html`](prototipo/Login.dc.html) | Tela ágil de autenticação / criação de apelido social. |
-| `/entrar` | redireciona para `/login` | **ALIAS** | [`Login.dc.html`](prototipo/Login.dc.html) | Atalho de entrada. |
-| `/redefinir-senha` | `TelaRedefinirSenha` | **ATIVO** | [`Login.dc.html`](prototipo/Login.dc.html) | Recuperação de senha fora da tela de autenticação principal. |
-| `/como-jogar` | `ComoJogar` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Guia público indexável sobre comunidade e o que a Arena vai oferecer quando abrir. |
-| `/en` | `HomeEn` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Home em inglês, indexável, com `hreflang` recíproco com `/`. Copy adaptada ao público de língua inglesa, não traduzida; a Arena que ela linka continua em PT-BR. Mesma moldura e tokens de `/como-arrotar`. Entrada HTML: `paginas/en.html`. Missão 0056. |
-| `/como-arrotar` | `ComoArrotar` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Guia completo e indexável: oito técnicas passo a passo, seção que separa verdade de lenda dos truques de clickbait, aviso de saúde, quando procurar médico e fontes. Missão 0058. |
-| `/tipos-de-arroto` | `TiposDeArroto` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Guia dos estilos que a Arena pretende avaliar quando estiver disponível. |
-| `/ranking-de-arrotos` | `RankingDeArrotos` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Explica as faixas de nota previstas para a Arena; não declara recordes ativos. |
-| `/ranking` | redireciona para `/ranking-de-arrotos` | **ALIAS** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Atalho para o ranking público. |
-| `/videos-de-arroto` e `/videos` | redirecionam para `/` | **ALIAS** | sem protótipo (arquivado) | Não renderizam `VideosDeArroto` nem levam à comunidade de vídeos (a rota `/c/arrotos-youtube` também cai na home). |
-| `/grupos` | `TelaGrupos` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Diretório de grupos externos no WhatsApp, Telegram e TikTok. |
-| `/g/:slug` | redireciona para `/grupos` | **ALIAS** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Grupo externo que não tem página individual ativa. |
-| `/privacidade` | `PoliticaDePrivacidade` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Política formal de tratamento de dados e áudio. |
-| `/termos` | `TermosDeUso` | **CANÔNICO ATIVO** | [`Páginas Públicas.dc.html`](prototipo/P%C3%A1ginas%20P%C3%BAblicas.dc.html) | Regras de conduta, opt-in e responsabilidade na rede. |
-| `/resenha/:id`, `/historia/:id` e `/conto/:id` | `EntradaHistoria` | **LEGADO ATIVO** | - | Renderiza `TelaHistoria` (pasta `features/comunidade`, legada). Fora da missão 0057. |
-| `/comunidade`, `/bondes`, `/comm`, `/comunidade/:slug`, `/comunidades/:slug`, `/topico/:id` e `/t/:id` | redirecionam para `/` | **ALIAS** | - | Rotas de comunidade descontinuadas. |
-| `/mobile` e `/versao-mobile` | redirecionam para `/` | **ALIAS** | - | Atalhos antigos. `/versoes` renderiza `TelaVersoesWebapp` (apoio). |
-| `/admin` | `TelaAdministracao` | **CANÔNICO RESTRITO** | - | Painel interno seguro para aprovações e moderação (RPC autorizada). |
-| `/landing` | `TelaLanding` | **CANÔNICO APOIO** | [`Landing.dc.html`](prototipo/Landing.dc.html) | Mostruário da landing page. Hoje é **escura** (`contrato-visual.spec.ts` exige fundo `rgb(10, 11, 14)` e `color-scheme: dark`). |
-| `/versoes` | `TelaVersoesWebapp` | **CANÔNICO APOIO** | [`Versões Webapp.dc.html`](prototipo/Vers%C3%B5es%20Webapp.dc.html) | Painel de visualização responsiva de breakpoints do webapp. |
+| Rota URL | Componente Renderizado | Status / Papel | Descrição e Comportamento |
+|---|---|---|---|
+| `/` | `InicioOpenDesign` | **CANÔNICO ATIVO** | Entrada da rede social (3 colunas desktop, webapp mobile). Mostra conversas em comunidades, busca e Rodas para explorar. |
+| `/feed` | `EntradaInicial` → `InicioOpenDesign` | **ALIAS ATIVO** | Link antigo que usa a mesma entrada social canônica da raiz. |
+| `/em-alta` | redireciona para `/` | **ALIAS** | Atalho antigo; cai na home. |
+| `/seguindo` | `InicioOpenDesign` (`view="seguindo"`) | **CANÔNICO ATIVO** | Sua Tropa: feed exclusivo das pessoas seguidas por quem está conectado. |
+| `/arena` e `/arena/em-breve` | `TelaArenaEmBreveOpenDesign` | **CANÔNICO ATIVO — EM BREVE** | A entrada mostra a indisponibilidade da Arena; não promete gravação, nota ou duelo ativos. |
+| `/comunidades` | redireciona para `/` | **ALIAS (comunidades descontinuadas como rota)** | As views `comunidades` e `comunidade` existem dentro de `InicioOpenDesign` e só abrem por navegação interna; a URL não abre mais. Conferido em `App.tsx` em 23/11/2026. |
+| `/c/:slug` | redireciona para `/` | **ALIAS** | Ver `/comunidades`. Não declarar a tela de tópicos como publicada sem evidência própria. |
+| `/c/:slug/novo` | redireciona para `/` | **ALIAS** | Ver `/comunidades`. |
+| `/c/:slug/t/:id` | redireciona para `/` | **ALIAS** | Ver `/comunidades`. |
+| `/explorar` | redireciona para `/` | **ALIAS** | Ver `/comunidades`. `TelaExplorarOpenDesign` só abre por navegação interna. |
+| `/desafios` | `EntradaDesafios` | **LEGADO ATIVO** | Renderiza telas da pasta `features/comunidade` (legadas). Não editar visual sem Cartão de Missão próprio; fora da missão 0057. |
+| `/x1/:code` | `EntradaPorLink` (`Arena`) | **CANÔNICO ATIVO** | Desafio X1 direto por código curto. Abre a Arena pronta para ouvir e responder. |
+| `/b/:code` | `EntradaPorLink` (`Arena`) | **ALIAS** | Atalho alternativo para desafio X1. |
+| `/d/:id` | `ChallengeView` | **CANÔNICO ATIVO** | Visualização legada/direta de desafio por UUID longo. |
+| `/perfil` | `EntradaPerfil` → `InicioOpenDesign` (view `perfil`) | **CANÔNICO ATIVO** | Perfil próprio da pessoa conectada (arrotos postados, nota média, vitórias no X1). |
+| `/u/:handle` | `EntradaPerfilHandle` → `InicioOpenDesign` (view `perfil`) | **CANÔNICO ATIVO** | Perfil público de qualquer participante pelo `@handle`. |
+| `/perfil/:handle` | `EntradaPerfilHandle` | **ALIAS ATIVO** | Compatibilidade para o perfil público por handle. |
+| `/login` | `InicioOpenDesign` (`view="auth"`) | **CANÔNICO ATIVO** | Tela ágil de autenticação / criação de apelido social. |
+| `/entrar` | redireciona para `/login` | **ALIAS** | Atalho de entrada. |
+| `/redefinir-senha` | `TelaRedefinirSenha` | **ATIVO** | Recuperação de senha fora da tela de autenticação principal. |
+| `/como-jogar` | `ComoJogar` | **CANÔNICO ATIVO** | Guia público indexável sobre comunidade e o que a Arena vai oferecer quando abrir. |
+| `/en` | `HomeEn` | **CANÔNICO ATIVO** | Home em inglês, indexável, com `hreflang` recíproco com `/`. Copy adaptada ao público de língua inglesa, não traduzida; a Arena que ela linka continua em PT-BR. Mesma moldura e tokens de `/como-arrotar`. Entrada HTML: `paginas/en.html`. Missão 0056. |
+| `/como-arrotar` | `ComoArrotar` | **CANÔNICO ATIVO** | Guia completo e indexável: oito técnicas passo a passo, seção que separa verdade de lenda dos truques de clickbait, aviso de saúde, quando procurar médico e fontes. Missão 0058. |
+| `/tipos-de-arroto` | `TiposDeArroto` | **CANÔNICO ATIVO** | Guia dos estilos que a Arena pretende avaliar quando estiver disponível. |
+| `/ranking-de-arrotos` | `RankingDeArrotos` | **CANÔNICO ATIVO** | Explica as faixas de nota previstas para a Arena; não declara recordes ativos. |
+| `/ranking` | redireciona para `/ranking-de-arrotos` | **ALIAS** | Atalho para o ranking público. |
+| `/videos-de-arroto` e `/videos` | redirecionam para `/` | **ALIAS** | Não renderizam `VideosDeArroto` nem levam à comunidade de vídeos (a rota `/c/arrotos-youtube` também cai na home). |
+| `/grupos` | `TelaGrupos` | **CANÔNICO ATIVO** | Diretório de grupos externos no WhatsApp, Telegram e TikTok. |
+| `/g/:slug` | redireciona para `/grupos` | **ALIAS** | Grupo externo que não tem página individual ativa. |
+| `/privacidade` | `PoliticaDePrivacidade` | **CANÔNICO ATIVO** | Política formal de tratamento de dados e áudio. |
+| `/termos` | `TermosDeUso` | **CANÔNICO ATIVO** | Regras de conduta, opt-in e responsabilidade na rede. |
+| `/resenha/:id`, `/historia/:id` e `/conto/:id` | `EntradaHistoria` | **LEGADO ATIVO** | Renderiza `TelaHistoria` (pasta `features/comunidade`, legada). Fora da missão 0057. |
+| `/comunidade`, `/bondes`, `/comm`, `/comunidade/:slug`, `/comunidades/:slug`, `/topico/:id` e `/t/:id` | redirecionam para `/` | **ALIAS** | Rotas de comunidade descontinuadas. |
+| `/mobile` e `/versao-mobile` | redirecionam para `/` | **ALIAS** | Atalhos antigos. `/versoes` renderiza `TelaVersoesWebapp` (apoio). |
+| `/admin` | `TelaAdministracao` | **CANÔNICO RESTRITO** | Painel interno seguro para aprovações e moderação (RPC autorizada). |
+| `/landing` | `TelaLanding` | **CANÔNICO APOIO** | Mostruário da landing page. Hoje é **escura** (`contrato-visual.spec.ts` exige fundo `rgb(10, 11, 14)` e `color-scheme: dark`). |
+| `/versoes` | `TelaVersoesWebapp` | **CANÔNICO APOIO** | Painel de visualização responsiva de breakpoints do webapp. |
 
 ---
 

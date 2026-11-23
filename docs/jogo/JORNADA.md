@@ -15,4 +15,4 @@ A pessoa entra e vê uma coisa: gravar o arroto e mandar. Nada explica o produto
 5. **X1.** Link de desafio, resposta de quem recebe e resultado provisório. A revanche leva de volta à Arena.
 6. **Mural e perfil.** Os arrotos publicados, o perfil e o ranking. Publicar exige autorização explícita.
 
-Referência visual: [`../design/prototipo/Jornada.dc.html`](../design/prototipo/Jornada.dc.html). Os estados reais da Arena estão em [`ARENA.md`](ARENA.md).
+Os estados reais da Arena estão em [`ARENA.md`](ARENA.md).

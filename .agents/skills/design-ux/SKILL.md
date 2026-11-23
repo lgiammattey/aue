@@ -16,7 +16,7 @@ Procedimento do **Diego** para desenhar a experiência do Auê. A definição do
 5. **X1:** link de desafio, resposta de quem recebe, resultado provisório e revanche.
 6. **Mural e perfil:** arrotos publicados, perfil e ranking. Publicar exige autorização explícita.
 
-Protótipos de referência em `docs/design/prototipo/`. Antes de mexer em tela, consulte o [mapa de telas](../../../docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md).
+Não há protótipos: tela nova é proposta pelo Diego e aprovada pelo Luiz antes do código. Antes de mexer em tela, consulte o [mapa de telas](../../../docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md).
 
 ---
 

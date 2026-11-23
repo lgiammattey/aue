@@ -29,21 +29,6 @@ A lista descreve código e superfície disponível; não é validação de todos
 
 ---
 
-## Os Protótipos Canônicos
-
-**A referência visual viva do produto reside em [`docs/design/prototipo/`](docs/design/prototipo/):**
-
-- [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html) — A máquina da Arena e estados de captura
-- [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html) — Página de chegada e acesso rápido
-- [`Login.dc.html`](docs/design/prototipo/Login.dc.html) — Autenticação e entrada como convidado
-- [`Jornada.dc.html`](docs/design/prototipo/Jornada.dc.html) — As 6 fases da jornada do jogador
-- [`Versões Webapp.dc.html`](docs/design/prototipo/Vers%C3%B5es%20Webapp.dc.html) — Matriz de visualização desktop, tablet e celular
-- [`Design System.dc.html`](docs/design/prototipo/Design%20System.dc.html) — Mostruário de componentes, cores e tokens
-
-Abra direto no navegador — roda de forma autônoma sem build. Ver [`docs/design/README.md`](docs/design/README.md).
-
----
-
 ## Exclusivamente Web (Desktop & Webapp)
 
 O Auê vive **100% na web** (`https://aue.web.app`), hospedado no Firebase Hosting.
@@ -103,7 +88,7 @@ Comece por [`docs/README.md`](docs/README.md).
 - Jornada em 6 fases: [`docs/jogo/JORNADA.md`](docs/jogo/JORNADA.md)
 - Estados da Arena: [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md)
 - Regras e pontuação: [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md)
-- Design e protótipos: [`docs/design/README.md`](docs/design/README.md)
+- Design: [`docs/design/README.md`](docs/design/README.md)
 - Escopo atual: [`docs/escopo/ESCOPO_ATUAL.md`](docs/escopo/ESCOPO_ATUAL.md)
 - Arquitetura e ADRs: [`docs/technical/adr/README.md`](docs/technical/adr/README.md)
 - Tom de voz: [`docs/jogo/VOZ.md`](docs/jogo/VOZ.md)

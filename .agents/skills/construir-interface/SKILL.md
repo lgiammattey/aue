@@ -5,7 +5,7 @@ description: Diretrizes do Diego para construir componentes e telas do Auê! e A
 
 # Skill: construir-interface
 
-Procedimento do **Diego** para construir interfaces e componentes do Auê! em React 19 com fidelidade visual 1:1 aos protótipos em `docs/design/prototipo/` e ao Design System v5 (`DESIGN.md`).
+Procedimento do **Diego** para construir interfaces e componentes do Auê! em React 19 com fidelidade visual ao Design System v5 (`DESIGN.md`).
 
 ---
 

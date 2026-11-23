@@ -26,7 +26,7 @@ Procedimento do **Diego** para transformar os fluxos da Tropa e da Arena em **es
 
 ## 2. Componentes Oficiais do Design System v5
 
-Referência viva: [`docs/design/prototipo/Design System.dc.html`](../../../docs/design/prototipo/Design%20System.dc.html)
+Referência viva: 
 
 ### 2.1 Botões (`Botao`)
 - **Primário:** Fundo `--accent`, texto `--accent-on`, border-radius 18px (`--radius-md`) ou 999px (`--radius-full`), peso 700. Para ação principal de cada estado.

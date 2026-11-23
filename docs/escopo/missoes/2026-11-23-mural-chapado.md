@@ -3,11 +3,11 @@
 ## 1. Enquadramento (Tiago)
 
 - **Dor / Problema da pessoa:** o mural parece um Twitter. O post é avatar, nome, @ e texto. O arroto, que é o motivo de o Auê existir, não aparece. As 7 reações ocupam duas linhas e não mostram contagem. O comentário some num ícone solto. Há cerca de 12 molduras numa tela só, com card dentro de card.
-- **Comportamento esperado na tela:** o mural mostra os arrotos que a galera mandou, seja pela Arena, seja direto no mural, com as reações e os comentários em cima deles. Cada post tem player com waveform e, quando veio da Arena, a nota. Reação vira emoji com contagem, só as que existem, e um `＋` abre as 7. O último comentário aparece na prévia, e tocar abre um sheet com o player fixo no topo. Um botão de ação fecha o loop: "Bater 70" ou "Levar pra Arena". O post de X1 do protótipo não existe no produto (áudio de duelo é privado) e sai na próxima versão do protótipo.
-- **Fora de escopo (Não vira):** tema claro, nova paleta, nova família tipográfica, comentário em áudio, post só de texto, mudança na Arena, mudança nas páginas públicas.
-- **Pista (Lane):** Full flow comum, com gate arquitetural se a consulta do feed mudar de contrato (contagem por reação e último comentário).
-- **Por que esta pista:** tela existente com componentes canônicos (`CardDoPost`, `ThreadDeComentarios`). Pode virar sistêmica se o contrato do feed mudar.
-- **Fonte de verdade afetada:** `ADR 0004` (texto puro deixa de ser post). Precisa de ADR novo antes de aceitar post sem arroto como regra.
+- **Comportamento esperado na tela:** o mural mostra os arrotos que a galera mandou, seja pela Arena, seja direto no mural, com as reações e os comentários em cima deles. Cada post tem player com waveform e, quando veio da Arena, a nota. Reação vira emoji com contagem, só as que existem, e um `＋` abre as 7. O último comentário aparece na prévia, e tocar abre um sheet com o player fixo no topo. Post só de texto continua, sem player. O resultado de X1 vira post, com placar e áudio só de quem consentir. Um botão de ação fecha o loop: "Bater 70", "Levar pra Arena" ou "Revanche".
+- **Fora de escopo (Não vira):** tema claro, nova paleta, nova família tipográfica, comentário em áudio, mudança na Arena, mudança nas páginas públicas.
+- **Pista (Lane):** Full flow sistêmica. Há RPC nova (`listar_mural`), mudança na regra de reação (migração) e dependência de ADR sobre áudio de duelo.
+- **Por que esta pista:** o contrato do Mural muda (RPC `listar_mural`), a regra de reação muda no banco e o post de X1 com áudio depende de ADR novo. Os componentes canônicos continuam `CardDoPost` e `ThreadDeComentarios`.
+- **Fonte de verdade afetada:** ADR 0004 §5 (card de causo), ajustado pelo ADR 0013 proposto. ADR 0011 (áudio de duelo privado) precisa de ADR novo para o áudio no post de X1.
 
 ## 2. Donos e Fronteiras (Iury)
 
@@ -17,16 +17,22 @@
 - **Especificação e Auditoria Visual:** Rian, a partir de [`docs/design/propostas/mural-chapado.html`](../../design/propostas/mural-chapado.html)
 - **Gate Arquitetural (Camillo / Lucas):** pendente (contrato do feed e waveform)
 - **Auditoria e Prova Real:** Marcelo
-- **ADR:** [0013, Mural: todo post tem arroto](../../technical/adr/0013-mural-todo-post-tem-arroto.md), aberto como proposto em 23/11/2026. Implementação só depois de aceito e com o Gate aprovado.
-- **Decisão pendente do Luiz:** aceitar o ADR 0013 depois do Gate do Camillo e do Lucas.
+- **ADR:** [0013, Mural: o arroto é o centro](../../technical/adr/0013-mural-o-arroto-e-o-centro.md), aberto como proposto em 23/11/2026. Implementação só depois de aceito e com o Gate aprovado.
+- **Gate Arquitetural:** Camillo e Lucas, ambos aprovado com condições ([Camillo](2026-11-23-mural-chapado-gate-camillo.md), [Lucas](2026-11-23-mural-chapado-gate-lucas.md)).
+- **Decisão pendente do Luiz:** aceitar o ADR 0013 e pedir o ADR novo sobre áudio de duelo publicado com consentimento (post de X1 com áudio).
 
 ### Decisões já tomadas pelo Luiz em 23/11/2026
 
 1. Mural chapado, sem card, só tema escuro.
-2. Todo post tem arroto. O texto é legenda opcional.
+2. O arroto é o centro do Mural, mas o post só de texto continua existindo, discreto e sem player.
 3. Botão "Bater X" entra nesta rodada.
 4. Barra inferior mobile entra, com o botão de arrotar no centro. O botão "+ Postar" e o título "MURAL" saem.
 5. Paleta: vale o que está implementado. Laranja `#ff5500` sobre `#0a0b0e`, como em `src/styles/designSystem.css`. O verde `#c6ff00` do `DESIGN.md` e do mapa de telas não vale para esta missão.
+
+6. Um anexo por post, como o banco impõe hoje.
+7. Uma única reação por pessoa. Tocar em outra troca, tocar na mesma remove.
+8. O resultado de X1 vira post no Mural, com placar e com áudio só de quem consentir publicar. Depende de ADR novo sobre o ADR 0011.
+9. O dado do Mural é tópico, não causo.
 
 ### Divergência de documentação
 
@@ -55,6 +61,10 @@ O `DESIGN.md` (§2) e o mapa de telas (§4) ainda descrevem verde `#c6ff00` sobr
 | Comentário com prévia e sheet com player fixo | Marcelo | Safari iOS e Chrome Android | pendente |
 | Post sem arroto julgado nunca mostra nota | Marcelo | Teste unitário e rota real com dado real | pendente |
 | Um áudio por vez, carga só ao entrar na tela | Camillo | Teste e perfil de rede no celular | pendente |
+| Uma reação por pessoa: trocar substitui, tocar na mesma remove | Lucas e Marcelo | Teste de RPC e rota real | pendente |
+| Post de texto aparece sem player e sem botão de ação | Rian | Rota real em 390 e 1440 | pendente |
+| Post de X1 só toca o áudio de quem consentiu | Lucas e Marcelo | Teste de permissão e rota real, depois do ADR novo | pendente |
+| Card otimista não mostra nota calculada no navegador | Marcelo | Teste unitário e rota real | pendente |
 | `scrollWidth === innerWidth` em 390 com dados reais | Marcelo | Rota real | pendente |
 | Antes e depois comparados, contrato visual E2E verde | Rian | Capturas desktop e mobile | pendente |
 | Alvos de toque >= 44px e safe area na barra inferior | Marcelo | Safari iOS | pendente |

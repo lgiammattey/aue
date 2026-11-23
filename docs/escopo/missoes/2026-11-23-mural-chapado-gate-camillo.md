@@ -2,7 +2,7 @@
 
 **Data:** 2026-11-23
 **Lado:** plataforma, performance e arquitetura. Dados, RPC, contagens e migração são do Lucas e não estão decididos aqui.
-**Insumos:** [ADR 0013](../../technical/adr/0013-mural-todo-post-tem-arroto.md) (proposto), [Cartão de Missão](2026-11-23-mural-chapado.md), [protótipo](../../design/propostas/mural-chapado.html), ADRs 0001, 0004, 0010 e 0012.
+**Insumos:** [ADR 0013](../../technical/adr/0013-mural-o-arroto-e-o-centro.md) (proposto), [Cartão de Missão](2026-11-23-mural-chapado.md), [protótipo](../../design/propostas/mural-chapado.html), ADRs 0001, 0004, 0010 e 0012.
 
 ## Parecer: APROVADO COM CONDIÇÕES
 

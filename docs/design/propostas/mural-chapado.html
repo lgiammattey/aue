@@ -102,6 +102,10 @@ svg { display: block; flex: none; }
 .x1 .quem { font: 600 14px/20px var(--font-body); color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .x1 .vs { padding-bottom: 12px; color: var(--muted); font: 700 16px/24px var(--font-body); }
 
+.x1-audio { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.player--mini { margin-top: 0; gap: 8px; padding: 0; }
+.player--mini .play { background: var(--fog); color: var(--fg); }
+.priv { color: var(--muted); font: 400 13px/18px var(--font-body); text-align: right; }
 .rwrap { position: relative; margin-top: 8px; }
 .reacoes { display: flex; flex-wrap: wrap; gap: 4px; margin-left: -10px; }
 .chip, .ab { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; font: 700 13px/16px var(--font-body); font-variant-numeric: tabular-nums; }
@@ -279,6 +283,10 @@ svg { display: block; flex: none; }
       legenda: 'Ganhei por 3. Quem quer o próximo?',
       r: { '🤘': 6, '👍': 3 },
       cm: [{ n: 'kayky_aue', t: '4h', x: 'Foi sorte. Revanche já.' }, { n: 'giamz', t: '3h', x: 'Entra na fila que eu sou o próximo.' }] },
+    { id: 'p5', nome: 'rian_aue', handle: 'rian_aue', quando: '6h', origem: 'texto', tipo: 'texto', dur: 0, seed: 1, tropa: false,
+      legenda: 'Quem topa um X1 no intervalo da reunião das 15h?',
+      r: { '👍': 4, '🤙': 2 },
+      cm: [{ n: 'giamz', t: '5h', x: 'Eu topo. Leva o fôlego.' }, { n: 'lucas_aue', t: '4h', x: 'Reunião que é reunião termina com arroto.' }] },
     { id: 'p4', nome: 'tiago_aue', handle: 'tiago_aue', quando: '1d', origem: 'arena', nota: 91, dur: 8, seed: 45, tropa: false,
       legenda: 'Primeira vez que passo dos 90. Sem gás, só técnica.',
       r: { '🍺': 9, '🤘': 7, '👍': 4, '🤙': 2 },
@@ -291,7 +299,7 @@ svg { display: block; flex: none; }
   function find(id) { return posts.filter(function (p) { return p.id === id; })[0]; }
   function fmt(s) { s = Math.floor(s); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function nOf(p, e) { var m = state.mine[p.id] || {}; return (p.r[e] || 0) + (m[e] ? 1 : 0); }
+  function nOf(p, e) { return (p.r[e] || 0) + (state.mine[p.id] === e ? 1 : 0); }
   function emojisOf(p) {
     return REACOES.filter(function (e) { return nOf(p, e) > 0; }).sort(function (a, b) { return nOf(p, b) - nOf(p, a); });
   }
@@ -315,22 +323,27 @@ svg { display: block; flex: none; }
       (temNota ? '<div class="nota' + (p.nota >= 90 ? ' ouro' : '') + '"><small>NOTA</small><b aria-label="Nota ' + p.nota + '">' + p.nota + '</b></div>' : '') +
       '</div>';
   }
-  var ORIGEM = { arena: 'da Arena', mural: 'gravado no mural', x1: 'X1' };
+  var ORIGEM = { arena: 'da Arena', mural: 'gravado no mural', x1: 'X1', texto: 'só texto' };
   function ctaOf(p) {
+    if (p.tipo === 'texto') return null;
     if (p.tipo === 'x1') return { t: 'Revanche', i: 'repeat' };
     if (p.nota != null) return { t: 'Bater ' + p.nota, i: 'bolt' };
     return { t: 'Levar pra Arena', i: 'mic' };
   }
   function postHTML(p) {
-    var m = state.mine[p.id] || {}, cta = ctaOf(p), ultimo = p.cm[p.cm.length - 1], miolo, chips = '';
+    var mi = state.mine[p.id] || null, cta = ctaOf(p), ultimo = p.cm[p.cm.length - 1], miolo, chips = '';
     emojisOf(p).forEach(function (e) {
-      chips += '<button class="chip" type="button" data-act="react" data-id="' + p.id + '" data-e="' + e + '" aria-pressed="' + (m[e] ? 'true' : 'false') + '" aria-label="' + e + ', ' + nOf(p, e) + ' reações"><span class="e">' + e + '</span>' + nOf(p, e) + '</button>';
+      chips += '<button class="chip" type="button" data-act="react" data-id="' + p.id + '" data-e="' + e + '" aria-pressed="' + (mi === e ? 'true' : 'false') + '" aria-label="' + e + ', ' + nOf(p, e) + ' reações"><span class="e">' + e + '</span>' + nOf(p, e) + '</button>';
     });
     if (p.tipo === 'x1') {
       var aGanha = p.a.v >= p.b.v;
       miolo = '<div class="x1"><div class="lado' + (aGanha ? '' : ' perde') + '"><span class="n">' + p.a.v + '</span><span class="quem">' + esc(p.a.n) + '</span></div>' +
         '<span class="vs" aria-hidden="true">×</span>' +
-        '<div class="lado lado--b' + (aGanha ? ' perde' : '') + '"><span class="n">' + p.b.v + '</span><span class="quem">' + esc(p.b.n) + '</span></div></div>';
+        '<div class="lado lado--b' + (aGanha ? ' perde' : '') + '"><span class="n">' + p.b.v + '</span><span class="quem">' + esc(p.b.n) + '</span></div></div>' +
+        '<div class="x1-audio"><div class="player player--bare player--mini" data-id="' + p.id + '"><button class="play" type="button" data-act="play" data-id="' + p.id + '" aria-pressed="false" aria-label="Ouvir o arroto de ' + esc(p.a.n) + '">' + PLAY + '</button><span class="tempo">' + fmt(p.dur) + '</span></div>' +
+        '<span class="priv">Áudio de ' + esc(p.b.n) + ' é privado</span></div>';
+    } else if (p.tipo === 'texto') {
+      miolo = '';
     } else {
       miolo = playerHTML(p, false);
     }
@@ -347,7 +360,7 @@ svg { display: block; flex: none; }
       '<button class="ab" type="button" data-act="comment" data-id="' + p.id + '" aria-label="Comentários, ' + p.cm.length + '">' + ic('chat', 20) + p.cm.length + '</button>' +
       '<button class="ab" type="button" data-act="share" aria-label="Compartilhar">' + ic('share', 20) + '</button>' +
       '<button class="ab" type="button" data-act="save" data-id="' + p.id + '" aria-pressed="' + (state.saved[p.id] ? 'true' : 'false') + '" aria-label="Salvar">' + ic('save', 20) + '</button>' +
-      '<button class="cta" type="button" data-act="cta" data-id="' + p.id + '">' + ic(cta.i, 18) + cta.t + '</button></div>' +
+      (cta ? '<button class="cta" type="button" data-act="cta" data-id="' + p.id + '">' + ic(cta.i, 18) + cta.t + '</button>' : '') + '</div>' +
       '<button class="previa" type="button" data-act="comment" data-id="' + p.id + '"><b>' + esc(ultimo.n) + '</b> <span class="t">' + esc(ultimo.x) + '</span><span class="ver">Ver os ' + p.cm.length + ' comentários</span></button>' +
       '</article>';
   }
@@ -442,6 +455,9 @@ svg { display: block; flex: none; }
       '<div class="sh-body spec">' +
       '<h3>Tipografia</h3>' + rows(tipo) +
       '<h3>Espaçamento</h3>' + rows(esp) +
+      '<h3>Reação</h3><p>Uma por pessoa. Tocar em outra troca, tocar na mesma remove.</p>' +
+      '<h3>Post só de texto</h3><p>Sem player e sem botão de ação. Mesma legenda de 16/24, mesmas reações e comentários. O arroto continua sendo o destaque do Mural.</p>' +
+      '<h3>Post de X1</h3><p>Placar dos dois. Só toca o áudio de quem consentiu publicar. O do outro aparece como privado.</p>' +
       '<h3>Molduras</h3><p>Uma superfície por post: o player. Nada dentro dele. Reação, ação e comentário ficam direto no fundo. Popover de reação e sheet de comentários são molduras funcionais.</p>' +
       '<h3>Cor (código atual)</h3><div class="sw"><span><i style="background:#0a0b0e"></i>bg</span><span><i style="background:#151820"></i>surface</span><span><i style="background:#232834"></i>border</span><span><i style="background:#f3f4f6"></i>fg</span><span><i style="background:#8b92a3"></i>muted</span><span><i style="background:#ff5500"></i>accent</span><span><i style="background:#f5b82e"></i>gold</span></div>' +
       '<p style="margin-top:8px">Accent em 2 lugares, sempre: o ponto de exclamação do logo e o botão de arrotar. Tocar um áudio não acende laranja.</p>' +
@@ -462,17 +478,16 @@ svg { display: block; flex: none; }
       if (state.id === id) { state.id = null; } else { state.id = id; state.t = 0; }
       sync();
     } else if (act === 'react' || act === 'pick') {
-      e = el.getAttribute('data-e'); state.mine[id] = state.mine[id] || {};
-      state.mine[id][e] = !state.mine[id][e];
+      e = el.getAttribute('data-e'); state.mine[id] = state.mine[id] === e ? null : e;
       if (act === 'pick') closePop();
       var keep = $('.sheet'); if (!keep) renderFeed();
     } else if (act === 'plus') {
       var jaAberto = el.getAttribute('aria-expanded') === 'true';
       closePop();
       if (!jaAberto) {
-        p = find(id); m = state.mine[id] || {};
+        p = find(id); m = state.mine[id] || null;
         var pop = document.createElement('div'); pop.className = 'pop'; pop.setAttribute('role', 'group'); pop.setAttribute('aria-label', 'Escolher reação');
-        pop.innerHTML = REACOES.map(function (r) { return '<button type="button" data-act="pick" data-id="' + id + '" data-e="' + r + '" aria-pressed="' + (m[r] ? 'true' : 'false') + '" aria-label="Reagir com ' + r + '">' + r + '</button>'; }).join('');
+        pop.innerHTML = REACOES.map(function (r) { return '<button type="button" data-act="pick" data-id="' + id + '" data-e="' + r + '" aria-pressed="' + (m === r ? 'true' : 'false') + '" aria-label="Reagir com ' + r + '">' + r + '</button>'; }).join('');
         el.closest('.rwrap').appendChild(pop); el.setAttribute('aria-expanded', 'true');
       }
     } else if (act === 'comment') {

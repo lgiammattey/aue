@@ -4,11 +4,13 @@
   color: var(--fg, #f3f4f6);
 }
 
+/* Ranking chapado (Missão 0057, DESIGN §4.1): título + linhas + filete, sem caixa. */
 .top-arrotadores {
-  padding: 14px;
-  border: 1px solid var(--border, #232834);
-  border-radius: var(--radius-md, 6px);
-  background: var(--surface, #151820);
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--border, #232834);
+  border-radius: 0;
+  background: transparent;
 }
 
 .top-arrotadores__heading > span {
@@ -192,7 +194,7 @@
 
 /* Faixa compacta mobile/tablet */
 .top-arrotadores--faixa {
-  padding: 12px 14px;
+  padding: 12px 0;
 }
 
 .top-arrotadores__faixa-topo {

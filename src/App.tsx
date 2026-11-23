@@ -12,6 +12,7 @@ const PoliticaDePrivacidade = lazy(() => import('./features/legal/PoliticaDePriv
 const TermosDeUso = lazy(() => import('./features/legal/TermosDeUso').then((m) => ({ default: m.TermosDeUso })));
 const ComoJogar = lazy(() => import('./features/publico/ComoJogar').then((m) => ({ default: m.ComoJogar })));
 const ComoArrotar = lazy(() => import('./features/publico/ComoArrotar').then((m) => ({ default: m.ComoArrotar })));
+const HomeEn = lazy(() => import('./features/publico/HomeEn').then((m) => ({ default: m.HomeEn })));
 const TiposDeArroto = lazy(() => import('./features/publico/TiposDeArroto').then((m) => ({ default: m.TiposDeArroto })));
 const RankingDeArrotos = lazy(() => import('./features/publico/RankingDeArrotos').then((m) => ({ default: m.RankingDeArrotos })));
 const TelaComunidade = lazy(() => import('./features/comunidade/TelaComunidade').then((m) => ({ default: m.TelaComunidade })));
@@ -113,6 +114,12 @@ function EntradaInicial({ incluirArenaNoTopo = false }: { readonly incluirArenaN
   );
 }
 
+/** A faixa +18 fala o idioma da página em que a pessoa está. */
+function AvisoMaioridadeDaRota() {
+  const { pathname } = useLocation();
+  return <AvisoMaioridade idioma={pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'pt'} />;
+}
+
 function EntradaRaiz() {
   if (FLAGS.arenaV2) {
     return <EntradaDaArena conteudoDoRepouso={<ConteudoDaHome />} />;
@@ -174,8 +181,8 @@ export function App() {
   return (
     <>
       <AvisoDeOffline />
-      <AvisoMaioridade />
       <Router>
+        <AvisoMaioridadeDaRota />
         <RastreadorDePaginas telemetria={telemetriaDeNavegacao} />
         <Suspense fallback={null}>
         <Routes>
@@ -228,6 +235,7 @@ export function App() {
 
           {/* Páginas Públicas e Legais */}
           <Route path="/como-jogar" element={<ComoJogar />} />
+          <Route path="/en" element={<HomeEn />} />
           <Route path="/como-arrotar" element={<ComoArrotar />} />
           <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
           <Route path="/ranking-de-arrotos" element={<RankingDeArrotos />} />

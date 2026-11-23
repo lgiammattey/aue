@@ -11,6 +11,8 @@
     "rewrites": [
       { "source": "/privacidade", "destination": "/privacidade.html" },
       { "source": "/termos", "destination": "/termos.html" },
+      { "source": "/en", "destination": "/en.html" },
+      { "source": "/en/", "destination": "/en.html" },
       { "source": "/como-jogar", "destination": "/como-jogar.html" },
       { "source": "/como-arrotar", "destination": "/como-arrotar.html" },
       { "source": "/tipos-de-arroto", "destination": "/tipos-de-arroto.html" },

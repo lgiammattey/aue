@@ -21,6 +21,7 @@
 .admin__grade { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 1fr); gap: 12px 40px; margin-top: 12px; }
 .admin__grade--movimento { grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); }
 .admin__grade--final { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+.admin__grade--unico { grid-template-columns: minmax(0, 1fr); }
 .admin__bloco { min-width: 0; padding: 24px 0 12px; border-top: 1px solid var(--border); }
 .admin__section-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
 .admin__section-head h2 { margin: 0; font-size: 21px; line-height: 1.05; letter-spacing: -.025em; }

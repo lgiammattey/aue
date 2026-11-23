@@ -18,7 +18,7 @@
 .app--perfil-arena .od-profile__handle { font: 700 13px/1.4 var(--font-mono, monospace); color: var(--muted, #8b92a3); }
 .app--perfil-arena .od-profile__athlete .od-profile__identity { padding-top: 16px; }
 .app--perfil-arena .od-profile__bio { max-width: 680px; font-size: 15px; line-height: 1.55; color: var(--fg-secondary, #c8cdd8); }
-.app--perfil-arena .od-profile__dashboard { margin-top: 20px; padding: 20px; border: 1px solid var(--border, #232834); border-radius: var(--radius-md, 6px); background: var(--surface, #151820); }
+.app--perfil-arena .od-profile__dashboard { margin-top: 20px; padding: 20px 0 0; border: 0; border-top: 1px solid var(--border, #232834); border-radius: 0; background: transparent; }
 .app--perfil-arena .od-profile__dashboard-head h2 { font-size: clamp(24px, 3vw, 34px); text-transform: uppercase; }
 .app--perfil-arena .od-profile__dashboard-stats { margin-top: 16px; }
 .app--perfil-arena .od-profile__dashboard .od-profile__best-score, .app--perfil-arena .od-profile__dashboard .od-profile__best-empty { font-size: clamp(38px, 5vw, 54px); font-variant-numeric: tabular-nums; }
@@ -32,7 +32,7 @@
 .app--perfil-arena .od-profile .od-profile__activity { margin-top: 0; padding: 24px 0; border: 0; border-radius: 0; background: transparent; }
 .app--perfil-arena .od-profile__activity-head h2 { font: 400 28px/1.1 var(--font-display, 'Anton', sans-serif); text-transform: uppercase; }
 .app--perfil-arena .od-profile__record-cta, .app--perfil-arena .od-profile__post { border-radius: var(--radius-sm, 4px); box-shadow: none; }
-.app--perfil-arena .od-profile__post { border-bottom: 1px solid var(--border, #232834); }
+.app--perfil-arena .od-profile__post { padding: 16px 0; background: transparent; border-bottom: 1px solid var(--border, #232834); }
 .app--perfil-arena .card-do-post { margin: 0; padding: 20px 0; border: 0; border-bottom: 1px solid var(--border, #232834); border-radius: 0; background: transparent; }
 .app--perfil-arena .post-community-avatar { display: none; }
 .app--perfil-arena a:focus-visible, .app--perfil-arena button:focus-visible { outline: 3px solid var(--accent, #ff5500); outline-offset: 3px; }
@@ -45,9 +45,10 @@
   .app--perfil-arena .od-profile .od-profile__tab-btn { padding: 10px 14px; }
 }
 
-/* Cards de atividade no perfil preservam superfície neutra carbono */
+/* Atividade do perfil: sem caixa por item (Missão 0057) */
 .app--perfil-arena .od-profile .od-profile__activity--posts { max-width: none; }
-.app--perfil-arena .od-profile__activity .card-do-post--perfil { margin: 12px 0; padding: 16px 14px 10px; border: 1px solid var(--border, #232834); border-radius: var(--radius-md, 6px); background: var(--surface, #151820); box-shadow: none; }
-.app--perfil-arena .od-profile__activity .card-do-post--perfil:hover { background: var(--surface-2, #1d212c); }
+/* Post no perfil em filete, sem caixa (Missão 0057, decisão do Luiz): linha com separador, como na timeline do X. */
+.app--perfil-arena .od-profile__activity .card-do-post--perfil { margin: 0; padding: 20px 0; border: 0; border-bottom: 1px solid var(--border, #232834); border-radius: 0; background: transparent; box-shadow: none; }
+.app--perfil-arena .od-profile__activity .card-do-post--perfil:hover { background: transparent; }
 
 .app--perfil-arena .card-do-post--perfil .post-avatar-col::after { bottom: 0; }

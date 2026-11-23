@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PortaDeAdministracao, ResumoAdministrativo } from '../../portas/administracao';
+import { ConexaoComOAnalyticsPendente } from '../../portas/analyticsAdministrativo';
 import { TelaAdministracao } from './TelaAdministracao';
 
 function portaComResumo(alteracoes: Partial<ResumoAdministrativo> = {}): PortaDeAdministracao {
@@ -28,6 +29,26 @@ describe('TelaAdministracao', () => {
     tela.unmount();
     render(<TelaAdministracao porta={portaComResumo({ acompanhamentoDeAcessosIniciadoEm: null })} />);
     expect(await screen.findByText('A coleta de acessos ainda não está disponível.')).toBeTruthy();
+  });
+
+  it('mostra a conexão com o GA4 como pendente, sem inventar números', async () => {
+    render(<TelaAdministracao porta={portaComResumo()} analytics={{ obterResumo: vi.fn(async () => { throw new ConexaoComOAnalyticsPendente(); }) }} />);
+    expect(await screen.findByText(/Conexão com o GA4 pendente/)).toBeTruthy();
+    expect(screen.queryByText(/Volta em 1 dia/)).toBeNull();
+  });
+
+  it('desenha origem, dispositivo e retorno quando o GA4 responde', async () => {
+    const analytics = { obterResumo: vi.fn(async () => ({ inicio: '2026-10-01', fim: '2026-10-22', origens: [{ nome: 'zap', sessoes: 40 }], dispositivos: [{ nome: 'mobile', sessoes: 55 }], retornoEmUmDia: 0.25, retornoEmSeteDias: null })) };
+    render(<TelaAdministracao porta={portaComResumo()} analytics={analytics} />);
+    expect(await screen.findByText('Origem: zap')).toBeTruthy();
+    expect(screen.getByText('Dispositivo: mobile')).toBeTruthy();
+    expect(screen.getByText('25%')).toBeTruthy();
+    expect(screen.getByText('—')).toBeTruthy();
+  });
+
+  it('GA4 fora do ar aparece como indisponível, não como pendente', async () => {
+    render(<TelaAdministracao porta={portaComResumo()} analytics={{ obterResumo: vi.fn(async () => { throw new Error('rede'); }) }} />);
+    expect(await screen.findByText('GA4 indisponível agora.')).toBeTruthy();
   });
 
   it.each([30, 90])('preserva a atividade de todos os %i dias ao agrupar barras', async (quantidade) => {

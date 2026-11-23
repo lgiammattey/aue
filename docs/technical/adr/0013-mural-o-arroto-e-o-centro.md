@@ -1,12 +1,12 @@
 # ADR 0013: Mural, o arroto é o centro
 
-**Status:** proposto. Decisão de produto do Luiz em 23/11/2026. Falta aceitar depois do Gate Arquitetural (parecer do Camillo e do Lucas: aprovado com condições, nos arquivos `2026-11-23-mural-chapado-gate-*.md`).
+**Status:** aceito pelo Luiz em 23/11/2026. O Gate Arquitetural deu parecer aprovado com condições (Camillo e Lucas, nos arquivos `2026-11-23-mural-chapado-gate-*.md`), e as condições entram na implementação. A parte do post de X1 com áudio só vale depois do ADR 0014.
 **Data:** 2026-11-23
 **Decisão de produto:** Luiz
 **Complementa:** ADR 0010 (comunidades, tópicos e respostas) e ADR 0012 (nota do áudio publicado)
 **Ajusta, quando aceito:** ADR 0004 §5 (card de causo com texto como protagonista)
 **Mantém:** ADR 0001, ADR 0004 §2 itens 2 e 3, ADR 0005, ADR 0011
-**Depende de:** ADR novo sobre áudio de duelo publicado com consentimento (ver "Depende de")
+**Depende de:** ADR 0014 (resultado de X1 no Mural com áudio consentido), ainda proposto
 **Vale para:** o Mural (`/feed`) e o composer que publica nele
 
 ---
@@ -39,7 +39,7 @@ O Luiz quer outra coisa: o Mural serve para ver os arrotos que a galera mandou, 
 
 ## Depende de
 
-- **Áudio de duelo publicado.** O ADR 0011 mantém o áudio de duelo privado. Tocar o áudio de quem consentiu num post de X1 exige consentimento por duelista na hora, e isso toca o §8 item 9 do ADR 0001 (afrouxar o acesso a áudio exposto). Precisa de ADR próprio, a abrir antes de implementar essa parte. Até lá o post de X1 existe só com o placar.
+- **Áudio de duelo publicado.** O ADR 0011 mantém o áudio de duelo privado. O [ADR 0014](0014-x1-no-mural-com-audio-consentido.md) propõe consentimento por duelista, na hora, com cópia do áudio para o Mural e sem abrir o bucket do duelo. Até ele ser aceito, o post de X1 existe só com o placar.
 
 ## O que este ADR não decide
 

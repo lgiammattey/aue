@@ -25,7 +25,8 @@ nome de pasta dentro de uma camada, refactor. Isso é PR.
 | [0008](0008-paginas-publicas-dos-grupos.md) | Páginas públicas dos grupos externos no build | aceito |
 | [0009](0009-identidade-social-promovida.md) | Identidade social promovida | aceito |
 | [0010](0010-comunidades-topicos-e-respostas.md) | Comunidades, tópicos e respostas (sem feed solto) — decisão aceita; migração e aceite de implementação pendentes | aceito |
-| [0013](0013-mural-o-arroto-e-o-centro.md) | Mural: o arroto é o centro, texto e resultado de X1 também postam | proposto |
+| [0013](0013-mural-o-arroto-e-o-centro.md) | Mural: o arroto é o centro, texto e resultado de X1 também postam | aceito |
+| [0014](0014-x1-no-mural-com-audio-consentido.md) | Resultado de X1 no Mural, com áudio só de quem consentir | proposto |
 
 ---
 

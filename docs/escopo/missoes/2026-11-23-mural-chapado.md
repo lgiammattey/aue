@@ -17,9 +17,10 @@
 - **Especificação e Auditoria Visual:** Rian, a partir de [`docs/design/propostas/mural-chapado.html`](../../design/propostas/mural-chapado.html)
 - **Gate Arquitetural (Camillo / Lucas):** pendente (contrato do feed e waveform)
 - **Auditoria e Prova Real:** Marcelo
-- **ADR:** [0013, Mural: o arroto é o centro](../../technical/adr/0013-mural-o-arroto-e-o-centro.md), aberto como proposto em 23/11/2026. Implementação só depois de aceito e com o Gate aprovado.
+- **ADR:** [0013, Mural: o arroto é o centro](../../technical/adr/0013-mural-o-arroto-e-o-centro.md), aceito pelo Luiz em 23/11/2026, com o Gate aprovado com condições.
 - **Gate Arquitetural:** Camillo e Lucas, ambos aprovado com condições ([Camillo](2026-11-23-mural-chapado-gate-camillo.md), [Lucas](2026-11-23-mural-chapado-gate-lucas.md)).
-- **Decisão pendente do Luiz:** aceitar o ADR 0013 e pedir o ADR novo sobre áudio de duelo publicado com consentimento (post de X1 com áudio).
+- **ADR do X1 com áudio:** [0014](../../technical/adr/0014-x1-no-mural-com-audio-consentido.md), proposto. Fecha o Gate do post de X1 quando aceito.
+- **Decisão pendente do Luiz:** aceitar o mecanismo de consentimento do ADR 0014.
 
 ### Decisões já tomadas pelo Luiz em 23/11/2026
 
@@ -74,4 +75,4 @@ O `DESIGN.md` (§2) e o mapa de telas (§4) ainda descrevem verde `#c6ff00` sobr
 - **Arquivos/módulos alterados:** nenhum código nesta rodada. Entram só o protótipo e este cartão.
 - **Parecer do Marcelo:** pendente
 - **Veredito Final do Tiago:** pendente
-- **Pendências ou decisão necessária do Luiz:** aceitar o ADR 0013 depois do Gate.
+- **Pendências ou decisão necessária do Luiz:** aceitar o mecanismo de consentimento do ADR 0014. Medir no banco quantos posts com áudio existem antes de ligar o flag.

@@ -39,4 +39,3 @@ O cabeçalho é YAML (em `.claude/`) ou TOML (em `.codex/`), e um valor sem aspa
 
 As skills em `.agents/skills/` são procedimentos. Quem as usa é quem tem a área: Tiago (`revisar-produto`, `alinhar-com-luiz`, `visao-do-produto`, `tom-de-voz`, `filtro-anti-ia`, `orquestrar-squad`, `padrao-git-e-issues`), Diego (`design-ux`, `design-ui`, `construir-interface`, `garantir-web`, `escrever-testes`) e Camillo (`conselho-arquitetura`, `modelar-dados-e-api`, `google-search-console`, `escrever-testes`). `auditar-qualidade` e `auditar-modularidade` são da auditoria cruzada: quem não escreveu o código as roda.
 
-Algumas skills ainda falam em "Bonde", "Marcelo" ou "Rian". Onde isso aparecer, leia como Tropa e como o papel de quem audita ou desenha, e corrija quando passar por ali.

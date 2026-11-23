@@ -21,7 +21,6 @@ Procedimento do **Camillo (SEO técnico e Google Search Console)** para garantir
      - `/como-arrotar` (Guia educativo e de atração de tráfego)
      - `/como-jogar` (Regras e tutorial do jogo)
      - `/privacidade` e `/termos`
-     - Páginas públicas de comunidades em alta
    - Garantir que URLs privadas de duelo X1 e rotas autenticadas **não** vazem no sitemap.
    - Sincronizar paridade com [`public/robots.txt`](file:///d:/Meus%20Documentos/Projetos/GitHub/aue/public/robots.txt).
 
@@ -32,7 +31,7 @@ Procedimento do **Camillo (SEO técnico e Google Search Console)** para garantir
 
 4. **Experiência na Página & Core Web Vitals:**
    - Acompanhar relatórios de LCP (Largest Contentful Paint), INP (Interaction to Next Paint) e CLS (Cumulative Layout Shift) reportados pelo Search Console.
-   - Alertar imediatamente o **Diego** e o **Camillo** se qualquer asset de áudio, fonte ou script causar lentidão na renderização da landing ou feed.
+   - Alertar imediatamente o **Diego** e o **Camillo** se qualquer asset de áudio, fonte ou script causar lentidão na renderização da landing ou mural.
 
 5. **Erros de Cobertura e Indexação:**
    - Auditar relatórios de erros 404, falhas de redirecionamento, URLs bloqueadas por robots.txt e páginas rastreadas mas não indexadas.

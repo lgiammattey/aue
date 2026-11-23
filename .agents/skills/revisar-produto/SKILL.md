@@ -29,11 +29,11 @@ Antes de acionar a oficina:
 
 Com a evidência do auditor (funcional e testes) e a fidelidade visual 1:1 com `docs/design/prototipo/`), avalie:
 
-1. **Necessidade:** Resolve uma dor real da pessoa no Bonde do Arroto ou na Arena sem adicionar fricção?
-2. **Valor:** Deixa o ato de arrotar, ouvir causos no feed, debater ou desafiar no X1 mais divertido?
+1. **Necessidade:** Resolve uma dor real da pessoa no Arena ou no mural sem adicionar fricção?
+2. **Valor:** Deixa o ato de arrotar, receber a nota, ouvir outros arrotos ou desafiar no X1 mais divertido?
 3. **Coerência:** Respeita o Design System v5 (Anton + Archivo, temas escuro/claro, sem gradientes falsos, máximo 2 verdes por estado)?
 4. **Experiência:** Está responsivo nas 3 larguras (Desktop 3 colunas, Tablet ícones, Webapp Mobile com alvos de toque >= 44px e safe area)?
-5. **Funcionamento Ponta a Ponta:** O áudio toca instantaneamente no feed? A Arena grava, valida e revela a nota sem engasgos?
+5. **Funcionamento Ponta a Ponta:** O áudio toca instantaneamente no mural? A Arena grava, valida e revela a nota sem engasgos?
 6. **Qualidade e Prova:** O auditor auditou testes, build e estados de resiliência (`MIC_ERROR`, `NO_SOUND`)? Falta de prova vira `NÃO VALIDADO`.
 7. **Simplicidade:** Foi feito com o mínimo de código e modularidade clara, sem complexidade prematura?
 

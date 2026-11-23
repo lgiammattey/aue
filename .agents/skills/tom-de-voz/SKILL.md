@@ -1,6 +1,6 @@
 ---
 name: tom-de-voz
-description: Aplica a voz autêntica, zoeira e direta do Auê! na copy do Bonde do Arroto, comunidades e Arena.
+description: Aplica a voz autêntica, zoeira e direta do Auê! na copy da Arena, do mural e do X1.
 ---
 
 # Skill: tom-de-voz

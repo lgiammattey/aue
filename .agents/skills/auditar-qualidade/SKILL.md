@@ -30,13 +30,13 @@ Qualquer falha bloqueia a entrega imediatamente (`BLOQUEIA`).
 
 Verificação contra as 6 fases de [`JORNADA.md`](../../../docs/jogo/JORNADA.md):
 1. **Descoberta:** Landing rápida ("Tá rolando agora"), atalho "Arrotar sem conta" leva direto à Arena, login sem fricção.
-2. **Bonde do Arroto:** Feed de causos com áudios reproduzíveis, waveform e badges de score. Um áudio tocando pausa qualquer outro.
+2. **Mural:** arrotos com áudios reproduzíveis, waveform e badges de score. Um áudio tocando pausa qualquer outro.
 3. **Arena:** Ciclo `IDLE → RECORDING → VALIDATING → JUDGING → RESULT`. Bolha reage ao microfone sem travamentos.
 4. **Resiliência:**
    - `MIC_ERROR`: Instrução clara se permissão for negada.
    - `NO_SOUND`: Convite a tentar de novo sem penalizar a nota.
    - Desligamento de microfone (`MediaStreamTrack.stop()`) em todos os desfechos.
-5. **Depois da Nota:** Geração de card vertical 9:12 sem deformar layout, opção de postar na comunidade e desafio X1.
+5. **Depois da Nota:** Geração de card vertical 9:12 sem deformar layout, opção de postar no mural e desafio X1.
 6. **X1 & Revanche:** Placar versus sem vermelho no derrotado; botão Revanche aciona contagem `3, 2, 1` e reinicia disputa sem criar rota fantasma.
 
 ---

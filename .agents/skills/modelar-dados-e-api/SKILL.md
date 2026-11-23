@@ -1,11 +1,11 @@
 ---
 name: modelar-dados-e-api
-description: Guia para Camillo desenhar contratos, tabelas, feeds e motor de áudio do Auê.
+description: Guia para Camillo desenhar contratos, tabelas, mural e motor de áudio do Auê.
 ---
 
 # Skill: modelar-dados-e-api
 
-Procedimento do **Camillo** (Áudio, Backend e Arquitetura) para desenhar contratos, APIs, tabelas e módulos da rede social de arrotadores e da Arena.
+Procedimento do **Camillo** (Áudio, Backend e Arquitetura) para desenhar contratos, APIs, tabelas e módulos do jogo e do mural.
 
 ---
 
@@ -13,12 +13,12 @@ Procedimento do **Camillo** (Áudio, Backend e Arquitetura) para desenhar contra
 
 1. **Camadas Claras:**
    - **Motor de Áudio & Score (`src/features/audio` / `src/features/score`):** YAMNet, Web Audio API e algoritmos de pontuação isolados de qualquer componente visual.
-   - **Social & Comunidades (`src/features/feed` / `src/features/communities`):** Queries de feed paginado, posts com áudio, curtidas, respostas e dados de comunidades.
+   - **Mural e perfil:** queries de mural paginado, posts com áudio, curtidas e respostas.
    - **Portas de Plataforma (`src/plataforma/`):** Acesso a microfone, armazenamento local e cliente Supabase vivem estritamente atrás de portas em `src/portas/`.
    - **Telas e UI (`src/components/`, `src/routes/`):** Somente apresentação e consumo das portas.
 
 2. **Supabase & Segurança (RLS):**
-   - Áudios e causos públicos no feed têm leitura livre.
+   - Áudios e causos públicos no mural têm leitura livre.
    - Desafios privados (X1) só podem ser ouvidos e respondidos pelos participantes autorizados.
    - Moderação e denúncias com flag de revisão.
    - RPCs determinísticas para cálculo e persistência de pontuação oficial sem manipulação pelo cliente.

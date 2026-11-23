@@ -1,6 +1,6 @@
 ---
 name: design-ui
-description: Procedimento do Diego para especificar a UI do Auê!, Bonde do Arroto e Arena com fidelidade 1:1 ao Design System v5.
+description: Procedimento do Diego para especificar a UI do Auê! e Arena com fidelidade 1:1 ao Design System v5.
 ---
 
 # Skill: design-ui
@@ -12,7 +12,7 @@ Procedimento do **Diego** para transformar os fluxos da Tropa e da Arena em **es
 ## 1. Princípios Visuais Inegociáveis
 
 1. **Fundo Chapado:** `--bg` puro (`#0a0a08` no dark, `#f5f3ea` no light). Sem cards flutuantes genéricos com bordas gradientes ou blur exagerado. A interface respira na solidez dos tons.
-1b. **Card é exceção:** só item repetível (post, X1, comunidade em grade) e moldura funcional (modal, sheet). Seção, ranking, filtro, métrica e formulário ficam chapados, separados por espaço e filete de 1px. Proibido card dentro de card. Regra em `DESIGN.md` §4.1.
+1b. **Card é exceção:** só item repetível (post, X1) e moldura funcional (modal, sheet). Seção, ranking, filtro, métrica e formulário ficam chapados, separados por espaço e filete de 1px. Proibido card dentro de card. Regra em `DESIGN.md` §4.1.
 2. **Orçamento do Verde Ácido (`--accent: #c6ff00`):** No máximo **2 aparições simultâneas por estado**. Prioridade: (1) Bolha em gravação/pico; (2) Auê Score em revelação/resultado; (3) CTA primário ativo. Proibido pintar badges secundárias ou textos corridos de verde.
 3. **Temas Escuro e Claro:** Suporte nativo oficial com persistência via `localStorage ('bda-theme')`.
    - Dark: `--bg: #0a0a08`, `--surface: #171712`, `--surface-2: #1f1f18`, `--fg: #f5f3ea`, `--muted: #93917f`, `--border: #2b2a22`, `--border-strong: #74725f`, `--ind: #c6ff00`.
@@ -41,7 +41,6 @@ Referência viva: [`docs/design/prototipo/Design System.dc.html`](../../../docs/
 - Avatar circular (44px) com iniciais em peso 700 ou foto real.
 - Nome e handle (`@usuario`) + timestamp em mono.
 - Texto do causo (até 280 caracteres).
-- Comunidade vinculada: *"Postado em [Nome da Comunidade]"*.
 - Player de áudio integrado: botão play circular (40px), waveform com barras verticais reativas, duração em mono e badge de nota em Anton com pill `--accent`.
 - Barra de ações: Responder (threads), Repostar, Curtir (coração com transição pop), Desafiar autor e Compartilhar.
 
@@ -63,7 +62,7 @@ Referência viva: [`docs/design/prototipo/Design System.dc.html`](../../../docs/
 
 - **Desktop (>= 1060px):**
   - Coluna Esquerda (275px): navegação vertical e botão de postar/arrotar.
-  - Coluna Central (600px): timeline do Bonde do Arroto ou Arena centralizada, com bordas laterais 1px `--border`.
+  - Coluna Central (600px): mural ou Arena centralizada, com bordas laterais 1px `--border`.
   - Coluna Direita (320px): busca, ranking de hoje, quem seguir e X1 abertos.
 - **Tablet (700px a 1059px):**
   - Coluna esquerda compacta com ícones (76px).

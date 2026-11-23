@@ -16,23 +16,17 @@ externo tem autoridade sobre o que está escrito aqui.
 
 > **A definição vigente do produto é [`docs/jogo/AUE.md`](docs/jogo/AUE.md).** Onde o resto desta seção ou outro documento a contradisser, vale ela.
 
-**Auê é uma experiência web de Arena e mural para arrotadores, em desktop e mobile.**
+**Auê é um jogo web de arrotar, em desktop e mobile.** A pessoa grava um arroto, manda o áudio e recebe a nota do juiz. Em volta do jogo existe um mural. O jogo manda.
 
-O corte publicado usa Arena v2 na entrada. As rotas de comunidades e tópicos no React redirecionam à raiz; a arquitetura e os protótipos antigos não comprovam que esses hubs estejam ativos. Consulte [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md).
-
-> **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
-
-O Auê combina a **Arena** de gravação e medição experimental com mural, perfis, ranking, desafios e grupos externos. A medição não comprova a origem do som.
-
-O loop completo em 6 fases é:
+> **Arrote. Receba a nota. Chame os amigos pro X1.**
 
 ```text
-DESCOBERTA → TROPA (PESSOAS) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
-    ▲                                                                   │
-    └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
+GRAVAR → MANDAR → RECEBER A NOTA → (DESAFIAR NO X1 | TENTAR DE NOVO | IR AO MURAL)
 ```
 
-A experiência roda com excelência tanto em telas grandes no **desktop** (layout de 3 colunas: navegação, feed/arena e lateral de tendências/ranking) quanto na palma da mão como **webapp mobile** (com barra inferior, safe area e alvos tocáveis >= 44px).
+A nota é um laudo experimental e não comprova a origem do som. Comunidades e tópicos saíram do produto (ADR 0015). O corte publicado e seus limites estão em [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md).
+
+A experiência roda tanto no **desktop** (3 colunas) quanto como **webapp mobile** (barra inferior, safe area e alvos tocáveis >= 44px).
 
 ---
 

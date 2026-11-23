@@ -305,16 +305,16 @@ h1, h2, h3, p {
 }
 
 /* =============================================================================
- * Tela de resultado — 1:1 com `resultado.html` do protótipo antigo, que foi
- * removido do repositório na troca para o protótipo do lançamento mínimo. A
- * fonte atual é `docs/design/prototipo-arena/arena.html`, estado `RESULT`.
+ * Tela de resultado — 1:1 com o desenho antigo, que foi
+ * removido do repositório na troca para o desenho do lançamento mínimo. A
+ * fonte atual é desenho original, estado `RESULT`.
  *
- * Os valores vêm do protótipo antigo, traduzidos para os
+ * Os valores vêm do desenho antigo, traduzidos para os
  * tokens do app. Estavam em estilo inline no componente, com uma grade de 4
- * colunas onde o protótipo tem barras empilhadas — o que mudava a leitura das
+ * colunas onde o desenho original tem barras empilhadas — o que mudava a leitura das
  * parciais de "quatro números" para "quatro medidas comparáveis".
  *
- * As `animation` do protótipo NÃO vieram: lá elas estão anuladas logo abaixo da
+ * As `animation` do desenho original NÃO vieram: lá elas estão anuladas logo abaixo da
  * própria declaração (`.score-num,.score-classification{animation:none}`),
  * então copiá-las seria trazer código morto.
  * ============================================================================= */
@@ -445,7 +445,7 @@ h1, h2, h3, p {
 }
 
 /*
-  O protótipo não tem estado desabilitado, e o app precisa de um: o botão de
+  O desenho original não tem estado desabilitado, e o app precisa de um: o botão de
   desafiar espera o upload do áudio. Sem esta regra, `disabled` num `.btn` fica
   IDÊNTICO a um botão clicável.
 */

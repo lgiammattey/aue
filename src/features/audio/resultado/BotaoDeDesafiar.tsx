@@ -61,7 +61,7 @@ export const BotaoDeDesafiar: React.FC<BotaoDeDesafiarProps> = ({
 
     {!escondeDesafio && !linkDesafio && estadoAudio === 'enviando' && (
       /*
-        O rótulo muda, e não só o `disabled`. O protótipo não previu este estado,
+        O rótulo muda, e não só o `disabled`. O desenho original não previu este estado,
         e sem a regra `.btn:disabled` (que entrou no index.css com esta tela) um
         `.btn-primary` desabilitado ficava IDÊNTICO a um clicável — a pessoa
         tocava achando que travou. O texto é o que comunica; a opacidade só

@@ -23,7 +23,7 @@ import { formatarNota, NOTA_AUSENTE } from './nota';
 
 describe('formatarNota — comportamento', () => {
   it('escreve a nota com VÍRGULA e uma casa decimal', () => {
-    // O literal do protótipo (`resultado.html`, data-od-id="score-value").
+    // O literal do desenho original.
     // Comparado como string crua, e não contra `toLocaleString`, senão o teste
     // repetiria o bug em vez de reprová-lo.
     expect(formatarNota(91.4)).toBe('91,4');

@@ -67,7 +67,7 @@ export function criarPontuadorWeb(): Pontuador {
           classificacao: fala.reacao,
           frase: fala.fraseDoJuiz,
           medidas: {
-            // Os nomes de rua do protótipo, mapeados nas parciais da fórmula.
+            // Os nomes de rua do desenho original, mapeados nas parciais da fórmula.
             grave: resultado.partialScores.depth,
             estouro: resultado.partialScores.power,
             folego: resultado.partialScores.duration,

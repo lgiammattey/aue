@@ -2,7 +2,7 @@ import type React from 'react';
 import type { Origin, ParciaisAcusticas } from '../rules';
 import { EscolhaDeOrigem } from './EscolhaDeOrigem';
 
-/** Os quatro rótulos do protótipo, na ordem em que aparecem lá. */
+/** Os quatro rótulos do desenho original, na ordem em que aparecem lá. */
 const MEDIDAS: Array<[rotulo: string, chave: keyof ParciaisAcusticas]> = [
   ['Profundidade', 'depth'],
   ['Potência', 'power'],
@@ -35,11 +35,11 @@ export interface TelaDeJulgamentoProps {
 }
 
 /**
- * TELA DE JULGAMENTO — porte de `julgando.html`, com uma amputação deliberada.
+ * TELA DE JULGAMENTO — porte do desenho original, com uma amputação deliberada.
  *
  * O QUE FOI DEIXADO PARA TRÁS, E É O PONTO MAIS IMPORTANTE DESTE ARQUIVO
  * ---------------------------------------------------------------------
- * O protótipo (`julgando.html`, linhas 105-120) tem um cronômetro de 5 a 10
+ * O desenho original tem um cronômetro de 5 a 10
  * segundos aleatórios: se ninguém escolhesse a origem, ele abria o resultado
  * sozinho — "Escolha uma opção ou deixe o Auê decidir".
  *
@@ -54,7 +54,7 @@ export interface TelaDeJulgamentoProps {
  * não escolheu, a tela espera. Para sempre, se for o caso — e há uma saída
  * explícita ("Descartar essa") para quem mudou de ideia.
  *
- * AS BARRAS SÃO REAIS. O protótipo anima quatro barras para 92%, 88%, 76% e 84%
+ * AS BARRAS SÃO REAIS. O desenho original anima quatro barras para 92%, 88%, 76% e 84%
  * — números escritos no CSS. Copiar aquilo seria mostrar medida inventada de um
  * áudio que já foi medido de verdade, e a casa inteira tem regra contra isso.
  * Enquanto a análise corre, a barra varre sem número; quando ela termina, a

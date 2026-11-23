@@ -18,10 +18,10 @@ export interface AcoesDoResultadoProps {
 }
 
 /**
- * AÇÕES — `result-actions` do protótipo: o primário em cima, e os dois
+ * AÇÕES — `result-actions` do desenho original: o primário em cima, e os dois
  * secundários lado a lado numa `.btn-row`. Estavam os três empilhados.
  *
- * ORDEM IMPORTA, e ela coincide com a do protótipo. "Compartilhar" vinha
+ * ORDEM IMPORTA, e ela coincide com a do desenho original. "Compartilhar" vinha
  * primeiro, e sem link de desafio gerado ele compartilha
  * `window.location.origin` (useShareResult) — ou seja, a home, e o link nunca
  * viajava. Só quem adivinhasse a ordem produzia um desafio.
@@ -49,10 +49,10 @@ export const AcoesDoResultado: React.FC<AcoesDoResultadoProps> = ({
     />
 
     {/*
-      A `.btn-row` do protótipo: os dois secundários dividem a largura.
+      A `.btn-row` do desenho original: os dois secundários dividem a largura.
 
       O rótulo de compartilhar continua DINÂMICO, e é a única divergência
-      deliberada de texto nesta tela. O protótipo diz só "Compartilhar", mas ali
+      deliberada de texto nesta tela. O desenho original diz só "Compartilhar", mas ali
       ele leva para uma tela de compartilhamento; aqui ele abre a folha do
       sistema NA HORA, e o que viaja muda conforme exista ou não link de batalha.
       Dizer "Compartilhar" nos dois casos esconderia justamente a diferença que a

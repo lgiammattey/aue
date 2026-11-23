@@ -20,7 +20,7 @@ import { TelaSemSom } from './TelaSemSom';
 const nada = () => {};
 
 describe('TelaDeGravacao', () => {
-  it('mostra o tempo DECORRIDO com uma casa, no formato do protótipo', () => {
+  it('mostra o tempo DECORRIDO com uma casa, no formato do desenho original', () => {
     // 10s de teto, 7,3s restando -> 2,7s decorridos -> "02,7".
     const html = renderToStaticMarkup(
       createElement(TelaDeGravacao, {
@@ -116,7 +116,7 @@ describe('TelaDeJulgamento', () => {
 
     expect(html).toContain('fx-preenchimento-indefinido');
     expect(html).toContain('Medindo o estrago');
-    // Nenhuma largura fixa: o protótipo anima para 92%, 88%, 76% e 84% —
+    // Nenhuma largura fixa: o desenho original anima para 92%, 88%, 76% e 84% —
     // números escritos no CSS, sobre um áudio que ainda não foi medido.
     expect(html).not.toContain('width:92%');
     expect(html).not.toContain('width:88%');
@@ -144,7 +144,7 @@ describe('TelaDeJulgamento', () => {
       O §3.4 do contrato: "A origem é informada pelo usuário. O sistema não deve
       fingir detectá-la automaticamente."
 
-      O protótipo (julgando.html:105-120) abre o resultado sozinho depois de 5 a
+      O desenho original abre o resultado sozinho depois de 5 a
       10 segundos e escreve "Escolha uma opção ou deixe o Auê decidir". Este
       teste é a fronteira: a copy não pode oferecer isso, porque a copy é o
       primeiro lugar onde a regra costuma voltar.

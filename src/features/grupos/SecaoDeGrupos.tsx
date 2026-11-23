@@ -9,7 +9,7 @@ interface SecaoDeGruposProps {
   /** Para teste ou troca de adaptador. Sem ela, usa o do navegador. */
   porta?: PortaDeGrupos;
   titulo?: string;
-  /** `publica`: o desenho de `/grupos` (Páginas Públicas.dc.html). Padrão: o do app. */
+  /** `publica`: o desenho de `/grupos`. Padrão: o do app. */
   variante?: VarianteDeGrupos;
 }
 

@@ -14,7 +14,7 @@ function formatarTempo(segundos: number): string {
 }
 
 /**
- * Forma de onda do protótipo (56 barras, mesma conta do `waveBars`). É desenho,
+ * Forma de onda do desenho original (56 barras, mesma conta do `waveBars`). É desenho,
  * não medida do áudio: não existe análise do arquivo na tela, então ela fica
  * parada e cinza. Calculada uma vez, fora do render.
  */

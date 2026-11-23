@@ -7,7 +7,7 @@ import type { PodioDaRoda } from '../disputa/podio';
  * partida.
  *
  * Quem manda aqui é [`docs/jogo/ARENA.md`](../../../docs/jogo/ARENA.md).
- * Protótipo, design system e handoff decidem como cada estado se parece e se
+ * Design system e handoff decidem como cada estado se parece e se
  * move — **não criam, não renomeiam e não removem estado**. Se faltar um, a
  * conversa volta para o ARENA.md antes de existir código.
  *

@@ -62,7 +62,7 @@ describe('PlayerDoArroto', () => {
     expect(screen.getByRole('button', { name: 'Ouvir áudio' })).toBeTruthy();
   });
 
-  it('usa classes próprias e a forma de onda do protótipo (56 barras)', () => {
+  it('usa classes próprias e a forma de onda do desenho original (56 barras)', () => {
     const { container } = render(
       <PlayerDoArroto tocando={false} tempoAtualSegundos={0} duracaoSegundos={6} aoAlternar={vi.fn()} />,
     );

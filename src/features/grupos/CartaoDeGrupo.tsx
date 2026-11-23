@@ -4,7 +4,7 @@ import { ROTULO_DA_PLATAFORMA, ROTULO_DO_BOTAO } from './rotulos';
 
 /**
  * `app`: o cartão da aba Comunidade. `publica`: o de `/grupos`, medido em
- * `docs/design/prototipo/Páginas Públicas.dc.html` — sem borda, mais respiro,
+ * desenho original — sem borda, mais respiro,
  * avatar escuro com as iniciais em Archivo.
  */
 export type VarianteDeGrupos = 'app' | 'publica';

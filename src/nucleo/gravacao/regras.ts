@@ -79,7 +79,7 @@ export function estourouOTeto(decorridoMs: number): boolean {
  * O cronômetro como a pessoa lê: `0,0s`.
  *
  * Vírgula porque o jogo é em português, e uma casa decimal porque é o que o
- * protótipo mostra. `Math.floor` e não arredondamento: o cronômetro nunca pode
+ * desenho original mostra. `Math.floor` e não arredondamento: o cronômetro nunca pode
  * mostrar 10,0s num teto de 10 segundos que já teria parado a gravação.
  */
 export function formatarCronometro(decorridoMs: number): string {

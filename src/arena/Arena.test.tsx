@@ -867,7 +867,7 @@ describe('a nota', () => {
     await ateANota(dubles);
 
     expect(document.querySelector('.nota')?.textContent).toContain('91,4');
-    // A classificação em cima, a zoeira embaixo — como no protótipo.
+    // A classificação em cima, a zoeira embaixo — como no desenho original.
     expect(screen.getByText(NOTA.classificacao)).toBeDefined();
     expect(screen.getByText(NOTA.frase)).toBeDefined();
 
@@ -2450,7 +2450,7 @@ describe('a revelação em cascata', () => {
       "Vou mandar outro!" reabre o microfone e joga fora a nota que a pessoa
       ainda não viu, e o compartilhar abre a folha do sistema por cima de um
       resultado invisível. Enquanto a revelação corre, os três não existem —
-      igual ao protótipo.
+      igual ao desenho original.
     */
     expect(document.querySelector('.acao')?.getAttribute('data-pronta')).toBe('0');
     expect(document.querySelectorAll('.acao button')).toHaveLength(0);

@@ -169,7 +169,7 @@ import './arena.css';
  * `VERSUS`, `SCOREBOARD`, `REMATCH`).
  *
  * Referências: `docs/jogo/ARENA.md` (quem manda nos estados),
- * `docs/design/prototipo-arena/arena.html` (como se parece e se move),
+ * desenho original (como se parece e se move),
  * `docs/technical/adr/0001-arquitetura-oficial-do-aue.md` (as camadas).
  */
 import { atualizarMaiorScoreLocal } from '../plataforma/web/perfil';
@@ -1495,7 +1495,7 @@ export function Arena({
   /*
     ═══════════════ O MOVIMENTO DA RODADA ═══════════════
 
-    Tudo aqui embaixo é o vocabulário do protótipo canônico ligado nos momentos
+    Tudo aqui embaixo é o vocabulário do desenho original ligado nos momentos
     que o design system §13.2 mapeia. Três regras valem para os cinco efeitos:
 
     1. **todo timer volta no `return`.** Sair do estado no meio da animação não
@@ -1624,7 +1624,7 @@ export function Arena({
     quadro em que o número chegava no valor final: um piscão, não uma
     revelação. O DESIGN §9.3 e §13.2 são explícitos que os dois andam juntos
     (`pop` 560ms **+** contagem 900ms), e é o que o `RESULT_REVEAL` do
-    protótipo faz.
+    desenho original faz.
 
     Por isso ele mora aqui, na ENTRADA do `RESULT`: o mesmo commit que monta a
     `NotaContada` e começa a contar é o que solta o `pop`. O `anim` devolve o
@@ -1812,7 +1812,7 @@ export function Arena({
             reacao: <h1 className="grito">{revancheContra(rivalDaRevanche.current)}</h1>,
             /*
               Sem cronômetro e sem CTA: não dá pra pular a cerimônia tocando
-              nem apertando nada — o protótipo não prevê pular.
+              nem apertando nada — o desenho original não prevê pular.
             */
             acao: null,
           };
@@ -1919,7 +1919,7 @@ export function Arena({
           reacao: (
             <>
               {/*
-                A CLASSIFICAÇÃO EM CIMA, A ZOEIRA EMBAIXO — como no protótipo.
+                A CLASSIFICAÇÃO EM CIMA, A ZOEIRA EMBAIXO — como no desenho original.
 
                 Inverti isto na primeira versão e o resultado ficou com a frase
                 do juiz em corpo de manchete e em accent, brigando com a nota
@@ -2606,7 +2606,7 @@ export function Arena({
                 : situacao.estado === 'SCOREBOARD' && 'podio' in situacao
                   ? /*
                       Pódio da roda de cinco: não há dois lados pra confrontar,
-                      então não existe modo canônico pra isso no protótipo.
+                      então não existe modo canônico pra isso no desenho original.
                       Reaproveita `esperando` — presente e vivo, sem fingir
                       vitória de alguém específico.
                     */
@@ -2626,7 +2626,7 @@ export function Arena({
                     : 'repouso';
 
   /*
-    A MARCA DA ESPERA — o `data-dim` do protótipo (`arena.html` l.1155), e nada
+    A MARCA DA ESPERA — o `data-dim` do desenho original, e nada
     além disso.
 
     O que ele liga no CSS é uma troca de fundo que, no `--bg` de hoje, quase
@@ -2647,7 +2647,7 @@ export function Arena({
 
     Não é opacidade: os botões não são montados. Enquanto a revelação corre não
     tem nada para tocar ali, e no fim os três nascem juntos — que é o que o
-    protótipo faz (`arena.html`: `setState` esconde `btnShare`/`btnGhost` em
+    desenho original faz (`setState` esconde `btnShare`/`btnGhost` em
     toda troca de estado, `RESULT_REVEAL` esconde também o `btnMain`, e
     `[hidden]` lá é `display:none !important`).
 

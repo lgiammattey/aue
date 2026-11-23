@@ -7,7 +7,7 @@ import type { PortaDeForum } from '../../portas/forum';
 import { TelaComunidadeOpenDesign } from './TelaComunidadeOpenDesign';
 import { TelaDiretorioOpenDesign } from './TelaDiretorioOpenDesign';
 
-describe('Telas de Comunidade Open Design (1:1 com protótipo)', () => {
+describe('Telas de Comunidade Open Design (1:1 com desenho original)', () => {
   afterEach(() => {
     cleanup();
   });

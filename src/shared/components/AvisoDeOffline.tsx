@@ -10,13 +10,13 @@ import React, { useState, useSyncExternalStore } from 'react';
  * ter arrotado. Antes desta tela, o único sinal de que existia rede era o erro
  * no fim.
  *
- * NÃO BLOQUEIA NADA, e isso é a decisão. O protótipo antigo
- * (`offline.html`, removido do repositório na troca para o protótipo do
+ * NÃO BLOQUEIA NADA, e isso é a decisão. O desenho antigo
+ * (removido do repositório na troca para o desenho original do
  * lançamento mínimo) desenhava um banner por cima do
  * app com um botão "continuar mesmo assim" — ou seja, um aviso, não um muro. Foi
  * o que foi seguido.
  *
- * O QUE O TEXTO NÃO DIZ, E O PROTÓTIPO DIZIA. O protótipo promete "o resultado
+ * O QUE O TEXTO NÃO DIZ, E O DESENHO ORIGINAL DIZIA. O desenho original promete "o resultado
  * será sincronizado depois". ISSO NÃO EXISTE: não há fila de envio, não há
  * repetição automática, e o áudio gravado offline morre com a aba. Prometer
  * sincronização que ninguém implementou é exatamente o tipo de mentira que o

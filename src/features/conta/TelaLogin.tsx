@@ -7,7 +7,7 @@ import { useEntrarNaConta } from './useEntrarNaConta';
 import { emailParece, type PortaDeConta } from '../../portas/conta';
 
 /**
- * O `/login`, no cartão estilo Google de `docs/design/prototipo/Login.dc.html`.
+ * O `/login`, no cartão estilo Google do desenho original.
  *
  * Só entra quem já tem conta. Criar conta, convite e Google não existem aqui:
  * o convite ainda não tem backend, e o botão que não funciona fica desabilitado

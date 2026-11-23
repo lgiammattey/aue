@@ -1,7 +1,7 @@
 /**
  * A geometria da Bolha — matemática pura, sem DOM.
  *
- * Portado do protótipo canônico (`docs/design/prototipo-arena/arena.html`):
+ * Portado do desenho original:
  * um blob de N pontos suavizado por Catmull-Rom convertido em curvas cúbicas.
  * Mesma fórmula, mesmas constantes; o que mudou foi virar função testável em
  * vez de fechar sobre variáveis globais de um `<script>`.
@@ -77,7 +77,7 @@ export function caminhoDaBolha(forma: FormaDaBolha, tempo: number): string {
  * derrota) são a #86, e chegam com a fatia de cada estado. Escrever vocabulário
  * emocional para estado que ninguém consegue ver é enfeite.
  *
- * Valores do protótipo, modos `idle` e `recording`.
+ * Valores do desenho original, modos `idle` e `recording`.
  */
 export const REPOUSO: FormaDaBolha = {
   raio: 118,

@@ -20,9 +20,9 @@ import { FLAGS } from '../../shared/flags';
  * corte e cobrar nada é cobrar nada. Se uma cláusula não corresponde a algo que
  * o código faz, ela não entra.
  *
- * A IDADE MÍNIMA (13 anos) vem do protótipo (`legal.html`), que é a fonte de
+ * A IDADE MÍNIMA (13 anos) vem do desenho original, que é a fonte de
  * produto mais próxima de uma decisão registrada sobre o assunto. O que MUDOU em
- * relação a ele: o protótipo diz "conforme verificado na Entrada", e no app não
+ * relação a ele: o desenho original diz "conforme verificado na Entrada", e no app não
  * existe verificação nenhuma. Então aqui isso está escrito como o que é — uma
  * regra, não um portão.
  */

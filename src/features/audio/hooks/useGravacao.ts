@@ -4,7 +4,7 @@ import { esquecerMicrofoneLiberado, lembrarMicrofoneLiberado } from '../microfon
 
 export const SEGUNDOS_DE_GRAVACAO = 10;
 
-/** Quantas barras a onda tem. O protótipo (`gravacao.html`) desenha dez. */
+/** Quantas barras a onda tem. O desenho original desenha dez. */
 const BARRAS_DA_ONDA = 10;
 
 /**
@@ -55,7 +55,7 @@ export function useGravacao(params: ParametrosDaGravacao): Gravacao {
   /**
    * O cronômetro em MILISSEGUNDOS, e não em segundos inteiros.
    *
-   * A tela de gravação mostra `02,7 / 10s` (protótipo `gravacao.html`), e o
+   * A tela de gravação mostra `02,7 / 10s` (desenho original), e o
    * intervalo já batia de 200 em 200 ms — o arredondamento para inteiro jogava
    * fora uma precisão que já existia. `segundosRestantes` continua sendo
    * exportado, derivado daqui: um estado só, duas leituras, nenhum render extra.

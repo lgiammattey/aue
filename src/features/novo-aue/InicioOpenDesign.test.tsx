@@ -18,7 +18,7 @@ vi.mock('../../plataforma/web/notaDoAudioPublicado', () => ({
   retentarNotasPublicadasPendentes: vi.fn(async () => {}),
 }));
 
-describe('InicioOpenDesign (1:1 com protótipo Open Design)', () => {
+describe('InicioOpenDesign (1:1 com desenho original)', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();

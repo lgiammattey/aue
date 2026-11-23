@@ -94,7 +94,7 @@ describe('a fonte chega igual em toda entrada HTML', () => {
   });
 });
 
-describe('os tokens de tipografia batem com o protótipo canônico', () => {
+describe('os tokens de tipografia batem com o desenho original', () => {
   function token(nome: string): string {
     const achado = new RegExp(`--${nome}:\\s*([^;]+);`).exec(CSS_RAIZ);
     expect(achado, `--${nome} sumiu de src/index.css`).toBeTruthy();
@@ -126,7 +126,7 @@ describe('os tokens de tipografia batem com o protótipo canônico', () => {
     expect(token('font-mono')).toBe("ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace");
   });
 
-  it('nenhum token de fonte diverge do protótipo canônico', () => {
+  it('nenhum token de fonte diverge do desenho original', () => {
     /*
       O design system é quem decide os tokens canônicos (AGENTS.md §2). Estes três tokens
       foram COPIADOS de lá; este teste é o que impede o app de sair andando
@@ -137,8 +137,8 @@ describe('os tokens de tipografia batem com o protótipo canônico', () => {
 
     for (const nome of ['font-display', 'font-body', 'font-mono']) {
       const achado = new RegExp(`--${nome}:([^;]+);`).exec(prototipo);
-      expect(achado, `--${nome} sumiu do protótipo`).toBeTruthy();
-      expect(normalizar(token(nome)), `--${nome} divergiu do protótipo`).toBe(
+      expect(achado, `--${nome} sumiu do desenho original`).toBeTruthy();
+      expect(normalizar(token(nome)), `--${nome} divergiu do desenho original`).toBe(
         normalizar((achado as RegExpExecArray)[1]),
       );
     }

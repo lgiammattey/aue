@@ -1,8 +1,7 @@
 import type React from 'react';
 
 /**
- * Os dois ícones do fluxo, copiados dos SVG do protótipo (`gravacao.html`,
- * `permissao.html`, `permissao-negada.html`).
+ * Os dois ícones do fluxo, copiados dos SVG do desenho original.
  *
  * Ficam num arquivo só porque aparecem em três telas e porque `currentColor` +
  * `viewBox` são a única coisa que precisa ser igual entre elas. Sempre

@@ -7,7 +7,7 @@ export interface TelaDeMicrofoneBloqueadoProps {
 }
 
 /**
- * MICROFONE BLOQUEADO — porte de `permissao-negada.html`.
+ * MICROFONE BLOQUEADO — porte do desenho original.
  *
  * O que existia antes: uma linha de 13px em cinza, "O navegador bloqueou o
  * microfone. Libere a permissão e toque em gravar de novo." — verdadeira e
@@ -18,7 +18,7 @@ export interface TelaDeMicrofoneBloqueadoProps {
  * Os passos são deliberadamente genéricos ("configurações do navegador ou do
  * app"): o caminho real muda entre Safari iOS, Chrome Android e desktop, e
  * inventar um roteiro específico daria instrução errada para a maioria. É o
- * mesmo texto do protótipo, que já tinha resolvido isso.
+ * mesmo texto do desenho original, que já tinha resolvido isso.
  *
  * "Tentar novamente" chama `getUserMedia` de novo de propósito. Em parte dos
  * navegadores a permissão volta a ser perguntada depois de liberada nas

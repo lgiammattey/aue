@@ -95,7 +95,7 @@ describe('termos de uso', () => {
 
   it('não inventa cobrança nem verificação de idade, e diz que a conta é opcional', () => {
     /*
-      As três armadilhas deste documento, todas presentes no protótipo:
+      As três armadilhas deste documento, todas presentes no desenho original:
 
       - "plano opcional pago": Auê+ está desligado por flag e não há provedor de
         pagamento integrado. Cobrança escrita em termos é promessa de cobrar.

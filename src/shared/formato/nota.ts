@@ -1,7 +1,7 @@
 /**
  * A NOTA ESCRITA. Fonte única.
  *
- * VÍRGULA, e não ponto. O protótipo (`resultado.html`, `data-od-id="score-value"`)
+ * VÍRGULA, e não ponto. O desenho original
  * mostra "91,4"; `toFixed(1)` devolvia "91.4". Num app inteiro em português a
  * nota era o único número escrito em inglês, bem no lugar onde o olho para.
  *
@@ -66,7 +66,7 @@ const FORMATADOR_DE_NOTA = new Intl.NumberFormat('pt-BR', {
  * ausente sem ninguém notar. Aqui a ausência é decidida ANTES da coerção.
  *
  * Sem segundo parâmetro de casas decimais: a casa única não é configuração, é
- * o contrato com o protótipo Open Design — um parâmetro abriria a porta para a
+ * o contrato com o desenho original — um parâmetro abriria a porta para a
  * segunda divergência. Sem parâmetro de fallback enquanto nenhum ponto de uso
  * pedir; os quatro sites com valor opcional já resolvem a ausência com guarda
  * de render própria, e `NOTA_AUSENTE` é só a rede de segurança.

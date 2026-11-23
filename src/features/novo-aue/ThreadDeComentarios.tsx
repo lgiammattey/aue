@@ -1,6 +1,6 @@
 /**
  * CANÔNICO ATIVO — Visualização de Conversa / Thread de Comentários
- * Referência visual: o protótipo arquivado "Bonde do Arroto" (ver o histórico do Git)
+ * Referência visual: desenho original
  * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
  * 
  * Exibe o post principal destacado no topo, stream de respostas fluidas,

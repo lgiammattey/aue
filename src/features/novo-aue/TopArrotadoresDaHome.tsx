@@ -13,7 +13,7 @@ export function TopArrotadoresDaHome({
   ocultarCabecalho = false,
 }: {
   readonly porta?: PortaDeForum;
-  readonly variante?: 'painel' | 'faixa-mobile';
+  readonly variante?: 'painel' | 'faixa-mobile' | 'liga-hero';
   readonly ocultarCabecalho?: boolean;
 }) {
   const [porta] = useState(() => fornecida ?? criarForumWeb());

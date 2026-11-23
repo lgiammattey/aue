@@ -65,15 +65,17 @@ describe('/como-arrotar com a moldura pública', () => {
     expect(html).toMatch(/<h1>[\s\S]*Como arrotar/);
   });
 
-  it('apresenta as modalidades sem incentivar forçar o corpo', () => {
+  it('apresenta técnicas práticas e modalidades sem incentivar forçar o corpo', () => {
     const html = montar(ComoArrotar);
-    expect(html).toContain('Primeiro: deixa o bicho vir');
-    expect(html).toContain('Arroto alto: o que chama atenção');
-    expect(html).toContain('Arroto longo: o que não acaba nunca');
+    expect(html).toContain('Como arrotar de propósito (no comando)');
+    expect(html).toContain('Bebida com gás: o combustível certo');
+    expect(html).toContain('Arroto alto: postura e garganta solta');
+    expect(html).toContain('Arroto longo: segurar e dosar o ar');
     expect(html).toContain('Arroto explosivo: curto e grosso');
     expect(html).toContain('Arroto grave: o trovão de dentro');
-    expect(html).toContain('A ideia é dar risada, não passar mal.');
-    expect(html).toContain('não precisa forçar a voz ou a garganta');
+    expect(html).toContain('Truque clássico: como arrotar o alfabeto');
+    expect(html).toContain('A ideia é dar risada, não passar mal');
+    expect(html).toContain('sem forçar a voz pra não machucar');
   });
 
   it('usa a navegação da Arena', () => {
@@ -187,7 +189,7 @@ describe('voz das páginas públicas', () => {
   it('a faixa final convida pra participar, sem falar em competição', () => {
     const html = montar(ComoArrotar);
 
-    expect(html).toContain('Treinou? Quero ouvir.');
+    expect(html).toContain('Treinou? Testa agora no microfone.');
     expect(html).toContain('Gravar meu arroto');
     expect(html).not.toContain('Bora fazer barulho?');
     expect(html).not.toContain('entra na competição');

@@ -1,96 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Só entra aqui URL que EXISTE no roteador (src/App.tsx), seja estável e pública
-  E TENHA CANONICAL PRÓPRIO.
-
-  A terceira condição é nova e é o motivo desta revisão. Enquanto havia um único
-  `index.html` servido pelo rewrite da Vercel em qualquer caminho, TODA URL era
-  entregue com `<link rel="canonical">` apontando para a raiz — inclusive
-  /privacidade, que este arquivo já declarava como indexável. Sitemap e canonical
-  diziam coisas opostas sobre a mesma URL, e quem decide nesse conflito é o
-  canonical: o buscador trata a página como duplicata da home e ela não é
-  indexada. Listar uma URL sem canonical próprio não é otimista, é ruído.
-
-  Hoje /privacidade, /termos, /como-jogar e /como-arrotar são ENTRADAS DE BUILD
-  (privacidade.html, termos.html, como-jogar.html e como-arrotar.html, ver
-  vite.config.ts), cada uma com o seu canonical, título e descrição. Por isso
-  podem estar aqui.
-
-  /como-jogar e /como-arrotar são as duas páginas que EXPLICAM alguma coisa por
-  escrito — a home é a Arena, e Arena não tem texto. A primeira responde "o que
-  é isso", a segunda responde a busca que traz gente de fora ("como arrotar",
-  "como arrotar alto"). É por isso que as duas entram com prioridade alta em
-  relação às legais.
-
-  LIMITE DECLARADO: o app continua sendo uma SPA sem prerender. O conteúdo das
-  três páginas só existe depois que o JavaScript roda — o Googlebot renderiza e
-  enxerga, um rastreador que não renderiza vê só o <noscript>. Este arquivo
-  declara URLs corretas; ele não promete posição nem indexação.
-
-  O roteador tem também `/b/:code` e `/d/:id` (batalha e desafio): conteúdo
-  efêmero, por usuário e que expira em 7 dias, então não são indexáveis em lista.
-  As duas continuam LIBERADAS em robots.txt, o que é outra coisa — o rastreador
-  precisa poder buscá-las para gerar o card de prévia quando alguém compartilha.
-  Liberar para leitura não é declarar para indexação.
-
-  Domínio confirmado por Luiz em 2026-08-08. Se mudar, muda junto com
-  index.html, privacidade.html, termos.html, public/robots.txt e
-  src/shared/desktop/enderecoPublico.ts. Todos estão travados por
-  src/qualidade/seo-publico.test.ts.
--->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://aue.web.app/</loc>
-    <lastmod>2026-11-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/como-jogar</loc>
-    <lastmod>2026-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/como-arrotar</loc>
-    <lastmod>2026-11-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/tipos-de-arroto</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/ranking-de-arrotos</loc>
-    <lastmod>2026-11-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/comunidades</loc>
-    <lastmod>2026-10-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/grupos</loc>
-    <lastmod>2026-10-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/privacidade</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://aue.web.app/termos</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
+  <url><loc>https://aue.web.app/</loc><lastmod>2026-11-23</lastmod><priority>1.0</priority></url>
+  <url><loc>https://aue.web.app/comunidades</loc><lastmod>2026-10-22</lastmod><priority>0.9</priority></url>
+  <url><loc>https://aue.web.app/como-jogar</loc><lastmod>2026-11-17</lastmod><priority>0.8</priority></url>
+  <url><loc>https://aue.web.app/como-arrotar</loc><lastmod>2026-11-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://aue.web.app/tipos-de-arroto</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
+  <url><loc>https://aue.web.app/ranking-de-arrotos</loc><lastmod>2026-11-17</lastmod><priority>0.8</priority></url>
+  <url><loc>https://aue.web.app/grupos</loc><lastmod>2026-10-18</lastmod><priority>0.7</priority></url>
+  <url><loc>https://aue.web.app/privacidade</loc><lastmod>2026-08-08</lastmod><priority>0.3</priority></url>
+  <url><loc>https://aue.web.app/termos</loc><lastmod>2026-08-08</lastmod><priority>0.3</priority></url>
 </urlset>

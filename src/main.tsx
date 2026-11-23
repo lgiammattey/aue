@@ -1,15 +1,23 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { configuracaoAusente } from './db/supabase'
 import { garantirSessao } from './shared/auth/sessaoAnonima'
 import { EntradaArenaLocalV2 } from './arena/v2/EntradaArenaLocalV2'
+import { ConteudoDaHome } from './arena/v2/ConteudoDaHome'
+import { TopArrotadoresDaHome } from './features/novo-aue/TopArrotadoresDaHome'
 import { FLAGS } from './shared/flags'
 import { entradaLocalArenaV2 } from './plataforma/web/entradaLocalArenaV2'
 import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguracaoAusente'
 import { configurarExclusaoTelemetria } from './plataforma/web/exclusaoTelemetria'
 import { ComAvisoExclusaoTelemetria } from './plataforma/web/AvisoExclusaoTelemetria'
+import { ComoArrotar } from './features/publico/ComoArrotar'
+import { ComoJogar } from './features/publico/ComoJogar'
+import { TiposDeArroto } from './features/publico/TiposDeArroto'
+import { PoliticaDePrivacidade } from './features/legal/PoliticaDePrivacidade'
+import { TermosDeUso } from './features/legal/TermosDeUso'
 
 const estadoExclusao = configurarExclusaoTelemetria()
 
@@ -56,7 +64,46 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   configurar") é confuso, e a saída é sempre a mesma: configure as variáveis em
   Production E Preview, e rode um NOVO build.
 */
-if (configuracaoAusente && FLAGS.arenaV2 && entradaLocalArenaV2()) {
+const rotasEstaticasSemBanco = new Set([
+  '/como-arrotar',
+  '/como-jogar',
+  '/tipos-de-arroto',
+  '/privacidade',
+  '/termos',
+])
+
+if (configuracaoAusente && import.meta.env.DEV && window.location.pathname === '/') {
+  // Em dev sem .env, permite visualizar a Home com a Arena local e o conteúdo editorial abaixo.
+  raiz.render(
+    <StrictMode>
+      <ComAvisoExclusaoTelemetria estado={estadoExclusao}>
+        <BrowserRouter>
+          <EntradaArenaLocalV2
+            conteudoDoRepouso={<ConteudoDaHome />}
+            rankingDoHero={<TopArrotadoresDaHome variante="liga-hero" />}
+          />
+        </BrowserRouter>
+      </ComAvisoExclusaoTelemetria>
+    </StrictMode>,
+  )
+} else if (configuracaoAusente && import.meta.env.DEV && rotasEstaticasSemBanco.has(window.location.pathname)) {
+  // Em dev sem .env, permite visualizar páginas estáticas públicas sem montar o App nem chamar o Supabase.
+  raiz.render(
+    <StrictMode>
+      <ComAvisoExclusaoTelemetria estado={estadoExclusao}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/como-arrotar" element={<ComoArrotar />} />
+            <Route path="/como-jogar" element={<ComoJogar />} />
+            <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
+            <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
+            <Route path="/termos" element={<TermosDeUso />} />
+          </Routes>
+        </BrowserRouter>
+      </ComAvisoExclusaoTelemetria>
+    </StrictMode>,
+  )
+} else if (configuracaoAusente && FLAGS.arenaV2 && entradaLocalArenaV2()) {
   // Só a gravação local: sem App, sessão anônima ou acesso ao Supabase.
   raiz.render(<StrictMode><ComAvisoExclusaoTelemetria estado={estadoExclusao}><EntradaArenaLocalV2 /></ComAvisoExclusaoTelemetria></StrictMode>)
 } else if (configuracaoAusente) {

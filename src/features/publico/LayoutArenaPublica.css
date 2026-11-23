@@ -18,6 +18,7 @@
 .guia-arena__secoes, .guia-arena__cta { max-width:920px; margin:auto; }
 .guia-arena .publico-secao { display:grid; grid-template-columns:minmax(200px, 1fr) minmax(0, 1.4fr); gap:32px; padding:28px; margin-bottom:14px; border:1px solid var(--border, #232834); border-radius:var(--radius-md, 6px); background:var(--surface, #151820); }
 .guia-arena .publico-secao-cabeca, .guia-arena .publico-secao-corpo { display:flex; flex-direction:column; gap:12px; }
+.guia-arena .publico-ilustracao { width:100%; max-width:220px; aspect-ratio:1; object-fit:cover; border-radius:var(--radius-sm, 4px); border:1px solid var(--border, #232834); margin-top:4px; display:block; }
 .guia-arena .publico-secao h2, .guia-arena__cta h2 { margin:0; font:400 clamp(28px, 3vw, 38px)/1.1 var(--font-display, 'Anton', sans-serif); text-transform:uppercase; color:var(--fg, #f3f4f6); }
 .guia-arena .publico-secao p { margin:0; color:var(--fg-secondary, #c8cdd8); font-size:15px; line-height:1.65; }
 .guia-arena .publico-links { display:flex; flex-wrap:wrap; gap:8px 20px; }

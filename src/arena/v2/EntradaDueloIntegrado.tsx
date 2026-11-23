@@ -10,12 +10,14 @@ import { FluxoArenaV2 } from './FluxoArenaV2';
 export function EntradaDueloIntegrado({
   modo,
   conteudoDoRepouso,
+  rankingDoHero,
   adversarioHandle,
   modoEmbutido = false,
   aoPublicarAudio,
 }: {
   modo: 'criar' | 'responder';
   conteudoDoRepouso?: ReactNode;
+  rankingDoHero?: ReactNode;
   adversarioHandle?: string | null;
   modoEmbutido?: boolean;
   aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
@@ -32,6 +34,7 @@ export function EntradaDueloIntegrado({
     <FluxoArenaV2
       modo={modo}
       conteudoDoRepouso={conteudoDoRepouso}
+      rankingDoHero={rankingDoHero}
       adversarioHandle={adversario}
       modoEmbutido={modoEmbutido}
       aoPublicarAudio={aoPublicarAudio}

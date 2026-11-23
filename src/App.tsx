@@ -23,6 +23,7 @@ const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOp
 const TelaArenaEmBreveOpenDesign = lazy(() => import('./features/novo-aue/TelaArenaEmBreveOpenDesign').then((m) => ({ default: m.TelaArenaEmBreveOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/conta/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
+const TopArrotadoresDaHome = lazy(() => import('./features/novo-aue/TopArrotadoresDaHome').then((m) => ({ default: m.TopArrotadoresDaHome })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
 import { FLAGS } from './shared/flags';
@@ -118,12 +119,13 @@ function EntradaRaiz() {
 function EntradaDaArena({ conteudoDoRepouso, modoEmbutido = false }: { conteudoDoRepouso?: ReactNode; modoEmbutido?: boolean } = {}) {
   const { search } = useLocation();
   const adversarioHandle = new URLSearchParams(search).get('desafiar');
+  const rankingDoHero = conteudoDoRepouso && !modoEmbutido && !adversarioHandle ? <TopArrotadoresDaHome variante="liga-hero" /> : undefined;
   if (FLAGS.dueloV2) {
-    return <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} modoEmbutido={modoEmbutido} />;
+    return <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} rankingDoHero={rankingDoHero} adversarioHandle={adversarioHandle} modoEmbutido={modoEmbutido} />;
   }
   return modoEmbutido
     ? <EntradaArenaLocalV2 modoEmbutido conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />
-    : <ArenaV2 conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />;
+    : <ArenaV2 conteudoDoRepouso={conteudoDoRepouso} rankingDoHero={rankingDoHero} adversarioHandle={adversarioHandle} />;
 }
 
 function DueloIndisponivel() {

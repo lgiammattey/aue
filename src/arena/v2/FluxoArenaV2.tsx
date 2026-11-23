@@ -20,6 +20,7 @@ export interface FluxoArenaV2Props {
   readonly aoVoltar?: () => void;
   readonly telemetria?: TelemetriaArenaV2;
   readonly conteudoDoRepouso?: ReactNode;
+  readonly rankingDoHero?: ReactNode;
   readonly adversarioHandle?: string | null;
   readonly modoEmbutido?: boolean;
   readonly aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
@@ -37,6 +38,7 @@ export function FluxoArenaV2({
   aoVoltar,
   telemetria,
   conteudoDoRepouso,
+  rankingDoHero,
   adversarioHandle,
   modoEmbutido = false,
   aoPublicarAudio,
@@ -57,6 +59,7 @@ export function FluxoArenaV2({
           <ArenaV2
             key={novaArena}
             conteudoDoRepouso={tela === 'arena' ? conteudoDoRepouso : undefined}
+            rankingDoHero={tela === 'arena' ? rankingDoHero : undefined}
             adversarioHandle={adversarioHandle}
             modoEmbutido={modoEmbutido}
             aoPublicarAudio={aoPublicarAudio}

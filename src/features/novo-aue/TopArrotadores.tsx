@@ -8,7 +8,7 @@ interface Props {
   readonly audioTocandoId: string | null;
   readonly aoOuvir: (pessoa: ArrotadorDoTop) => void;
   readonly aoTentar: () => void;
-  readonly variante?: 'painel' | 'faixa-mobile';
+  readonly variante?: 'painel' | 'faixa-mobile' | 'liga-hero';
   readonly ocultarCabecalho?: boolean;
 }
 
@@ -29,6 +29,52 @@ export function TopArrotadores({
   ocultarCabecalho = false,
 }: Props) {
   const [expandida, setExpandida] = useState(false);
+
+  if (variante === 'liga-hero') {
+    return (
+      <section className="liga-hero" aria-label="Liga">
+        <h2 className="liga-hero__titulo">LIGA</h2>
+
+        {estado === 'carregando' && <p className="liga-hero__aviso">Carregando a liga…</p>}
+        {estado === 'erro' && (
+          <p className="liga-hero__aviso">
+            Não deu para carregar a liga.{' '}
+            <button type="button" onClick={aoTentar}>Recarregar</button>
+          </p>
+        )}
+        {estado === 'pronto' && pessoas.length === 0 && (
+          <p className="liga-hero__aviso">Ainda não há arrotos na liga.</p>
+        )}
+
+        {estado === 'pronto' && pessoas.length > 0 && (
+          <ol className="liga-hero__lista">
+            {pessoas.map((pessoa, indice) => {
+              const nome = pessoa.apelido || pessoa.handle;
+              const chave = `top-${pessoa.alvoTipo}-${pessoa.alvoId}`;
+              const estaTocando = audioTocandoId === chave;
+              return (
+                <li key={`${pessoa.handle}-${pessoa.alvoId}`}>
+                  <span className={classeDaPosicao(indice)}>{String(indice + 1).padStart(2, '0')}</span>
+                  <Link className="top-arrotadores__pessoa" to={`/u/${encodeURIComponent(pessoa.handle)}`}>
+                    {pessoa.avatarUrl ? <img src={pessoa.avatarUrl} alt="" /> : <span aria-hidden="true">{nome.slice(0, 1).toUpperCase()}</span>}
+                    <strong>{nome}</strong>
+                  </Link>
+                  <button
+                    type="button"
+                    className={`liga-hero__play${estaTocando ? ' is-tocando' : ''}`}
+                    aria-label={`${estaTocando ? 'Pausar' : 'Ouvir'} arroto de ${nome}`}
+                    onClick={() => aoOuvir(pessoa)}
+                  >
+                    {estaTocando ? '❚❚' : '▶'}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </section>
+    );
+  }
 
   if (variante === 'faixa-mobile') {
     const lider = pessoas[0] ?? null;

@@ -236,7 +236,82 @@
 }
 
 .top-arrotadores a:focus-visible,
-.top-arrotadores button:focus-visible {
+.top-arrotadores button:focus-visible,
+.liga-hero a:focus-visible,
+.liga-hero button:focus-visible {
   outline: 3px solid var(--accent, #ff5500);
   outline-offset: 2px;
+}
+
+/* LIGA integrada dentro do Hero, sem card */
+.liga-hero {
+  width: 100%;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+
+.liga-hero__titulo {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent, #ff5500);
+}
+
+.liga-hero__aviso {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted, #8b92a3);
+}
+
+.liga-hero__aviso button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--accent, #ff5500);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.liga-hero__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.liga-hero__lista li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.liga-hero__lista li:last-child {
+  border-bottom: 0;
+}
+
+.liga-hero__play {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-strong, #3b4254);
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  color: var(--fg, #f3f4f6);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.liga-hero__play.is-tocando {
+  border-color: var(--accent, #ff5500);
+  background: var(--accent, #ff5500);
+  color: var(--accent-on, #0a0b0e);
 }

@@ -31,6 +31,8 @@ interface Props {
   aoAbrirMeusDesafios?: () => void;
   /** Conteúdo da home; desmontado enquanto a Arena está em uso. */
   conteudoDoRepouso?: ReactNode;
+  /** Ranking da Liga exibido dentro do próprio Hero quando em repouso. */
+  rankingDoHero?: ReactNode;
   readonly adversarioHandle?: string | null;
   /** Quando true, renderiza módulo compacto expansível na Home sem duplicar `<main>` nem `<h1>`. */
   readonly modoEmbutido?: boolean;
@@ -82,6 +84,7 @@ export function ArenaV2({
   aoVoltar,
   aoAbrirMeusDesafios,
   conteudoDoRepouso,
+  rankingDoHero,
   adversarioHandle,
   modoEmbutido = false,
   aoPublicarAudio,
@@ -385,7 +388,7 @@ export function ArenaV2({
             <p className="arena-v2__instrucao">
               {adversarioLimpo
                 ? `X1 contra @${adversarioLimpo}.`
-                : 'Grava, pega nota, intima no X1.'}
+                : 'Grava no microfone, vê a nota e manda nos grupos.'}
             </p>
           )}
         </div>
@@ -545,6 +548,7 @@ export function ArenaV2({
       {estado === 'permissao' && <p className="arena-v2__status-texto" role="status">Libera o mic aí.</p>}
       {estado === 'calibrando' && <p className="arena-v2__status-texto" role="status">Calibrando. Fica quieto 1s.</p>}
       {estado === 'finalizando' && <p className="arena-v2__status-texto" role="status">Fechando o áudio…</p>}
+      {estado === 'pronto' && rankingDoHero}
     </section>
   );
 

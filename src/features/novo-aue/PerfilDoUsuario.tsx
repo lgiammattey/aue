@@ -1,6 +1,6 @@
 /**
  * Cabeçalho e abas do perfil (`/perfil` e `/u/:handle`), no desenho do protótipo
- * `Bonde do Arroto.dc.html` (classes `pf-*`). Só apresenta: dado, estado e ação
+ * o protótipo arquivado "Bonde do Arroto" (ver o histórico do Git) (classes `pf-*`). Só apresenta: dado, estado e ação
  * chegam por props. Nenhuma API de navegador aqui.
  */
 import { useRef, useState, type KeyboardEvent, type Ref } from 'react';

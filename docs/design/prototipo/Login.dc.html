@@ -45,7 +45,7 @@
 class Component extends DCLogic {
   state = { theme: 'dark', step: 'email', email: '', pass: '', nick: '', err: '', show: false };
   componentDidMount() { try { const t = localStorage.getItem('bda-theme'); if (t) this.setState({ theme: t }); } catch (x) {} }
-  go = () => { window.location.href = 'Bonde do Arroto.dc.html'; };
+  go = () => { window.location.href = 'Arena.dc.html'; };
   renderVals() {
     const s = this.state, light = s.theme === 'light', st = s.step;
     const vars = light ? { '--bg': '#f5f3ea', '--surface': '#ebe9de', '--surface-2': '#dedcd0', '--fg': '#0a0a08', '--muted': '#57554a', '--border': '#d6d4c6', '--border-strong': '#85836f', '--ind': '#0a0a08', '--danger': '#c4161a', colorScheme: 'light' } : { '--border-strong': '#74725f', '--ind': '#c6ff00', colorScheme: 'dark' };

@@ -17,7 +17,7 @@
 
 <header style="max-width:1120px;width:100%;margin:0 auto;padding:20px 24px;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center">
 <span style="font-weight:900;font-size:34px;line-height:1;letter-spacing:-.06em">auê<span style="color:#2f5d0a">!</span></span>
-<a href="Comunidades.dc.html" style="font-weight:600;font-size:15px;color:var(--fg);text-decoration:underline;white-space:nowrap" style-hover="color:var(--muted)">Só dar uma olhada</a>
+<a href="Arena.dc.html" style="font-weight:600;font-size:15px;color:var(--fg);text-decoration:underline;white-space:nowrap" style-hover="color:var(--muted)">Só dar uma olhada</a>
 </header>
 
 <section style="max-width:1120px;width:100%;margin:0 auto;padding:24px 24px 72px;box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:56px;align-items:start">
@@ -71,7 +71,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { mode: 'login', code: '', nick: '', email: '', pass: '', why: '', err: '', sent: false };
-  go = () => { try { localStorage.setItem('aue-logged', '1'); } catch (x) {} window.location.href = 'Comunidades.dc.html'; };
+  go = () => { try { localStorage.setItem('aue-logged', '1'); } catch (x) {} window.location.href = 'Arena.dc.html'; };
   renderVals() {
     const s = this.state, m = s.mode, set = (k) => (e) => this.setState({ [k]: e.target.value, err: '' });
     const okMail = s.email.includes('@') && s.email.includes('.');

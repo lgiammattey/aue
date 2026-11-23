@@ -19,7 +19,7 @@
 <div style="max-width:1080px;margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;gap:20px;box-sizing:border-box">
 <a href="Landing.dc.html" style="font-weight:900;font-size:30px;letter-spacing:-.06em;line-height:1;flex:none">auê<span style="color:#2f5d0a">!</span></a>
 <nav style="flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6"><button onClick="{{ t.go }}" style="{{ t.style }}" style-hover="background:var(--surface)">{{ t.label }}</button></sc-for></nav>
-<a href="Comunidades.dc.html" style="flex:none;height:38px;padding:0 18px;border-radius:999px;background:var(--fg);color:var(--bg);font-weight:700;font-size:14px;display:flex;align-items:center;white-space:nowrap" style-hover="opacity:.85;color:var(--bg)">Entrar</a>
+<a href="Arena.dc.html" style="flex:none;height:38px;padding:0 18px;border-radius:999px;background:var(--fg);color:var(--bg);font-weight:700;font-size:14px;display:flex;align-items:center;white-space:nowrap" style-hover="opacity:.85;color:var(--bg)">Entrar</a>
 </div></header>
 
 <main style="max-width:1080px;margin:0 auto;padding:0 20px;box-sizing:border-box">
@@ -77,7 +77,7 @@
 </section>
 </main>
 
-<footer style="border-top:1px solid var(--border)"><div style="max-width:1080px;margin:0 auto;padding:24px 20px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:13px;color:var(--muted)"><span>© 2026 auê!</span><span style="display:flex;flex-wrap:wrap;gap:6px 20px"><a href="Comunidades.dc.html" style="color:var(--muted)">Comunidades</a><a href="Landing.dc.html" style="color:var(--muted)">Entrar</a><a href="#" style="color:var(--muted)">Privacidade</a><a href="#" style="color:var(--muted)">Termos</a></span></div></footer>
+<footer style="border-top:1px solid var(--border)"><div style="max-width:1080px;margin:0 auto;padding:24px 20px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:13px;color:var(--muted)"><span>© 2026 auê!</span><span style="display:flex;flex-wrap:wrap;gap:6px 20px"><a href="Arena.dc.html" style="color:var(--muted)">Comunidades</a><a href="Landing.dc.html" style="color:var(--muted)">Entrar</a><a href="#" style="color:var(--muted)">Privacidade</a><a href="#" style="color:var(--muted)">Termos</a></span></div></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
@@ -89,7 +89,7 @@ class Component extends DCLogic {
     const L = (k, label) => ({ label, go: go(k) });
     return {
       'como-jogar': { nav: 'Como jogar', eyebrow: 'Guia rápido', title: 'Como jogar o Auê', lead: 'O Auê reúne quem gosta de arrotos, histórias e desafios. Você participa de comunidades, conversa em tópicos e leva o arroto pra Arena, que devolve uma nota de 0 a 100. Não é sorteio: o que não for arroto não vira nota.', blocks: [
-        { eyebrow: 'As comunidades', title: 'Cada conversa tem seu lugar', paras: ['Toda publicação pertence a uma comunidade e a um tópico. A comunidade é o grupo; o tópico é o assunto. Qualquer visitante lê e ouve. Pra criar tópicos e responder, precisa de conta.'], links: [L('x', 'Ver comunidades')].map(l => ({ ...l, go: () => { window.location.href = 'Comunidades.dc.html'; } })) },
+        { eyebrow: 'As comunidades', title: 'Cada conversa tem seu lugar', paras: ['Toda publicação pertence a uma comunidade e a um tópico. A comunidade é o grupo; o tópico é o assunto. Qualquer visitante lê e ouve. Pra criar tópicos e responder, precisa de conta.'], links: [L('x', 'Ver comunidades')].map(l => ({ ...l, go: () => { window.location.href = 'Arena.dc.html'; } })) },
         { eyebrow: 'A Arena', title: 'Arrotar e receber a nota', paras: ['Toque em arrotar e solte. O microfone só é pedido nessa hora. O Auê grava, julga e mostra a nota com as quatro medidas. Não gostou do número? Manda outro.', 'Depois, você escolhe: publicar o resultado como resposta num tópico, abrir uma discussão nova ou guardar pra você.'] },
         { eyebrow: 'O X1', title: 'Desafiar um amigo', paras: ['Chame alguém por um link privado. Quem abrir ouve o seu arroto, arrota a resposta no próprio aparelho e as duas notas se enfrentam. No fim tem placar e revanche.'] },
         { eyebrow: 'Sem instalar', title: 'Direto no navegador, de graça', paras: ['Funciona no navegador do celular, Android ou iPhone. Sem assinatura e sem moeda dentro do jogo.'], hasCards: true, cards: [{ t: 'Seu áudio', d: 'Entenda o que o Auê faz com ele na página de privacidade.' }] }

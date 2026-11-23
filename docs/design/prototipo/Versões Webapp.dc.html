@@ -29,7 +29,7 @@
 class Component extends DCLogic {
   renderVals() {
     const mk = (title, src, w, h, k) => ({ title, src, size: w + ' × ' + h, box: { width: w * k, height: h * k, border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', background: 'var(--bg)' }, frame: { width: w, height: h, border: 0, transform: 'scale(' + k + ')', transformOrigin: '0 0' } });
-    return { frames: [mk('Desktop · Feed', 'Bonde do Arroto.dc.html', 1280, 800, 0.9), mk('Desktop · Arena', 'Arena.dc.html', 1280, 800, 0.9), mk('Tablet · Feed', 'Bonde do Arroto.dc.html', 820, 900, 0.8), mk('Celular · Feed', 'Bonde do Arroto.dc.html', 390, 844, 0.8), mk('Celular · Arena', 'Arena.dc.html', 390, 844, 0.8)] };
+    return { frames: [mk('Desktop · Feed', 'Arena.dc.html', 1280, 800, 0.9), mk('Desktop · Arena', 'Arena.dc.html', 1280, 800, 0.9), mk('Tablet · Feed', 'Arena.dc.html', 820, 900, 0.8), mk('Celular · Feed', 'Arena.dc.html', 390, 844, 0.8), mk('Celular · Arena', 'Arena.dc.html', 390, 844, 0.8)] };
   }
 }
 </script>

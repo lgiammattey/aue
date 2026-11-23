@@ -33,9 +33,7 @@ A lista descreve código e superfície disponível; não é validação de todos
 
 **A referência visual viva do produto reside em [`docs/design/prototipo/`](docs/design/prototipo/):**
 
-- [`Tropa do Arroto.dc.html`](docs/design/prototipo/Bonde%20do%20Arroto.dc.html) — A camada social de pessoas e o feed compartilhado
 - [`Arena.dc.html`](docs/design/prototipo/Arena.dc.html) — A máquina da Arena e estados de captura
-- [`Comunidades.dc.html`](docs/design/prototipo/Comunidades.dc.html) — Hub de comunidades e rankings
 - [`Landing.dc.html`](docs/design/prototipo/Landing.dc.html) — Página de chegada e acesso rápido
 - [`Login.dc.html`](docs/design/prototipo/Login.dc.html) — Autenticação e entrada como convidado
 - [`Jornada.dc.html`](docs/design/prototipo/Jornada.dc.html) — As 6 fases da jornada do jogador

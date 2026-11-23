@@ -74,13 +74,22 @@ Pode usar "bora", "manda essa", "quero ver superar", "solta esse arroto",
 - **Sem emoji, meme forçado, fetiche nem excesso de palavrão.**
 - **Escrever pouco, com significado.** Não aumentar texto pra bater número de
   palavras. A copy passa pelo [filtro anti-IA](../../.agents/skills/filtro-anti-ia/SKILL.md).
+- **Zero travessão (`—` ou `–`) na copy pública.** Usar vírgula, ponto ou dois
+  pontos. Travessão denuncia texto artificial e quebra o ritmo de conversa.
+- **Linguagem real de X, Reddit, fóruns e WhatsApp.** Antes de escrever sobre um
+  tema, observar como as pessoas realmente falam dele nesses espaços no Brasil e
+  usar esse vocabulário vivo, sem parecer blog corporativo nem tutorial genérico.
+- **Rótulos de anúncio com a cara do Auê.** Blocos patrocinados mantêm
+  identificação clara de publicidade (`PUBLI`, `PATROCINADO`, `ANÚNCIO`), mas
+  podem assumir a piada da casa (ex.: `PUBLI · PRA PAGAR O REFRI DA SEMANA`).
 
 ## SEO
 
 - Cada página pública indexável tem título, meta description, H1 e texto de
   apoio próprios, com uma intenção de busca clara e sem repetir palavra-chave à toa.
 - Termos como "comunidade de arrotadores", "como arrotar", "aprender a arrotar",
-  "áudios de arrotos" e "desafio de arroto" entram só onde são relevantes.
+  "áudios de arrotos" e "desafio de arroto" entram só onde são relevantes,
+  combinados com linguagem natural de PT-BR e termos de busca local quando fizer sentido.
 - Na home, o primeiro bloco diz em poucos segundos o que é o Auê, pra quem é e
   o que a pessoa pode fazer.
 - O conteúdo das comunidades complementa o SEO com conversa de verdade, nunca

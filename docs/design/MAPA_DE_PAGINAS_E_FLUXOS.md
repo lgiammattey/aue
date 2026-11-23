@@ -146,3 +146,9 @@ Pedidos de copy, testes ou toque não abrem mudança de tema, tipografia ou mold
    - Respeito obrigatório a `env(safe-area-inset-bottom)` e `env(safe-area-inset-top)`.
 4. **Verdade de Dados:**
    - Proibido injetar números fictícios de seguidores, membros de grupo ou arrotos inventados.
+5. **Imagens, Ilustrações e Ativos Estáticos (`public/`):**
+   - **Ilustrações editoriais (`public/ilustracoes/`):** usadas em guias como `/como-arrotar` (`como-arrotar-comando-codex.png`, `como-arrotar-gas-codex.png`, `como-arrotar-postura-codex.png`). Devem seguir o mesmo estilo visual entre si (ilustração cartoon editorial flat, traço limpo, integrada ao fundo escuro `#0d0f14`), sem cara de foto genérica de IA, sem rostos reconhecíveis de pessoas reais e sem misturar estilos diferentes na mesma página.
+   - **Comunidades (`public/comunidades/`):** ícones e capas das comunidades (`eu-arroto-e-dai`, `arrotos-do-youtube`, `grupos-whatsapp`) seguem identidade própria de cada hub.
+   - **Ecossistema (`public/ecossistema/`):** selos dos projetos parceiros (`lagcheck`, `linka`, `signallq`) usados no rodapé/seção de ecossistema.
+   - **Compartilhamento (`public/og-image.png`):** imagem padrão de Open Graph quando a rota não gera card dinâmico próprio.
+   - Todo ativo visual publicado fica versionado em `public/`, sem depender de URL externa frágil.

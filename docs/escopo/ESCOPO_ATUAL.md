@@ -1,5 +1,19 @@
 # Escopo atual — Auê
 
+## Corte implementado e publicação, 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+A Arena v2 está ligada no workflow de produção junto com duelo privado, duas flags de disputa local e anúncios. O código aponta `/` para a Arena integrada e `/feed` para o mural; as rotas de comunidades e tópicos redirecionam no React. A home exibiu Arena, ranking, mural e grupos no navegador. A execução ponta a ponta de gravação, envio, duelo e publicação não foi verificada nesta revisão.
+
+O escopo de 17/11 abaixo é decisão de produto; não confunda a liga privada semanal proposta com a seção Liga visível ou com ranking existente. Regras do duelo antigo, como ouvir antes da resposta, não descrevem a v2. Em caso de conflito, o código publicado e o registro de produção prevalecem para o que existe; decisões sobre o futuro permanecem decisões, não prova de entrega.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
+> **Revisão de 23/11/2026:** este documento contém decisões e descrições anteriores que ainda precisam de reconciliação integral com a Arena v2 e o mural. Para o corte publicado, evidências e limites, consulte [Produção atual](../PRODUCAO_ATUAL.md). As rotas de comunidades e tópicos redirecionam no roteador; não trate texto histórico como prova de recurso ativo.
+
 ## Direção aprovada: MVP v2 (17/11/2026)
 
 A [Missão 0035](../../.agents/missoes/0035-arena-mvp-v2.md) muda a direção da

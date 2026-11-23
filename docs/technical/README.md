@@ -1,5 +1,7 @@
 # Técnica — como o Auê se sustenta
 
+> **Arquitetura e estado publicado — 23/11/2026:** ADRs e planos registram decisões; código versionado, configuração do build e estado remoto determinam o que foi implantado. Não presuma que um ADR prove que a função esteja operacional. Veja [Produção atual](../PRODUCAO_ATUAL.md).
+
 Este diretório explica a implementação. Ele não amplia escopo, cria tela nem
 substitui o comportamento real do código e das migrações.
 

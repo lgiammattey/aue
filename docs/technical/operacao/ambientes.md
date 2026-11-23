@@ -1,5 +1,17 @@
 # Ambientes do Auê
 
+## Conferência de 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../../PRODUCAO_ATUAL.md).
+
+O conector listou `Auê` como ativo e saudável e `aue-staging` como ativo. A comparação por número de versão retornou 117 migrações locais e 117 no histórico do projeto `Auê`, sem versões exclusivas em nenhum dos lados. Isso substitui a afirmação histórica abaixo de que o histórico não reflete a pasta; não prova que os arquivos tenham sido aplicados sem alterações nem que políticas e funções atuais correspondam ao conteúdo versionado. A identidade do projeto de produção segue o mapeamento registrado neste documento; os segredos do workflow não são legíveis nesta conferência.
+
+O histórico sobre SQL Editor, credenciais e CLI é datado e não deve ser tratado como único procedimento atual. Consulte o estado do ambiente antes de aplicar qualquer mudança.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 Onde o Auê realmente roda, e como uma migração chega ao banco. Nada disto dá
 para descobrir lendo o repositório, e foi por isso que este arquivo existe.
 

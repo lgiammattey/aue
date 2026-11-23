@@ -1,4 +1,6 @@
 # AUÊ!
+
+> **Direção artística e versão publicada — 23/11/2026:** Este documento é referência de direção artística; telas, comunidades e componentes descritos não comprovam o que está publicado. Confira o mapa de páginas e o navegador antes de alterar a interface. Veja [Produção atual](../PRODUCAO_ATUAL.md).
 ## Art Bible
 
 **Versão:** 1.0  

@@ -1,4 +1,6 @@
 # AUÊ!
+
+> **GDD histórico e direção — 23/11/2026:** Este GDD reúne regras de uma visão anterior. A home atual usa Arena v2, a comparação do duelo é por duração informada pelo cliente, e as rotas de comunidade redirecionam no React. O texto abaixo conserva a visão e não prova que cada recurso esteja disponível. Veja [Produção atual](../PRODUCAO_ATUAL.md).
 ## Game Design Document
 
 **Versão:** 1.0  

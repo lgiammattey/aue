@@ -1,5 +1,20 @@
 # Loop Principal do Auê!
 
+## Fluxo publicado, 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+1. A home oferece gravação e navegação para mural, ranking e grupos.
+2. A pessoa pede o microfone, calibra o ambiente, grava e revisa a tentativa. A análise pode ser inconclusiva; uma gravação sem laudo não recebe nota.
+3. Quando o laudo medido está disponível, o código oferece usar a tentativa no desafio. Publicação no mural é uma ação separada e depende do fluxo e permissões.
+4. No duelo v2, a resposta usa sua própria gravação; o resultado compara durações informadas pelo cliente e é provisório. Convites e resultados dependem do servidor.
+
+Esta descrição não valida o fluxo completo em aparelhos ou a entrega de cada áudio. O ciclo de revanche e a audição prévia descritos abaixo pertencem ao contrato antigo e não devem ser atribuídos automaticamente ao duelo v2.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 A jornada completa e suas decisões estão em [`JORNADA.md`](JORNADA.md). Este documento consolida a mecânica do loop operacional entre o feed social e a máquina da Arena.
 
 ---

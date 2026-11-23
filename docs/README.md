@@ -11,11 +11,11 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 ## Comece por aqui
 
 1. [`../AGENTS.md`](../AGENTS.md) — **a autoridade única**: squad, governança, precedência, escopo e regras.
-2. [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md) — o que foi conferido no `aue.web.app`, com data e limite da prova.
+2. [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md) — o corte publicado, o que foi observado no navegador e os limites da prova.
 3. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: a Tropa, comunidades, Arena e X1.
 4. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop em 6 fases da experiência.
 5. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
-6. [`jogo/ARENA.md`](jogo/ARENA.md) — os dez estados da máquina da Arena.
+6. [`jogo/ARENA.md`](jogo/ARENA.md) — os estados atuais da Arena v2 e o contrato anterior preservado.
 7. [`design/README.md`](design/README.md) e [`design/prototipo/`](design/prototipo/) — **os protótipos interativos canônicos**.
 8. [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) — **o mapa de páginas, rotas e componentes canônicos** (guia anti-confusão).
 9. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
@@ -34,7 +34,7 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 | Qual é a jornada do jogador? | [`jogo/JORNADA.md`](jogo/JORNADA.md) e [`design/prototipo/Jornada.dc.html`](design/prototipo/Jornada.dc.html) |
 | Que estados a Arena tem? | [`jogo/ARENA.md`](jogo/ARENA.md) |
 | Como o jogo pontua e o que não vale? | [`jogo/REGRAS.md`](jogo/REGRAS.md) |
-| O que está no ar agora? | [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md), conferido no navegador e datado |
+| O que está no ar agora? | [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md), com evidências e limites datados |
 | Com o que a interface se parece? | Protótipos canônicos em [`design/prototipo/`](design/prototipo/) — referência de desenho, não prova de publicação |
 | Qual componente implementa cada tela/rota? | [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) |
 | De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e [`design/prototipo/Design System.dc.html`](design/prototipo/Design%20System.dc.html) |

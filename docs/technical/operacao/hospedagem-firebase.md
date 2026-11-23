@@ -1,5 +1,7 @@
 # Hospedagem no Firebase
 
+> **Corte implantado — 23/11/2026:** O workflow atual publica no Firebase com flags explícitas para Arena v2, duelo, disputa local e anúncios. Confira o workflow vigente e o retrato de produção antes de alterar ou executar procedimentos antigos. Veja [Produção atual](../../PRODUCAO_ATUAL.md).
+
 > **Atualização de 20/10/2026:** `https://aue.web.app` é a produção verificada e
 > o Firebase Hosting é a única publicação deste repositório. A convivência com
 > Vercel foi contexto de migração; não é procedimento vigente.

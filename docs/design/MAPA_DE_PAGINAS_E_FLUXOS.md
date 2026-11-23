@@ -1,5 +1,29 @@
 # Mapa de Páginas, Rotas e Fluxos do Auê!
 
+## Mapa operacional do corte, 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+| Rota | Código ativo com as flags do build de produção |
+|---|---|
+| `/` | `EntradaRaiz` → `EntradaDaArena` → `EntradaDueloIntegrado` + `ConteudoDaHome` e ranking |
+| `/arena` | `EntradaDaArena`; `/arena/em-breve` tem tela própria |
+| `/feed` | `EntradaInicial` → `InicioOpenDesign`, com Arena embutida quando ligada |
+| `/seguindo` | `InicioOpenDesign` na visão seguindo |
+| `/duelo` | `EntradaDueloIntegrado`, modo resposta |
+| `/perfil`, `/u/:handle`, `/perfil/:handle` | `TelaPerfilOpenDesign` |
+| `/grupos` | `TelaGrupos`; `/g/:slug` no React redireciona para `/grupos`, sujeito a páginas estáticas do Hosting |
+| `/comunidades`, `/c/:slug`, `/c/:slug/t/:id`, `/topico/:id` | Redirecionam para `/` no React; Hosting pode responder antes do React |
+| `/x1/:code`, `/b/:code`, `/d/:id` | Fluxos de compatibilidade distintos do duelo v2 |
+
+O mapa anterior abaixo pode conter rotas e componentes históricos. Para confirmar uma alteração, confira `src/App.tsx`, `firebase.json` e o navegador; protótipo não prova publicação.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
+> **Revisão de 23/11/2026:** este documento contém decisões e descrições anteriores que ainda precisam de reconciliação integral com a Arena v2 e o mural. Para o corte publicado, evidências e limites, consulte [Produção atual](../PRODUCAO_ATUAL.md). As rotas de comunidades e tópicos redirecionam no roteador; não trate texto histórico como prova de recurso ativo.
+
 > **Documento Canônico de Orientação de Telas e Componentes**  
 > Autoridade: [`../../AGENTS.md`](../../AGENTS.md) | Design System: [`design-system/system/DESIGN.md`](design-system/system/DESIGN.md)
 

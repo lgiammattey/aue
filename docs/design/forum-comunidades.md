@@ -1,5 +1,15 @@
 # Fórum de comunidades — especificação de UX/UI
 
+## Estado de uso em 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+As rotas de comunidades e tópicos no roteador React redirecionam à raiz. Este documento registra desenho anterior e não deve ser usado como evidência de navegação ativa, disponibilidade do fórum ou política de acesso atual. O banco pode preservar objetos e dados de versões anteriores.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 **Autor:** Rian (UX/UI e guardião do protótipo)
 **Para:** Kayky (implementação em React 19)
 **Data:** 19/10/2026

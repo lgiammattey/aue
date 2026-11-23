@@ -1,5 +1,7 @@
 # ADR 0010 — Comunidades, tópicos e respostas (sem feed solto)
 
+> **Contexto de 23/11/2026:** registro histórico da decisão. No commit publicado, as rotas de comunidades e tópicos no React redirecionam para `/`; isso não apaga dados nem altera por si só esta decisão formal. Consulte [Produção atual](../../PRODUCAO_ATUAL.md) e o roteador antes de inferir disponibilidade.
+
 **Status:** aceito — Gate Arquitetural do Camillo aprovado; implementação do composer e das mídias ainda pendente de PR, testes e aceite de qualidade.
 **Data:** 2026-10-19 (atualizado em 2026-10-20 e 2026-10-21, emenda do perfil)
 **Decisão de produto:** Luiz, em 19/10/2026 ([#251](https://github.com/lgiammattey/aue/issues/251)), com mídia e composer definidos em 20/10/2026

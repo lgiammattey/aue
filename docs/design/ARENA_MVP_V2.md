@@ -1,5 +1,15 @@
 # Arena MVP v2 — desenho da experiência
 
+## Implementação em 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+A Arena v2 e o duelo privado constam no build publicado. O laudo é experimental, a comparação do duelo usa duração fornecida pelo cliente e a UI não foi validada ponta a ponta nesta revisão. Liga privada semanal, telas previstas e demais itens deste plano não se tornam entregues por existirem neste documento ou por haver uma seção visual chamada Liga.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 **Missão:** [0035 — arena, desafio e revanche](../../.agents/missoes/0035-arena-mvp-v2.md)
 **Situação:** especificação para implementação; não descreve uma entrega publicada.
 **Referência de produção:** [`../PRODUCAO_ATUAL.md`](../PRODUCAO_ATUAL.md), sujeita a nova conferência no navegador.

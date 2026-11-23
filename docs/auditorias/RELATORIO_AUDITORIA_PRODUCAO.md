@@ -1,5 +1,7 @@
 # Relatório de auditoria de produção — Auê
 
+> **Relatório datado — 23/11/2026:** Os achados abaixo são registros da data da auditoria, não comprovação de situação atual ou de resolução. Confirme cada achado antes de agir. Veja [Produção atual](../PRODUCAO_ATUAL.md).
+
 **Data da rodada:** 21/10/2026 (BRT)
 **Produção observada:** `https://aue.web.app/`
 **Código auditado:** `87491845c46ef20f2c05104157616cbf419dfdab` (`main` e `origin/main` no início da rodada)

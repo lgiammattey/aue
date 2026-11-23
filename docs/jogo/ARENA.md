@@ -1,5 +1,17 @@
 # A Arena — estados
 
+## Estados reais da Arena v2, 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+`src/arena/v2/ArenaV2.tsx` declara `pronto`, `permissao`, `calibrando`, `gravando`, `finalizando`, `revisao` e `erro`. `FluxoArenaV2` compõe as telas `arena`, `duelo`, `meus` e `encerrado`. A gravação pode produzir laudo medido ou inconclusivo; quando a captura PCM não está disponível existe alternativa de gravação sem laudo e sem nota.
+
+Os dez estados e a máquina detalhados abaixo descrevem a Arena anterior; não são os nomes nem uma prova de comportamento da v2. Os fluxos legados continuam no repositório e têm contratos próprios.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 O GDD [`AUÊ!-2.md`](AUÊ!-2.md) e a prancha visual de telas recebida descrevem
 momentos e variações visuais do jogo. Eles não alteram a máquina abaixo: os dez
 estados deste documento continuam sendo os únicos estados de produto. Uma

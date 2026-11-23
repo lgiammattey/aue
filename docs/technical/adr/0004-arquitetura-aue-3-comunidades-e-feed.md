@@ -1,5 +1,7 @@
 # ADR 0004 — Auê 3.0: Arquitetura de Comunidades, Feed de Causos e Jogo
 
+> **Contexto de 23/11/2026:** registro histórico da decisão. No commit publicado, as rotas de comunidades e tópicos no React redirecionam para `/`; isso não apaga dados nem altera por si só esta decisão formal. Consulte [Produção atual](../../PRODUCAO_ATUAL.md) e o roteador antes de inferir disponibilidade.
+
 **Status:** aceito
 **Data:** 2026-10-17
 **Decidiu:** Giam & Camillo (aprovado pelo Luiz)

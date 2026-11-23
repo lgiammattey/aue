@@ -10,12 +10,12 @@ vi.mock('../../plataforma/web/conta', () => ({ criarContaWeb: () => ({ estado: v
 beforeEach(() => { FLAGS.arenaV2 = true; FLAGS.dueloV2 = false; });
 afterEach(() => { cleanup(); FLAGS.arenaV2 = false; FLAGS.dueloV2 = false; });
 describe('Ranking integrado às rotas', () => {
-  it('está dentro da Home unificada', async () => {
+  it('está dentro do Hero da Home quando arenaV2 está ligada', async () => {
     window.history.pushState({}, '', '/');
     render(<App />);
     const tops = await screen.findAllByText('TOP TESTE');
     expect(tops.length).toBeGreaterThanOrEqual(1);
-    expect(tops[0].closest('.app')).toBeTruthy();
+    expect(tops[0].closest('.arena-v2')).toBeTruthy();
   });
   it('não aparece na rota isolada da Arena', async () => {
     window.history.pushState({}, '', '/arena');

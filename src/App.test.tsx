@@ -120,17 +120,18 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.getByText('O link está incompleto ou é inválido. Peça um novo convite.')).toBeTruthy();
   });
 
-  it('com as duas flags a Arena e o Mural abrem juntos na raiz', async () => {
+  it('com as duas flags a Arena, a Liga e os guias abrem juntos na raiz', async () => {
     FLAGS.arenaV2 = true;
     FLAGS.dueloV2 = true;
     render(<App />);
     expect(await screen.findByRole('button', { name: 'Gravar agora' })).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 1, name: 'Mural' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'LIGA' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Como arrotar' })).toBeTruthy();
   });
 
-  it('com flag opt-in preserva a intenção do link de gravação legado', async () => {
+  it('com flag opt-in preserva a intenção do link de gravação no Mural "/feed?gravar=1"', async () => {
     FLAGS.arenaV2 = true;
-    window.history.pushState({}, 'Gravar', '/?gravar=1');
+    window.history.pushState({}, 'Gravar', '/feed?gravar=1');
     render(<App />);
     await waitFor(() => expect(window.location.pathname).toBe('/login'));
     expect(new URLSearchParams(window.location.search).get('volta')).toBe('/feed?gravar=1');

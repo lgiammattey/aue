@@ -23,6 +23,7 @@ const TelaPerfilOpenDesign = lazy(() => import('./features/novo-aue/TelaPerfilOp
 const TelaArenaEmBreveOpenDesign = lazy(() => import('./features/novo-aue/TelaArenaEmBreveOpenDesign').then((m) => ({ default: m.TelaArenaEmBreveOpenDesign })));
 const TelaRedefinirSenha = lazy(() => import('./features/conta/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
+const ConteudoDaHome = lazy(() => import('./arena/v2/ConteudoDaHome').then((m) => ({ default: m.ConteudoDaHome })));
 const TopArrotadoresDaHome = lazy(() => import('./features/novo-aue/TopArrotadoresDaHome').then((m) => ({ default: m.TopArrotadoresDaHome })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
@@ -113,6 +114,9 @@ function EntradaInicial({ incluirArenaNoTopo = false }: { readonly incluirArenaN
 }
 
 function EntradaRaiz() {
+  if (FLAGS.arenaV2) {
+    return <EntradaDaArena conteudoDoRepouso={<ConteudoDaHome />} />;
+  }
   return <EntradaInicial incluirArenaNoTopo />;
 }
 

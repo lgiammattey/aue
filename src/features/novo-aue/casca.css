@@ -156,6 +156,11 @@ button, a {
 
 .rightbar .vitrine-apps--sidebar {
   margin: 0;
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--aue-line);
+  border-radius: 0;
+  background: transparent;
 }
 
 .vitrine-apps__identificador {
@@ -1248,11 +1253,20 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 18px;
-  padding: 6px;
-  border-radius: 18px;
-  background: var(--aue-surface);
-  box-shadow: 0 10px 24px rgb(0 0 0 / 12%);
+  margin-bottom: 8px;
+  padding: 6px 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Widgets da coluna direita chapados (Missão 0057, DESIGN §4.1): sem caixa, só filete. */
+.rightbar .top-arrotadores,
+.rightbar .slot-patrocinado--sidebar .panel {
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--aue-line);
+  border-radius: 0;
+  background: transparent;
 }
 
 .rightbar-account__profile {

@@ -21,6 +21,23 @@
 - **Auditoria e Prova Real:** Marcelo
 - **Decisão pendente do Luiz:** aprovar a lista da Fase 1 (quais telas e blocos perdem a caixa, e em que ordem). Sem essa aprovação, Kayky não abre código.
 
+## 2b. Decisões do Luiz (23/11/2026, após o inventário do Rian)
+
+Inventário em [`docs/escopo/inventario-cards-0057.md`](../../docs/escopo/inventario-cards-0057.md).
+
+1. **Anúncios** viram widget chapado. O rótulo "Anúncio"/"Patrocinado" continua visível (rotulagem não se perde).
+2. **Resposta em thread**: filete, como no X.
+3. **`/como-arrotar` e `/tipos-de-arroto`**: o Luiz acha que não precisam existir agora (conteúdo já está na home, rotas não indexadas). **Não removidas aqui.** Ambas estão no `sitemap.xml` e na `/en` e remover rota mexe em SEO, redirecionamento e testes. Ficam **congeladas** nesta missão (sem trabalho de card) até decisão de missão própria com Rodrigo.
+4. **Moldura da Arena em `/x1`** (440px, raio 32px, só desktop): Luiz delegou. Decisão do Tiago: **sai**. Desktop usa coluna central sem moldura de celular; mobile ocupa a largura da tela. Tem que funcionar nos dois.
+5. **Tiles de origem e linha do link do desafio**: são controles (escolher origem do áudio, copiar o link), como botão e campo. **Ficam.**
+6. **Post no perfil**: **filete** (não card). Vale remover o conflito `perfilArena.css:38` x `:50`.
+7. **Tema claro**: não é requisito agora. Risco removido da missão.
+8. **Login**: a tela continua existindo e funcionando. Só sai a caixa do formulário e da `/landing`. Autorizado ajustar `contrato-visual.spec.ts:46`.
+9. **`/desafios` e `/resenha/:id` (legadas)**: sem resposta do Luiz. Ficam **fora** da missão até ele decidir.
+10. **Mapa de telas**: autorizado corrigir (rotas que redirecionam, perfil morto, landing escura). Feito.
+
+**Execução:** fatia 1 (coluna direita da casca) feita em 23/11/2026. Ordem das próximas segue o inventário: informativas, ranking, admin, feed/seguindo, perfil, comunidades/compositor, landing, login, Arena/X1.
+
 ## 3. Fases
 
 1. **Inventário (Rian, Exploração).** Por rota, em desktop e mobile: listar cada caixa (borda + `--surface` + raio) e classificar `fica` (item repetível ou moldura funcional), `sai` (vira chapado) ou `dúvida`. Candidatos de partida, pelos CSS com mais superfícies: `InicioOpenDesign.css`, `casca.css` (rightbar, widgets), `arena.css`, `forum.css`, `TelaAdministracao.css`, `LayoutPublico.css`, `perfilArena.css`, `TopArrotadores.css` (Liga/ranking em painel), `conteudoDaHome.css`. Entrega: tabela rota → caixa → decisão, com captura atual. Rian leva ao Luiz.

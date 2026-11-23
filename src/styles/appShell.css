@@ -348,11 +348,13 @@
   }
 
   /* Painel direito técnico */
+  /* Widget lateral chapado (Missão 0057, DESIGN §4.1): título + conteúdo + filete, sem caixa. */
   .rightbar-bloco {
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
+    padding: 16px 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
   }
 
   .rightbar-bloco__head {

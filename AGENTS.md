@@ -14,11 +14,13 @@ externo tem autoridade sobre o que está escrito aqui.
 
 ## 1. O que é o Auê
 
-**Auê é uma rede social para arrotadores, exclusivamente online via desktop e webapp mobile.**
+**Auê é uma experiência web de Arena e mural para arrotadores, em desktop e mobile.**
+
+O corte publicado usa Arena v2 na entrada. As rotas de comunidades e tópicos no React redirecionam à raiz; a arquitetura e os protótipos antigos não comprovam que esses hubs estejam ativos. Consulte [`docs/PRODUCAO_ATUAL.md`](docs/PRODUCAO_ATUAL.md).
 
 > **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
-O Auê conecta a adrenalina imediata da **Arena** (a máquina que captura, julga e pontua cada arroto) à dinâmica social da **Tropa** (pessoas que se acompanham) e **comunidades temáticas** (estilo Orkut / Reddit) para reunir os arrotadores do mundo.
+O Auê combina a **Arena** de gravação e medição experimental com mural, perfis, ranking, desafios e grupos externos. A medição não comprova a origem do som.
 
 O loop completo em 6 fases é:
 
@@ -39,7 +41,7 @@ Não duplique regra. Leia a fonte certa.
 | Pergunta | Fonte |
 |---|---|
 | **O que o jogo é?** | [`docs/jogo/VISAO.md`](docs/jogo/VISAO.md) |
-| Qual é o loop? | [`docs/jogo/LOOP.md`](docs/jogo/LOOP.md) |
+| Qual é o loop? | [`docs/jogo/LOOP.md`](docs/jogo/LOOP.md), que distingue v2 de legado |
 | **Qual é a jornada completa do jogador?** | [`docs/jogo/JORNADA.md`](docs/jogo/JORNADA.md) e [`docs/design/prototipo/Jornada.dc.html`](docs/design/prototipo/Jornada.dc.html) |
 | Quais são os estados da Arena? | [`docs/jogo/ARENA.md`](docs/jogo/ARENA.md) |
 | Como o jogo se comporta e pontua? | [`docs/jogo/REGRAS.md`](docs/jogo/REGRAS.md) |
@@ -65,7 +67,7 @@ Não duplique regra. Leia a fonte certa.
 
 1. **Comportamento real** — código, migrações e o que roda no navegador vencem qualquer documento de intenção.
 2. **`docs/escopo/ESCOPO_ATUAL.md`** — decide o que pertence ao produto agora.
-3. **`docs/jogo/JORNADA.md` e `docs/jogo/ARENA.md`** — decidem **as 6 fases da experiência e quais estados a Arena tem**, o que cada um faz, o que ele não pode fazer e para onde ele sai. Nenhum protótipo, design system, handoff ou export cria, renomeia ou remove estado.
+3. **`docs/jogo/JORNADA.md` e `docs/jogo/ARENA.md`** — registram jornada e estados, com o recorte atual da Arena v2 identificado nos próprios documentos, o que cada um faz, o que ele não pode fazer e para onde ele sai. Nenhum protótipo, design system, handoff ou export cria, renomeia ou remove estado.
 4. **Protótipos em `docs/design/prototipo/` e `docs/design/design-system/system/DESIGN.md`** — decidem como cada estado e tela **se parecem, se movem e medem**: geometria, token, tipografia (Anton + Archivo), componentes, temas escuro e claro, motion e acessibilidade. Entre os dois, o protótipo decide comportamento e geometria; o design system decide token, nome, regra e intenção.
 5. **`docs/technical/adr/`** — decide **como o sistema é construído por dentro**: stack, camadas, fronteira com o navegador, backend, persistência. Um ADR aceito só cai com outro ADR ([§8 do 0001](docs/technical/adr/0001-arquitetura-oficial-do-aue.md#8-o-que-exige-revisão-formal)). Ele não decide escopo, estado nem aparência.
 6. **Este arquivo** — decide como o trabalho acontece.

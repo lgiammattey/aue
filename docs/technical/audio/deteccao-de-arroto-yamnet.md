@@ -1,5 +1,7 @@
 # Detecção de arroto — o juiz que ouve antes de dar nota
 
+> **Relação com a Arena v2 — 23/11/2026:** Esta página descreve YAMNet e o fluxo que o utiliza. A Arena v2 publicada calcula laudo acústico experimental em `src/nucleo/julgamento/laudoExperimental.ts`; não presuma que o laudo v2 identifica arrotos. Veja [Produção atual](../../PRODUCAO_ATUAL.md).
+
 **Estado:** Implementado e ligado (sem flag).
 **Feature:** #19 — O juiz, sem caô, sem nota tirada do cu.
 **Escopo:** decide se a gravação **contém arroto**. Não mexe na fórmula da nota.

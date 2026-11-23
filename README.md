@@ -20,12 +20,12 @@ Feito por quem já fazia essa zoeira antes de existir qualquer linha de código.
 
 A plataforma roda 100% na web moderna, adaptada tanto para telas grandes no **desktop** (layout de 3 colunas: navegação, feed/arena e lateral de tendências/ranking) quanto na palma da mão como **webapp mobile** (com barra inferior, safe area e alvos tocáveis >= 44px).
 
-1. **Tropa (Pessoas):** Acompanha as resenhas em texto, áudio e mídia das pessoas seguidas. Cada publicação continua ligada a uma comunidade, com comentários, reações, salvar e compartilhar.
-2. **Arena:** Máquina de estados contínua (`IDLE`, `RECORDING`, `ORIGIN`, `JUDGING`, `RESULT`, `CHALLENGE`, `VERSUS`, `SCOREBOARD`, `REMATCH`, `ERROR`) onde o áudio é gravado, validado pelo YAMNet e pontuado de 0 a 100 (Auê Score).
-3. **Mural:** As antigas rotas de comunidades e tópicos redirecionam para a entrada principal no roteador. Consulte o retrato de produção antes de tratar hubs como ativos.
-4. **Desafios X1:** Duelos diretos entre amigos via link no zap com comparativo visual e revanche imediata.
-5. **Diretório de Grupos:** Diretório aberto de grupos externos no WhatsApp, Telegram e TikTok.
-6. **Perfis de Jogador:** Identidade de arrotador com apelido, handle `@` e histórico social.
+1. **Arena:** Gravação no navegador, calibração e laudo acústico experimental. A medição pode ser inconclusiva; não prova a origem do som nem compara aparelhos de forma calibrada.
+2. **Duelo:** A tentativa medida pode ser usada para um desafio privado. A comparação v2 usa duração informada pelo cliente e apresenta resultado provisório.
+3. **Mural e perfis:** Entrada social em `/feed`, perfil e ações de publicação conforme permissões do fluxo.
+4. **Ranking e grupos:** A home apresenta a seção Liga e oferece acesso ao ranking e ao diretório de grupos externos.
+
+A lista descreve código e superfície disponível; não é validação de todos os fluxos. Comunidades e tópicos anteriores redirecionam no roteador. Veja [Produção atual](docs/PRODUCAO_ATUAL.md).
 
 ---
 
@@ -50,7 +50,7 @@ Abra direto no navegador — roda de forma autônoma sem build. Ver [`docs/desig
 
 O Auê vive **100% na web** (`https://aue.web.app`), hospedado no Firebase Hosting.
 
-- **Sem download de loja:** Abre no navegador, joga em três segundos e compartilha no WhatsApp.
+- **Sem download de loja:** Abre no navegador, sem instalação por loja.
 - **PWA instalável:** Pode ser adicionado à tela inicial no Android e no iOS. Cache de assets não prova que jogo, gravação ou social funcionem sem rede.
 - **Zero cascas nativas:** Lojas nativas (Google Play / App Store) estão fora de escopo.
 
@@ -68,7 +68,7 @@ O Auê vive **100% na web** (`https://aue.web.app`), hospedado no Firebase Hosti
 
 - **Frontend:** React 19 + TypeScript + Vite + React Router
 - **PWA:** `vite-plugin-pwa` (Workbox) com cache de runtime para o modelo de IA
-- **Áudio & IA:** Web Audio API + MediaRecorder + modelo YAMNet local (TensorFlow.js) para detecção de arrotos reais
+- **Áudio:** Web Audio API + MediaRecorder e laudo acústico experimental na Arena v2; o repositório também contém componentes legados com YAMNet. O laudo v2 não identifica a origem do som.
 - **Backend & Dados:** Supabase (PostgreSQL, Row Level Security, RPCs, Auth, Storage privado e Edge Functions)
 - **Hospedagem:** Firebase Hosting com geração estática de páginas para grupos e SEO
 - **Qualidade & Testes:** Vitest + Testing Library + Oxlint + validações de arquitetura

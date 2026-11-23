@@ -1,5 +1,7 @@
 # Calibração do motor de arroto — lote real de 10/08/2026
 
+> **Calibração histórica — 23/11/2026:** Esta análise é da régua de agosto e não valida a régua experimental-2 da Arena v2 entre dispositivos. Consulte a implementação atual e suas limitações. Veja [Produção atual](../../PRODUCAO_ATUAL.md).
+
 **Origem do lote:** 43 arquivos enviados por Luiz para ajuste fino do motor.  
 **Privacidade:** os áudios NÃO entram no repositório. Este documento guarda somente medições e rótulos.  
 **Objetivo:** calibrar a nota e confirmar que voz/outro som não deve chegar à pontuação.

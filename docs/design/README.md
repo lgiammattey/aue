@@ -1,5 +1,7 @@
 # Design & Experiência do Auê!
 
+> **Referências de design — 23/11/2026:** Os protótipos são referências de desenho, não prova de entrega. No corte publicado a raiz é a Arena v2 e as antigas rotas de comunidades redirecionam no React. Veja [Produção atual](../PRODUCAO_ATUAL.md).
+
 Este diretório contém a documentação visual, protótipos interativos e tokens canônicos do Auê!.
 
 ---

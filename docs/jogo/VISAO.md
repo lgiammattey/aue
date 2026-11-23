@@ -1,5 +1,17 @@
 # Visão do produto — Auê!
 
+## Produto em produção, 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+Auê é uma experiência web de Arena de arrotos com mural, perfis, ranking e diretório de grupos externos. A entrada principal apresenta gravação experimental e atalhos para o mural. O frontend redireciona as antigas rotas de comunidades e tópicos para a raiz: os hubs descritos abaixo são históricos ou intenção, não uma navegação ativa comprovada. A área Liga exibida na home não demonstra, por si só, a implementação de liga privada semanal.
+
+Gravar, revisar, publicar e compartilhar são ações distintas. A medição é experimental e não comprova a origem do som. Conta e autorização variam conforme a ação; leia o código antes de afirmar que toda interação é anônima.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 O desenho completo de produto está em [`AUÊ!-2.md`](AUÊ!-2.md) e a jornada detalhada em [`JORNADA.md`](JORNADA.md). Esta visão é a referência curta e normativa do que é o Auê!.
 
 ---

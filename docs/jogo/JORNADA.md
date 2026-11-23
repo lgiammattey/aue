@@ -1,5 +1,17 @@
 # Tropa do Arroto · Jornada do Jogador
 
+## Jornada observada e implementada, 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+A página inicial no navegador mostrou Arena, ação de gravar, acesso ao mural, ranking, grupos e aviso 18+. O código implementa permissão, calibração, gravação, revisão e tratamento de falhas. Depois de uma medição válida, a tentativa pode ser usada para criar ou responder um duelo; há fluxos separados para publicação e compartilhamento. Não foi concedido acesso ao microfone nem executada uma partida ponta a ponta nesta revisão.
+
+A sequência de seis fases abaixo é uma referência histórica de desenho. Não representa literalmente a ordem da home, os estados da Arena v2 nem uma garantia de comunidades, placar ou revanche no fluxo novo.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 > **Fluxo de referência canônico para produto, design e engenharia.**  
 > Cada caixa representa uma tela ou estado; as ramificações mostram as decisões do usuário.  
 > O loop de revanche nunca termina em "pronto".

@@ -1,12 +1,12 @@
 # Produção atual — Auê
 
 **Referência:** commit `dc83657589294fb45e28f7b5753712044e709b08` na main.
-**Conferência:** 23/11/2026, por código e execução do GitHub Actions.
+**Conferência:** 23/11/2026, por código, GitHub Actions, histórico de migrações e observação da página inicial em navegador desktop.
 **Endereço configurado:** https://aue.web.app/
 
 A execução [Publicar no Firebase](https://github.com/lgiammattey/aue/actions/runs/45114720736) para esse commit terminou com sucesso no canal live. A execução independente [Validação](https://github.com/lgiammattey/aue/actions/runs/45114720565) do mesmo commit falhou. A publicação bem-sucedida não prova aprovação da validação, operação do banco ou funcionamento de cada jornada.
 
-Não foi possível conferir a página em navegador nesta revisão. Portanto, os itens abaixo são o comportamento configurado no código publicado, não aceite funcional ou visual. Migrações do Supabase efetivamente aplicadas, configurações do projeto, dados, permissões e fluxos reais ainda precisam de conferência no ambiente.
+A página inicial foi aberta em navegador desktop e mostrou aviso 18+, Arena com gravação, seção Liga em carregamento, links de mural, ranking e grupos. A verificação não acionou microfone, confirmação de idade, login ou gravação e não prova jornadas de ponta a ponta. As rotas abaixo descrevem o código; configuração efetiva, permissões e recursos no backend exigem testes próprios.
 
 ## Corte do build publicado
 
@@ -28,12 +28,17 @@ O workflow `.github/workflows/publicar-firebase.yml` liga `VITE_FEATURE_ARENA_EX
 
 As rotas de comunidades e tópicos no roteador React redirecionam para `/`. O Firebase configura redirecionamentos próprios para `/comunidade`, `/videos` e `/videos-de-arroto`; a resposta final depende também da precedência de Hosting e deve ser verificada ao vivo. Não apresentar hubs de comunidades como navegação ativa sem prova.
 
+## Backend conferido
+
+O projeto Supabase `Auê` estava ativo e saudável. A listagem mostrou ativas as funções `duelo-audio-v2`, `notas-worker`, `painel-administrativo` e `cadastrar-grupo`, presentes no repositório, além de `og-preview`, `teste-content-type` e `uso-unico-imagens-oficiais`, ausentes da pasta versionada `supabase/functions/`. A listagem confirma presença e estado, não equivalência do código implantado, necessidade atual ou segurança; não apague funções sem investigação específica.
+
 ## Limites e próximos checks
 
 - Validar abertura, gravação, nota, publicação consentida e erros em desktop e celular real.
 - Validar criação, resposta e revelação do duelo, incluindo acesso e retenção no backend. Não assumir que regras legadas valem para v2.
 - Verificar recursos de perfil, mural, ranking, grupos e anúncios no navegador e no Supabase.
-- Investigar a falha de validação e verificar migrações aplicadas antes de afirmar paridade do banco.
+- O histórico do projeto `Auê` e a pasta local têm as mesmas 117 versões de migração. A comparação foi apenas de versões: conteúdo do schema, policies, configuração e execução real não foram verificados.
+- A validação falhou no teste de fronteira arquitetural: `src/arena/v2/ConteudoDaHome.tsx` importa `AdsterraNativeBanner` de `features/novo-aue`. Tipos, lint, processamento de áudio, teste Chromium e build passaram nessa execução.
 - A conferência anterior de 22/10/2026 está no histórico Git; dados e impressões daquela data não descrevem o momento atual.
 
 Fontes: [roteador](../src/App.tsx), [flags](../src/shared/flags.ts), [workflow de publicação](../.github/workflows/publicar-firebase.yml) e [configuração do Hosting](../firebase.json). Planejamento e propostas não são evidência de entrega.

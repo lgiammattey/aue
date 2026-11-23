@@ -1,5 +1,22 @@
 # Arquitetura do Auê
 
+## Arquitetura do corte implantado, 23/11/2026
+
+Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).
+
+- `src/App.tsx` escolhe a Arena v2 e o duelo integrado pelas flags; `src/arena/v2/` contém captura, revisão, duelo e composição.
+- `src/nucleo/julgamento/laudoExperimental.ts` calcula o laudo no cliente. O resultado do duelo usa duração recebida do cliente e é provisório; não trate a fórmula legada de `enviar_resultado` como validação independente desse laudo.
+- `src/features/novo-aue/` contém a casca social e `src/features/grupos/` o diretório externo; rotas de comunidades no React redirecionam para a raiz.
+- Frontend é servido pelo Firebase Hosting; Auth, dados, funções e Storage dependem do projeto Supabase configurado no build. `VITE_*` é incorporada no build.
+- O histórico do projeto Supabase `Auê` tem 117 versões de migração, iguais às 117 versões presentes na pasta na conferência. Isso não prova conteúdo de objetos, configuração, políticas atuais nem execução ponta a ponta.
+- O CI do commit falhou no teste de fronteira: `ConteudoDaHome.tsx` importa `AdsterraNativeBanner` de `features/novo-aue`. Tipos, lint e build passaram nessa execução; a falha arquitetural não foi corrigida por esta revisão documental.
+
+As seções anteriores a seguir descrevem principalmente a arquitetura e os contratos legados. Confira o código antes de usar os nomes de rotas, regras e flags ali como estado atual.
+
+## Registro anterior preservado
+
+O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
+
 > **Revisão de 23/11/2026:** este documento contém decisões e descrições anteriores que ainda precisam de reconciliação integral com a Arena v2 e o mural. Para o corte publicado, evidências e limites, consulte [Produção atual](../PRODUCAO_ATUAL.md). As rotas de comunidades e tópicos redirecionam no roteador; não trate texto histórico como prova de recurso ativo.
 
 O GDD [`../jogo/AUÊ!-2.md`](../jogo/AUÊ!-2.md) e o Art Bible

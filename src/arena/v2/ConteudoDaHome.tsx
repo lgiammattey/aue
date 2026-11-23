@@ -1,5 +1,5 @@
 import './conteudoDaHome.css';
-import { AdsterraBanner300x250 } from '../../shared/components/AdsterraBanner300x250';
+import { AdsterraNativeBanner } from '../../features/novo-aue/AdsterraNativeBanner';
 import { GruposNaHome } from './GruposNaHome';
 
 const TIPOS_DE_ARROTO = [
@@ -135,7 +135,7 @@ export function ConteudoDaHome() {
         </section>
 
         <div className="conteudo-home__anuncio">
-          <AdsterraBanner300x250 />
+          <AdsterraNativeBanner rotulo="PUBLI · PRA PAGAR O REFRI DA SEMANA" />
         </div>
 
         <section id="grupos" className="conteudo-home__secao" aria-label="Grupos de WhatsApp">

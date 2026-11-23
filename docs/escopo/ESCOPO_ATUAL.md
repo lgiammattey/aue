@@ -1,5 +1,7 @@
 # Escopo atual — Auê
 
+> **Revisão de 23/11/2026:** este documento contém decisões e descrições anteriores que ainda precisam de reconciliação integral com a Arena v2 e o mural. Para o corte publicado, evidências e limites, consulte [Produção atual](../PRODUCAO_ATUAL.md). As rotas de comunidades e tópicos redirecionam no roteador; não trate texto histórico como prova de recurso ativo.
+
 ## Direção aprovada: MVP v2 (17/11/2026)
 
 A [Missão 0035](../../.agents/missoes/0035-arena-mvp-v2.md) muda a direção da

@@ -1,6 +1,6 @@
 /**
- * Cabeçalho e abas do perfil (`/perfil` e `/u/:handle`), no desenho do protótipo
- * `Bonde do Arroto.dc.html` (classes `pf-*`). Só apresenta: dado, estado e ação
+ * Cabeçalho e abas do perfil (`/perfil` e `/u/:handle`), no desenho do desenho original
+ * desenho original (classes `pf-*`). Só apresenta: dado, estado e ação
  * chegam por props. Nenhuma API de navegador aqui.
  */
 import { useRef, useState, type KeyboardEvent, type Ref } from 'react';
@@ -11,7 +11,7 @@ import type { PerfilPublico } from '../../portas/perfil';
 
 const TRACO = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
 
-/** Acima disso a bio ganha "ver mais" (a mesma medida do protótipo). */
+/** Acima disso a bio ganha "ver mais" (a mesma medida do desenho original). */
 const BIO_LONGA = 90;
 
 const REDES = [

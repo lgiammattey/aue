@@ -1,7 +1,7 @@
 import type React from 'react';
 import { IconeDeMicrofone } from './icones';
 
-/** A onda achatada do protótipo: nada acontecendo, e é esse o recado. */
+/** A onda achatada do desenho original: nada acontecendo, e é esse o recado. */
 const ONDA_CHATA = ['15%', '22%', '12%', '25%', '18%', '10%', '20%', '14%', '24%', '16%'];
 
 export interface TelaSemSomProps {
@@ -17,7 +17,7 @@ export interface TelaSemSomProps {
 }
 
 /**
- * SEM SOM — porte de `gravacao-sem-som.html`.
+ * SEM SOM — porte do desenho original.
  *
  * O que existia antes: uma linha vermelha de `role="alert"` embaixo do botão de
  * gravar, no meio da tela inicial. Ela dizia a coisa certa e desaparecia no

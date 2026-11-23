@@ -10,13 +10,13 @@ import { LIMIAR_DE_ARROTO, type VereditoDeArroto } from './juiz/vereditoDeArroto
 /**
  * A JORNADA DO FLUXO INDIVIDUAL, de ponta a ponta, sem microfone de verdade.
  *
- * O recorte MVP1 do protótipo (`index-mvp1.html`) descreve uma sequência de
+ * O recorte MVP1 do desenho original descreve uma sequência de
  * TELAS — home → permissão → gravação → julgando(+origem) → resultado. O app
  * tinha uma tela só, com o julgamento reduzido ao rótulo de um botão. Este
  * arquivo trava a sequência que passou a existir.
  *
  * A ASSERÇÃO QUE MAIS IMPORTA está em "o veredito NUNCA fecha sozinho": o
- * protótipo abre o resultado depois de 5 a 10 segundos se ninguém escolher a
+ * desenho original abre o resultado depois de 5 a 10 segundos se ninguém escolher a
  * origem, e docs/jogo/REGRAS.md §3 proíbe exatamente isso. É uma linha de
  * código de distância voltar a existir, e ela não quebraria mais nada.
  *
@@ -188,7 +188,7 @@ describe('AudioRecorder — a jornada do MVP1', () => {
 
   it('o veredito NUNCA fecha sozinho — §3.4', async () => {
     /*
-      `julgando.html:105-120` sorteia de 5 a 10 segundos e abre o resultado sem
+      o desenho original sorteia de 5 a 10 segundos e abre o resultado sem
       ninguém escolher, dizendo "deixe o Auê decidir". A origem pesa 10% da nota
       e define `is_artificial`: um padrão silencioso é o app declarando por você
       uma coisa que só você sabe.

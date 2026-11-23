@@ -1,6 +1,6 @@
 /**
  * CANÔNICO ATIVO — Experiência Principal da Tropa do Arroto (OpenDesign)
- * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
+ * Referência visual: desenho original
  * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
  * 
  * Orquestra o layout de 3 colunas (desktop) e webapp mobile (o mesmo componente, responsivo).

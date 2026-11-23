@@ -1,11 +1,11 @@
 ---
 name: construir-interface
-description: Diretrizes do Kayky para construir componentes e telas do Auê!, Bonde do Arroto e Arena em React 19 com fidelidade 1:1.
+description: Diretrizes do Diego para construir componentes e telas do Auê! e Arena em React 19 com fidelidade 1:1.
 ---
 
 # Skill: construir-interface
 
-Procedimento do **Kayky** para construir interfaces e componentes do Auê! em React 19 com fidelidade visual 1:1 aos protótipos em `docs/design/prototipo/` e ao Design System v5 (`DESIGN.md`).
+Procedimento do **Diego** para construir interfaces e componentes do Auê! em React 19 com fidelidade visual ao Design System v5 (`DESIGN.md`).
 
 ---
 
@@ -25,9 +25,9 @@ Procedimento do **Kayky** para construir interfaces e componentes do Auê! em Re
 
 3. **Arquitetura de Layout em 3 Larguras:**
    - **Desktop (>= 1060px):**
-     - Coluna de navegação esquerda (275px fixa): logo `AUÊ!`, links Início, Auê Arena, Comunidades, Desafios, Perfil, toggle de tema e botão verde "Postar".
-     - Coluna central (600px): feed do Bonde do Arroto ou Arena, delimitada por bordas de 1px `--border`.
-     - Coluna lateral direita (320px): busca rápida, tendências "Em alta no Bonde", ranking do dia e X1 abertos.
+     - Coluna de navegação esquerda (275px fixa): logo `AUÊ!`, links Início, Auê Arena, Desafios, Perfil, toggle de tema e botão verde "Postar".
+     - Coluna central (600px): mural ou Arena, delimitada por bordas de 1px `--border`.
+     - Coluna lateral direita (320px): busca rápida, tendências, ranking do dia e X1 abertos.
    - **Tablet (700px a 1059px):**
      - Menu lateral encolhido em ícones (76px).
    - **Webapp Mobile (< 700px):**

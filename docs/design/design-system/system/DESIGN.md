@@ -4,14 +4,7 @@ category: Brands
 surface: Rede social para arrotadores (Desktop e Webapp Mobile)
 status: "Design System canônico — v5 (Tropa & Arena)"
 canonical_refs:
-  - "docs/design/prototipo/Design System.dc.html"
-  - "docs/design/prototipo/Bonde do Arroto.dc.html" # arquivo legado; superfície exibida como Tropa
-  - "docs/design/prototipo/Arena.dc.html"
-  - "docs/design/prototipo/Landing.dc.html"
-  - "docs/design/prototipo/Login.dc.html"
-  - "docs/design/prototipo/Comunidades.dc.html"
-  - "docs/design/prototipo/Jornada.dc.html"
-  - "docs/design/prototipo/Versões Webapp.dc.html"
+  - "docs/design/design-system/system/DESIGN.md"
 colors:
   dark:
     bg: "#0a0a08"
@@ -53,18 +46,7 @@ Fundo chapado, sem cards flutuantes genéricos, sem gradiente decorativo. Verde 
 
 ## 1. Referências Canônicas
 
-Os arquivos em `docs/design/prototipo/` e este Design System são as referências canônicas de UX/UI do Auê!:
-
-| Artefato | Arquivo | Responsabilidade |
-|---|---|---|
-| **Design System** | [`docs/design/prototipo/Design System.dc.html`](../../prototipo/Design%20System.dc.html) | Demonstração viva de cores, tipos, raios, botões e componentes |
-| **Tropa do Arroto** | [`docs/design/prototipo/Tropa do Arroto.dc.html`](../../prototipo/Bonde%20do%20Arroto.dc.html) | Pessoas seguidas, feed de resenhas, posts com áudio, composer, desafios X1 e perfil |
-| **Arena** | [`docs/design/prototipo/Arena.dc.html`](../../prototipo/Arena.dc.html) | Máquina de estados do arroto (IDLE, RECORDING, VALIDATING, JUDGING, RESULT, X1) |
-| **Comunidades** | [`docs/design/prototipo/Comunidades.dc.html`](../../prototipo/Comunidades.dc.html) | Praça central, descoberta de categorias, rankings e moderação |
-| **Landing** | [`docs/design/prototipo/Landing.dc.html`](../../prototipo/Landing.dc.html) | Recepção estilo Twitter ("Tá rolando agora"), login social e atalho para arrotar |
-| **Login** | [`docs/design/prototipo/Login.dc.html`](../../prototipo/Login.dc.html) | Autenticação simples (Google, Apple, E-mail/Senha/Apelido) ou Convidado |
-| **Jornada** | [`docs/design/prototipo/Jornada.dc.html`](../../prototipo/Jornada.dc.html) | O fluxo completo em 6 fases de decisão e resiliência |
-| **Versões Webapp** | [`docs/design/prototipo/Versões Webapp.dc.html`](../../prototipo/Vers%C3%B5es%20Webapp.dc.html) | Responsividade em 3 larguras: Desktop (1280px), Tablet (820px) e Celular (390px) |
+Este Design System é a referência canônica de UX/UI do Auê!. Não há protótipos: a tela em produção e este documento mandam.
 
 ---
 

@@ -4,7 +4,7 @@ O Auê é uma **rede social para arrotadores, exclusivamente online via desktop 
 
 > **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
-A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arquivo serve como mapa para localizar cada decisão, protótipo e especificação.
+A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arquivo serve como mapa para localizar cada decisão e especificação.
 
 ---
 
@@ -12,11 +12,11 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 
 1. [`../AGENTS.md`](../AGENTS.md) — **a autoridade única**: squad, governança, precedência, escopo e regras.
 2. [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md) — o corte publicado, o que foi observado no navegador e os limites da prova.
-3. [`jogo/VISAO.md`](jogo/VISAO.md) — **o que o produto é**: a Tropa, comunidades, Arena e X1.
-4. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop em 6 fases da experiência.
-5. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada completa do jogador do descobrimento à revanche.
-6. [`jogo/ARENA.md`](jogo/ARENA.md) — os estados atuais da Arena v2 e o contrato anterior preservado.
-7. [`design/README.md`](design/README.md) e [`design/prototipo/`](design/prototipo/) — **os protótipos interativos canônicos**.
+3. [`jogo/AUE.md`](jogo/AUE.md) — **o que o produto é**: o jogo de gravar e duelar, com o mural em volta.
+4. [`jogo/LOOP.md`](jogo/LOOP.md) — o loop da experiência.
+5. [`jogo/JORNADA.md`](jogo/JORNADA.md) — a jornada do jogador.
+6. [`jogo/ARENA.md`](jogo/ARENA.md) — os estados atuais da Arena v2.
+7. [`design/README.md`](design/README.md) — design system e direção visual.
 8. [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) — **o mapa de páginas, rotas e componentes canônicos** (guia anti-confusão).
 9. [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) — o que estamos construindo agora.
 10. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
@@ -29,21 +29,20 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 
 | Pergunta | Fonte |
 |---|---|
-| O que o jogo e a rede social são? | [`jogo/VISAO.md`](jogo/VISAO.md) |
+| O que o Auê é? | [`jogo/AUE.md`](jogo/AUE.md) |
 | Qual é o loop da experiência? | [`jogo/LOOP.md`](jogo/LOOP.md) |
-| Qual é a jornada do jogador? | [`jogo/JORNADA.md`](jogo/JORNADA.md) e [`design/prototipo/Jornada.dc.html`](design/prototipo/Jornada.dc.html) |
+| Qual é a jornada do jogador? | [`jogo/JORNADA.md`](jogo/JORNADA.md) e  |
 | Que estados a Arena tem? | [`jogo/ARENA.md`](jogo/ARENA.md) |
 | Como o jogo pontua e o que não vale? | [`jogo/REGRAS.md`](jogo/REGRAS.md) |
 | O que está no ar agora? | [`PRODUCAO_ATUAL.md`](PRODUCAO_ATUAL.md), com evidências e limites datados |
-| Com o que a interface se parece? | Protótipos canônicos em [`design/prototipo/`](design/prototipo/) — referência de desenho, não prova de publicação |
+| Com o que a interface se parece? | A tela em produção e o [design system](design/design-system/system/DESIGN.md) |
 | Qual componente implementa cada tela/rota? | [`design/MAPA_DE_PAGINAS_E_FLUXOS.md`](design/MAPA_DE_PAGINAS_E_FLUXOS.md) |
-| De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e [`design/prototipo/Design System.dc.html`](design/prototipo/Design%20System.dc.html) |
+| De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e  |
 | Qual é a direção artística que une tudo? | [`design/AUÊ!.md`](design/AUÊ!.md) |
 | Isso pertence ao produto agora? | [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) |
 | O que pegar para fazer? | [`escopo/BACKLOG.md`](escopo/BACKLOG.md) |
 | Quem implementa, valida e aceita? | [`../AGENTS.md`](../AGENTS.md) e [`.agents/README.md`](../.agents/README.md) |
 | Como o Auê fala? | [`jogo/VOZ.md`](jogo/VOZ.md) |
-| De onde veio o produto? | [`jogo/HISTORIA.md`](jogo/HISTORIA.md) |
 | Que stack é essa e por quê? | [`technical/adr/0001-arquitetura-oficial-do-aue.md`](technical/adr/0001-arquitetura-oficial-do-aue.md) |
 | Como o link chega no zap com prévia? | [`technical/adr/0003-a-previa-do-link.md`](technical/adr/0003-a-previa-do-link.md) |
 | Como funciona a arquitetura de feed e comunidades? | [`technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md`](technical/adr/0004-arquitetura-aue-3-comunidades-e-feed.md) |
@@ -62,8 +61,8 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 
 1. **Comportamento real** — código, migrações e o que roda no navegador vencem documento de intenção.
 2. **`escopo/ESCOPO_ATUAL.md`** — decide o que pertence ao produto agora.
-3. **`jogo/JORNADA.md` e `jogo/ARENA.md`** — decidem as 6 fases da experiência e quais estados a Arena tem. Nenhum protótipo, design system ou handoff cria, renomeia ou remove estado.
-4. **Protótipos em `design/prototipo/` e `design/design-system/system/DESIGN.md`** — decidem como cada estado e tela se parecem, se movem e medem.
+3. **`jogo/JORNADA.md` e `jogo/ARENA.md`** — decidem as 6 fases da experiência e quais estados a Arena tem. Nenhum design system ou handoff cria, renomeia ou remove estado.
+4. **`design/design-system/system/DESIGN.md`** — decide como cada estado e tela se parecem, se movem e medem.
 5. **`technical/adr/`** — decide como o produto é construído por dentro. Um ADR aceito só cai com outro ADR.
 6. **`../AGENTS.md`** — decide como o trabalho acontece.
 7. **Demais documentos** — contexto e histórico.
@@ -75,12 +74,11 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 ```text
 docs/
 ├── README.md                          ← você está aqui
-├── jogo/        VISAO · LOOP · JORNADA · ARENA · REGRAS · VOZ · HISTORIA · AUÊ!-2
-├── design/      README · AUÊ! (Art Bible) · prototipo/ · design-system/ · fontes/
+├── jogo/        AUE · LOOP · JORNADA · ARENA · REGRAS · VOZ
+├── design/      README · AUÊ! (Art Bible) · design-system/ · fontes/
 ├── escopo/      ESCOPO_ATUAL · BACKLOG
 ├── technical/   README · arquitetura · adr/ · audio/ · dados/ · operacao/
 ├── schema/      nomenclatura · banco_de_dados
-└── pesquisa/    análise competitiva de mercado
 ```
 
 ---

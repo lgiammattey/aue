@@ -1,7 +1,7 @@
 /**
  * OS DOIS HELPERS DE MOVIMENTO DO PROTÓTIPO, TRAZIDOS PARA O JOGO.
  *
- * São cópia do `anim()` e do `flag()` de `docs/design/prototipo-arena/arena.html`
+ * São cópia do `anim()` e do `flag()` do desenho original
  * (l.1133 e l.1137), que é onde o vocabulário de motion da Arena já estava
  * escrito e funcionando.
  *
@@ -23,7 +23,7 @@ const NADA_A_DESFAZER: Desfazer = () => {};
  * O `void el.offsetWidth` no meio é o detalhe que faz a coisa REANIMAR: sem
  * forçar o recálculo de layout entre tirar e pôr a classe, o navegador junta
  * as duas mudanças no mesmo quadro e a animação simplesmente não roda de novo.
- * É o mesmo truque do protótipo, e é por isso que ele está comentado aqui em
+ * É o mesmo truque do desenho original, e é por isso que ele está comentado aqui em
  * vez de parecer linha morta que alguém apaga na próxima limpeza.
  *
  * Com movimento reduzido não dispara nada — e não precisa: nenhuma informação

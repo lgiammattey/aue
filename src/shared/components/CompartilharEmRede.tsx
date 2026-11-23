@@ -89,7 +89,7 @@ export const CompartilharEmRede: React.FC<CompartilharEmRedeProps> = ({ url, tex
             rel="noopener noreferrer"
             /*
               O rótulo visível é só o nome da rede — é o que cabe num botão de
-              13px e é o que o protótipo mostra. Para quem usa leitor de tela,
+              13px e é o que o desenho original mostra. Para quem usa leitor de tela,
               "WhatsApp" sozinho não diz que é uma ação de compartilhar.
             */
             aria-label={`Compartilhar no ${rede.nome}`}

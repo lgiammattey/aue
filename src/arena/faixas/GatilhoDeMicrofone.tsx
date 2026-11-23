@@ -3,7 +3,7 @@ import { JA_FOI } from '../../nucleo/fala/gravacao';
 /**
  * A ação da rodada solo — do toque no microfone até o `JÁ FOI`.
  *
- * No protótipo a entrada da Arena não é uma pílula de texto: é o microfone
+ * No desenho original a entrada da Arena não é uma pílula de texto: é o microfone
  * dentro de um botão (`.mic-cta`). O gesto que o jogo pede é falar, e o ícone
  * diz isso antes de qualquer rótulo.
  *

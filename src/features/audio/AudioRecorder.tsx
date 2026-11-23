@@ -426,7 +426,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
    * esquece o blob.
    *
    * É o "Tentar de novo" da tela de resultado (`btn-tentar-de-novo` do
-   * protótipo) e também o "Cancelar" das telas de gravação, julgamento e sem
+   * desenho original) e também o "Cancelar" das telas de gravação, julgamento e sem
    * som. Um verbo só para "descartar o que está em curso e voltar ao começo".
    *
    * NÃO começa a gravar sozinho: pedir o microfone no toque de um botão escrito
@@ -553,8 +553,8 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
    *
    * O componente desenhava tudo de uma vez: botão, campo de nome, aviso de
    * permissão, erro e resultado empilhados na mesma coluna, e o "julgamento"
-   * era o rótulo do botão virando "Julgando...". O recorte MVP1 do protótipo
-   * (`index-mvp1.html`) descreve uma jornada de telas, e é ela que está aqui.
+   * era o rótulo do botão virando "Julgando...". O recorte MVP1 do desenho original
+   * descreve uma jornada de telas, e é ela que está aqui.
    *
    * Estado derivado, e não um `useState('etapa')`, pelo motivo de sempre: dois
    * donos para a mesma verdade sempre dessincronizam. A etapa é uma LEITURA do
@@ -723,7 +723,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         ("Gravar meu Auê", "Julgando...", "Gravar de novo") e convivia, na tela
         de resultado, com o "Tentar de novo" das ações — dois botões de nomes
         quase iguais e efeitos diferentes, um começando a gravar na hora e o
-        outro só voltando para a bolha. O protótipo tem um. Ficou o "Tentar de
+        outro só voltando para a bolha. O desenho original tem um. Ficou o "Tentar de
         novo" da tela de resultado, que é onde a pessoa está olhando.
       */}
       {etapa === 'inicio' && (
@@ -783,7 +783,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
       {/*
         O AVISO DE PERMISSÃO NEGADA virou tela (`TelaDeMicrofoneBloqueado`), com
-        os três passos do protótipo. Era uma linha de 13px em cinza que dizia a
+        os três passos do desenho original. Era uma linha de 13px em cinza que dizia a
         verdade e não ajudava ninguém a sair de lá.
 
         O alerta abaixo é suprimido nas duas etapas que já mostram a mesma

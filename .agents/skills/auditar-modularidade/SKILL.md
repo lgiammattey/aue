@@ -1,11 +1,11 @@
 ---
 name: auditar-modularidade
-description: Runbook do Marcelo para detectar acoplamento, responsabilidades misturadas e duplicação de regra no código do Auê.
+description: Runbook da auditoria cruzada para detectar acoplamento, responsabilidades misturadas e duplicação de regra no código do Auê.
 ---
 
 # Skill: auditar-modularidade
 
-Ferramenta de revisão do **Marcelo (Qualidade)** para impedir que o Auê vire um
+Ferramenta de revisão de quem audita (Camillo ou Diego) para impedir que o Auê vire um
 monobloco impossível de mexer.
 
 ## 1. O que é monólito aqui

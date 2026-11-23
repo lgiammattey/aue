@@ -15,9 +15,9 @@ Ele é quem tem mais estrada, e é para ele que a dúvida sobe. Isso **não** fa
 
 Não é "isso está bonito?". É:
 
-> **O que isso quebra daqui a seis meses com milhares de arrotos tocando no feed, e quem vai estar olhando quando quebrar?**
+> **O que isso quebra daqui a seis meses com milhares de arrotos tocando no mural, e quem vai estar olhando quando quebrar?**
 
-Decisão de arquitetura raramente parece errada no dia. Ela se mostra errada depois, quando a rolagem do feed engasga ou o banco de dados sobrecarrega com consultas mal indexadas.
+Decisão de arquitetura raramente parece errada no dia. Ela se mostra errada depois, quando a rolagem do mural engasga ou o banco de dados sobrecarrega com consultas mal indexadas.
 
 ## 2. Conselho vem com o preço, não só com a opinião
 
@@ -37,5 +37,5 @@ Ele puxa o freio em três situações:
 
 Os dois fecham acordo antes do código existir:
 - Tiago defende a diversão, o engajamento e a simplicidade do produto;
-- Camillo defende a sustentabilidade técnica, a performance do feed e a integridade da arquitetura.
-- Se não convergirem, Tiago e Iury levam as opções claras para o Luiz bater o martelo.
+- Camillo defende a sustentabilidade técnica, a performance do mural e a integridade da arquitetura.
+- Se não convergirem, Tiago leva as opções claras para o Luiz bater o martelo.

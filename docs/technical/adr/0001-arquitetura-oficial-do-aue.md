@@ -367,7 +367,7 @@ Toda PR passa por isto:
 ---
 
 **Autoridade:** este documento decide **como o Auê é construído por dentro**.
-Não decide o que o jogo é ([`../../jogo/VISAO.md`](../../jogo/VISAO.md)), nem
+Não decide o que o jogo é ([`../../jogo/AUE.md`](../../jogo/AUE.md)), nem
 quais estados a Arena tem ([`../../jogo/ARENA.md`](../../jogo/ARENA.md)), nem o
 que pertence ao escopo agora
 ([`../../escopo/ESCOPO_ATUAL.md`](../../escopo/ESCOPO_ATUAL.md)). E, como

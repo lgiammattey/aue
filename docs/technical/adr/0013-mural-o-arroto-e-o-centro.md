@@ -45,7 +45,7 @@ O Luiz quer outra coisa: o Mural serve para ver os arrotos que a galera mandou, 
 
 - **Tópicos de comunidade.** O ADR 0010 continua valendo como está.
 - **Futuro do `/feed`.** O ADR 0010 pretende aposentar o feed solto. Este ADR assume que o Mural continua existindo enquanto essa migração não acontece.
-- **Aparência.** Fica no protótipo [`docs/design/propostas/mural-chapado.html`](../../design/propostas/mural-chapado.html) e no [Cartão de Missão](../../escopo/missoes/2026-11-23-mural-chapado.md).
+- **Aparência.** Fica no protótipo [`docs/design/propostas/mural-chapado.html`](../../design/propostas/mural-chapado.html).
 
 ## Alternativas descartadas
 

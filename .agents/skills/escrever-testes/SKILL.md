@@ -1,11 +1,11 @@
 ---
 name: escrever-testes
-description: Diretrizes para Kayky e Lucas escreverem testes unitários e de integração (vitest) para feed, comunidades e Arena do Auê.
+description: Diretrizes para Diego e Camillo escreverem testes unitários e de integração (vitest) para a Arena, o mural e o X1 do Auê.
 ---
 
 # Skill: escrever-testes
 
-Procedimento do **Kayky** e **Lucas** para escrever testes automatizados junto com o código — cobrindo regras do jogo, máquina da Arena, feed social e recursos de áudio.
+Procedimento do **Diego** e **Camillo** para escrever testes automatizados junto com o código — cobrindo regras do jogo, máquina da Arena, mural e recursos de áudio.
 
 Ferramenta: `vitest` via `npm run test`.
 
@@ -21,7 +21,6 @@ Ferramenta: `vitest` via `npm run test`.
    - Bloqueio de transições inválidas.
 3. **Feed & Timeline de Causos:**
    - Carregamento e paginação da lista de posts.
-   - Filtragem correta por comunidade.
    - Formatação dos dados do post (autor, áudio, pontuação, data).
 4. **Ciclo de Vida de Áudio & Microfone:**
    - Liberação de recursos após término ou cancelamento.

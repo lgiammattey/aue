@@ -18,7 +18,7 @@ import { MS_DA_SAIDA, escalaDaBolha, msDaTransicao } from './bolhaQueOuve';
  * "91.4". A proibição vale mesmo quando o número não é nota; `Intl` faz o mesmo
  * trabalho, em pt-BR, sem o `replace`.
  *
- * `minimumIntegerDigits: 2` dá o zero à esquerda do protótipo sem `padStart`:
+ * `minimumIntegerDigits: 2` dá o zero à esquerda do desenho original sem `padStart`:
  * um `padStart` depois do arredondamento erra quando a parte inteira cresce.
  */
 const CRONOMETRO = new Intl.NumberFormat('pt-BR', {
@@ -47,7 +47,7 @@ export interface TelaDeGravacaoProps {
 }
 
 /**
- * TELA DE GRAVAÇÃO — porte de `gravacao.html`.
+ * TELA DE GRAVAÇÃO — porte do desenho original.
  *
  * O que existia antes: um botão escrito "Parar (7s)". Nada dizia que o
  * microfone estava aberto, nada mostrava o tempo passando de forma legível, e a

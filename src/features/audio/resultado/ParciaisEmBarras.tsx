@@ -12,7 +12,7 @@ export interface ParciaisEmBarrasProps {
 }
 
 /**
- * A ORDEM é do protótipo e é invariante — por isso vive numa constante única,
+ * A ORDEM é do desenho original e é invariante — por isso vive numa constante única,
  * legível de cabo a rabo, em vez de quatro blocos de JSX soltos no meio da
  * tela. `origin` fica de fora de propósito: ele existe no tipo, pesa 10% da
  * nota, e nunca foi mostrado ao usuário.
@@ -25,7 +25,7 @@ const ORDEM = [
 ] as const;
 
 /**
- * PARCIAIS COMO BARRAS, na ordem do protótipo.
+ * PARCIAIS COMO BARRAS, na ordem do desenho original.
  *
  * Eram quatro números numa grade de 4 colunas, na ordem Duração, Potência,
  * Profund., Textura — e "Profund." era abreviação forçada pela largura da

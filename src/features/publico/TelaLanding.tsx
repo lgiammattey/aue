@@ -7,7 +7,7 @@ import { useEntrarNaConta } from '../conta/useEntrarNaConta';
 import type { PortaDeConta } from '../../portas/conta';
 
 /**
- * A landing de `/`, fiel a `docs/design/prototipo/Landing.dc.html`.
+ * A landing de `/`, fiel a desenho original.
  *
  * O Auê está fechado pra quem não tem conta, e é isso que a tela diz:
  * - só entra quem já tem conta (e-mail e senha, a mesma entrada do `/login`);

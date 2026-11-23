@@ -6,10 +6,6 @@ Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e c�
 
 Este levantamento é histórico. Feed, ranking, perfis, grupos e outras áreas voltaram a ter código e migrações posteriores; não use a lista abaixo como prova de que uma tabela está sem consumidor ou que pode ser excluída. Antes de qualquer limpeza, procure referências em código, funções, jobs, migrações e ambiente remoto.
 
-## Registro anterior preservado
-
-O texto a seguir registra decisões, contratos e referências anteriores. Em conflito com o retrato acima, não descreve o comportamento atual; contratos legados continuam relevantes para links e dados antigos.
-
 > **Atualização de 18/10/2026 (Auê 3.0).** `posts_comunidade`, `comentarios`,
 > `reacoes` e `denuncias` voltaram a ter consumidor: o feed de causos
 > ([ADR 0004](../adr/0004-arquitetura-aue-3-comunidades-e-feed.md)), pelas RPCs

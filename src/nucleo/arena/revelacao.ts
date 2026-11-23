@@ -3,7 +3,7 @@
  *
  * **Não é estado da Arena.** Os dez estados de `docs/jogo/ARENA.md` continuam
  * os dez; isto aqui é momento dentro do `RESULT`, como `conferindo` e
- * `abrindoODesafio` já são. O protótipo chama de `RESULT_REVEAL`, e o próprio
+ * `abrindoODesafio` já são. O desenho original chama de `RESULT_REVEAL`, e o próprio
  * `ARENA.md` classifica como momento.
  *
  * Por que a ordem é requisito e não estilo: mostrar tudo de uma vez mata o

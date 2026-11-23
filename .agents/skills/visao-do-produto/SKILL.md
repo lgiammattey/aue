@@ -1,58 +1,32 @@
 ---
 name: visao-do-produto
-description: Critérios de produto e engajamento da rede social jogável do Auê! (Bonde do Arroto, comunidades, Arena e X1).
+description: Filtro de produto do Auê: o jogo de gravar, mandar o áudio e receber a nota é o centro, com o mural em volta.
 ---
 
 # Skill: visao-do-produto
 
-O filtro do **Tiago**: isto fortalece o Bonde do Arroto, a comunidade e a diversão do jogo?
+O filtro do **Tiago**: isto fortalece gravar, receber a nota, desafiar no X1 ou voltar pra jogar?
 
-O Auê! é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**. A Arena captura e pontua o arroto; o Bonde publicado sustenta a resenha diária com posts por comunidade, comentários, reações, salvar e compartilhar. A direção de tópicos é aceita, mas não deve ser tratada como entregue sem prova.
-
-O loop completo em 6 fases:
+A definição vigente é [`docs/jogo/AUE.md`](../../../docs/jogo/AUE.md). Esta skill não a repete nem a contradiz.
 
 ```text
-DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO)
-    ▲                                                                   │
-    └────────────────────── REVANCHE (LOOP INFINITO) ───────────────────┘
+GRAVAR → MANDAR → RECEBER A NOTA → (DESAFIAR NO X1 | TENTAR DE NOVO | IR AO MURAL)
 ```
 
----
+## O filtro de corte
 
-## 1. A Resenha é a Unidade Atual
+Antes de abrir qualquer missão, o Tiago confere:
 
-Na produção, a unidade é a **resenha**:
-- texto, áudio ou mídia externa quando o post tem esse conteúdo;
-- autor e comunidade de origem;
-- comentários, reações, salvar e compartilhar;
-- leitura aberta a visitante; participação condicionada à entrada.
+1. **Facilita gravar e mandar em poucos segundos, sem conta?** O primeiro minuto é gravar.
+2. **Fortalece a nota, o X1 ou a vontade de tentar de novo?** O jogo manda; o mural é o que mantém a pessoa por perto.
+3. **Respeita a pessoa e a privacidade?** Gravar pra jogar não autoriza publicar. Áudio só vai ao mural com autorização explícita no ato do envio.
+4. **A promessa é honesta?** A nota é medição experimental e não prova a origem do som. Falha não vira sucesso por copy.
+5. **Funciona em desktop e no webapp mobile, sem loja nativa?**
 
-Se uma proposta de tela esconde o áudio, burocratiza a reprodução ou dilui a nota, o Tiago corta na hora.
+## Fora do produto
 
----
+Comunidades temáticas e tópicos saíram (ADR 0015). O mural pode virar fórum; é decisão aberta do Luiz, então não se desenha estrutura nova para ele antes dela.
 
-## 2. A Praça Central e as Comunidades Temáticas
+## O loop não termina em "pronto"
 
-- **Bonde do Arroto:** a home social do Auê, com filtros Quentes, Novos e Top.
-- **Comunidades:** identificam a origem de cada resenha.
-- Não inventar total de membros, ranking, regra ou forma de participação que não tenha prova no produto.
-
----
-
-## 3. O Loop de Revanche Nunca Termina em "Pronto"
-
-- Todo resultado de partida na Arena e todo duelo no X1 termina com um convite à ação:
-  - *Publicar na comunidade*, *Chamar pro X1*, *Compartilhar card* ou *Mandar outro*.
-- No X1, o placar versus com as duas notas preserva o perdedor sem usar cor vermelha (vermelho é exclusivo para falha técnica).
-- O botão **Revanche** faz a contagem `3, 2, 1` e joga os dois arrotadores direto de volta para a Arena `IDLE` com o mesmo oponente.
-
----
-
-## 4. O Filtro de Corte do Tiago
-
-Antes de abrir qualquer missão, o Tiago valida:
-
-1. **Facilita arrotar e ouvir em menos de 10 segundos?**
-2. **Estimula o desafio no X1 e a resenha no feed?**
-3. **Respeita o jogador e a privacidade?** Áudio só é publicado no feed com autorização expressa no ato do envio.
-4. **Funciona com perfeição no Desktop (3 colunas) e no Webapp Mobile sem precisar de loja nativa?**
+Toda nota termina com um convite: desafiar no X1, tentar de novo ou ver o mural. O perdedor nunca recebe vermelho; vermelho é falha técnica.

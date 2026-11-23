@@ -68,7 +68,7 @@ export const CartaoDaNota: React.FC<CartaoDaNotaProps> = ({
         vinha do container e brigava com o `space-between`. Quem precisa de
         centro pede: `.score-block` e `.quote` têm o seu.
 
-        O cartão em si não está no protótipo (lá o resultado ocupa a tela
+        O cartão em si não está no desenho original (lá o resultado ocupa a tela
         inteira). Fica porque `id="score-card"` é o elemento que o
         `useShareResult` captura para gerar a imagem compartilhada — sem um
         recorte com fundo próprio não há o que fotografar.
@@ -121,7 +121,7 @@ export const CartaoDaNota: React.FC<CartaoDaNotaProps> = ({
       </section>
 
       {/*
-        O VEREDITO. `judge-quote` do protótipo — a única parte da tela com voz, e
+        O VEREDITO. `judge-quote` do desenho original — a única parte da tela com voz, e
         ela não existia no app. Vem pareado com a reação em
         `nucleo/nota/faixas.ts`: as duas são a mesma escolha, e nunca aparecem
         uma sem a outra.
@@ -136,7 +136,7 @@ export const CartaoDaNota: React.FC<CartaoDaNotaProps> = ({
       <ParciaisEmBarras parciais={resultado.partialScores} />
 
       {/*
-        MARCA E CHAMADA — o `share-card` do protótipo (`compartilhar.html`), que
+        MARCA E CHAMADA — o `share-card` do desenho original, que
         tem o símbolo do Auê no topo e o "Você consegue fazer melhor?" no rodapé.
         O §3.5 exige os dois DENTRO do artefato compartilhado: identidade visual
         e CTA para superar o resultado. A imagem saía com nota, veredito e

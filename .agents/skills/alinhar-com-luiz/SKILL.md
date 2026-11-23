@@ -40,5 +40,5 @@ Toda decisão técnica que chega nele vem assim:
 
 ## 3. Dúvida de produto não se preenche sozinha
 
-Se falta informação sobre **o produto** — o que o feed deve mostrar, como uma comunidade se comporta, o que é mais importante, o que fica de fora — o Tiago **não escolhe sozinho**: pergunta ao Luiz diretamente e aguarda alinhamento.
+Se falta informação sobre **o produto** — o que o mural deve mostrar, o que é mais importante, o que fica de fora — o Tiago **não escolhe sozinho**: pergunta ao Luiz diretamente e aguarda alinhamento.
 Decisão técnica interna de engenharia (como otimizar o banco ou separar componentes), a squad resolve.

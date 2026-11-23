@@ -22,7 +22,7 @@ function CaminhoAtual() {
   return <output data-testid="caminho-atual">{location.pathname}</output>;
 }
 
-describe('TelaLanding (Protótipo Canônico Landing.dc.html)', () => {
+describe('TelaLanding', () => {
   afterEach(() => {
     cleanup();
   });

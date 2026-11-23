@@ -1,6 +1,6 @@
 /**
  * CANÔNICO ATIVO — Compositor de Novos Causos e Posts
- * Referência visual: docs/design/prototipo/Bonde do Arroto.dc.html
+ * Referência visual: desenho original
  * Mapeamento: docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md
  * 
  * Permite digitação com o limite do destino, gravação de áudio em 1 clique

@@ -11,8 +11,7 @@
 **Direção:** 2D · flat · dark · expressivo · áudio-reativo
 
 Este Art Bible consolida a direção artística do Auê. A máquina de estados segue
-[`../jogo/ARENA.md`](../jogo/ARENA.md), a geometria e o comportamento seguem o
-protótipo, e os tokens seguem o design system em `design-system/system/`. A
+[`../jogo/ARENA.md`](../jogo/ARENA.md), a geometria e os tokens seguem o design system em `design-system/system/`. A
 prancha de telas recebida é uma referência de composição para os momentos do
 jogo, não uma lista de rotas ou estados novos.
 
@@ -38,11 +37,9 @@ Este documento **não substitui** as fontes canônicas existentes.
 
 Para implementação da Arena:
 
-- [`prototipo/Arena.dc.html`](prototipo/Arena.dc.html) determina geometria e comportamento visual;
 - `docs/design/design-system/system/DESIGN.md` determina tokens, componentes e regras;
 - `docs/jogo/ARENA.md` determina os estados;
-- este Art Bible determina **a direção artística da Arena**. A comunidade e o
-  feed publicados seguem seus protótipos e o Design System.
+- este Art Bible determina **a direção artística da Arena**. As telas publicadas seguem o Design System.
 
 Quando houver conflito técnico, os documentos canônicos acima vencem.
 

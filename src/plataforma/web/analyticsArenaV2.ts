@@ -2,9 +2,12 @@ import type { EventoArenaV2, TelemetriaArenaV2 } from '../../portas/telemetriaAr
 import type { PaginaMonitorada } from '../../nucleo/telemetria/paginas';
 import type { EventoDeTelemetria } from '../../portas/telemetria';
 import { telemetriaBloqueada } from './exclusaoTelemetria';
+import { URL_CANONICA_DA_HOME } from '../../shared/enderecoPublico';
 
 const ID_MEDICAO = 'G-43GWYNCCMD';
-const LOCAL_CANONICO = 'https://aue.web.app/';
+const LOCAL_CANONICO = URL_CANONICA_DA_HOME;
+/** O domínio novo e o antigo servem o mesmo site. A medição vale nos dois. */
+const HOSTS_COM_MEDICAO: ReadonlySet<string> = new Set(['arrotaaue.com.br', 'aue.web.app']);
 const EVENTOS: readonly EventoArenaV2[] = [
   'abriu_arena_v2',
   'iniciou_gravacao',
@@ -38,7 +41,7 @@ let configurada = false;
 function segura(): boolean {
   return (
     typeof window !== 'undefined'
-    && window.location.hostname === 'aue.web.app'
+    && HOSTS_COM_MEDICAO.has(window.location.hostname)
     && !telemetriaBloqueada()
     && ROTAS_SEGURAS.has(window.location.pathname)
     && !window.location.search

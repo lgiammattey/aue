@@ -42,9 +42,9 @@ describe('Analytics da Arena', () => {
     expect(filas.every(item => Object.prototype.toString.call(item) === '[object Arguments]')).toBe(true);
     expect(filas.map(item => Array.from(item))).toEqual([
       ['js', expect.any(Date)],
-      ['config', 'G-43GWYNCCMD', expect.objectContaining({ send_page_view: false, page_location: 'https://aue.web.app/', page_referrer: '' })],
-      ['event', 'page_view', expect.objectContaining({ pagina: 'arena', page_location: 'https://aue.web.app/', page_referrer: '' })],
-      ['event', 'concluiu_gravacao', expect.objectContaining({ page_location: 'https://aue.web.app/', page_referrer: '' })],
+      ['config', 'G-43GWYNCCMD', expect.objectContaining({ send_page_view: false, page_location: 'https://arrotaaue.com.br/', page_referrer: '' })],
+      ['event', 'page_view', expect.objectContaining({ pagina: 'arena', page_location: 'https://arrotaaue.com.br/', page_referrer: '' })],
+      ['event', 'concluiu_gravacao', expect.objectContaining({ page_location: 'https://arrotaaue.com.br/', page_referrer: '' })],
     ]);
     expect(document.querySelector('script[src*="googletagmanager.com/gtag/js"]')?.getAttribute('referrerpolicy')).toBe('no-referrer');
   });
@@ -92,6 +92,6 @@ describe('Analytics da Arena', () => {
     a.analyticsArenaV2.registrar(evento);
     const filas = (window as unknown as { dataLayer: unknown[][] }).dataLayer.map((item) => Array.from(item));
     expect(filas).toContainEqual(['event', 'page_view', expect.objectContaining({ pagina: categoria })]);
-    expect(filas).toContainEqual(['event', evento, expect.objectContaining({ page_location: 'https://aue.web.app/' })]);
+    expect(filas).toContainEqual(['event', evento, expect.objectContaining({ page_location: 'https://arrotaaue.com.br/' })]);
   });
 });

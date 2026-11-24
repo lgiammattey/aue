@@ -66,6 +66,23 @@
   color: var(--v2-volt);
 }
 
+.arena-v2__identidade {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Selo discreto: contorno fino e tipo pequeno. Não usa o acento, que já está no ponto de exclamação da marca. */
+.arena-v2__beta {
+  padding: 3px 6px;
+  border: 1px solid var(--v2-line-strong);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--v2-quiet);
+  font: 700 10px/1 var(--font-body);
+  letter-spacing: 0.14em;
+}
+
 .arena-v2__cabecalho nav,
 .arena-v2__rodape {
   display: flex;

@@ -86,6 +86,14 @@ describe('Arena v2', () => {
     fireEvent.click(botao);
     expect(avancar).not.toHaveBeenCalled();
   });
+  it('avisa que o jogo está em beta ao lado da marca, sem tirar o botão de gravar do lugar', () => {
+    const duble = aparelho();
+    render(<ArenaV2 captura={duble.captura} />);
+    const selo = screen.getByText('BETA');
+    expect(selo.previousElementSibling?.textContent).toBe('AUÊ!');
+    expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
+  });
+
   it('não pede microfone na entrada e abre o mural pela rota existente', () => {
     const { captura } = aparelho();
     render(<ArenaV2 captura={captura} />);

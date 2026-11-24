@@ -14,8 +14,8 @@ describe('prévia pública genérica do convite de duelo', () => {
     const html = ler('paginas/duelo.html');
     expect(html).toContain('<meta name="robots" content="noindex, nofollow"');
     expect(html).toContain('<meta name="referrer" content="no-referrer"');
-    expect(html).toContain('<meta property="og:url" content="https://aue.web.app/duelo"');
-    expect(html).toContain('<meta property="og:image" content="https://aue.web.app/og-image.png"');
+    expect(html).toContain('<meta property="og:url" content="https://arrotaaue.com.br/duelo"');
+    expect(html).toContain('<meta property="og:image" content="https://arrotaaue.com.br/og-image.png"');
     expect(html).toContain('<meta property="og:title"');
     expect(html).toContain('<meta property="og:description"');
     expect(html).toContain('<script type="module" src="/src/main.tsx"></script>');

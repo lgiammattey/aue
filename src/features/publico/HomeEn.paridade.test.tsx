@@ -7,7 +7,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { HomeEn, TITULO_DA_HOME_EN } from './HomeEn';
 
 function textos(elementos: NodeListOf<Element>): Array<string | undefined> {
-  return Array.from(elementos, (e) => e.textContent?.replace(/\s+/g, ' ').trim());
+  // A Arena em inglês é só JavaScript: não existe no <noscript>, então fica fora da paridade.
+  return Array.from(elementos)
+    .filter((e) => !e.closest('.home-en__arena'))
+    .map((e) => e.textContent?.replace(/\s+/g, ' ').trim());
 }
 
 describe('home em inglês (/en)', () => {
@@ -44,12 +47,32 @@ describe('home em inglês (/en)', () => {
     expect(document.title).toBe('Auê! Grave seu arroto e entre na resenha');
   });
 
-  it('os botões de gravar levam para a Arena e há saída para a versão em português', () => {
+  it('a Arena em inglês está na página, e o botão de gravar do fim leva até ela', () => {
     const { container } = render(<MemoryRouter><HomeEn /></MemoryRouter>);
+    const arena = container.querySelector('#arena.home-en__arena');
+    expect(arena).toBeTruthy();
+    expect(arena!.querySelector('button')?.textContent).toBe('Record now');
     const links = Array.from(container.querySelectorAll('a'));
     const gravar = links.filter((a) => /record (a|my) burp/i.test(a.textContent ?? ''));
-    expect(gravar).toHaveLength(2);
-    for (const a of gravar) expect(a.getAttribute('href')).toBe('/');
+    expect(gravar).toHaveLength(1);
+    expect(gravar[0].getAttribute('href')).toBe('#arena');
+  });
+
+  it('nenhum link da página em inglês leva à Arena em português sem estar rotulado como português', () => {
+    const { container } = render(<MemoryRouter><HomeEn /></MemoryRouter>);
+    for (const a of Array.from(container.querySelectorAll('a[href="/"]'))) {
+      expect(a.getAttribute('hreflang')).toBe('pt-BR');
+    }
+  });
+
+  it('a página em inglês não fala português nem avisa que a Arena está em português', () => {
+    const { container } = render(<MemoryRouter><HomeEn /></MemoryRouter>);
+    expect(container.textContent).not.toMatch(/Arena is in Portuguese/i);
+  });
+
+  it('há saída para a versão em português', () => {
+    const { container } = render(<MemoryRouter><HomeEn /></MemoryRouter>);
+    const links = Array.from(container.querySelectorAll('a'));
     expect(links.some((a) => a.getAttribute('hreflang') === 'pt-BR' && a.textContent === 'Português')).toBe(true);
   });
 });

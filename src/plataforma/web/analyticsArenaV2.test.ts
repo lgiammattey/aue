@@ -48,6 +48,18 @@ describe('Analytics da Arena', () => {
     ]);
     expect(document.querySelector('script[src*="googletagmanager.com/gtag/js"]')?.getAttribute('referrerpolicy')).toBe('no-referrer');
   });
+  it('em /en a medição liga e o evento da Arena em inglês leva o idioma, sem tocar no português', async () => {
+    window.history.replaceState(null, '', '/en');
+    const a = await import('./analyticsArenaV2');
+    a.analyticsArenaV2Em.registrar('concluiu_gravacao');
+    a.analyticsArenaV2.registrar('iniciou_gravacao');
+    const eventos = (window as unknown as { dataLayer: unknown[][] }).dataLayer
+      .map((item) => Array.from(item)).filter((item) => item[0] === 'event');
+    expect(eventos).toEqual([
+      ['event', 'concluiu_gravacao', { send_to: 'G-43GWYNCCMD', page_location: 'https://arrotaaue.com.br/', page_referrer: '', idioma: 'en' }],
+      ['event', 'iniciou_gravacao', { send_to: 'G-43GWYNCCMD', page_location: 'https://arrotaaue.com.br/', page_referrer: '', }],
+    ]);
+  });
   it('espelha eventos de funil só com o nome, sem código de batalha nem caminho', async () => {
     window.history.replaceState(null, '', '/arena');
     const a = await import('./analyticsArenaV2');

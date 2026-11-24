@@ -20,9 +20,10 @@ O Luiz quer saber se o site consegue atrair tráfego e fortalecer a página inic
 |---|---|---|---|
 | 1 | Beta na home, sitemap limpo e domínio próprio com canonical | Full flow comum | Camillo (SEO e config), Diego (selo beta) |
 | 2 | Prova do fluxo gravar, nota e cartão em celular real | Fast lane ou Full flow comum | Diego e Camillo, um audita o outro |
-| 3 | Artigos em pt-BR e inglês com imagens no estilo atual | Full flow comum | Diego (telas), Camillo (SEO técnico) |
-| 4 | Perfil mínimo público com áudios privados | Full flow comum | Diego, com contrato do Camillo |
-| 5 | Fórum e X1 como foco | Fora desta fase | Depende de medição e de ADR |
+| 3 | Arena em inglês: loop gravar, nota e cartão em `/en` ([cartão](missao-3-arena-em-ingles.md)) | Full flow comum | Diego (telas e textos), Camillo (camada de idioma) |
+| 4 | Conteúdo de busca em pt-BR e inglês com imagens no estilo atual ([cartão](missao-4-conteudo-de-busca.md)) | Full flow comum | Diego (telas), Camillo (SEO técnico) |
+| 5 | Perfil mínimo público com áudios privados | Full flow comum | Diego, com contrato do Camillo |
+| 6 | Fórum e X1 como foco | Fora desta fase | Depende de medição e de ADR |
 
 Este cartão detalha a missão 1. As outras ganham cartão próprio quando chegar a vez delas.
 

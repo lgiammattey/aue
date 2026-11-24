@@ -86,6 +86,33 @@ describe('Arena v2', () => {
     fireEvent.click(botao);
     expect(avancar).not.toHaveBeenCalled();
   });
+  it('em inglês, a Arena fala inglês do começo ao fim e não mostra atalhos em português', async () => {
+    const duble = aparelho();
+    render(<ArenaV2 captura={duble.captura} idioma="en" />);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('BURP IT OUT.');
+    expect(screen.getByText('Record on your mic, see your score and send it to your friends.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Gravar agora' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Mural' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Record now' }));
+    await screen.findByText('Calibrating. Stay quiet for 1 second.');
+    act(() => { duble.eventos().aoCalibrar(); });
+    await screen.findByRole('button', { name: 'Stop recording' });
+    expect(screen.getByText('RECORDING')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Stop recording' }));
+    await screen.findByText('YOUR RECORDING');
+    expect(screen.getByRole('button', { name: 'Discard and record another' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Share audio' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Download audio' })).toBeTruthy();
+  });
+
+  it('em inglês, o microfone negado aparece em inglês, com o botão de tentar de novo', async () => {
+    const duble = aparelho(Promise.resolve({ ok: false, motivo: 'permissao_negada' }));
+    render(<ArenaV2 captura={duble.captura} idioma="en" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Record now' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('The microphone is blocked. Allow access in your browser settings and try again.');
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy();
+  });
+
   it('avisa que o jogo está em beta ao lado da marca, sem tirar o botão de gravar do lugar', () => {
     const duble = aparelho();
     render(<ArenaV2 captura={duble.captura} />);

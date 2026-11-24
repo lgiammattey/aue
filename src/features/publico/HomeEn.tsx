@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { definirIdiomaETitulo } from '../../plataforma/web/documento';
+import { analyticsArenaV2Em } from '../../plataforma/web/analyticsArenaV2';
+import { ArenaV2 } from '../../arena/v2/ArenaV2';
 import '../../arena/v2/conteudoDaHome.css';
 import './LayoutArenaPublica.css';
 import './ComoArrotar.css';
@@ -11,8 +13,9 @@ import './HomeEn.css';
  * traduzida. O texto existe em dois lugares que precisam bater: aqui e no
  * `<noscript>` de `paginas/en.html`. `HomeEn.paridade.test.tsx` cobra os dois.
  *
- * Decisão de produto: a página linka a Arena, que continua em PT-BR. A copy diz
- * isso na lata em vez de fingir uma Arena em inglês que ainda não existe.
+ * A Arena em inglês mora aqui, embutida logo abaixo do topo. O guia continua
+ * igual: ela é só JavaScript e não entra no `<noscript>`, e o teste de paridade
+ * a ignora de propósito (`.home-en__arena`).
  */
 export const TITULO_DA_HOME_EN = 'Burping Community: How to Burp & Record Yours | Auê';
 
@@ -33,6 +36,7 @@ export function HomeEn() {
         <Link className="guia-arena__marca" to="/en" aria-label="Auê home">
           AUÊ<span className="guia-arena__bang">!</span>
         </Link>
+        <span className="home-en__beta">BETA</span>
         <nav aria-label="Main navigation">
           <a href="#how-to-burp">How to burp</a>
           <a href="#burp-types">Burp types</a>
@@ -49,10 +53,6 @@ export function HomeEn() {
               Auê is a free burping community. Learn to burp on command, burp the alphabet, record yours in your browser, and send it to your friends.
             </p>
             <p>Say it ow-WAY. In Brazilian Portuguese it means a loud, happy mess, which is about right.</p>
-            <Link className="como-arrotar-hero__cta" to="/">
-              Record a burp
-            </Link>
-            <p className="home-en__aviso">The Arena is in Portuguese for now. The mic works the same in any language.</p>
           </div>
           <div className="como-arrotar-hero__arte">
             <img
@@ -61,6 +61,10 @@ export function HomeEn() {
             />
           </div>
         </section>
+
+        <div id="arena" className="home-en__arena">
+          <ArenaV2 modoEmbutido idioma="en" telemetria={analyticsArenaV2Em} />
+        </div>
 
         <div className="guia-arena__secoes">
           <section id="how-to-burp" className="como-arrotar-bloco" aria-labelledby="home-en-how-to-burp">
@@ -166,7 +170,7 @@ export function HomeEn() {
           <section className="guia-arena__cta" aria-labelledby="home-en-cta">
             <h2 id="home-en-cta">Practiced? Test it on the mic.</h2>
             <p>Open the Arena in your browser, record a burp and play it back. Then send it to someone who'll appreciate it.</p>
-            <Link to="/">Record my burp</Link>
+            <a href="#arena">Record my burp</a>
           </section>
         </div>
       </div>

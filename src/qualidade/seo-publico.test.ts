@@ -621,11 +621,13 @@ describe('SEO público — home em inglês (/en)', () => {
     expect(semLinks).not.toMatch(/\b(arroto|arrotar|você|não|para|com)\b/i);
   });
 
-  it('sem JavaScript o rastreador acha um H1 e os links para a Arena e para a versão PT', () => {
+  it('sem JavaScript o rastreador acha um H1 e o link para a versão PT', () => {
     const html = ler('../paginas/en.html');
     const corpo = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? '';
     expect((corpo.match(/<h1>/g) ?? []).length).toBe(1);
-    expect(corpo).toContain('<a href="/">Record my burp</a>');
+    // Sem JavaScript não existe Arena, então o noscript não oferece um botão de gravar que não abre nada.
+    expect(corpo).not.toContain('Record my burp');
+    expect(corpo).not.toMatch(/Arena is in Portuguese/i);
     expect(corpo).toContain('hreflang="pt-BR"');
   });
 });

@@ -14,6 +14,7 @@ import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguraca
 import { configurarExclusaoTelemetria } from './plataforma/web/exclusaoTelemetria'
 import { ComAvisoExclusaoTelemetria } from './plataforma/web/AvisoExclusaoTelemetria'
 import { ComoArrotar } from './features/publico/ComoArrotar'
+import { HomeEn } from './features/publico/HomeEn'
 import { ComoJogar } from './features/publico/ComoJogar'
 import { TiposDeArroto } from './features/publico/TiposDeArroto'
 import { PoliticaDePrivacidade } from './features/legal/PoliticaDePrivacidade'
@@ -65,6 +66,7 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   Production E Preview, e rode um NOVO build.
 */
 const rotasEstaticasSemBanco = new Set([
+  '/en',
   '/como-arrotar',
   '/como-jogar',
   '/tipos-de-arroto',
@@ -93,6 +95,7 @@ if (configuracaoAusente && import.meta.env.DEV && window.location.pathname === '
       <ComAvisoExclusaoTelemetria estado={estadoExclusao}>
         <BrowserRouter>
           <Routes>
+            <Route path="/en" element={<HomeEn />} />
             <Route path="/como-arrotar" element={<ComoArrotar />} />
             <Route path="/como-jogar" element={<ComoJogar />} />
             <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />

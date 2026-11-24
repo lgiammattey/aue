@@ -26,10 +26,23 @@
   color: var(--fg, #f3f4f6);
 }
 
-.como-arrotar-hero__texto .home-en__aviso {
-  margin: 14px 0 0;
+/* Selo discreto, igual ao da home em português: contorno fino e tipo pequeno, sem usar o acento. */
+.home-en__beta {
+  margin-right: auto;
+  margin-left: 10px;
+  padding: 3px 6px;
+  border: 1px solid var(--border-strong, #3b4254);
+  border-radius: var(--radius-sm, 4px);
   color: var(--muted, #8b92a3);
-  font-size: 13px;
+  font: 700 10px/1 var(--font-body);
+  letter-spacing: 0.14em;
+}
+
+/* A Arena embutida respeita a largura do guia e nunca alarga a página. */
+.home-en__arena {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0 0 32px;
 }
 
 .home-en .guia-arena__marca,

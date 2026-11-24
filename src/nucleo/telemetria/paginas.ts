@@ -27,6 +27,6 @@ export function paginaMonitoradaDoCaminho(caminho: string): PaginaMonitorada | n
   if (caminho === '/arena' || caminho.startsWith('/arena/') || /^\/(?:b|x1|d)\/[^/]+$/.test(caminho)) return 'arena';
   if (caminho === '/perfil' || /^\/(?:u|perfil)\/[^/]+$/.test(caminho)) return 'perfil';
   if (caminho === '/login' || caminho === '/entrar' || caminho === '/redefinir-senha') return 'entrada';
-  if (['/como-jogar', '/como-arrotar', '/tipos-de-arroto', '/ranking-de-arrotos', '/grupos', '/privacidade', '/termos'].includes(caminho)) return 'publica';
+  if (['/en', '/como-jogar', '/como-arrotar', '/tipos-de-arroto', '/ranking-de-arrotos', '/grupos', '/privacidade', '/termos'].includes(caminho)) return 'publica';
   return null;
 }

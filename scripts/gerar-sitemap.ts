@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SITE_URL = 'https://aue.web.app';
+const SITE_URL = 'https://arrotaaue.com.br';
 
 // Data estável da última revisão de conteúdo/SEO (evita atualizar diariamente sem alteração real)
 const LASTMOD = '2026-11-17';
@@ -26,7 +26,6 @@ const PAR_HOME: NonNullable<RotaSitemap['alternates']> = [
 const ROUTES: readonly RotaSitemap[] = [
   { path: '/', priority: '1.0', lastmod: '2026-11-23', alternates: PAR_HOME },
   { path: '/en', priority: '0.9', lastmod: '2026-11-23', alternates: PAR_HOME },
-  { path: '/comunidades', priority: '0.9', lastmod: '2026-10-22' },
   { path: '/como-jogar', priority: '0.8' },
   { path: '/como-arrotar', priority: '0.8', lastmod: '2026-11-23' },
   { path: '/tipos-de-arroto', priority: '0.8', lastmod: '2026-10-18' },

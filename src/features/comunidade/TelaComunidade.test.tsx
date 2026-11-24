@@ -172,7 +172,7 @@ describe('TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafio
     expect(screen.queryByText('Vídeo pro TikTok')).toBeNull();
     expect(screen.queryByText('Baixar card (PNG)')).toBeNull();
     expect(screen.queryByText(/\/x1\//)).toBeNull();
-    expect(screen.getByText(/aue\.web\.app\/historia\//)).toBeDefined();
+    expect(screen.getByText(/arrotaaue\.com\.br\/historia\//)).toBeDefined();
   });
 
   it('causo que só existe neste aparelho não abre o compartilhar com link que daria 404', async () => {

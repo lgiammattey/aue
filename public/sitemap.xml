@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url><loc>https://aue.web.app/</loc><lastmod>2026-11-23</lastmod><priority>1.0</priority><xhtml:link rel="alternate" hreflang="pt-BR" href="https://aue.web.app/"/><xhtml:link rel="alternate" hreflang="en" href="https://aue.web.app/en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://aue.web.app/"/></url>
-  <url><loc>https://aue.web.app/en</loc><lastmod>2026-11-23</lastmod><priority>0.9</priority><xhtml:link rel="alternate" hreflang="pt-BR" href="https://aue.web.app/"/><xhtml:link rel="alternate" hreflang="en" href="https://aue.web.app/en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://aue.web.app/"/></url>
-  <url><loc>https://aue.web.app/comunidades</loc><lastmod>2026-10-22</lastmod><priority>0.9</priority></url>
-  <url><loc>https://aue.web.app/como-jogar</loc><lastmod>2026-11-17</lastmod><priority>0.8</priority></url>
-  <url><loc>https://aue.web.app/como-arrotar</loc><lastmod>2026-11-23</lastmod><priority>0.8</priority></url>
-  <url><loc>https://aue.web.app/tipos-de-arroto</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
-  <url><loc>https://aue.web.app/ranking-de-arrotos</loc><lastmod>2026-11-17</lastmod><priority>0.8</priority></url>
-  <url><loc>https://aue.web.app/grupos</loc><lastmod>2026-10-18</lastmod><priority>0.7</priority></url>
-  <url><loc>https://aue.web.app/privacidade</loc><lastmod>2026-08-08</lastmod><priority>0.3</priority></url>
-  <url><loc>https://aue.web.app/termos</loc><lastmod>2026-08-08</lastmod><priority>0.3</priority></url>
+  <url><loc>https://arrotaaue.com.br/</loc><lastmod>2026-11-23</lastmod><priority>1.0</priority><xhtml:link rel="alternate" hreflang="pt-BR" href="https://arrotaaue.com.br/"/><xhtml:link rel="alternate" hreflang="en" href="https://arrotaaue.com.br/en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://arrotaaue.com.br/"/></url>
+  <url><loc>https://arrotaaue.com.br/en</loc><lastmod>2026-11-23</lastmod><priority>0.9</priority><xhtml:link rel="alternate" hreflang="pt-BR" href="https://arrotaaue.com.br/"/><xhtml:link rel="alternate" hreflang="en" href="https://arrotaaue.com.br/en"/><xhtml:link rel="alternate" hreflang="x-default" href="https://arrotaaue.com.br/"/></url>
+  <url><loc>https://arrotaaue.com.br/como-jogar</loc><lastmod>2026-11-17</lastmod><priority>0.8</priority></url>
+  <url><loc>https://arrotaaue.com.br/como-arrotar</loc><lastmod>2026-11-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://arrotaaue.com.br/tipos-de-arroto</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
+  <url><loc>https://arrotaaue.com.br/ranking-de-arrotos</loc><lastmod>2026-11-17</lastmod><priority>0.8</priority></url>
+  <url><loc>https://arrotaaue.com.br/grupos</loc><lastmod>2026-10-18</lastmod><priority>0.7</priority></url>
+  <url><loc>https://arrotaaue.com.br/privacidade</loc><lastmod>2026-08-08</lastmod><priority>0.3</priority></url>
+  <url><loc>https://arrotaaue.com.br/termos</loc><lastmod>2026-08-08</lastmod><priority>0.3</priority></url>
 </urlset>

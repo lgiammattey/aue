@@ -10,7 +10,7 @@ import {
   urlDoGrupo,
 } from './paginaEstatica';
 
-const ORIGEM = 'https://aue.web.app';
+const ORIGEM = 'https://arrotaaue.com.br';
 
 const GRUPO: GrupoParaPagina = {
   slug: 'gym-arrotos',
@@ -26,15 +26,15 @@ describe('montarPaginaDoGrupo', () => {
 
   it('tem título, descrição e canonical próprios, com a barra final', () => {
     expect(html).toContain('<title>GYM Arrotos — grupo de WhatsApp no Auê!</title>');
-    expect(html).toContain('<link rel="canonical" href="https://aue.web.app/g/gym-arrotos/" />');
-    expect(html).toContain('<meta property="og:url" content="https://aue.web.app/g/gym-arrotos/" />');
+    expect(html).toContain('<link rel="canonical" href="https://arrotaaue.com.br/g/gym-arrotos/" />');
+    expect(html).toContain('<meta property="og:url" content="https://arrotaaue.com.br/g/gym-arrotos/" />');
     expect(html).toContain('content="Grupo pra quem tem talento em arrotar."');
     expect(html).not.toMatch(/noindex/i);
   });
 
   it('declara dados estruturados WebPage em JSON-LD', () => {
     expect(html).toContain('"@type":"WebPage"');
-    expect(html).toContain('"url":"https://aue.web.app/g/gym-arrotos/"');
+    expect(html).toContain('"url":"https://arrotaaue.com.br/g/gym-arrotos/"');
     expect(html).toContain('"inLanguage":"pt-BR"');
   });
 
@@ -43,7 +43,7 @@ describe('montarPaginaDoGrupo', () => {
   });
 
   it('sem imagem, o card usa a imagem do Auê; com imagem, usa a do grupo', () => {
-    expect(html).toContain('content="https://aue.web.app/og-image.png"');
+    expect(html).toContain('content="https://arrotaaue.com.br/og-image.png"');
     expect(html).not.toContain('class="capa"');
     const com = montarPaginaDoGrupo({ ...GRUPO, imagemUrl: 'https://x.supabase.co/storage/v1/object/public/b/a.png' }, ORIGEM);
     expect(com).toContain('class="capa" src="https://x.supabase.co/storage/v1/object/public/b/a.png"');
@@ -92,9 +92,9 @@ describe('hashDaLista', () => {
 
 describe('sitemap e lista estática', () => {
   it('acrescenta uma entrada por grupo antes de fechar o urlset', () => {
-    const base = '<urlset>\n  <url><loc>https://aue.web.app/</loc></url>\n</urlset>';
+    const base = '<urlset>\n  <url><loc>https://arrotaaue.com.br/</loc></url>\n</urlset>';
     const r = acrescentarAoSitemap(base, [GRUPO], ORIGEM);
-    expect(r).toContain('<loc>https://aue.web.app/g/gym-arrotos/</loc>');
+    expect(r).toContain('<loc>https://arrotaaue.com.br/g/gym-arrotos/</loc>');
     expect(r.trimEnd().endsWith('</urlset>')).toBe(true);
     expect(acrescentarAoSitemap(base, [], ORIGEM)).toBe(base);
   });
@@ -104,7 +104,7 @@ describe('sitemap e lista estática', () => {
   });
 
   it('urlDoGrupo e escaparHtml', () => {
-    expect(urlDoGrupo(ORIGEM, 'x')).toBe('https://aue.web.app/g/x/');
+    expect(urlDoGrupo(ORIGEM, 'x')).toBe('https://arrotaaue.com.br/g/x/');
     expect(escaparHtml(`&<>"'`)).toBe('&amp;&lt;&gt;&quot;&#39;');
   });
 });

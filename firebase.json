@@ -4,9 +4,10 @@
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "redirects": [
-      { "source": "/comunidade", "destination": "/comunidades", "type": 301 },
-      { "source": "/videos-de-arroto", "destination": "/c/arrotos-youtube", "type": 301 },
-      { "source": "/videos", "destination": "/c/arrotos-youtube", "type": 301 }
+      { "source": "/comunidades", "destination": "/", "type": 301 },
+      { "source": "/comunidade", "destination": "/", "type": 301 },
+      { "source": "/videos-de-arroto", "destination": "/", "type": 301 },
+      { "source": "/videos", "destination": "/", "type": 301 }
     ],
     "rewrites": [
       { "source": "/privacidade", "destination": "/privacidade.html" },
@@ -17,7 +18,6 @@
       { "source": "/como-arrotar", "destination": "/como-arrotar.html" },
       { "source": "/tipos-de-arroto", "destination": "/tipos-de-arroto.html" },
       { "source": "/ranking-de-arrotos", "destination": "/ranking-de-arrotos.html" },
-      { "source": "/comunidades", "destination": "/comunidades.html" },
       { "source": "/grupos", "destination": "/grupos.html" },
       { "source": "/duelo", "destination": "/duelo.html" },
       { "source": "/duelo/", "destination": "/duelo.html" },

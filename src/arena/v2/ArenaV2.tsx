@@ -563,7 +563,10 @@ export function ArenaV2({
   return (
     <main className={`arena-v2 arena-v2--${estado}`}>
       <header className="arena-v2__cabecalho">
-        <a href="/" className="arena-v2__marca">AUÊ<span>!</span></a>
+        <div className="arena-v2__identidade">
+          <a href="/" className="arena-v2__marca">AUÊ<span>!</span></a>
+          <span className="arena-v2__beta">BETA</span>
+        </div>
         <nav aria-label="Navegação principal">
           <a href="/feed">Mural</a>
           <a href="/ranking-de-arrotos">Ranking</a>

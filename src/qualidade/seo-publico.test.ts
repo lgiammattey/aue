@@ -49,7 +49,6 @@ const ENTRADAS: ReadonlyArray<{ caminho: string; arquivo: string; temOpenGraph: 
   { caminho: '/como-arrotar', arquivo: '../paginas/como-arrotar.html', temOpenGraph: true },
   { caminho: '/tipos-de-arroto', arquivo: '../paginas/tipos-de-arroto.html', temOpenGraph: true },
   { caminho: '/ranking-de-arrotos', arquivo: '../paginas/ranking-de-arrotos.html', temOpenGraph: true },
-  { caminho: '/comunidades', arquivo: '../paginas/comunidades.html', temOpenGraph: true },
   { caminho: '/grupos', arquivo: '../paginas/grupos.html', temOpenGraph: true },
   /*
     As duas legais ficam SEM Open Graph, e é decisão, não esquecimento: ninguém
@@ -189,7 +188,6 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       '../paginas/como-arrotar.html',
       '../paginas/tipos-de-arroto.html',
       '../paginas/ranking-de-arrotos.html',
-      '../paginas/comunidades.html',
       '../paginas/grupos.html',
       '../paginas/privacidade.html',
       '../paginas/termos.html',
@@ -224,7 +222,6 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
       '../paginas/como-arrotar.html',
       '../paginas/tipos-de-arroto.html',
       '../paginas/ranking-de-arrotos.html',
-      '../paginas/comunidades.html',
       '../paginas/grupos.html',
       '../paginas/privacidade.html',
       '../paginas/termos.html',
@@ -281,26 +278,22 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     }
   });
 
-  it('a URL antiga do diretório redireciona permanentemente para a canônica', () => {
+  it('as rotas de comunidades e vídeos, que saíram do produto (ADR 0015), redirecionam com 301 para a home', () => {
     const firebase = JSON.parse(ler('../firebase.json')) as {
-      hosting: { redirects?: Array<{ source: string; destination: string; type: number }> };
+      hosting: {
+        redirects: Array<{ source: string; destination: string; type: number }>;
+        rewrites: Array<{ source: string; destination: string }>;
+      };
     };
-
-    expect(firebase.hosting.redirects).toContainEqual({
-      source: '/comunidade',
-      destination: '/comunidades',
-      type: 301,
-    });
+    for (const source of ['/comunidades', '/comunidade', '/videos', '/videos-de-arroto']) {
+      expect(firebase.hosting.redirects).toContainEqual({ source, destination: '/', type: 301 });
+      expect(firebase.hosting.rewrites.some((regra) => regra.source === source)).toBe(false);
+    }
   });
 
-  it('aliases de vídeos redirecionam ao destino existente sem rewrite para arquivo ausente', () => {
-    const firebase = JSON.parse(ler('../firebase.json')) as {
-      hosting: { redirects: Array<{ source: string; destination: string; type: number }>; rewrites: Array<{ source: string; destination: string }> };
-    };
-    for (const source of ['/videos', '/videos-de-arroto']) {
-      expect(firebase.hosting.redirects).toContainEqual({ source, destination: '/c/arrotos-youtube', type: 301 });
-      expect(firebase.hosting.rewrites.some(regra => regra.source === source)).toBe(false);
-    }
+  it('o sitemap não lista rotas que saíram do produto', () => {
+    const sitemap = ler('../public/sitemap.xml');
+    expect(sitemap).not.toContain('/comunidades');
   });
 
   it('toda rota de conteúdo é entrada de build — senão o rewrite aponta para arquivo que não existe', () => {
@@ -552,7 +545,7 @@ describe('SEO público — Arena e mural de arrotos', () => {
   it('o diretório de grupos declara CollectionPage em JSON-LD', () => {
     const html = ler('../paginas/grupos.html');
     expect(html).toContain('"@type": "CollectionPage"');
-    expect(html).toContain('"url": "https://aue.web.app/grupos"');
+    expect(html).toContain('"url": "https://arrotaaue.com.br/grupos"');
   });
 
 });
@@ -623,7 +616,8 @@ describe('SEO público — home em inglês (/en)', () => {
     expect(corpo).not.toMatch(/\bcauso\b/i);
     // Palavras que só existem em português. Os nomes do site (Auê, Arena) e os
     // links para as páginas legais em PT ficam de fora de propósito.
-    const semLinks = corpo.replace(/<a [^>]*>[^<]*<\/a>/g, '');
+    // Endereços também saem: o `com` de `arrotaaue.com.br` não é a palavra em português.
+    const semLinks = corpo.replace(/<a [^>]*>[^<]*<\/a>/g, '').replace(/https?:\/\/[^\s"'<>]+/g, '');
     expect(semLinks).not.toMatch(/\b(arroto|arrotar|você|não|para|com)\b/i);
   });
 

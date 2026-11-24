@@ -3,6 +3,7 @@ import { withSupabase } from "@supabase/server";
 import { normalizarMetricasDaAdsterra, urlDasEstatisticasDaAdsterra } from "./metricas.ts";
 
 const ORIGENS_PERMITIDAS = new Set([
+  "https://arrotaaue.com.br",
   "https://aue.web.app",
   "https://aue.vercel.app",
   "http://127.0.0.1:5173",

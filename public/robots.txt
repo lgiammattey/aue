@@ -17,4 +17,4 @@ Allow: /d/
 # Convites v2 precisam ser lidos para mostrar a prévia e respeitar noindex.
 Allow: /duelo
 
-Sitemap: https://aue.web.app/sitemap.xml
+Sitemap: https://arrotaaue.com.br/sitemap.xml

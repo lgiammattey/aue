@@ -23,6 +23,7 @@ const EVENTOS: readonly EventoArenaV2[] = [
 const CATEGORIAS: readonly PaginaMonitorada[] = ['feed', 'comunidades', 'comunidade', 'topico', 'explorar', 'arena', 'perfil', 'entrada', 'publica'];
 const ROTAS_SEGURAS = new Set([
   '/',
+  '/en',
   '/arena',
   '/feed',
   '/como-arrotar',
@@ -71,13 +72,23 @@ function pronta(): JanelaAnalytics | null {
   return w;
 }
 
-/** Best effort. Nenhum caminho real, token, áudio ou medição entra nos parâmetros. */
-export const analyticsArenaV2: TelemetriaArenaV2 = {
-  registrar(evento) {
-    if (!EVENTOS.includes(evento)) return;
-    try { pronta()?.gtag?.('event', evento, { send_to: ID_MEDICAO, page_location: LOCAL_CANONICO, page_referrer: '' }); } catch { /* Não interromper a Arena. */ }
-  },
-};
+/**
+ * Best effort. Nenhum caminho real, token, áudio ou medição entra nos parâmetros.
+ * Em inglês o evento leva `idioma: 'en'`, para separar a Arena de `/en` da de `/`.
+ * Em português nada muda nos parâmetros que já existem.
+ */
+export function criarAnalyticsArenaV2(idioma: 'pt' | 'en'): TelemetriaArenaV2 {
+  const extra = idioma === 'en' ? { idioma } : {};
+  return {
+    registrar(evento) {
+      if (!EVENTOS.includes(evento)) return;
+      try { pronta()?.gtag?.('event', evento, { send_to: ID_MEDICAO, page_location: LOCAL_CANONICO, page_referrer: '', ...extra }); } catch { /* Não interromper a Arena. */ }
+    },
+  };
+}
+
+export const analyticsArenaV2: TelemetriaArenaV2 = criarAnalyticsArenaV2('pt');
+export const analyticsArenaV2Em: TelemetriaArenaV2 = criarAnalyticsArenaV2('en');
 
 /**
  * Espelha no GA4 os eventos de funil que já vão para `eventos_de_telemetria`.

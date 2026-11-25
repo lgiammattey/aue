@@ -1,0 +1,46 @@
+name: 'Emergência: publicar worker do legado'
+
+# Contingência para indisponibilidade do workflow_dispatch. Este arquivo só é
+# ouvido no push da branch descartável abaixo. O commit precisa carregar o
+# marcador explícito para que até esse push não autorizado fique sem deploy.
+on:
+  push:
+    branches: [codex/publicar-redirect-legado-emergencia]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publicar-redirect-legado
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: publicar worker e redirect no site aue
+    if: ${{ github.ref == 'refs/heads/codex/publicar-redirect-legado-emergencia' && contains(github.event.head_commit.message, '[PUBLICAR_REDIRECT_LEGADO]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar a branch de emergência aprovada
+        uses: actions/checkout@v4
+
+      - name: Autenticar no Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUE_GAME }}
+
+      - name: Conferir a configuração isolada do legado
+        run: |
+          node <<'NODE'
+          const { hosting } = require('./firebase.legado-redirect.json');
+          if (hosting.site !== 'aue' || hosting.target || !Array.isArray(hosting.redirects)) {
+            throw new Error('A configuração do legado não aponta exclusivamente ao site aue.');
+          }
+          NODE
+
+      - name: Preparar worker de migração do legado
+        run: |
+          mkdir -p dist
+          cp scripts/sw-legado-migracao.js dist/sw.js
+
+      - name: Publicar somente o redirect do legado
+        run: npx --yes firebase-tools@latest deploy --config firebase.legado-redirect.json --only hosting --project aue-game --non-interactive

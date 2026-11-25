@@ -68,4 +68,17 @@ describe('transição para o site Firebase aue-oficial', () => {
     expect(workflow).toContain('--only hosting');
     expect(workflow).not.toContain('publicar-firebase.yml');
   });
+
+  it('mantém a contingência isolada da main e exige marcador no único push aceito', () => {
+    const emergencia = ler('.github/workflows/publicar-redirect-legado-emergencia.yml');
+
+    expect(emergencia).toContain('branches: [codex/publicar-redirect-legado-emergencia]');
+    expect(emergencia).not.toContain('workflow_dispatch:');
+    expect(emergencia).not.toMatch(/branches:\s*\[[^\]]*main/);
+    expect(emergencia).toContain("github.ref == 'refs/heads/codex/publicar-redirect-legado-emergencia'");
+    expect(emergencia).toContain('[PUBLICAR_REDIRECT_LEGADO]');
+    expect(emergencia).toContain('firebase.legado-redirect.json');
+    expect(emergencia).toContain('cp scripts/sw-legado-migracao.js dist/sw.js');
+    expect(emergencia).toContain('--only hosting');
+  });
 });

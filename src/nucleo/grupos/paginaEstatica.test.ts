@@ -95,6 +95,9 @@ describe('sitemap e lista estática', () => {
     const base = '<urlset>\n  <url><loc>https://arrotaaue.com.br/</loc></url>\n</urlset>';
     const r = acrescentarAoSitemap(base, [GRUPO], ORIGEM);
     expect(r).toContain('<loc>https://arrotaaue.com.br/g/gym-arrotos/</loc>');
+    // O grupo não tem data de atualização no contrato de leitura. Inventar a
+    // data do build faria o Google receber uma atualização falsa a cada deploy.
+    expect(r).not.toContain('<lastmod>');
     expect(r.trimEnd().endsWith('</urlset>')).toBe(true);
     expect(acrescentarAoSitemap(base, [], ORIGEM)).toBe(base);
   });

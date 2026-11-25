@@ -53,6 +53,12 @@ on:
   # Permite republicar sem precisar de commit novo — útil quando o que mudou
   # foi um segredo, não o código.
   workflow_dispatch:
+    inputs:
+      somente_validar:
+        description: 'Faz build e confere o sitemap final, sem publicar no Firebase'
+        required: false
+        default: false
+        type: boolean
   # Páginas dos grupos (ADR 0004). De hora em hora o primeiro job confere se a
   # lista de grupos mudou; só se mudou é que o build e o deploy rodam.
   #
@@ -156,7 +162,19 @@ jobs:
           EXIGIR_GRUPOS: '1'
         run: npm run build
 
+      # O sitemap de `dist/` é o que chega ao Firebase. Esta trava roda depois
+      # do gerador de grupos: uma falha ali não pode publicar um sitemap que
+      # apague URLs que o Google já descobriu.
+      - name: Conferir sitemap final contra o que está publicado
+        env:
+          EXIGIR_GRUPOS: '1'
+        run: node scripts/verificar-sitemap-final.ts
+
+      # No disparo manual, `somente_validar` deixa a prova do artefato e do
+      # sitemap disponível antes da publicação. Push e agendamento seguem
+      # publicando, sem depender desse input manual.
       - name: Publicar
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.somente_validar != true }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

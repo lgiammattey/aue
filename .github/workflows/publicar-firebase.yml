@@ -1,6 +1,8 @@
 # Publicação do Auê no Firebase Hosting
 #
-# Todo merge na `main` publica em https://aue.web.app. Esta é a ÚNICA
+# Todo merge na `main` publica no site Firebase `aue-oficial`. O domínio
+# canônico é associado ao site somente no corte operacional documentado em
+# `docs/technical/operacao/transicao-aue-oficial.md`. Esta é a ÚNICA
 # hospedagem (decisão de 18/10/2026): o `vercel.json` saiu do repositório e a
 # integração da Vercel com o GitHub deve ficar desligada, senão cada push
 # publica duas vezes e os endereços podem servir builds diferentes.
@@ -180,4 +182,7 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUE_GAME }}
           projectId: aue-game
+          # Alvo explícito: esta automação não pode voltar a publicar no
+          # site legado `aue` por acidente.
+          target: aue-oficial
           channelId: live

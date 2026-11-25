@@ -6,9 +6,15 @@
     "redirects": [
       { "source": "/", "destination": "https://arrotaaue.com.br/", "type": 301 },
       {
-        "regex": "^/((?:[^_].*|_$|_[^_].*|__[^/].*|__$))$",
+        "regex": "^/((?:[^_s].*|s$|s[^w].*|sw$|sw[^.].*|sw\\.$|sw\\.[^j].*|sw\\.j$|sw\\.j[^s].*|sw\\.js.+|_$|_[^_].*|__$|__[^/].*))$",
         "destination": "https://arrotaaue.com.br/:1",
         "type": 301
+      }
+    ],
+    "headers": [
+      {
+        "source": "/sw.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       }
     ]
   },

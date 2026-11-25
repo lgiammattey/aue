@@ -28,17 +28,21 @@ describe('transição para o site Firebase aue-oficial', () => {
         site?: string;
         target?: string;
         redirects?: Array<{ source?: string; regex?: string; destination?: string; type?: number }>;
+        headers?: Array<{ source?: string; headers?: Array<{ key: string; value: string }> }>;
       };
       emulators?: { hosting?: { port?: number } };
     }>('firebase.legado-redirect.json');
 
     expect(legado.hosting.site).toBe('aue');
     expect(legado.hosting.target).toBeUndefined();
+    expect(legado.hosting.headers).toContainEqual({
+      source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }],
+    });
     expect(legado.emulators?.hosting?.port).toBe(5003);
     expect(legado.hosting.redirects).toEqual([
       { source: '/', destination: 'https://arrotaaue.com.br/', type: 301 },
       {
-        regex: '^/((?:[^_].*|_$|_[^_].*|__[^/].*|__$))$',
+        regex: '^/((?:[^_s].*|s$|s[^w].*|sw$|sw[^.].*|sw\\.$|sw\\.[^j].*|sw\\.j$|sw\\.j[^s].*|sw\\.js.+|_$|_[^_].*|__$|__[^/].*))$',
         destination: 'https://arrotaaue.com.br/:1',
         type: 301,
       },
@@ -55,7 +59,12 @@ describe('transição para o site Firebase aue-oficial', () => {
     expect(workflow).toContain("github.ref != 'refs/heads/main'");
     expect(workflow).toContain('REDIRECT_LEGADO_APOS_DOMINIO_CONECTADO');
     expect(workflow).toContain('firebase.legado-redirect.json');
-    expect(workflow).toContain('mkdir -p dist');
+    expect(workflow).toContain('cp scripts/sw-legado-migracao.js dist/sw.js');
+    const worker = ler('scripts/sw-legado-migracao.js');
+    const codigoDoWorker = worker.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
+    expect(worker).toContain('self.registration.unregister()');
+    expect(worker).toContain('fetch(event.request)');
+    expect(codigoDoWorker).not.toMatch(/caches\.delete|localStorage|indexedDB/i);
     expect(workflow).toContain('--only hosting');
     expect(workflow).not.toContain('publicar-firebase.yml');
   });

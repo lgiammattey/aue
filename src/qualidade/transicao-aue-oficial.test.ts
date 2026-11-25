@@ -55,6 +55,7 @@ describe('transição para o site Firebase aue-oficial', () => {
     expect(workflow).toContain("github.ref != 'refs/heads/main'");
     expect(workflow).toContain('REDIRECT_LEGADO_APOS_DOMINIO_CONECTADO');
     expect(workflow).toContain('firebase.legado-redirect.json');
+    expect(workflow).toContain('mkdir -p dist');
     expect(workflow).toContain('--only hosting');
     expect(workflow).not.toContain('publicar-firebase.yml');
   });

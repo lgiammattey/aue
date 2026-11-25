@@ -64,6 +64,19 @@ export default defineConfig({
         }
       },
     },
+    {
+      // Hosting usa este arquivo só depois de não encontrar rota ou ativo. O
+      // status continua 404, mas o BrowserRouter lê a URL original e desenha a
+      // TelaNaoEncontrada já aprovada, sem trocar a experiência por uma página
+      // padrão do provedor.
+      name: 'preservar-404-do-app',
+      enforce: 'post',
+      generateBundle(_options, bundle) {
+        const index = bundle['index.html'];
+        if (!index || index.type !== 'asset') throw new Error('build sem index.html para a página 404.');
+        this.emitFile({ type: 'asset', fileName: '404.html', source: index.source });
+      },
+    },
     react(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -96,7 +109,22 @@ export default defineConfig({
           manual da entrega que o Google deve ler. Esses dois arquivos sempre
           seguem para a rede.
         */
-        navigateFallbackDenylist: [/^\/(?:sitemap\.xml|robots\.txt)$/, /^\/duelo(?:\.html|\/)?(?:\?|$)/],
+        /*
+          O fallback de navegação não é uma permissão para qualquer URL virar
+          a home. O Firebase só reescreve rotas conhecidas, e o worker precisa
+          obedecer à mesma fronteira quando já controla o navegador. Sem esta
+          allowlist, `/qualquer-coisa` recebe index.html no PWA e vira soft 404.
+
+          `/g/:slug` é propositalmente AUSENTE: grupos publicados são HTML
+          gerado depois do Vite e devem chegar à rede, nunca receber a casca
+          precacheada. Grupo desconhecido também vai à rede, onde o Hosting o
+          entrega ao roteador sem afirmar que o dado não existe.
+        */
+        navigateFallbackAllowlist: [
+          /^\/$/,
+          /^\/(?:feed|em-alta|seguindo|arena|arena\/em-breve|desafios|perfil|login|entrar|redefinir-senha|admin|ranking|landing|versoes|mobile|versao-mobile)\/?$/,
+          /^\/(?:x1|b|d|u|perfil|resenha|historia|conto)\/[^/]+\/?$/,
+        ],
         /*
           ÁUDIO ASSINADO NUNCA É CACHEADO.
 
@@ -215,9 +243,8 @@ export default defineConfig({
           `share_target` REMOVIDO no corte de lançamento. Ele anunciava o app
           ao sistema operacional como destino de compartilhamento de áudio e
           fazia POST para /import-audio, rota que não existe no roteador
-          (só há /d/:id e o catch-all). Com o rewrite de SPA do Firebase Hosting esse
-          POST passa a cair no index.html em vez de dar 404, ou seja, o
-          usuário compartilharia um áudio e o app abriria sem nada acontecer.
+          (só há /d/:id). Sem uma regra de Hosting, esse POST dá 404, que é
+          melhor do que abrir a casca sem importar nada.
           Para reativar: criar a rota e o handler que lê o FormData do POST.
         */
       }

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 const raiz = resolve(import.meta.dirname, '../..');
 const ler = (arquivo: string) => readFileSync(resolve(raiz, arquivo), 'utf8');
 const hosting = JSON.parse(ler('firebase.json')).hosting as {
-  rewrites: { source: string; destination: string }[];
+  rewrites: { source?: string; regex?: string; destination: string }[];
   headers: { source: string; headers: { key: string; value: string }[] }[];
 };
 
@@ -24,16 +24,16 @@ describe('prévia pública genérica do convite de duelo', () => {
     expect(ler('public/sitemap.xml')).not.toContain('/duelo');
   });
 
-  it('direciona os dois caminhos para o HTML específico antes da SPA', () => {
-    const fallback = hosting.rewrites.findIndex(({ source }) => source === '**');
+  it('direciona os dois caminhos para o HTML específico sem fallback genérico', () => {
     for (const source of ['/duelo', '/duelo/']) {
       const index = hosting.rewrites.findIndex((regra) => regra.source === source);
       expect(index).toBeGreaterThanOrEqual(0);
-      expect(index).toBeLessThan(fallback);
       expect(hosting.rewrites[index].destination).toBe('/duelo.html');
     }
-    expect(hosting.rewrites[fallback].destination).toBe('/index.html');
-    expect(hosting.rewrites.some(({ source }) => source.startsWith('/b/') || source.startsWith('/d/'))).toBe(false);
+    expect(hosting.rewrites.some(({ source }) => source === '**')).toBe(false);
+    for (const regex of ['^/b/[^/]+/?$', '^/d/[^/]+/?$', '^/x1/[^/]+/?$']) {
+      expect(hosting.rewrites.find((regra) => regra.regex === regex)?.destination).toBe('/index.html');
+    }
   });
 
   it('protege a prévia genérica e os links privados, sem bloquear o rastreador', () => {
@@ -65,6 +65,8 @@ describe('prévia pública genérica do convite de duelo', () => {
     const config = ler('vite.config.ts');
     expect(config).toContain("duelo: entrada('paginas/duelo.html')");
     expect(config).toContain("'duelo.html'");
-    expect(config).toContain('/^\\/duelo(?:\\.html|\\/)?(?:\\?|$)/');
+    expect(config).toContain('navigateFallbackAllowlist');
+    const allowlist = /navigateFallbackAllowlist:\s*\[([\s\S]*?)\],\n\s*\/\*/.exec(config)?.[1] ?? '';
+    expect(allowlist).not.toContain('duelo');
   });
 });

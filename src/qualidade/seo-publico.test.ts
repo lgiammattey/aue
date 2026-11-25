@@ -121,8 +121,13 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
 
   it('o service worker não trata sitemap e robots como rota da SPA', () => {
     const config = ler('../vite.config.ts');
-    expect(config).toContain('/^\\/(?:sitemap\\.xml|robots\\.txt)$/');
-    expect(config).toContain('/^\\/duelo(?:\\.html|\\/)?(?:\\?|$)/');
+    expect(config).toContain('navigateFallbackAllowlist');
+    expect(config).toContain('/^\\\/$/');
+    expect(config).toContain('(?:x1|b|d|u|perfil|resenha|historia|conto)');
+    expect(config).toContain('\\/[^/]+\\/?$');
+    const allowlist = /navigateFallbackAllowlist:\s*\[([\s\S]*?)\],\n\s*\/\*/.exec(config)?.[1] ?? '';
+    expect(allowlist, 'a allowlist do Workbox desapareceu').not.toBe('');
+    expect(allowlist, 'grupo estático não pode receber index.html do cache').not.toMatch(/(?:\(|\|)g(?:\||\))/);
   });
 
   it('o domínio é o mesmo em todo lugar — inclusive no og:url e no JSON-LD da home', () => {
@@ -248,47 +253,82 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     const hospedagens = [
       {
         nome: 'firebase.json',
-        catchAll: '**',
         rewrites: (
           JSON.parse(ler('../firebase.json')) as {
-            hosting: { rewrites: Array<{ source: string; destination: string }> };
+            hosting: { rewrites: Array<{ source?: string; regex?: string; destination: string }> };
           }
         ).hosting.rewrites,
       },
     ];
 
-    // A home não tem rewrite próprio: ela É o catch-all.
+    // A home é arquivo físico; as páginas indexáveis usam HTML próprio.
     const rotas = ENTRADAS.map(({ caminho }) => caminho).filter((caminho) => caminho !== '/');
 
-    for (const { nome, catchAll, rewrites } of hospedagens) {
+    for (const { nome, rewrites } of hospedagens) {
       const posicao = (fonte: string) => rewrites.findIndex((r) => r.source === fonte);
-      const fim = posicao(catchAll);
-
-      expect(fim, `${nome} perdeu o catch-all — /b/CODIGO voltaria a dar 404`).toBeGreaterThan(-1);
+      expect(posicao('**'), `${nome} não pode devolver index.html para URL desconhecida`).toBe(-1);
 
       for (const rota of rotas) {
         const indice = posicao(rota);
         expect(indice, `${nome}: ${rota} não tem rewrite próprio`).toBeGreaterThan(-1);
-        expect(
-          indice,
-          `${nome}: ${rota} está DEPOIS do catch-all e seria servida com o HTML da home`,
-        ).toBeLessThan(fim);
         expect(rewrites[indice].destination).toBe(`${rota}.html`);
+        expect(rewrites.find((r) => r.source === `${rota}/`)?.destination, `${nome}: ${rota}/ perdeu a compatibilidade`).toBe(`${rota}.html`);
       }
+    }
+  });
+
+  it('o Hosting só reescreve aliases e padrões dinâmicos conhecidos', () => {
+    const firebase = JSON.parse(ler('../firebase.json')) as {
+      hosting: { rewrites: Array<{ source?: string; regex?: string; destination: string }> };
+    };
+    const fontes = new Map(firebase.hosting.rewrites.flatMap((regra) => regra.source ? [[regra.source, regra.destination]] : []));
+    const regexes = new Map(firebase.hosting.rewrites.flatMap((regra) => regra.regex ? [[regra.regex, regra.destination]] : []));
+    for (const rota of [
+      '/feed', '/em-alta', '/seguindo', '/arena', '/arena/em-breve', '/desafios', '/perfil', '/login', '/entrar',
+      '/redefinir-senha', '/admin', '/ranking', '/landing', '/versoes', '/mobile', '/versao-mobile',
+    ]) {
+      expect(fontes.get(rota), `${rota} deixou de funcionar ao recarregar`).toBe('/index.html');
+      expect(fontes.get(`${rota}/`), `${rota}/ deixou de funcionar ao recarregar`).toBe('/index.html');
+    }
+    for (const regex of [
+      '^/x1/[^/]+/?$', '^/b/[^/]+/?$', '^/d/[^/]+/?$', '^/u/[^/]+/?$', '^/perfil/[^/]+/?$',
+      '^/resenha/[^/]+/?$', '^/historia/[^/]+/?$', '^/conto/[^/]+/?$', '^/g/[^/]+/?$',
+    ]) {
+      expect(regexes.get(regex), `${regex} deixou de funcionar ao recarregar`).toBe('/index.html');
+    }
+    for (const [source, destino] of fontes) {
+      if (destino !== '/index.html') continue;
+      expect(source, `${source} não pode aceitar segmentos extras`).not.toContain('**');
+    }
+    for (const [regex, destino] of regexes) {
+      expect(destino).toBe('/index.html');
+      expect(regex).toMatch(/^\^\/[^/]+\/\[\^\/\]\+\/\?\$$/);
     }
   });
 
   it('as rotas de comunidades e vídeos, que saíram do produto (ADR 0015), redirecionam com 301 para a home', () => {
     const firebase = JSON.parse(ler('../firebase.json')) as {
       hosting: {
-        redirects: Array<{ source: string; destination: string; type: number }>;
-        rewrites: Array<{ source: string; destination: string }>;
+        redirects: Array<{ source?: string; regex?: string; destination: string; type: number }>;
+        rewrites: Array<{ source?: string; regex?: string; destination: string }>;
       };
     };
     for (const source of ['/comunidades', '/comunidade', '/videos', '/videos-de-arroto']) {
       expect(firebase.hosting.redirects).toContainEqual({ source, destination: '/', type: 301 });
       expect(firebase.hosting.rewrites.some((regra) => regra.source === source)).toBe(false);
     }
+    const aposentadas = firebase.hosting.redirects.flatMap((regra) => regra.source ? [regra.source] : []);
+    for (const source of [
+      '/bondes', '/bondes/', '/comm', '/comm/', '/explorar', '/explorar/',
+    ]) {
+      expect(aposentadas, `${source} é alias real do roteador e precisa de 301`).toContain(source);
+    }
+    const regexes = firebase.hosting.redirects.flatMap((regra) => regra.regex ? [regra.regex] : []);
+    for (const regex of [
+      '^/comunidade/[^/]+/?$', '^/comunidades/[^/]+/?$', '^/c/[^/]+/?$', '^/c/[^/]+/novo/?$',
+      '^/c/[^/]+/t/[^/]+/?$', '^/topico/[^/]+/?$', '^/t/[^/]+/?$',
+    ]) expect(regexes, `${regex} é alias real do roteador e precisa de 301`).toContain(regex);
+    expect(aposentadas.some((source) => source.includes('**')), 'redirect de rota aposentada não pode engolir URL inexistente').toBe(false);
   });
 
   it('o sitemap não lista rotas que saíram do produto', () => {
@@ -327,6 +367,12 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     const firebase = JSON.parse(ler('../firebase.json')) as { hosting: { cleanUrls?: boolean } };
     // cleanUrls reescreve destinos `.html` e já derrubou o catch-all uma vez.
     expect(firebase.hosting.cleanUrls).toBeUndefined();
+  });
+
+  it('o build preserva a tela 404 do app com status HTTP de 404', () => {
+    const config = ler('../vite.config.ts');
+    expect(config).toContain("fileName: '404.html'");
+    expect(config).toContain("const index = bundle['index.html']");
   });
 });
 
@@ -595,15 +641,14 @@ describe('SEO público — home em inglês (/en)', () => {
     expect((sitemap.match(/hreflang="en"/g) ?? []).length).toBe(2);
   });
 
-  it('o Firebase serve /en e /en/ com en.html, antes do catch-all', () => {
+  it('o Firebase serve /en e /en/ com en.html sem fallback genérico', () => {
     const { rewrites } = (JSON.parse(ler('../firebase.json')) as {
-      hosting: { rewrites: Array<{ source: string; destination: string }> };
+      hosting: { rewrites: Array<{ source?: string; regex?: string; destination: string }> };
     }).hosting;
-    const fim = rewrites.findIndex((r) => r.source === '**');
+    expect(rewrites.some((r) => r.source === '**')).toBe(false);
     for (const source of ['/en', '/en/']) {
       const indice = rewrites.findIndex((r) => r.source === source);
       expect(indice, `${source} sem rewrite`).toBeGreaterThan(-1);
-      expect(indice).toBeLessThan(fim);
       expect(rewrites[indice].destination).toBe('/en.html');
     }
   });

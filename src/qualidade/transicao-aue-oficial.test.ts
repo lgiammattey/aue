@@ -44,5 +44,18 @@ describe('transição para o site Firebase aue-oficial', () => {
       },
     ]);
     expect(ler('firebase.json')).not.toContain('https://arrotaaue.com.br/:1');
+    expect(ler('.github/workflows/publicar-firebase.yml')).not.toContain('firebase.legado-redirect.json');
+  });
+
+  it('só permite publicar o redirect por disparo manual, a partir da main e com confirmação', () => {
+    const workflow = ler('.github/workflows/publicar-redirect-legado.yml');
+
+    expect(workflow).toContain('workflow_dispatch:');
+    expect(workflow).not.toMatch(/^\s*(?:push|schedule):/m);
+    expect(workflow).toContain("github.ref != 'refs/heads/main'");
+    expect(workflow).toContain('REDIRECT_LEGADO_APOS_DOMINIO_CONECTADO');
+    expect(workflow).toContain('firebase.legado-redirect.json');
+    expect(workflow).toContain('--only hosting');
+    expect(workflow).not.toContain('publicar-firebase.yml');
   });
 });

@@ -1,0 +1,66 @@
+name: Publicar redirect do site legado
+
+# Este workflow não troca domínio. Ele só pode ser disparado depois de o
+# responsável pela transferência confirmar que arrotaaue.com.br já atende pelo
+# site aue-oficial. Push e agendamento nunca chegam aqui.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmar:
+        description: 'Digite REDIRECT_LEGADO_APOS_DOMINIO_CONECTADO para publicar o 301 no site aue'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publicar-redirect-legado
+  cancel-in-progress: false
+
+jobs:
+  confirmar-corte:
+    name: confirmar corte do legado
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recusar branch que não seja a main
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          echo '::error::O redirect legado só pode sair da main já aprovada.'
+          exit 1
+
+      - name: Conferir confirmação explícita
+        env:
+          CONFIRMACAO: ${{ inputs.confirmar }}
+        run: |
+          test "$CONFIRMACAO" = 'REDIRECT_LEGADO_APOS_DOMINIO_CONECTADO' || {
+            echo '::error::Confirmação ausente ou incorreta. Não publique antes de o domínio estar conectado ao aue-oficial.'
+            exit 1
+          }
+
+  publicar:
+    name: publicar 301 no site aue
+    needs: confirmar-corte
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar a main aprovada
+        uses: actions/checkout@v4
+
+      # A ação de autenticação grava a credencial no checkout, por isso ela
+      # vem depois dele. A mesma conta do deploy oficial é suficiente.
+      - name: Autenticar no Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUE_GAME }}
+
+      - name: Conferir a configuração isolada do legado
+        run: |
+          node <<'NODE'
+          const { hosting } = require('./firebase.legado-redirect.json');
+          if (hosting.site !== 'aue' || hosting.target || !Array.isArray(hosting.redirects)) {
+            throw new Error('A configuração do legado não aponta exclusivamente ao site aue.');
+          }
+          NODE
+
+      - name: Publicar somente o redirect do legado
+        run: npx --yes firebase-tools@latest deploy --config firebase.legado-redirect.json --only hosting --project aue-game --non-interactive

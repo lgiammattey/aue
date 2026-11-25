@@ -62,11 +62,12 @@ jobs:
           }
           NODE
 
-      # O config do legado aponta para dist, mas ele não precisa do build do
-      # app: todo caminho público é 301. O diretório vazio evita publicar HTML
-      # antigo por acidente e satisfaz a exigência do Firebase CLI.
-      - name: Preparar artefato vazio do legado
-        run: mkdir -p dist
+      # Todo caminho público continua 301. A exceção é o worker same-origin
+      # que migra PWAs já instalados sem tocar nos dados locais.
+      - name: Preparar worker de migração do legado
+        run: |
+          mkdir -p dist
+          cp scripts/sw-legado-migracao.js dist/sw.js
 
       - name: Publicar somente o redirect do legado
         run: npx --yes firebase-tools@latest deploy --config firebase.legado-redirect.json --only hosting --project aue-game --non-interactive

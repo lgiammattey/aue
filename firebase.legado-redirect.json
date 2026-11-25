@@ -1,0 +1,20 @@
+{
+  "hosting": {
+    "site": "aue",
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      { "source": "/", "destination": "https://arrotaaue.com.br/", "type": 301 },
+      {
+        "regex": "^/((?:[^_].*|_$|_[^_].*|__[^/].*|__$))$",
+        "destination": "https://arrotaaue.com.br/:1",
+        "type": 301
+      }
+    ]
+  },
+  "emulators": {
+    "hosting": {
+      "port": 5003
+    }
+  }
+}

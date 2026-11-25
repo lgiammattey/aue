@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "aue",
+    "target": "aue-oficial",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "redirects": [

@@ -1,0 +1,48 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const raiz = resolve(import.meta.dirname, '../..');
+const lerJson = <T>(arquivo: string): T => JSON.parse(readFileSync(resolve(raiz, arquivo), 'utf8')) as T;
+const ler = (arquivo: string): string => readFileSync(resolve(raiz, arquivo), 'utf8');
+
+describe('transição para o site Firebase aue-oficial', () => {
+  it('amarra o deploy normal ao novo site, sem trocar o domínio por configuração', () => {
+    const firebase = lerJson<{ hosting: { target?: string; site?: string } }>('firebase.json');
+    const firebaserc = lerJson<{
+      targets?: { 'aue-game'?: { hosting?: Record<string, string[]> } };
+    }>('.firebaserc');
+    const workflow = ler('.github/workflows/publicar-firebase.yml');
+
+    expect(firebase.hosting.target).toBe('aue-oficial');
+    expect(firebase.hosting.site).toBeUndefined();
+    expect(firebaserc.targets?.['aue-game']?.hosting?.['aue-oficial']).toEqual(['aue-oficial']);
+    expect(workflow).toContain('target: aue-oficial');
+    expect(workflow).toContain("EXIGIR_GRUPOS: '1'");
+    expect(workflow).toContain('scripts/verificar-sitemap-final.ts');
+  });
+
+  it('mantém o redirecionamento do legado fora do deploy normal e conserva caminho', () => {
+    const legado = lerJson<{
+      hosting: {
+        site?: string;
+        target?: string;
+        redirects?: Array<{ source?: string; regex?: string; destination?: string; type?: number }>;
+      };
+      emulators?: { hosting?: { port?: number } };
+    }>('firebase.legado-redirect.json');
+
+    expect(legado.hosting.site).toBe('aue');
+    expect(legado.hosting.target).toBeUndefined();
+    expect(legado.emulators?.hosting?.port).toBe(5003);
+    expect(legado.hosting.redirects).toEqual([
+      { source: '/', destination: 'https://arrotaaue.com.br/', type: 301 },
+      {
+        regex: '^/((?:[^_].*|_$|_[^_].*|__[^/].*|__$))$',
+        destination: 'https://arrotaaue.com.br/:1',
+        type: 301,
+      },
+    ]);
+    expect(ler('firebase.json')).not.toContain('https://arrotaaue.com.br/:1');
+  });
+});

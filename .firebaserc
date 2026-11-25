@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "aue-game"
+  },
+  "targets": {
+    "aue-game": {
+      "hosting": {
+        "aue-oficial": ["aue-oficial"]
+      }
+    }
   }
 }

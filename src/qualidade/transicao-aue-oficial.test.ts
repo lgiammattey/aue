@@ -68,4 +68,33 @@ describe('transição para o site Firebase aue-oficial', () => {
     expect(workflow).toContain('--only hosting');
     expect(workflow).not.toContain('publicar-firebase.yml');
   });
+
+  it('mantém a Vercel como redirect legado, com worker atualizável na própria origem', () => {
+    const vercel = lerJson<{
+      outputDirectory?: string;
+      installCommand?: string;
+      buildCommand?: string;
+      headers?: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
+      redirects?: Array<{ source: string; destination: string; statusCode: number }>;
+      rewrites?: unknown;
+    }>('vercel.json');
+
+    expect(vercel.outputDirectory).toBe('dist');
+    expect(vercel.installCommand).toBe('true');
+    // A Vercel não constrói uma cópia parcial do app. Só materializa o worker
+    // canônico, enquanto Firebase segue sendo o único publicador do jogo.
+    expect(vercel.buildCommand).toBe('rm -rf dist && mkdir -p dist && cp scripts/sw-legado-migracao.js dist/sw.js');
+    expect(vercel.headers).toEqual([
+      { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }] },
+    ]);
+    expect(vercel.redirects).toEqual([
+      { source: '/', destination: 'https://arrotaaue.com.br/', statusCode: 301 },
+      {
+        source: '/:path((?!sw\\.js$).*)',
+        destination: 'https://arrotaaue.com.br/:path*',
+        statusCode: 301,
+      },
+    ]);
+    expect(vercel.rewrites).toBeUndefined();
+  });
 });

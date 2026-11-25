@@ -360,10 +360,39 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     }
   });
 
-  it('a hospedagem é só o Firebase: não sobrou vercel.json nem cleanUrls', () => {
-    // Decisão de 18/10/2026: um endereço, uma hospedagem. Um `vercel.json`
-    // voltando ao repositório é sinal de segundo publicador (e de dois jogos).
-    expect(() => ler('../vercel.json')).toThrow();
+  it('o app só é publicado pelo Firebase; Vercel só mantém o redirect do legado', () => {
+    /*
+      O app continua no Firebase. A única configuração Vercel aceita no
+      repositório serve o worker de migração de PWAs instalados no domínio
+      histórico e redireciona todo o restante para o domínio oficial.
+
+      Tirar a exceção de /sw.js faz o navegador receber 301 ao atualizar o
+      worker instalado, algo que a especificação recusa. Transformar isto num
+      rewrite ou num segundo build do jogo volta a criar duas produções.
+    */
+    const vercel = JSON.parse(ler('../vercel.json')) as {
+      outputDirectory?: string;
+      installCommand?: string;
+      buildCommand?: string;
+      headers?: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
+      redirects?: Array<{ source: string; destination: string; statusCode: number }>;
+      rewrites?: unknown;
+    };
+    expect(vercel.outputDirectory).toBe('dist');
+    expect(vercel.installCommand).toBe('true');
+    expect(vercel.buildCommand).toBe('rm -rf dist && mkdir -p dist && cp scripts/sw-legado-migracao.js dist/sw.js');
+    expect(vercel.headers).toEqual([
+      { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }] },
+    ]);
+    expect(vercel.redirects).toEqual([
+      { source: '/', destination: 'https://arrotaaue.com.br/', statusCode: 301 },
+      {
+        source: '/:path((?!sw\\.js$).*)',
+        destination: 'https://arrotaaue.com.br/:path*',
+        statusCode: 301,
+      },
+    ]);
+    expect(vercel.rewrites).toBeUndefined();
     const firebase = JSON.parse(ler('../firebase.json')) as { hosting: { cleanUrls?: boolean } };
     // cleanUrls reescreve destinos `.html` e já derrubou o catch-all uma vez.
     expect(firebase.hosting.cleanUrls).toBeUndefined();

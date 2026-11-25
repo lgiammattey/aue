@@ -36,7 +36,7 @@ describe('prévia pública genérica do convite de duelo', () => {
     expect(hosting.rewrites.some(({ source }) => source.startsWith('/b/') || source.startsWith('/d/'))).toBe(false);
   });
 
-  it('protege os três endereços e deixa o robô ler o noindex', () => {
+  it('protege a prévia genérica e os links privados, sem bloquear o rastreador', () => {
     for (const source of ['/duelo', '/duelo/', '/duelo.html']) {
       const regra = hosting.headers.find((item) => item.source === source);
       expect(regra?.headers).toEqual(expect.arrayContaining([
@@ -45,7 +45,23 @@ describe('prévia pública genérica do convite de duelo', () => {
         { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
       ]));
     }
+
+    // /b e /d continuam liberados no robots.txt para os bots que criam a
+    // prévia compartilhada. O noindex vem pelo cabeçalho, que impede a
+    // indexação sem impedir a leitura do HTML. /x1 é o alias ainda aceito pelo
+    // roteador e tem a mesma característica privada.
+    for (const source of ['/b/**', '/d/**', '/x1/**']) {
+      const regra = hosting.headers.find((item) => item.source === source);
+      expect(regra?.headers).toEqual(expect.arrayContaining([
+        { key: 'Cache-Control', value: 'no-store' },
+        { key: 'Referrer-Policy', value: 'no-referrer' },
+        { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+      ]));
+    }
     expect(ler('public/robots.txt')).toContain('Allow: /duelo');
+    for (const rota of ['Allow: /b/', 'Allow: /d/']) {
+      expect(ler('public/robots.txt')).toContain(rota);
+    }
     const config = ler('vite.config.ts');
     expect(config).toContain("duelo: entrada('paginas/duelo.html')");
     expect(config).toContain("'duelo.html'");

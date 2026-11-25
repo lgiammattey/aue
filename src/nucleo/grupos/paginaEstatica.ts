@@ -167,12 +167,10 @@ export function montarListaEstatica(grupos: readonly GrupoParaPagina[]): string 
 /** Acrescenta as páginas dos grupos ao sitemap já existente. */
 export function acrescentarAoSitemap(sitemap: string, grupos: readonly GrupoParaPagina[], origem: string): string {
   if (grupos.length === 0) return sitemap;
-  const hoje = new Date().toISOString().slice(0, 10);
   const entradas = grupos
     .map(
       (g) => `  <url>
     <loc>${escaparHtml(urlDoGrupo(origem, g.slug))}</loc>
-    <lastmod>${hoje}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>`,

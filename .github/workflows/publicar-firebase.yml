@@ -59,6 +59,11 @@ on:
         required: false
         default: false
         type: boolean
+      clonar_aue_oficial:
+        description: 'Copia a versão auditada para aue-oficial, sem publicar no site aue'
+        required: false
+        default: false
+        type: boolean
   # Páginas dos grupos (ADR 0004). De hora em hora o primeiro job confere se a
   # lista de grupos mudou; só se mudou é que o build e o deploy rodam.
   #
@@ -112,7 +117,7 @@ jobs:
     needs: verificar
     # `verificar` fica "skipped" fora do agendamento, e job que depende de job
     # pulado também seria pulado. `!cancelled()` evita isso.
-    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.verificar.outputs.mudou == 'true') }}
+    if: ${{ !cancelled() && inputs.clonar_aue_oficial != true && (github.event_name != 'schedule' || needs.verificar.outputs.mudou == 'true') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -181,3 +186,43 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUE_GAME }}
           projectId: aue-game
           channelId: live
+
+  clonar-aue-oficial:
+    name: clonar versão auditada para aue-oficial
+    # Este caminho só existe para a cópia inicial. Não lê nem publica o build
+    # local, não toca no canal live de `aue` e não altera domínio.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.clonar_aue_oficial == true }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código para a credencial temporária
+        uses: actions/checkout@v4
+
+      - name: Preparar o Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Autenticar sem expor a conta de serviço
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AUE_GAME }}
+
+      - name: Guardar prova da versão de origem
+        run: |
+          curl --fail --silent --show-error --retry 3 https://aue.web.app/ -o /tmp/aue-antes.html
+          curl --fail --silent --show-error --retry 3 https://aue.web.app/sitemap.xml -o /tmp/aue-sitemap-antes.xml
+
+      - name: Clonar a versão imutável auditada
+        run: npx --yes firebase-tools hosting:clone aue:@5e63a45ddcd599c2 aue-oficial:live --project aue-game --non-interactive
+
+      - name: Conferir a cópia sem mexer na origem
+        run: |
+          curl --fail --silent --show-error --retry 3 https://aue.web.app/ -o /tmp/aue-depois.html
+          curl --fail --silent --show-error --retry 3 https://aue.web.app/sitemap.xml -o /tmp/aue-sitemap-depois.xml
+          curl --fail --silent --show-error --retry 3 https://aue-oficial.web.app/ -o /tmp/aue-oficial.html
+          curl --fail --silent --show-error --retry 3 https://aue-oficial.web.app/sitemap.xml -o /tmp/aue-oficial-sitemap.xml
+          cmp --silent /tmp/aue-antes.html /tmp/aue-depois.html
+          cmp --silent /tmp/aue-sitemap-antes.xml /tmp/aue-sitemap-depois.xml
+          cmp --silent /tmp/aue-antes.html /tmp/aue-oficial.html
+          cmp --silent /tmp/aue-sitemap-antes.xml /tmp/aue-oficial-sitemap.xml

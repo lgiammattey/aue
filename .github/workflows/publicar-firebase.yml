@@ -214,7 +214,7 @@ jobs:
           curl --fail --silent --show-error --retry 3 https://aue.web.app/sitemap.xml -o /tmp/aue-sitemap-antes.xml
 
       - name: Clonar a versão imutável auditada
-        run: npx --yes firebase-tools hosting:clone aue:@5e63a45ddcd599c2 aue-oficial:live --project aue-game --non-interactive
+        run: npx --yes firebase-tools hosting:clone aue@5e63a45ddcd599c2 aue-oficial:live --project aue-game --non-interactive
 
       - name: Conferir a cópia sem mexer na origem
         run: |

@@ -28,12 +28,11 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     localStorage.clear();
   });
 
-  it('exibe o Hub Open Design na raiz "/" para primeiro visitante sem sessão', async () => {
+  it('abre o Início ilustrado para o primeiro visitante e oferece o gravador', async () => {
     render(<App />);
-
-    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'ARROTAR' })).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 1, name: 'Mural' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: /solta o arroto/i })).toBeTruthy();
+    expect(screen.getAllByRole('link', { name: /^arrotar/i }).some((link) => link.getAttribute('href') === '/arena')).toBe(true);
+    expect(screen.getByAltText(/quatro amigos à mesa num churrasco/i)).toBeTruthy();
   });
 
   it('endereço que o Auê não conhece mostra a página não encontrada, sem mandar para a home calado', async () => {
@@ -49,7 +48,7 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     estadoDaConta.valor = { temSessao: true, anonima: false, perfilSocialPendente: false };
     render(<App />);
 
-    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
+    expect((await screen.findAllByLabelText('Auê, página inicial')).length).toBeGreaterThan(0);
     expect(window.location.pathname).toBe('/');
   });
 
@@ -57,15 +56,15 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     localStorage.setItem('aue.visitou', 'true');
     render(<App />);
 
-    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'ARROTAR' })).toBeTruthy();
+    expect((await screen.findAllByLabelText('Auê, página inicial')).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { level: 1, name: /solta o arroto/i })).toBeTruthy();
   });
 
   it('mantém "/feed" na nova casca unificada, sem ressuscitar o feed legado', async () => {
     window.history.pushState({}, 'Feed', '/feed');
     render(<App />);
 
-    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
+    expect((await screen.findAllByLabelText('Auê, página inicial')).length).toBeGreaterThan(0);
     expect(screen.queryByPlaceholderText('O que tá rolando no bonde?')).toBeNull();
     expect(window.location.pathname).toBe('/feed');
   });
@@ -86,21 +85,21 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.queryByRole('button', { name: 'Toque para começar' })).toBeNull();
   });
 
-  it.each(['/', '/arena'])('com flag opt-in abre Arena local em %s', async (caminho) => {
+  it('com flag opt-in abre Arena local em /arena', async () => {
     FLAGS.arenaV2 = true;
-    window.history.pushState({}, 'Arena v2', caminho);
+    window.history.pushState({}, 'Arena v2', '/arena');
     render(<App />);
     expect(await screen.findByRole('button', { name: 'Gravar agora' })).toBeTruthy();
     expect(screen.queryByText(/convite pronto/i)).toBeNull();
   });
 
-  it('com flag opt-in integra Arena e Mural no mesmo Hub e em /feed', async () => {
+  it('abre a Resenha em /feed e dá acesso à Arena pela navegação', async () => {
     FLAGS.arenaV2 = true;
     window.history.pushState({}, 'Feed', '/feed');
     render(<App />);
-    expect(await screen.findByLabelText('Auê, página inicial')).toBeTruthy();
-    expect(await screen.findByRole('button', { name: 'Gravar agora' })).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 1, name: 'Mural' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Resenha' })).toBeTruthy();
+    expect(screen.getAllByRole('link', { name: 'Arrotar' }).some((link) => link.getAttribute('href') === '/arena')).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Gravar agora' })).toBeNull();
   });
 
   it('não abre o duelo com a flag desligada', async () => {
@@ -120,13 +119,13 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
     expect(screen.getByText('O link está incompleto ou é inválido. Peça um novo convite.')).toBeTruthy();
   });
 
-  it('com as duas flags a Arena, a Liga e os guias abrem juntos na raiz', async () => {
+  it('com as duas flags mostra Início, guia e atalho para Disputas', async () => {
     FLAGS.arenaV2 = true;
     FLAGS.dueloV2 = true;
     render(<App />);
-    expect(await screen.findByRole('button', { name: 'Gravar agora' })).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 2, name: 'LIGA' })).toBeTruthy();
-    expect(screen.getByRole('heading', { level: 2, name: 'Como arrotar' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: /solta o arroto/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Ver Disputas' }).getAttribute('href')).toBe('/disputas');
+    expect(await screen.findByRole('heading', { level: 2, name: 'Como arrotar' })).toBeTruthy();
   });
 
   it('com flag opt-in preserva a intenção do link de gravação no Mural "/feed?gravar=1"', async () => {
@@ -161,7 +160,7 @@ describe('Jornada do App (Entrada Inteligente e Transição para Arena)', () => 
       const { unmount } = render(<App />);
 
       await waitFor(() => expect(window.location.pathname).toBe('/'));
-      expect(await screen.findByRole('heading', { level: 1, name: 'Mural' })).toBeTruthy();
+      expect(await screen.findByRole('heading', { level: 1, name: /solta o arroto/i })).toBeTruthy();
       expect(screen.queryByRole('heading', { level: 1, name: 'Encontre sua comunidade.' })).toBeNull();
       unmount();
     }

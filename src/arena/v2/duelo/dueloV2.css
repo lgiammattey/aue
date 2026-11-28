@@ -1,5 +1,8 @@
 .duelo-v2__pagina { box-sizing: border-box; width: 100%; min-height: 100svh; padding: env(safe-area-inset-top) max(28px, env(safe-area-inset-right)) 48px max(28px, env(safe-area-inset-left)); background: var(--bg, #0a0b0e); color: var(--fg, #f3f4f6); font-family: var(--font-body, 'Archivo', sans-serif); }
 .duelo-v2__pagina[hidden] { display: none; }
+.duelo-v2__pagina--m05 { min-height: auto; padding: 0; background: transparent; }
+.duelo-v2__pagina--m05 .duelo-v2__cabecalho { display: none; }
+.duelo-v2__pagina--m05 .duelo-v2 { width: min(100%, 1060px); padding: clamp(20px, 4vw, 48px) 0; }
 .duelo-v2__cabecalho { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 68px; max-width: 1360px; margin: 0 auto; }
 .duelo-v2__cabecalho a { color: var(--fg, #f3f4f6); font: 32px/1 var(--font-display, 'Anton', sans-serif); text-decoration: none; }
 .duelo-v2__cabecalho span { color: var(--accent, #ff5500); font: 700 11px var(--font-mono, monospace); letter-spacing: .08em; text-transform: uppercase; }
@@ -33,6 +36,14 @@
 .duelo-v2__previa { margin-top: 12px; padding: 16px; border: 1px solid var(--border, #232834); border-radius: var(--radius-md, 6px); background: var(--surface, #151820); overflow-wrap: anywhere; }
 .duelo-v2__previa p { margin: 0 0 10px; }
 .duelo-v2 ol { padding-left: 22px; color: var(--fg-secondary, #c8cdd8); }
+.duelo-v2__versus { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; margin: 24px 0; border-top: 1px solid var(--border, #232834); border-bottom: 1px solid var(--border, #232834); }
+.duelo-v2__lutador { position: relative; min-width: 0; padding: 22px 20px; text-align: center; }
+.duelo-v2__lutador + .duelo-v2__lutador { border-left: 1px solid var(--border, #232834); }
+.duelo-v2__lutador > span, .duelo-v2__lutador small { display: block; color: var(--muted, #8b92a3); font: 700 10px/1.4 var(--font-mono, monospace); letter-spacing: .08em; text-transform: uppercase; }
+.duelo-v2__lutador > strong { display: block; margin: 8px 0 4px; color: var(--fg, #f3f4f6); font: 400 clamp(34px, 5vw, 56px)/1 var(--font-display, 'Anton', sans-serif); font-variant-numeric: tabular-nums; }
+.duelo-v2__lutador > i { position: absolute; top: 50%; right: -17px; z-index: 1; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--border-strong, #3b4254); border-radius: 50%; background: var(--bg, #0a0b0e); color: var(--accent, #ff5500); font: 400 26px/1 var(--font-display, 'Anton', sans-serif); font-style: normal; transform: translateY(-50%); }
+.duelo-v2__lutador .arena-player { margin-top: 14px; text-align: left; }
+@media (max-width: 560px) { .duelo-v2__lutador { padding: 18px 7px; } .duelo-v2__lutador > strong { font-size: clamp(28px, 10vw, 42px); } .duelo-v2__lutador > button { width: 100%; margin-right: 0; padding-inline: 5px; font-size: 11px; } .duelo-v2__lutador .arena-player { padding-inline: 6px; } .duelo-v2__lutador .arena-player__tempo { display: none; } }
 @media (max-width: 699px) {
   .duelo-v2__pagina { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
   .duelo-v2__cabecalho { min-height: 58px; }

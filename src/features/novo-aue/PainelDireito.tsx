@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { GruposNaHome } from '../../arena/v2/GruposNaHome';
 import type { ComunidadeDoForum, NotificacaoDeMencao } from '../../portas/forum';
@@ -7,6 +7,7 @@ import { SlotPatrocinado } from './SlotPatrocinadoDoFeed';
 import { TopArrotadoresDaHome } from './TopArrotadoresDaHome';
 
 interface Props {
+  readonly anuncio?: ReactNode;
   readonly comunidades?: readonly ComunidadeDoForum[];
   readonly aoAbrirComunidade?: (slug: string) => void;
   readonly comunidadesEntradas?: Record<string, boolean>;
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export const PainelDireito = memo(function PainelDireito({
+  anuncio,
   estaAutenticado = false,
   contaPerfil,
   notificacoesDeMencao = [],
@@ -104,7 +106,7 @@ export const PainelDireito = memo(function PainelDireito({
           <GruposNaHome limite={3} emPainel />
         </section>
 
-        <SlotPatrocinado posicionamento="sidebar" />
+        {anuncio ?? <SlotPatrocinado posicionamento="sidebar" />}
 
         <footer className="site-footer site-footer--page">
           <div className="footer-links">

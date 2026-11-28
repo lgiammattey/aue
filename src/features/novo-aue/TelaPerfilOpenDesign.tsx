@@ -6,6 +6,7 @@ import type { PortaDeConta } from '../../portas/conta';
 import type { PortaDePerfil } from '../../portas/perfil';
 
 interface Props {
+  readonly experienciaM05?: boolean;
   readonly portaForum?: PortaDeForum;
   readonly portaComunidade?: PortaDeComunidade;
   readonly portaPerfil?: PortaDePerfil;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function TelaPerfilOpenDesign({
+  experienciaM05,
   portaForum,
   portaComunidade,
   portaPerfil,
@@ -21,6 +23,7 @@ export function TelaPerfilOpenDesign({
   const { handle } = useParams<{ handle?: string }>();
   return (
     <InicioOpenDesign
+      experienciaM05={experienciaM05}
       portaForum={portaForum}
       portaComunidade={portaComunidade}
       portaPerfil={portaPerfil}

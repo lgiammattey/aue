@@ -21,9 +21,13 @@ export interface FluxoArenaV2Props {
   readonly telemetria?: TelemetriaArenaV2;
   readonly conteudoDoRepouso?: ReactNode;
   readonly rankingDoHero?: ReactNode;
+  readonly conteudoAposResultado?: ReactNode;
   readonly adversarioHandle?: string | null;
+  /** Abre a lista privada de desafios sem passar pelo gravador. */
+  readonly telaInicial?: 'arena' | 'meus';
   readonly modoEmbutido?: boolean;
-  readonly aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
+  readonly experienciaM05?: boolean;
+  readonly aoPublicarAudio?: (audio: Blob, nota: number | null, duracaoMs: number) => void;
 }
 
 /** Composição local: dependências explícitas evitam conexão acidental com produção. */
@@ -39,11 +43,14 @@ export function FluxoArenaV2({
   telemetria,
   conteudoDoRepouso,
   rankingDoHero,
+  conteudoAposResultado,
   adversarioHandle,
+  telaInicial = 'arena',
   modoEmbutido = false,
+  experienciaM05 = false,
   aoPublicarAudio,
 }: FluxoArenaV2Props) {
-  const [tela, setTela] = useState<'arena' | 'duelo' | 'meus' | 'encerrado'>(modo === 'criar' ? 'arena' : 'duelo');
+  const [tela, setTela] = useState<'arena' | 'duelo' | 'meus' | 'encerrado'>(telaInicial === 'meus' && modo === 'criar' ? 'meus' : modo === 'criar' ? 'arena' : 'duelo');
   const [modoAtual, setModoAtual] = useState(modo);
   const [novaArena, setNovaArena] = useState(0);
   const [tentativa, setTentativa] = useState<TentativaDoDuelo | null>(null);
@@ -60,8 +67,10 @@ export function FluxoArenaV2({
             key={novaArena}
             conteudoDoRepouso={tela === 'arena' ? conteudoDoRepouso : undefined}
             rankingDoHero={tela === 'arena' ? rankingDoHero : undefined}
+            conteudoAposResultado={conteudoAposResultado}
             adversarioHandle={adversarioHandle}
             modoEmbutido={modoEmbutido}
+            experienciaM05={experienciaM05}
             aoPublicarAudio={aoPublicarAudio}
             telemetria={telemetria}
             captura={captura}
@@ -76,7 +85,7 @@ export function FluxoArenaV2({
           )}
         </div>
       )}
-      <div className="duelo-v2__pagina" hidden={tela !== 'duelo'}>
+      <div className={`duelo-v2__pagina${experienciaM05 ? ' duelo-v2__pagina--m05' : ''}`} hidden={tela !== 'duelo'}>
         <header className="duelo-v2__cabecalho">
           <a href="/">AUÊ<span>!</span></a>
           <span>ARENA · DESAFIO</span>
@@ -110,7 +119,7 @@ export function FluxoArenaV2({
         )}
       </div>
       {tela === 'meus' && duelo && compartilhar && origem && (
-        <div className="duelo-v2__pagina">
+        <div className={`duelo-v2__pagina${experienciaM05 ? ' duelo-v2__pagina--m05' : ''}`}>
           <header className="duelo-v2__cabecalho">
             <a href="/">AUÊ<span>!</span></a>
             <span>ARENA · DESAFIOS</span>
@@ -120,7 +129,7 @@ export function FluxoArenaV2({
             compartilhar={compartilhar}
             origem={origem}
             aoNovoDesafio={novoDesafio}
-            aoVoltar={() => setTela('arena')}
+            aoVoltar={telaInicial === 'meus' ? () => aoVoltar?.() : () => setTela('arena')}
           />
         </div>
       )}

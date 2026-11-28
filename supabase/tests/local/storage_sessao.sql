@@ -5,6 +5,16 @@ INSERT INTO auth.users(id, email, is_anonymous) VALUES
   ('62000000-0000-4000-8000-000000000001','conta@example.invalid',false),
   ('62000000-0000-4000-8000-000000000002',null,true);
 UPDATE public.perfis SET perfil_social_concluido_em = now() WHERE id='62000000-0000-4000-8000-000000000001';
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM storage.buckets
+    WHERE id = 'anexos_do_forum'
+      AND 'audio/wav' = ANY(allowed_mime_types)
+  ) THEN
+    RAISE EXCEPTION 'bucket de anexos do fórum não aceita WAV';
+  END IF;
+END $$;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','62000000-0000-4000-8000-000000000001',true);
 DO $$ BEGIN

@@ -140,6 +140,17 @@ it('abre meus desafios a partir da Arena e permite voltar', async () => {
   expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
 });
 
+it('abre a lista privada de desafios quando a rota começa em Disputas', async () => {
+  const d = dados();
+  Object.assign(d.d, { listarMeusDuelos: vi.fn(async () => ({ ok: true, valor: { itens: [], temMais: false } })) });
+  const voltar = vi.fn();
+  render(<FluxoArenaV2 modo="criar" telaInicial="meus" duelo={d.duelo} compartilhar={d.compartilhar} origem="https://teste.example" captura={d.captura} aoVoltar={voltar} />);
+  expect(await screen.findByRole('heading', { name: 'MEUS DESAFIOS' })).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Gravar agora' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Voltar' }));
+  expect(voltar).toHaveBeenCalledOnce();
+});
+
 it('não abre meus desafios por cima de uma tentativa em andamento ou revisão', async () => {
   const d = dados();
   render(<FluxoArenaV2 modo="criar" duelo={d.duelo} compartilhar={d.compartilhar} origem="https://teste.example" captura={d.captura} />);

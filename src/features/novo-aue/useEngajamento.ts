@@ -83,19 +83,25 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
   useEffect(() => {
     const contar = forum.contarReacoesDosTopicos;
     if (!contar || !idsDeTopicos) return;
-    const novos = idsDeTopicos.split(',').filter((id) => !jaPedidos.current.has(id));
+    const pedidos = jaPedidos.current;
+    const novos = idsDeTopicos.split(',').filter((id) => !pedidos.has(id));
     if (novos.length === 0) return;
-    novos.forEach((id) => jaPedidos.current.add(id));
+    novos.forEach((id) => pedidos.add(id));
+    const pendentes = new Set(novos);
+    const marcarConcluidos = (ids: string[], confirmado: boolean) => {
+      for (const id of ids) {
+        pendentes.delete(id);
+        if (!confirmado) pedidos.delete(id);
+      }
+    };
     let ativo = true;
     for (let i = 0; i < novos.length; i += 100) {
       const lote = novos.slice(i, i + 100);
       contar.call(forum, lote).then(
         (r) => {
           if (!ativo) return;
-          if (!r.ok) {
-            lote.forEach((id) => jaPedidos.current.delete(id));
-            return;
-          }
+          marcarConcluidos(lote, r.ok);
+          if (!r.ok) return;
           setEngajamento((atual) => {
             const proximo = { ...atual };
             for (const id of lote) {
@@ -105,11 +111,12 @@ export function useEngajamento({ forum, comunidadePort, estaAutenticado, aoPedir
             return proximo;
           });
         },
-        () => lote.forEach((id) => jaPedidos.current.delete(id)),
+        () => { if (ativo) marcarConcluidos(lote, false); },
       );
     }
     return () => {
       ativo = false;
+      for (const id of pendentes) pedidos.delete(id);
     };
   }, [forum, idsDeTopicos]);
 

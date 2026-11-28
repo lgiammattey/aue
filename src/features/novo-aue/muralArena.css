@@ -39,3 +39,50 @@
 .od-profile__button--challenge:hover {
   background: var(--accent-hover, #ff6d24);
 }
+
+.app--m05 .feed-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.app--m05 .m05-conversa-ausente {
+  padding: 16px;
+  color: var(--muted);
+}
+
+@media (min-width: 700px) and (max-width: 760px) {
+  .app--m05 { grid-template-columns: minmax(0, 1fr); }
+  .app--m05 > .sidebar { display: none; }
+}
+
+@media (min-width: 761px) and (max-width: 1023px) {
+  .app--m05 > .sidebar .m05-nav__link { justify-content: center; padding-inline: 4px; }
+  .app--m05 > .sidebar .m05-nav__link > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+.compositor-consentimento {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 10px;
+  margin-block: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.compositor-consentimento input {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  accent-color: var(--accent);
+}
+
+.app--m05 .topbar-mobile-nav { display: none; }

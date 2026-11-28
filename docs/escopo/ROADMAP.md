@@ -10,7 +10,7 @@
 | M02 — Integrity | Integridade de notas e cadastro de grupos | Aceita pelo PO com as ressalvas do [relatório](../missoes/M02-RELATORIO.md) |
 | M03 — Cleanup | Remoção comprovada de legado, testes SQL e CI entre branches | Aceita pelo PO com ressalvas e incorporada à `develop`. Provas no [relatório](../missoes/M03-RELATORIO.md) |
 | M04 — Reliability | Áudio, sessão, mídia, PWA, CI e regressões | Aceita pelo PO com ressalvas e integrada à `develop` pela [PR #388](https://github.com/lgiammattey/aue/pull/388), com [CI verde](https://github.com/lgiammattey/aue/actions/runs/46138295564). Pendências no [relatório](../missoes/M04-RELATORIO.md). |
-| M05 — Experience | Arena, Mural, Perfil e experiência pública | [Definição funcional e visual](../missoes/m05/PROPOSTA.md) para aprovação do PO. Implementação depende do aceite. |
+| M05 — Experience | Início, Resenha, Arrotar, Disputas e Perfil | Implementação autorizada pelo PO conforme o [cartão](../missoes/m05/CARTAO.md) e o [protótipo aprovado](../missoes/m05/prototipo/index.html). A entrega aguarda aceite. |
 | M06 — Release | Homologação, SEO, rollback e prova de publicação autorizada | Bloqueada |
 
 Os achados M00 e as pendências de SEO/operação estão no [backlog](BACKLOG.md). Os itens são abertos; sua presença no planejamento não comprova correção. O acompanhamento executivo não canônico é a [página do Auê](https://chatgpt.com/space/page_78a57da82f108191baa7cafabdbac7dc); a governança e o estado versionado desta entrega ficam no repositório.

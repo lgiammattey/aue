@@ -7,7 +7,10 @@ import { configuracaoAusente } from './db/supabase'
 import { garantirSessao } from './shared/auth/sessaoAnonima'
 import { EntradaArenaLocalV2 } from './arena/v2/EntradaArenaLocalV2'
 import { ConteudoDaHome } from './arena/v2/ConteudoDaHome'
-import { TopArrotadoresDaHome } from './features/novo-aue/TopArrotadoresDaHome'
+import { InicioM05 } from './features/m05/InicioM05'
+import { MolduraM05, NavegacaoM05 } from './features/m05/NavegacaoM05'
+import { ArenaV2 } from './arena/v2/ArenaV2'
+import { analyticsArenaV2Em } from './plataforma/web/analyticsArenaV2'
 import { FLAGS } from './shared/flags'
 import { entradaLocalArenaV2 } from './plataforma/web/entradaLocalArenaV2'
 import { TelaDeConfiguracaoAusente } from './shared/components/TelaDeConfiguracaoAusente'
@@ -75,15 +78,15 @@ const rotasEstaticasSemBanco = new Set([
 ])
 
 if (configuracaoAusente && import.meta.env.DEV && window.location.pathname === '/') {
-  // Em dev sem .env, permite visualizar a Home com a Arena local e o conteúdo editorial abaixo.
+  // A Home abre sem banco em dev. A Resenha precisa de um ambiente configurado.
   raiz.render(
     <StrictMode>
       <ComAvisoExclusaoTelemetria estado={estadoExclusao}>
         <BrowserRouter>
-          <EntradaArenaLocalV2
-            conteudoDoRepouso={<ConteudoDaHome />}
-            rankingDoHero={<TopArrotadoresDaHome variante="liga-hero" />}
-          />
+          <div className="m05-app">
+            <MolduraM05><InicioM05 comResenha={false}><ConteudoDaHome comAnuncio={false} /></InicioM05></MolduraM05>
+            <NavegacaoM05 mobile />
+          </div>
         </BrowserRouter>
       </ComAvisoExclusaoTelemetria>
     </StrictMode>,
@@ -95,13 +98,29 @@ if (configuracaoAusente && import.meta.env.DEV && window.location.pathname === '
       <ComAvisoExclusaoTelemetria estado={estadoExclusao}>
         <BrowserRouter>
           <Routes>
-            <Route path="/en" element={<HomeEn />} />
+            <Route path="/en" element={<div className="m05-app"><MolduraM05 idioma="en"><HomeEn comResenha={false} /></MolduraM05><NavegacaoM05 idioma="en" mobile /></div>} />
             <Route path="/como-arrotar" element={<ComoArrotar />} />
             <Route path="/como-jogar" element={<ComoJogar />} />
             <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
             <Route path="/privacidade" element={<PoliticaDePrivacidade />} />
             <Route path="/termos" element={<TermosDeUso />} />
           </Routes>
+        </BrowserRouter>
+      </ComAvisoExclusaoTelemetria>
+    </StrictMode>,
+  )
+} else if (configuracaoAusente && import.meta.env.DEV && window.location.pathname === '/arena') {
+  const emIngles = new URLSearchParams(window.location.search).get('lang') === 'en'
+  raiz.render(
+    <StrictMode>
+      <ComAvisoExclusaoTelemetria estado={estadoExclusao}>
+        <BrowserRouter>
+          <div className="m05-app">
+            <MolduraM05 idioma={emIngles ? 'en' : 'pt'}>
+              {emIngles ? <ArenaV2 experienciaM05 idioma="en" telemetria={analyticsArenaV2Em} /> : <EntradaArenaLocalV2 experienciaM05 />}
+            </MolduraM05>
+            <NavegacaoM05 idioma={emIngles ? 'en' : 'pt'} mobile />
+          </div>
         </BrowserRouter>
       </ComAvisoExclusaoTelemetria>
     </StrictMode>,

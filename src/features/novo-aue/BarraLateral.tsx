@@ -1,7 +1,9 @@
 import { memo } from 'react';
+import { NavegacaoM05 } from '../m05/NavegacaoM05';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface Props {
+  readonly experienciaM05?: boolean;
   readonly viewAtual: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar' | 'arena';
   readonly estaAutenticado: boolean;
   readonly aoMudarView: (view: 'feed' | 'seguindo' | 'auth' | 'perfil' | 'comunidade' | 'comunidades' | 'explorar' | 'arena', slug?: string) => void;
@@ -57,6 +59,7 @@ function IconeDaNavegacao({ tipo }: { readonly tipo: IconeDaNavegacao }) {
 
 /** Sidebar fixa do App Shell desktop/tablet. No mobile o componente é ocultado via CSS (sem Bottom Nav). */
 export const BarraLateral = memo(function BarraLateral({
+  experienciaM05 = false,
   viewAtual,
   estaAutenticado,
   aoMudarView,
@@ -83,7 +86,7 @@ export const BarraLateral = memo(function BarraLateral({
         </span>
       </Link>
 
-      <nav className="sidebar-desktop-nav" aria-label="Menu principal">
+      {experienciaM05 ? <NavegacaoM05 /> : <nav className="sidebar-desktop-nav" aria-label="Menu principal">
         <button
           className={`nav-item ${isInicioAtivo ? 'active' : ''}`}
           type="button"
@@ -148,7 +151,7 @@ export const BarraLateral = memo(function BarraLateral({
         >
           ARROTAR
         </button>
-      </nav>
+      </nav>}
 
       <div className="sidebar-footer">
         {estaAutenticado ? (

@@ -41,7 +41,7 @@ const TIPOS_DE_ARROTO = [
 ] as const;
 
 /** Conteúdo público indexável exibido abaixo da Arena na página inicial, sem cards. */
-export function ConteudoDaHome() {
+export function ConteudoDaHome({ comAnuncio = true }: { readonly comAnuncio?: boolean } = {}) {
   return (
     <div className="conteudo-home" aria-label="Guia e comunidade do Auê">
       <div className="conteudo-home__interno">
@@ -135,7 +135,7 @@ export function ConteudoDaHome() {
         </section>
 
         <div className="conteudo-home__anuncio">
-          <AdsterraNativeBanner rotulo="PUBLI · PRA PAGAR O REFRI DA SEMANA" />
+          {comAnuncio && <AdsterraNativeBanner rotulo="PUBLI · PRA PAGAR O REFRI DA SEMANA" />}
         </div>
 
         <section id="grupos" className="conteudo-home__secao" aria-label="Grupos de WhatsApp">

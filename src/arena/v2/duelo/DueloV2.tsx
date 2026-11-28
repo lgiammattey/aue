@@ -363,12 +363,35 @@ function ResultadoDoDuelo({ duelo, token, resultado, neutro, aoVoltar, compartil
     finally { enviandoDenuncia.current = false; }
   };
   const duracao = (ms: number) => `${(ms / 1000).toFixed(2).replace('.', ',')} s`;
+  // Revelações antigas não trazem ladoSessao. O contrato anterior já as tratava
+  // como a sessão de quem respondeu, então preservamos essa leitura aqui.
+  const ladoDaSessao = resultado.ladoSessao ?? 'desafiante';
+  const nomeDoLado = (lado: 'criador' | 'desafiante') => neutro
+    ? lado === 'criador' ? 'Quem criou' : 'Quem respondeu'
+    : ladoDaSessao === lado ? 'Você' : 'Adversário';
+  const rotuloDoAudio = (lado: 'criador' | 'desafiante') => neutro
+    ? lado === 'criador' ? 'Abrir áudio de quem criou' : 'Abrir áudio de quem respondeu'
+    : ladoDaSessao === lado ? 'Abrir minha gravação' : 'Abrir áudio do adversário';
+  const rotuloDoPlayer = (lado: 'criador' | 'desafiante') => neutro
+    ? lado === 'criador' ? 'Áudio de quem criou' : 'Áudio de quem respondeu'
+    : ladoDaSessao === lado ? 'Sua gravação' : 'Áudio do adversário';
   return <div className="duelo-v2__resultado">
     <h3>MEDIÇÕES DO DESAFIO</h3><p>As medições são informadas pelos aparelhos e ainda não foram verificadas.</p>
-    <dl><div><dt>{neutro ? 'Quem criou' : resultado.ladoSessao === 'criador' ? 'Você' : 'Adversário'}</dt><dd>{duracao(resultado.criador.duracaoMs)}</dd></div><div><dt>{neutro ? 'Quem respondeu' : resultado.ladoSessao === 'criador' ? 'Adversário' : 'Você'}</dt><dd>{duracao(resultado.desafiante.duracaoMs)}</dd></div></dl>
+    <div className="duelo-v2__versus" aria-label="Comparação das tentativas">
+      {(['criador', 'desafiante'] as const).map((lado, indice) => {
+        const bloqueado = denuncia === 'registrada' && !neutro && ladoDaSessao !== lado;
+        const medicao = resultado[lado];
+        return <section key={lado} className="duelo-v2__lutador">
+          <span>{nomeDoLado(lado)}</span>
+          <strong>{duracao(medicao.duracaoMs)}</strong>
+          <small>Medição experimental</small>
+          <button type="button" disabled={bloqueado} onClick={() => void ouvir(lado)}>{rotuloDoAudio(lado)}</button>
+          {audio?.lado === lado && endereco && <PlayerDeAudio endereco={endereco} rotulo={rotuloDoPlayer(lado)} />}
+          {indice === 0 && <i aria-hidden="true">×</i>}
+        </section>;
+      })}
+    </div>
     <p>Compare as duas durações. Isso não define vitória, placar ou ranking.</p>
-    <button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao !== 'criador'} onClick={() => void ouvir('criador')}>{neutro ? 'Abrir áudio de quem criou' : resultado.ladoSessao === 'criador' ? 'Abrir minha gravação' : 'Abrir áudio do adversário'}</button><button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao === 'criador'} onClick={() => void ouvir('desafiante')}>{neutro ? 'Abrir áudio de quem respondeu' : resultado.ladoSessao === 'criador' ? 'Abrir áudio do adversário' : 'Abrir minha gravação'}</button>
-    {audio && endereco && <PlayerDeAudio endereco={endereco} rotulo={neutro ? (audio.lado === 'criador' ? 'Áudio de quem criou' : 'Áudio de quem respondeu') : (audio.lado === (resultado.ladoSessao ?? 'desafiante') ? 'Sua gravação' : 'Áudio do adversário')} />}
     {erro && <p role="alert">{erro}</p>}
     {!neutro && !denunciaAberta && <button type="button" onClick={() => setDenunciaAberta(true)}>Denunciar áudio do adversário</button>}
     {denunciaAberta && <section aria-label="Denunciar áudio do adversário">

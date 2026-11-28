@@ -1,22 +1,13 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { definirIdiomaETitulo } from '../../plataforma/web/documento';
-import { analyticsArenaV2Em } from '../../plataforma/web/analyticsArenaV2';
-import { ArenaV2 } from '../../arena/v2/ArenaV2';
+import { InicioM05 } from '../m05/InicioM05';
 import '../../arena/v2/conteudoDaHome.css';
 import './LayoutArenaPublica.css';
 import './ComoArrotar.css';
 import './HomeEn.css';
 
-/**
- * Home em inglês (`/en`). Copy adaptada ao público de língua inglesa, não
- * traduzida. O texto existe em dois lugares que precisam bater: aqui e no
- * `<noscript>` de `paginas/en.html`. `HomeEn.paridade.test.tsx` cobra os dois.
- *
- * A Arena em inglês mora aqui, embutida logo abaixo do topo. O guia continua
- * igual: ela é só JavaScript e não entra no `<noscript>`, e o teste de paridade
- * a ignora de propósito (`.home-en__arena`).
- */
+/** O artigo em inglês também está no HTML para indexação sem JavaScript. */
 export const TITULO_DA_HOME_EN = 'Burping Community: How to Burp & Record Yours | Auê';
 
 const TIPOS = [
@@ -27,45 +18,12 @@ const TIPOS = [
   { numero: '05', nome: 'The Dud', criterio: 'Just air', descricao: "Lots of effort, mostly air. No real vibration, so it doesn't count as a burp." },
 ] as const;
 
-export function HomeEn() {
+export function HomeEn({ comResenha = true }: { readonly comResenha?: boolean } = {}) {
   useEffect(() => definirIdiomaETitulo('en', TITULO_DA_HOME_EN), []);
 
   return (
-    <main className="guia-arena home-en">
-      <header className="guia-arena__topo">
-        <Link className="guia-arena__marca" to="/en" aria-label="Auê home">
-          AUÊ<span className="guia-arena__bang">!</span>
-        </Link>
-        <span className="home-en__beta">BETA</span>
-        <nav aria-label="Main navigation">
-          <a href="#how-to-burp">How to burp</a>
-          <a href="#burp-types">Burp types</a>
-          <Link to="/" hrefLang="pt-BR" lang="pt-BR">Português</Link>
-        </nav>
-      </header>
-
-      <div className="guia-arena__miolo">
-        <section className="guia-arena__hero como-arrotar-hero">
-          <div className="como-arrotar-hero__texto">
-            <span>Burping community</span>
-            <h1>Burping is a talent. Meet the crew.</h1>
-            <p>
-              Auê is a free burping community. Learn to burp on command, burp the alphabet, record yours in your browser, and send it to your friends.
-            </p>
-            <p>Say it ow-WAY. In Brazilian Portuguese it means a loud, happy mess, which is about right.</p>
-          </div>
-          <div className="como-arrotar-hero__arte">
-            <img
-              src="/ilustracoes/como-arrotar-comando-codex.png"
-              alt="Illustration of a friend in a backwards cap letting out orange sound waves"
-            />
-          </div>
-        </section>
-
-        <div id="arena" className="home-en__arena">
-          <ArenaV2 modoEmbutido idioma="en" telemetria={analyticsArenaV2Em} />
-        </div>
-
+    <InicioM05 idioma="en" comResenha={comResenha}>
+      <div className="guia-arena home-en">
         <div className="guia-arena__secoes">
           <section id="how-to-burp" className="como-arrotar-bloco" aria-labelledby="home-en-how-to-burp">
             <span className="como-arrotar-rotulo">Step by step</span>
@@ -170,16 +128,11 @@ export function HomeEn() {
           <section className="guia-arena__cta" aria-labelledby="home-en-cta">
             <h2 id="home-en-cta">Practiced? Test it on the mic.</h2>
             <p>Open the Arena in your browser, record a burp and play it back. Then send it to someone who'll appreciate it.</p>
-            <a href="#arena">Record my burp</a>
+            <Link to="/arena?lang=en">Record my burp</Link>
           </section>
         </div>
       </div>
 
-      <footer className="guia-arena__rodape">
-        <Link to="/" hrefLang="pt-BR" lang="pt-BR">Português</Link>
-        <Link to="/privacidade" hrefLang="pt-BR" lang="pt-BR">Privacy (in Portuguese)</Link>
-        <Link to="/termos" hrefLang="pt-BR" lang="pt-BR">Terms (in Portuguese)</Link>
-      </footer>
-    </main>
+    </InicioM05>
   );
 }

@@ -28,6 +28,7 @@ export interface DesafioAlvoDoCompositor {
 
 interface Props {
   readonly aberto: boolean;
+  readonly anexoInicial?: Extract<AnexoRascunho, { tipo: 'audio' }>;
   readonly controleDeDialogo?: ControleDeDialogo;
   readonly destino?: 'pessoal' | 'comunidade';
   readonly comunidades: readonly ComunidadeDoForum[];
@@ -48,6 +49,7 @@ interface Props {
 
 export function ModalCompositor({
   aberto,
+  anexoInicial,
   controleDeDialogo,
   destino = 'pessoal',
   comunidades,
@@ -64,7 +66,8 @@ export function ModalCompositor({
   const [comunidadeSlug, setComunidadeSlug] = useState(
     comunidadePadraoSlug ?? comunidades[0]?.slug ?? '',
   );
-  const [anexo, setAnexo] = useState<AnexoRascunho | null>(null);
+  const [anexo, setAnexo] = useState<AnexoRascunho | null>(anexoInicial ?? null);
+  const [consentiuAudioDaArena, setConsentiuAudioDaArena] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [gravando, setGravando] = useState(false);
@@ -78,6 +81,10 @@ export function ModalCompositor({
   const playerDeAudio = useRef<HTMLAudioElement>(null);
   const limparVisibilidadeDoCampo = useRef<(() => void) | null>(null);
   const cicloDaGravacao = useCicloDeGravacaoLivre(aberto);
+
+  useEffect(() => {
+    if (aberto && anexoInicial) setEnderecoDoAudio(criarEnderecoLocal(anexoInicial.arquivo));
+  }, [aberto, anexoInicial]);
 
   useEffect(() => {
     if (comunidadePadraoSlug) setComunidadeSlug(comunidadePadraoSlug);
@@ -130,6 +137,7 @@ export function ModalCompositor({
 
   if (!aberto) return null;
 
+  const precisaConsentimento = Boolean(anexoInicial && anexo === anexoInicial);
   const videoNoTexto = detectarLinkDeVideo(corpo);
   const imagemSelecionada = anexo?.tipo === 'imagem';
   const comunidadeAtual = comunidades.find((comunidade) => comunidade.slug === comunidadeSlug);
@@ -248,7 +256,7 @@ export function ModalCompositor({
 
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault();
-    if (enviando) return;
+    if (enviando || (precisaConsentimento && !consentiuAudioDaArena)) return;
     if (cicloDaGravacao.bloqueiaEnvio()) {
       setErro('Termine, tente de novo ou descarte a gravação antes de publicar.');
       return;
@@ -303,7 +311,7 @@ export function ModalCompositor({
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialogComposerTitle"
-      onClick={(e) => e.target === e.currentTarget && fechar()}
+      onClick={(e) => !enviando && e.target === e.currentTarget && fechar()}
     >
       <div className="modal-comentarios-sheet composer-sheet" style={{ maxWidth: 600 }}>
         <header className="comments-sheet-header">
@@ -487,6 +495,13 @@ export function ModalCompositor({
             </div>
           )}
 
+          {precisaConsentimento && (
+            <label className="compositor-consentimento">
+              <input type="checkbox" checked={consentiuAudioDaArena} disabled={enviando} onChange={(evento) => setConsentiuAudioDaArena(evento.target.checked)} />
+              <span>Autorizo publicar esta gravação na Resenha e no meu perfil. Outras pessoas poderão ouvir e compartilhar.</span>
+            </label>
+          )}
+
           {erro && (
             <p className="comments-composer-error" role="alert">
               {erro}
@@ -601,7 +616,7 @@ export function ModalCompositor({
               <button
                 type="submit"
                 className="comments-submit-btn"
-                disabled={enviando || gravando || cicloDaGravacao.bloqueiaEnvio() || (!corpo.trim() && !anexo)}
+                disabled={enviando || gravando || cicloDaGravacao.bloqueiaEnvio() || (precisaConsentimento && !consentiuAudioDaArena) || (!corpo.trim() && !anexo)}
               >
                 {enviando ? 'Publicando…' : 'Publicar'}
               </button>

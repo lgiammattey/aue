@@ -17,14 +17,13 @@ import { criarPautasWeb } from '../../plataforma/web/pautas';
 import { criarArrotosDoPerfilRemoto } from '../../plataforma/web/arrotosDoPerfil';
 import { criarUrlDePreviewDeImagem, prepararImagemDePerfil, revokeUrlDePreviewDeImagem } from '../../plataforma/web/imagem';
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
-import { analyticsArenaV2 } from '../../plataforma/web/analyticsArenaV2';
 import { analisarNotaDoAudioPublicado } from '../../plataforma/web/notaDoAudioPublicado';
 import { criarEnderecoLocal, soltarEnderecoLocal } from '../../plataforma/web/enderecoDeAudio';
 import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
 import type { CapturaDeAudio } from '../../portas/captura';
 import type { PortaDeComunidade } from '../../portas/comunidade';
 import { sugerirHandle, type PortaDeConta, type ResultadoDaConta } from '../../portas/conta';
-import type { AnexoDeAudioDoTopico, AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, CursorDoForum, NotaRetrospectiva, NotificacaoDeMencao, PortaDeForum, PreviaDeRespostaDoTopico, PublicacaoPessoal, RespostaDoForum, TipoDeMidiaDaComunidade, TopicoDoAutor } from '../../portas/forum';
+import type { AnexoDeAudioDoTopico, AnexoDoForum, AnexoParaPublicar, ComunidadeDoForum, CursorDoForum, NotaRetrospectiva, NotificacaoDeMencao, PortaDeForum, PreviaDeRespostaDoTopico, RespostaDoForum, TipoDeMidiaDaComunidade, TopicoDoAutor } from '../../portas/forum';
 import type { Conexao, DadosDoPerfil, PerfilPublico, PortaDePerfil } from '../../portas/perfil';
 import type { PautaDoForum, PortaDePautas } from '../../portas/pautas';
 import { BarraLateral } from './BarraLateral';
@@ -33,6 +32,8 @@ import { CardDoPost } from './CardDoPost';
 import { ListaDeTopicos } from './ListaDeTopicos';
 import { PautaAbertaDaComunidade } from './PautaDaComunidade';
 import { SlotPatrocinadoDoFeed } from './SlotPatrocinadoDoFeed';
+import { AnuncioM05 } from '../m05/AnuncioM05';
+import { FLAGS } from '../../shared/flags';
 import { PreviaDaConversa } from './PreviaDaConversa';
 import { ThreadDeComentarios } from './ThreadDeComentarios';
 import { ModalCompositor, type AnexoRascunho, type DesafioAlvoDoCompositor } from './ModalCompositor';
@@ -47,6 +48,7 @@ import { DialogoDoPost } from './DialogoDoPost';
 import { ModalConexoes, type EstadoDasConexoes } from './ModalConexoes';
 import { PainelDireito } from './PainelDireito';
 import { PlayerDoArroto } from './PlayerDoArroto';
+import { useAudioDaResenha } from './useAudioDaResenha';
 import { TopArrotadoresDaHome } from './TopArrotadoresDaHome';
 import { erroDeEnvio } from '../../nucleo/forum/escrita';
 import { SalvosDoPerfil } from './SalvosDoPerfil';
@@ -57,11 +59,15 @@ import '../../styles/appShell.css';
 import './InicioOpenDesign.css';
 import './diretorioArena.css';
 import { criarPaginacaoDoMural } from './paginacaoDoMural';
+import { aplicarNotaAoTopico, audioDoTopico, hidratarPaginaDaResenha, hidratarPublicacoesPessoais } from './publicacoesDaResenha';
 import './muralArena.css';
 import './perfilArena.css';
 import './authArena.css';
 
 interface Props {
+  readonly experienciaM05?: boolean;
+  readonly anexoDaArena?: Extract<AnexoRascunho, { tipo: 'audio' }> | null;
+  readonly aoFecharAnexoDaArena?: () => void;
   readonly portaForum?: PortaDeForum;
   readonly portaPautas?: PortaDePautas;
   readonly portaComunidade?: PortaDeComunidade;
@@ -88,7 +94,7 @@ interface AudioDiretoPronto {
   readonly origem: 'gravacao' | 'arquivo';
 }
 
-type FiltroDoFeed = 'resenha' | 'arrotos' | 'links';
+type FiltroDoFeed = 'resenha' | 'arrotos' | 'midia';
 
 function IconeDaRede({ rede }: { readonly rede: 'instagram' | 'tiktok' | 'youtube' | 'twitter' }) {
   if (rede === 'instagram') return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.4" cy="6.6" r=".9" fill="currentColor" stroke="none" /></svg>;
@@ -119,54 +125,6 @@ function fonteDaCapaDaComunidade(comunidade: Pick<ComunidadeDoForum, 'slug' | 'c
   return comunidade?.capaUrl ?? undefined;
 }
 
-/**
- * O acervo da casa só chega pela leitura autorizada do tópico. A URL pública
- * é resolvida pela plataforma, para a tela não conhecer o Storage.
- */
-function audioDoTopico(audio: AnexoDeAudioDoTopico | null | undefined, forum: PortaDeForum) {
-  if (audio?.caminhoDoAudioDaCasa) {
-    const enderecoDoAudio = forum.enderecoDoAudioDaCasa?.(audio.caminhoDoAudioDaCasa) ?? undefined;
-    return {
-      temAudio: Boolean(enderecoDoAudio),
-      enderecoDoAudio,
-      nota: audio.nota ?? undefined,
-      duracaoSegundos: audio.duracao ?? undefined,
-    };
-  }
-  if (audio?.caminhoDoAudio && forum.assinarAudioDoResultado) {
-    return {
-      temAudio: true,
-      enderecoDoAudio: () => forum.assinarAudioDoResultado!(audio.caminhoDoAudio!),
-      nota: audio.nota ?? undefined,
-      duracaoSegundos: audio.duracao ?? undefined,
-    };
-  }
-  return {
-    temAudio: false,
-    enderecoDoAudio: undefined,
-    nota: undefined,
-    duracaoSegundos: undefined,
-  };
-}
-
-function paraItemDePublicacaoPessoal(publicacao: PublicacaoPessoal, anexo?: AnexoDoForum, urlDoAnexo?: string): ItemDoFeed {
-  return {
-    id: `topico-${publicacao.id}`,
-    tipo: 'topico',
-    origem: 'pessoal',
-    comunidadeSlug: '',
-    titulo: publicacao.titulo,
-    corpo: publicacao.corpo,
-    autorNome: publicacao.autor.apelido ?? publicacao.autor.handle ?? 'Anônimo',
-    autorHandle: publicacao.autor.handle ?? undefined,
-    autorAvatarUrl: publicacao.autor.avatarUrl ?? undefined,
-    criadoEm: publicacao.criadoEm,
-    respostasTotal: publicacao.respostasTotal,
-    temAudio: anexo?.tipo === 'audio',
-    anexo: anexo ? { tipo: anexo.tipo, url: urlDoAnexo, duracaoMs: anexo.duracaoMs } : undefined,
-  };
-}
-
 function paraItemDeTopicoDoPerfil(topico: TopicoDoAutor, perfil: PerfilPublico, forum: PortaDeForum, anexo?: AnexoDoForum, urlDoAnexo?: string, audioProjetado?: AnexoDeAudioDoTopico): ItemDoFeed {
   const audio = audioDoTopico(audioProjetado ?? topico.audio, forum);
   return {
@@ -195,56 +153,6 @@ async function calcularNotaLocalDoAudio(arquivo: Blob): Promise<number | undefin
   } catch {
     return undefined;
   }
-}
-
-function aplicarNotaAoTopico(
-  anexo: AnexoDoForum | undefined,
-  url: string | undefined,
-  audioRaw: AnexoDeAudioDoTopico | null | undefined,
-  audioResolvido: ReturnType<typeof audioDoTopico>,
-  nota: NotaRetrospectiva | undefined,
-): { readonly nota?: number; readonly notaRetrospectiva: boolean; readonly duracaoSegundos?: number } {
-  const anexoDeAudio = anexo?.tipo === 'audio';
-  const fonteAtual = anexoDeAudio ? 'anexo' : audioRaw?.caminhoDoAudioDaCasa ? 'casa' : null;
-  const avaliada = Boolean(
-    (anexoDeAudio || audioResolvido.nota === undefined)
-    && nota?.fonte === fonteAtual
-    && (fonteAtual === 'anexo' ? Boolean(url) : audioResolvido.temAudio),
-  );
-  return {
-    nota: anexoDeAudio ? (avaliada ? nota?.nota : undefined) : audioResolvido.nota ?? (avaliada ? nota?.nota : undefined),
-    notaRetrospectiva: Boolean(avaliada && nota?.versao === 'retrospectiva-acustica-legado-v1' && (anexoDeAudio || audioResolvido.nota === undefined)),
-    duracaoSegundos: anexoDeAudio ? undefined : audioResolvido.duracaoSegundos,
-  };
-}
-
-async function hidratarPublicacoesPessoais(
-  publicacoes: readonly PublicacaoPessoal[],
-  forum: PortaDeForum,
-): Promise<readonly ItemDoFeed[]> {
-  if (publicacoes.length === 0) return [];
-  const ids = publicacoes.map((publicacao) => publicacao.id);
-  const anexos = new Map<string, AnexoDoForum>();
-  const notas = new Map<string, NotaRetrospectiva>();
-  if (forum.listarAnexosDoForum) {
-    const leitura = await forum.listarAnexosDoForum({ topicoIds: ids });
-    if (leitura.ok) leitura.valor.forEach((anexo) => anexos.set(anexo.alvoId, anexo));
-  }
-  if (forum.listarNotasRetrospectivas) {
-    const leitura = await forum.listarNotasRetrospectivas(ids);
-    if (leitura.ok) leitura.valor.forEach((nota) => notas.set(nota.id, nota));
-  }
-  return Promise.all(publicacoes.map(async (publicacao) => {
-    const anexo = anexos.get(publicacao.id);
-    const url = anexo?.caminho && forum.assinarAnexoDoForum
-      ? await forum.assinarAnexoDoForum(anexo.caminho).then((leitura) => (leitura.ok ? leitura.valor : undefined))
-      : anexo?.urlVideo ?? undefined;
-    const item = paraItemDePublicacaoPessoal(publicacao, anexo, url);
-    const nota = notas.get(publicacao.id);
-    return nota?.fonte === 'anexo' && anexo?.tipo === 'audio' && url
-      ? { ...item, nota: nota.nota, notaRetrospectiva: nota.versao === 'retrospectiva-acustica-legado-v1' }
-      : item;
-  }));
 }
 
 function paraItemDaPrevia(
@@ -288,6 +196,9 @@ function paraItemDaPrevia(
 }
 
 export function InicioOpenDesign({
+  experienciaM05 = false,
+  anexoDaArena,
+  aoFecharAnexoDaArena,
   portaForum,
   portaPautas,
   portaComunidade,
@@ -311,6 +222,8 @@ export function InicioOpenDesign({
   const slugParam = slugInicial ?? params.slug;
   const handleParam = handleInicial ?? params.handle;
   const topicoIdParam = topicoIdInicial ?? params.id;
+  const conversaDaHome = experienciaM05 && viewInicial === 'feed' ? new URLSearchParams(location.search).get('conversa') : null;
+  const conversaAbertaPelaUrl = useRef<string | null>(null);
 
   const [forum] = useState(() => portaForum ?? criarForumWeb());
   // Testes que injetam o fórum não devem disparar a RPC real de pautas. Em
@@ -348,7 +261,7 @@ export function InicioOpenDesign({
   const [estadoTopicosDaComunidade, setEstadoTopicosDaComunidade] = useState<'carregando' | 'pronto' | 'erro'>('carregando');
 
   // Perfil
-  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'marcados' | 'arrotos' | 'salvos'>('arrotos');
+  const [abaPerfil, setAbaPerfil] = useState<'posts' | 'marcados' | 'arrotos' | 'salvos'>(experienciaM05 ? 'posts' : 'arrotos');
   const [perfilAtivo, setPerfilAtivo] = useState<PerfilPublico | null>(null);
   const [topicosDaComunidadeDoPerfil, setTopicosDaComunidadeDoPerfil] = useState<readonly ItemDoFeed[]>([]);
   const [publicacoesPessoaisDoPerfil, setPublicacoesPessoaisDoPerfil] = useState<readonly ItemDoFeed[]>([]);
@@ -419,12 +332,7 @@ export function InicioOpenDesign({
   const [comunidadesEntradas, setComunidadesEntradas] = useState<Record<string, boolean>>({});
 
   // Audio player
-  const [audioTocandoId, setAudioTocandoId] = useState<string | null>(null);
-  const [audioSelecionadoId, setAudioSelecionadoId] = useState<string | null>(null);
-  const [tempoAtualDoAudio, setTempoAtualDoAudio] = useState(0);
-  const [duracaoDoAudio, setDuracaoDoAudio] = useState<number | null>(null);
-  const elementoAudio = useRef<HTMLAudioElement | null>(null);
-  const pedidoDeAudioAtual = useRef(0);
+  const { alternarAudio, audioSelecionadoId, audioTocandoId, tempoAtualDoAudio, duracaoDoAudio, falhaNoAudio } = useAudioDaResenha();
 
   // Modais
   const [modalCompositorAberto, setModalCompositorAberto] = useState(abrirCompositor);
@@ -1093,68 +1001,7 @@ export function InicioOpenDesign({
       if (adicionar) { setCarregandoMaisFeed(true); setErroMaisFeed(false); }
       try {
         const [pagina, resComunidades] = await Promise.all([paginacao.proxima(), leituraComunidades]);
-        const topicos = pagina.entradas.flatMap((entrada) => entrada.tipo === 'comunidade' ? [entrada.valor] : []);
-        const pessoais = pagina.entradas.flatMap((entrada) => entrada.tipo === 'pessoal' ? [entrada.valor] : []);
-        const anexosPorTopico = new Map<string, AnexoDoForum>();
-        const audioPorTopico = new Map<string, AnexoDeAudioDoTopico>();
-        const notasRetrospectivas = new Map<string, import('../../portas/forum').NotaRetrospectiva>();
-        const corpos = new Map<string, string>();
-        const removidos = new Set<string>();
-        if (forum.listarAnexosDoForum) {
-          const leitura = await forum.listarAnexosDoForum({ topicoIds: [...topicos.map((t) => t.id), ...pessoais.map((p) => p.id)] });
-          if (!leitura.ok) throw new Error('Não foi possível carregar os anexos.');
-          leitura.valor.forEach((anexo) => anexosPorTopico.set(anexo.alvoId, anexo));
-        }
-        if (forum.listarAudioDosTopicos) {
-          const leitura = await forum.listarAudioDosTopicos(topicos.map((t) => t.id));
-          if (!leitura.ok) throw new Error('Não foi possível carregar os áudios.');
-          leitura.valor.forEach(({ topicoId, audio }) => audioPorTopico.set(topicoId, audio));
-        }
-        if (forum.listarNotasRetrospectivas) {
-          const leitura = await forum.listarNotasRetrospectivas(pagina.entradas.map((entrada) => entrada.valor.id));
-          if (leitura.ok) leitura.valor.forEach((nota) => notasRetrospectivas.set(nota.id, nota));
-        }
-        // A projeção da lista não possui corpo; consulta pública em lotes evita disparar 30 de uma vez.
-        for (let i = 0; i < topicos.length; i += 6) {
-          await Promise.all(topicos.slice(i, i + 6).map(async (topico) => {
-            const detalhe = await forum.obterTopico(topico.id);
-            if (!detalhe) return; // Adaptadores antigos de teste não implementam essa leitura.
-            if (!detalhe.ok) throw new Error('Não foi possível carregar o conteúdo da publicação.');
-            if (!detalhe.valor) { removidos.add(topico.id); return; }
-            corpos.set(topico.id, detalhe.valor.corpo);
-          }));
-        }
-        const avatares = new Map((resComunidades.ok ? resComunidades.valor : []).map((c) => [c.slug, fonteDoAvatarDaComunidade(c)]));
-        const itens: ItemDoFeed[] = [];
-        for (const entrada of pagina.entradas) {
-          const item = entrada.valor;
-          if (entrada.tipo === 'comunidade' && removidos.has(item.id)) continue;
-          const anexo = anexosPorTopico.get(item.id);
-          let url = anexo?.urlVideo ?? undefined;
-          if (anexo?.caminho) {
-            if (!forum.assinarAnexoDoForum) throw new Error('Anexo indisponível.');
-            const assinatura = await forum.assinarAnexoDoForum(anexo.caminho);
-            if (!assinatura.ok) throw new Error('Não foi possível abrir o anexo.');
-            url = assinatura.valor;
-          }
-          if (entrada.tipo === 'pessoal') {
-            const nota = notasRetrospectivas.get(item.id);
-            const avaliada = nota?.fonte === 'anexo' && anexo?.tipo === 'audio' && Boolean(url);
-            itens.push({ ...paraItemDePublicacaoPessoal(entrada.valor, anexo, url), ...(avaliada ? { nota: nota.nota, notaRetrospectiva: nota.versao === 'retrospectiva-acustica-legado-v1' } : {}) });
-          } else {
-            const t = entrada.valor;
-            const audioRaw = audioPorTopico.get(t.id) ?? t.audio;
-            const audio = audioDoTopico(audioRaw, forum);
-            const notaAplicada = aplicarNotaAoTopico(anexo, url, audioRaw, audio, notasRetrospectivas.get(t.id));
-            itens.push({ id: `topico-${t.id}`, tipo: 'topico', comunidadeSlug: t.comunidade.slug,
-              comunidadeAvatarUrl: avatares.get(t.comunidade.slug), titulo: t.titulo, corpo: corpos.get(t.id) ?? '',
-              autorNome: t.autor.apelido ?? t.autor.handle ?? 'Anônimo', autorHandle: t.autor.handle ?? undefined,
-              autorAvatarUrl: t.autor.avatarUrl ?? undefined, criadoEm: t.criadoEm, respostasTotal: t.respostasTotal,
-              temAudio: anexo?.tipo === 'audio' || audio.temAudio, enderecoDoAudio: audio.enderecoDoAudio,
-              ...notaAplicada,
-              anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined });
-          }
-        }
+        const itens = await hidratarPaginaDaResenha(forum, pagina.entradas, resComunidades.ok ? resComunidades.valor : []);
         if (!ativo) return;
         pagina.confirmar();
         setItensFeed((anteriores) => adicionar ? [...anteriores, ...itens.filter((item) => !anteriores.some((a) => a.id === item.id))] : itens);
@@ -1196,9 +1043,9 @@ export function InicioOpenDesign({
       );
     }
 
-    if (filtroDoFeed === 'links') {
+    if (filtroDoFeed === 'midia') {
       return porDataDePublicacao.filter((post) =>
-        Boolean(post.videoUrl || post.anexo?.tipo === 'videoExterno'),
+        Boolean(post.videoUrl || post.anexo?.tipo === 'videoExterno' || post.anexo?.tipo === 'imagem'),
       );
     }
 
@@ -1239,92 +1086,6 @@ export function InicioOpenDesign({
     return () => { ativo = false; };
   }, [viewAtual, estaAutenticado, comunidadePort]);
 
-  useEffect(() => () => {
-    const audio = elementoAudio.current;
-    if (!audio) return;
-    audio.pause();
-    audio.onloadedmetadata = null;
-    audio.ondurationchange = null;
-    audio.ontimeupdate = null;
-    audio.onended = null;
-    audio.onerror = null;
-    audio.src = '';
-  }, []);
-
-  // Áudio player handler
-  const alternarAudio = async (
-    urlOuResolver?: string | (() => Promise<string | null>),
-    identificador?: string,
-  ) => {
-    if (!urlOuResolver) return;
-    const pedido = ++pedidoDeAudioAtual.current;
-    const chave = identificador ?? (typeof urlOuResolver === 'string' ? urlOuResolver : null);
-    if (chave && audioTocandoId === chave) {
-      elementoAudio.current?.pause();
-      setAudioTocandoId(null);
-      return;
-    }
-    if (chave && audioSelecionadoId === chave && elementoAudio.current?.src) {
-      try {
-        await elementoAudio.current.play();
-        if (pedido === pedidoDeAudioAtual.current) {
-          setAudioTocandoId(chave);
-          analyticsArenaV2.registrar('ouviu_arroto');
-        }
-      } catch {
-        if (pedido === pedidoDeAudioAtual.current) setAudioTocandoId(null);
-      }
-      return;
-    }
-    let url: string | null = null;
-    if (typeof urlOuResolver === 'function') {
-      url = await urlOuResolver();
-    } else {
-      url = urlOuResolver;
-    }
-    if (!url || pedido !== pedidoDeAudioAtual.current) return;
-    if (!elementoAudio.current) {
-      elementoAudio.current = new Audio(url);
-    } else {
-      elementoAudio.current.pause();
-      elementoAudio.current.src = url;
-    }
-    const audio = elementoAudio.current;
-    const sincronizarDuracao = () => {
-      if (pedido !== pedidoDeAudioAtual.current) return;
-      setDuracaoDoAudio(Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : null);
-    };
-    audio.onloadedmetadata = sincronizarDuracao;
-    audio.ondurationchange = sincronizarDuracao;
-    audio.ontimeupdate = () => {
-      if (pedido === pedidoDeAudioAtual.current) setTempoAtualDoAudio(audio.currentTime || 0);
-    };
-    audio.onended = () => {
-      if (pedido !== pedidoDeAudioAtual.current) return;
-      setAudioTocandoId(null);
-      setTempoAtualDoAudio(0);
-    };
-    audio.onerror = () => {
-      if (pedido !== pedidoDeAudioAtual.current) return;
-      setAudioTocandoId(null);
-      setTempoAtualDoAudio(0);
-      setDuracaoDoAudio(null);
-    };
-    setTempoAtualDoAudio(0);
-    setDuracaoDoAudio(null);
-    setAudioSelecionadoId(chave ?? url);
-    try {
-      await audio.play();
-      if (pedido === pedidoDeAudioAtual.current) {
-        setAudioTocandoId(chave ?? url);
-        analyticsArenaV2.registrar('ouviu_arroto');
-      }
-      else audio.pause();
-    } catch {
-      if (pedido === pedidoDeAudioAtual.current) setAudioTocandoId(null);
-    }
-  };
-
   const pedirEntrada = useCallback((mensagem: string) => {
     exibirToast(mensagem);
     (aoEntrar ?? (() => setViewAtual('auth')))();
@@ -1332,8 +1093,12 @@ export function InicioOpenDesign({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aoEntrar]);
   const itensVisiveis = useMemo(
-    () => [...itensFeed, ...itensSeguindo, ...topicosDaComunidade, ...entradasDaPauta, ...(postComentariosAtivo ? [postComentariosAtivo] : [])],
-    [itensFeed, itensSeguindo, topicosDaComunidade, entradasDaPauta, postComentariosAtivo],
+    () => [...itensFeed, ...itensSeguindo, ...topicosDaComunidade, ...entradasDaPauta,
+      ...(viewAtual === 'perfil' && abaPerfil === 'posts' ? [...publicacoesPessoaisDoPerfil, ...topicosDaComunidadeDoPerfil] : []),
+      ...(viewAtual === 'perfil' && abaPerfil === 'marcados' ? publicacoesMarcadasDoPerfil : []),
+      ...(postComentariosAtivo ? [postComentariosAtivo] : [])],
+    [itensFeed, itensSeguindo, topicosDaComunidade, entradasDaPauta, postComentariosAtivo,
+      viewAtual, abaPerfil, publicacoesPessoaisDoPerfil, topicosDaComunidadeDoPerfil, publicacoesMarcadasDoPerfil],
   );
   const { propsDeEngajamento } = useEngajamento({
     forum,
@@ -1813,7 +1578,7 @@ export function InicioOpenDesign({
       return false;
     }
 
-    const notaDoAudio = notaPrecalculada ?? (
+    const notaDoAudio = experienciaM05 ? undefined : notaPrecalculada ?? (
       dados.anexo?.tipo === 'audio' ? await calcularNotaLocalDoAudio(dados.anexo.arquivo) : undefined
     );
 
@@ -2382,6 +2147,7 @@ export function InicioOpenDesign({
 
   const perfilExibido = perfilAtivo ?? meuPerfil;
   const notasExibidas = resumoDasNotas.perfilId === perfilExibido?.id ? resumoDasNotas : null;
+  const temNotaPublicada = notasExibidas?.estado === 'pronto' && (notasExibidas.melhorNota !== null || notasExibidas.media !== null);
   const estadoDosArrotosExibidos = handleDosArrotos === perfilExibido?.handle ? estadoArrotosDoPerfil : 'carregando';
   const donoDoPerfil = Boolean(perfilExibido?.souEu);
   const postsDoPerfil = useMemo(
@@ -2396,7 +2162,7 @@ export function InicioOpenDesign({
     .map((parte) => parte[0]?.toUpperCase())
     .join('') ?? '';
 
-  const haDialogoAberto = modalCompositorAberto
+  const haDialogoAberto = Boolean(anexoDaArena) || modalCompositorAberto
     || modalGravarArrotoAberto
     || modalComentariosAberto
     || modalPerfilAberto
@@ -2429,9 +2195,29 @@ export function InicioOpenDesign({
     setModalGravarArrotoAberto(true);
   }, [aoEntrar, estaAutenticado, location.search, navigate]);
 
+  useEffect(() => {
+    if (!conversaDaHome) {
+      conversaAbertaPelaUrl.current = null;
+      return;
+    }
+    if (estadoFeed !== 'pronto' || conversaAbertaPelaUrl.current === conversaDaHome) return;
+    const post = itensFeed.find(({ id }) => id === conversaDaHome);
+    if (!post) return;
+    conversaAbertaPelaUrl.current = conversaDaHome;
+    void abrirComentarios(post, undefined, true);
+  // A abertura depende da chegada da publicação, não de cada render do handler.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversaDaHome, estadoFeed, itensFeed]);
+
+  useEffect(() => {
+    if (experienciaM05 && falhaNoAudio) exibirToast('Não deu para ouvir esse áudio. Tenta de novo.');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [experienciaM05, falhaNoAudio]);
+
   return (
-    <div className={`app${viewAtual === 'auth' ? ' app--auth' : ''}${viewAtual === 'comunidades' ? ' app--diretorio' : ''}${viewAtual === 'feed' ? ' app--mural' : ''}${viewAtual === 'perfil' ? ' app--perfil-arena' : ''}`}>
+    <div className={`app${experienciaM05 ? ' app--m05' : ''}${viewAtual === 'auth' ? ' app--auth' : ''}${viewAtual === 'comunidades' ? ' app--diretorio' : ''}${viewAtual === 'feed' ? ' app--mural' : ''}${viewAtual === 'perfil' ? ' app--perfil-arena' : ''}`}>
       {viewAtual !== 'auth' && <BarraLateral
+        experienciaM05={experienciaM05}
         viewAtual={viewAtual}
         estaAutenticado={estaAutenticado}
         aoMudarView={(v, s) => {
@@ -2530,9 +2316,8 @@ export function InicioOpenDesign({
               setPostComentariosAtivo(null);
               setComentarioInicialParaResponder(null);
               setListaComentarios([]);
-              if (topicoIdParam) {
-                navigate('/');
-              }
+              if (conversaDaHome) navigate('/feed', { replace: true });
+              else if (topicoIdParam) navigate('/');
             }}
             aoEnviarComentario={enviarComentario}
             {...propsDeEngajamento(postComentariosAtivo)} {...propsDeModeracao(postComentariosAtivo)} {...propsDeDesafio(postComentariosAtivo)}
@@ -2547,7 +2332,7 @@ export function InicioOpenDesign({
             {viewAtual === 'feed' && (
           <section aria-label="Feed principal">
             {slotArena}
-            {!slotArena && (
+            {!experienciaM05 && !slotArena && (
               <section className="arena-v2 arena-v2--embutida" aria-label="Atalho de gravação">
                 <div className="arena-v2__palco">
                   <div className="arena-v2__cabecalho-modulo">
@@ -2576,13 +2361,11 @@ export function InicioOpenDesign({
               </section>
             )}
 
-            <div className="hub-mobile-ranking">
-              <TopArrotadoresDaHome variante="faixa-mobile" />
-            </div>
+            {!experienciaM05 && <div className="hub-mobile-ranking"><TopArrotadoresDaHome variante="faixa-mobile" /></div>}
 
             <div className="mural-cabecalho">
               <div className="mural-cabecalho__titulo-grupo">
-                <h1>Mural</h1>
+                <h1>{experienciaM05 ? 'Resenha' : 'Mural'}</h1>
               </div>
               <button
                 type="button"
@@ -2596,11 +2379,18 @@ export function InicioOpenDesign({
             <div className="mural-controles">
               <div className="feed-filters" role="group" aria-label="Filtrar publicações">
                 <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'resenha'} onClick={() => setFiltroDoFeed('resenha')}>Tudo</button>
-                <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'arrotos'} onClick={() => setFiltroDoFeed('arrotos')}>Arrotos</button>
+                <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'arrotos'} onClick={() => setFiltroDoFeed('arrotos')}>{experienciaM05 ? 'Áudios' : 'Arrotos'}</button>
+                {experienciaM05 && <>
+                  <button type="button" className="feed-filter" aria-pressed={filtroDoFeed === 'midia'} onClick={() => setFiltroDoFeed('midia')}>Mídia</button>
+                  <Link className="feed-filter" to="/seguindo">Seguindo</Link>
+                </>}
               </div>
             </div>
 
             <div className="feed">
+              {conversaDaHome && estadoFeed === 'pronto' && !itensFeed.some(({ id }) => id === conversaDaHome) && (
+                <p className="m05-conversa-ausente" role="status">A publicação não está nesta página da Resenha.</p>
+              )}
               {estadoFeed === 'carregando' && (
                 <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--aue-muted)' }}>
                   <p>Carregando conversas…</p>
@@ -2618,9 +2408,9 @@ export function InicioOpenDesign({
                 <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--aue-muted)' }}>
                   <p>{filtroDoFeed === 'arrotos'
                     ? temMaisFeed ? 'Buscando mais publicações com áudio…' : 'Nenhum arroto aqui ainda.'
-                    : filtroDoFeed === 'links'
-                      ? 'Nenhum link aqui ainda.'
-                      : 'Mural vazio. Manda o primeiro.'}
+                    : filtroDoFeed === 'midia'
+                      ? 'Nenhuma foto ou vídeo aqui ainda.'
+                      : experienciaM05 ? 'Resenha vazia. Manda o primeiro.' : 'Mural vazio. Manda o primeiro.'}
                   </p>
                 </div>
               )}
@@ -2628,6 +2418,7 @@ export function InicioOpenDesign({
                 return (
                   <div key={post.id}>
                     <CardDoPost
+                      compacto={experienciaM05}
                       post={post}
                       {...propsDeEngajamento(post)} {...propsDeModeracao(post)} {...propsDeDesafio(post)}
                       audioTocando={audioTocandoId === post.id}
@@ -2649,7 +2440,7 @@ export function InicioOpenDesign({
                       aoCarregarMais={() => void carregarMaisRespostasNaPrevia(post)}
                       aoResponder={(comentario) => void abrirComentarios(post, comentario)}
                     />
-                    {((indice + 1) % 3 === 0 || (itensDoFeedFiltrados.length < 3 && indice === itensDoFeedFiltrados.length - 1)) && (
+                    {experienciaM05 ? <AnuncioM05 area="resenha" aposItem={indice + 1} /> : ((indice + 1) % 3 === 0 || (itensDoFeedFiltrados.length < 3 && indice === itensDoFeedFiltrados.length - 1)) && (
                       <SlotPatrocinadoDoFeed indiceDoSlot={(indice + 1) % 3 === 0 ? Math.floor((indice + 1) / 3) - 1 : 0} />
                     )}
                   </div>
@@ -2688,7 +2479,7 @@ export function InicioOpenDesign({
             {estadoSeguindo === 'carregando' && <p className="od-profile__muted">Carregando seu feed…</p>}
             {estadoSeguindo === 'erro' && <section className="od-profile__state"><h2>Não deu para abrir seu feed agora.</h2><p>Tenta de novo quando a conexão voltar.</p><button className="tab" type="button" onClick={() => setViewAtual('feed')}>Voltar ao início</button></section>}
             {estadoSeguindo === 'pronto' && postsSeguindo.length === 0 && <section className="od-profile__state"><h2>Quem você segue ainda está quieto.</h2><p>Siga alguns perfis pelo Mural para ver os posts deles aqui.</p><button className="tab" type="button" onClick={() => { setViewAtual('feed'); navigate('/'); }}>Ir para o Mural</button></section>}
-            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post, indice) => <div key={post.id}><CardDoPost post={post} {...propsDeEngajamento(post)} {...propsDeModeracao(post)} {...propsDeDesafio(post)} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} /><PreviaDaConversa post={post} comentarios={previasDasConversas.get(post.id) ?? []} carregando={previasEmCarregamento.has(post.id)} expandida={conversasExpandidas.has(post.id)} carregandoMais={respostasEmExpansao.has(post.id)} temMais={conversasExpandidas.has(post.id) ? cursoresDasConversas.get(post.id) !== null : (previasDasConversas.get(post.id)?.length ?? 0) < post.respostasTotal} aoCarregarMais={() => void carregarMaisRespostasNaPrevia(post)} aoResponder={(comentario) => void abrirComentarios(post, comentario)} />{((indice + 1) % 3 === 0 || (postsSeguindo.length < 3 && indice === postsSeguindo.length - 1)) && <SlotPatrocinadoDoFeed indiceDoSlot={(indice + 1) % 3 === 0 ? Math.floor((indice + 1) / 3) - 1 : 0} />}</div>)}</div>}
+            {estadoSeguindo === 'pronto' && postsSeguindo.length > 0 && <div className="feed">{postsSeguindo.map((post, indice) => <div key={post.id}><CardDoPost compacto={experienciaM05} post={post} {...propsDeEngajamento(post)} {...propsDeModeracao(post)} {...propsDeDesafio(post)} audioTocando={audioTocandoId === post.id} tempoAtualDoAudio={audioSelecionadoId === post.id ? tempoAtualDoAudio : 0} duracaoDoAudio={audioSelecionadoId === post.id ? duracaoDoAudio : null} aoTocarAudio={(fonte) => void alternarAudio(fonte, post.id)} aoAbrirComentarios={() => void abrirComentarios(post)} {...propsDeComentariosDoPost(post)} /><PreviaDaConversa post={post} comentarios={previasDasConversas.get(post.id) ?? []} carregando={previasEmCarregamento.has(post.id)} expandida={conversasExpandidas.has(post.id)} carregandoMais={respostasEmExpansao.has(post.id)} temMais={conversasExpandidas.has(post.id) ? cursoresDasConversas.get(post.id) !== null : (previasDasConversas.get(post.id)?.length ?? 0) < post.respostasTotal} aoCarregarMais={() => void carregarMaisRespostasNaPrevia(post)} aoResponder={(comentario) => void abrirComentarios(post, comentario)} />{experienciaM05 ? <AnuncioM05 area="resenha" aposItem={indice + 1} /> : ((indice + 1) % 3 === 0 || (postsSeguindo.length < 3 && indice === postsSeguindo.length - 1)) && <SlotPatrocinadoDoFeed indiceDoSlot={(indice + 1) % 3 === 0 ? Math.floor((indice + 1) / 3) - 1 : 0} />}</div>)}</div>}
           </section>
         )}
 
@@ -3050,7 +2841,7 @@ export function InicioOpenDesign({
             {estadoPerfil === 'pronto' && perfilExibido && (
               <>
                 <article className="od-profile__hero od-profile__hero--plain od-profile__athlete">
-                  <div className="od-profile__athlete-label">FICHA <span>AUÊ!</span></div>
+                  {!experienciaM05 && <div className="od-profile__athlete-label">FICHA <span>AUÊ!</span></div>}
                   <input ref={inputDaCapa} className="od-profile__file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher nova capa do perfil" onChange={(e) => void abrirAjusteDeImagem(e.target.files?.[0], 'capa')} />
                   <div className="od-profile__body">
                     <div className="od-profile__topline">
@@ -3069,6 +2860,9 @@ export function InicioOpenDesign({
                         </div>
                         <div className="od-profile__name"><h1>{perfilExibido.apelido}</h1><p className="od-profile__handle">@{perfilExibido.handle}</p></div>
                       </div>
+                      {experienciaM05 && donoDoPerfil && FLAGS.arenaV2 && FLAGS.dueloV2 && (
+                        <Link className="od-profile__button od-profile__his" to="/disputas">Meus X1</Link>
+                      )}
                       {!donoDoPerfil && (
                         <div className="od-profile__actions">
                           <button type="button" className="join od-profile__button" onClick={() => void alternarSeguirPerfil()} disabled={alternandoSeguir}>
@@ -3088,7 +2882,7 @@ export function InicioOpenDesign({
                             }
                             aria-label={`Desafiar @${perfilExibido.handle}`}
                           >
-                            <span aria-hidden="true">⚔️</span> Puxar X1
+                            {experienciaM05 ? 'Desafiar' : <><span aria-hidden="true">⚔️</span> Puxar X1</>}
                           </button>
                         </div>
                       )}
@@ -3114,7 +2908,7 @@ export function InicioOpenDesign({
                       </div>
                     </div>
 
-                    <section className="od-profile__dashboard" aria-labelledby="perfilPlacar">
+                    {(!experienciaM05 || temNotaPublicada) && <section className="od-profile__dashboard" aria-labelledby="perfilPlacar">
                       <div className="od-profile__dashboard-head">
                         <div><h2 id="perfilPlacar">{donoDoPerfil ? 'Seu placar' : 'Placar'}</h2></div>
                         {donoDoPerfil && <Link className="join od-profile__button od-profile__arena" to="/arena">Ir pra Arena <span aria-hidden="true">↗</span></Link>}
@@ -3124,7 +2918,7 @@ export function InicioOpenDesign({
                           <h3 id="perfilMelhorNota">Melhor nota</h3>
                           {notasExibidas?.estado === 'pronto' && notasExibidas.melhorNota !== null
                             ? <p className="od-profile__best-score">{Math.round(notasExibidas.melhorNota)}<span> pts</span></p>
-                            : <p className="od-profile__best-empty">—</p>}
+                            : <p className="od-profile__best-empty">{experienciaM05 ? 'Sem nota' : '—'}</p>}
                           {(notasExibidas?.estado === 'erro' || !notasExibidas || notasExibidas.estado === 'carregando' || notasExibidas.melhorNota === null) && (
                             <p className="od-profile__best-caption">
                               {notasExibidas?.estado === 'erro'
@@ -3139,7 +2933,7 @@ export function InicioOpenDesign({
                           <h3>Média</h3>
                           {notasExibidas?.estado === 'pronto' && notasExibidas.media !== null
                             ? <p className="od-profile__best-score">{notasExibidas.media.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}<span> pts</span></p>
-                            : <p className="od-profile__best-empty">—</p>}
+                            : <p className="od-profile__best-empty">{experienciaM05 ? 'Sem nota' : '—'}</p>}
                           {(notasExibidas?.estado === 'erro' || !notasExibidas || notasExibidas.estado === 'carregando' || notasExibidas.media === null) && (
                             <p className="od-profile__best-caption">
                               {notasExibidas?.estado === 'erro'
@@ -3151,7 +2945,7 @@ export function InicioOpenDesign({
                           )}
                         </div>
                       </div>
-                    </section>
+                    </section>}
                     <div className="od-profile__connections">
                       <button type="button" aria-label={`Ver quem segue (${perfilExibido.totalSeguidores})`} onClick={() => void abrirConexoes('seguidores')}><b>{perfilExibido.totalSeguidores}</b> seguidores</button>
                       <button type="button" aria-label={`Ver quem é seguido (${perfilExibido.totalSeguindo})`} onClick={() => void abrirConexoes('seguindo')}><b>{perfilExibido.totalSeguindo}</b> seguindo</button>
@@ -3224,6 +3018,7 @@ export function InicioOpenDesign({
                       <div key={post.id}>
                         <CardDoPost
                           variante="perfil"
+                          compacto={experienciaM05}
                           post={post}
                           {...propsDeEngajamento(post)}
                           {...propsDeModeracao(post)}
@@ -3235,11 +3030,12 @@ export function InicioOpenDesign({
                           aoAbrirComentarios={() => void abrirComentarios(post)}
                           {...propsDeComentariosDoPost(post)}
                         />
-                        {((indice + 1) % 3 === 0 || (postsDoPerfil.length < 3 && indice === postsDoPerfil.length - 1)) && (
+                        {!experienciaM05 && ((indice + 1) % 3 === 0 || (postsDoPerfil.length < 3 && indice === postsDoPerfil.length - 1)) && (
                           <SlotPatrocinadoDoFeed indiceDoSlot={(indice + 1) % 3 === 0 ? Math.floor((indice + 1) / 3) - 1 : 0} />
                         )}
                       </div>
                     ))}
+                    {experienciaM05 && postsDoPerfil.length > 0 && <AnuncioM05 area="perfil" />}
                     {estadoTopicosDoPerfil === 'pronto' && estadoPublicacoesPessoais === 'pronto' && postsDoPerfil.length === 0 && (
                       <div className="od-profile__empty"><h3>Nenhum post ainda.</h3></div>
                     )}
@@ -3256,6 +3052,7 @@ export function InicioOpenDesign({
                       <CardDoPost
                         key={post.id}
                         variante="perfil"
+                          compacto={experienciaM05}
                         post={post}
                         {...propsDeEngajamento(post)}
                         {...propsDeModeracao(post)}
@@ -3532,6 +3329,7 @@ export function InicioOpenDesign({
         comunidades={comunidades}
         comunidadesEntradas={comunidadesEntradas}
         viewAtual={viewAtual}
+        anuncio={experienciaM05 ? <AnuncioM05 area={viewAtual === 'perfil' ? 'perfil' : 'resenha'} lateral /> : undefined}
         regrasDaComunidade={regrasDaComunidade}
         estaAutenticado={estaAutenticado}
         contaPerfil={meuPerfil}
@@ -3554,16 +3352,22 @@ export function InicioOpenDesign({
 
       {/* ==================== MODAIS ==================== */}
       <ModalCompositor
-        aberto={modalCompositorAberto}
+        key={anexoDaArena ? 'arena' : 'post'}
+        aberto={Boolean(anexoDaArena) || modalCompositorAberto}
+        anexoInicial={anexoDaArena ?? undefined}
         controleDeDialogo={controleDeDialogo}
-        destino={destinoDoCompositor}
+        destino={anexoDaArena ? 'pessoal' : destinoDoCompositor}
         comunidades={comunidades}
         comunidadePadraoSlug={destinoDoCompositor === 'comunidade' ? comunidadeSlug : undefined}
         autor={{ nome: meuPerfil?.apelido ?? 'Você', avatarUrl: meuPerfil?.avatarUrl }}
         desafioAlvo={desafioAlvo}
-        aoFechar={() => { setDesafioAlvo(null); setModalCompositorAberto(false); }}
+        aoFechar={() => {
+          setDesafioAlvo(null);
+          setModalCompositorAberto(false);
+          if (anexoDaArena) aoFecharAnexoDaArena?.();
+        }}
         criarGravacao={forum.criarGravacaoLivreDoForum}
-        aoPublicar={publicarPost}
+        aoPublicar={anexoDaArena ? (dados) => publicarPost(dados, 'pessoal') : publicarPost}
       />
 
       <ModalGravarArroto

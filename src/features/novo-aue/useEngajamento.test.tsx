@@ -31,10 +31,14 @@ const reacoes = (like: number, minhas: ReacoesDoTopico['minhas'] = []): ReacoesD
   minhas,
 });
 
-function montar(forum: Partial<PortaDeForum>, opcoes: { auth?: boolean; comunidade?: Partial<PortaDeComunidade> } = {}) {
+function montar(forum: Partial<PortaDeForum>, opcoes: {
+  auth?: boolean;
+  comunidade?: Partial<PortaDeComunidade>;
+  itens?: readonly ItemDoFeed[];
+} = {}) {
   const aoPedirEntrada = vi.fn();
   const exibirToast = vi.fn();
-  const itens = [topico, causoItem];
+  const itens = opcoes.itens ?? [topico, causoItem];
   const retorno = renderHook(() => useEngajamento({
     forum: forum as PortaDeForum,
     comunidadePort: (opcoes.comunidade ?? {}) as PortaDeComunidade,
@@ -54,6 +58,22 @@ describe('useEngajamento', () => {
     expect(result.current.propsDeEngajamento(topico).minhas).toEqual(['like']);
     expect(contar).toHaveBeenCalledTimes(1);
     expect(contar).toHaveBeenCalledWith([ID]);
+  });
+
+  it('consulta em lote as cinco publicações pessoais da prévia da Home', async () => {
+    const pessoais = Array.from({ length: 5 }, (_, indice) => {
+      const id = `11111111-1111-4111-8111-${String(indice + 1).padStart(12, '0')}`;
+      return {
+        ...topico,
+        id: `topico-${id}`,
+        origem: 'pessoal' as const,
+        comunidadeSlug: '',
+      };
+    });
+    const contar = vi.fn(async () => ({ ok: true as const, valor: {} }));
+    montar({ contarReacoesDosTopicos: contar, alternarReacaoDoTopico: vi.fn() }, { itens: pessoais });
+    await waitFor(() => expect(contar).toHaveBeenCalledTimes(1));
+    expect(contar).toHaveBeenCalledWith(pessoais.map((post) => post.id.replace('topico-', '')).sort());
   });
 
   it('enquanto a contagem do servidor não chega, não entrega número nenhum ao card', async () => {

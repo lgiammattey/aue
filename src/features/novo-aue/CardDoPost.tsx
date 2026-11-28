@@ -15,6 +15,8 @@ import './CardDoPost.css';
 interface Props {
   readonly post: ItemDoFeed;
   readonly variante?: 'perfil' | 'feed';
+  readonly compacto?: boolean;
+  readonly idioma?: 'pt' | 'en';
   /** Só é exibido quando a rota fornece persistência real. */
   readonly salvo?: boolean;
   readonly reacoes?: Partial<Omit<EngajamentoDoPost, 'minhas'>>;
@@ -44,27 +46,29 @@ interface Props {
   readonly aoAbrirComentarios?: () => void;
 }
 
-function formatarTempoRelativo(isoOuData: string): string {
+function formatarTempoRelativo(isoOuData: string, idioma: 'pt' | 'en'): string {
   try {
     const data = new Date(isoOuData);
     const segundos = Math.max(0, Math.floor((Date.now() - data.getTime()) / 1000));
-    if (segundos < 60) return 'agora';
+    if (segundos < 60) return idioma === 'en' ? 'now' : 'agora';
     const minutos = Math.floor(segundos / 60);
     if (minutos < 60) return `${minutos}m`;
     const horas = Math.floor(minutos / 60);
     if (horas < 24) return `${horas}h`;
     const dias = Math.floor(horas / 24);
-    if (dias === 1) return 'ontem';
+    if (dias === 1) return idioma === 'en' ? 'yesterday' : 'ontem';
     if (dias < 7) return `${dias}d`;
-    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(data);
+    return new Intl.DateTimeFormat(idioma === 'en' ? 'en' : 'pt-BR', { day: '2-digit', month: 'short' }).format(data);
   } catch {
-    return 'agora';
+    return idioma === 'en' ? 'now' : 'agora';
   }
 }
 
 export const CardDoPost = memo(function CardDoPost({
   post,
   variante = 'feed',
+  compacto = false,
+  idioma = 'pt',
   salvo,
   reacoes,
   minhas = [],
@@ -82,6 +86,14 @@ export const CardDoPost = memo(function CardDoPost({
   aoAbrirComentarios,
 }: Props) {
   const [copiado, setCopiado] = useState(false);
+
+  const emIngles = idioma === 'en';
+  const positivo = emIngles ? 'Like' : 'Curtir';
+  const negativo = emIngles ? 'Dislike' : 'Não curtir';
+  const notaDoAudio = emIngles ? 'Score' : 'Nota';
+  const salvar = salvo ? (emIngles ? 'Saved' : 'Salvo') : (emIngles ? 'Save' : 'Salvar');
+  const compartilhar = emIngles ? 'Share' : 'Compartilhar';
+  const comentariosDoPost = emIngles ? `${post.respostasTotal} comments` : `${post.respostasTotal} comentários`;
 
   const autorInicial = (post.autorNome || post.autorHandle || '?').charAt(0).toUpperCase();
   const ePessoal = post.origem === 'pessoal';
@@ -132,7 +144,7 @@ export const CardDoPost = memo(function CardDoPost({
 
   return (
     <article
-      className={`feed-post card-do-post${variante === 'perfil' ? ' card-do-post--perfil' : ''}${post.tipo === 'topico' && post.respostasTotal > 0 ? ' card-do-post--thread' : ''}${audioTocando ? ' card-do-post--tocando' : ''}`}
+      className={`feed-post card-do-post${compacto ? ' card-do-post--compacto' : ''}${variante === 'perfil' ? ' card-do-post--perfil' : ''}${post.tipo === 'topico' && post.respostasTotal > 0 ? ' card-do-post--thread' : ''}${audioTocando ? ' card-do-post--tocando' : ''}`}
       id={`post-${post.id}`}
     >
       <div className="post-avatar-col">
@@ -199,7 +211,7 @@ export const CardDoPost = memo(function CardDoPost({
               {post.autorHandle && <span className="post-meta-dot" aria-hidden="true">·</span>}
 
               <time dateTime={post.criadoEm} className="post-meta-time">
-                {formatarTempoRelativo(post.criadoEm)}
+                {formatarTempoRelativo(post.criadoEm, idioma)}
               </time>
             </div>
           </div>
@@ -221,18 +233,19 @@ export const CardDoPost = memo(function CardDoPost({
           <div className={`post-audio-wrapper audio-com-nota${temNota ? ' audio-com-nota--com-placar' : ''}`}>
             <div className="audio-com-nota__player">
               <PlayerDoArroto
+                idioma={idioma}
                 tocando={audioTocando}
                 tempoAtualSegundos={tempoAtualDoAudio}
-                duracaoSegundos={duracaoDoAudio}
+                duracaoSegundos={duracaoDoAudio ?? post.duracaoSegundos ?? (post.anexo?.duracaoMs ? post.anexo.duracaoMs / 1000 : null)}
                 aoAlternar={() =>
-                  aoTocarAudio?.(post.anexo?.tipo === 'audio' ? post.anexo.url : post.enderecoDoAudio)
+                  aoTocarAudio?.(post.anexo?.tipo === 'audio' ? post.enderecoDoAudio ?? post.anexo.url : post.enderecoDoAudio)
                 }
               />
             </div>
             {temNota && (
               <div className={`audio-com-nota__placar${notaOuro ? ' is-ouro' : ''}`}>
-                <span className="audio-com-nota__rotulo">NOTA</span>
-                <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${post.nota} de 100`}>
+                <span className="audio-com-nota__rotulo">{notaDoAudio.toUpperCase()}</span>
+                <span className="audio-com-nota__nota" role="img" aria-label={`${notaDoAudio}: ${post.nota} ${emIngles ? 'out of' : 'de'} 100`}>
                   {post.nota}
                 </span>
               </div>
@@ -242,8 +255,8 @@ export const CardDoPost = memo(function CardDoPost({
 
         {!temAudio && temNota && (
           <div className={`post-nota-isolada${notaOuro ? ' is-ouro' : ''}`}>
-            <span className="audio-com-nota__rotulo">NOTA</span>
-            <span className="audio-com-nota__nota" role="img" aria-label={`Nota: ${post.nota} de 100`}>
+            <span className="audio-com-nota__rotulo">{notaDoAudio.toUpperCase()}</span>
+            <span className="audio-com-nota__nota" role="img" aria-label={`${notaDoAudio}: ${post.nota} ${emIngles ? 'out of' : 'de'} 100`}>
               {post.nota}
             </span>
           </div>
@@ -274,7 +287,31 @@ export const CardDoPost = memo(function CardDoPost({
         )}
 
         <footer className="post-footer-ficha" aria-label="Interações da jogada">
-          {variante !== 'perfil' && (
+          {compacto && (aoCurtir || aoReagir || reacoes) && (
+            <div className="post-reactions-bar" role="group" aria-label={emIngles ? 'Post ratings' : 'Avaliações da publicação'}>
+              {([
+                { tipo: 'like', rotulo: positivo, acao: aoCurtir },
+                { tipo: 'dislike', rotulo: negativo, acao: post.tipo === 'topico' && aoReagir ? () => aoReagir('dislike') : undefined },
+              ] as const).filter(({ acao, tipo }) => acao || reacoes?.[tipo] !== undefined).map(({ tipo, rotulo, acao }) => (
+                <button
+                  key={tipo}
+                  type="button"
+                  className={`reaction-chip action-btn${minhas.includes(tipo) ? ' is-active' : ''}`}
+                  onClick={acao}
+                  disabled={!acao}
+                  aria-pressed={minhas.includes(tipo)}
+                  aria-label={rotulo}
+                  title={rotulo}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path transform={tipo === 'dislike' ? 'rotate(180 12 12)' : undefined} d="M7 21H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1h3m0 10h10.2a2 2 0 0 0 2-1.6l1.6-7A2 2 0 0 0 19 10h-5l.7-4.1A2.6 2.6 0 0 0 12 3l-5 8v10Z" />
+                  </svg>
+                  {reacoes?.[tipo] !== undefined && <span className="action-btn__count" aria-live="polite">{reacoes[tipo]}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          {!compacto && variante !== 'perfil' && (
             <div className="post-reactions-bar" role="group" aria-label="Reações competitivas">
               <button
                 type="button"
@@ -321,8 +358,8 @@ export const CardDoPost = memo(function CardDoPost({
               type="button"
               className={`action-btn action-btn--reply${threadAberta ? ' is-active' : ''}`}
               onClick={aoAbrirComentarios}
-              aria-label={`${post.respostasTotal} comentários`}
-              title={threadAberta ? 'Recolher respostas' : 'Ver respostas'}
+              aria-label={comentariosDoPost}
+              title={emIngles ? 'View replies' : (threadAberta ? 'Recolher respostas' : 'Ver respostas')}
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M20 4.5H4a2 2 0 00-2 2v9a2 2 0 002 2h9l5 3.5v-3.5h2a2 2 0 002-2v-9a2 2 0 00-2-2z" />
@@ -341,7 +378,7 @@ export const CardDoPost = memo(function CardDoPost({
                 onClick={aoAlternarSalvar}
                 disabled={!aoAlternarSalvar}
                 aria-pressed={Boolean(salvo)}
-                aria-label={salvo ? 'Salvo' : 'Salvar'}
+                aria-label={salvar}
                 title={aoAlternarSalvar ? (salvo ? 'Remover dos salvos' : 'Salvar') : 'Salvar não está disponível aqui'}
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill={salvo ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -355,13 +392,13 @@ export const CardDoPost = memo(function CardDoPost({
               type="button"
               className="action-btn action-btn--share"
               onClick={() => void aoCompartilhar()}
-              aria-label="Compartilhar"
-              title="Compartilhar o link"
+              aria-label={compartilhar}
+              title={compartilhar}
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 3v13M7 8l5-5 5 5M5 14v6h14v-6" />
               </svg>
-              {copiado && <span className="action-btn__feedback">Copiado!</span>}
+              {copiado && <span className="action-btn__feedback">{emIngles ? 'Copied!' : 'Copiado!'}</span>}
               <span className="sr-only">Compartilhar</span>
             </button>
 

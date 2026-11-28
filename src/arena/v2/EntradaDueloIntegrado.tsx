@@ -11,16 +11,22 @@ export function EntradaDueloIntegrado({
   modo,
   conteudoDoRepouso,
   rankingDoHero,
+  conteudoAposResultado,
   adversarioHandle,
+  telaInicial,
   modoEmbutido = false,
+  experienciaM05 = false,
   aoPublicarAudio,
 }: {
   modo: 'criar' | 'responder';
   conteudoDoRepouso?: ReactNode;
   rankingDoHero?: ReactNode;
+  conteudoAposResultado?: ReactNode;
   adversarioHandle?: string | null;
+  telaInicial?: 'arena' | 'meus';
   modoEmbutido?: boolean;
-  aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
+  experienciaM05?: boolean;
+  aoPublicarAudio?: (audio: Blob, nota: number | null, duracaoMs: number) => void;
 }) {
   const navigate = useNavigate();
   const { search } = useLocation();
@@ -35,12 +41,15 @@ export function EntradaDueloIntegrado({
       modo={modo}
       conteudoDoRepouso={conteudoDoRepouso}
       rankingDoHero={rankingDoHero}
+      conteudoAposResultado={conteudoAposResultado}
       adversarioHandle={adversario}
+      telaInicial={telaInicial}
       modoEmbutido={modoEmbutido}
+      experienciaM05={experienciaM05}
       aoPublicarAudio={aoPublicarAudio}
       {...portas}
       telemetria={analyticsArenaV2}
-      aoVoltar={modo === 'responder' ? () => navigate('/') : undefined}
+      aoVoltar={modo === 'responder' ? () => navigate('/') : telaInicial === 'meus' ? () => navigate('/arena') : undefined}
     />
   );
 }

@@ -506,3 +506,49 @@
     animation: none;
   }
 }
+
+.card-do-post--compacto .post-audio-wrapper.audio-com-nota {
+  width: min(100%, 286px);
+}
+
+.card-do-post--compacto .post-audio-wrapper.audio-com-nota:not(.audio-com-nota--com-placar) {
+  width: min(100%, 220px);
+}
+
+.card-do-post--compacto .audio-com-nota__placar {
+  min-width: 52px;
+  padding: 4px 8px;
+}
+
+.card-do-post--compacto .audio-com-nota__nota { font-size: 25px; }
+
+.card-do-post--compacto .post-footer-ficha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 10px;
+}
+
+.card-do-post--compacto .post-reactions-bar,
+.card-do-post--compacto .post-actions-bar {
+  gap: 0;
+  border: 0;
+  padding: 0;
+}
+
+.card-do-post--compacto .reaction-chip {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+}
+
+.card-do-post--compacto .reaction-chip.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.card-do-post--compacto .post-actions-bar .action-btn.action-btn--challenge {
+  min-height: 44px;
+  margin-inline-start: 0;
+}

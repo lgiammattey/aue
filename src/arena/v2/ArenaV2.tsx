@@ -34,11 +34,15 @@ interface Props {
   conteudoDoRepouso?: ReactNode;
   /** Ranking da Liga exibido dentro do próprio Hero quando em repouso. */
   rankingDoHero?: ReactNode;
+  /** Conteúdo opcional que só entra depois da pessoa revisar o resultado. */
+  conteudoAposResultado?: ReactNode;
   readonly adversarioHandle?: string | null;
   /** Quando true, renderiza módulo compacto expansível na Home sem duplicar `<main>` nem `<h1>`. */
   readonly modoEmbutido?: boolean;
+  /** Aplica a composição aprovada para a M05 sem alterar quem ainda consome a Arena anterior. */
+  readonly experienciaM05?: boolean;
   /** Permite publicar explicitamente o áudio gravado no Mural (somente sob ação do usuário). */
-  readonly aoPublicarAudio?: (audio: Blob, nota?: number | null) => void;
+  readonly aoPublicarAudio?: (audio: Blob, nota: number | null, duracaoMs: number) => void;
   /** O idioma segue a rota (`/en` fala inglês). Sem a prop, a Arena fala português. */
   readonly idioma?: Idioma;
 }
@@ -88,8 +92,10 @@ export function ArenaV2({
   aoAbrirMeusDesafios,
   conteudoDoRepouso,
   rankingDoHero,
+  conteudoAposResultado,
   adversarioHandle,
   modoEmbutido = false,
+  experienciaM05 = false,
   aoPublicarAudio,
   idioma = 'pt',
 }: Props) {
@@ -110,6 +116,7 @@ export function ArenaV2({
   const [decorrido, setDecorrido] = useState(0);
   const [nivel, setNivel] = useState(0);
   const [audio, setAudio] = useState<Blob | null>(null);
+  const [duracaoMsDaGravacao, setDuracaoMsDaGravacao] = useState(0);
   const player = useRef<HTMLAudioElement | null>(null);
   const [laudo, setLaudo] = useState<LaudoExperimental | null>(null);
   const [mensagem, setMensagem] = useState('');
@@ -259,6 +266,7 @@ export function ArenaV2({
           return;
         }
         setAudio(resultado.dados);
+        setDuracaoMsDaGravacao(resultado.duracaoMs);
         setLaudo(null);
         mudar('revisao');
         telemetria?.registrar('concluiu_gravacao');
@@ -275,6 +283,7 @@ export function ArenaV2({
       }
       const audioDaTentativa = wavDaEmissao(resultado.emissao, resultado.sampleRate);
       setAudio(audioDaTentativa);
+      setDuracaoMsDaGravacao(Math.round((resultado.emissao.length / resultado.sampleRate) * 1000));
       const laudoCalculado = calcularLaudoExperimental(resultado.ambiente, resultado.emissao, resultado.sampleRate);
       setLaudo(laudoCalculado);
       mudar('revisao');
@@ -339,6 +348,7 @@ export function ArenaV2({
   const descartar = () => {
     cancelar(false);
     setAudio(null);
+    setDuracaoMsDaGravacao(0);
     setLaudo(null);
     setMensagem('');
     setMensagemCompartilhamento(''); setCompartilhando(false); compartilhamentoAtivo.current = null;
@@ -348,7 +358,7 @@ export function ArenaV2({
     mudar('pronto');
   };
 
-  const Titulo = modoEmbutido ? 'h2' : 'h1';
+  const Titulo = modoEmbutido || experienciaM05 ? 'h2' : 'h1';
   const tituloTexto = estado === 'revisao'
     ? t.titulo.revisao
     : estado === 'gravando'
@@ -509,7 +519,10 @@ export function ArenaV2({
               <button
                 type="button"
                 className="arena-v2__secundario arena-v2__secundario--destaque"
-                onClick={() => aoPublicarAudio(audio, laudo?.estado === 'medido' ? laudo.nota : null)}
+                onClick={() => {
+                  if (player.current && !player.current.paused) player.current.pause();
+                  aoPublicarAudio(audio, laudo?.estado === 'medido' ? laudo.nota : null, duracaoMsDaGravacao);
+                }}
               >
                 {t.publicarNoMural}
               </button>
@@ -525,7 +538,8 @@ export function ArenaV2({
             </button>
           </div>
           {mensagemCompartilhamento && <p className="arena-v2__status-texto" role="status">{mensagemCompartilhamento}</p>}
-          {!modoEmbutido && <AdsterraBanner300x250 />}
+          {!modoEmbutido && !experienciaM05 && <AdsterraBanner300x250 />}
+          {conteudoAposResultado}
         </div>
       )}
 
@@ -566,7 +580,7 @@ export function ArenaV2({
   }
 
   return (
-    <main className={`arena-v2 arena-v2--${estado}`}>
+    <main className={`arena-v2 arena-v2--${estado}${experienciaM05 ? ' arena-v2--m05' : ''}`}>
       <header className="arena-v2__cabecalho">
         <div className="arena-v2__identidade">
           <a href="/" className="arena-v2__marca">AUÊ<span>!</span></a>
@@ -580,6 +594,12 @@ export function ArenaV2({
         </nav>
       </header>
       <div className="arena-v2__conteudo">
+        {experienciaM05 && (
+          <header className="arena-v2__cabecalho-m05">
+            <p>O CLUBE DO ARROTO</p>
+            <h1>Arrotar</h1>
+          </header>
+        )}
         <section className="arena-v2__desafio" aria-label={t.cabecalho.seuDesafioAria}>
           <span>{t.cabecalho.modoArena}</span>
           <strong>{adversarioLimpo ? t.cabecalho.contra(adversarioLimpo.toUpperCase()) : t.cabecalho.puxaOAr}</strong>

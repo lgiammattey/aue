@@ -1,0 +1,98 @@
+/* Avaliação de publicações. Requer markup .publication-audio e .post-actions. */
+.publication-audio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 480px);
+  margin: 14px 0 4px;
+}
+
+.publication-audio .m05-player,
+.publication-audio audio {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.publication-score {
+  display: inline-flex;
+  align-items: baseline;
+  min-height: 36px;
+  padding: 0 10px;
+  color: var(--copper2, #ff7840);
+  border: 1px solid color-mix(in srgb, var(--copper, #ff5500) 45%, transparent);
+  font: 24px/1 var(--display, Impact, sans-serif);
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.publication-score small {
+  margin-left: 3px;
+  color: var(--muted);
+  font: 800 9px ui-monospace, monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 10px;
+}
+
+.post-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.post-actions button:hover { color: var(--ink); background: rgb(255 255 255 / 4%); }
+.post-actions button[aria-pressed='true'] { color: var(--copper, #ff5500); }
+.post-actions button[aria-pressed='false'] { color: var(--muted); }
+.post-actions button:focus-visible { outline: 3px solid var(--copper2, #ff7840); outline-offset: -3px; }
+
+.post-actions svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.post-actions [data-count] { min-width: 1ch; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 420px) {
+  .publication-audio { grid-template-columns: minmax(0, 1fr); }
+  .publication-score { justify-self: start; }
+  .post-actions { justify-content: space-between; }
+  .post-actions button { padding: 0 7px; }
+}
+
+.publication-audio {
+  width: fit-content;
+  max-width: 100%;
+  grid-template-columns: minmax(0, 300px) auto;
+}
+.publication-audio .m05-player {
+  width: min(300px, 100%);
+}
+.publication-score {
+  align-items: center;
+}
+@media (max-width: 420px) {
+  .publication-audio { width: 100%; grid-template-columns: minmax(0, 1fr) auto; }
+  .publication-audio .m05-player { min-width: 0; }
+}

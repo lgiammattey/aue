@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="refinamento.css" />
     <link rel="stylesheet" href="publicidade-demo.css" />
     <link rel="stylesheet" href="home-resenha.css" />
+    <link rel="stylesheet" href="avaliacoes.css" />
   </head>
   <body data-surface="public">
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -242,9 +243,9 @@
                   <span class="post-tag">Da gravação</span>
                 </header>
                 <p class="post-lead">Treinei a semana toda pra isso. Quem puxa a revanche?</p>
-                <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
+                <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa" data-publication-score="83,4"></audio>
                 <footer>
-                  <button data-action="react" aria-pressed="false">Apoiar <span aria-label="Apoios de exemplo">12</span></button>
+                  <button data-action="react" aria-pressed="false">Avaliar <span>12</span></button>
                   <button data-action="comment">Abrir conversa <span data-mural-comment-count>2</span></button>
                   <button data-view="perfil">Ver ficha <span aria-hidden="true">↗</span></button>
                 </footer>
@@ -307,7 +308,7 @@
           <section id="perfil-publicacoes">
             <div class="section-line"><h2>Publicações</h2><button class="text-btn" data-view="mural">Abrir Resenha</button></div>
             <p>83,4 no teste de exemplo. Quem encara?</p>
-            <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
+            <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa" data-publication-score="83,4"></audio>
           </section>
           <section id="perfil-historico"><div class="section-line"><h2>Histórico de X1</h2><button class="text-btn" data-action="history">Meus X1</button></div><p>Seu histórico é privado.</p><button class="outline" data-action="responded">Ver comparação de exemplo</button></section>
           <aside>
@@ -391,6 +392,7 @@
     <script src="app.js"></script>
     <script src="home-resenha.js"></script>
     <script src="players.js"></script>
+    <script src="avaliacoes.js"></script>
     <script src="publicidade-demo.js"></script>
   </body>
 </html>

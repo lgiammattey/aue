@@ -13,3 +13,9 @@ Camillo encontrou paginação existente que reúne publicações pessoais e tóp
 A primeira opção a avaliar é repetir a consulta existente em intervalo de baixo custo e sinalizar diferenças por identificador, sem trocar o feed em uso. Realtime exigiria verificar publicação de eventos e permissões, e tratar evento apenas como sinal para consultar de novo pela mesma regra de elegibilidade. O código inspecionado não comprovou uma inscrição Realtime de feed. A política de frequência, custo e comportamento em desconexão precisa ser medida no ambiente autorizado.
 
 Nenhuma fonte remota, configuração Realtime ou política aplicada foi verificada nesta rodada. Posts reais, serviço de áudio, aparelho físico e autenticação continuam fora da prova do protótipo.
+
+## Player e avaliações
+
+O player da publicação usa a mesma montagem no Início, na Resenha e no Perfil. A onda tem largura limitada, e a nota aparece apenas no exemplo que a possui. Os polegares trocam ou removem uma avaliação na sessão demonstrativa. Comentário, compartilhamento e salvamento estão representados na mesma barra. A avaliação da publicação não define vencedor ou consequência competitiva.
+
+Na base existente, as reações de tópico já oferecem like e dislike mutuamente exclusivos por sessão, com troca e remoção. O feed de causos legados usa outro contrato e não oferece dislike. Salvos e compartilhamento seguem caminhos próprios. A convergência dos dois tipos de publicação exige desenho e validação antes de conectar este protótipo ao produto. A leitura foi feita no código e nas migrations locais.

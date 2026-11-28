@@ -77,13 +77,16 @@
     if (en) post.querySelector('.post-tag').textContent = 'Burp';
     const audio = post.querySelector('audio');
     audio.src = src;
+    if (name !== 'Rafa Ronco') audio.removeAttribute('data-publication-score');
     audio.preload = 'none';
     audio.setAttribute('aria-label', (en ? 'Synthetic audio by ' : 'Áudio sintético de ') + name);
     audio.removeAttribute('data-aue-player-pronto');
     audio.classList.remove('m05-player__nativo');
     post.querySelectorAll('.m05-player').forEach(player => player.remove());
+    const previousWrapper = audio.closest('.publication-audio');
+    if (previousWrapper) previousWrapper.replaceWith(audio);
     const footer = post.querySelector('footer');
-    footer.innerHTML = '<button data-action="react" aria-pressed="false">Apoiar <span></span></button><button data-action="comment">Comentários <span></span></button><button data-action="home-profile">Ver perfil</button>';
+    footer.innerHTML = '<button data-action="react" aria-pressed="false">Avaliar <span></span></button><button data-action="comment">Comentários <span></span></button><button data-action="home-profile">Ver perfil</button>';
     if (en) {
       footer.children[0].firstChild.textContent = 'Like ';
       footer.children[1].firstChild.textContent = 'Comments ';
@@ -100,6 +103,7 @@
     list.replaceChildren(...visible.map(card));
     empty.hidden = visible.length > 0;
     if (window.iniciarPlayersAue) window.iniciarPlayersAue();
+    if (window.montarAvaliacoesAue) window.montarAvaliacoesAue();
   }
 
   root.addEventListener('click', event => {

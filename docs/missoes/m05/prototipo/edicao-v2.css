@@ -84,11 +84,70 @@ body[data-surface="club"] .language-toggle {
 .public-actions .cta {
   gap: 14px;
 }
-.rivalry-art {
+.barbecue-panel {
+  container-type: inline-size;
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  border-bottom: 2px solid var(--copper);
+}
+.barbecue-art {
   display: block;
   width: 100%;
   height: auto;
-  border-bottom: 2px solid var(--copper);
+}
+.barbecue-dialogue {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.comic-bubble {
+  position: absolute;
+  left: var(--bubble-x);
+  top: var(--bubble-y);
+  transform: translateX(-50%);
+  padding: 1.5cqw 2.4cqw;
+  border: 2px solid #151412;
+  border-radius: 52% 46% 49% 44%;
+  background: var(--bubble-color, #f2efe9);
+  color: #161310;
+  box-shadow: .35cqw .5cqw #151412;
+  font: 400 clamp(13px, 3.9cqw, 29px)/1.1 var(--display);
+  white-space: nowrap;
+}
+.comic-bubble::after {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: var(--tail-x, 42%);
+  width: 3.7cqw;
+  height: 4.1cqw;
+  background: var(--bubble-color, #f2efe9);
+  clip-path: polygon(0 0, 100% 0, var(--tail-tip, 55%) 100%);
+  content: "";
+}
+.comic-burp {
+  --bubble-x: 20%;
+  --bubble-y: 12%;
+  --bubble-color: #ffb373;
+  --tail-tip: 18%;
+}
+.comic-friend {
+  --bubble-x: 46%;
+  --bubble-y: 24%;
+}
+.comic-reply {
+  --bubble-x: 73%;
+  --bubble-y: 16%;
+  --tail-x: 25%;
+  --tail-tip: 32%;
+}
+.comic-speaker {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .public-guide {
   display: grid;
@@ -592,4 +651,13 @@ dialog {
 .x1-states [aria-pressed="true"] {
   color: var(--copper2);
   border-bottom-color: var(--copper);
+}
+
+.toast:empty {
+  visibility: hidden;
+}
+@media (max-width: 680px) {
+  .public-actions .outline {
+    padding-inline: 12px;
+  }
 }

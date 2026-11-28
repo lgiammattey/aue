@@ -26,18 +26,19 @@ DO $$ BEGIN
 END $$;
 SELECT set_config('storage.operation','storage.object.upload',true);
 SELECT public.aue_v2_confirmar_gravacao(((SELECT valor FROM dados_teste WHERE chave='a')::jsonb->>'id')::uuid,1200,'experimental-2');
-INSERT INTO dados_teste VALUES ('d', public.aue_v2_criar_duelo(((SELECT valor FROM dados_teste WHERE chave='a')::jsonb->>'id')::uuid)::text);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_teste WHERE chave='d'); BEGIN
+INSERT INTO dados_teste VALUES ('d', public.aue_v2_criar_duelo(((SELECT valor FROM dados_teste WHERE chave='a')::jsonb->>'id')::uuid, repeat('a', 64))::text);
+DO $$ DECLARE t text := repeat('a', 64); BEGIN
   IF length(t) <> 64 THEN RAISE EXCEPTION 'Token inválido'; END IF;
   BEGIN
-    PERFORM public.aue_v2_criar_duelo(((SELECT valor FROM dados_teste WHERE chave='a')::jsonb->>'id')::uuid);
-    RAISE EXCEPTION 'Gravação criou segundo duelo';
-  EXCEPTION WHEN unique_violation THEN NULL; END;
+    IF public.aue_v2_criar_duelo(((SELECT valor FROM dados_teste WHERE chave='a')::jsonb->>'id')::uuid, t)->>'estado' <> 'aguardando_resposta' THEN
+      RAISE EXCEPTION 'Retry de criação não preservou convite';
+    END IF;
+  END;
   IF public.aue_v2_responder_duelo(t, ((SELECT valor FROM dados_teste WHERE chave='a')::jsonb->>'id')::uuid)->>'estado' <> 'criador' THEN RAISE EXCEPTION 'Criador ocupou vaga'; END IF;
 END $$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
 SELECT set_config('storage.operation','storage.object.get_authenticated',true);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_teste WHERE chave='d'); BEGIN
+DO $$ DECLARE t text := repeat('a', 64); BEGIN
   IF public.aue_v2_abrir_duelo(t) <> '{"estado":"aguardando_resposta","categoria":"duracao"}'::jsonb THEN RAISE EXCEPTION 'Prévia revelou dados'; END IF;
   IF public.aue_v2_revelar_duelo(t)->>'estado' <> 'indisponivel' THEN RAISE EXCEPTION 'Revelação prematura'; END IF;
   PERFORM set_config('storage.operation','storage.object.upload',true);
@@ -53,7 +54,7 @@ INSERT INTO dados_teste VALUES ('b', public.aue_v2_preparar_gravacao()::text);
 INSERT INTO storage.objects(bucket_id,name) SELECT 'duelos_v2', valor::jsonb->>'caminho' FROM dados_teste WHERE chave='b';
 SELECT public.aue_v2_confirmar_gravacao(((SELECT valor FROM dados_teste WHERE chave='b')::jsonb->>'id')::uuid,900,'experimental-2');
 SELECT set_config('storage.operation','storage.object.get_authenticated',true);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_teste WHERE chave='d'); b uuid := ((SELECT valor FROM dados_teste WHERE chave='b')::jsonb->>'id')::uuid; v jsonb; BEGIN
+DO $$ DECLARE t text := repeat('a', 64); b uuid := ((SELECT valor FROM dados_teste WHERE chave='b')::jsonb->>'id')::uuid; v jsonb; BEGIN
   IF public.aue_v2_responder_duelo(t,b)->>'estado' <> 'respondido' THEN RAISE EXCEPTION 'Resposta recusada'; END IF;
   IF public.aue_v2_responder_duelo(t,b)->>'estado' <> 'respondido' THEN RAISE EXCEPTION 'Retry não é idempotente'; END IF;
   v := public.aue_v2_revelar_duelo(t);
@@ -61,7 +62,7 @@ DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_teste WHERE ch
   IF EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id='duelos_v2' AND name=(SELECT valor::jsonb->>'caminho' FROM dados_teste WHERE chave='a')) THEN RAISE EXCEPTION 'GET direto indevido após resposta'; END IF;
 END $$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_teste WHERE chave='d'); BEGIN
+DO $$ DECLARE t text := repeat('a', 64); BEGIN
   IF public.aue_v2_revelar_duelo(t)->>'estado' <> 'indisponivel' THEN RAISE EXCEPTION 'Terceiro recebeu resultado'; END IF;
   IF EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id='duelos_v2') THEN RAISE EXCEPTION 'Terceiro leu áudio'; END IF;
   IF public.aue_v2_responder_duelo(t,gen_random_uuid())->>'estado' <> 'ocupado' THEN RAISE EXCEPTION 'Duelo fechado aceitou terceiro'; END IF;

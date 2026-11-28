@@ -10,8 +10,8 @@ SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001'
 INSERT INTO dados_privacidade VALUES ('a', public.aue_v2_preparar_gravacao()::text);
 INSERT INTO storage.objects(bucket_id,name) SELECT 'duelos_v2', valor::jsonb->>'caminho' FROM dados_privacidade WHERE chave='a';
 SELECT public.aue_v2_confirmar_gravacao(((SELECT valor FROM dados_privacidade WHERE chave='a')::jsonb->>'id')::uuid,1200,'experimental-2');
-INSERT INTO dados_privacidade VALUES ('d',public.aue_v2_criar_duelo(((SELECT valor FROM dados_privacidade WHERE chave='a')::jsonb->>'id')::uuid)::text);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_privacidade WHERE chave='d'); BEGIN
+INSERT INTO dados_privacidade VALUES ('d',public.aue_v2_criar_duelo(((SELECT valor FROM dados_privacidade WHERE chave='a')::jsonb->>'id')::uuid, repeat('a', 64))::text);
+DO $$ DECLARE t text := repeat('a', 64); BEGIN
   IF public.aue_v2_denunciar_audio(t,'criador','ofensivo')->>'estado' <> 'indisponivel' THEN RAISE EXCEPTION 'Denúncia antes da resposta'; END IF;
   IF aue_privado.pode_remover_audio_v2((SELECT valor::jsonb->>'caminho' FROM dados_privacidade WHERE chave='a')) THEN RAISE EXCEPTION 'Remoção sem pedido'; END IF;
 END $$;
@@ -26,7 +26,7 @@ INSERT INTO dados_privacidade VALUES ('b', public.aue_v2_preparar_gravacao()::te
 INSERT INTO storage.objects(bucket_id,name) SELECT 'duelos_v2', valor::jsonb->>'caminho' FROM dados_privacidade WHERE chave='b';
 SELECT public.aue_v2_confirmar_gravacao(((SELECT valor FROM dados_privacidade WHERE chave='b')::jsonb->>'id')::uuid,900,'experimental-2');
 SELECT set_config('storage.operation','storage.object.get_authenticated',true);
-SELECT public.aue_v2_responder_duelo((SELECT valor::jsonb->>'token' FROM dados_privacidade WHERE chave='d'), ((SELECT valor FROM dados_privacidade WHERE chave='b')::jsonb->>'id')::uuid);
+SELECT public.aue_v2_responder_duelo(repeat('a', 64), ((SELECT valor FROM dados_privacidade WHERE chave='b')::jsonb->>'id')::uuid);
 SELECT set_config('storage.operation','storage.object.sign',true);
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id='duelos_v2') THEN RAISE EXCEPTION 'URL assinada ainda pode ser gerada'; END IF;
@@ -36,7 +36,7 @@ DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id='duelos_v2') THEN RAISE EXCEPTION 'URLs assinadas ainda podem ser geradas'; END IF;
 END $$;
 SELECT set_config('storage.operation','storage.object.get_authenticated',true);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_privacidade WHERE chave='d'); BEGIN
+DO $$ DECLARE t text := repeat('a', 64); BEGIN
   IF public.aue_v2_denunciar_audio(t,'desafiante','ofensivo')->>'estado' <> 'indisponivel' THEN RAISE EXCEPTION 'Pode denunciar áudio próprio'; END IF;
   IF public.aue_v2_denunciar_audio(t,'criador','ofensivo')->>'estado' <> 'registrada' THEN RAISE EXCEPTION 'Falhou denúncia válida'; END IF;
   IF public.aue_v2_denunciar_audio(t,'criador','ofensivo')->>'estado' <> 'registrada' THEN RAISE EXCEPTION 'Retry denúncia falhou'; END IF;
@@ -44,7 +44,7 @@ DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_privacidade WH
   IF EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id='duelos_v2' AND name=(SELECT valor::jsonb->>'caminho' FROM dados_privacidade WHERE chave='a')) THEN RAISE EXCEPTION 'Áudio denunciado legível'; END IF;
 END $$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_privacidade WHERE chave='d'); BEGIN
+DO $$ DECLARE t text := repeat('a', 64); BEGIN
   IF public.aue_v2_denunciar_audio(t,'criador','ofensivo')->>'estado' <> 'indisponivel' THEN RAISE EXCEPTION 'Terceiro denunciou'; END IF;
 END $$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000004',true);
@@ -56,7 +56,7 @@ DO $$ DECLARE d uuid := ((SELECT valor FROM dados_privacidade WHERE chave='denun
   IF public.aue_v2_moderar_denuncia(d,'restaurada')->>'estado' <> 'restaurada' THEN RAISE EXCEPTION 'Moderação falhou'; END IF;
 END $$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
-DO $$ DECLARE t text := (SELECT valor::jsonb->>'token' FROM dados_privacidade WHERE chave='d'); BEGIN
+DO $$ DECLARE t text := repeat('a', 64); BEGIN
   IF public.aue_v2_revelar_duelo(t)->>'estado' <> 'revelado' THEN RAISE EXCEPTION 'Não restaurou'; END IF;
   IF public.aue_v2_denunciar_audio(t,'criador','ofensivo')->>'estado' <> 'ja_analisada' THEN RAISE EXCEPTION 'Retry após moderação falhou'; END IF;
   IF public.aue_v2_revelar_duelo(t)->>'estado' <> 'revelado' THEN RAISE EXCEPTION 'Retry reabriu denúncia encerrada'; END IF;
@@ -69,7 +69,7 @@ DO $$ DECLARE a uuid := ((SELECT valor FROM dados_privacidade WHERE chave='a')::
   IF public.aue_v2_confirmar_exclusao(a)->>'estado' <> 'remocao_pendente' THEN RAISE EXCEPTION 'Declarou excluído antes da API'; END IF;
   IF jsonb_array_length(public.aue_v2_exclusoes_pendentes()) <> 1 THEN RAISE EXCEPTION 'Perdeu exclusão pendente'; END IF;
   IF EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id='duelos_v2' AND name=v->>'caminho') THEN RAISE EXCEPTION 'Dono ainda baixa após exclusão'; END IF;
-  IF public.aue_v2_revelar_duelo((SELECT valor::jsonb->>'token' FROM dados_privacidade WHERE chave='d'))->>'estado' <> 'indisponivel' THEN RAISE EXCEPTION 'Resultado revelou áudio em remoção'; END IF;
+  IF public.aue_v2_revelar_duelo(repeat('a', 64))->>'estado' <> 'indisponivel' THEN RAISE EXCEPTION 'Resultado revelou áudio em remoção'; END IF;
 END $$;
 SELECT set_config('storage.operation','storage.object.delete_many',true);
 DO $$ DECLARE caminho text := (SELECT valor::jsonb->>'caminho' FROM dados_privacidade WHERE chave='a'); BEGIN

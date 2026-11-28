@@ -1,0 +1,48 @@
+.demo-ad-controls {
+  position: fixed;
+  z-index: 20;
+  right: 10px;
+  bottom: 10px;
+  padding: 7px 10px;
+  background: #1c1e23;
+  border: 1px solid #545862;
+  color: #f4f3ef;
+  font: 12px Archivo, sans-serif;
+}
+.demo-ad-controls label { display: flex; align-items: center; gap: 8px; }
+.demo-ad-controls select { min-height: 38px; max-width: 150px; color: #f4f3ef; background: #101115; border: 1px solid #666; font: inherit; }
+.demo-ad-controls [role="status"]:not(:empty) { display: block; padding-top: 5px; max-width: 210px; }
+.demo-ad {
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  text-align: center;
+  min-height: 110px;
+  margin-block: 24px;
+  padding: 16px;
+  background: #1b1c20;
+  border: 1px dashed #696b71;
+  color: #d9dadc;
+}
+.demo-ad small { color: #c1c3c8; font-size: 10px; letter-spacing: .08em; }
+.demo-ad strong { font-size: 15px; }
+.demo-ad span { font-size: 12px; color: #c1c3c8; }
+.ad-sidebar { min-height: 250px; max-width: 300px; }
+.ad-feed { min-height: 130px; }
+@media (max-width: 900px) {
+  .demo-ad-controls { bottom: calc(72px + env(safe-area-inset-bottom)); right: 6px; }
+  .ad-sidebar { display: none; }
+}
+body[data-surface="club"]:has(#arena.active) .demo-ad-controls,
+body[data-surface="club"]:has(#x1.active) .demo-ad-controls {
+  position: static;
+  width: fit-content;
+  margin: 12px auto 90px;
+}
+.demo-ad-controls,
+body[data-surface="club"]:has(#arena.active) .demo-ad-controls,
+body[data-surface="club"]:has(#x1.active) .demo-ad-controls {
+  position: static;
+  width: fit-content;
+  margin: 16px auto 90px;
+}

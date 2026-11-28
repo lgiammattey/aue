@@ -9,15 +9,19 @@
     <link rel="stylesheet" href="clube.css" />
     <link rel="stylesheet" href="players.css" />
     <link rel="stylesheet" href="edicao-v2.css" />
+    <link rel="stylesheet" href="refinamento.css" />
+    <link rel="stylesheet" href="publicidade-demo.css" />
   </head>
   <body data-surface="public">
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
     <header class="topbar">
       <button class="brand" data-view="home" aria-label="Ir para início">AUÊ<span>!</span></button>
       <nav aria-label="Navegação principal">
-        <button data-view="arena">Arena</button>
-        <button data-view="mural">Mural</button>
-        <button data-view="perfil">Perfil</button>
+        <button data-view="home" data-label-pt="Início" data-label-en="Home">Início</button>
+        <button data-view="mural" data-label-pt="Resenha" data-label-en="Hangout">Resenha</button>
+        <button data-view="arena" data-label-pt="Arrotar" data-label-en="Burp">Arrotar</button>
+        <button data-view="disputas" data-label-pt="Disputas" data-label-en="Battles">Disputas</button>
+        <button data-view="perfil" data-label-pt="Perfil" data-label-en="Profile">Perfil</button>
       </nav>
       <div class="header-tools">
         <div class="language-toggle" role="group" aria-label="Idioma da Home">
@@ -30,9 +34,10 @@
 
     <nav class="club-nav" aria-label="Navegação do clube">
       <div class="club-nav-label">Clube <span class="demo">V2 demo</span></div>
-      <button data-view="arena"><span aria-hidden="true">◉</span>Arena</button>
-      <button data-action="see-invite"><span aria-hidden="true">×</span>Desafios</button>
-      <button data-view="mural"><span aria-hidden="true">≋</span>Mural</button>
+      <button data-view="home"><span aria-hidden="true">⌂</span>Início</button>
+      <button data-view="mural"><span aria-hidden="true">≋</span>Resenha</button>
+      <button data-view="arena"><span aria-hidden="true">◉</span>Arrotar</button>
+      <button data-view="disputas"><span aria-hidden="true">×</span>Disputas</button>
       <button data-view="perfil"><span aria-hidden="true">◌</span>Perfil</button>
     </nav>
     <main id="conteudo" tabindex="-1">
@@ -41,9 +46,9 @@
           <div class="public-pitch">
             <span class="eyebrow">O clube do arroto <span class="demo">Protótipo V2</span></span>
             <h1 id="home-title">SOLTA O <em>ARROTO.</em><br />CHAMA NO X1.</h1>
-            <p>Grave na Arena, receba o laudo experimental e mande um desafio pra quem topa responder.</p>
+            <p>AUÊ. Aqui, arroto é talento.</p>
             <div class="public-actions">
-              <button class="cta" data-view="arena">Entrar na Arena <span aria-hidden="true">→</span></button>
+              <button class="cta" data-view="arena">Arrotar <span aria-hidden="true">→</span></button>
               <button class="outline" data-action="see-invite">Ver um X1</button>
             </div>
             <p class="fine">18+ · Dá pra jogar solo como visitante. Você escolhe se quer publicar.</p>
@@ -58,9 +63,9 @@
           </figure>
         </div>
         <div class="public-guide" aria-label="Como funciona">
-          <section><h2>Grave na Arena</h2><p>Ouça a tentativa e mande pro juiz quando estiver pronta.</p></section>
+          <section><h2>Arrote</h2><p>Ouça a tentativa e mande pro juiz quando estiver pronta.</p></section>
           <section><h2>Chame no X1</h2><p>Mande um convite privado. Cada um grava na sua hora.</p></section>
-          <section><h2>Caia na resenha</h2><p>Ouça as jogadas que a galera quis compartilhar.</p><button class="text-btn" data-view="mural">Abrir o Mural <span aria-hidden="true">→</span></button></section>
+          <section><h2>Caia na resenha</h2><p>Ouça as jogadas que a galera quis compartilhar.</p><button class="text-btn" data-view="mural">Abrir Resenha <span aria-hidden="true">→</span></button></section>
         </div>
       </section>
 
@@ -71,7 +76,7 @@
             <h1 id="home-title-en">LET IT <em>RIP.</em><br />CALL A FRIEND.</h1>
             <p>Record a burp, get an experimental score and send a friend a one-on-one challenge.</p>
             <div class="public-actions">
-              <button class="cta" data-view="arena">Enter the Arena <span aria-hidden="true">→</span></button>
+              <button class="cta" data-view="arena">Burp <span aria-hidden="true">→</span></button>
               <button class="outline" data-action="see-invite">See a challenge</button>
             </div>
             <p class="fine">18+ · Play solo as a guest. You choose what to post. The game demo is in Portuguese.</p>
@@ -86,20 +91,20 @@
           </figure>
         </div>
         <div class="public-guide" aria-label="How to play">
-          <section><h2>Record in the Arena</h2><p>Listen back and send your attempt to the judge.</p></section>
+          <section><h2>Burp</h2><p>Listen back and send your attempt to the judge.</p></section>
           <section><h2>Invite a friend</h2><p>Share a private link and take your turns whenever you're ready.</p></section>
-          <section><h2>Join the banter</h2><p>Listen to the clips other players chose to post.</p><button class="text-btn" data-view="mural">Visit the Wall <span aria-hidden="true">→</span></button></section>
+          <section><h2>Join the banter</h2><p>Listen to the clips other players chose to post.</p><button class="text-btn" data-view="mural">Visit the Hangout <span aria-hidden="true">→</span></button></section>
         </div>
       </section>
 
       <section class="screen" id="arena" aria-labelledby="arena-title" hidden>
         <div class="arena-head">
-          <div><span class="eyebrow">O clube do arroto <span class="demo">Demo</span></span><h1 id="arena-title">Arena</h1></div>
-          <button class="outline" data-action="history">Meus X1</button>
+          <div><span class="eyebrow">O clube do arroto <span class="demo">Demo</span></span><h1 id="arena-title">Arrotar</h1></div>
+          <button class="outline" data-view="disputas">Disputas</button>
         </div>
         <div class="arena-grid">
           <div class="arena-stage" data-state="ready">
-            <div class="stage-label"><span data-capture-mode>Tentativa solo</span> <span class="demo">Demo</span></div>
+            <div class="stage-label"><span data-capture-mode>Gravação solo</span> <span class="demo">Demo</span></div>
             <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div role="status">
               <h2 data-arena-title>Gravação solo</h2>
@@ -114,17 +119,7 @@
               <button data-action="network-error">Erro de rede</button>
             </div>
           </div>
-          <aside class="arena-rail">
-            <h2 class="lobby-title">Mesa de desafios <span class="demo">Exemplos</span></h2>
-            <button class="outline arena-challenge" data-action="new-challenge">Desafiar no X1</button>
-            <ul>
-              <li><span class="lobby-state">Recebido · exemplo</span><b>Convite do Rafa</b><button class="text-btn" data-action="see-invite">Abrir convite <span aria-hidden="true">→</span></button></li>
-              <li><span class="lobby-state">Em andamento · exemplo</span><b>Aguardando Bel</b><button class="text-btn" data-action="see-invite">Acompanhar</button></li>
-              <li><span class="lobby-state">Encerrado · exemplo</span><b>Rafa × Bel</b><button class="text-btn" data-action="responded">Ver comparação</button></li>
-              <li><b>Seus registros</b><span>Confira as notas de áudios que você publicou.</span><button class="text-btn" data-view="perfil">Ver perfil</button></li>
-            </ul>
-            <p class="rail-rule">Os convites são fictícios. O gravador usa um áudio sintético.</p>
-          </aside>
+
         </div>
       </section>
 
@@ -142,7 +137,7 @@
             <div class="result-actions">
               <button class="cta" data-action="create-link">Criar convite X1 <span aria-hidden="true">→</span></button>
               <button class="outline" data-view="arena">Tentar de novo</button>
-              <button class="text-btn" data-action="publish">Publicar no Mural</button>
+              <button class="text-btn" data-action="publish">Postar na Resenha</button>
             </div>
           </section>
         </div>
@@ -197,17 +192,26 @@
         </details>
       </section>
 
+      <section class="screen disputes-screen" id="disputas" aria-labelledby="disputas-title" hidden>
+        <header class="section-head"><div><span class="eyebrow">Disputas <span class="demo">Demo</span></span><h1 id="disputas-title">Disputas</h1></div><button class="cta" data-action="new-challenge">Mandar X1</button></header>
+        <div class="disputes-board">
+          <button class="dispute-row" data-action="see-invite"><span class="dispute-state">Recebido</span><b>Rafa Ronco <i>×</i> Você</b><small>Responda quando puder</small></button>
+          <button class="dispute-row" data-action="responded"><span class="dispute-state">Comparação</span><b>Rafa Ronco <i>×</i> Bel da Roda</b><small>Duas medições experimentais</small></button>
+          <button class="dispute-row" data-action="expired"><span class="dispute-state">Encerrado</span><b>Convite expirado</b><small>Sem vencedor oficial</small></button>
+        </div>
+      </section>
+
       <section class="screen mural-clube" id="mural" aria-labelledby="mural-title" hidden>
         <header class="section-head">
           <div>
-            <h1 id="mural-title">Mural</h1>
+            <h1 id="mural-title">Resenha</h1>
             <p>As jogadas que a galera publicou e a resenha que veio junto.</p>
           </div>
-          <button class="outline" data-action="compose-post">Escrever no Mural</button>
+          <button class="outline" data-action="compose-post">Escrever na Resenha</button>
         </header>
         <div class="mural-clube-grid">
           <div class="mural-main">
-            <div class="tabs mural-tabs" role="group" aria-label="Filtrar Mural">
+            <div class="tabs mural-tabs" role="group" aria-label="Filtrar Resenha">
               <button class="selected" data-action="all-posts" aria-pressed="true">Tudo</button>
               <button data-action="audio-posts" aria-pressed="false">Áudios</button>
               <button data-action="media-posts" aria-pressed="false">Mídia</button>
@@ -225,14 +229,14 @@
               </article>
               <article class="post mural-post" data-demo-post hidden>
                 <header><span class="avatar self" aria-hidden="true">V</span><div><b>Você</b><span>Agora · áudio de demonstração</span></div></header>
-                <p>Minha tentativa na Arena.</p>
+                <p>Minha tentativa ao arrotar.</p>
                 <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético da sua publicação"></audio>
               </article>
               <article class="post mural-post audio-post" data-rafa-post data-post-kind="audio" data-post-author="rafa">
                 <header>
                   <span class="avatar mural-avatar rafa" aria-hidden="true"></span>
                   <div><b>Rafa Ronco</b><span>@rafaronco · áudio · demo</span></div>
-                  <span class="post-tag">Da Arena</span>
+                  <span class="post-tag">Da gravação</span>
                 </header>
                 <p class="post-lead">Treinei a semana toda pra isso. Quem puxa a revanche?</p>
                 <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
@@ -262,10 +266,10 @@
               </article>
             </section>
           </div>
-          <aside class="mural-guide" aria-label="Sobre o Mural">
-            <h2>Da Arena pro Mural</h2>
-            <p>As publicações acima são exemplos do protótipo. Gravar na Arena e responder a um X1 são ações privadas.</p>
-            <button class="text-btn" data-view="arena">Ir pra Arena <span aria-hidden="true">→</span></button>
+          <aside class="mural-guide" aria-label="Sobre a Resenha">
+            <h2>Da gravação pra Resenha</h2>
+            <p>As publicações acima são exemplos do protótipo. Gravar ao arrotar e responder a um X1 são ações privadas.</p>
+            <button class="text-btn" data-view="arena">Arrotar <span aria-hidden="true">→</span></button>
             <section class="mural-proposals">
               <h2>Formatos em proposta</h2>
               <dl>
@@ -298,7 +302,7 @@
         <nav class="profile-tabs" aria-label="Seções do perfil"><a href="#perfil-publicacoes">Publicações</a><a href="#perfil-historico">Histórico</a><button class="outline" data-action="new-challenge">Desafiar</button></nav>
         <div class="profile-content">
           <section id="perfil-publicacoes">
-            <div class="section-line"><h2>Publicações</h2><button class="text-btn" data-view="mural">Abrir no Mural</button></div>
+            <div class="section-line"><h2>Publicações</h2><button class="text-btn" data-view="mural">Abrir Resenha</button></div>
             <p>83,4 no teste de exemplo. Quem encara?</p>
             <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
           </section>
@@ -315,7 +319,7 @@
         <span class="eyebrow">Estado vazio <span class="demo">Demo</span></span>
         <h1 id="empty-title">NENHUM X1 POR AQUI.</h1>
         <p data-empty-copy>Os seus convites e respostas aparecem aqui.</p>
-        <button class="cta" data-action="back-empty">Voltar pra Arena</button>
+        <button class="cta" data-action="back-empty">Voltar a arrotar</button>
       </section>
 
       <section class="screen status-screen" id="error" aria-labelledby="error-title" hidden>
@@ -327,9 +331,10 @@
     </main>
 
     <nav class="mobile-nav" aria-label="Navegação do jogo">
-      <button data-action="see-invite"><b aria-hidden="true">×</b><span>Desafios</span></button>
-      <button data-view="arena"><b aria-hidden="true">◉</b><span>Arena</span></button>
-      <button data-view="mural"><b aria-hidden="true">≋</b><span>Mural</span></button>
+      <button data-view="home"><b aria-hidden="true">⌂</b><span>Início</span></button>
+      <button data-view="mural"><b aria-hidden="true">≋</b><span>Resenha</span></button>
+      <button class="nav-arrotar" data-view="arena"><b aria-hidden="true">◉</b><span>Arrotar</span></button>
+      <button data-view="disputas"><b aria-hidden="true">×</b><span>Disputas</span></button>
       <button data-view="perfil"><b aria-hidden="true">◌</b><span>Perfil</span></button>
     </nav>
 
@@ -343,10 +348,10 @@
     </dialog>
 
     <dialog id="publish-dialog" aria-labelledby="publish-title">
-      <h2 id="publish-title">Publicar no Mural</h2>
+      <h2 id="publish-title">Postar na Resenha</h2>
       <p>Seu áudio apareceria numa publicação pública. Ouça a amostra antes de decidir.</p>
       <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Prévia sintética para publicação"></audio>
-      <label class="consent-check"><input type="checkbox" /> Autorizo publicar este áudio de demonstração no Mural.</label>
+      <label class="consent-check"><input type="checkbox" /> Autorizo publicar este áudio de demonstração na Resenha.</label>
       <div class="dialog-actions">
         <button class="outline" data-action="close-dialog">Cancelar</button>
         <button class="cta" data-action="confirm-publish" disabled>Publicar demonstração</button>
@@ -368,7 +373,7 @@
     </dialog>
 
     <dialog id="mural-composer" aria-labelledby="mural-composer-title">
-      <h2 id="mural-composer-title">Escrever no Mural</h2>
+      <h2 id="mural-composer-title">Escrever na Resenha</h2>
       <p>O post aparece só na sessão desta demonstração.</p>
       <form data-mural-post-form>
         <label class="mural-field">Sua resenha<textarea rows="4" required maxlength="280"></textarea></label>
@@ -382,5 +387,6 @@
     <div class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>
     <script src="players.js"></script>
+    <script src="publicidade-demo.js"></script>
   </body>
 </html>

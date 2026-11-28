@@ -10,8 +10,7 @@ const consentAudio = publishDialog.querySelector('audio');
 const soloAudio = 'amostra-curta.wav';
 const responseAudio = 'amostra-longa.wav';
 const muralComposer = find('#mural-composer');
-const accent = new URLSearchParams(location.search).get('cor');
-document.documentElement.dataset.accent = accent === 'saturado' ? 'saturado' : 'cobre';
+document.documentElement.dataset.accent = 'saturado';
 
 let language = 'pt';
 let session = false;
@@ -29,10 +28,10 @@ let pendingSessionAction;
 let emptyReturn = 'arena';
 
 const captureSteps = {
-  ready: ['Gravação solo', 'A tentativa só começa quando você aciona o gravador.', 'Gravar tentativa'],
+  ready: ['SOLTA O ARROTO.', 'Sua vez.', 'ARROTAR'],
   permission: ['Permissão de microfone', 'No jogo, o navegador pede acesso. Aqui a permissão é simulada.', 'Continuar na demo'],
-  calibrating: ['Calibrando', 'A Arena mede o ruído do ambiente antes da tentativa.', 'Começar gravação'],
-  recording: ['Gravando', 'O gravador está em demonstração. Você pode parar quando quiser.', 'Parar e revisar'],
+  calibrating: ['Calibrando', 'O gravador mede o ruído do ambiente antes da tentativa.', 'Começar gravação'],
+  recording: ['Gravando…', 'Demonstração com áudio sintético.', 'Finalizar'],
   review: ['Ouça sua tentativa', 'Essa amostra sintética representa a gravação. Você decide se quer enviar.', 'Mandar pro juiz'],
   finalizing: ['Julgando…', 'Aguarde a confirmação da tentativa.', 'Aguarde'],
   fallback: ['Áudio pronto, sem laudo', 'Você ainda pode ouvir a amostra. Uma tentativa sem análise fica sem nota.', 'Tentar de novo'],
@@ -62,7 +61,7 @@ function show(view) {
     screen.classList.toggle('active', active);
   }
 
-  const navView = view === 'result' || view === 'error' ? 'arena' : view === 'empty' ? emptyReturn : view;
+  const navView = view === 'result' || view === 'error' ? 'arena' : view === 'x1' ? 'disputas' : view === 'empty' ? emptyReturn : view;
   for (const button of document.querySelectorAll('nav [data-view], nav [data-action="see-invite"]')) {
     if (button.dataset.view === navView || (navView === 'x1' && button.dataset.action === 'see-invite')) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
@@ -215,6 +214,15 @@ function toggleFollow() {
 
 function chooseLanguage(next) {
   language = next;
+  for (const button of document.querySelectorAll('[data-label-pt]')) {
+    button.textContent = button.dataset[next === 'en' ? 'labelEn' : 'labelPt'];
+  }
+  const navLabels = next === 'en'
+    ? { home: 'Home', mural: 'Hangout', arena: 'Burp', disputas: 'Battles', perfil: 'Profile' }
+    : { home: 'Início', mural: 'Resenha', arena: 'Arrotar', disputas: 'Disputas', perfil: 'Perfil' };
+  for (const button of document.querySelectorAll('.mobile-nav [data-view]')) {
+    button.querySelector('span').textContent = navLabels[button.dataset.view];
+  }
   for (const button of document.querySelectorAll('[data-language]')) {
     button.setAttribute('aria-pressed', String(button.dataset.language === next));
   }
@@ -224,11 +232,11 @@ function chooseLanguage(next) {
 function showEmpty(origin) {
   emptyReturn = origin;
   const mural = origin === 'mural';
-  find('#empty-title').textContent = mural ? 'O MURAL ESTÁ VAZIO.' : 'NENHUM X1 POR AQUI.';
+  find('#empty-title').textContent = mural ? 'A RESENHA ESTÁ VAZIA.' : 'NENHUM X1 POR AQUI.';
   find('[data-empty-copy]').textContent = mural
     ? 'Quando a galera publicar, a resenha aparece aqui.'
     : 'Os seus convites e respostas aparecem aqui.';
-  find('[data-action="back-empty"]').textContent = mural ? 'Voltar pro Mural' : 'Voltar pra Arena';
+  find('[data-action="back-empty"]').textContent = mural ? 'Voltar pra Resenha' : 'Voltar pra Arrotar';
   show('empty');
 }
 
@@ -314,7 +322,7 @@ const actions = {
     publishDialog.close();
     setMuralFilter('all');
     show('mural');
-    speak('A publicação entrou neste Mural de demonstração.');
+    speak('Post publicado na Resenha de demonstração.');
   },
   empty: () => showEmpty('mural'),
   'back-empty': () => emptyReturn === 'arena' ? openCapture() : show('mural'),
@@ -364,7 +372,7 @@ find('[data-mural-post-form]').addEventListener('submit', (event) => {
   field.value = '';
   muralComposer.close();
   setMuralFilter('all');
-  speak('Seu texto entrou neste Mural de demonstração.');
+  speak('Texto publicado na Resenha de demonstração.');
 });
 
 find('[data-mural-comment-form]').addEventListener('submit', (event) => {

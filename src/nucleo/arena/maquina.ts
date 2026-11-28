@@ -94,6 +94,7 @@ const LIGADO: ReadonlyArray<{
     `ERROR` — todo estado que pede microfone tem esta saída.
   */
   { de: 'RESULT', evento: 'MICROFONE_NEGADO', para: 'ERROR' },
+  { de: 'RESULT', evento: 'DEU_RUIM_NA_GRAVACAO', para: 'ERROR' },
   { de: 'RESULT', evento: 'DESAFIO_CRIADO', para: 'CHALLENGE' },
   { de: 'RESULT', evento: 'DESAFIO_FALHOU', para: 'ERROR' },
   { de: 'CHALLENGE', evento: 'DEIXA_PRA_LA', para: 'IDLE' },
@@ -101,10 +102,12 @@ const LIGADO: ReadonlyArray<{
   { de: 'VERSUS', evento: 'AGUENTA_ESSA', para: 'RECORDING' },
   { de: 'VERSUS', evento: 'VER_O_PLACAR', para: 'SCOREBOARD' },
   { de: 'VERSUS', evento: 'MICROFONE_NEGADO', para: 'ERROR' },
+  { de: 'VERSUS', evento: 'DEU_RUIM_NA_GRAVACAO', para: 'ERROR' },
   { de: 'IDLE', evento: 'DESAFIO_FALHOU', para: 'ERROR' },
   { de: 'RESULT', evento: 'RESPOSTA_ENVIADA', para: 'SCOREBOARD' },
   { de: 'SCOREBOARD', evento: 'REVANCHE', para: 'REMATCH' },
   { de: 'SCOREBOARD', evento: 'MICROFONE_NEGADO', para: 'ERROR' },
+  { de: 'SCOREBOARD', evento: 'DEU_RUIM_NA_GRAVACAO', para: 'ERROR' },
   { de: 'REMATCH', evento: 'PAROU_COM_SOM', para: 'ORIGIN' },
   { de: 'REMATCH', evento: 'PAROU_SEM_SOM', para: 'ERROR' },
   { de: 'REMATCH', evento: 'NAO_EH_ARROTO', para: 'ERROR' },

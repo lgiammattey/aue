@@ -154,15 +154,26 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_CONTATO_PRIVACIDADE: ${{ secrets.VITE_CONTATO_PRIVACIDADE }}
+          VITE_APP_VERSION: ${{ github.sha }}
           VITE_FEATURE_DISPUTA_LOCAL: '1'
           VITE_FEATURE_DISPUTA_NA_ARENA: '1'
           VITE_FEATURE_ARENA_EXPERIMENTAL: '1'
           VITE_FEATURE_DUELO_PRIVADO: '1'
-          # Placements Adsterra habilitados conforme decisão do Luiz em 2026-10-20.
+          # Inclui a integração no build. A configuração de rede fica separada.
           VITE_FEATURE_ADSTERRA: '1'
+          VITE_ADSTERRA_ATIVAR_REDE: ${{ vars.VITE_ADSTERRA_ATIVAR_REDE }}
+          VITE_ADSTERRA_CONFIG_URL: ${{ vars.VITE_ADSTERRA_CONFIG_URL }}
+          VITE_ADSTERRA_FREQUENCIA_INICIO: ${{ vars.VITE_ADSTERRA_FREQUENCIA_INICIO }}
+          VITE_ADSTERRA_FREQUENCIA_RESENHA: ${{ vars.VITE_ADSTERRA_FREQUENCIA_RESENHA }}
+          VITE_ADSTERRA_FREQUENCIA_DISPUTAS: ${{ vars.VITE_ADSTERRA_FREQUENCIA_DISPUTAS }}
+          VITE_ADSTERRA_FREQUENCIA_PERFIL: ${{ vars.VITE_ADSTERRA_FREQUENCIA_PERFIL }}
+          VITE_ADSTERRA_FREQUENCIA_RESULTADO: ${{ vars.VITE_ADSTERRA_FREQUENCIA_RESULTADO }}
           # Toda publicação preserva as páginas de grupos já descobertas pelo Google.
           EXIGIR_GRUPOS: '1'
         run: npm run build
+
+      - name: Identificar o commit do artefato
+        run: printf '{"sha":"%s"}\n' "$GITHUB_SHA" > dist/versao-do-build.json
 
       # O sitemap de `dist/` é o que chega ao Firebase. Esta trava roda depois
       # do gerador de grupos: uma falha ali não pode publicar um sitemap que
@@ -176,7 +187,7 @@ jobs:
       # sitemap disponível antes da publicação. Push e agendamento seguem
       # publicando, sem depender desse input manual.
       - name: Publicar
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.somente_validar != true }}
+        if: ${{ github.ref == 'refs/heads/main' && (github.event_name != 'workflow_dispatch' || inputs.somente_validar != true) }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

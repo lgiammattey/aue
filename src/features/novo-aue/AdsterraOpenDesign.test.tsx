@@ -31,7 +31,7 @@ describe('Adsterra no OpenDesign — placements ficam desligados até publicaç�
     expect(screen.queryByText('Banca o servidor 🍺')).toBeNull();
   });
 
-  it('exibe o card de parceiro com Smartlink quando a flag de publicação está ligada', async () => {
+  it('não oferece Smartlink externo quando a capacidade está ligada', async () => {
     vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
     const { PainelDireito: PainelComAdsterra } = await import('./PainelDireito');
 
@@ -45,8 +45,7 @@ describe('Adsterra no OpenDesign — placements ficam desligados até publicaç�
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Banca o servidor 🍺')).toBeTruthy();
-    const link = screen.getByRole('link', { name: /Ver oferta/i });
-    expect(link.getAttribute('href')).toContain('arwf.org');
+    expect(screen.queryByText('Banca o servidor 🍺')).toBeNull();
+    expect(screen.queryByRole('link', { name: /Ver oferta/i })).toBeNull();
   });
 });

@@ -61,40 +61,37 @@ describe('SlotPatrocinadoDoFeed', () => {
     await waitFor(() => expect(document.querySelector('.vitrine-apps--sidebar')).toBeTruthy());
   });
 
-  it('renderiza o banner nativo da Adsterra no feed quando a flag está ligada', async () => {
+  it('não carrega a rede Adsterra no teste mesmo com a capacidade ligada', async () => {
     vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
     const { SlotPatrocinadoDoFeed } = await import('./SlotPatrocinadoDoFeed');
 
     const { getByLabelText } = render(<SlotPatrocinadoDoFeed />);
 
-    expect(getByLabelText('Conteúdo patrocinado')).toBeTruthy();
-    expect(document.querySelector('[data-testid="adsterra-native-container"]')).toBeTruthy();
+    expect(() => getByLabelText('Conteúdo patrocinado')).toThrow();
+    expect(document.querySelector('[data-testid="adsterra-native-container"]')).toBeNull();
   });
 
-  it('alterna Banner 300x250 e Smartlink nos espaços seguintes do feed para não gerar caixa vazia', async () => {
+  it('não monta Banner 300x250 nem Smartlink nos testes', async () => {
     vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
     const { SlotPatrocinadoDoFeed } = await import('./SlotPatrocinadoDoFeed');
 
-    const { getByText, rerender } = render(<SlotPatrocinadoDoFeed indiceDoSlot={1} />);
+    const { rerender } = render(<SlotPatrocinadoDoFeed indiceDoSlot={1} />);
     const containerBanner = document.querySelector('[data-testid="adsterra-banner-300x250"]');
-    expect(containerBanner).toBeTruthy();
-    const iframe = containerBanner?.querySelector('iframe');
-    expect(iframe?.getAttribute('srcdoc')).toContain('228f60177e45ec5b79116ace2c420d5b');
+    expect(containerBanner).toBeNull();
     expect(document.querySelector('[data-testid="adsterra-native-container"]')).toBeNull();
 
     rerender(<SlotPatrocinadoDoFeed indiceDoSlot={2} />);
-    expect(getByText('Banca o servidor 🍺')).toBeTruthy();
+    expect(document.querySelector('[href*="arwf.org"]')).toBeNull();
     expect(document.querySelector('[data-testid="adsterra-banner-300x250"]')).toBeNull();
   });
 
-  it('renderiza o card de parceiro da Adsterra na lateral quando a flag está ligada', async () => {
+  it('não renderiza Smartlink na lateral quando a capacidade está ligada', async () => {
     vi.stubEnv('VITE_FEATURE_ADSTERRA', '1');
     const { SlotPatrocinado } = await import('./SlotPatrocinadoDoFeed');
 
-    const { getByText, getByRole } = render(<SlotPatrocinado posicionamento="sidebar" />);
+    const { queryByText, queryByRole } = render(<SlotPatrocinado posicionamento="sidebar" />);
 
-    expect(getByText('Banca o servidor 🍺')).toBeTruthy();
-    const link = getByRole('link', { name: /Ver oferta/i });
-    expect(link.getAttribute('href')).toContain('arwf.org');
+    expect(queryByText('Banca o servidor 🍺')).toBeNull();
+    expect(queryByRole('link', { name: /Ver oferta/i })).toBeNull();
   });
 });

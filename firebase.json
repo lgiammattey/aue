@@ -101,12 +101,21 @@
       {
         "source": "/disputas{,/}",
         "headers": [
-          { "key": "Cache-Control", "value": "no-cache" },
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "Referrer-Policy", "value": "no-referrer" },
           { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
         ]
       },
       {
-        "source": "/perfil{,/**}",
+        "source": "/{perfil,admin,redefinir-senha}{,/}",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store" },
+          { "key": "Referrer-Policy", "value": "no-referrer" },
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
+      },
+      {
+        "source": "/perfil/*",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       },
       {
@@ -124,6 +133,10 @@
       {
         "source": "/manifest.webmanifest",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/versao-do-build.json",
+        "headers": [{ "key": "Cache-Control", "value": "no-store" }]
       },
       {
         "source": "/duelo",

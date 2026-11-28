@@ -56,9 +56,9 @@ describe('contrato SQL dos duelos v2', () => {
       `);
       for (const arquivo of [
         'supabase/migrations/20261118001942_duelo_v2_privado.sql',
+        'supabase/migrations/20261118003111_duelos_v2_convites_recuperaveis.sql',
         'supabase/tests/duelos_v2.sql',
         'supabase/tests/duelos_v2_privacidade.sql',
-        'supabase/migrations/20261118003111_duelos_v2_convites_recuperaveis.sql',
         'supabase/tests/duelos_v2_convites.sql',
         'supabase/migrations/20261118004900_denuncia_por_duelo_v2.sql',
         'supabase/tests/duelos_v2_denuncia_recuperado.sql',

@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ADSTERRA_CONFIG, anunciosAdsterraHabilitados } from '../../plataforma/web/adsterra';
-import { analyticsArenaV2 } from '../../plataforma/web/analyticsArenaV2';
+import { anunciosAdsterraHabilitados } from '../../plataforma/web/adsterra';
 import { AdsterraBanner300x250 } from '../../shared/components/AdsterraBanner300x250';
 import { ADSENSE_CONFIGURADO, AdBanner, type EstadoDoAdSense } from '../../shared/components/AdBanner';
 import { AdsterraNativeBanner } from './AdsterraNativeBanner';
@@ -15,47 +14,6 @@ const slotPorPosicionamento: Record<PosicionamentoDoSlot, string | undefined> = 
   feed: SLOT_DO_FEED,
   sidebar: SLOT_DA_LATERAL,
 };
-
-function PainelLateralAdsterra() {
-  return (
-    <aside className="panel adsterra-smartlink-panel" aria-label="Conteúdo patrocinado">
-      <span
-        style={{
-          fontSize: '10px',
-          fontFamily: 'var(--font-mono)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          color: 'var(--aue-accent, #ff5500)',
-          fontWeight: 700,
-        }}
-      >
-        PATROCINADO
-      </span>
-      <h2 style={{ marginTop: 4, fontFamily: "var(--font-display, 'Anton', sans-serif)", fontSize: 18, letterSpacing: '-0.02em' }}>
-        Banca o servidor 🍺
-      </h2>
-      <p style={{ fontSize: 13, color: 'var(--aue-muted)', margin: '6px 0 12px', lineHeight: 1.45 }}>
-        Dá um clique e ajuda a manter o Auê no ar.
-      </p>
-      <a
-        href={ADSTERRA_CONFIG.smartlinkUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="join"
-        onClick={() => analyticsArenaV2.registrar('clicou_anuncio')}
-        style={{
-          display: 'inline-block',
-          textAlign: 'center',
-          textDecoration: 'none',
-          width: '100%',
-          boxSizing: 'border-box',
-        }}
-      >
-        Ver oferta ↗
-      </a>
-    </aside>
-  );
-}
 
 function SlotAdSenseOuVitrine({ posicionamento }: { readonly posicionamento: PosicionamentoDoSlot }) {
   const slot = slotPorPosicionamento[posicionamento];
@@ -76,8 +34,8 @@ function SlotAdSenseOuVitrine({ posicionamento }: { readonly posicionamento: Pos
 /**
  * A propaganda externa ou da casa ocupa o slot patrocinado.
  *
- * Quando a Adsterra está habilitada, intercala o Native Banner (slot 0), o
- * Banner 300x250 isolado (slots ímpares) e o card de ofertas Smartlink (slots pares e lateral).
+ * Quando a Adsterra está habilitada, intercala o Native Banner e o Banner
+ * 300x250 isolado. Smartlinks e barras flutuantes não são formatos permitidos.
  * Sem Adsterra, prioriza o AdSense caso configurado, caindo na vitrine da casa se vazio.
  */
 export function SlotPatrocinado({
@@ -89,15 +47,12 @@ export function SlotPatrocinado({
 }) {
   if (anunciosAdsterraHabilitados) {
     if (posicionamento === 'sidebar') {
-      return <PainelLateralAdsterra />;
+      return <AdsterraBanner300x250 />;
     }
     if (indiceDoSlot === 0) {
       return <AdsterraNativeBanner />;
     }
-    if (indiceDoSlot % 2 === 1) {
-      return <AdsterraBanner300x250 />;
-    }
-    return <PainelLateralAdsterra />;
+    return <AdsterraBanner300x250 />;
   }
 
   return <SlotAdSenseOuVitrine posicionamento={posicionamento} />;

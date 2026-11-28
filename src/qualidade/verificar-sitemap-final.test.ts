@@ -56,7 +56,7 @@ describe('workflow de publicação', () => {
     expect(workflow).toContain('workflow_dispatch:\n    inputs:\n      somente_validar:');
     expect(workflow).toContain("type: boolean");
     expect(workflow).toContain("default: false");
-    expect(workflow).toContain("if: ${{ github.event_name != 'workflow_dispatch' || inputs.somente_validar != true }}");
+    expect(workflow).toContain("if: ${{ github.ref == 'refs/heads/main' && (github.event_name != 'workflow_dispatch' || inputs.somente_validar != true) }}");
     expect(workflow).toContain('push:\n    branches: [main]');
     expect(workflow).toContain("schedule:\n    - cron: '17 * * * *'");
   });

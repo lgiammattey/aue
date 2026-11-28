@@ -40,7 +40,7 @@ describe('novo Design System nos cards e player (Carbono + Laranja Elétrico)', 
   it('--border-strong e --ind vêm do novo Design System em TokensDoCard.css', () => {
     expect(tokens).toContain('--border-strong: var(--aue-line-strong, #3b4254)');
     expect(tokens).toContain('--ind: var(--aue-accent, #ff5500)');
-    for (const css of [card, player, ler('./PerfilDoUsuario.css'), ler('./FolhaDaFoto.css')]) {
+    for (const css of [card, player, ler('./FolhaDaFoto.css')]) {
       expect(css).not.toMatch(/--border-strong:\s*#|--ind:\s*#/);
     }
   });

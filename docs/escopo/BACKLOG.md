@@ -15,7 +15,7 @@ Estas são pendências de verificação, não uma nova priorização aprovada. A
 
 ## M00 — backlog técnico transferido para M01
 
-A tabela registra o estado em 27/11/2026. As atualizações da M02 estão no fim desta página. A prioridade abaixo é a da auditoria; não representa missão iniciada. A prova, SHA e limites estão no [baseline M00](../technical/auditorias/M00-BASELINE.md). Os relatórios completos foram preservados fora do repositório em `~/AUE-AUDITORIA/` no ambiente que executou a auditoria; os principais resultados sintéticos foram copiados ao baseline versionado. Revalidar fatos e prioridade antes de executar.
+A tabela registra o estado em 27/11/2026. As atualizações da M02 e da M03 estão no fim desta página. A prioridade abaixo é a da auditoria; não representa missão iniciada. A prova, SHA e limites estão no [baseline M00](../technical/auditorias/M00-BASELINE.md). Os relatórios completos foram preservados fora do repositório em `~/AUE-AUDITORIA/` no ambiente que executou a auditoria; os principais resultados sintéticos foram copiados ao baseline versionado. Revalidar fatos e prioridade antes de executar.
 
 | ID | Prioridade M00 | Assunto e critério de prova futuro | Evidência M00 |
 |---|---|---|---|
@@ -66,4 +66,12 @@ A tabela registra o estado em 27/11/2026. As atualizações da M02 estão no fim
 | AUE-T14 | As duas suítes sociais passaram das antigas falhas de assinatura e permissão. No schema atual, ainda exigem comunidades removidas ou colunas de uma versão anterior. A migração de fixtures deve preservar as asserções de autorização. |
 | AUE-T04 | Continuam pendentes a prova física de microfone e a validação do jogo completo em iPhone e Android. |
 
-Os resultados por suíte e as condições para abrir M03 ficam no [relatório da M02](../missoes/M02-RELATORIO.md).
+Os resultados por suíte ficam no [relatório da M02](../missoes/M02-RELATORIO.md).
+
+### Fechamento técnico da M03
+
+- **AUE-T06 e T09.** Saíram os perfis substituídos, a galeria e a antiga tela de exploração sem consumidor. As duas Arenas, os players e as superfícies sociais históricas seguem com consumidores distintos. Qualquer corte posterior depende de prova de paridade e plano para links e acervo.
+- **AUE-T14.** `topicos.sql` e `forum_leituras.sql` foram reconciliados com os contratos versionados. A prova usa PostgreSQL descartável com papéis, Auth e Storage simulados.
+- **AUE-T04, T07, T08 e T13.** Para uma eventual M04, priorizar gravação, reprodução, sessão e retomada em iPhone e Android reais, descarte de URLs de objeto e estabilidade dos testes com relógio. Conferir a PWA e os redirects nos dispositivos usados pela galera.
+
+O [relatório da M03](../missoes/M03-RELATORIO.md) registra as retiradas, os resultados locais e a validação de PRs encadeados. O aceite do PO segue pendente.

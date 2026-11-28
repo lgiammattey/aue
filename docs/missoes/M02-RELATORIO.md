@@ -1,6 +1,6 @@
 # M02 · Integridade de resultados e cadastro de grupos
 
-**Parecer de coordenação: aprovado com ressalvas para revisão em PR.** O laudo experimental continua disponível. Uma medição declarada pelo navegador deixou de valer como prova para XP, conquistas, vitória e placar. No X1, tanto quem abre o resultado quanto quem volta pelo histórico vê as duas durações como medições experimentais. Homologação, publicação e aceite do PO estão pendentes.
+**Parecer de coordenação: aprovado com ressalvas para revisão em PR.** O laudo experimental continua disponível. Uma medição declarada pelo navegador deixou de valer como prova para XP, conquistas, vitória e placar. No X1, tanto quem abre o resultado quanto quem volta pelo histórico vê as duas durações como medições experimentais. O PO aceitou a M02 com as ressalvas registradas. Homologação e publicação seguem pendentes.
 
 ## O que foi entregue
 
@@ -34,4 +34,4 @@ Camillo atuou com o perfil nativo e fechou a decisão de engenharia. Um agente d
 
 A branch `codex/m02-integrity` parte de `921a3cc6fddd8990c7f30432d645232d1c302cee`, na [Foundation #385](https://github.com/lgiammattey/aue/pull/385). O workflow de validação só atende PRs destinados à main ou pushes na main. Os gatilhos versionados de publicação foram conferidos antes do push. A situação observada no GitHub consta do PR.
 
-**M03 continua bloqueada à espera do PO.** As pendências de homologação e a atualização das duas suítes SQL estão no [backlog](../escopo/BACKLOG.md). Para considerar a limpeza de legado, o PO precisa aceitar o recorte da M02 e autorizar a próxima missão. A eventual remoção de consumidores ou contratos antigos depende de prova de uso.
+Com o aceite da M02, o PO autorizou a [M03](M03-RELATORIO.md). As pendências de homologação seguem no [backlog](../escopo/BACKLOG.md).

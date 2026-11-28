@@ -116,6 +116,17 @@ INSERT INTO auth.users (id, email, is_anonymous) VALUES
   ('b1000000-0000-0000-0000-000000000004', 'dede@forum.aue', false),
   ('b1000000-0000-0000-0000-000000000005', NULL, true),
   ('b1000000-0000-0000-0000-000000000006', 'casa@forum.aue', false);
+-- O catálogo temático original foi removido da produção. A suíte continua
+-- provando leitura, cursor e autorização com comunidades exclusivamente
+-- sintéticas, criadas e revertidas junto com esta transação.
+INSERT INTO public.grupos (nome, slug, descricao, icone) VALUES
+  ('Bonde Geral de teste', 'bonde-geral', 'Fixture isolada.', '📢'),
+  ('Cerveja Gelada de teste', 'cerveja-gelada', 'Fixture isolada.', '🍺'),
+  ('Refri & Cia de teste', 'refri-cia', 'Fixture isolada.', '🥤'),
+  ('Churrasco Raiz de teste', 'churrasco-raiz', 'Fixture isolada.', '🥩'),
+  ('Histórias de Arroto de teste', 'historias-de-arroto', 'Fixture isolada.', '📖'),
+  ('Na reunião da firma de teste', 'reuniao-da-firma', 'Fixture isolada.', '💼'),
+  ('Primeiro encontro de teste', 'primeiro-encontro', 'Fixture isolada.', '💔');
 UPDATE public.perfis SET perfil_social_concluido_em = now()
  WHERE id IN ('b1000000-0000-0000-0000-000000000001', 'b1000000-0000-0000-0000-000000000002',
               'b1000000-0000-0000-0000-000000000003', 'b1000000-0000-0000-0000-000000000006');
@@ -207,11 +218,12 @@ BEGIN
     PERFORM t_forum.ok(EXISTS (SELECT 1 FROM pg_proc p WHERE p.pronamespace = 'public'::regnamespace AND p.proname = r.nome
       AND pg_get_function_identity_arguments(p.oid) = r.args), 'assinatura de ' || r.nome || ' intacta');
   END LOOP;
-  -- Colunas de topicos e respostas exatamente como a 14 criou.
+  -- O schema corrente inclui anexos e origem. A coluna original permanece
+  -- porque registros históricos, acervo e workers continuam dependendo dela.
   PERFORM t_forum.ok((SELECT string_agg(attname, ',' ORDER BY attnum) FROM pg_attribute WHERE attrelid = 'public.topicos'::regclass AND attnum > 0 AND NOT attisdropped)
-    = 'id,comunidade_id,autor_id,titulo,corpo,status,fixado,resultado_id,consentimento_audio_publico,caminho_do_audio_da_casa,criado_em,editado_em,ultima_atividade_em,legado_post_id', 'colunas de topicos intactas');
+    = 'id,comunidade_id,autor_id,titulo,corpo,status,fixado,resultado_id,consentimento_audio_publico,caminho_do_audio_da_casa,criado_em,editado_em,ultima_atividade_em,legado_post_id,anexo_tipo,anexo_caminho,anexo_mime,anexo_tamanho_bytes,anexo_duracao_ms,video_externo_url,origem', 'colunas de topicos no contrato vigente');
   PERFORM t_forum.ok((SELECT string_agg(attname, ',' ORDER BY attnum) FROM pg_attribute WHERE attrelid = 'public.respostas'::regclass AND attnum > 0 AND NOT attisdropped)
-    = 'id,topico_id,pai_id,nivel,autor_id,corpo,status,criado_em,editado_em,legado_comentario_id', 'colunas de respostas intactas');
+    = 'id,topico_id,pai_id,nivel,autor_id,corpo,status,criado_em,editado_em,legado_comentario_id,anexo_tipo,anexo_caminho,anexo_mime,anexo_tamanho_bytes,anexo_duracao_ms,video_externo_url', 'colunas de respostas no contrato vigente');
   -- Os cinco espelhos seguem ligados.
   PERFORM t_forum.ok((SELECT count(*) FROM pg_trigger WHERE tgname LIKE 'aue_espelha_%' AND NOT tgisinternal AND tgenabled = 'O') = 5, 'cinco triggers-espelho ligados');
 END $t$;
@@ -324,8 +336,10 @@ UPDATE public.respostas r SET criado_em = v.c::timestamptz
 DO $t$
 DECLARE r record; v_lista jsonb; v_um jsonb; v_n integer;
 BEGIN
-  SELECT count(*) INTO v_n FROM public.listar_comunidades_do_forum();
-  PERFORM t_forum.ok(v_n = 9, 'visitante lê o diretório: 9 comunidades com slug (sem acervo vazio, sem grupo sem slug): ' || v_n);
+  SELECT count(*) INTO v_n FROM public.listar_comunidades_do_forum()
+   WHERE slug IN ('bonde-geral', 'cerveja-gelada', 'refri-cia', 'churrasco-raiz',
+                  'historias-de-arroto', 'reuniao-da-firma', 'primeiro-encontro');
+  PERFORM t_forum.ok(v_n = 7, 'visitante lê as sete comunidades sintéticas da fixture');
   PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.listar_comunidades_do_forum() c WHERE nullif(btrim(c.slug), '') IS NULL OR c.nome LIKE 'Grupo %slug%'), 'grupo com slug nulo, vazio ou só espaços não aparece');
   PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.listar_comunidades_do_forum() c WHERE lower(c.slug) = 'acervo'), 'acervo sem tópico visível não aparece');
 
@@ -423,14 +437,14 @@ DECLARE r record;
 BEGIN
   SELECT * INTO r FROM public.obter_comunidade_do_forum('acervo');
   PERFORM t_forum.ok(r.slug = 'acervo' AND r.topicos_total = 1 AND r.membros_total = 0 AND r.sou_membro = false, 'acervo aparece com 1 tópico visível, 0 membros');
-  PERFORM t_forum.ok((SELECT count(*) FROM public.listar_comunidades_do_forum()) = 10, 'diretório com acervo: 10');
+  PERFORM t_forum.ok(EXISTS (SELECT 1 FROM public.listar_comunidades_do_forum() WHERE slug = 'acervo'), 'acervo com tópico visível entra no diretório');
 END $t$;
 :como_admin
 UPDATE public.topicos SET status = 'oculto' WHERE legado_post_id = 'b4000000-0000-0000-0000-000000000001';
 :como_visitante
 DO $t$ BEGIN
   PERFORM t_forum.ok((SELECT count(*) FROM public.obter_comunidade_do_forum('acervo')) = 0, 'acervo com tópico oculto some do obter');
-  PERFORM t_forum.ok((SELECT count(*) FROM public.listar_comunidades_do_forum()) = 9, 'acervo com tópico oculto some do diretório');
+  PERFORM t_forum.ok(NOT EXISTS (SELECT 1 FROM public.listar_comunidades_do_forum() WHERE slug = 'acervo'), 'acervo com tópico oculto some do diretório');
 END $t$;
 :como_admin
 UPDATE public.topicos SET status = 'aberto' WHERE legado_post_id = 'b4000000-0000-0000-0000-000000000001';
@@ -631,7 +645,8 @@ DO $t$ BEGIN
   PERFORM t_forum.ok((SELECT count(*) FROM public.explorar_topicos(100)) = 8, 'logado lê o explorar');
   PERFORM t_forum.ok((SELECT count(*) FROM public.listar_topicos_do_autor('ana_forum', 100)) = 5, 'logado lê tópicos do autor');
   PERFORM t_forum.ok((SELECT count(*) FROM public.listar_respostas_do_autor('ana_forum', 100)) = 5, 'logado lê respostas do autor');
-  PERFORM t_forum.ok((SELECT count(*) FROM public.listar_comunidades_do_forum()) = 10, 'logado lê o diretório');
+  PERFORM t_forum.ok((SELECT count(*) FROM public.listar_comunidades_do_forum()
+    WHERE slug IN ('bonde-geral', 'cerveja-gelada', 'refri-cia')) = 3, 'logado lê as comunidades da fixture');
 END $t$;
 
 -- Visitante não chega às tabelas nem ao reparo.

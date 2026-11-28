@@ -159,14 +159,6 @@ function EntradaDesafios() {
   );
 }
 
-function EntradaPerfil() {
-  return <TelaPerfilOpenDesign />;
-}
-
-function EntradaPerfilHandle() {
-  return <TelaPerfilOpenDesign />;
-}
-
 function EntradaSeguindo() {
   return <InicioOpenDesign viewInicial="seguindo" />;
 }
@@ -218,9 +210,9 @@ export function App() {
           <Route path="/duelo" element={FLAGS.arenaV2 && FLAGS.dueloV2 ? <EntradaDueloIntegrado modo="responder" /> : <DueloIndisponivel />} />
 
           {/* Perfil e Conta */}
-          <Route path="/perfil" element={<EntradaPerfil />} />
-          <Route path="/u/:handle" element={<EntradaPerfilHandle />} />
-          <Route path="/perfil/:handle" element={<EntradaPerfilHandle />} />
+          <Route path="/perfil" element={<TelaPerfilOpenDesign />} />
+          <Route path="/u/:handle" element={<TelaPerfilOpenDesign />} />
+          <Route path="/perfil/:handle" element={<TelaPerfilOpenDesign />} />
           <Route path="/login" element={<InicioOpenDesign viewInicial="auth" />} />
           <Route path="/entrar" element={<Navigate to="/login" replace />} />
           <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />

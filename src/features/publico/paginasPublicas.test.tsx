@@ -13,7 +13,6 @@ import { ComoJogar } from './ComoJogar';
 import { ComoArrotar } from './ComoArrotar';
 import { TiposDeArroto } from './TiposDeArroto';
 import { RankingDeArrotos } from './RankingDeArrotos';
-import { VideosDeArroto } from './VideosDeArroto';
 
 function montar(componente: FC): string {
   return renderToStaticMarkup(createElement(MemoryRouter, null, createElement(componente)));
@@ -153,40 +152,12 @@ describe('/ranking-de-arrotos com a moldura pública', () => {
   });
 });
 
-describe('/videos-de-arroto com a moldura pública', () => {
-  it('tem um H1 só, e é o da página', () => {
-    const html = montar(VideosDeArroto);
-    expect([...html.matchAll(/<h1[\s>]/g)]).toHaveLength(1);
-    expect(html).toMatch(/<h1>[\s\S]*Vídeos de arroto pra ouvir e aprender/);
-  });
-
-  it('lista os vídeos curados do YouTube com capas nativas e links originais', () => {
-    const html = montar(VideosDeArroto);
-    expect(html).not.toContain('Fartin Around');
-    expect(html).not.toContain('TikTok');
-    expect(html).toContain('Garoto Arroto');
-    expect(html).toContain('Gamer Burps 38');
-    expect(html).toContain('Aula de Arroto com Professor Moises');
-    expect(html).toContain('Assistir arroto');
-    expect(html).toContain('Ir pra Arena');
-    expect(html).toContain('Ver original no YouTube ↗');
-  });
-
-  it('usa a casca compartilhada e links de navegação', () => {
-    const html = montar(VideosDeArroto);
-    expect(html).toContain('app od-informativo');
-    expect(html).toContain('href="/ranking-de-arrotos"');
-    expect(html).toContain('href="/grupos"');
-  });
-});
-
 describe('voz das páginas públicas', () => {
   const paginas: ReadonlyArray<[string, FC]> = [
     ['/como-jogar', ComoJogar],
     ['/como-arrotar', ComoArrotar],
     ['/tipos-de-arroto', TiposDeArroto],
     ['/ranking-de-arrotos', RankingDeArrotos],
-    ['/videos-de-arroto', VideosDeArroto],
   ];
 
   it.each(paginas)('%s não chama o Auê de jogo de arroto nem fala em "causo"', (_rota, componente) => {

@@ -20,7 +20,8 @@ name: Validação
 
 on:
   pull_request:
-    branches: [main]
+    # PRs encadeados usam uma branch codex/ como base.
+    branches: [main, 'codex/**']
   push:
     branches: [main]
 

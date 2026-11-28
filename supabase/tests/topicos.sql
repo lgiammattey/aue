@@ -61,6 +61,14 @@ INSERT INTO auth.users (id, email, is_anonymous) VALUES
   ('a0000000-0000-0000-0000-000000000004', 'd@teste.aue', false),
   ('a0000000-0000-0000-0000-000000000005', NULL, true),
   ('a0000000-0000-0000-0000-000000000006', 'casa@teste.aue', false);
+-- As comunidades temáticas de semeação foram removidas do produto pela
+-- migration 20261020235900. Estas linhas são apenas a fixture desta transação,
+-- para manter cenários de autorização entre comunidades sem depender de dados
+-- publicados ou do catálogo histórico.
+INSERT INTO public.grupos (nome, slug, descricao, icone) VALUES
+  ('Bonde Geral de teste', 'bonde-geral', 'Fixture isolada.', '📢'),
+  ('Cerveja Gelada de teste', 'cerveja-gelada', 'Fixture isolada.', '🍺'),
+  ('Refri & Cia de teste', 'refri-cia', 'Fixture isolada.', '🥤');
 -- Promovida também exige o perfil social concluído (20261018000011).
 UPDATE public.perfis SET perfil_social_concluido_em = now()
  WHERE id IN (SELECT id FROM auth.users WHERE email IS NOT NULL AND NOT is_anonymous AND id::text LIKE 'a0000000-%');
@@ -303,7 +311,9 @@ DO $t$
 DECLARE v_n integer; v_l record;
 BEGIN
   SELECT count(*) INTO v_n FROM public.listar_comunidades_sociais();
-  PERFORM t_topicos.ok(v_n >= 9, 'visitante lê comunidades');
+  SELECT count(*) INTO v_n FROM public.listar_comunidades_sociais()
+   WHERE slug IN ('bonde-geral', 'cerveja-gelada', 'refri-cia');
+  PERFORM t_topicos.ok(v_n = 3, 'visitante lê as três comunidades da fixture');
   SELECT * INTO v_l FROM public.listar_topicos('cerveja-gelada');
   PERFORM t_topicos.ok(v_l.id = t_topicos.pegar('t2') AND v_l.respostas_total = 5, 'visitante lê tópicos com contagem');
   PERFORM t_topicos.ok(v_l.apelido IS NOT NULL AND v_l.handle IS NOT NULL AND v_l.comunidade_slug = 'cerveja-gelada' AND v_l.autor_id = 'a0000000-0000-0000-0000-000000000002', 'autor e comunidade no tópico');
@@ -460,6 +470,9 @@ BEGIN
 END $t$;
 :como_admin
 DO $t$ BEGIN
+  -- Este cenário confere os CHECKs da tabela. Sem JWT, o trigger de frequência
+  -- corretamente deixa manutenção administrativa passar até a constraint.
+  PERFORM set_config('request.jwt.claim.sub', '', true);
   -- o banco também segura o limite, sem passar pela RPC
   PERFORM t_topicos.erro($$INSERT INTO public.topicos (comunidade_id, autor_id, titulo) SELECT id, 'a0000000-0000-0000-0000-000000000001', repeat('a', 121) FROM public.grupos LIMIT 1$$, '23514');
   PERFORM t_topicos.erro($$INSERT INTO public.topicos (comunidade_id, autor_id, titulo, status) SELECT id, 'a0000000-0000-0000-0000-000000000001', 't', 'qualquer' FROM public.grupos LIMIT 1$$, '23514');
@@ -595,6 +608,11 @@ SELECT v.id, v.dono, public.aue_nota_v2(50, 50, 50, 50, public.aue_origin_score_
     ('e0000000-0000-0000-0000-000000000001'::uuid, 'a0000000-0000-0000-0000-000000000001'::uuid, 'a0000000-0000-0000-0000-000000000001/privado-a.m4a'),
     ('e0000000-0000-0000-0000-000000000002'::uuid, 'a0000000-0000-0000-0000-000000000002'::uuid, 'a0000000-0000-0000-0000-000000000002/privado-b.m4a')
   ) AS v(id, dono, caminho);
+-- Os cenários anteriores exercitam deliberadamente mais escritas que o teto
+-- de produção por hora. Envelhece apenas a fixture já criada antes da próxima
+-- família de casos, sem reduzir a cobertura do limite em sua migration própria.
+UPDATE public.topicos SET criado_em = now() - interval '2 hours'
+ WHERE autor_id = 'a0000000-0000-0000-0000-000000000001';
 :como_a
 DO $t$
 DECLARE v_t public.topicos;
@@ -871,8 +889,10 @@ BEGIN
   PERFORM t_topicos.ok(v_n = 0, 'respostas do oculto não vazam');
   SELECT * INTO v FROM public.obter_topico('b0000000-0000-0000-0000-000000000005');
   PERFORM t_topicos.ok(v.caminho_do_audio = 'a0000000-0000-0000-0000-000000000002/privado-b.m4a' AND v.nota IS NOT NULL, 'áudio do acervo com consentimento continua ligado ao resultado real');
-  SELECT count(*) INTO v_n FROM public.listar_topicos('acervo');
-  PERFORM t_topicos.ok(v_n = 1, 'o acervo lista o post órfão');
+  -- Comunidades e suas listas saíram do produto. O registro histórico segue
+  -- acessível pelo ID estável, que é o contrato preservado para links antigos.
+  SELECT count(*) INTO v_n FROM public.obter_topico('b0000000-0000-0000-0000-000000000003');
+  PERFORM t_topicos.ok(v_n = 1, 'o post órfão permanece acessível pelo ID histórico');
 END $t$;
 
 -- Idempotência: rodar de novo não muda nada.

@@ -6,7 +6,8 @@
   document.body.append(panel);
 
   const placements = [
-    { target: '#home .public-guide', position: 'afterend', area: 'Início', format: 'Banner horizontal', className: 'ad-horizontal' },
+    { target: '#home .public-hero', position: 'afterend', area: 'Início', format: 'Banner horizontal', className: 'ad-horizontal' },
+    { target: '#home [data-home-live]', position: 'afterend', area: 'Início', format: 'Banner entre seções', className: 'ad-horizontal' },
     { target: '#home-en .public-guide', position: 'afterend', area: 'Home', format: 'Horizontal banner', className: 'ad-horizontal', en: true },
     { target: '#mural .mural-guide', position: 'beforeend', area: 'Resenha', format: 'Retângulo · 300 × 250', className: 'ad-sidebar' },
     { target: '#mural .feed', position: 'beforeend', area: 'Resenha', format: 'Entre publicações · após 4 a 6 posts', className: 'ad-feed' },

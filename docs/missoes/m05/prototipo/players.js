@@ -21,6 +21,7 @@
     if (audio.dataset.auePlayerPronto === 'true') return;
     audio.dataset.auePlayerPronto = 'true';
 
+    const en = audio.closest('[lang="en"]') !== null;
     const caixa = document.createElement('div');
     caixa.className = 'm05-player';
     caixa.dataset.estado = 'parado';
@@ -30,14 +31,14 @@
     const botao = document.createElement('button');
     botao.type = 'button';
     botao.className = 'm05-player__botao';
-    botao.textContent = 'Ouvir';
-    botao.setAttribute('aria-label', 'Ouvir áudio');
+    botao.textContent = en ? 'Play' : 'Ouvir';
+    botao.setAttribute('aria-label', en ? 'Play audio' : 'Ouvir áudio');
 
     const trilho = document.createElement('div');
     trilho.className = 'm05-player__trilho';
     trilho.tabIndex = 0;
     trilho.setAttribute('role', 'slider');
-    trilho.setAttribute('aria-label', 'Avançar no áudio');
+    trilho.setAttribute('aria-label', en ? 'Seek audio' : 'Avançar no áudio');
     trilho.setAttribute('aria-valuemin', '0');
     trilho.setAttribute('aria-valuenow', '0');
     trilho.setAttribute('aria-valuemax', '0');
@@ -68,8 +69,8 @@
       const duracaoConhecida = Number.isFinite(audio.duration) && audio.duration > 0;
       const ativo = !audio.paused && !audio.ended;
       caixa.dataset.estado = ativo ? 'tocando' : 'parado';
-      botao.textContent = ativo ? 'Pausar' : 'Ouvir';
-      botao.setAttribute('aria-label', ativo ? 'Pausar áudio' : 'Ouvir áudio');
+      botao.textContent = ativo ? (en ? 'Pause' : 'Pausar') : (en ? 'Play' : 'Ouvir');
+      botao.setAttribute('aria-label', ativo ? (en ? 'Pause audio' : 'Pausar áudio') : (en ? 'Play audio' : 'Ouvir áudio'));
       const mostraCentimos = duracaoConhecida && audio.duration < 10;
       const tempoMostrado = ativo || !duracaoConhecida ? audio.currentTime : audio.duration;
       relogio.textContent = tempo(tempoMostrado, mostraCentimos);
@@ -127,6 +128,8 @@
   function iniciar() {
     document.querySelectorAll('audio[data-aue-player]').forEach(montar);
   }
+
+  window.iniciarPlayersAue = iniciar;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar, { once: true });
   else iniciar();

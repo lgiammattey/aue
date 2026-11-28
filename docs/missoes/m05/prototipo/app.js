@@ -330,7 +330,8 @@ const actions = {
   react: (button) => withSession(() => {
     const pressed = button.getAttribute('aria-pressed') === 'true';
     button.setAttribute('aria-pressed', String(!pressed));
-    button.querySelector('span').textContent = pressed ? '12' : '13';
+    const count = button.querySelector('span');
+    count.textContent = String(Number(count.textContent) + (pressed ? -1 : 1));
   }),
   follow: () => withSession(toggleFollow),
   following: () => withSession(() => setMuralFilter('following')),

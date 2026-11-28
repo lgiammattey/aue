@@ -30,7 +30,7 @@ A consulta autorizada usou somente leitura de metadados do projeto Auê, Postgre
 | Storage | Mesmos nove buckets. duelos_v2 é privado, tem limite de 5 MiB e já aceita WAV. audio_records também é privado e aceita WAV. anexos_do_forum é privado, 10 MiB, e ainda recusa WAV no bucket e nas constraints de tópicos e respostas. A candidata adiciona WAV mantendo WebM, Ogg, MP4/M4A, MPEG/MP3 e os limites anteriores. |
 | Auth | E-mail e sessões anônimas habilitados, com cadastro aberto e confirmação de e-mail ativa. Provedores sociais da configuração pública estavam desligados. As sessões hospedadas após o corte precisam de homologação no ambiente correspondente. |
 | Edge Functions | cadastrar-grupo v5 ainda tem o código anterior e precisa da versão que chama a RPC atômica. notas-worker v35 precisa do entrypoint que aceita audio_records. O código comparado de duelo-audio-v2 v41 e painel-administrativo v83 é idêntico ao candidato. og-preview, teste-content-type e uso-unico-imagens-oficiais também constam ativos. |
-| Worker e dependências | O worker roda no GitHub Actions da main e chama o gateway notas-worker. A [execução agendada observada](https://github.com/lgiammattey/aue/actions/runs/46109267548) passou. Origem confiável no gateway e processamento com a versão candidata seguem sem prova. YAMNet/Chromium, Auth, Storage e PostgREST compõem a cadeia. O build do Firebase também depende da leitura dos grupos públicos para preservar o sitemap. |
+| Worker e dependências | O worker roda no GitHub Actions da main e chama o gateway notas-worker. A [execução agendada observada](https://github.com/lgiammattey/aue/actions/runs/46109267548) passou. O candidato rodou contra Edge, Storage, banco e YAMNet locais. Recusou HTTP sem segredo e concluiu dois itens sintéticos como rejeitados pelo modelo, sem erro. Origem confiável no gateway e processamento com o candidato hospedado seguem sem prova. O build do Firebase depende ainda da leitura dos grupos públicos para preservar o sitemap. |
 
 | Versão pendente | Mudança que precisa bater depois da aplicação |
 |---|---|
@@ -42,7 +42,7 @@ A consulta autorizada usou somente leitura de metadados do projeto Auê, Postgre
 | 20261128000041 | EXECUTE do helper interno do fórum retirado dos clientes. |
 | 20261128000042 | Bucket, constraints e RPC de anexos da Resenha passam a aceitar WAV. |
 
-O primeiro startup local confirmou o pré-requisito histórico de criar o bucket privado duelos_v2. Com ele provisionado na fixture, as 124 migrations passaram. A Edge Runtime local respondeu 503 ao determinar o entrypoint. A stack descartável subiu sem Edge. O 500 de admin.listUsers veio de um token nulo nos dados de seed. A prova seguiu com contas sintéticas novas e login anônimo habilitado só nessa stack.
+O primeiro startup local confirmou o pré-requisito histórico de criar o bucket privado duelos_v2. Com ele provisionado na fixture, as 124 migrations passaram. O 503 inicial da Edge veio da montagem de arquivos da VM. Servir as funções de um diretório que a VM consegue ler resolveu o problema local. O 500 de admin.listUsers veio de um token nulo no seed. A prova seguiu com contas sintéticas novas e login anônimo habilitado só nessa stack.
 
 No ensaio incremental, PostgreSQL recebeu as sete migrations uma por vez sobre 117 já aplicadas. A conta, perfil, sessão, resultado e quatro publicações e objetos sintéticos em WebM/Ogg/M4A/MP3 permaneceram reconhecíveis. O resultado antigo recebeu a classe legado prevista. Um dump local com SHA-256 restaurou a mesma conta, perfil, sessão, resultado e quatro referências de mídia em outro banco. Esse ensaio prova a recuperação dos registros sintéticos. O teste HTTP cobriu os bytes de áudio separadamente.
 
@@ -53,7 +53,7 @@ No ensaio incremental, PostgreSQL recebeu as sete migrations uma por vez sobre 1
 | Início PT/EN | Canonicals, alternates e entradas PT/EN conferidos. As duas Homes mostraram cinco itens elegíveis e playback no Chromium e WebKit. Dez cenários locais incluíram navegação, largura travada em 320, 390 e 1440 px e anúncio simulado. Atualização da Resenha preservou o player no Chromium. Destaques, vazio e falhas têm cobertura de componente ou contrato. |
 | Arrotar | Chromium gravou PCM com uma amostra de microfone sintética. O consentimento começou desmarcado e nenhum envio aconteceu antes da autorização. Depois houve upload WAV 200, RPC de publicação 200 e reprodução após recarga. MP4, WebM, modelo do juiz, falha e descarte têm cobertura automatizada. Laudo continua experimental. |
 | Resenha | Fixture WebM teve URL assinada e 35.319 bytes entregues pelo Storage local. Reações positiva, negativa e retirada passaram no Chromium. Comentário, imagem e seguidores entraram pelo seed HTTP. Player, nota elegível, vídeo e compartilhamento têm cobertura de contrato ou componente. |
-| Disputas | Roteiros SQL corrigidos e o de convites passaram no PostgreSQL local. Criação, recuperação, privacidade, denúncia e exclusão cobertas. Resposta, comparação experimental e expiração têm prova SQL/contrato. Falta a jornada inteira de duas contas com Edge e bytes privados. |
+| Disputas | Roteiros SQL corrigidos e o de convites passaram no PostgreSQL local. O X1 sintético fez convite, resposta e recuperação com duas contas. Edge devolveu 200/200 para os participantes com WAV íntegro e no-store, e 404 para a terceira conta. Chromium e WebKit abriram o X1 respondido sem declarar vencedor. Expiração, denúncia e exclusão têm prova SQL/contrato. |
 | Perfil | Três contas sintéticas criadas, login com senha, sessão anônima, conclusão de perfil e seguir passaram via API local. Resumo de notas conferido em desktop e viewport móvel. Foto, busca, visibilidade e permissões contam com testes existentes. |
 
 Além da prova da Resenha, o WebKit tocou um Blob WAV autorizado no próprio compositor, com avanço do player e publicação ainda bloqueada sem consentimento. A reprodução logo após uma captura física segue sem prova. WebKit local não disponibilizou o microfone sintético exigido pelo roteiro de captura.
@@ -92,8 +92,8 @@ Confirmar no painel publisher a elegibilidade dos placements existentes para arr
 | Código e CI | GO | M05 validada e integrada. Checks da candidata registrados na PR. |
 | Banco e migrations | NO-GO | Sete migrations pendentes no ambiente hospedado. Ensaio incremental passou. |
 | Integridade dos dados | NO-GO | Fixture histórica preservada. Compatibilidade e recuperação hospedadas pendentes. |
-| Auth, Storage e serviços | NO-GO | Auth e Storage passaram localmente. Edge local 503, novo gateway/worker hospedado sem prova. |
-| Áudio e compatibilidade | NO-GO | PCM sintético, consentimento, WAV e rollback local comprovados. Compositor após captura física e X1 com Edge e áudio privado pendentes. |
+| Auth, Storage e serviços | NO-GO | Auth, Storage, X1 e worker passaram em recortes locais com Edge. Novo gateway/worker e configuração hospedada sem prova. |
+| Áudio e compatibilidade | NO-GO | PCM sintético, consentimento, WAV, X1 privado e rollback local comprovados. Compositor após captura física e validação do corte hospedado pendentes. |
 | Experiência | GO com ressalvas | Chromium e WebKit passaram os recortes de experiência. Aparelhos físicos não validados. |
 | Publicidade | NO-GO | Isolamento e switch conferidos com dublê. Inventário, clique e entrega do provedor sem homologação. |
 | SEO e PWA | GO com ressalvas | HTTP, build e PWA legado conferidos. Indexação nova e PWA em aparelho aguardam prova. |

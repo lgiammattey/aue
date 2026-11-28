@@ -94,6 +94,7 @@ describe('Analytics da Arena', () => {
     expect((window as unknown as Record<string, unknown>)['ga-disable-G-43GWYNCCMD']).toBe(true);
   });
   it.each([
+    ['/arena', 'arena', 'falhou_gravacao'],
     ['/feed', 'feed', 'ouviu_arroto'],
     ['/como-arrotar', 'publica', 'confirmou_maioridade'],
     ['/grupos', 'publica', 'clicou_anuncio'],

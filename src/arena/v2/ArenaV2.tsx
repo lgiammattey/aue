@@ -118,6 +118,10 @@ export function ArenaV2({
   const aberturaRegistrada = useRef(false);
   useEffect(() => { if (!aberturaRegistrada.current) { aberturaRegistrada.current = true; telemetria?.registrar('abriu_arena_v2'); } }, [telemetria]);
 
+  useEffect(() => {
+    if (estado === 'erro') telemetria?.registrar('falhou_gravacao');
+  }, [estado, telemetria]);
+
   const mudar = useCallback((proximo: Estado) => {
     estadoRef.current = proximo;
     setEstado(proximo);

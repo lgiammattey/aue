@@ -1,0 +1,42 @@
+{
+  "ambiente": "cópia descartável, Node 24.19.0/npm 11.17.0, sem credenciais reais",
+  "notas": "Códigos de saída observados na sessão; logs preservados com cores ANSI removidas. Unitários em uma rodada sem retry. Última checagem de governança na worktree M01.",
+  "resultados": {
+    "unitarios": {
+      "comando": "npm run test",
+      "exit_code": 0,
+      "arquivo": "M01-unitarios.txt",
+      "sha256": "cec0b9c70025751528596e53aaa2cfafd2a1865c3892ebfe021a04fd0954f56b"
+    },
+    "typecheck": {
+      "comando": "npm run typecheck",
+      "exit_code": 0,
+      "arquivo": "M01-typecheck.txt",
+      "sha256": "ecc9a75143e26f67e3d42354284dee9b44acc0bda9946edfccef10c4b6ca7475"
+    },
+    "lint": {
+      "comando": "npm run lint",
+      "exit_code": 0,
+      "arquivo": "M01-lint.txt",
+      "sha256": "bc6b87089a46bc6fc195607fee386514dddb7e7c1f42eebf34e01933f02f8c51"
+    },
+    "processamento": {
+      "comando": "node --test scripts/nota-automatica/processar.test.mjs",
+      "exit_code": 0,
+      "arquivo": "M01-processamento.txt",
+      "sha256": "f061db946bbb80b2e47ac24ab956e8beb1399826c7ca9c02fec188f25a2e8129"
+    },
+    "build": {
+      "comando": "npm run build",
+      "exit_code": 0,
+      "arquivo": "M01-build.txt",
+      "sha256": "59adfd97286dcee070ce37b658bb47f38bfbe7f0442e54a5e0a26ae7e163b4f9"
+    },
+    "governanca": {
+      "comando": "parsers TOML/YAML, comparação workflow, backlog, skills/list e git diff --check",
+      "exit_code": 0,
+      "arquivo": "M01-governanca.txt",
+      "sha256": "76bf97bb96cc7aeecdbd496da6bfe897bf766df4394b691e0b24d52dd4f93fa3"
+    }
+  }
+}

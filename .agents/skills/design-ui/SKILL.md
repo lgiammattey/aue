@@ -1,11 +1,13 @@
 ---
 name: design-ui
-description: Procedimento do Diego para especificar a UI do Auê! e Arena com fidelidade 1:1 ao Design System v5.
+description: Procedimento do Felipe para especificar a UI do Auê! e Arena com fidelidade ao design system vigente.
 ---
 
 # Skill: design-ui
 
-Procedimento do **Diego** para transformar os fluxos da Tropa e da Arena em **especificação visual 1:1** com o Design System v5 para ele mesmo construir em React 19.
+Procedimento do **Felipe** para transformar fluxos permitidos da Arena, Mural e Perfil em especificação visual aderente ao design system vigente antes da implementação em React 19. Conflito entre documento e código é registrado; não autoriza redesign.
+
+> Os valores e componentes descritos abaixo são referências a conferir contra a rota e o mapa de páginas. Não usar esta skill para trocar paleta, tema, moldura, tipografia ou layout sem pedido explícito, Cartão de Missão e aceite visual.
 
 ---
 
@@ -13,8 +15,8 @@ Procedimento do **Diego** para transformar os fluxos da Tropa e da Arena em **es
 
 1. **Fundo Chapado:** `--bg` puro (`#0a0a08` no dark, `#f5f3ea` no light). Sem cards flutuantes genéricos com bordas gradientes ou blur exagerado. A interface respira na solidez dos tons.
 1b. **Card é exceção:** só item repetível (post, X1) e moldura funcional (modal, sheet). Seção, ranking, filtro, métrica e formulário ficam chapados, separados por espaço e filete de 1px. Proibido card dentro de card. Regra em `DESIGN.md` §4.1.
-2. **Orçamento do Verde Ácido (`--accent: #c6ff00`):** No máximo **2 aparições simultâneas por estado**. Prioridade: (1) Bolha em gravação/pico; (2) Auê Score em revelação/resultado; (3) CTA primário ativo. Proibido pintar badges secundárias ou textos corridos de verde.
-3. **Temas Escuro e Claro:** Suporte nativo oficial com persistência via `localStorage ('bda-theme')`.
+2. **Orçamento do accent:** O token e a cor efetivamente aplicados na rota têm no máximo **2 aparições simultâneas por estado**. Prioridade: (1) Bolha em gravação/pico; (2) Auê Score em revelação/resultado; (3) CTA primário ativo. Proibido pintar badges secundárias ou textos corridos com o accent. Divergência entre documentação e CSS vira registro, não redesign automático.
+3. **Temas:** Preserve o tema e tokens da rota. A persistência e os temas disponíveis devem ser confirmados no código e no comportamento real antes de virar critério de aceite.
    - Dark: `--bg: #0a0a08`, `--surface: #171712`, `--surface-2: #1f1f18`, `--fg: #f5f3ea`, `--muted: #93917f`, `--border: #2b2a22`, `--border-strong: #74725f`, `--ind: #c6ff00`.
    - Light: `--bg: #f5f3ea`, `--surface: #ebe9de`, `--surface-2: #dedcd0`, `--fg: #0a0a08`, `--muted: #57554a`, `--border: #d6d4c6`, `--border-strong: #85836f`, `--ind: #0a0a08`.
 4. **Tipografia Canônica:**
@@ -24,7 +26,7 @@ Procedimento do **Diego** para transformar os fluxos da Tropa e da Arena em **es
 
 ---
 
-## 2. Componentes Oficiais do Design System v5
+## 2. Componentes Oficiais do Design System
 
 Referência viva: 
 

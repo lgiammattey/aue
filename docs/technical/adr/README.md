@@ -25,6 +25,8 @@ nome de pasta dentro de uma camada, refactor. Isso é PR.
 | [0008](0008-paginas-publicas-dos-grupos.md) | Páginas públicas dos grupos externos no build | aceito |
 | [0009](0009-identidade-social-promovida.md) | Identidade social promovida | aceito |
 | [0010](0010-comunidades-topicos-e-respostas.md) | Comunidades, tópicos e respostas (sem feed solto) | substituído pelo 0015 |
+| [0011](0011-audio-privado-duelo-na-borda.md) | Entrega de áudio privado do duelo | aceito, ativação condicionada às verificações do próprio ADR |
+| [0012](0012-nota-de-audio-publicado-em-servidor.md) | Nota de áudio publicado em serviço confiável | aceito |
 | [0013](0013-mural-o-arroto-e-o-centro.md) | Mural: o arroto é o centro, texto e resultado de X1 também postam | aceito |
 | [0014](0014-x1-no-mural-com-audio-consentido.md) | Resultado de X1 no Mural, com áudio só de quem consentir | proposto |
 | [0015](0015-o-jogo-e-o-centro.md) | O jogo é o centro; comunidades e tópicos saem | aceito |
@@ -52,6 +54,13 @@ café:
 
 ADR aceito **não se edita para virar outra decisão**. Escreve um novo e marca o
 antigo como substituído. O histórico é o que impede a gente de rodar em círculo.
+
+## Leitura no dia a dia
+
+O [registro de arquitetura](../arquitetura.md) descreve código e limites de
+prova no SHA revisado; ele não altera ADR. Para produto, valem `docs/jogo/AUE.md`
+e `docs/escopo/ESCOPO_ATUAL.md`. A M01 registrou esse arranjo documental sem
+trocar stack, backend, hospedagem ou qualquer contrato do sistema.
 
 ## Quando um ADR é obrigatório
 

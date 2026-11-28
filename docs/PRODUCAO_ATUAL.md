@@ -2,7 +2,7 @@
 
 **Referência:** commit `d541e3162e6f1e6a488f92f16d1cf17791b57cbf` na main.
 **Conferência:** 23/11/2026, por código, GitHub Actions, histórico de migrações e observação em navegador desktop da página inicial e de cinco rotas públicas.
-**Endereço configurado:** https://aue.web.app/
+**Endereço oficial atual:** https://arrotaaue.com.br/; `aue.web.app` é host legado. O restante deste retrato é histórico, de 23/11/2026. A M00 observou um deploy posterior sem conseguir identificar com certeza o SHA servido hoje; veja [baseline M00](technical/auditorias/M00-BASELINE.md).
 
 A execução [Publicar no Firebase](https://github.com/lgiammattey/aue/actions/runs/45280078724) para esse commit terminou com sucesso no canal live, e a execução independente [Validação](https://github.com/lgiammattey/aue/actions/runs/45280078824) do mesmo commit também passou. Uma não substitui a outra: a publicação bem-sucedida não prova operação do banco nem funcionamento de cada jornada.
 
@@ -24,7 +24,7 @@ O workflow `.github/workflows/publicar-firebase.yml` liga `VITE_FEATURE_ARENA_EX
 | `/perfil`, `/u/:handle`, `/login` | Perfil e autenticação. |
 | `/grupos` | Diretório de grupos externos. |
 | `/como-jogar`, `/como-arrotar`, `/tipos-de-arroto`, `/ranking-de-arrotos` | Páginas públicas. |
-| `/en` | Home em inglês, indexável, com `hreflang` recíproco com `/`. A Arena que ela linka continua em português. |
+| `/en` | Home em inglês, indexável, com `hreflang` recíproco com `/`. O código auditado pela M00 passa `idioma=en` para a Arena v2; comportamento publicado atual não foi comprovado por esta linha histórica. |
 | `/admin` | Entrada administrativa; acesso efetivo depende das autorizações do backend. |
 
 As rotas de comunidades e tópicos no roteador React redirecionam para `/`. O Firebase configura redirecionamentos próprios para `/comunidade`, `/videos` e `/videos-de-arroto`; a resposta final depende também da precedência de Hosting e deve ser verificada ao vivo. Não apresentar hubs de comunidades como navegação ativa sem prova.

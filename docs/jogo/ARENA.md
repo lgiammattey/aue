@@ -12,11 +12,9 @@ Os dez estados e a máquina detalhados abaixo descrevem a Arena anterior; não s
 
 O teste `arena-md.paridade.test.ts` amarra este texto ao código. Só mude os dois juntos.
 
-O GDD [`AUÊ!-2.md`](AUÊ!-2.md) e a prancha visual de telas recebida descrevem
-momentos e variações visuais do jogo. Eles não alteram a máquina abaixo: os dez
-estados deste documento continuam sendo os únicos estados de produto. Uma
-prancha com 20 cartões pode representar submomentos dentro desses estados,
-nunca vinte rotas novas.
+Materiais antigos de GDD e pranchas visuais não estão disponíveis como fontes
+canônicas neste repositório. Não use essas referências para criar estados. Os
+dez estados abaixo documentam a Arena legada; a Arena v2 está descrita acima.
 
 A experiência principal do Auê acontece em **uma Arena que muda de estado**.
 

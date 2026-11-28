@@ -1,40 +1,39 @@
 ---
 name: revisar-produto
-description: Enquadramento de missão (Cartão de Missão), modelo das 7 perguntas e aceite final do Tiago na rede social do Auê!
+description: Enquadramento de missão, Cartão de Missão e parecer final de Marcelo para o Auê.
 ---
 
 # Skill: revisar-produto
 
-Use na largada (para classificar a pista, abrir o Cartão de Missão e acionar Camillo e/ou Diego) e na chegada (para dar o aceite final após a prova de quem auditou).
+Use no Enquadramento (para analisar, decidir e abrir o Cartão de Missão) e na chegada (para emitir parecer após Construção, Auto-Teste e Prova de Fogo).
 
 ---
 
 ## 1. Na Largada (Enquadramento e Cartão de Missão)
 
 Antes de acionar a oficina:
-1. Diferencie **Exploração** (troca de ideia com o Luiz, zero código) de **Decisão de Execução**.
-2. Passe pelo filtro da jornada de 6 fases:
-   `DESCOBERTA → BONDE (FEED) → ARENA → RESILIÊNCIA → DEPOIS DA NOTA → X1 (DUELO) → REVANCHE`
+1. Diferencie **Ideia** (conversa, zero código), **Análise**, **Decisão** e **Missão**.
+2. Confirme o loop vigente em `AUE.md`, `JORNADA.md` e `ARENA.md`; não crie estado ou funcionalidade por um documento antigo.
 3. Classifique a **Pista (Lane)**:
    - `Exploração` (zero código);
    - `Fast lane` (ajuste cirúrgico de copy, token visual ou bug isolado);
    - `Full flow comum` (nova tela ou componente dentro dos contratos existentes);
-   - `Full flow sistêmica` (Gate Arquitetural Obrigatório de Camillo para banco, motor de áudio ou performance);
+   - `Full flow sistêmica` (aplicar o Gate de Camillo conforme os gatilhos do [workflow](../../WORKFLOW.md#2-construção-e-auto-teste));
    - `Hot lane` (build quebrada ou fluxo crítico inoperante).
 4. Abra o [Cartão de Missão](../../templates/mission-card.md) com escopo limpo, critérios observáveis e a prova que o auditor precisará cobrar.
 
 ---
 
-## 2. Na Chegada (As 7 Perguntas de Aceite do Tiago)
+## 2. Na Chegada (Parecer de Marcelo)
 
 Com a evidência do auditor (funcional e testes) e a fidelidade visual ao design system, avalie:
 
 1. **Necessidade:** Resolve uma dor real da pessoa no Arena ou no mural sem adicionar fricção?
 2. **Valor:** Deixa o ato de arrotar, receber a nota, ouvir outros arrotos ou desafiar no X1 mais divertido?
-3. **Coerência:** Respeita o Design System v5 (Anton + Archivo, temas escuro/claro, sem gradientes falsos, máximo 2 verdes por estado)?
+3. **Coerência:** Respeita a fonte visual vigente (Anton + Archivo e tokens aplicados) sem usar a missão para resolver conflito de design por conta própria?
 4. **Experiência:** Está responsivo nas 3 larguras (Desktop 3 colunas, Tablet ícones, Webapp Mobile com alvos de toque >= 44px e safe area)?
 5. **Funcionamento Ponta a Ponta:** O áudio toca instantaneamente no mural? A Arena grava, valida e revela a nota sem engasgos?
-6. **Qualidade e Prova:** O auditor auditou testes, build e estados de resiliência (`MIC_ERROR`, `NO_SOUND`)? Falta de prova vira `NÃO VALIDADO`.
+6. **Qualidade e Prova:** Renan registrou testes, build e estados de resiliência (`MIC_ERROR`, `NO_SOUND`), distinguindo simulação, navegador, aparelho e produção? Falta de prova vira `NÃO VALIDADO`.
 7. **Simplicidade:** Foi feito com o mínimo de código e modularidade clara, sem complexidade prematura?
 
 ---

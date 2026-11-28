@@ -1,0 +1,70 @@
+{
+  "data_local": "2026-11-27",
+  "base": "ba161a10c50ffa8b7d7c060043e435a8deb59ea1 com diff M01 e M01.1 documental",
+  "ambiente": "cópia descartável; Node 24.19.0; npm 11.17.0; env isolado sem credenciais de produto; npm ci --ignore-scripts",
+  "checks": {
+    "typecheck": {
+      "comando": "npm run typecheck",
+      "exit_code": 0,
+      "sha256_saida_bruta": "fe7f6e9258f2c455d251c1ce34b73f3fc25b802a96ec351856f342e6724f9ba6"
+    },
+    "lint": {
+      "comando": "npm run lint",
+      "exit_code": 0,
+      "sha256_saida_bruta": "1e4fb07fcdcacc585da2794314c5a5b1ddb21a717eca6d5b9740dbd40babe237"
+    },
+    "unitarios": {
+      "comando": "npm run test",
+      "exit_code": 0,
+      "sha256_saida_bruta": "3679bb28affadba7753cbfdf985149c0b540bba61b711e1f1adbaf800566b1e6"
+    },
+    "processamento": {
+      "comando": "node --test scripts/nota-automatica/processar.test.mjs",
+      "exit_code": 0,
+      "sha256_saida_bruta": "891d330ba66ef392194a47d97bbae2a36a101d3e5ea6e8b6953cacabaf212a70"
+    },
+    "build": {
+      "comando": "npm run build",
+      "exit_code": 0,
+      "sha256_saida_bruta": "9def0958f373408f4f13685a2c86caba2fe71a31fe19459b1c4517d61f79505a"
+    }
+  },
+  "unitarios": {
+    "aprovados": 2600,
+    "ignorados": 9,
+    "arquivos_aprovados": 265,
+    "arquivos_ignorados": 1,
+    "retry": false
+  },
+  "lint": {
+    "avisos": 23,
+    "erros": 0,
+    "novos_vs_m01": 0,
+    "removidos_vs_m01": 0,
+    "comparacao_m00": "23 ocorrências iguais por regra e localização nas três rodadas M00, M01 e M01.1"
+  },
+  "processamento": {
+    "aprovados": 9,
+    "falhas": 0
+  },
+  "build": "passou; geração das páginas de grupos pulada por ausência de credenciais",
+  "testes_de_forum": {
+    "comando": "vitest run src/plataforma/web/forum.servidor.test.ts --reporter=json",
+    "aprovados": 0,
+    "ignorados": 9,
+    "nomes": [
+      "fórum no ambiente aplicado: leitura de visitante o diretório responde a visitante e ninguém é membro",
+      "fórum no ambiente aplicado: leitura de visitante slug que não existe: obterComunidadeDoForum diz null; listarTopicos devolve página vazia, não erro",
+      "fórum no ambiente aplicado: leitura de visitante visitante lê tópicos sem ser autor e sem dono de nada",
+      "fórum no ambiente aplicado: leitura de visitante Explorar, ordem atividade paginar de 2 em 2 não repete nem pula, e bate com a leitura de uma vez",
+      "fórum no ambiente aplicado: leitura de visitante Explorar, ordem recentes paginar de 2 em 2 não repete nem pula, e bate com a leitura de uma vez",
+      "fórum no ambiente aplicado: leitura de visitante tópicos da comunidade com mais tópicos, ordem atividade paginar de 2 em 2 não repete nem pula (cursor leva o fixado)",
+      "fórum no ambiente aplicado: leitura de visitante tópicos da comunidade com mais tópicos, ordem recentes paginar de 2 em 2 não repete nem pula (cursor leva o fixado)",
+      "fórum no ambiente aplicado: leitura de visitante respostas de um tópico: paginar de 2 em 2, em ordem cronológica, sem repetir nem pular",
+      "fórum no ambiente aplicado: leitura de visitante listas do autor: handle que não existe devolve página vazia (não prova que a pessoa existe)"
+    ],
+    "condicao": "sem opt-in e ambiente remoto configurado"
+  },
+  "governanca": "4 TOML e 21 frontmatters YAML válidos; 17 skills descobertas, zero erros; workflow com conteúdo não comentário idêntico à base; IDs AUE-T01–T15; git diff --check",
+  "limites": "Não houve validação de produção, staging, aparelhos, nem migrations reais; testes da M00 com falhas anteriores não foram apagados."
+}

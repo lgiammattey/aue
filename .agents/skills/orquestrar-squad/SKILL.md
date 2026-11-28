@@ -1,17 +1,18 @@
 ---
 name: orquestrar-squad
-description: Orquestração e delegação de tarefas da squad do Auê entre Tiago, Camillo e Diego.
+description: Orquestração e delegação da squad do Auê entre Marcelo, Felipe, Camillo e Renan.
 ---
 
 # Skill: orquestrar-squad
 
-Use esta skill quando uma etapa do trabalho precisar do titular da área ou quando o paralelismo acelerar a entrega sem conflito de arquivos. Quem orquestra é o **Tiago**.
+Use esta skill quando uma etapa do trabalho precisar do titular da área ou quando o paralelismo acelerar a entrega sem conflito de arquivos. Quem orquestra é **Marcelo**.
 
 Os titulares vivem em `.codex/agents/` e `.claude/agents/`:
 
-- **Tiago (`tiago`)**: produto, Cartão de Missão, WIP 1 e aceite final. Somente leitura.
-- **Camillo (`camillo`)**: áudio, nota do juiz, backend, Supabase, arquitetura, Gate Arquitetural, plataforma e SEO técnico. Escreve quando delegado e audita o Diego.
-- **Diego (`diego`)**: telas, Arena e experiência em React 19, fidelidade ao design system. Escreve quando delegado e audita a parte visível do Camillo.
+- **Marcelo (`marcelo`)**: Product Lead, Cartão de Missão, WIP 1, dependências, roadmap e parecer final. Pode registrar cartões, decisões e roadmap no escopo delegado; não implementa código de produto.
+- **Felipe (`felipe`)**: UX/UI e Design Lead, design system, acessibilidade, responsividade e revisão da parte visível. Escreve quando delegado.
+- **Camillo (`camillo`)**: Tech Lead full-stack, áudio, backend, Supabase, arquitetura, Gate Arquitetural, plataforma e SEO técnico. Escreve quando delegado.
+- **Renan (`renan`)**: Quality Lead, Prova de Fogo, critérios de aceite e parecer de quem não implementou. Pode executar testes e registrar evidências no escopo delegado; declara o grau de independência.
 
 ## Antes de delegar
 
@@ -29,7 +30,7 @@ Nunca coloque dois agentes escrevendo nos mesmos arquivos ao mesmo tempo.
 ## Mensagem mínima de passagem de bastão
 
 ```text
-Agente: <tiago|camillo|diego>
+Agente: <marcelo|felipe|camillo|renan>
 Objetivo: <entrega concreta>
 Escopo de leitura: <arquivos, módulos ou fontes>
 Escopo de escrita: <somente leitura ou arquivos/módulos autorizados>
@@ -39,6 +40,6 @@ Retorno: evidências, arquivos alterados, comandos e testes executados, riscos e
 
 ## Travas de retorno
 
-- **Auditoria cruzada:** quem implementou não audita. Exigir parecer `BLOQUEIA`, `AJUSTA`, `ISSUE_FUTURA` ou `SEM ACHADOS MATERIAIS` com prova reproduzível em navegador real (desktop e webapp mobile).
-- **Para o Tiago (aceite final):** enviar só depois da implementação e da auditoria do outro agente.
-- **Antes da auditoria:** o Tiago confere o `git diff` e os testes.
+- **Prova de Fogo:** Renan não valida o que implementou. Exigir parecer `BLOQUEIA`, `AJUSTA`, `ISSUE_FUTURA` ou `SEM ACHADOS MATERIAIS` com evidência compatível com o risco. Registrar se foi mock, ambiente descartável, navegador, aparelho ou produção; não prometer navegador ou aparelho real sem prova.
+- **Para Marcelo:** enviar só depois da construção, auto-teste e Prova de Fogo.
+- **Antes da validação:** Marcelo confere o `git diff`, o Cartão e as evidências.

@@ -1,0 +1,269 @@
+
+> aue@0.0.0 lint
+> oxlint
+
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/features/administracao/ModeracaoDueloV2.tsx:21:53]
+ 20 |   }, [servico]);
+ 21 |   useEffect(() => { void carregar(); return () => { geracao.current++; }; }, [carregar]);
+    :                                                     ^^^^^^^^^^^^^^^
+ 22 |   useEffect(() => { if (!audio) return; const local = criarEnderecoLocal(audio.dados); setEndereco(local); return () => soltarEnderecoLocal(local); }, [audio]);
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! eslint(no-useless-escape): Unnecessary escape character '"'
+     ,-[src/qualidade/seo-publico.test.ts:578:64]
+ 577 |     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
+ 578 |     expect(ler('../paginas/como-arrotar.html')).not.toContain('\"@type\": \"HowTo\"');
+     :                                                                ^^
+ 579 |     for (const termo of ['arroto alto', 'arroto longo', 'arroto explosivo', 'arroto grave', 'arrotar em público', 'gravar meu arroto']) {
+     `----
+  help: Replace `\"` with `"`.
+
+  ! eslint(no-useless-escape): Unnecessary escape character '"'
+     ,-[src/qualidade/seo-publico.test.ts:578:71]
+ 577 |     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
+ 578 |     expect(ler('../paginas/como-arrotar.html')).not.toContain('\"@type\": \"HowTo\"');
+     :                                                                       ^^
+ 579 |     for (const termo of ['arroto alto', 'arroto longo', 'arroto explosivo', 'arroto grave', 'arrotar em público', 'gravar meu arroto']) {
+     `----
+  help: Replace `\"` with `"`.
+
+  ! eslint(no-useless-escape): Unnecessary escape character '"'
+     ,-[src/qualidade/seo-publico.test.ts:578:75]
+ 577 |     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
+ 578 |     expect(ler('../paginas/como-arrotar.html')).not.toContain('\"@type\": \"HowTo\"');
+     :                                                                           ^^
+ 579 |     for (const termo of ['arroto alto', 'arroto longo', 'arroto explosivo', 'arroto grave', 'arrotar em público', 'gravar meu arroto']) {
+     `----
+  help: Replace `\"` with `"`.
+
+  ! eslint(no-useless-escape): Unnecessary escape character '"'
+     ,-[src/qualidade/seo-publico.test.ts:578:82]
+ 577 |     expect(noscript, 'como-arrotar.html sem <noscript>').toBeTruthy();
+ 578 |     expect(ler('../paginas/como-arrotar.html')).not.toContain('\"@type\": \"HowTo\"');
+     :                                                                                  ^^
+ 579 |     for (const termo of ['arroto alto', 'arroto longo', 'arroto explosivo', 'arroto grave', 'arrotar em público', 'gravar meu arroto']) {
+     `----
+  help: Replace `\"` with `"`.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/arena/v2/duelo/MeusDuelosV2.tsx:60:20]
+ 59 |     void carregar(0);
+ 60 |     return () => { geracao.current++; audioGeracao.current++; };
+    :                    ^^^^^^^^^^^^^^^
+ 61 |   }, [carregar]);
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/arena/v2/duelo/MeusDuelosV2.tsx:60:39]
+ 59 |     void carregar(0);
+ 60 |     return () => { geracao.current++; audioGeracao.current++; };
+    :                                       ^^^^^^^^^^^^^^^^^^^^
+ 61 |   }, [carregar]);
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/shared/components/AdBanner.tsx:18:14]
+ 17 | /** Há cliente do Google disponível nesta build; ainda depende do id do slot. */
+ 18 | export const ADSENSE_CONFIGURADO = Boolean(CLIENTE_ADSENSE);
+    :              ^^^^^^^^^^^^^^^^^^^
+ 19 | 
+    `----
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/arena/v2/duelo/DueloV2.tsx:52:32]
+ 51 |     return () => {
+ 52 |       montado.current = false; geracaoEnvio.current++;
+    :                                ^^^^^^^^^^^^^^^^^^^^
+ 53 |       if (envioEmCurso.current) {
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+     ,-[src/arena/v2/duelo/DueloV2.tsx:228:7]
+ 227 |     return () => {
+ 228 |       geracao.current++;
+     :       ^^^^^^^^^^^^^^^
+ 229 |       if (envioEmCurso.current) {
+     `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+   ,-[src/features/novo-aue/ModalAjustarImagem.tsx:8:17]
+ 7 | /** Mantém os centros nos mesmos limites que o canvas aplica ao recorte. */
+ 8 | export function limitarRecorteAoQuadro(r:RecorteVisual,g:G):RecorteVisual{
+   :                 ^^^^^^^^^^^^^^^^^^^^^^
+ 9 |   const proporcao=g.larguraDaJanela/g.alturaDaJanela;
+   `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/features/novo-aue/ModalAjustarImagem.tsx:16:17]
+ 15 | }
+ 16 | export function recorteDepoisDoArrasto(r:RecorteVisual,dx:number,dy:number,g:G):RecorteVisual{const s=Math.max(g.larguraDaJanela/g.larguraDaImagem,g.alturaDaJanela/g.alturaDaImagem)*r.zoom;return limitarRecorteAoQuadro({...r,centroX:r.centroX-dx/(g.larguraDaImagem*s),centroY:r.centroY-dy/(g.alturaDaImagem*s)},g)}
+    :                 ^^^^^^^^^^^^^^^^^^^^^^
+ 17 | interface P{aberto:boolean;tipo:TipoDeImagemAjustavel;previewUrl:string|null;estado:EstadoDoAjusteDeImagem;erro?:string|null;recorte:RecorteVisual;aoFechar():void;aoSalvar():void;aoTrocarArquivo():void;aoAlterarRecorte(r:RecorteVisual):void}
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/features/forum/contexto.tsx:32:17]
+ 31 | 
+ 32 | export function criarDependenciasPadrao(): DependenciasDoForum {
+    :                 ^^^^^^^^^^^^^^^^^^^^^^^
+ 33 |   return {
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/features/forum/contexto.tsx:53:17]
+ 52 | /** Quem não recebeu portas de fora cria as de verdade, uma vez. */
+ 53 | export function useDependenciasOuPadrao(): DependenciasDoForum {
+    :                 ^^^^^^^^^^^^^^^^^^^^^^^
+ 54 |   const doContexto = useContext(Contexto);
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/features/forum/contexto.tsx:59:17]
+ 58 | 
+ 59 | export function useDependenciasDoForum(): DependenciasDoForum {
+    :                 ^^^^^^^^^^^^^^^^^^^^^^
+ 60 |   const deps = useContext(Contexto);
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/features/forum/BuscaDoForum.tsx:16:17]
+ 15 | 
+ 16 | export function tipoDaBuscaNaUrl(valor: string | null): TipoDeBusca {
+    :                 ^^^^^^^^^^^^^^^^
+ 17 |   return valor === 'comunidades' || valor === 'topicos' ? valor : 'pessoas';
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file has exports. Move your component(s) to a separate file.
+    ,-[e2e/harness.tsx:24:10]
+ 23 | const postComTituloAutoral: ItemDoFeed = { ...postDeMidia, id: 'post-e2e-autoral', titulo: 'O gás virou história' };
+ 24 | function Harness() {
+    :          ^^^^^^^
+ 25 |   const [modal, setModal] = useState<'comentarios' | 'compositor' | 'gravar' | null>(null);
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file has exports. Move your component(s) to a separate file.
+    ,-[e2e/harness.tsx:32:10]
+ 31 |  */
+ 32 | function HarnessMicrofoneCompositor() {
+    :          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 33 |   const [publicado, setPublicado] = useState<{ tipo: string; tamanho: number } | null>(null);
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file has exports. Move your component(s) to a separate file.
+    ,-[e2e/harness.tsx:55:10]
+ 54 | }
+ 55 | function HarnessQuebras() {
+    :          ^^^^^^^^^^^^^^
+ 56 |   const texto = 'Primeira linha\nSegunda linha\n\nOutro parágrafo';
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file has exports. Move your component(s) to a separate file.
+    ,-[e2e/harness.tsx:63:10]
+ 62 | }
+ 63 | function HarnessPauta() {
+    :          ^^^^^^^^^^^^
+ 64 |   const entradas = [
+    `----
+
+  ! react(only-export-components): Fast refresh only works when a file has exports. Move your component(s) to a separate file.
+     ,-[e2e/harness.tsx:114:10]
+ 113 | 
+ 114 | function HarnessAdministracao() {
+     :          ^^^^^^^^^^^^^^^^^^^^
+ 115 |   return <TelaAdministracao porta={portaAdministrativaDoHarness} />;
+     `----
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'comunidadeAtiva'
+     ,-[src/features/novo-aue/InicioOpenDesign.tsx:906:6]
+ 879 |           comunidadeSlug: t.comunidade.slug,
+ 880 |           comunidadeAvatarUrl: fonteDoAvatarDaComunidade(comunidadeAtiva),
+     :                                                          ^^^^^^^|^^^^^^^
+     :                                                                 `-- useEffect uses `comunidadeAtiva` here
+ 881 |           titulo: t.titulo,
+ 882 |           corpo: t.corpo,
+ 883 |           autorNome: t.autor.apelido ?? (t.autor.handle ? `@${t.autor.handle}` : 'Anônimo'),
+ 884 |           autorHandle: t.autor.handle ?? undefined,
+ 885 |           autorAvatarUrl: t.autor.avatarUrl ?? undefined,
+ 886 |           criadoEm: t.criadoEm,
+ 887 |           respostasTotal: t.respostasTotal,
+ 888 |           temAudio: audio.temAudio || anexo?.tipo === 'audio',
+ 889 |           enderecoDoAudio: audio.enderecoDoAudio,
+ 890 |           ...notaAplicada,
+ 891 |           anexo: anexo ? { tipo: anexo.tipo, url, duracaoMs: anexo.duracaoMs } : undefined,
+ 892 |         });
+ 893 |       }
+ 894 |       setTopicosDaComunidade(itens);
+ 895 |       void carregarPreviasDasConversas(itens);
+ 896 |       setEstadoTopicosDaComunidade('pronto');
+ 897 |     }).catch(() => {
+ 898 |       if (!ativo) return;
+ 899 |       setTopicosDaComunidade([]);
+ 900 |       setEstadoTopicosDaComunidade('erro');
+ 901 |     });
+ 902 | 
+ 903 |     return () => {
+ 904 |       ativo = false;
+ 905 |     };
+ 906 |   }, [comunidadeSlug, forum, abaComunidade, carregarPreviasDasConversas]);
+     :      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 907 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has missing dependencies: 'abrirComentarios', and 'carregarPreviasDasConversas'
+      ,-[src/features/novo-aue/InicioOpenDesign.tsx:1005:6]
+  967 |           setEntradasDaPauta(entradas);
+  968 |           void carregarPreviasDasConversas(entradas);
+      :                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  969 |           setEstadoDaPauta('pronto');
+  970 |           return;
+  971 |         }
+  972 | 
+  973 |         const res = await forum.obterTopico(topicoIdParam);
+  974 |         if (!ativo) return;
+  975 |         if (!res.ok || !res.valor) {
+  976 |           setFalhaTopico(true);
+  977 |           setEstadoDaPauta('ocioso');
+  978 |           return;
+  979 |         }
+  980 |         const anexos = new Map<string, AnexoDoForum>();
+  981 |         const notas = new Map<string, NotaRetrospectiva>();
+  982 |         if (forum.listarAnexosDoForum) {
+  983 |           const leitura = await forum.listarAnexosDoForum({ topicoIds: [res.valor.id] });
+  984 |           if (leitura.ok) leitura.valor.forEach((anexo) => anexos.set(anexo.alvoId, anexo));
+  985 |         }
+  986 |         if (forum.listarNotasRetrospectivas) {
+  987 |           const leitura = await forum.listarNotasRetrospectivas([res.valor.id]);
+  988 |           if (leitura.ok) leitura.valor.forEach((nota) => notas.set(nota.id, nota));
+  989 |         }
+  990 |         const post = await paraItem(res.valor, anexos, notas);
+  991 |         if (!ativo) return;
+  992 |         setEstadoDaPauta('ocioso');
+  993 |         setPostComentariosAtivo(post);
+  994 |         void abrirComentarios(post, undefined, true);
+      :              ^^^^^^^^^^^^^^^^
+  995 |       } catch {
+  996 |         if (!ativo) return;
+  997 |         setEstadoDaPauta('erro');
+  998 |       }
+  999 |     };
+ 1000 |     void carregar();
+ 1001 | 
+ 1002 |     return () => {
+ 1003 |       ativo = false;
+ 1004 |     };
+ 1005 |   }, [topicoIdParam, forum, pautas, comunidadeAtiva]);
+      :      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 1006 | 
+      `----
+  help: Either include it or remove the dependency array.
+
+Found 23 warnings and 0 errors.
+Finished in 47ms on 681 files with 104 rules using 10 threads.

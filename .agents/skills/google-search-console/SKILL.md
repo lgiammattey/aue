@@ -1,6 +1,6 @@
 ---
 name: google-search-console
-description: Procedimento do Camillo (SEO técnico) para gerenciar Google Search Console, SEO técnico, indexação, sitemaps e Core Web Vitals do Auê!.
+description: Procedimento do Camillo para SEO técnico, indexação, sitemaps e Core Web Vitals do Auê.
 ---
 
 # Skill: google-search-console
@@ -12,17 +12,17 @@ Procedimento do **Camillo (SEO técnico e Google Search Console)** para garantir
 ## 1. Responsabilidades Centrais
 
 1. **Propriedade e Verificação do Domínio:**
-   - Garantir que o token / arquivo de verificação do Google Search Console (`google-site-verification`) esteja sempre ativo, servido na raiz e protegido por testes automatizados ([`src/seo-publico.test.ts`](file:///d:/Meus%20Documentos/Projetos/GitHub/aue/src/seo-publico.test.ts)).
+   - Garantir que o token / arquivo de verificação do Google Search Console (`google-site-verification`) esteja sempre ativo, servido na raiz e protegido por testes automatizados ([`src/qualidade/seo-publico.test.ts`](../../../src/qualidade/seo-publico.test.ts)).
    - Monitorar propriedade nos protocolos HTTP/HTTPS e domínios canônicos oficiais.
 
 2. **Sitemap & Rastreabilidade:**
-   - Manter [`public/sitemap.xml`](file:///d:/Meus%20Documentos/Projetos/GitHub/aue/public/sitemap.xml) estritamente atualizado com as páginas públicas indexáveis:
-     - `/` (Landing pública)
+   - Manter [`public/sitemap.xml`](../../../public/sitemap.xml) estritamente atualizado com as páginas públicas indexáveis:
+     - `/` (home pública indexável; não confundir com a rota de apoio `/landing`)
      - `/como-arrotar` (Guia educativo e de atração de tráfego)
      - `/como-jogar` (Regras e tutorial do jogo)
      - `/privacidade` e `/termos`
    - Garantir que URLs privadas de duelo X1 e rotas autenticadas **não** vazem no sitemap.
-   - Sincronizar paridade com [`public/robots.txt`](file:///d:/Meus%20Documentos/Projetos/GitHub/aue/public/robots.txt).
+   - Sincronizar paridade com [`public/robots.txt`](../../../public/robots.txt).
 
 3. **Tags Canônicas & Metadados de Indexação:**
    - Conferir se todas as páginas públicas possuem `<link rel="canonical" href="...">` apontando para a URL canônica correta do domínio em produção.
@@ -31,7 +31,7 @@ Procedimento do **Camillo (SEO técnico e Google Search Console)** para garantir
 
 4. **Experiência na Página & Core Web Vitals:**
    - Acompanhar relatórios de LCP (Largest Contentful Paint), INP (Interaction to Next Paint) e CLS (Cumulative Layout Shift) reportados pelo Search Console.
-   - Alertar imediatamente o **Diego** e o **Camillo** se qualquer asset de áudio, fonte ou script causar lentidão na renderização da landing ou mural.
+   - Alertar Felipe e Camillo se qualquer asset de áudio, fonte ou script causar lentidão na renderização da landing ou mural.
 
 5. **Erros de Cobertura e Indexação:**
    - Auditar relatórios de erros 404, falhas de redirecionamento, URLs bloqueadas por robots.txt e páginas rastreadas mas não indexadas.
@@ -43,4 +43,4 @@ Procedimento do **Camillo (SEO técnico e Google Search Console)** para garantir
 
 - **SEO não justifica texto de robô:** Nada de empilhar palavras-chave repetitivas que cheiram a IA. O conteúdo precisa ser autêntico, divertido e útil para o jogador real.
 - **Link do zap não é link indexável:** URLs de duelos privados (X1) pertencem aos duelistas e não devem ser indexadas no Google.
-- **`src/seo-publico.test.ts` é sagrado:** Nenhuma alteração de rota, sitemap ou tag canônica é feita sem atualizar e passar o teste de paridade.
+- **`src/qualidade/seo-publico.test.ts` protege o contrato SEO versionado.** Alterações de rota, sitemap ou canonical precisam passar pelo teste de paridade. Confira a propriedade do Search Console e a resposta publicada separadamente, no ambiente autorizado.

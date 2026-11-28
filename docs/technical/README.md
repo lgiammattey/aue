@@ -7,7 +7,9 @@ substitui o comportamento real do código e das migrações.
 
 ## Onde cada coisa mora
 
-- [`arquitetura.md`](arquitetura.md) descreve a estrutura implementada hoje.
+- [`arquitetura.md`](arquitetura.md) descreve a estrutura versionada, as divergências e os limites de prova.
+- [`QUALIDADE.md`](QUALIDADE.md) define os gates; [`operacao/RELEASE.md`](operacao/RELEASE.md) trata de release autorizado.
+- [`auditorias/M00-BASELINE.md`](auditorias/M00-BASELINE.md) registra o diagnóstico aceito com ressalvas e as evidências sintéticas essenciais.
 - [`adr/`](adr/) guarda as decisões arquiteturais aceitas. O
   [`ADR 0001`](adr/0001-arquitetura-oficial-do-aue.md) define as quatro camadas
   e a fronteira com o navegador.

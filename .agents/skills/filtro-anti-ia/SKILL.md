@@ -105,7 +105,7 @@ Lê em voz alta. Uma pergunta:
 Se cabe, tá bom. Se parece post de LinkedIn, campanha de agência ou changelog de
 SaaS, refaz.
 
-Segundo teste, pra copy e issue — o **Teste de Guinho**, em
+Segundo teste, para copy e issue — o filtro de voz em
 [`docs/jogo/VOZ.md`](../../../docs/jogo/VOZ.md).
 
 ## 6. Uma coisa que não é cheiro de IA

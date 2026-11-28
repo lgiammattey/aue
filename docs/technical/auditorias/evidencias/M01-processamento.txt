@@ -1,0 +1,17 @@
+✔ registra somente a nota da análise (0.815625ms)
+✔ não pontua bytes de outra versão (0.433208ms)
+✔ distingue rejeição, falha e nota inválida (0.1315ms)
+✔ rejeita item inválido antes de buscar áudio (0.171875ms)
+✔ não conta como sucesso nota recusada no servidor (0.079041ms)
+✔ sinaliza falhas e concessões não confirmadas, sem tratar rejeição como erro (0.040042ms)
+✔ continua o lote depois de uma falha e preserva a outra nota (0.107542ms)
+✔ envia segredo apenas ao gateway fixo e não segue redirecionamento (11.735ms)
+✔ integra worker e gateway com concessão e bytes válidos (4.54125ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 49.935791

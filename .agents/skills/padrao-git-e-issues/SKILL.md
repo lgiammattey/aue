@@ -9,8 +9,7 @@ Issue, PR e commit do Auê são **primos anotando o que precisa ser feito**. Nã
 são documento de banco, não são ticket de service desk, não são história de
 sprint.
 
-Quem abre issue normalmente é o **Giam** (é ele quem planeja e prioriza). PR e
-commit são do **Guinho**. A voz é a mesma pros três.
+Marcelo planeja e prioriza; quem implementa registra commit e PR. A voz é a mesma para a squad.
 
 Tudo aqui passa obrigatoriamente pela
 [`filtro-anti-ia`](../filtro-anti-ia/SKILL.md).
@@ -53,7 +52,7 @@ No que isso NÃO pode virar. Escreve mesmo. É o que segura o escopo.
 
 ## Tá pronto quando
 
-A lista que o Giam vai conferir no aceite. Cada linha tem que ser conferível.
+A lista que Marcelo e Renan conseguem conferir no aceite. Cada linha tem que ser conferível.
 ```
 
 Critério técnico, API, segurança e detalhe de execução entram **onde forem
@@ -119,9 +118,9 @@ abria em nada. Agora o erro aparece e dá pra tentar de novo.
 Mesma voz. O corpo do PR carrega, além da história:
 
 - o relatório de auditoria
-  ([`AGENTS.md`](../../../AGENTS.md) §5.4), separando o que foi verificado
+  ([Prova de Fogo](../../WORKFLOW.md#3-prova-de-fogo)), separando o que foi verificado
   automaticamente, por leitura, em celular real, e o que **não** foi;
-- o aceite do Giam ([`AGENTS.md`](../../../AGENTS.md) §5.5).
+- o parecer de Marcelo e a Prova de Fogo de Renan, conforme a governança vigente.
 
 Essas duas partes podem ser secas e diretas. Relatório não é lugar de piada, e
 também não é lugar de enfeite.
@@ -132,7 +131,7 @@ também não é lugar de enfeite.
 - [ ] tem "Não viaja" escrito?
 - [ ] o "Tá pronto quando" é conferível linha por linha?
 - [ ] passou na [`filtro-anti-ia`](../filtro-anti-ia/SKILL.md)?
-- [ ] passou no **Teste de Guinho**
+- [ ] passou no filtro de voz de [`VOZ.md`](../../../docs/jogo/VOZ.md)
       ([`docs/jogo/VOZ.md`](../../../docs/jogo/VOZ.md))?
 
 ## Relacionados

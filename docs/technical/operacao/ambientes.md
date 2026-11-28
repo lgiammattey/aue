@@ -37,6 +37,12 @@ O segundo item é o que falha em silêncio. Toda migração que toca RLS de
 `resultados` ou policy do bucket precisa, depois da produção, de um teste
 manual: abrir uma batalha em `aue.web.app` e apertar o play.
 
+## Sessão anônima no ambiente de teste
+
+Antes de validar upload ou X1 como visitante, confira se **Anonymous sign-ins** está habilitado nas configurações de Auth do projeto autorizado. A migration `20260807000029_login_anonimo.sql` documenta esse pré-requisito separadamente do schema. Sem sessão, o código prevê que a captura e a nota local possam continuar. Upload e duelo dependem da sessão.
+
+Registre o ambiente e o resultado observado, sem incluir credenciais, dados pessoais ou URLs assinadas. O estado do provedor deve ser conferido em cada ambiente.
+
 ## Como uma migração chega ao banco
 
 **Colando o SQL no SQL Editor do painel.** Não é preferência, é o que sobrou:

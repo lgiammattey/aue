@@ -1,0 +1,68 @@
+{
+  "fonte": {
+    "commit": "ba161a10c50ffa8b7d7c060043e435a8deb59ea1",
+    "handler": "supabase/functions/cadastrar-grupo/index.ts"
+  },
+  "ambiente": "Node local, sem rede, sem credenciais e sem servidor Supabase",
+  "adaptacoes": [
+    "TypeScript transpilado em memória; regras.ts é o fonte versionado transpilado.",
+    "O import npm:@supabase/supabase-js@2 foi substituído por createClient injetado; o import relativo de regras foi redirecionado ao mesmo fonte transpilado.",
+    "Deno.serve foi capturado para chamar o handler; Deno.env entrega valores sintéticos.",
+    "O dublê de Supabase controla snapshots e não representa PostgREST, RLS, Storage ou transação PostgreSQL."
+  ],
+  "cenarios": [
+    {
+      "nome": "cinco simultâneas, mesmo IP sintético",
+      "quantidade": 5,
+      "simultaneo": true,
+      "falharContador": false,
+      "status": [
+        201,
+        201,
+        201,
+        201,
+        201
+      ],
+      "respostas201": 5,
+      "respostas429": 0,
+      "gruposCriados": 5,
+      "contadorPersistido": 5,
+      "leiturasDoContador": 10
+    },
+    {
+      "nome": "cinco seriais, mesmo IP sintético",
+      "quantidade": 5,
+      "simultaneo": false,
+      "falharContador": false,
+      "status": [
+        201,
+        201,
+        201,
+        429,
+        429
+      ],
+      "respostas201": 3,
+      "respostas429": 2,
+      "gruposCriados": 3,
+      "contadorPersistido": 3,
+      "leiturasDoContador": 10
+    },
+    {
+      "nome": "quatro seriais com falha simulada ao persistir contador",
+      "quantidade": 4,
+      "simultaneo": false,
+      "falharContador": true,
+      "status": [
+        201,
+        201,
+        201,
+        201
+      ],
+      "respostas201": 4,
+      "respostas429": 0,
+      "gruposCriados": 4,
+      "contadorPersistido": 0,
+      "leiturasDoContador": 8
+    }
+  ]
+}

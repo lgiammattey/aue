@@ -1,17 +1,17 @@
 # Validação do Auê
 #
-# Roda as quatro verificações que o AGENTS.md §7 exige antes de qualquer merge:
+# Roda as quatro verificações que o AGENTS.md exige antes de qualquer merge:
 # typecheck, lint, test e build. Sem isso, a regra existia só no papel — quem
 # rodava era quem lembrasse.
 #
-# ESTE WORKFLOW NÃO PUBLICA NADA. A publicação continua sendo da Vercel, pela
-# integração com o GitHub: todo push vira prévia e todo merge na `main` vira
-# produção, sem passar por aqui. Criar um segundo publicador aqui dentro faria
-# cada push publicar duas vezes.
+# ESTE WORKFLOW NÃO PUBLICA NADA. A publicação versionada vive em
+# `publicar-firebase.yml`, que usa Firebase Hosting. Esta validação não é
+# dependência declarada do workflow de publicação; a obrigatoriedade antes de
+# merge depende da proteção de branch configurada fora do repositório.
 #
 # POR ISSO ELE NÃO PRECISA DE SEGREDO NENHUM. Não há token, chave ou variável
 # de ambiente configurada no GitHub para este arquivo funcionar. As chaves do
-# app vivem na Vercel e são injetadas por ela no momento do build.
+# app são usadas pelo workflow de publicação no momento do build configurado.
 #
 # `typecheck`, `lint`, `test` e `build` rodam sem `.env.local`: nenhum deles
 # depende de banco, rede ou chave.

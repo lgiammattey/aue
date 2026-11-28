@@ -1,11 +1,11 @@
 ---
 name: escrever-testes
-description: Diretrizes para Diego e Camillo escreverem testes unitários e de integração (vitest) para a Arena, o mural e o X1 do Auê.
+description: Diretrizes para Felipe e Camillo escreverem testes do Auê, com Renan diferenciando auto-teste de validação.
 ---
 
 # Skill: escrever-testes
 
-Procedimento do **Diego** e **Camillo** para escrever testes automatizados junto com o código — cobrindo regras do jogo, máquina da Arena, mural e recursos de áudio.
+Procedimento de **Felipe** e **Camillo** para escrever testes automatizados junto com o código — cobrindo regras do jogo, máquina da Arena, mural e recursos de áudio. Renan usa as evidências na Prova de Fogo dos trechos que não implementou. Registre revisão técnica cruzada, revisão humana ou atuação por papéis conforme o [workflow](../../WORKFLOW.md).
 
 Ferramenta: `vitest` via `npm run test`.
 
@@ -17,7 +17,7 @@ Ferramenta: `vitest` via `npm run test`.
    - Garantir paridade da conta (duração, potência, ressonância).
    - Casos limites (áudio muito curto, áudio mudo, nota máxima).
 2. **Máquina de Estados da Arena:**
-   - Transições de estado corretas (`IDLE` → `RECORDING` → `ANALYZING` → `RESULT`).
+   - Testar as transições do fluxo tocado. Na V2, partir dos estados em `src/arena/v2/ArenaV2.tsx` (pronto, permissão, calibração, gravação, finalização, revisão e erro). No legado, seguir `src/nucleo/arena/maquina.ts`, incluindo os passos `RECORDING`, `ORIGIN`, `JUDGING` e `RESULT`.
    - Bloqueio de transições inválidas.
 3. **Feed & Timeline de Causos:**
    - Carregamento e paginação da lista de posts.

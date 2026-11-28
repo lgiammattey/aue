@@ -1,0 +1,6 @@
+TOML: 4 perfis e configuração válidos, nomes corretos
+YAML: 21 frontmatters válidos
+Workflow: conteúdo não comentário idêntico ao HEAD
+Backlog: AUE-T01–T15 presentes
+app-server skills/list: 17 skills do projeto, zero erros
+git diff --check: aprovado

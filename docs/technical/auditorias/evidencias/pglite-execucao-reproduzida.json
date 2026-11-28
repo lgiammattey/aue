@@ -1,0 +1,42 @@
+{
+  "ambiente": "PGlite isolado, sem rede nem credenciais",
+  "cadeiaCompleta": {
+    "estado": "passou",
+    "migrations": 117,
+    "probes": {
+      "privileges": {
+        "anon_insert_resultados": false,
+        "anon_uso_aue_privado": false,
+        "authenticated_worker": false,
+        "service_worker": true,
+        "anon_enviar_resultado": true
+      },
+      "directResult": {
+        "executou": false,
+        "erro": {
+          "sqlstate": "42501",
+          "mensagem": "permission denied for table resultados"
+        }
+      },
+      "privateRead": {
+        "executou": false,
+        "erro": {
+          "sqlstate": "42501",
+          "mensagem": "permission denied for schema aue_privado"
+        }
+      },
+      "rpcNota": "100",
+      "authenticatedWorker": {
+        "executou": false,
+        "erro": {
+          "sqlstate": "42501",
+          "mensagem": "permission denied for function reivindicar_audios_para_nota"
+        }
+      },
+      "serviceWorker": {
+        "executou": true,
+        "erro": null
+      }
+    }
+  }
+}

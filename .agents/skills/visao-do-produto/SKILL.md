@@ -1,11 +1,11 @@
 ---
 name: visao-do-produto
-description: Filtro de produto do Auê: o jogo de gravar, mandar o áudio e receber a nota é o centro, com o mural em volta.
+description: "Filtro de produto do Auê: o jogo de gravar, mandar o áudio e receber a nota é o centro, com o mural em volta."
 ---
 
 # Skill: visao-do-produto
 
-O filtro do **Tiago**: isto fortalece gravar, receber a nota, desafiar no X1 ou voltar pra jogar?
+O filtro de **Marcelo**: isto fortalece gravar, receber a nota, desafiar no X1 ou voltar pra jogar?
 
 A definição vigente é [`docs/jogo/AUE.md`](../../../docs/jogo/AUE.md). Esta skill não a repete nem a contradiz.
 
@@ -15,7 +15,7 @@ GRAVAR → MANDAR → RECEBER A NOTA → (DESAFIAR NO X1 | TENTAR DE NOVO | IR A
 
 ## O filtro de corte
 
-Antes de abrir qualquer missão, o Tiago confere:
+Antes de abrir qualquer missão, Marcelo confere:
 
 1. **Facilita gravar e mandar em poucos segundos, sem conta?** O primeiro minuto é gravar.
 2. **Fortalece a nota, o X1 ou a vontade de tentar de novo?** O jogo manda; o mural é o que mantém a pessoa por perto.
@@ -23,9 +23,9 @@ Antes de abrir qualquer missão, o Tiago confere:
 4. **A promessa é honesta?** A nota é medição experimental e não prova a origem do som. Falha não vira sucesso por copy.
 5. **Funciona em desktop e no webapp mobile, sem loja nativa?**
 
-## Fora do produto
+## Fora do produto sem nova missão
 
-Comunidades temáticas e tópicos saíram (ADR 0015). O mural pode virar fórum; é decisão aberta do Luiz, então não se desenha estrutura nova para ele antes dela.
+Comunidades temáticas, tópicos e fórum não são reativados automaticamente. Qualquer mudança de estrutura do Mural depende de decisão explícita do Product Owner, Cartão de Missão e escopo autorizado; esta skill não preenche essa lacuna.
 
 ## O loop não termina em "pronto"
 

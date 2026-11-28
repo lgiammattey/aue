@@ -1,0 +1,707 @@
+
+> aue@0.0.0 test
+> node --no-experimental-webstorage ./node_modules/vitest/vitest.mjs run
+
+
+ RUN  v4.1.10 /private/tmp/aue-m01-foundation-check
+
+ ✓ src/qualidade/seo-publico.test.ts (39 tests) 16ms
+ ✓ src/plataforma/web/forum.test.ts (103 tests) 32ms
+ ✓ src/plataforma/web/dueloV2.test.ts (43 tests) 482ms
+ ✓ src/arena/v2/duelo/DueloV2.test.tsx (19 tests) 386ms
+Not implemented: HTMLMediaElement's pause() method
+stderr | src/plataforma/web/desafios.test.ts > responder o round pelo link > briga que já tem dois donos recusa o terceiro, e a tela não inventa sucesso
+Falha ao abrir o desafio { code: '42501', message: 'Esta briga já tem dois donos.' }
+
+ ✓ src/plataforma/web/desafios.test.ts (25 tests) 8ms
+Not implemented: Window's scrollTo() method
+ ✓ src/arena/v2/ArenaV2.test.tsx (32 tests) 934ms
+stderr | src/features/novo-aue/TelaComunidadeOpenDesign.test.tsx > Telas de Comunidade Open Design (1:1 com desenho original) > entrar e sair: o botão diz "Participando" (toque para sair), a contagem de membros acompanha e a porta é chamada
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+stderr | src/features/novo-aue/TelaComunidadeOpenDesign.test.tsx > Telas de Comunidade Open Design (1:1 com desenho original) > se a porta recusar, não muda o botão nem a contagem e avisa
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+stderr | src/features/novo-aue/TelaComunidadeOpenDesign.test.tsx > Telas de Comunidade Open Design (1:1 com desenho original) > moderador não sai: o botão diz "Moderador", fica desabilitado e a porta nunca é chamada
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+stderr | src/features/novo-aue/InicioOpenDesign.test.tsx > InicioOpenDesign (1:1 com desenho original) > abre um tópico agrupado mantendo cada publicação no seu ID original
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ src/features/novo-aue/TelaComunidadeOpenDesign.test.tsx (12 tests) 1043ms
+Not implemented: Window's scrollTo() method
+ ✓ src/features/forum/TelaComunidadeDoForum.test.tsx (30 tests) 1883ms
+ ✓ src/db/contas-da-casa.migracoes.test.ts (40 tests) 24ms
+stderr | src/features/comunidade/TelaComunidade.test.tsx > TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafios) > navega entre as 3 abas (Feed, Comunidade, Desafios) com somente Eu Arroto, e Daí? e link do Telegram
+[telemetria] evento não gravado: abriu_arena TypeError: fetch failed
+
+Not implemented: Window's scrollTo() method
+stderr | src/features/comunidade/TelaComunidade.test.tsx > TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafios) > abre o modal de compartilhamento só com ações que existem e com link real
+[telemetria] evento não gravado: abriu_arena TypeError: fetch failed
+
+ ✓ src/nucleo/arena/maquina.test.ts (32 tests) 8ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/features/novo-aue/InicioOpenDesign.test.tsx > InicioOpenDesign (1:1 com desenho original) > mantém o ajuste aberto e explica a recusa quando salvar a foto falha
+`NaN` is an invalid value for the `width` css style property.
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+stderr | src/features/comunidade/TelaComunidade.test.tsx > TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafios) > filtra causos no feed pela busca da coluna lateral e exibe o card da comunidade no Telegram
+[telemetria] evento não gravado: abriu_arena TypeError: fetch failed
+
+stderr | src/features/comunidade/TelaComunidade.test.tsx > TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafios) > filtra causos no feed pela busca da coluna lateral e exibe o card da comunidade no Telegram
+[telemetria] evento não gravado: abriu_arena TypeError: fetch failed
+
+stderr | src/features/comunidade/TelaComunidade.test.tsx > TelaComunidade (Canônico Bonde do Arroto - Feed, Comunidade e Desafios) > offline não inventa postagem local para uma conta promovida
+[telemetria] evento não gravado: abriu_arena TypeError: fetch failed
+
+ ✓ src/features/forum/AcoesDaComunidade.test.tsx (28 tests) 1668ms
+     ✓ sair do campo e voltar a um campo em seguida não pisca a barra; só some depois do atraso  318ms
+ ✓ src/features/comunidade/TelaComunidade.test.tsx (20 tests) 1412ms
+ ✓ src/features/audio/rules.formula.test.ts (24 tests) 16ms
+ ✓ src/db/deriva-de-funcoes.migracoes.test.ts (16 tests) 48ms
+ ✓ src/features/forum/TelaTopico.test.tsx (22 tests) 643ms
+stderr | src/features/audio/AudioRecorder.fluxo.test.tsx > AudioRecorder — a jornada do MVP1 > gravação sem som vira tela própria, não uma linha de erro
+Falha ao analisar o áudio AudioMudoError: Não deu para ouvir nada nessa gravação.
+    at /private/tmp/aue-m01-foundation-check/src/features/audio/AudioRecorder.fluxo.test.tsx:245:32
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:64 {
+  rms: 0.0004
+}
+
+stderr | src/features/novo-aue/InicioOpenDesign.test.tsx > InicioOpenDesign (1:1 com desenho original) > mantém a comunidade fora da roda quando a porta recusa a entrada
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+stderr | src/features/novo-aue/InicioOpenDesign.test.tsx > InicioOpenDesign (1:1 com desenho original) > mantém a comunidade fora da roda quando a porta falha
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+ ✓ src/plataforma/web/captura.test.ts (22 tests) 8ms
+stderr | src/features/audio/hooks/useGravacao.test.tsx > useGravacao — todo caminho de saída solta o microfone > 4b. microfone indisponível NÃO vira permissão negada
+Microfone indisponível DOMException {}
+
+stderr | src/features/audio/hooks/useGravacao.test.tsx > useGravacao — todo caminho de saída solta o microfone > 4c. uma negativa anterior não contamina a falha seguinte
+Microfone indisponível DOMException {}
+
+stderr | src/features/audio/hooks/useGravacao.test.tsx > useGravacao — todo caminho de saída solta o microfone > 6. o gravador falhar ao subir — o caminho que era MUDO na main
+Falha ao iniciar a gravação Error: formato recusado pelo navegador
+    at GravadorFalso.start (/private/tmp/aue-m01-foundation-check/src/features/audio/hooks/useGravacao.test.tsx:60:44)
+    at Object.iniciar (/private/tmp/aue-m01-foundation-check/src/features/audio/hooks/useGravacao.ts:412:16)
+    at /private/tmp/aue-m01-foundation-check/src/features/audio/hooks/useGravacao.test.tsx:208:29
+
+ ✓ src/features/audio/hooks/useGravacao.test.tsx (13 tests) 38ms
+Not implemented: Window's scrollTo() method
+ ✓ src/features/novo-aue/CardDoPost.test.tsx (18 tests) 378ms
+ ✓ src/features/forum/TelaNovoTopico.test.tsx (58 tests) 3736ms
+ ✓ src/features/audio/origem.paridade.test.ts (7 tests) 16ms
+Not implemented: Window's scrollTo() method
+ ✓ src/features/novo-aue/InicioOpenDesign.test.tsx (33 tests) 3637ms
+     ✓ após login devolve a intenção de gravação social ao feed  588ms
+stderr | src/features/audio/AudioRecorder.fluxo.test.tsx > AudioRecorder — a jornada do MVP1 > silêncio não chega a ser julgado — a inferência cara não roda à toa
+Falha ao analisar o áudio AudioMudoError: Não deu para ouvir nada nessa gravação.
+    at /private/tmp/aue-m01-foundation-check/src/features/audio/AudioRecorder.fluxo.test.tsx:292:32
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:64 {
+  rms: 0.0004
+}
+
+stderr | src/plataforma/web/telemetria.test.ts > registrar > só confirma a página na sessão depois do insert aceito
+[telemetria] evento não gravado: visitou_pagina permission denied
+
+stderr | src/plataforma/web/telemetria.test.ts > registrar > o Supabase recusando a linha não lança
+[telemetria] evento não gravado: abriu_arena violates check constraint
+
+ ✓ src/plataforma/web/telemetria.test.ts (21 tests) 22ms
+ ✓ src/db/leitura-fechada.migracoes.test.ts (6 tests) 43ms
+stderr | src/features/audio/AudioRecorder.fluxo.test.tsx > AudioRecorder — a jornada do MVP1 > microfone ocupado NÃO manda a pessoa mexer em permissão que está liberada
+Microfone indisponível DOMException {}
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > falha de leitura não é lista vazia > feed, comunidades e respostas lançam FalhaDeLeitura quando o servidor recusa
+Falha ao ler o feed { message: 'boom' }
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > falha de leitura não é lista vazia > feed, comunidades e respostas lançam FalhaDeLeitura quando o servidor recusa
+Falha ao listar comunidades { message: 'boom' }
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > falha de leitura não é lista vazia > feed, comunidades e respostas lançam FalhaDeLeitura quando o servidor recusa
+Falha ao ler os comentários { message: 'boom' }
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > postar causo pelo servidor > servidor recusou: a porta devolve falha, não um causo "postado" só no aparelho
+Falha ao postar o causo TypeError: Cannot destructure property 'data' of '(intermediate value)' as it is undefined.
+    at Object.postarCauso (/private/tmp/aue-m01-foundation-check/src/plataforma/web/comunidade.ts:363:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at /private/tmp/aue-m01-foundation-check/src/plataforma/web/comunidade.servidor.test.ts:175:17
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > reação, comentário e denúncia pelo servidor > repost usa o tipo aceito pelo CHECK, e erro do servidor não vira sucesso
+Falha ao registrar a reação { message: 'boom' }
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > reação, comentário e denúncia pelo servidor > comentário passa pela RPC e recusa não vira resposta na tela
+O servidor recusou o comentário { message: 'negado' }
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > reação, comentário e denúncia pelo servidor > denúncia que o servidor recusa devolve false: a tela não pode dizer que denunciou
+Falha ao denunciar TypeError: Cannot destructure property 'data' of '(intermediate value)' as it is undefined.
+    at Object.denunciarCauso (/private/tmp/aue-m01-foundation-check/src/plataforma/web/comunidade.ts:649:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at /private/tmp/aue-m01-foundation-check/src/plataforma/web/comunidade.servidor.test.ts:257:12
+    at file:///private/tmp/aue-m01-foundation-check/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+stderr | src/plataforma/web/comunidade.servidor.test.ts > reação, comentário e denúncia pelo servidor > denúncia recusada não vira sucesso
+O servidor recusou a denúncia { code: '42501', message: 'conta promovida' }
+
+ ✓ src/plataforma/web/comunidade.servidor.test.ts (15 tests) 10ms
+ ✓ src/arena/v2/duelo/MeusDuelosV2.test.tsx (13 tests) 522ms
+ ✓ src/arena/Arena.roda.test.tsx (33 tests) 4351ms
+     ✓ a vez anda para o próximo da lista, e o round só vira quando todos jogaram  319ms
+     ✓ o último arroto troca o CTA por VER O PÓDIO  327ms
+     ✓ fecha a mesa no SCOREBOARD, sem estado novo  326ms
+     ✓ a Bolha fica no pódio, no modo esperando — sem fingir vitória de ninguém  312ms
+ ↓ src/plataforma/web/forum.servidor.test.ts (9 tests | 9 skipped)
+ ✓ src/features/audio/fluxo/telas.test.tsx (14 tests) 13ms
+ ✓ src/features/audio/AudioRecorder.fluxo.test.tsx (13 tests) 2090ms
+ ✓ src/features/novo-aue/useEngajamento.test.tsx (12 tests) 253ms
+Not implemented: HTMLMediaElement's play() method
+ ✓ src/features/forum/EscreverNaConversa.test.tsx (87 tests) 4726ms
+ ✓ src/plataforma/web/capturaPcmV2.test.ts (10 tests) 12ms
+ ✓ src/qualidade/lancamento.smoke.test.ts (12 tests) 25ms
+ ✓ src/features/legal/paginasLegais.test.tsx (17 tests) 93ms
+ ✓ src/arena/v2/FluxoArenaV2.test.tsx (9 tests) 713ms
+ ✓ src/qualidade/arquitetura.fronteira.test.ts (5 tests) 46ms
+ ✓ src/features/perfil/TelaPerfil.test.tsx (11 tests) 731ms
+ ✓ src/features/publico/paginasPublicas.test.tsx (26 tests) 82ms
+ ✓ src/features/audio/resultado/compartilhamento.test.tsx (11 tests) 14ms
+Not implemented: Window's scrollTo() method
+ ✓ src/nucleo/elenco/backfill.test.ts (15 tests) 8ms
+ ✓ src/plataforma/web/conta.test.ts (14 tests) 9ms
+Not implemented: Window's scrollTo() method
+ ✓ src/features/administracao/TelaAdministracao.test.tsx (10 tests) 371ms
+ ✓ src/features/legal/coerenciaDeAnuncios.test.tsx (8 tests) 180ms
+ ✓ src/features/forum/TelaDiretorio.test.tsx (15 tests) 659ms
+ ✓ src/db/feed-de-causos.migracoes.test.ts (12 tests) 14ms
+Not implemented: Window's scrollTo() method
+ ✓ src/nucleo/forum/escrita.test.ts (27 tests) 9ms
+Not implemented: HTMLMediaElement's play() method
+Not implemented: Window's scrollTo() method
+ ✓ src/features/novo-aue/ModalComentarios.test.tsx (8 tests) 277ms
+ ✓ src/plataforma/web/comunidade.test.ts (11 tests) 6ms
+Not implemented: Window's scrollTo() method
+ ✓ src/plataforma/web/compartilhamento.test.ts (12 tests) 16ms
+ ✓ src/features/novo-aue/DenunciarEApagar.test.tsx (6 tests) 1237ms
+     ✓ post de outra pessoa: só Denunciar; envia o motivo, avisa e o post continua lá  440ms
+Not implemented: HTMLMediaElement's play() method
+Not implemented: Window's scrollTo() method
+ ✓ src/features/novo-aue/ThreadDeComentarios.test.tsx (6 tests) 440ms
+ ✓ src/features/grupos/grupos.test.tsx (12 tests) 453ms
+ ✓ src/qualidade/fonte-nas-entradas.test.ts (9 tests) 5ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > exibe o Hub Open Design na raiz "/" para primeiro visitante sem sessão
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/features/novo-aue/TelaPerfilOpenDesign.test.tsx (6 tests) 738ms
+ ✓ src/nucleo/elenco/scripts.fronteira.test.ts (15 tests) 474ms
+ ✓ src/nucleo/disputa/turnos.test.ts (15 tests) 3ms
+ ✓ src/plataforma/web/analyticsArenaV2.test.ts (17 tests) 30ms
+ ✓ src/nucleo/fala/compartilhamento.test.ts (17 tests) 4ms
+ ✓ src/plataforma/web/gravacaoLivreDoForum.test.ts (9 tests) 9ms
+stderr | src/features/conta/TelaLogin.test.tsx > TelaLogin (cartão estilo Google, só pra quem já tem conta) > entra e leva pra home
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+ ✓ src/db/nomenclatura-ptbr.migracoes.test.ts (70 tests) 118ms
+stderr | src/features/conta/TelaLogin.test.tsx > TelaLogin (cartão estilo Google, só pra quem já tem conta) > quem veio por um link de conversa volta para ela depois de entrar
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+ ✓ src/nucleo/forum/apresentacao.test.ts (15 tests) 17ms
+stderr | src/features/conta/TelaLogin.test.tsx > TelaLogin (cartão estilo Google, só pra quem já tem conta) > destino de volta que sai do site é ignorado
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+ ✓ src/features/conta/TelaLogin.test.tsx (12 tests) 317ms
+ ✓ src/nucleo/julgamento/trechoAtivo.test.ts (18 tests) 9ms
+ ✓ src/plataforma/web/perfilRemoto.test.ts (11 tests) 8ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > abre o Hub na raiz "/" também para uma conta pronta
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > mantém o visitante no Hub na raiz "/" sem forçar outra rota
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > mantém o visitante no Hub na raiz "/" sem forçar outra rota
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/nucleo/nota/fala.derivacao.test.ts (3 tests) 100ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > mantém "/feed" na nova casca unificada, sem ressuscitar o feed legado
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > preserva a intenção do link antigo de gravar ao pedir login
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > leva a Arena para a apresentação de em breve, sem montar a casca legada do feed
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > leva a Arena para a apresentação de em breve, sem montar a casca legada do feed
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/features/perfil/TelaPerfilBurpzilla.test.tsx (7 tests) 639ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > com flag opt-in abre Arena local em /
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/qualidade/confirmacao-exclusao-sem-evidencia.test.ts (1 test) 1477ms
+   ✓ cliente não confirma exclusão sem evidência registrada pelo serviço  1476ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > com flag opt-in integra Arena e Mural no mesmo Hub e em /feed
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > com flag opt-in integra Arena e Mural no mesmo Hub e em /feed
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/features/publico/TelaLanding.test.tsx > TelaLanding > mostra erro honesto se as credenciais não baterem
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+ ✓ src/nucleo/elenco/cronograma.paridade.test.ts (12 tests) 8ms
+ ✓ src/features/publico/TelaLanding.test.tsx (9 tests) 880ms
+ ✓ src/db/telemetria-eventos.migracoes.test.ts (21 tests) 14ms
+ ✓ src/nucleo/julgamento/laudoExperimental.test.ts (10 tests) 11ms
+ ✓ src/qualidade/corte-de-producao.paridade.test.ts (3 tests) 6ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > com flag opt-in preserva a intenção do link de gravação no Mural "/feed?gravar=1"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > com flag opt-in preserva a intenção do link de gravação no Mural "/feed?gravar=1"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/nucleo/nota/faixas.test.ts (13 tests) 66ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+Não foi possível criar a sessão anônima. O app segue sem sessão: grava e mostra a nota, mas o áudio não sobe e o duelo fica mudo. Confira Authentication > Providers > Anonymous sign-ins no painel do Supabase. AuthRetryableFetchError: fetch failed
+    at _handleRequest (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:130:15)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at _request (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/lib/fetch.js:113:18)
+    at SupabaseAuthClient.signInAnonymously (/private/tmp/aue-m01-foundation-check/node_modules/@supabase/auth-js/dist/main/GoTrueClient.js:514:25)
+    at /private/tmp/aue-m01-foundation-check/src/shared/auth/sessaoAnonima.ts:86:48 {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: abriu_arena TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+Falha ao abrir o desafio {
+  message: 'TypeError: fetch failed',
+  details: 'TypeError: fetch failed\n' +
+    '\n' +
+    'Caused by: Error: getaddrinfo ENOTFOUND exemplo.supabase.co (ENOTFOUND)\n' +
+    'Error: getaddrinfo ENOTFOUND exemplo.supabase.co\n' +
+    '    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)',
+  hint: '',
+  code: ''
+}
+
+ ✓ src/qualidade/duelos-v2-audio-edge.test.ts (1 test) 2091ms
+   ✓ fecha GET direto e consulta a sessão atual sem ampliar acesso  2090ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/arena/movimentoReduzido.test.ts (3 tests) 4ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/shared/desktop/qr.test.ts (7 tests) 30ms
+ ✓ src/qualidade/resumoNotasPublicadasBanco.test.ts (1 test) 2147ms
+     ✓ conta publicações visíveis do autor, inclusive resultado da Arena, e respeita acesso aos áudios de perfil  2146ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/shared/formato/nota.test.ts (10 tests) 32ms
+stderr | src/App.test.tsx > Jornada do App (Entrada Inteligente e Transição para Arena) > redireciona todas as antigas rotas de comunidades e explorar direto para o Hub "/"
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/App.test.tsx (16 tests) 2746ms
+     ✓ exibe o Hub Open Design na raiz "/" para primeiro visitante sem sessão  412ms
+     ✓ endereço que o Auê não conhece mostra a página não encontrada, sem mandar para a home calado  341ms
+     ✓ leva a Arena para a apresentação de em breve, sem montar a casca legada do feed  322ms
+     ✓ com flag opt-in abre Arena local em /  335ms
+     ✓ com flag opt-in integra Arena e Mural no mesmo Hub e em /feed  361ms
+     ✓ com as duas flags ligadas encaminha um convite inválido para o fluxo de resposta  321ms
+ ✓ src/nucleo/telemetria/sessao.test.ts (8 tests) 6ms
+ ✓ src/nucleo/grupos/paginaEstatica.test.ts (12 tests) 12ms
+ ✓ src/qualidade/transicao-aue-oficial.test.ts (4 tests) 4ms
+ ✓ src/features/novo-aue/TelaExplorarOpenDesign.test.tsx (5 tests) 1325ms
+     ✓ usa a casca da Tropa, sem a casca legada do fórum, e separa os links do tópico e da roda  344ms
+     ✓ mantém busca e tipo na URL e usa a porta do servidor  440ms
+ ✓ src/qualidade/filaNotasBanco.test.ts (1 test) 2275ms
+     ✓ reivindica só publicação visível, valida concessão e ETag e preserva notas existentes  2274ms
+ ✓ src/features/audio/resultado/CartaoDaNota.test.tsx (7 tests) 14ms
+ ✓ src/qualidade/topArrotadoresBanco.test.ts (1 test) 2207ms
+     ✓ escolhe a maior nota de cada pessoa, exclui casas, versões não confiáveis e itens ocultos, e não retorna caminhos  2206ms
+ ✓ src/nucleo/disputa/round.paridade.test.ts (7 tests) 4ms
+ ✓ src/plataforma/web/controleDeDialogo.test.ts (7 tests) 15ms
+ ✓ src/arena/v2/textos.test.ts (8 tests) 12ms
+ ✓ src/nucleo/arena/arena-md.paridade.test.ts (3 tests) 4ms
+ ✓ src/arena/bolha/caminhoDaMarca.test.ts (22 tests) 6ms
+ ✓ src/db/painel-administrativo.migracoes.test.ts (9 tests) 11ms
+ ✓ src/nucleo/forum/rascunho.test.ts (8 tests) 5ms
+ ✓ src/qualidade/exclusao-auth-conservadora.test.ts (1 test) 1531ms
+   ✓ preserva vínculos e bloqueia JWT antigo após exclusão de conta vazia  1531ms
+ ✓ src/plataforma/web/imagem.test.ts (8 tests) 11ms
+ ✓ src/features/audio/juiz/vereditoDeArroto.test.ts (11 tests) 3ms
+ ✓ src/nucleo/elenco/podeAplicar.test.ts (14 tests) 14ms
+ ✓ src/arena/v2/RankingIntegrado.test.tsx (4 tests) 225ms
+ ✓ src/db/mimes-do-bucket.test.ts (3 tests) 17ms
+ ✓ src/shared/aFlagMorta.test.ts (4 tests) 43ms
+ ✓ src/shared/auth/sessaoAnonima.test.ts (6 tests) 61ms
+ ✓ src/features/audio/juiz/ondaDe16k.test.ts (5 tests) 3ms
+ ✓ src/plataforma/web/pontuacao.paridade.test.ts (4 tests) 3ms
+ ✓ src/features/novo-aue/ModalGerirComunidade.test.tsx (6 tests) 244ms
+ ✓ src/nucleo/elenco/montagem.test.ts (12 tests) 10ms
+ ✓ src/arena/bolha/BolhaAue.test.tsx (4 tests) 43ms
+ ✓ src/plataforma/web/arrotosDoPerfil.test.ts (5 tests) 4ms
+ ✓ src/features/audio/fluxo/estilosUsados.test.ts (22 tests) 4ms
+ ✓ src/plataforma/web/ambienteDoForum.test.ts (8 tests) 54ms
+ ✓ src/nucleo/grupos/regras.test.ts (24 tests) 5ms
+ ✓ src/arena/CartaoDaImagem.test.tsx (14 tests) 10ms
+ ✓ src/plataforma/web/administracao.test.ts (4 tests) 7ms
+ ✓ src/features/novo-aue/SlotPatrocinadoDoFeed.test.tsx (6 tests) 209ms
+ ✓ src/features/forum/BuscaDoForum.test.tsx (8 tests) 865ms
+ ✓ src/features/audio/fluxo/estilosSaudaveis.test.ts (5 tests) 4ms
+ ✓ src/nucleo/disputa/podio.test.ts (12 tests) 4ms
+ ✓ src/features/audio/resultado/anuncio.test.tsx (4 tests) 24ms
+ ✓ src/features/audio/microfoneJaLiberado.test.ts (8 tests) 11ms
+ ✓ src/features/forum/TelaExplorar.test.tsx (6 tests) 1012ms
+ ✓ src/nucleo/prazo/prazoDaBatalha.test.ts (12 tests) 7ms
+ ✓ src/plataforma/web/focoNoDialogo.test.ts (9 tests) 124ms
+ ✓ src/features/novo-aue/ModalCompositor.test.tsx (4 tests) 388ms
+ ✓ src/qualidade/verificar-sitemap-final.test.ts (6 tests) 159ms
+ ✓ src/qualidade/notasRetrospectivasBanco.test.ts (1 test) 1682ms
+     ✓ publica só a nota do arquivo atual e oculta conteúdo removido  1681ms
+ ✓ src/features/novo-aue/TopArrotadoresDaHome.test.tsx (4 tests) 227ms
+ ✓ src/qualidade/duelo-seo.test.ts (3 tests) 6ms
+ ✓ src/qualidade/rankingContasDaCasaBanco.test.ts (1 test) 1446ms
+     ✓ usa somente áudio da casa publicado, consentido e audível, preservando uma nota por autor  1446ms
+ ✓ src/qualidade/reacoesCompetitivasBanco.test.ts (1 test) 1397ms
+     ✓ aceita voto de sessão anônima, mantém like/dislike exclusivos e alterna atitudes  1396ms
+ ✓ src/nucleo/fala/erros.test.ts (6 tests) 6ms
+ ✓ src/features/publico/HomeEn.paridade.test.tsx (7 tests) 175ms
+ ✓ src/features/forum/useEnvio.test.tsx (5 tests) 34ms
+ ✓ src/features/audio/resultado/BotaoDeDesafiar.test.tsx (9 tests) 10ms
+ ✓ src/features/audio/fluxo/EscolhaDeOrigem.test.tsx (8 tests) 215ms
+ ✓ src/features/novo-aue/PerfilConectado.test.tsx (3 tests) 212ms
+ ✓ src/features/novo-aue/ModalEditarPerfil.test.tsx (6 tests) 315ms
+ ✓ src/features/comunidade/CardDeCausoRecorte.test.tsx (3 tests) 259ms
+ ✓ src/qualidade/ads-txt.test.ts (4 tests) 2ms
+ ✓ src/plataforma/web/coletorPcmV2.worklet.test.ts (3 tests) 12ms
+stderr | src/plataforma/web/grupos.test.ts > criarGruposWeb > denúncia repetida (23505) conta como registrada; outro erro, não
+Falha ao denunciar o grupo { code: '42501' }
+
+ ✓ src/plataforma/web/grupos.test.ts (9 tests) 24ms
+ ✓ src/plataforma/web/audioDaCasa.test.ts (6 tests) 4ms
+ ✓ src/plataforma/web/notaDoAudioPublicado.test.ts (4 tests) 8ms
+ ✓ src/features/novo-aue/PlayerDoArroto.test.tsx (5 tests) 256ms
+ ✓ src/nucleo/elenco/sorteio.test.ts (8 tests) 99ms
+ ✓ src/features/novo-aue/DialogoDoPost.test.tsx (5 tests) 163ms
+ ✓ src/features/comunidade/CardDeCausoAutor.test.tsx (6 tests) 254ms
+ ✓ src/plataforma/web/compartilhamentoDeAudio.test.ts (8 tests) 10ms
+ ✓ src/qualidade/registroNotaPublicadaBanco.test.ts (1 test) 1213ms
+     ✓ aceita somente áudio do próprio autor publicado e preserva nota existente  1211ms
+ ✓ src/features/novo-aue/estilosDoPerfil.test.ts (6 tests) 3ms
+ ✓ src/features/audio/hooks/subirAudioDoResultado.test.ts (3 tests) 4ms
+ ✓ src/features/audio/juiz/julgarSeEhArroto.test.ts (6 tests) 7ms
+ ✓ src/features/audio/fluxo/bolhaQueOuve.test.ts (11 tests) 3ms
+ ✓ src/nucleo/midia/embeds.test.ts (21 tests) 5ms
+ ✓ src/db/dono-da-briga.paridade.test.ts (3 tests) 19ms
+ ✓ src/plataforma/web/exclusaoTelemetria.test.ts (6 tests) 45ms
+ ✓ src/features/comunidade/TelaHistoriaLayout.test.tsx (8 tests) 626ms
+ ✓ src/features/comunidade/components/useEnvioDeResposta.test.tsx (6 tests) 405ms
+ ✓ src/features/audio/mensagemDeFalhaNaAnalise.test.ts (5 tests) 3ms
+ ✓ src/features/comunidade/TelaHistoria.test.tsx (2 tests) 392ms
+ ✓ src/qualidade/espelhoDoArrotoBanco.test.ts (1 test) 1321ms
+     ✓ vincula os dois cards na mesma transação e verifica autoria e áudio  1320ms
+ ✓ src/nucleo/gravacao/regras.test.ts (12 tests) 3ms
+ ✓ src/features/comunidade/ComunidadePorSlug.test.tsx (6 tests) 353ms
+ ✓ src/plataforma/web/pautas.test.ts (3 tests) 5ms
+ ✓ src/features/novo-aue/paginacaoDoMural.test.ts (3 tests) 11ms
+ ✓ src/features/novo-aue/MenuDoPost.test.tsx (7 tests) 165ms
+ ✓ src/plataforma/web/detector.test.ts (6 tests) 5ms
+ ✓ src/features/audio/ultimaBatalha.test.ts (11 tests) 6ms
+ ✓ src/features/audio/juiz/classesDoYamnet.test.ts (3 tests) 17ms
+ ✓ src/arena/tamanhoDaProvocacao.test.ts (6 tests) 4ms
+ ✓ src/db/video-externo.migracoes.test.ts (12 tests) 6ms
+ ✓ src/plataforma/web/perfilRemoto.foto.test.ts (4 tests) 4ms
+ ✓ src/features/comunidade/CardDeCausoAudio.test.tsx (4 tests) 278ms
+ ✓ src/features/audio/resultado/mensagemDeFalhaAoCompartilhar.test.ts (6 tests) 3ms
+ ✓ src/features/audio/fluxo/TelaDeConvite.test.tsx (5 tests) 13ms
+ ✓ src/features/audio/resultado/LinkDaBatalha.test.tsx (4 tests) 13ms
+ ✓ src/arena/v2/duelo/EntradaDueloV2.test.tsx (3 tests) 141ms
+ ✓ src/features/audio/silencio.test.ts (4 tests) 2ms
+ ✓ src/nucleo/perfil/redesSociais.test.ts (22 tests) 6ms
+ ✓ src/features/novo-aue/SalvosDoPerfil.test.tsx (4 tests) 187ms
+ ✓ src/db/engajamento.migracoes.test.ts (5 tests) 3ms
+ ✓ src/features/novo-aue/ModalConexoes.test.tsx (5 tests) 126ms
+ ✓ src/arena/motion/anim.test.ts (7 tests) 10ms
+ ✓ src/features/novo-aue/PreviaDaConversa.test.tsx (2 tests) 108ms
+ ✓ src/arena/v2/ArenaV2.player.test.tsx (2 tests) 334ms
+ ✓ src/features/novo-aue/verdeDoPerfil.test.ts (4 tests) 4ms
+ ✓ src/features/novo-aue/NotaNosComentarios.test.tsx (6 tests) 227ms
+ ✓ src/nucleo/fala/versus.test.ts (8 tests) 3ms
+ ✓ src/features/novo-aue/ModalAjustarImagem.test.tsx (4 tests) 219ms
+ ✓ src/features/administracao/ModeracaoDueloV2.test.tsx (3 tests) 218ms
+ ✓ src/features/novo-aue/semEspelhos.test.ts (5 tests) 4ms
+ ✓ src/nucleo/perfil/campos.test.ts (33 tests) 5ms
+ ✓ src/plataforma/web/cicloDeVida.test.ts (5 tests) 5ms
+ ✓ src/plataforma/web/wavDaEmissao.test.ts (3 tests) 4ms
+ ✓ src/nucleo/telemetria/aquisicao.test.ts (14 tests) 2ms
+ ✓ src/qualidade/notasWorkerEdge.test.ts (2 tests) 26ms
+ ✓ src/db/limite-de-frequencia.migracoes.test.ts (11 tests) 4ms
+ ✓ src/plataforma/web/AvisoExclusaoTelemetria.test.tsx (5 tests) 113ms
+ ✓ src/features/telemetria/RastreadorDePaginas.test.tsx (3 tests) 92ms
+ ✓ src/db/painel-administrativo.test.ts (4 tests) 3ms
+ ✓ src/db/endurecimento.migracoes.test.ts (4 tests) 2ms
+ ✓ src/nucleo/origem/origens.paridade.test.ts (4 tests) 4ms
+ ✓ src/features/novo-aue/AdsterraNativeBanner.test.tsx (3 tests) 25ms
+ ✓ src/qualidade/duelos-v2-exclusao-conta.test.ts (1 test) 1307ms
+   ✓ bloqueia gravações e novas referências ao iniciar exclusão de conta  1306ms
+ ✓ src/plataforma/web/armazenamento.test.ts (4 tests) 9ms
+ ✓ src/qualidade/sincronia-dos-icones.test.ts (7 tests) 5ms
+ ✓ src/arena/bolha/formaDoCartao.test.ts (5 tests) 3ms
+ ✓ src/nucleo/julgamento/tempo.test.ts (8 tests) 4ms
+ ✓ src/nucleo/elenco/horario.test.ts (5 tests) 4ms
+ ✓ src/features/novo-aue/FolhaDaFoto.test.tsx (4 tests) 116ms
+ ✓ src/db/foto-de-perfil.migracoes.test.ts (4 tests) 5ms
+ ✓ src/features/conta/TelaRedefinirSenha.test.tsx (2 tests) 157ms
+ ✓ src/nucleo/fala/idle.test.ts (6 tests) 4ms
+ ✓ src/features/novo-aue/BarraLateral.test.tsx (1 test) 167ms
+ ✓ src/qualidade/duelos-v2-banco.test.ts (5 tests) 5813ms
+     ✓ recusa bucket ausente  1345ms
+     ✓ recusa bucket público  1164ms
+     ✓ recusa bucket MIME diferente  1035ms
+     ✓ recusa bucket limite diferente  1184ms
+     ✓ aplica as migrations e executa as provas de privacidade e convites  1082ms
+ ✓ src/features/novo-aue/VitrineDeApps.test.tsx (3 tests) 184ms
+ ✓ src/qualidade/notaRetrospectiva.test.ts (2 tests) 3ms
+ ✓ src/nucleo/comunidade/limites.test.ts (8 tests) 4ms
+ ✓ src/shared/components/AvisoMaioridade.test.tsx (2 tests) 93ms
+ ✓ src/features/publico/TelaNaoEncontrada.test.tsx (3 tests) 202ms
+ ✓ src/db/agentes-da-squad.migracoes.test.ts (2 tests) 3ms
+ ✓ src/features/novo-aue/casca.layout.test.ts (3 tests) 3ms
+ ✓ src/db/busca.migracoes.test.ts (4 tests) 2ms
+ ✓ src/db/grupos-whatsapp.migracao.test.ts (3 tests) 6ms
+ ✓ src/db/correcao-coleta-painel.migracoes.test.ts (2 tests) 3ms
+ ✓ src/features/comunidade/LimitesNosCampos.test.tsx (3 tests) 157ms
+ ✓ src/plataforma/web/enderecoDoJogo.test.ts (4 tests) 3ms
+ ✓ src/db/painel-administrativo-acessos.migracoes.test.ts (3 tests) 4ms
+ ✓ src/features/forum/MidiaDoForum.test.tsx (3 tests) 89ms
+ ✓ src/nucleo/comunidade/comunidadesPadrao.test.ts (5 tests) 3ms
+ ✓ src/db/arrotos-do-perfil.migracoes.test.ts (3 tests) 3ms
+ ✓ src/arena/v2/GruposNaHome.test.tsx (2 tests) 123ms
+ ✓ src/nucleo/arena/revelacao.test.ts (6 tests) 3ms
+ ✓ src/features/novo-aue/tempoRelativo.test.ts (4 tests) 15ms
+ ✓ src/features/comunidade/components/ArvoreDeComentarios.test.tsx (3 tests) 130ms
+ ✓ src/plataforma/web/audioUnico.test.ts (3 tests) 3ms
+ ✓ src/features/novo-aue/BarraSuperior.test.tsx (2 tests) 118ms
+ ✓ src/nucleo/elenco/formatoAudio.test.ts (5 tests) 4ms
+ ✓ src/shared/components/BottomNav.rodape.test.tsx (3 tests) 97ms
+stderr | src/features/novo-aue/AdsterraOpenDesign.test.tsx > Adsterra no OpenDesign — placements ficam desligados até publicação explícita > exibe o card de parceiro com Smartlink quando a flag de publicação está ligada
+GoTrueClient@sb-exemplo-auth-token:1 (2.112.2) 2026-11-28T00:49:24.216Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+
+ ✓ src/nucleo/comunidade/caminhoDeVolta.test.ts (16 tests) 3ms
+ ✓ src/db/perfil-e-comunidade.migracoes.test.ts (3 tests) 3ms
+stderr | src/nucleo/comunidade/leituraNoBuild.test.ts > leitura estática das comunidades > não transforma uma falha de leitura em diretório vazio
+comunidades: o Supabase respondeu 503
+
+ ✓ src/nucleo/comunidade/leituraNoBuild.test.ts (2 tests) 20ms
+ ✓ src/features/novo-aue/AdsterraOpenDesign.test.tsx (2 tests) 92ms
+ ✓ src/nucleo/elenco/uuid.test.ts (4 tests) 4ms
+stderr | src/arena/v2/RankingRotas.test.tsx > Ranking integrado às rotas > está dentro do Hero da Home quando arenaV2 está ligada
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/db/redes-sociais.migracoes.test.ts (2 tests) 2ms
+ ✓ src/features/comunidade/TelaComunidadeFalha.test.tsx (2 tests) 222ms
+ ✓ src/plataforma/web/limparDadosLocais.test.ts (1 test) 3ms
+stderr | src/arena/v2/RankingRotas.test.tsx > Ranking integrado às rotas > não aparece no fluxo de convite
+[telemetria] evento não gravado: visitou_pagina TypeError: fetch failed
+
+ ✓ src/arena/bolha/caminhoDaBolha.test.ts (4 tests) 3ms
+ ✓ src/features/publico/LayoutPublico.test.tsx (2 tests) 61ms
+ ✓ src/nucleo/telemetria/paginas.test.ts (13 tests) 2ms
+ ✓ src/features/publico/comoArrotarParidade.test.tsx (1 test) 39ms
+ ✓ src/qualidade/respostas-no-mural.test.ts (1 test) 2ms
+ ✓ src/features/novo-aue/ModalGravarArroto.test.tsx (1 test) 73ms
+ ✓ src/features/comunidade/AbaDesafios.test.tsx (2 tests) 111ms
+ ✓ src/nucleo/arena/contagemDaRevanche.test.ts (4 tests) 2ms
+ ✓ src/db/permissao-helper-anexo-forum.migracoes.test.ts (1 test) 3ms
+ ✓ src/nucleo/comunidade/paginaEstatica.test.ts (2 tests) 5ms
+ ✓ src/features/comunidade/ComposerCauso.test.tsx (1 test) 124ms
+ ✓ src/features/novo-aue/midiasDasComunidades.test.ts (1 test) 3ms
+ ✓ src/features/comunidade/ModalNovoCauso.test.tsx (1 test) 85ms
+ ✓ src/arena/v2/RankingRotas.test.tsx (3 tests) 704ms
+     ✓ está dentro do Hero da Home quando arenaV2 está ligada  333ms
+     ✓ não aparece no fluxo de convite  318ms
+ ✓ src/nucleo/grupos/regras.paridade.test.ts (1 test) 2ms
+ ✓ src/nucleo/social/mencoes.test.ts (2 tests) 2ms
+ ✓ src/nucleo/arena/entradaV2.test.ts (7 tests) 2ms
+ ✓ src/plataforma/web/tokenConviteDueloV2.test.ts (2 tests) 6ms
+ ✓ src/plataforma/web/espacoDoElemento.test.ts (1 test) 2ms
+ ✓ src/features/novo-aue/PautaDaComunidade.test.tsx (1 test) 44ms
+ ✓ src/arena/Arena.test.tsx (144 tests) 21054ms
+     ✓ pede confirmação dizendo o que some e o que fica  361ms
+     ✓ apagou: diz apagado, e apaga o resultado certo  419ms
+     ✓ NÃO diz apagado quando o arquivo não saiu  417ms
+     ✓ falhou no lote: não diz apagado, e o tenta de novo não repete o que já saiu  344ms
+     ✓ quem criou o desafio também consegue apagar  348ms
+     ✓ grava mantendo a disputa, e vai pelo caminho da revanche  309ms
+     ✓ tocar em Revanche dispara pediu_revanche, com o código da disputa  410ms
+     ✓ fechou o round: o placar de vitórias já conta ele  457ms
+     ✓ fecha dois rounds seguidos ganhando: a segunda frase não repete a primeira  651ms
+     ✓ abriu o round: mandei, e agora é ele — sem botão de arrotar  487ms
+     ✓ mandei duas vezes o mesmo round: nada duplica e a tela diz o estado real  492ms
+     ✓ teto de rounds não vira erro: volta pro placar dizendo chega  723ms
+     ✓ disputa vencida no meio da revanche cai no erro certo  432ms
+     ✓ a cerimônia do 3…2…1 abre antes de qualquer coisa de gravação  379ms
+     ✓ sumir da tela no meio da contagem volta pro IDLE, com o microfone solto  327ms
+     ✓ entrar na gravação dispara o anel, e ele não fica em laço  731ms
+     ✓ a marca da espera entra com o JUDGING e sai junto com ele  1280ms
+     ✓ a segunda revelação da sessão entra inteira, sem teatro  1298ms
+
+ Test Files  265 passed | 1 skipped (266)
+      Tests  2600 passed | 9 skipped (2609)
+   Start at  21:49:04
+   Duration  22.28s (transform 6.87s, setup 0ms, import 20.17s, tests 101.97s, environment 40.72s)
+

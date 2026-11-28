@@ -1,5 +1,5 @@
 # Configuração de projeto do Codex para o Auê.
-# AGENTS.md é a entrada; documentacao/GOVERNANCA.md contém a autoridade normativa.
+# AGENTS.md é a entrada e a autoridade normativa; .agents/WORKFLOW.md detalha o fluxo.
 
 [agents]
 enabled = true

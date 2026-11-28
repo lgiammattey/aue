@@ -5,7 +5,7 @@ description: Aplica a voz autêntica, zoeira e direta do Auê! na copy da Arena,
 
 # Skill: tom-de-voz
 
-Procedimento do **Tiago** para escrever ou revisar a copy do Auê!. O **Diego** usa quando monta as telas e o auditor para checar autenticidade.
+Procedimento de **Marcelo** para escrever ou revisar a copy do Auê!. Felipe usa quando monta telas e Renan pode checar aderência aos requisitos da missão.
 
 Todo texto passa pelo crivo da [`filtro-anti-ia`](../filtro-anti-ia/SKILL.md).
 
@@ -25,8 +25,8 @@ A voz do Auê é rápida, provocativa, com gíria natural e sem pudor quando cab
 ### 2.1 Landing e Login
 - *"Tá rolando agora / Entra no bonde hoje."*
 - *"Ao se cadastrar, você aceita os Termos e a Política de Privacidade. A piada é com o arroto, nunca com a pessoa."*
-- *"Não quer conta agora? Arrota como convidado. Pra postar e salvar o placar, precisa de conta."*
-- *"Arrotar sem conta"* (botão direto para a Arena).
+- Se o fluxo vigente e autorizado permitir jogar sem conta: *"Não quer conta agora? Arrota como convidado. Pra postar e salvar o placar, precisa de conta."*
+- *"Arrotar sem conta"* só pode nomear botão quando esse caminho existir, estiver autorizado e levar ao destino real da Arena.
 
 ### 2.2 Arena de Arroto
 - **IDLE:** *"Bora? Solta o primeiro e vê quanto dá."*

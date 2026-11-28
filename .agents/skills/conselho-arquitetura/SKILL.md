@@ -1,6 +1,6 @@
 ---
 name: conselho-arquitetura
-description: Como o Camillo aconselha o time sem virar dono da decisão, e como ele e o Tiago fecham acordo quando discordam.
+description: Como Camillo aconselha a squad sem virar dono da decisão e fecha opções técnicas com Marcelo.
 ---
 
 # Skill: conselho-arquitetura
@@ -33,9 +33,9 @@ Ele puxa o freio em três situações:
 - **quando quebra a experiência web pura** — acoplando o código a recursos que não funcionam no navegador do desktop ou do celular;
 - **quando é abstração vazia para feature que não existe** — complicar o código hoje por suposições distantes.
 
-## 4. Acordo com o Tiago
+## 4. Acordo com Marcelo
 
 Os dois fecham acordo antes do código existir:
-- Tiago defende a diversão, o engajamento e a simplicidade do produto;
+- Marcelo defende o problema real, o escopo e a simplicidade do produto;
 - Camillo defende a sustentabilidade técnica, a performance do mural e a integridade da arquitetura.
-- Se não convergirem, Tiago leva as opções claras para o Luiz bater o martelo.
+- Se não convergirem, Marcelo leva as opções claras ao Product Owner.

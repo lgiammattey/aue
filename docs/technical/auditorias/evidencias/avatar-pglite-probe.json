@@ -1,0 +1,61 @@
+{
+  "ambiente": "PGlite descartável sem rede/credenciais; stubs Auth/Storage adaptados",
+  "adaptacao": "mesma base externa das suítes Duelo: stubs com extensões/CREATE ROLE adaptados, owner_id/grants DML/auth.sessions/storage.allow_any_operation adicionados; prelude antes de 20261019000014",
+  "cenarios": [
+    {
+      "grant_helper_artificial": false,
+      "migrations": 117,
+      "helper_exec": false,
+      "helper_chamada": {
+        "estado": "erro",
+        "erro": {
+          "sqlstate": "42501",
+          "mensagem": "permission denied for function aue_e_conta_promovida"
+        }
+      },
+      "insert": {
+        "estado": "erro",
+        "erro": {
+          "sqlstate": "42501",
+          "mensagem": "permission denied for function aue_e_conta_promovida"
+        }
+      },
+      "update": {
+        "estado": "erro",
+        "erro": {
+          "sqlstate": "42501",
+          "mensagem": "permission denied for function aue_e_conta_promovida"
+        }
+      }
+    },
+    {
+      "grant_helper_artificial": true,
+      "migrations": 117,
+      "helper_exec": true,
+      "helper_chamada": {
+        "estado": "sucesso",
+        "retorno": [
+          {
+            "promovida": true
+          }
+        ]
+      },
+      "insert": {
+        "estado": "sucesso",
+        "retorno": [
+          {
+            "name": "a1000000-0000-0000-0000-000000000001/avatar.jpg"
+          }
+        ]
+      },
+      "update": {
+        "estado": "sucesso",
+        "retorno": [
+          {
+            "name": "a1000000-0000-0000-0000-000000000001/avatar.jpg"
+          }
+        ]
+      }
+    }
+  ]
+}

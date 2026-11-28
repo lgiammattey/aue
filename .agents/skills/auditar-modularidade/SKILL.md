@@ -5,7 +5,7 @@ description: Runbook da auditoria cruzada para detectar acoplamento, responsabil
 
 # Skill: auditar-modularidade
 
-Ferramenta de revisão de quem audita (Camillo ou Diego) para impedir que o Auê vire um
+Ferramenta de revisão de quem audita (Renan, Camillo ou Felipe, desde que não tenha implementado) para impedir que o Auê vire um
 monobloco impossível de mexer.
 
 ## 1. O que é monólito aqui
@@ -79,8 +79,7 @@ existir teste/contrato que trave a paridade.
 
 Leia [`docs/escopo/ESCOPO_ATUAL.md`](../../../docs/escopo/ESCOPO_ATUAL.md).
 
-Não aprove uma refatoração que, para "organizar melhor", começa a construir
-infraestrutura de feed, ranking ou monetização — que saíram da visão.
+Uma refatoração preserva os fluxos do Mural no escopo da missão. Qualquer expansão de feed, ranking ou monetização exige decisão de produto.
 
 Refatoração boa reduz risco da fatia atual. Não usa limpeza como desculpa para
 reabrir o que foi fechado.

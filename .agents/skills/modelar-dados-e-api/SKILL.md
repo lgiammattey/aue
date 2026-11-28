@@ -12,19 +12,19 @@ Procedimento do **Camillo** (Áudio, Backend e Arquitetura) para desenhar contra
 ## 1. Princípios Arquiteturais do Auê
 
 1. **Camadas Claras:**
-   - **Motor de Áudio & Score (`src/features/audio` / `src/features/score`):** YAMNet, Web Audio API e algoritmos de pontuação isolados de qualquer componente visual.
+   - **Áudio e nota:** preservar a separação entre a composição dos fluxos (`src/arena/`, `src/features/audio/`), as regras puras (`src/nucleo/`) e os adaptadores de navegador em `src/plataforma/`.
    - **Mural e perfil:** queries de mural paginado, posts com áudio, curtidas e respostas.
    - **Portas de Plataforma (`src/plataforma/`):** Acesso a microfone, armazenamento local e cliente Supabase vivem estritamente atrás de portas em `src/portas/`.
-   - **Telas e UI (`src/components/`, `src/routes/`):** Somente apresentação e consumo das portas.
+   - **Telas e UI:** identificar o componente ativo no [mapa de páginas e fluxos](../../../docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md). A UI compõe e apresenta o fluxo usando casos de uso e portas.
 
 2. **Supabase & Segurança (RLS):**
-   - Áudios e causos públicos no mural têm leitura livre.
-   - Desafios privados (X1) só podem ser ouvidos e respondidos pelos participantes autorizados.
-   - Moderação e denúncias com flag de revisão.
-   - RPCs determinísticas para cálculo e persistência de pontuação oficial sem manipulação pelo cliente.
+   - Definir leitura pública de áudio ou post somente quando o contrato e a policy aplicáveis a autorizarem; não inferir o grant implantado das migrations ou de PGlite.
+   - Desafios privados (X1) precisam limitar escuta e resposta aos participantes autorizados, com teste no ambiente declarado.
+   - Modelar moderação e denúncias conforme o escopo da missão, sem criar fluxo novo por esta skill.
+   - Tratar integridade da nota como requisito a provar: o M00 encontrou métricas enviadas pelo cliente manipuláveis em laboratório. Nenhuma consequência competitiva nova depende delas até uma missão autorizada validar autoria, vínculo com o áudio e contrato remoto.
 
 3. **Performance de Áudio Web:**
-   - Áudios salvos em buckets Supabase com CDN e URLs cacheadas.
+   - O contrato de cada fluxo define acesso, expiração e revogação do áudio. Para áudio privado ou moderável, verifique os cabeçalhos HTTP e a política de cache no ambiente autorizado. `NetworkOnly` comprova a estratégia do service worker no build examinado. A CDN exige verificação própria.
    - O player de áudio não pode gerar refetch desnecessário a cada rolagem da timeline.
 
 ---
@@ -35,5 +35,5 @@ Ao fechar um módulo antes do código:
 1. Definir o modelo de dados / schema (Postgres / Supabase);
 2. Escrever os contratos de TypeScript (`interfaces` / `types`);
 3. Especificar os estados de falha e offline;
-4. Definir como o Diego vai auditar (testes unitários e de integração);
-5. Submeter ao Tiago para alocação.
+4. Definir como Felipe valida o comportamento visível e como Renan conduz a Prova de Fogo;
+5. Submeter a Marcelo para enquadramento e sequência.

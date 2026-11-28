@@ -1,55 +1,27 @@
 # Auê: a definição
 
-> **Aprovada pelo Luiz em 23/11/2026.** Esta página é a única definição do produto. Onde outro documento a contradisser, vale esta página, e o outro documento deve ser alinhado, arquivado ou apagado.
+> Direção estabelecida pelo Product Owner para a M01 em 27/11/2026. Esta página define o produto; não autoriza implementação, redesenho nem release por si só.
 
 ## O que é
 
-Auê é um jogo web de arrotar. A pessoa grava um arroto, manda o áudio e recebe uma nota do juiz. Em volta do jogo existe um mural onde os arrotos aparecem e as pessoas conversam.
+Auê é uma plataforma web competitiva de arrotos, com comunidade em torno da competição. A pessoa grava um arroto, manda o áudio e recebe o laudo experimental do juiz. A Arena é o núcleo competitivo; o Mural reúne interação e resenha; o Perfil representa identidade e reputação. O gravador atende aos fluxos que precisam dele. O produto atende competidores, espectadores e visitantes no celular e no desktop.
 
-Os dois existem, mas **o jogo manda**: gravar, mandar e receber a nota é o centro. O mural é o que mantém a pessoa por perto depois da nota.
-
-## Para quem
-
-Quem abre o webapp, no celular ou no desktop. Não precisa de conta para jogar.
-
-## O primeiro minuto
-
-A pessoa entra e vê uma coisa: **gravar o arroto e mandar**. Nada de explicar o produto antes. Depois da nota ela escolhe o que fazer: mandar pra um amigo, tentar de novo ou ver o mural.
-
-## O loop
+O jogo continua no centro. O Mural e o Perfil dão contexto à competição; Auê não é uma rede social genérica. O primeiro minuto deve permitir encontrar o jogo sem exigir conta para apenas jogar, conforme o fluxo existente e as regras aplicáveis.
 
 ```text
 GRAVAR → MANDAR → RECEBER A NOTA → (DESAFIAR NO X1 | TENTAR DE NOVO | IR AO MURAL)
 ```
 
-## A nota
+A nota avalia o som recebido como experimento e não prova a origem do áudio. A M00 demonstrou em laboratório que métricas enviadas pelo cliente podem ser manipuladas; não atribuir nova consequência competitiva ao resultado antes de resolver e validar sua integridade.
 
-A nota é o laudo do juiz sobre o áudio enviado. É uma medição **experimental**: ela avalia o som recebido e não prova de onde ele veio. O texto do produto não promete mais do que isso.
+## O que preservar
 
-## O que está dentro
+Arena V2, captura e reprodução, X1 assíncrono, Mural e infraestrutura social, Perfil, acervo, dados, histórico de migrations e URLs públicas. A existência de código não comprova sua operação em produção. Não transformar gravação em autorização para publicação: o consentimento de publicar é explícito.
 
-| Peça | Situação |
-|---|---|
-| Arena: gravar, mandar, receber a nota | Centro do produto |
-| Duelo (X1) privado | Parte do jogo |
-| Mural | Fica; pode virar fórum (decisão aberta) |
-| Perfil e ranking (Liga) | Ficam |
+Comunidade em torno da competição não reativa por si só comunidades temáticas, tópicos, fórum, votos, ranking novo ou outra funcionalidade. Essas decisões, regras e UX dependem de missão própria. Código e links históricos ficam preservados até análise e autorização específicas. Lojas nativas continuam fora do escopo: o produto é web.
 
-## O que está fora
+## Horizonte e prova
 
-- Comunidades temáticas e tópicos: saem do produto. As rotas já redirecionam para `/`.
-- Lojas nativas (Google Play e App Store): fora de escopo, o Auê é só web.
+A direção futura inclui Arena, Mural e Perfil conectados, mas detalhes de competição, moderação, voto, progressão e home permanecem sujeitos a decisão e validação. O que prova valor é comportamento real: gravar, receber resultado, ouvir, publicar com consentimento ou chamar alguém para um X1; visitas não equivalem a jogadores.
 
-## Decisões abertas
-
-1. **O mural vira fórum?** Ainda não decidido. Até decidir, o mural não ganha estrutura nova de fórum.
-2. **Comunidade, tópicos e fórum no código** (`src/features/forum`, `comunidade`): só saem depois da decisão acima, e com OK do Luiz.
-3. **Liga:** a seção existe na home, mas a liga privada semanal não está comprovada. Confirmar o que ela é de fato antes de prometer.
-
-## O horizonte
-
-Publicar o jogo e o mural (ou fórum) e ver se atrai gente para a plataforma. É um experimento: o que prova sucesso é comportamento, não visita. Medir quem **gravou, recebeu a nota e voltou ou chamou alguém pro X1**.
-
-## O que ainda não foi provado
-
-O fluxo completo de gravar, enviar, receber a nota, publicar e duelar nunca foi conferido ponta a ponta em celular real (ver [`../PRODUCAO_ATUAL.md`](../PRODUCAO_ATUAL.md)). Antes de publicar para atrair usuário, esse caminho precisa de prova.
+M00 foi aceita para planejamento com ressalvas, sem homologação operacional integral. Para o estado observado e seus limites, veja [Produção atual](../PRODUCAO_ATUAL.md), [roadmap](../escopo/ROADMAP.md) e [backlog](../escopo/BACKLOG.md).

@@ -1,11 +1,13 @@
 ---
 name: construir-interface
-description: Diretrizes do Diego para construir componentes e telas do Auê! e Arena em React 19 com fidelidade 1:1.
+description: Diretrizes do Felipe para construir componentes e telas do Auê! e Arena em React 19, sem redesenho fora de missão.
 ---
 
 # Skill: construir-interface
 
-Procedimento do **Diego** para construir interfaces e componentes do Auê! em React 19 com fidelidade visual ao Design System v5 (`DESIGN.md`).
+Procedimento do **Felipe** para construir interfaces e componentes do Auê! em React 19 com fidelidade ao design system vigente (`DESIGN.md`).
+
+> Esta skill não é autorização de redesign. Quando tokens, componentes ou documentação conflitam com a rota ativa, registre o conflito, preserve a aparência aprovada e leve a decisão ao Cartão de Missão.
 
 ---
 
@@ -13,10 +15,10 @@ Procedimento do **Diego** para construir interfaces e componentes do Auê! em Re
 
 1. **Tokens CSS e Temas Dark/Light:**
    - Todo componente consome as variáveis CSS canônicas (`var(--bg)`, `var(--surface)`, `var(--surface-2)`, `var(--fg)`, `var(--muted)`, `var(--border)`, `var(--border-strong)`, `var(--accent)`, `var(--accent-on)`, `var(--gold)`, `var(--danger)`).
-   - Suporte nativo a tema escuro e claro: alternância via atributo de tema no elemento raiz e persistência em `bda-theme`.
+   - Preserve somente temas, alternância e persistência que a rota já suporte ou que estejam explicitamente no escopo da missão.
    - Fundo chapado: nunca usar gradientes em cards ou fundos de tela.
    - Sem cardificação: não embrulhar seção, lista, ranking, filtro ou formulário em caixa com borda, fundo e raio. Card só para item repetível e moldura funcional (`DESIGN.md` §4.1).
-   - Orçamento do verde ácido: no máximo 2 usos simultâneos de `--accent` por estado.
+   - Orçamento do accent aplicado na rota: no máximo 2 usos simultâneos por estado.
 
 2. **Tipografia e Classes:**
    - Display em `Anton`: Auê Score gigante (`92px` em reveal, `64px` em resultado), wordmark `AUÊ!`, títulos da Arena e falas secas do juiz.

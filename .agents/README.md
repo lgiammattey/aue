@@ -6,11 +6,12 @@ Tudo que a SQUAD usa mora aqui dentro. **Nada externo ao repositório é necess�
 
 ## Quem é quem
 
-A squad tem **três titulares**. Quem implementou não audita o próprio código.
+A squad tem **quatro titulares**. Quem implementou não valida a própria entrega.
 
-- **Tiago**: produto, Cartão de Missão, WIP 1 e aceite final pelas 7 perguntas.
-- **Camillo**: áudio, nota do juiz, backend, Supabase, arquitetura, Gate Arquitetural, plataforma e SEO técnico. Audita o que o Diego escreveu.
-- **Diego**: telas, Arena e experiência em React 19, design system. Audita a parte visível do que o Camillo entregou.
+- **Marcelo**: Product Lead e orquestrador. Controla escopo, WIP 1, Cartões de Missão, roadmap, decisões e parecer final.
+- **Felipe**: UX/UI e Design Lead. Guarda o design system, acessibilidade, responsividade e a experiência sem autorizar redesign fora de missão.
+- **Camillo**: Tech Lead full-stack. Guarda arquitetura, áudio, backend, Supabase, integridade, dependências, plataforma e Gate Arquitetural.
+- **Renan**: Quality Lead. Faz a Prova de Fogo, confere critérios de aceite, separa simulação de prova operacional e emite parecer sem auditar a própria implementação, registrando o grau de independência da revisão.
 
 O produto vive definido em [`docs/jogo/AUE.md`](../docs/jogo/AUE.md). As pistas e a ordem de atuação estão no [`AGENTS.md`](../AGENTS.md).
 
@@ -22,9 +23,10 @@ O papel de cada um é decidido no [`AGENTS.md`](../AGENTS.md), a fonte canônica
 
 ```text
 .claude/agents/     .codex/agents/
-├── tiago.md        ├── tiago.toml
+├── marcelo.md      ├── marcelo.toml
+├── felipe.md       ├── felipe.toml
 ├── camillo.md      ├── camillo.toml
-└── diego.md        └── diego.toml
+└── renan.md        └── renan.toml
 ```
 
 **Esses arquivos não criam papel nem regra.** Repetem o `AGENTS.md`. Mudou o `AGENTS.md`, muda o arquivo junto.
@@ -37,5 +39,5 @@ O cabeçalho é YAML (em `.claude/`) ou TOML (em `.codex/`), e um valor sem aspa
 
 ## Skills
 
-As skills em `.agents/skills/` são procedimentos. Quem as usa é quem tem a área: Tiago (`revisar-produto`, `alinhar-com-luiz`, `visao-do-produto`, `tom-de-voz`, `filtro-anti-ia`, `orquestrar-squad`, `padrao-git-e-issues`), Diego (`design-ux`, `design-ui`, `construir-interface`, `garantir-web`, `escrever-testes`) e Camillo (`conselho-arquitetura`, `modelar-dados-e-api`, `google-search-console`, `escrever-testes`). `auditar-qualidade` e `auditar-modularidade` são da auditoria cruzada: quem não escreveu o código as roda.
+As skills em `.agents/skills/` são procedimentos: Marcelo usa `revisar-produto`, `alinhar-com-luiz`, `visao-do-produto`, `tom-de-voz`, `filtro-anti-ia`, `orquestrar-squad` e `padrao-git-e-issues`; Felipe usa `design-ux`, `design-ui`, `construir-interface` e `garantir-web`; Camillo usa `conselho-arquitetura`, `modelar-dados-e-api`, `google-search-console` e `escrever-testes`; Renan conduz `auditar-qualidade` e `auditar-modularidade`. Quem não implementou pode aplicar essas duas últimas conforme o Cartão de Missão, sem alegar independência que não exista.
 

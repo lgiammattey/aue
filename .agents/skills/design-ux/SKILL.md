@@ -1,22 +1,24 @@
 ---
 name: design-ux
-description: Procedimento do Diego para desenhar a UX do Auê: a Arena de gravar e mandar, a nota, o X1 e o mural, em desktop e webapp.
+description: "Procedimento do Felipe para desenhar a UX do Auê: Arena, nota, X1 e Mural em desktop e webapp."
 ---
 
 # Skill: design-ux
 
-Procedimento do **Diego** para desenhar a experiência do Auê. A definição do produto é [`docs/jogo/AUE.md`](../../../docs/jogo/AUE.md) e a jornada está em [`docs/jogo/JORNADA.md`](../../../docs/jogo/JORNADA.md).
+Procedimento do **Felipe** para desenhar a experiência do Auê. A definição do produto é [`docs/jogo/AUE.md`](../../../docs/jogo/AUE.md) e a jornada está em [`docs/jogo/JORNADA.md`](../../../docs/jogo/JORNADA.md).
 
-## 1. A jornada
+## 1. A jornada de referência
 
-1. **Entrada:** a pessoa vê uma coisa, gravar e mandar. Sem conta, sem explicação antes.
-2. **Arena:** permissão do microfone, calibração, gravação e revisão.
+Antes de especificar ou alterar uma tela, confirme a rota, flags, componente canônico e estado real no mapa e no código. A jornada abaixo orienta apenas fluxos autorizados: não afirma que gravação, nota ou duelo estejam ativos em toda rota ou ambiente.
+
+1. **Entrada:** quando o fluxo de jogo estiver disponível, a pessoa deve conseguir encontrar gravar e mandar sem atrito indevido.
+2. **Arena:** permissão do microfone, calibração, gravação e revisão só entram nos estados já permitidos pela Arena ativa.
 3. **Resiliência:** microfone negado, silêncio e falha de rede viram erro claro com saída para tentar de novo. Nunca fingir sucesso.
-4. **Depois da nota:** a nota do juiz e três caminhos, desafiar no X1, tentar de novo ou ir ao mural.
-5. **X1:** link de desafio, resposta de quem recebe, resultado provisório e revanche.
-6. **Mural e perfil:** arrotos publicados, perfil e ranking. Publicar exige autorização explícita.
+4. **Depois da nota:** se o resultado existir no fluxo autorizado, os caminhos possíveis seguem o contrato ativo: desafiar no X1, tentar de novo ou ir ao mural.
+5. **X1:** link de desafio, resposta, resultado provisório e revanche dependem da rota e do contrato ativos; não criar estado por esta descrição.
+6. **Mural e perfil:** publicação, perfil e ranking seguem o que a rota e o contrato expõem. Publicar exige autorização explícita.
 
-Não há protótipos: tela nova é proposta pelo Diego e aprovada pelo Luiz antes do código. Antes de mexer em tela, consulte o [mapa de telas](../../../docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md).
+Não há protótipos: tela nova é proposta pelo Felipe e aprovada pelo Product Owner antes do código. Antes de mexer em tela, consulte o [mapa de telas](../../../docs/design/MAPA_DE_PAGINAS_E_FLUXOS.md).
 
 ---
 

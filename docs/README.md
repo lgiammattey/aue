@@ -1,6 +1,6 @@
 # Mapa da documentação do Auê
 
-O Auê é uma **rede social para arrotadores, exclusivamente online via desktop e webapp mobile**:
+O Auê é uma **plataforma web competitiva de arrotos**, com comunidade em torno da competição:
 
 > **Arrote. Receba a nota. Publique sua resenha. Chame os amigos pro X1.**
 
@@ -22,6 +22,10 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 10. [`escopo/BACKLOG.md`](escopo/BACKLOG.md) — o que está na fila.
 11. [`technical/README.md`](technical/README.md) — arquitetura, ADRs, áudio, dados e operação.
 12. [`jogo/VOZ.md`](jogo/VOZ.md) — o tom de voz autêntico, zoeiro e direto.
+13. [`escopo/ROADMAP.md`](escopo/ROADMAP.md) — missões, autorização e bloqueios.
+14. [`DECISOES.md`](DECISOES.md) — decisões de produto e governança; ADRs guardam decisões técnicas.
+15. [`../.agents/WORKFLOW.md`](../.agents/WORKFLOW.md) — fluxo, WIP e Prova de Fogo.
+16. [`technical/QUALIDADE.md`](technical/QUALIDADE.md) e [`technical/operacao/RELEASE.md`](technical/operacao/RELEASE.md) — gates e publicação autorizada.
 
 ---
 
@@ -40,7 +44,8 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 | De onde vêm cor, tipo, espaço e movimento? | [`design/design-system/system/DESIGN.md`](design/design-system/system/DESIGN.md) e  |
 | Qual é a direção artística que une tudo? | [`design/AUÊ!.md`](design/AUÊ!.md) |
 | Isso pertence ao produto agora? | [`escopo/ESCOPO_ATUAL.md`](escopo/ESCOPO_ATUAL.md) |
-| O que pegar para fazer? | [`escopo/BACKLOG.md`](escopo/BACKLOG.md) |
+| O que pegar para fazer? | [`escopo/ROADMAP.md`](escopo/ROADMAP.md) e [`escopo/BACKLOG.md`](escopo/BACKLOG.md); nenhuma missão começa sem autorização |
+| Como validar e preparar release? | [`technical/QUALIDADE.md`](technical/QUALIDADE.md) e [`technical/operacao/RELEASE.md`](technical/operacao/RELEASE.md) |
 | Quem implementa, valida e aceita? | [`../AGENTS.md`](../AGENTS.md) e [`.agents/README.md`](../.agents/README.md) |
 | Como o Auê fala? | [`jogo/VOZ.md`](jogo/VOZ.md) |
 | Que stack é essa e por quê? | [`technical/adr/0001-arquitetura-oficial-do-aue.md`](technical/adr/0001-arquitetura-oficial-do-aue.md) |
@@ -59,7 +64,8 @@ A autoridade única do repositório é [`../AGENTS.md`](../AGENTS.md). Este arqu
 
 ## Precedência
 
-1. **Comportamento real** — código, migrações e o que roda no navegador vencem documento de intenção.
+0. **`jogo/AUE.md`** — define o produto e sua direção.
+1. **Comportamento real** — código, migrações e o que roda no navegador vencem documento de intenção sobre implementação.
 2. **`escopo/ESCOPO_ATUAL.md`** — decide o que pertence ao produto agora.
 3. **`jogo/JORNADA.md` e `jogo/ARENA.md`** — decidem as 6 fases da experiência e quais estados a Arena tem. Nenhum design system ou handoff cria, renomeia ou remove estado.
 4. **`design/design-system/system/DESIGN.md`** — decide como cada estado e tela se parecem, se movem e medem.
@@ -76,7 +82,9 @@ docs/
 ├── README.md                          ← você está aqui
 ├── jogo/        AUE · LOOP · JORNADA · ARENA · REGRAS · VOZ
 ├── design/      README · AUÊ! (Art Bible) · design-system/ · fontes/
-├── escopo/      ESCOPO_ATUAL · BACKLOG
+├── escopo/      ESCOPO_ATUAL · ROADMAP · BACKLOG
+├── missoes/     Cartões e evidências por missão
+├── DECISOES.md  Decisões de produto e governança
 ├── technical/   README · arquitetura · adr/ · audio/ · dados/ · operacao/
 ├── schema/      nomenclatura · banco_de_dados
 ```

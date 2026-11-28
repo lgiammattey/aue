@@ -5,7 +5,7 @@ description: Procedimento para garantir funcionamento do Auê! exclusivamente on
 
 # Skill: garantir-web (Desktop e Webapp)
 
-Procedimento do **Diego** e **Camillo** para o Auê! rodar com fluidez impecável exclusivamente pela web — tanto no **Desktop** quanto no **Webapp Mobile** (iOS Safari e Android Chrome).
+Procedimento de **Felipe** e **Camillo** para verificar o Auê exclusivamente pela web — tanto no **Desktop** quanto no **Webapp Mobile**. Renan diferencia essa verificação de uma prova em aparelho físico.
 
 > O Auê! vive 100% online no navegador web moderno. Lojas nativas (Google Play / App Store) estão fora de escopo.
 
@@ -13,10 +13,10 @@ Procedimento do **Diego** e **Camillo** para o Auê! rodar com fluidez impecáve
 
 ## 1. No Desktop (Chrome, Firefox, Safari, Edge)
 
-- **Layout de 3 Colunas:** Coluna esquerda 275px fixa, coluna central de 600px com bordas `--border`, coluna direita 320px com ranking e tendências.
+- **Layout de 3 Colunas:** Validar a geometria e superfícies canônicas da rota no mapa de páginas. Medidas e colunas existentes são referência, não permissão para remodelar uma rota.
 - **Teclado & Acessibilidade:** Foco visível com contorno `--accent`, suporte a tecla `Espaço` para arrotar na Arena e `Esc` para fechar modais/sheets.
 - **Áudio no Feed:** Reprodução instantânea de causos com player leve, interrompendo qualquer áudio anterior ao iniciar outro.
-- **Tema:** Transição suave entre tema escuro (`#0a0a08`) e claro (`#f5f3ea`).
+- **Tema:** Validar o tema efetivamente servido pela rota. Conflito de token ou documentação é achado de governança, não decisão de mudança visual.
 
 ---
 

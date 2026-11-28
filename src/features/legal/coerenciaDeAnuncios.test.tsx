@@ -161,7 +161,9 @@ describe('a política e o AdBanner contam a mesma história', () => {
       VITE_ADSENSE_CLIENT: 'ca-pub-5542349230926522',
       VITE_ADSENSE_SLOT_RESULT: slot,
     });
-    expect(feed.includes('adsterra-native-container')).toBe(temAdsterra);
+    // Renderização estática não confirma maioridade nem autorização runtime,
+    // portanto nunca monta uma rede publicitária durante este teste.
+    expect(feed.includes('adsterra-native-container')).toBe(false);
     expect(politica.includes('Adsterra')).toBe(temAdsterra);
     expect(servindoAnuncio(telaDeResultado)).toBe(temAdSense);
     expect(politica.includes('Google AdSense')).toBe(temAdSense);

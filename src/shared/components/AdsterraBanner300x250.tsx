@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { ADSTERRA_CONFIG, anunciosAdsterraHabilitados, srcDocBanner300x250 } from '../../plataforma/web/adsterra';
+import { ADSTERRA_CONFIG, srcDocBanner300x250 } from '../../plataforma/web/adsterra';
+import { useFrameDePublicidade } from './usePublicidadeAdsterra';
 import './AdsterraBanner300x250.css';
 
 interface Props {
@@ -10,7 +11,9 @@ interface Props {
 export const AdsterraBanner300x250 = memo(function AdsterraBanner300x250({
   rotulo = 'Patrocinado',
 }: Props) {
-  if (!anunciosAdsterraHabilitados) return null;
+  const { ativo, observarFrame } = useFrameDePublicidade();
+
+  if (!ativo) return null;
 
   return (
     <aside
@@ -25,10 +28,15 @@ export const AdsterraBanner300x250 = memo(function AdsterraBanner300x250({
         className="adsterra-banner-300x250__container"
       >
         <iframe
+          ref={observarFrame}
           title="Publicidade patrocinada"
           width={ADSTERRA_CONFIG.banner300x250Width}
           height={ADSTERRA_CONFIG.banner300x250Height}
           scrolling="no"
+          sandbox="allow-scripts"
+          allow="autoplay 'none'; microphone 'none'; camera 'none'"
+          referrerPolicy="no-referrer"
+          loading="lazy"
           srcDoc={srcDocBanner300x250()}
         />
       </div>

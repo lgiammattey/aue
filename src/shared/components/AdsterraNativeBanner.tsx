@@ -1,5 +1,6 @@
-import { memo, useEffect } from 'react';
-import { ADSTERRA_CONFIG, anunciosAdsterraHabilitados, carregarNativeBanner } from '../../plataforma/web/adsterra';
+import { memo } from 'react';
+import { srcDocNativeBanner } from '../../plataforma/web/adsterra';
+import { useFrameDePublicidade } from './usePublicidadeAdsterra';
 
 interface Props {
   readonly rotulo?: string;
@@ -8,27 +9,26 @@ interface Props {
 export const AdsterraNativeBanner = memo(function AdsterraNativeBanner({
   rotulo = 'Patrocinado',
 }: Props) {
-  useEffect(() => {
-    carregarNativeBanner();
-  }, []);
-
-  if (!anunciosAdsterraHabilitados) return null;
+  const { ativo, observarFrame } = useFrameDePublicidade();
+  if (!ativo) return null;
 
   return (
-    <aside
-      className="card-post adsterra-native-card"
-      aria-label="Conteúdo patrocinado"
-    >
+    <aside className="card-post adsterra-native-card" aria-label="Conteúdo patrocinado">
       <div className="adsterra-native-header">
-        <span className="adsterra-native-label">
-          {rotulo}
-        </span>
+        <span className="adsterra-native-label">{rotulo}</span>
       </div>
-      <div
-        id={ADSTERRA_CONFIG.nativeContainerId}
-        data-testid="adsterra-native-container"
-        className="adsterra-native-container"
-      />
+      <div data-testid="adsterra-native-container" className="adsterra-native-container">
+        <iframe
+          ref={observarFrame}
+          title={rotulo}
+          sandbox="allow-scripts"
+          allow="autoplay 'none'; microphone 'none'; camera 'none'"
+          referrerPolicy="no-referrer"
+          loading="lazy"
+          style={{ display: 'block', width: '100%', aspectRatio: '4 / 1', height: 'auto', border: 0 }}
+          srcDoc={srcDocNativeBanner()}
+        />
+      </div>
     </aside>
   );
 });

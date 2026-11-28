@@ -21,9 +21,9 @@ name: Validação
 on:
   pull_request:
     # PRs encadeados usam uma branch codex/ como base.
-    branches: [main, 'codex/**']
+    branches: [main, develop, 'codex/**']
   push:
-    branches: [main]
+    branches: [main, develop]
 
 # Só leitura. Este workflow não escreve no repositório, não comenta em PR e não
 # publica pacote.

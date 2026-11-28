@@ -6,8 +6,8 @@ const AUTOR = '00000000-0000-0000-0000-000000000010';
 const VISITANTE = '00000000-0000-0000-0000-000000000099';
 const TOPICO = '10000000-0000-0000-0000-000000000001';
 
-describe('reações competitivas sem login (20261120231500)', () => {
-  it('aceita voto de sessão anônima, mantém like/dislike exclusivos e alterna atitudes', async () => {
+describe('reações competitivas em publicação pessoal (20261120231500)', () => {
+  it('aceita voto de sessão anônima numa publicação pessoal, mantém like/dislike exclusivos e alterna atitudes', async () => {
     const db = new PGlite();
     try {
       await db.exec(`
@@ -33,16 +33,17 @@ describe('reações competitivas sem login (20261120231500)', () => {
         $$;
         CREATE TABLE public.perfis (id uuid PRIMARY KEY, handle text, apelido text);
         CREATE TABLE public.grupos (id uuid PRIMARY KEY, slug text, nome varchar);
-        CREATE TABLE public.topicos (id uuid PRIMARY KEY, autor_id uuid, titulo text, status text, comunidade_id uuid, criado_em timestamptz);
+        CREATE TABLE public.topicos (id uuid PRIMARY KEY, autor_id uuid, titulo text, status text, comunidade_id uuid, origem text, criado_em timestamptz);
         CREATE TABLE public.posts_comunidade (id uuid PRIMARY KEY, group_id uuid, user_id uuid, content text, esta_escondido boolean, created_at timestamptz);
         INSERT INTO public.perfis VALUES ('${AUTOR}', 'autor', 'Autor');
-        INSERT INTO public.topicos VALUES ('${TOPICO}', '${AUTOR}', 'Arroto de respeito', 'aberto', null, now());
+        INSERT INTO public.topicos VALUES ('${TOPICO}', '${AUTOR}', 'Arroto de respeito', 'aberto', null, 'pessoal', now());
       `);
 
       await db.exec(await readFile('supabase/migrations/20261021001030_reacoes_de_topicos_e_salvos.sql', 'utf8'));
       await db.exec(await readFile('supabase/migrations/20261120231500_reacoes_competitivas_sem_login.sql', 'utf8'));
 
-      // Visitante (não promovido / anônimo) dá like e dislike (mutuamente exclusivos)
+      // Publicação pessoal não tem comunidade. Visitante com sessão anônima dá
+      // like e dislike, que continuam mutuamente exclusivos.
       expect((await db.query<{ alternar_reacao_do_topico: boolean }>('SELECT public.alternar_reacao_do_topico($1, $2)', [TOPICO, 'like'])).rows[0].alternar_reacao_do_topico).toBe(true);
       expect((await db.query<{ alternar_reacao_do_topico: boolean }>('SELECT public.alternar_reacao_do_topico($1, $2)', [TOPICO, 'dislike'])).rows[0].alternar_reacao_do_topico).toBe(true);
 

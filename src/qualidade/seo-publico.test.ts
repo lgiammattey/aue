@@ -127,6 +127,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     expect(config).toContain('\\/[^/]+\\/?$');
     const allowlist = /navigateFallbackAllowlist:\s*\[([\s\S]*?)\],\n\s*\/\*/.exec(config)?.[1] ?? '';
     expect(allowlist, 'a allowlist do Workbox desapareceu').not.toBe('');
+    expect(allowlist).toContain('|disputas|');
     expect(allowlist, 'grupo estático não pode receber index.html do cache').not.toMatch(/(?:\(|\|)g(?:\||\))/);
   });
 
@@ -284,7 +285,7 @@ describe('SEO público — sitemap, canonical e robots contam a mesma história'
     const fontes = new Map(firebase.hosting.rewrites.flatMap((regra) => regra.source ? [[regra.source, regra.destination]] : []));
     const regexes = new Map(firebase.hosting.rewrites.flatMap((regra) => regra.regex ? [[regra.regex, regra.destination]] : []));
     for (const rota of [
-      '/feed', '/em-alta', '/seguindo', '/arena', '/arena/em-breve', '/desafios', '/perfil', '/login', '/entrar',
+      '/feed', '/em-alta', '/seguindo', '/arena', '/arena/em-breve', '/desafios', '/disputas', '/perfil', '/login', '/entrar',
       '/redefinir-senha', '/admin', '/ranking', '/landing', '/versoes', '/mobile', '/versao-mobile',
     ]) {
       expect(fontes.get(rota), `${rota} deixou de funcionar ao recarregar`).toBe('/index.html');

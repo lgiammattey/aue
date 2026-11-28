@@ -1,9 +1,9 @@
 # Escopo atual
 
-A direção do produto está em [AUE.md](../jogo/AUE.md). O [roadmap](ROADMAP.md) registra qual missão está em execução ou aguarda aceite do PO. O recorte técnico da M03 está no [relatório da missão](../missoes/M03-RELATORIO.md).
+A direção do produto está em [AUE.md](../jogo/AUE.md). O [roadmap](ROADMAP.md) registra qual missão está em execução ou aguarda aceite do PO.
 
-A M03 abrange a retirada de código comprovadamente obsoleto, a atualização dos testes SQL e o CI de PRs encadeados. Arena V2, Mural, Perfil, acervo, links históricos, migrations e a integridade da M02 fazem parte do recorte que a missão preserva.
+A [M05](../missoes/m05/CARTAO.md) aplica a direção visual aprovada ao produto web. Início em PT e EN, Resenha, Arrotar, Disputas e Perfil usam a base integrada na develop. A Resenha reúne publicações públicas, e o X1 continua privado, assíncrono e com medições experimentais.
 
-A direção é uma plataforma competitiva com comunidade em torno do jogo. Ela não autoriza automaticamente comunidades temáticas, tópicos, votação, progressão, home nova ou outras ideias do backlog. Cada evolução exige decisão e missão própria. O produto continua exclusivamente web.
+A missão cobre integração e testes locais, com publicidade simulada. Disputas públicas, vitória oficial, votação competitiva e progressão continuam fora do escopo. Publicação e homologação são assunto da M06, após autorização.
 
 O histórico publicado e os limites de prova estão em [Produção atual](../PRODUCAO_ATUAL.md) e no [baseline M00](../technical/auditorias/M00-BASELINE.md).

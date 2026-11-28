@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { criarContaWeb } from './plataforma/web/conta';
 import { criarArmazenamentoWeb } from './plataforma/web/armazenamento';
@@ -25,13 +25,18 @@ const TelaArenaEmBreveOpenDesign = lazy(() => import('./features/novo-aue/TelaAr
 const TelaRedefinirSenha = lazy(() => import('./features/conta/TelaRedefinirSenha').then((m) => ({ default: m.TelaRedefinirSenha })));
 const TelaGrupos = lazy(() => import('./features/grupos/TelaGrupos').then((m) => ({ default: m.TelaGrupos })));
 const ConteudoDaHome = lazy(() => import('./arena/v2/ConteudoDaHome').then((m) => ({ default: m.ConteudoDaHome })));
-const TopArrotadoresDaHome = lazy(() => import('./features/novo-aue/TopArrotadoresDaHome').then((m) => ({ default: m.TopArrotadoresDaHome })));
 const TelaAdministracao = lazy(() => import('./features/administracao/TelaAdministracao').then((m) => ({ default: m.TelaAdministracao })));
 const TelaHistoria = lazy(() => import('./features/comunidade/TelaHistoria').then((m) => ({ default: m.TelaHistoria })));
 import { FLAGS } from './shared/flags';
 import { AvisoDeOffline } from './shared/components/AvisoDeOffline';
 import { AvisoMaioridade } from './shared/components/AvisoMaioridade';
-import { carregarSocialBar } from './plataforma/web/adsterra';
+import { analyticsArenaV2Em } from './plataforma/web/analyticsArenaV2';
+import { definirIdiomaETitulo, marcarPaginaNaoIndexavel } from './plataforma/web/documento';
+import { InicioM05 } from './features/m05/InicioM05';
+import type { AnexoRascunho } from './features/novo-aue/ModalCompositor';
+import { AnuncioM05 } from './features/m05/AnuncioM05';
+import { areaDaNavegacaoM05 } from './features/m05/areaDaNavegacaoM05';
+import { MolduraM05, NavegacaoM05 } from './features/m05/NavegacaoM05';
 import { Arena } from './arena/Arena';
 import { enderecoDoLoginComVolta } from './nucleo/comunidade/caminhoDeVolta';
 import { RastreadorDePaginas } from './features/telemetria/RastreadorDePaginas';
@@ -52,12 +57,17 @@ function EntradaPorLink() {
   return <Arena codigoDoDesafio={code} />;
 }
 
-function EntradaInicial({ incluirArenaNoTopo = false }: { readonly incluirArenaNoTopo?: boolean }) {
+type RascunhoDaArena = Extract<AnexoRascunho, { tipo: 'audio' }>;
+type AoPublicarDaArena = (audio: Blob, nota: number | null, duracaoMs: number) => void;
+
+function EntradaInicial({ rascunho, aoFecharRascunho }: {
+  readonly rascunho: RascunhoDaArena | null;
+  readonly aoFecharRascunho: () => void;
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const [destino, setDestino] = useState<'inicio' | 'perfil' | null>(null);
   const [autenticado, setAutenticado] = useState(false);
-  const arenaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -78,14 +88,6 @@ function EntradaInicial({ incluirArenaNoTopo = false }: { readonly incluirArenaN
     };
   }, []);
 
-  const focarArena = useCallback(() => {
-    const container = arenaRef.current;
-    if (!container) return;
-    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    const botao = container.querySelector<HTMLButtonElement>('.arena-v2__gatilho');
-    botao?.focus({ preventScroll: true });
-  }, []);
-
   if (destino === null) {
     return null;
   }
@@ -94,53 +96,76 @@ function EntradaInicial({ incluirArenaNoTopo = false }: { readonly incluirArenaN
     return <Navigate to="/perfil?boas-vindas=1" replace />;
   }
 
-  const volta = new URLSearchParams(location.search).get('gravar') === '1' ? '/feed?gravar=1' : '/feed';
-  const exibeArena = incluirArenaNoTopo && FLAGS.arenaV2;
-  const slotArena = exibeArena ? (
-    <div ref={arenaRef}>
-      <Suspense fallback={null}>
-        <EntradaDaArena modoEmbutido />
-      </Suspense>
-    </div>
-  ) : undefined;
-
+  const solicitouPublicar = new URLSearchParams(location.search).get('publicar') === '1';
+  if (rascunho && solicitouPublicar && !autenticado) {
+    return <Navigate to={enderecoDoLoginComVolta('/feed?publicar=1', 'entrar')} replace />;
+  }
+  const volta = location.pathname + location.search;
   return (
     <InicioOpenDesign
       autenticado={autenticado}
       aoEntrar={() => navigate(enderecoDoLoginComVolta(volta, 'entrar'))}
-      slotArena={slotArena}
-      aoFocarArena={exibeArena ? focarArena : undefined}
+      experienciaM05
+      anexoDaArena={solicitouPublicar ? rascunho : null}
+      aoFecharAnexoDaArena={aoFecharRascunho}
     />
   );
 }
 
-/** A faixa +18 fala o idioma da página em que a pessoa está. */
-function AvisoMaioridadeDaRota() {
-  const { pathname } = useLocation();
-  return <AvisoMaioridade idioma={pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'pt'} />;
-}
-
 function EntradaRaiz() {
-  if (FLAGS.arenaV2) {
-    return <EntradaDaArena conteudoDoRepouso={<ConteudoDaHome />} />;
-  }
-  return <EntradaInicial incluirArenaNoTopo />;
+  const { search } = useLocation();
+  const parametros = new URLSearchParams(search);
+  if (parametros.get('gravar') === '1') return <Navigate to={`/feed${search}`} replace />;
+  if (parametros.has('desafiar')) return <Navigate to={`/arena${search}`} replace />;
+
+  return (
+    <MolduraM05>
+      <InicioM05>
+        <Suspense fallback={null}><ConteudoDaHome comAnuncio={false} /></Suspense>
+      </InicioM05>
+    </MolduraM05>
+  );
 }
 
-function EntradaDaArena({ conteudoDoRepouso, modoEmbutido = false }: { conteudoDoRepouso?: ReactNode; modoEmbutido?: boolean } = {}) {
+function ArenaEmIngles({ aoPublicarAudio }: { readonly aoPublicarAudio: AoPublicarDaArena }) {
+  useEffect(() => definirIdiomaETitulo('en', 'Record a burp | Auê'), []);
+  return (
+    <MolduraM05 idioma="en">
+      <ArenaV2 experienciaM05 idioma="en" aoPublicarAudio={aoPublicarAudio} telemetria={analyticsArenaV2Em} conteudoAposResultado={<AnuncioM05 area="resultado" idioma="en" />} />
+    </MolduraM05>
+  );
+}
+
+function EntradaDaArena({ aoPublicarAudio }: { readonly aoPublicarAudio: AoPublicarDaArena }) {
   const { search } = useLocation();
-  const adversarioHandle = new URLSearchParams(search).get('desafiar');
-  const rankingDoHero = conteudoDoRepouso && !modoEmbutido && !adversarioHandle ? <TopArrotadoresDaHome variante="liga-hero" /> : undefined;
-  if (FLAGS.dueloV2) {
-    return <EntradaDueloIntegrado modo="criar" conteudoDoRepouso={conteudoDoRepouso} rankingDoHero={rankingDoHero} adversarioHandle={adversarioHandle} modoEmbutido={modoEmbutido} />;
-  }
-  return modoEmbutido
-    ? <EntradaArenaLocalV2 modoEmbutido conteudoDoRepouso={conteudoDoRepouso} adversarioHandle={adversarioHandle} />
-    : <ArenaV2 conteudoDoRepouso={conteudoDoRepouso} rankingDoHero={rankingDoHero} adversarioHandle={adversarioHandle} />;
+  const parametros = new URLSearchParams(search);
+  const adversarioHandle = parametros.get('desafiar');
+  if (parametros.get('lang') === 'en') return <ArenaEmIngles aoPublicarAudio={aoPublicarAudio} />;
+  if (!FLAGS.arenaV2) return <TelaArenaEmBreveOpenDesign />;
+
+  const conteudoAposResultado = <AnuncioM05 area="resultado" />;
+  return (
+    <MolduraM05>
+      {FLAGS.dueloV2
+        ? <EntradaDueloIntegrado experienciaM05 modo="criar" aoPublicarAudio={aoPublicarAudio} conteudoAposResultado={conteudoAposResultado} adversarioHandle={adversarioHandle} />
+        : <EntradaArenaLocalV2 experienciaM05 aoPublicarAudio={aoPublicarAudio} conteudoAposResultado={conteudoAposResultado} adversarioHandle={adversarioHandle} />}
+    </MolduraM05>
+  );
+}
+
+function EntradaDisputas() {
+  useEffect(() => marcarPaginaNaoIndexavel('Disputas | Auê'), []);
+  return (
+    <MolduraM05>
+      {FLAGS.arenaV2 && FLAGS.dueloV2
+        ? <EntradaDueloIntegrado experienciaM05 modo="criar" telaInicial="meus" />
+        : <DueloIndisponivel />}
+    </MolduraM05>
+  );
 }
 
 function DueloIndisponivel() {
-  return <main><h1>Desafio indisponível.</h1><p>Este desafio ainda não está disponível neste ambiente.</p><a href="/">Voltar para a Arena</a></main>;
+  return <main className="m05-estado"><h1>Desafio indisponível.</h1><p>Este desafio ainda não está disponível neste ambiente.</p><a href="/arena">Voltar para a Arena</a></main>;
 }
 
 function EntradaHistoria() {
@@ -160,33 +185,61 @@ function EntradaDesafios() {
 }
 
 function EntradaSeguindo() {
-  return <InicioOpenDesign viewInicial="seguindo" />;
+  return <InicioOpenDesign viewInicial="seguindo" experienciaM05 />;
 }
 
 export function App() {
   const [telemetriaDeNavegacao] = useState(() => criarTelemetriaWeb(criarArmazenamentoWeb()));
 
-  useEffect(() => {
-    carregarSocialBar();
-  }, []);
-
   return (
     <>
       <AvisoDeOffline />
       <Router>
-        <AvisoMaioridadeDaRota />
         <RastreadorDePaginas telemetria={telemetriaDeNavegacao} />
-        <Suspense fallback={null}>
+        <RotasDoApp />
+      </Router>
+    </>
+  );
+}
+
+function RotasDoApp() {
+  const { pathname, search } = useLocation();
+  const navigate = useNavigate();
+  const [rascunho, setRascunho] = useState<RascunhoDaArena | null>(null);
+  const caminho = pathname.replace(/\/+$/, '') || '/';
+  const ingles = caminho === '/en' || (caminho === '/arena' && new URLSearchParams(search).get('lang') === 'en');
+  const temNavegacao = areaDaNavegacaoM05(caminho) !== null;
+
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const naPublicacao = caminho === '/feed' && params.get('publicar') === '1';
+    const entrando = caminho === '/login' && params.get('volta') === '/feed?publicar=1';
+    const concluindoPerfil = caminho === '/perfil' && params.get('boas-vindas') === '1';
+    if (!naPublicacao && !entrando && !concluindoPerfil) setRascunho(null);
+  }, [caminho, search]);
+
+  const publicarDaArena: AoPublicarDaArena = (audio, _nota, duracaoMs) => {
+    setRascunho({ tipo: 'audio', arquivo: audio, duracaoMs });
+    navigate('/feed?publicar=1');
+  };
+  const fecharRascunho = () => {
+    setRascunho(null);
+    if (new URLSearchParams(search).get('publicar') === '1') navigate('/feed', { replace: true });
+  };
+
+  return (
+    <div className={temNavegacao ? 'm05-app' : 'app-rotas'}>
+      <AvisoMaioridade idioma={ingles ? 'en' : 'pt'} />
+      <Suspense fallback={null}>
         <Routes>
-          {/* Hub unificado (Arena + Mural) */}
           <Route path="/" element={<EntradaRaiz />} />
-          <Route path="/feed" element={<EntradaInicial incluirArenaNoTopo />} />
+          <Route path="/feed" element={<EntradaInicial rascunho={rascunho} aoFecharRascunho={fecharRascunho} />} />
           <Route path="/em-alta" element={<Navigate to="/" replace />} />
           <Route path="/seguindo" element={<EntradaSeguindo />} />
 
           {/* Arena de Arrotos (modo foco) */}
           <Route path="/arena/em-breve" element={<TelaArenaEmBreveOpenDesign />} />
-          <Route path="/arena" element={FLAGS.arenaV2 ? <EntradaDaArena /> : <TelaArenaEmBreveOpenDesign />} />
+          <Route path="/arena" element={<EntradaDaArena aoPublicarAudio={publicarDaArena} />} />
 
           {/* Comunidades descontinuadas — tudo vai para o Mural unificado em / */}
           <Route path="/comunidade" element={<Navigate to="/" replace />} />
@@ -203,16 +256,17 @@ export function App() {
           <Route path="/t/:id" element={<Navigate to="/" replace />} />
 
           {/* Desafios e Duelos X1 */}
+          <Route path="/disputas" element={<EntradaDisputas />} />
           <Route path="/desafios" element={<EntradaDesafios />} />
           <Route path="/x1/:code" element={<EntradaPorLink />} />
           <Route path="/b/:code" element={<EntradaPorLink />} />
           <Route path="/d/:id" element={<ChallengeView />} />
-          <Route path="/duelo" element={FLAGS.arenaV2 && FLAGS.dueloV2 ? <EntradaDueloIntegrado modo="responder" /> : <DueloIndisponivel />} />
+          <Route path="/duelo" element={FLAGS.arenaV2 && FLAGS.dueloV2 ? <MolduraM05><EntradaDueloIntegrado experienciaM05 modo="responder" /></MolduraM05> : <DueloIndisponivel />} />
 
           {/* Perfil e Conta */}
-          <Route path="/perfil" element={<TelaPerfilOpenDesign />} />
-          <Route path="/u/:handle" element={<TelaPerfilOpenDesign />} />
-          <Route path="/perfil/:handle" element={<TelaPerfilOpenDesign />} />
+          <Route path="/perfil" element={<TelaPerfilOpenDesign experienciaM05 />} />
+          <Route path="/u/:handle" element={<TelaPerfilOpenDesign experienciaM05 />} />
+          <Route path="/perfil/:handle" element={<TelaPerfilOpenDesign experienciaM05 />} />
           <Route path="/login" element={<InicioOpenDesign viewInicial="auth" />} />
           <Route path="/entrar" element={<Navigate to="/login" replace />} />
           <Route path="/redefinir-senha" element={<TelaRedefinirSenha />} />
@@ -227,7 +281,7 @@ export function App() {
 
           {/* Páginas Públicas e Legais */}
           <Route path="/como-jogar" element={<ComoJogar />} />
-          <Route path="/en" element={<HomeEn />} />
+          <Route path="/en" element={<MolduraM05 idioma="en"><HomeEn /></MolduraM05>} />
           <Route path="/como-arrotar" element={<ComoArrotar />} />
           <Route path="/tipos-de-arroto" element={<TiposDeArroto />} />
           <Route path="/ranking-de-arrotos" element={<RankingDeArrotos />} />
@@ -249,9 +303,9 @@ export function App() {
           {/* Fallback */}
           <Route path="*" element={<TelaNaoEncontrada />} />
         </Routes>
-        </Suspense>
-      </Router>
-    </>
+      </Suspense>
+      {temNavegacao && <NavegacaoM05 mobile idioma={ingles ? 'en' : 'pt'} />}
+    </div>
   );
 }
 

@@ -1,5 +1,19 @@
 # Mapa de Páginas, Rotas e Fluxos do Auê!
 
+## Rotas da M05
+
+O [cartão da M05](../missoes/m05/CARTAO.md) define o corte em revisão para a develop. A tabela de produção abaixo registra a versão publicada.
+
+| Área | Rota | Entrada |
+|---|---|---|
+| Início | `/`, `/en` | `InicioM05` com `ResenhaNoInicio` e a arte do churrasco |
+| Resenha | `/feed`, `/seguindo` | `InicioOpenDesign` em modo M05 |
+| Arrotar | `/arena`, `/arena?lang=en` | `ArenaV2` na casca M05. A publicação usa o compositor da Resenha e confirma consentimento |
+| Disputas | `/disputas`, convite em `/duelo` | `EntradaDueloIntegrado` para histórico privado, gravação e resposta |
+| Perfil | `/perfil`, `/u/:handle`, `/perfil/:handle` | `TelaPerfilOpenDesign` em modo M05 |
+
+`CardDoPost` segue sendo o componente compartilhado de publicação. `NavegacaoM05` usa a lateral no desktop e a barra inferior no mobile. As rotas históricas de histórias, desafios e links de convite continuam cobertas pelo roteador.
+
 ## Mapa operacional do corte, 23/11/2026
 
 Base: commit `dc83657589294fb45e28f7b5753712044e709b08`, deploy do Firebase e código. Conferência em 23/11/2026; detalhes e limites em [Produção atual](../PRODUCAO_ATUAL.md).

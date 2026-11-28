@@ -1,0 +1,52 @@
+/* Refinamento final V2. Carregado depois das camadas anteriores. */
+:root { --bg: #0a0b0e; --copper: #ff5500; --copper2: #ff7840; }
+.topbar nav, .club-nav { gap: 14px; }
+.topbar nav button, .club-nav button { letter-spacing: .01em; }
+.club-nav button[data-view='arena'] { color: var(--copper); font-weight: 900; }
+.arena-head h1, .section-head h1, .x1-head h1 { font-size: clamp(38px, 5vw, 68px); }
+.arena-stage h2 { font-size: clamp(42px, 5vw, 66px); }
+.lobby-title { font: 28px/1 var(--display); margin: 0 0 12px; }
+.lobby-state, .dispute-state { color: var(--copper2); display: block; font: 800 10px ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+.disputes-board { border-top: 1px solid var(--line); margin-top: 28px; }
+.dispute-row { align-items: center; background: transparent; border-bottom: 1px solid var(--line); display: grid; gap: 7px; grid-template-columns: 150px 1fr auto; min-height: 86px; padding: 16px 0; text-align: left; width: 100%; }
+.dispute-row:hover { color: var(--copper2); }.dispute-row b { font-size: 17px; }.dispute-row b i { color: var(--copper); font-style: normal; padding: 0 5px; }.dispute-row small { color: var(--muted); }
+.profile-hero .outline + .outline { margin-left: 8px; }
+.mobile-nav { grid-template-columns: repeat(5, 1fr); }.mobile-nav .nav-arrotar { background: var(--copper); color: var(--bg); margin-top: -18px; min-height: 66px; }
+@media (max-width: 620px) { .club-nav { display: none; }.mobile-nav { display: grid; }.mobile-nav button { min-width: 0; }.dispute-row { grid-template-columns: 1fr; gap: 4px; }.dispute-row small { font-size: 11px; }.disputes-screen .section-head { gap: 12px; }.disputes-screen .cta { width: 100%; }.arena-head h1, .section-head h1, .x1-head h1 { font-size: 48px; } }
+.arena-grid { grid-template-columns: minmax(0, 1fr); }
+.arena-stage { width: 100%; }
+body[data-surface="club"] .mobile-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (min-width: 901px) { body[data-surface="club"] .mobile-nav { display: none; } }
+@media (max-width: 900px) {
+  body[data-surface="public"] .mobile-nav {
+    display: grid;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: var(--charcoal);
+    border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  body[data-surface="public"] .mobile-nav button {
+    min-height: 48px;
+    min-width: 0;
+    display: grid;
+    justify-items: center;
+    padding: 7px 5px;
+    color: var(--muted);
+    background: transparent;
+  }
+  body[data-surface="public"] .mobile-nav .nav-arrotar {
+    background: var(--copper);
+    color: var(--bg);
+  }
+}
+@media (max-width: 900px) {
+  body[data-surface="club"] .mobile-nav .nav-arrotar,
+  body[data-surface="public"] .mobile-nav .nav-arrotar {
+    background: var(--copper);
+    color: var(--bg);
+  }
+}

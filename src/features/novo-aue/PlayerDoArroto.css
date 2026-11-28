@@ -37,7 +37,7 @@
     color var(--duration-fast, 160ms) ease;
 }
 
-.player-arroto__play[aria-label^='Pausar'],
+.player-arroto__play[aria-pressed='true'],
 .player-arroto__play:hover {
   background: var(--accent, #ff5500);
   border-color: var(--accent, #ff5500);

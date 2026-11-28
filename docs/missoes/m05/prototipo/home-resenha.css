@@ -1,0 +1,68 @@
+/* Feed compacto da Home. Carregar após as camadas gerais do protótipo. */
+.home-live {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 276px;
+  gap: clamp(28px, 5vw, 64px);
+  margin-top: clamp(28px, 5vw, 72px);
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+
+.home-live-feed { min-width: 0; }
+.home-live-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.home-live-heading h2 { margin: 0; font: 28px/1 var(--display); text-transform: uppercase; }
+.home-live-new { min-height: 32px; border: 1px solid rgb(255 85 0 / 45%); background: transparent; color: var(--copper2); font-size: 11px; font-weight: 800; }
+.home-live .mural-post { margin: 0; padding: 20px 0; }
+.home-live .mural-post + .mural-post { border-top: 1px solid var(--line); }
+.home-live .post footer { gap: 18px; }
+.home-live .m05-player { margin: 12px 0 2px; }
+.home-live-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.home-live-actions button { min-height: 40px; padding-inline: 10px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 800; }
+.home-live-actions button:hover { color: var(--copper2); }
+
+.home-live-aside { border-left: 1px solid var(--line); padding-left: 24px; }
+.home-live-aside h2 { font: 24px/1 var(--display); margin: 0 0 14px; }
+.home-live-aside p { color: var(--muted); font-size: 13px; line-height: 1.45; }
+.home-live-controls { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0 22px; }
+.home-live-controls button { min-height: 36px; padding: 0 10px; background: transparent; border: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.home-live-controls button[aria-pressed='true'] { border-color: var(--copper); color: var(--ink); }
+
+.home-live-ad {
+  display: grid;
+  min-height: 250px;
+  place-content: center;
+  margin: 22px 0;
+  padding: 20px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font: 800 10px ui-monospace, monospace;
+  letter-spacing: .1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.home-live-empty { padding: 52px 0; border-top: 1px solid var(--line); text-align: center; }
+.home-live-empty h3 { margin: 0 0 7px; font: 30px var(--display); }
+.home-live-empty p { margin: 0; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 800px) {
+  .home-live { grid-template-columns: 1fr; gap: 28px; }
+  .home-live-aside { border-left: 0; border-top: 1px solid var(--line); padding: 22px 0 0; }
+  .home-live-ad { min-height: 110px; }
+}
+
+@media (max-width: 420px) {
+  .home-live-heading { align-items: flex-start; flex-direction: column; }
+  .home-live-new { width: 100%; }
+  .home-live-actions { gap: 2px; justify-content: space-between; }
+}
+.home-live-header { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; gap:12px; }
+.home-live-header h2 { margin:0; font:32px var(--display); }
+.home-live-header .text-btn, .home-live-new, .home-live-demo button { min-height:44px; }
+.home-live-side { min-width:0; border-left:1px solid var(--line); padding-left:24px; }
+.home-live-side section + section { border-top:1px solid var(--line); margin-top:16px; padding-top:16px; }
+.home-live-side h2 { font:25px var(--display); margin:0; }
+.home-live-side p, .home-live-message { color:var(--muted); font-size:14px; }
+.home-live-demo summary { min-height:44px; cursor:pointer; padding-top:12px; color:var(--muted); }
+.home-live-demo button { margin:4px; }
+@media(max-width:800px) { .home-live-side { border-left:0; border-top:1px solid var(--line); padding:20px 0 0; } }

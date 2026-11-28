@@ -3,6 +3,7 @@ import './PlayerDoArroto.css';
 
 interface Props {
   readonly tocando: boolean;
+  readonly idioma?: 'pt' | 'en';
   readonly tempoAtualSegundos: number;
   readonly duracaoSegundos: number | null;
   readonly aoAlternar: () => void;
@@ -32,7 +33,8 @@ const CAMINHO_DO_PAUSE = 'M6 4h4v16H6zM14 4h4v16h-4z';
  * mostra o tempo corrido e preenche a onda aos poucos, em --fg (nunca verde).
  * Sem duração conhecida mostra o tempo corrido. Nunca inventa duração.
  */
-export function PlayerDoArroto({ tocando, tempoAtualSegundos, duracaoSegundos, aoAlternar }: Props) {
+export function PlayerDoArroto({ tocando, idioma = 'pt', tempoAtualSegundos, duracaoSegundos, aoAlternar }: Props) {
+  const en = idioma === 'en';
   const temDuracao = duracaoSegundos !== null && Number.isFinite(duracaoSegundos) && duracaoSegundos > 0;
   const mostraCorrido = tocando || !temDuracao;
   const tempo = mostraCorrido ? formatarTempo(tempoAtualSegundos) : formatarTempo(duracaoSegundos);
@@ -42,11 +44,12 @@ export function PlayerDoArroto({ tocando, tempoAtualSegundos, duracaoSegundos, a
     : 0;
 
   return (
-    <div className="player-arroto" role="region" aria-label="Player do arroto">
+    <div className="player-arroto" role="region" aria-label={en ? 'Burp player' : 'Player do arroto'}>
       <button
         type="button"
         className="player-arroto__play"
-        aria-label={tocando ? 'Pausar áudio' : 'Ouvir áudio'}
+        aria-label={tocando ? (en ? 'Pause audio' : 'Pausar áudio') : (en ? 'Play audio' : 'Ouvir áudio')}
+        aria-pressed={tocando}
         onClick={aoAlternar}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
@@ -58,7 +61,7 @@ export function PlayerDoArroto({ tocando, tempoAtualSegundos, duracaoSegundos, a
           <i key={i} className={i < tocadas ? 'is-tocada' : undefined} style={{ height: altura }} />
         ))}
       </div>
-      <span className="player-arroto__tempo" aria-label={`Tempo do áudio: ${tempo}`}>{tempo}</span>
+      <span className="player-arroto__tempo" aria-label={`${en ? 'Audio time' : 'Tempo do áudio'}: ${tempo}`}>{tempo}</span>
       <svg className="player-arroto__ondas" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true" focusable="false">
         <path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4" />
       </svg>

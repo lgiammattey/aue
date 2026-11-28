@@ -67,7 +67,9 @@ for (const viewport of VIEWPORTS) {
     await expect(page.locator('.app.app--auth')).toBeVisible();
     await page.getByRole('link', { name: 'Auê, página inicial' }).click();
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator('.app:not(.app--auth)')).toBeVisible();
+    await expect(page.locator('.m05-moldura')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /solta o arroto/i })).toBeVisible();
+    expect((await coresDaCasca(page, '.m05-moldura')).fundo).toBe('rgb(10, 11, 14)');
     expect(await page.locator('html').getAttribute('data-theme')).not.toBe('light');
   });
 

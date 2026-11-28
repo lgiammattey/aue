@@ -55,6 +55,8 @@
       { "source": "/arena/", "destination": "/index.html" },
       { "source": "/arena/em-breve", "destination": "/index.html" },
       { "source": "/arena/em-breve/", "destination": "/index.html" },
+      { "source": "/disputas", "destination": "/index.html" },
+      { "source": "/disputas/", "destination": "/index.html" },
       { "source": "/desafios", "destination": "/index.html" },
       { "source": "/desafios/", "destination": "/index.html" },
       { "source": "/perfil", "destination": "/index.html" },
@@ -95,6 +97,13 @@
       {
         "source": "/feed",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/disputas{,/}",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" },
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        ]
       },
       {
         "source": "/perfil{,/**}",

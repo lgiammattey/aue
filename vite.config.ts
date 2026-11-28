@@ -122,7 +122,7 @@ export default defineConfig({
         */
         navigateFallbackAllowlist: [
           /^\/$/,
-          /^\/(?:feed|em-alta|seguindo|arena|arena\/em-breve|desafios|perfil|login|entrar|redefinir-senha|admin|ranking|landing|versoes|mobile|versao-mobile)\/?$/,
+          /^\/(?:feed|em-alta|seguindo|arena|arena\/em-breve|desafios|disputas|perfil|login|entrar|redefinir-senha|admin|ranking|landing|versoes|mobile|versao-mobile)\/?$/,
           /^\/(?:x1|b|d|u|perfil|resenha|historia|conto)\/[^/]+\/?$/,
         ],
         /*

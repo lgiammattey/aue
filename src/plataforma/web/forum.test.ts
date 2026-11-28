@@ -861,6 +861,17 @@ describe('escritas: sucesso e o que vai ao servidor', () => {
     expect(r).toMatchObject({ ok: true, valor: { tipo: 'audio', mime: 'audio/webm', duracaoMs: 1_000 } });
   });
 
+  it('sobe WAV da emissão da Arena como áudio privado do fórum', async () => {
+    upload.mockResolvedValue({ error: null });
+    const audio = new Blob([new Uint8Array(44)], { type: 'audio/wav' });
+    const r = await criarForumWeb().enviarAnexoDoForum?.({ tipo: 'audio', arquivo: audio, duracaoMs: 1_000 });
+    expect(r?.ok).toBe(true);
+    expect(upload).toHaveBeenCalledWith(expect.stringMatching(/\/forum\/[0-9a-f-]+\.wav$/), audio, {
+      contentType: 'audio/wav', upsert: false,
+    });
+    expect(r).toMatchObject({ ok: true, valor: { tipo: 'audio', mime: 'audio/wav', duracaoMs: 1_000 } });
+  });
+
   it('lê mídia publicada por ids sem confundir vídeo externo com arquivo privado', async () => {
     rpc.mockResolvedValue({
       data: [

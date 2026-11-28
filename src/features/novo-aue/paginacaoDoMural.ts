@@ -1,11 +1,11 @@
 import type { CursorDoForum, PaginaDoForum, PortaDeForum, PublicacaoPessoal, TopicoDoExplorar } from '../../portas/forum';
 
 type Fonte<T> = { itens: T[]; cursor: CursorDoForum | null; iniciada: boolean; };
-type Entrada = { tipo: 'comunidade'; valor: TopicoDoExplorar } | { tipo: 'pessoal'; valor: PublicacaoPessoal };
-const LIMITE = 30;
+export type EntradaDaResenha = { tipo: 'comunidade'; valor: TopicoDoExplorar } | { tipo: 'pessoal'; valor: PublicacaoPessoal };
+
 
 /** Mantém uma cabeça conhecida de cada origem antes de emitir cada publicação. */
-export function criarPaginacaoDoMural(forum: PortaDeForum) {
+export function criarPaginacaoDoMural(forum: PortaDeForum, limite = 30) {
   let comunidades: Fonte<TopicoDoExplorar> = { itens: [], cursor: null, iniciada: false };
   let pessoais: Fonte<PublicacaoPessoal> = { itens: [], cursor: null, iniciada: false };
   const temMais = (c: Fonte<TopicoDoExplorar>, p: Fonte<PublicacaoPessoal>) => c.itens.length > 0 || p.itens.length > 0 || !c.iniciada || !p.iniciada || c.cursor !== null || p.cursor !== null;
@@ -13,7 +13,7 @@ export function criarPaginacaoDoMural(forum: PortaDeForum) {
     // Estado só é confirmado ao fim: falha de qualquer leitura permite repetir sem lacunas.
     const c = { ...comunidades, itens: [...comunidades.itens] };
     const p = { ...pessoais, itens: [...pessoais.itens] };
-    const saida: Entrada[] = [];
+    const saida: EntradaDaResenha[] = [];
     async function completar<T>(fonte: Fonte<T>, ler: (cursor: CursorDoForum | null) => Promise<{ ok: true; valor: PaginaDoForum<CursorDoForum, T> } | { ok: false }>) {
       if (fonte.itens.length || (fonte.iniciada && !fonte.cursor)) return;
       const resultado = await ler(fonte.cursor);
@@ -22,10 +22,10 @@ export function criarPaginacaoDoMural(forum: PortaDeForum) {
       fonte.cursor = resultado.valor.proximo;
       fonte.iniciada = true;
     }
-    while (saida.length < LIMITE) {
+    while (saida.length < limite) {
       await Promise.all([
-        completar(c, (cursor) => forum.explorarTopicos({ limite: LIMITE, ordem: 'recentes', ...(cursor ? { cursor } : {}) })),
-        completar(p, (cursor) => forum.listarPublicacoesPessoais ? forum.listarPublicacoesPessoais({ limite: LIMITE, ...(cursor ? { cursor } : {}) }) : Promise.resolve({ ok: true, valor: { itens: [], proximo: null } })),
+        completar(c, (cursor) => forum.explorarTopicos({ limite, ordem: 'recentes', ...(cursor ? { cursor } : {}) })),
+        completar(p, (cursor) => forum.listarPublicacoesPessoais ? forum.listarPublicacoesPessoais({ limite, ...(cursor ? { cursor } : {}) }) : Promise.resolve({ ok: true, valor: { itens: [], proximo: null } })),
       ]);
       const a = c.itens[0]; const b = p.itens[0];
       if (!a && !b) break;

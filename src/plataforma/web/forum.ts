@@ -533,7 +533,7 @@ function parametrosDoAnexo(anexo: AnexoParaPublicar | null | undefined): Record<
 
 const EXTENSAO_POR_MIME: Readonly<Record<string, string>> = {
   'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
-  'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3',
+  'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3', 'audio/wav': 'wav',
 };
 
 /** `MediaRecorder` costuma acrescentar codecs; o bucket aceita apenas a base. */

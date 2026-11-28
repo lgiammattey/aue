@@ -1,0 +1,16 @@
+.m05-anuncio {
+  display: grid;
+  place-content: center;
+  gap: 3px;
+  min-height: 96px;
+  margin-block: 20px;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  text-align: center;
+  font: 700 11px/1.4 var(--font-mono);
+  text-transform: uppercase;
+}
+
+.m05-anuncio--lateral { min-height: 250px; }
+@media (min-width: 761px) { .m05-anuncio--mobile { display: none; } }
+@media (max-width: 760px) { .m05-anuncio--desktop { display: none; } }

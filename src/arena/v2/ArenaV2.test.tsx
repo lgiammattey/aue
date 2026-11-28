@@ -148,6 +148,25 @@ describe('Arena v2', () => {
     expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
   });
 
+  it('só mostra o conteúdo posterior depois da revisão da gravação', async () => {
+    const duble = aparelho();
+    render(<ArenaV2 captura={duble.captura} conteudoAposResultado={<aside>Espaço após o resultado</aside>} />);
+    expect(screen.queryByText('Espaço após o resultado')).toBeNull();
+    await iniciar(duble);
+    fireEvent.click(screen.getByRole('button', { name: 'Finalizar gravação' }));
+    expect(await screen.findByText('Espaço após o resultado')).toBeTruthy();
+  });
+
+  it('entrega a duração real e pausa a reprodução antes de pedir publicação', async () => {
+    const duble = aparelho();
+    const publicar = vi.fn();
+    render(<ArenaV2 captura={duble.captura} aoPublicarAudio={publicar} />);
+    await iniciar(duble);
+    fireEvent.click(screen.getByRole('button', { name: 'Finalizar gravação' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Publicar no Mural' }));
+    expect(publicar).toHaveBeenCalledWith(expect.any(Blob), expect.any(Number), 1000);
+  });
+
   it('reproduz só o PCM da emissão, sem áudio da calibração ou arquivo original', async () => {
     const duble = aparelho();
     const ambiente = new Float32Array(500).fill(0.75);

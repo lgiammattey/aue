@@ -373,6 +373,10 @@ export function Arena({
     do que a Arena desenha em nenhum deles.
   */
   const codigoDaDisputa = useRef<string | null>(codigoDoDesafio ?? null);
+  const abandonarDisputa = useCallback(() => {
+    codigoDaDisputa.current = null;
+    revanchando.current = false;
+  }, []);
 
   /*
     A TRAVA DA SAÍDA ÚNICA.
@@ -782,6 +786,7 @@ export function Arena({
       encerrando.current = true;
       captura.soltar();
       if (estavaGravando) {
+        abandonarDisputa();
         despachar({ tipo: 'SUMIU_DA_TELA' });
       }
     });
@@ -790,7 +795,7 @@ export function Arena({
       cicloDeVida.parar();
       captura.soltar();
     };
-  }, [dependencias, despachar]);
+  }, [abandonarDisputa, dependencias, despachar]);
 
   /**
    * Abrir o microfone e entrar na gravação.
@@ -1452,13 +1457,14 @@ export function Arena({
   );
 
   const tentarDeNovo = useCallback(() => {
+    abandonarDisputa();
     audio.current = null;
     origemEscolhida.current = null;
     setAvisoDaRoda(null);
     setPassouOCelular(false);
     setFala((anterior) => sortearFala(anterior));
     despachar({ tipo: 'TENTAR_DE_NOVO' });
-  }, [despachar, sortearFala]);
+  }, [abandonarDisputa, despachar, sortearFala]);
 
   /**
    * "Ver minha nota" — sai do erro de volta para o resultado.

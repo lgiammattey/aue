@@ -74,4 +74,12 @@ Os resultados por suíte ficam no [relatório da M02](../missoes/M02-RELATORIO.m
 - **AUE-T14.** `topicos.sql` e `forum_leituras.sql` foram reconciliados com os contratos versionados. A prova usa PostgreSQL descartável com papéis, Auth e Storage simulados.
 - **AUE-T04, T07, T08 e T13.** Para uma eventual M04, priorizar gravação, reprodução, sessão e retomada em iPhone e Android reais, descarte de URLs de objeto e estabilidade dos testes com relógio. Conferir a PWA e os redirects nos dispositivos usados pela galera.
 
-O [relatório da M03](../missoes/M03-RELATORIO.md) registra as retiradas, os resultados locais e a validação de PRs encadeados. O aceite do PO segue pendente.
+O [relatório da M03](../missoes/M03-RELATORIO.md) registra as retiradas, os resultados locais e a validação de PRs encadeados. O PO aceitou a M03 com as ressalvas registradas.
+
+### Fechamento técnico da M04
+
+- **AUE-T07 e T13.** A Arena clássica solta o contexto do X1 ao abandonar a tentativa e dá saída quando o gravador falha ao abrir. Os testes da revanche usam relógio controlado. O Mural libera as URLs temporárias dos anexos otimistas quando o último uso acaba.
+- **AUE-T04, T05, T08, T10 e AUE-OPS-RLS.** Antes de publicar na M06, homologar em iPhone e Android reais, com serviços hospedados autorizados. Cobrir permissão, gravação, laudo, envio, reprodução, sessão, duelo e recuperação, publicação consentida, perfil, notificações e atualização de uma PWA já instalada. Confirmar Auth, Storage, RLS, Edge e worker com o build identificado.
+- **AUE-UX-MOBILE.** O [comparativo local da M04](../missoes/M04-RELATORIO.md) dá uma referência controlada. Ainda faltam métricas de campo e prova em rede e hardware reais.
+- **Runner E2E.** Padronizar as duas configurações locais de Arena (em breve e v2) com serviço sintético explícito, sem depender de credenciais hospedadas. A M04 executou as duas configurações em ambiente descartável.
+- **Compatibilidade de áudio para M06.** Conferir o erro de inicialização PCM da Arena v2 em Chromium e a prévia com reprodução parada do compositor em WebKit. Os dois sintomas ocorreram com mídia simulada na `develop` e na M04, após uma rodada anterior verde. Isolar a causa com build identificado e validar nos aparelhos de homologação.

@@ -19,6 +19,7 @@ import { criarUrlDePreviewDeImagem, prepararImagemDePerfil, revokeUrlDePreviewDe
 import { criarPerfilRemoto } from '../../plataforma/web/perfilRemoto';
 import { analyticsArenaV2 } from '../../plataforma/web/analyticsArenaV2';
 import { analisarNotaDoAudioPublicado } from '../../plataforma/web/notaDoAudioPublicado';
+import { criarEnderecoLocal, soltarEnderecoLocal } from '../../plataforma/web/enderecoDeAudio';
 import type { ArrotoDoPerfil, PortaDeArrotosDoPerfil } from '../../portas/arrotosDoPerfil';
 import type { CapturaDeAudio } from '../../portas/captura';
 import type { PortaDeComunidade } from '../../portas/comunidade';
@@ -445,6 +446,69 @@ export function InicioOpenDesign({
   const [listaComentarios, setListaComentarios] = useState<readonly ItemComentario[]>([]);
   const [carregandoComentarios, setCarregandoComentarios] = useState(false);
   const [enviandoComentario, setEnviandoComentario] = useState(false);
+  const enderecosOtimistas = useRef<Set<string> | null>(null);
+
+  const criarEnderecoOtimista = (arquivo: Blob): string | undefined => {
+    const enderecos = enderecosOtimistas.current;
+    if (!enderecos) return undefined;
+    const endereco = criarEnderecoLocal(arquivo);
+    enderecos.add(endereco);
+    return endereco;
+  };
+
+  useEffect(() => {
+    const enderecos = enderecosOtimistas.current;
+    if (!enderecos?.size) return;
+
+    const aindaEmUso = new Set<string>();
+    const registrarAnexosDosItens = (itens: readonly ItemDoFeed[]) => {
+      itens.forEach((item) => {
+        if (item.anexo?.url) aindaEmUso.add(item.anexo.url);
+      });
+    };
+    const registrarAnexosDosComentarios = (comentarios: readonly ItemComentario[]) => {
+      comentarios.forEach((comentario) => {
+        if (comentario.anexo?.url) aindaEmUso.add(comentario.anexo.url);
+      });
+    };
+
+    registrarAnexosDosItens(itensFeed);
+    registrarAnexosDosItens(itensSeguindo);
+    registrarAnexosDosItens(topicosDaComunidade);
+    registrarAnexosDosItens(topicosDaComunidadeDoPerfil);
+    registrarAnexosDosItens(publicacoesPessoaisDoPerfil);
+    registrarAnexosDosItens(publicacoesMarcadasDoPerfil);
+    registrarAnexosDosItens(entradasDaPauta);
+    if (postComentariosAtivo) registrarAnexosDosItens([postComentariosAtivo]);
+    registrarAnexosDosComentarios(listaComentarios);
+    previasDasConversas.forEach(registrarAnexosDosComentarios);
+
+    enderecos.forEach((endereco) => {
+      if (aindaEmUso.has(endereco)) return;
+      soltarEnderecoLocal(endereco);
+      enderecos.delete(endereco);
+    });
+  }, [
+    entradasDaPauta,
+    itensFeed,
+    itensSeguindo,
+    listaComentarios,
+    postComentariosAtivo,
+    previasDasConversas,
+    publicacoesMarcadasDoPerfil,
+    publicacoesPessoaisDoPerfil,
+    topicosDaComunidade,
+    topicosDaComunidadeDoPerfil,
+  ]);
+
+  useEffect(() => {
+    const enderecos = new Set<string>();
+    enderecosOtimistas.current = enderecos;
+    return () => {
+      enderecosOtimistas.current = null;
+      enderecos.forEach(soltarEnderecoLocal);
+    };
+  }, []);
 
   const carregarPreviasDasConversas = useCallback(async (posts: readonly ItemDoFeed[]) => {
     const postsComConversa = posts.filter((post) => post.tipo === 'topico' && post.respostasTotal > 0);
@@ -1660,7 +1724,7 @@ export function InicioOpenDesign({
         anexo: dados.anexo
           ? {
               tipo: dados.anexo.tipo,
-              url: dados.anexo.tipo === 'videoExterno' ? dados.anexo.url : URL.createObjectURL(dados.anexo.arquivo),
+              url: dados.anexo.tipo === 'videoExterno' ? dados.anexo.url : criarEnderecoOtimista(dados.anexo.arquivo),
               duracaoMs: dados.anexo.tipo === 'audio' ? dados.anexo.duracaoMs : undefined,
             }
           : undefined,
@@ -1787,7 +1851,7 @@ export function InicioOpenDesign({
       anexo: dados.anexo
         ? {
             tipo: dados.anexo.tipo,
-            url: dados.anexo.tipo === 'videoExterno' ? dados.anexo.url : URL.createObjectURL(dados.anexo.arquivo),
+            url: dados.anexo.tipo === 'videoExterno' ? dados.anexo.url : criarEnderecoOtimista(dados.anexo.arquivo),
             duracaoMs: dados.anexo.tipo === 'audio' ? dados.anexo.duracaoMs : undefined,
           }
         : undefined,
@@ -2061,7 +2125,14 @@ export function InicioOpenDesign({
     setItensSeguindo((prev) => prev.filter(sai));
     setTopicosDaComunidade((prev) => prev.filter(sai));
     setTopicosDaComunidadeDoPerfil((prev) => prev.filter(sai));
+    setPublicacoesPessoaisDoPerfil((prev) => prev.filter(sai));
+    setPublicacoesMarcadasDoPerfil((prev) => prev.filter(sai));
     setEntradasDaPauta((prev) => prev.filter(sai));
+    setPreviasDasConversas((anteriores) => {
+      const proximas = new Map(anteriores);
+      proximas.delete(post.id);
+      return proximas;
+    });
     if (postComentariosAtivo?.id === post.id) {
       setPostComentariosAtivo(null);
       setListaComentarios([]);

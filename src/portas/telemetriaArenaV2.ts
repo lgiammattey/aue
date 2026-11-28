@@ -3,6 +3,7 @@ export type EventoArenaV2 =
   | 'abriu_arena_v2'
   | 'iniciou_gravacao'
   | 'concluiu_gravacao'
+  | 'falhou_gravacao'
   | 'laudo_disponivel'
   | 'laudo_indisponivel'
   | 'abriu_compartilhamento_audio'

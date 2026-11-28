@@ -43,14 +43,17 @@ import {
   TETO_DA_ANALISE_MS,
 } from '../nucleo/julgamento/tempo';
 import { ATRASOS_DA_REVELACAO_MS } from '../nucleo/arena/revelacao';
-import { DURACAO_DO_TICK_MS, PAUSA_FINAL_MS } from '../nucleo/arena/contagemDaRevanche';
+import { duracaoDaContagemMs, NUMEROS_DA_CONTAGEM } from '../nucleo/arena/contagemDaRevanche';
 import { CHAMAR_PRO_X1, POSTAR_NO_BONDE } from '../nucleo/fala/desafio';
 import { JULGANDO, JULGANDO_DEMORANDO } from '../nucleo/fala/julgamento';
 import { Arena } from './Arena';
 import type { AdaptadoresDaArena } from './adaptadores';
 import type { DetalheDoEvento, EventoDeTelemetria } from '../portas/telemetria';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 interface Opcoes {
   resposta?: PedidoDeMicrofone;
@@ -729,39 +732,30 @@ async function ateAOrigem(dubles: ReturnType<typeof montarDubles>) {
 
 /** Vai até a nota na tela, atravessando o teatro do julgamento. */
 async function ateANota(dubles: ReturnType<typeof montarDubles>, alvo = /Cerveja/) {
-  const primeiro = await ateAOrigem(dubles);
-  void primeiro;
-  vi.useFakeTimers();
-  fireEvent.click(screen.getByRole('button', { name: alvo }));
-  /*
-    Avança além de TRÊS relógios que correm em sequência: o teto da análise, o
-    piso do teatro e a contagem da nota (com a rede de segurança dela).
+  await ateAOrigem(dubles);
+  await julgarOrigem(alvo);
+}
 
-    Parar no meio de qualquer um deixaria a Arena esperando um tempo que o
-    teste nunca deu — e trocar para timers reais no meio joga fora os timers
-    pendentes, então o relógio falso tem que cobrir o caminho inteiro.
-  */
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(TETO_DA_ANALISE_MS + PISO_DO_TEATRO_MS + 200);
+async function julgarOrigem(alvo = /Cerveja/) {
+  vi.useFakeTimers({
+    toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame', 'cancelAnimationFrame'],
   });
-  /*
-    Segundo avanço, depois de a nota já estar montada: a contagem e a rede de
-    segurança dela só nascem quando o RESULT entra na tela, e um avanço só —
-    feito antes de elas existirem — não as alcança.
-  */
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(2000);
-  });
-  /*
-    Terceiro avanço: a cascata da revelação. Os relógios dela só nascem quando
-    a contagem TERMINA — o React só solta o efeito no fim do bloco anterior —,
-    então eles ficam pendurados até alguém andar com o relógio mais uma vez.
-    Sem isto, `useRealTimers` os joga fora e a nota fica sozinha na tela.
-  */
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(ATRASOS_DA_REVELACAO_MS.x1 + 200);
-  });
-  vi.useRealTimers();
+  try {
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: alvo })));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(TETO_DA_ANALISE_MS + PISO_DO_TEATRO_MS);
+    });
+    // A contagem só é agendada quando o resultado monta. A revelação só
+    // começa quando a contagem termina. Cada bloco deixa o React montar o próximo.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ATRASOS_DA_REVELACAO_MS.x1);
+    });
+  } finally {
+    vi.useRealTimers();
+  }
 }
 
 describe('a origem', () => {
@@ -1273,23 +1267,7 @@ async function ateOPlacar(dubles: ReturnType<typeof montarDubles>, sorteio?: () 
   fireEvent.click(screen.getByRole('button', { name: 'Toque para enviar' }));
   await screen.findByRole('button', { name: /Cerveja/ });
 
-  vi.useFakeTimers();
-  fireEvent.click(screen.getByRole('button', { name: /Cerveja/ }));
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(TETO_DA_ANALISE_MS + PISO_DO_TEATRO_MS + 200);
-  });
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(2000);
-  });
-  /*
-    A cascata da revelação: enquanto ela corre, a faixa de ação está VAZIA —
-    nenhum botão montado. Sem este terceiro avanço o "Ver o estrago" não
-    existe ainda.
-  */
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(ATRASOS_DA_REVELACAO_MS.x1 + 200);
-  });
-  vi.useRealTimers();
+  await julgarOrigem();
 
   fireEvent.click(screen.getByRole('button', { name: 'Ver o estrago' }));
   fireEvent.change(screen.getByLabelText('Teu apelido'), { target: { value: 'Guinho' } });
@@ -1787,42 +1765,20 @@ describe('a revanche', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Revanche' })).toBeDefined());
 
     vi.useFakeTimers();
-    fireEvent.click(screen.getByRole('button', { name: 'Revanche' }));
-    /*
-      O clique dispara `pedir()` → `comecar()` antes de a cerimônia nascer —
-      duas promessas encadeadas, e só depois delas o efeito do 3…2…1 registra
-      os próprios relógios. Um `act` vazio dá a volta que falta para as duas
-      resolverem e o efeito montar, ANTES de avançar o tempo — sem isto o
-      avanço roda cedo demais, sem relógio nenhum para pegar.
-    */
-    await act(async () => {});
-    /*
-      A CERIMÔNIA DO 3…2…1 (issue #183): o microfone abre no clique, mas
-      "Já foi" só nasce quando o "1" some. Sem avançar o relógio a faixa de
-      ação fica vazia, e o teste nunca acha o botão.
-    */
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(3 * DURACAO_DO_TICK_MS + PAUSA_FINAL_MS + 50);
-    });
-    vi.useRealTimers();
+    try {
+      await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Revanche' })));
+      // O microfone abriu e o efeito do 3…2…1 já agendou a contagem.
+      expect(screen.getByText('Revanche contra Giam.')).toBeDefined();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(duracaoDaContagemMs(NUMEROS_DA_CONTAGEM));
+      });
+    } finally {
+      vi.useRealTimers();
+    }
 
-    await screen.findByRole('button', { name: 'Toque para enviar' });
-    fireEvent.click(screen.getByRole('button', { name: 'Toque para enviar' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Toque para enviar' }));
     await screen.findByRole('button', { name: /Cerveja/ });
-
-    vi.useFakeTimers();
-    fireEvent.click(screen.getByRole('button', { name: /Cerveja/ }));
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(TETO_DA_ANALISE_MS + PISO_DO_TEATRO_MS + 200);
-    });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(2000);
-    });
-    /* A cascata, de novo: sem ela a faixa de ação da revanche está vazia. */
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(ATRASOS_DA_REVELACAO_MS.x1 + 200);
-    });
-    vi.useRealTimers();
+    await julgarOrigem();
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver o estrago' }));
     fireEvent.change(screen.getByLabelText('Teu apelido'), { target: { value: 'Guinho' } });
@@ -1982,6 +1938,28 @@ describe('a revanche', () => {
     expect(screen.getByRole('button', { name: 'Toque para começar' })).toBeDefined();
     expect(dubles.captura.estaVivo()).toBe(false);
     expect(dubles.captura.estaGravando()).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toque para começar' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Toque para enviar' }));
+    await screen.findByRole('button', { name: /Cerveja/ });
+    await julgarOrigem();
+
+    expect(screen.getByRole('button', { name: 'Chamar pro X1' })).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Ver o estrago' })).toBeNull();
+    expect(dubles.desafios.revanches).toBe(0);
+  });
+
+  it('quando o gravador falha ao abrir, libera o microfone e mostra o erro', async () => {
+    const dubles = montarDubles();
+    await ateOPlacar(dubles);
+    const revanche = await screen.findByRole('button', { name: 'Revanche' });
+    vi.spyOn(dubles.captura, 'comecar').mockReturnValueOnce(false);
+
+    await act(async () => fireEvent.click(revanche));
+
+    expect(dubles.captura.estaVivo()).toBe(false);
+    expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Revanche' })).toBeNull();
   });
 });
 

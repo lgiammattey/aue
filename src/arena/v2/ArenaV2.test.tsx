@@ -237,10 +237,12 @@ describe('Arena v2', () => {
 
   it('informa permissão negada e permite tentar novamente', async () => {
     const { captura } = aparelho(Promise.resolve({ ok: false, motivo: 'permissao_negada' }));
-    render(<ArenaV2 captura={captura} />);
+    const registrar = vi.fn();
+    render(<ArenaV2 captura={captura} telemetria={{ registrar }} />);
     fireEvent.click(screen.getByRole('button', { name: 'Gravar agora' }));
     expect((await screen.findByRole('alert')).textContent).toContain('microfone está bloqueado');
     expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeTruthy();
+    expect(registrar.mock.calls).toEqual([['abriu_arena_v2'], ['falhou_gravacao']]);
   });
 
   it('ao sair durante permissão, ignora a resposta tardia', async () => {

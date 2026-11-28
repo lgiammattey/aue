@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { StrictMode } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -693,6 +694,89 @@ describe('InicioOpenDesign (1:1 com desenho original)', () => {
     expect(registrarOuGuardarNotaPublicada).not.toHaveBeenCalled();
     expect(await screen.findByText('Publicado! O áudio será analisado; a nota pode demorar alguns minutos.')).toBeTruthy();
     expect(await screen.findByRole('img', { name: 'Nota: 73 de 100' })).toBeTruthy();
+  });
+
+  it('solta a URL otimista do anexo quando a tela desmonta', async () => {
+    const criarUrl = vi.spyOn(URL, 'createObjectURL')
+      .mockReturnValueOnce('blob:previa-do-compositor')
+      .mockReturnValueOnce('blob:post-otimista');
+    const soltarUrl = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const imagem = new File(['imagem'], 'arroto.png', { type: 'image/png' });
+    const enviarAnexoDoForum = vi.fn(async () => ({
+      ok: true as const,
+      valor: { tipo: 'imagem' as const, caminho: 'eu/forum/arroto.png', mime: imagem.type, tamanhoBytes: imagem.size },
+    }));
+    const criarPublicacaoPessoal = vi.fn(async () => ({
+      ok: true as const,
+      valor: { id: 'post-com-imagem', criadoEm: '2026-10-22T12:00:00Z' },
+    }));
+    const forumComImagem: PortaDeForum = {
+      ...mockForum,
+      enviarAnexoDoForum,
+      criarPublicacaoPessoal,
+    };
+
+    const tela = render(
+      <StrictMode>
+        <MemoryRouter>
+          <InicioOpenDesign portaForum={forumComImagem} portaComunidade={mockComunidade} autenticado abrirCompositor />
+        </MemoryRouter>
+      </StrictMode>,
+    );
+
+    const seletorDeImagem = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(seletorDeImagem).toBeTruthy();
+    fireEvent.change(seletorDeImagem!, { target: { files: [imagem] } });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Texto da publicação' }), { target: { value: 'Imagem da roda' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+
+    await waitFor(() => expect(criarPublicacaoPessoal).toHaveBeenCalledOnce());
+    expect(criarUrl).toHaveBeenCalledTimes(2);
+    expect(soltarUrl).toHaveBeenCalledWith('blob:previa-do-compositor');
+    expect(soltarUrl).not.toHaveBeenCalledWith('blob:post-otimista');
+
+    tela.unmount();
+
+    expect(soltarUrl).toHaveBeenCalledWith('blob:post-otimista');
+  });
+
+  it('não cria URL otimista quando a publicação termina depois do unmount', async () => {
+    const criarUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:previa-do-compositor');
+    const soltarUrl = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const imagem = new File(['imagem'], 'arroto.png', { type: 'image/png' });
+    let concluirPublicacao: ((resultado: { ok: true; valor: { id: string; criadoEm: string } }) => void) | undefined;
+    const criarPublicacaoPessoal = vi.fn(() => new Promise<{ ok: true; valor: { id: string; criadoEm: string } }>((resolve) => {
+      concluirPublicacao = resolve;
+    }));
+    const forumComPublicacaoPendente: PortaDeForum = {
+      ...mockForum,
+      enviarAnexoDoForum: vi.fn(async () => ({
+        ok: true as const,
+        valor: { tipo: 'imagem' as const, caminho: 'eu/forum/arroto.png', mime: imagem.type, tamanhoBytes: imagem.size },
+      })),
+      criarPublicacaoPessoal,
+    };
+
+    const tela = render(
+      <MemoryRouter>
+        <InicioOpenDesign portaForum={forumComPublicacaoPendente} portaComunidade={mockComunidade} autenticado abrirCompositor />
+      </MemoryRouter>,
+    );
+
+    const seletorDeImagem = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(seletorDeImagem).toBeTruthy();
+    fireEvent.change(seletorDeImagem!, { target: { files: [imagem] } });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Texto da publicação' }), { target: { value: 'Imagem pendente' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+
+    await waitFor(() => expect(criarPublicacaoPessoal).toHaveBeenCalledOnce());
+    tela.unmount();
+    concluirPublicacao?.({ ok: true, valor: { id: 'post-tardio', criadoEm: '2026-10-22T12:00:00Z' } });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(criarUrl).toHaveBeenCalledOnce();
+    expect(soltarUrl).toHaveBeenCalledWith('blob:previa-do-compositor');
   });
 
   it('carrega a Resenha por data de publicação, sem usar o feed legado', async () => {

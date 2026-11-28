@@ -70,10 +70,34 @@ export function criarDueloV2(transporte: TransporteDueloV2 = transporteWeb): Due
   // IDs sem conteúdo permitem tentar a exclusão novamente após falha de rede.
   const descartadas = new Map<string, Promise<unknown> | null>();
   async function sessao() { try { return await transporte.sessao(); } catch { return null; } }
+  function falhaNoEnvio(
+    etapa: 'sessao' | 'upload' | 'persistencia',
+    motivo: FalhaDueloV2,
+    tentativaId: string,
+  ): ResultadoDueloV2<never> {
+    console.warn('[duelo-v2] Falha no envio', etapa, motivo);
+    return { ok: false, motivo, tentativaId };
+  }
+
+  async function baixarAudioDoServidor(dueloId: string, lado: 'criador' | 'desafiante'): Promise<ResultadoDueloV2<Blob>> {
+    try {
+      const { data, error } = await transporte.download(dueloId, lado);
+      if (!error) {
+        if (data instanceof Blob && data.size >= 44 && data.size <= MAX_BYTES) return sucesso(data);
+        console.warn('[duelo-v2] Falha na reprodução', 'resposta_invalida');
+        return falha('resposta_invalida');
+      }
+    } catch {
+      // A rede pode falhar pelo retorno do serviço ou pela rejeição da chamada.
+    }
+    console.warn('[duelo-v2] Falha na reprodução', 'falha_rede');
+    return falha('falha_rede');
+  }
+
   async function executarEnvio(p: Pendente): Promise<ResultadoDueloV2<{ readonly id: string }>> {
     const atual = await sessao();
     if (p.cancelada || !p.audio) return falha('cancelada');
-    if (!atual || atual.user.id !== p.usuario) return { ok: false, motivo: 'sem_sessao', tentativaId: p.id };
+    if (!atual || atual.user.id !== p.usuario) return falhaNoEnvio('sessao', 'sem_sessao', p.id);
     let falhouEnvio = false;
     try { falhouEnvio = Boolean((await transporte.upload(p.caminho, p.audio)).error); }
     catch { falhouEnvio = true; }
@@ -83,12 +107,20 @@ export function criarDueloV2(transporte: TransporteDueloV2 = transporteWeb): Due
       // resposta, é seguro verificar antes de afirmar que o envio falhou.
       const confirmacao = await transporte.rpc('aue_v2_confirmar_gravacao', { p_id: p.id, p_duracao_ms: p.duracao, p_versao_regua: REGUA });
       if (p.cancelada) return falha('cancelada');
-      if (confirmacao.error) return { ok: false, motivo: falhouEnvio ? 'envio_falhou' : 'falha_rede', tentativaId: p.id };
+      if (confirmacao.error) {
+        return falhouEnvio
+          ? falhaNoEnvio('upload', 'envio_falhou', p.id)
+          : falhaNoEnvio('persistencia', 'falha_rede', p.id);
+      }
       const confirmado = objeto(confirmacao.data);
-      if (confirmado?.id !== p.id || confirmado.estado !== 'confirmada') return { ok: false, motivo: 'resposta_invalida', tentativaId: p.id };
+      if (confirmado?.id !== p.id || confirmado.estado !== 'confirmada') {
+        return falhaNoEnvio('persistencia', 'resposta_invalida', p.id);
+      }
       pendentes.delete(p.id);
       return sucesso({ id: p.id });
-    } catch { return p.cancelada ? falha('cancelada') : { ok: false, motivo: 'falha_rede', tentativaId: p.id }; }
+    } catch {
+      return p.cancelada ? falha('cancelada') : falhaNoEnvio('persistencia', 'falha_rede', p.id);
+    }
   }
   function enviarPendente(p: Pendente): Promise<ResultadoDueloV2<{ readonly id: string }>> {
     if (p.emVoo) return p.emVoo;
@@ -295,9 +327,7 @@ export function criarDueloV2(transporte: TransporteDueloV2 = transporteWeb): Due
         if (resposta.error) return falha('falha_rede');
         const r = interpretarRevelacao(resposta.data);
         if (!r) return falha('resultado_indisponivel');
-        const { data, error } = await transporte.download(dueloId, lado);
-        if (error) return falha('falha_rede');
-        return data instanceof Blob && data.size >= 44 && data.size <= MAX_BYTES ? sucesso(data) : falha('resposta_invalida');
+        return baixarAudioDoServidor(dueloId, lado);
       } catch { return falha('falha_rede'); }
     },
     async abrir(token) {
@@ -405,12 +435,7 @@ export function criarDueloV2(transporte: TransporteDueloV2 = transporteWeb): Due
       if (lado !== 'criador' && lado !== 'desafiante') return falha('entrada_invalida');
       const r = await lerRevelacao(token);
       if (!r.ok) return r;
-      try {
-        const { data, error } = await transporte.download(r.valor.id, lado);
-        if (error) return falha('falha_rede');
-        if (!(data instanceof Blob) || data.size < 44 || data.size > MAX_BYTES) return falha('resposta_invalida');
-        return sucesso(data);
-      } catch { return falha('falha_rede'); }
+      return baixarAudioDoServidor(r.valor.id, lado);
     },
   };
   return api;

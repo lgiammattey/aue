@@ -115,8 +115,14 @@ describe('duelo v2 — adaptador', () => {
     t.rpc.mockImplementation(async (nome) => nome === 'aue_v2_preparar_gravacao'
       ? { data: { id: gravacao, bucket: 'duelos_v2', caminho }, error: null }
       : { data: null, error: 'objeto ausente' });
-    expect(await criarDueloV2(t).enviarGravacao(audio(), 1500)).toEqual({ ok: false, motivo: 'envio_falhou', tentativaId: gravacao });
-    expect(t.rpc).toHaveBeenCalledTimes(2);
+    const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      expect(await criarDueloV2(t).enviarGravacao(audio(), 1500)).toEqual({ ok: false, motivo: 'envio_falhou', tentativaId: gravacao });
+      expect(t.rpc).toHaveBeenCalledTimes(2);
+      expect(log.mock.calls).toEqual([['[duelo-v2] Falha no envio', 'upload', 'envio_falhou']]);
+    } finally {
+      log.mockRestore();
+    }
   });
   it('consulta confirmação quando a resposta do upload se perdeu', async () => {
     const t = transporte(); t.upload.mockRejectedValueOnce(new Error('timeout'));
@@ -246,6 +252,18 @@ describe('duelo v2 — adaptador', () => {
     expect(t.download).toHaveBeenCalledWith(outra, 'criador');
     expect(t.rpc).toHaveBeenCalledWith('aue_v2_revelar_duelo', { p_token: token });
   });
+  it('diagnostica falha no download sem registrar dados do duelo', async () => {
+    const t = transporte();
+    t.download.mockRejectedValueOnce(new Error(caminho));
+    const log = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      expect(await criarDueloV2(t).baixarAudio(token, 'criador')).toEqual({ ok: false, motivo: 'falha_rede' });
+      expect(log.mock.calls).toEqual([['[duelo-v2] Falha na reprodução', 'falha_rede']]);
+    } finally {
+      log.mockRestore();
+    }
+  });
+
   it('token e id inválidos não são enviados; criação incerta mantém token para retry', async () => {
     const t = transporte(); const d = criarDueloV2(t);
     expect(d.novoToken()).toEqual({ ok: true, valor: token });

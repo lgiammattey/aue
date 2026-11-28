@@ -1,6 +1,6 @@
 # Backlog do Auê
 
-**Atualizado em 27/11/2026.** Este arquivo é o registro versionado das pendências; as [issues abertas](https://github.com/lgiammattey/aue/issues) podem acompanhar execução, mas não autorizam missão nem comprovam prioridade ou conclusão. Valide antes de iniciar.
+**Atualizado em 28/11/2026.** Este arquivo é o registro versionado das pendências; as [issues abertas](https://github.com/lgiammattey/aue/issues) podem acompanhar execução, mas não autorizam missão nem comprovam prioridade ou conclusão. Valide antes de iniciar.
 
 ## Pendências identificadas nesta revisão
 
@@ -15,7 +15,7 @@ Estas são pendências de verificação, não uma nova priorização aprovada. A
 
 ## M00 — backlog técnico transferido para M01
 
-Estado em 27/11/2026: **todos abertos**. A prioridade abaixo é a da auditoria; não representa missão iniciada. A prova, SHA e limites estão no [baseline M00](../technical/auditorias/M00-BASELINE.md). Os relatórios completos foram preservados fora do repositório em `~/AUE-AUDITORIA/` no ambiente que executou a auditoria; os principais resultados sintéticos foram copiados ao baseline versionado. Revalidar fatos e prioridade antes de executar.
+A tabela registra o estado em 27/11/2026. As atualizações da M02 estão no fim desta página. A prioridade abaixo é a da auditoria; não representa missão iniciada. A prova, SHA e limites estão no [baseline M00](../technical/auditorias/M00-BASELINE.md). Os relatórios completos foram preservados fora do repositório em `~/AUE-AUDITORIA/` no ambiente que executou a auditoria; os principais resultados sintéticos foram copiados ao baseline versionado. Revalidar fatos e prioridade antes de executar.
 
 | ID | Prioridade M00 | Assunto e critério de prova futuro | Evidência M00 |
 |---|---|---|---|
@@ -53,3 +53,17 @@ Estado em 27/11/2026: **todos abertos**. A prioridade abaixo é a da auditoria; 
 
 - **M01-R01, validação dos perfis:** verificada na sessão compatível testada. Os quatro perfis responderam como agentes distintos e acessaram suas skills; a falha na sessão efêmera continua documentada como limitação de ambiente, sem diagnóstico interno definitivo. Se o mecanismo estiver indisponível no futuro, registrar execução por papéis sem alegar independência.
 - **M01-R02, classificação:** concluída, sem tratar avisos ou skips como corrigidos. Os 23 avisos preexistem à M01; os sete avisos de efeitos/limpeza de refs pedem investigação em M04 ou M05 conforme o consumidor e o risco, sem inferir falha ou correção imediata. Os nove testes de fórum foram ignorados por opt-in/ambiente ausente: validar contratos em M02 somente em ambiente fiel e autorizado, ou reavaliar em M03 após mapa de consumidores. Detalhes por ocorrência e histórico em [M01.1-QUALIDADE.md](../missoes/M01.1-QUALIDADE.md).
+
+
+### Fechamento técnico da M02
+
+| Item | Situação após a prova local |
+|---|---|
+| AUE-T01 e T05 | O laudo experimental tem restrições para XP e competição. A fila existente avalia o áudio publicado com consentimento. Falta homologar o caminho completo em serviço implantado autorizado. |
+| AUE-T02 | Cadastro e contador na mesma transação. Os tetos de 3 por origem e 100 no total foram exercitados em PostgreSQL. Confirmar a origem fornecida pelo gateway na futura homologação. |
+| AUE-T10 e AUE-OPS-RLS | Policies de Storage consultam apenas a promoção da própria sessão. Autor, outra pasta e sessão anônima foram exercitados com metadados sintéticos. Autenticação e entrega dos bytes no serviço hospedado seguem pendentes. |
+| AUE-T11 | O runner para no primeiro erro do PostgreSQL. Uma migration inválida bloqueou a seguinte e produziu saída de falha no teste descartável. |
+| AUE-T14 | As duas suítes sociais passaram das antigas falhas de assinatura e permissão. No schema atual, ainda exigem comunidades removidas ou colunas de uma versão anterior. A migração de fixtures deve preservar as asserções de autorização. |
+| AUE-T04 | Continuam pendentes a prova física de microfone e a validação do jogo completo em iPhone e Android. |
+
+Os resultados por suíte e as condições para abrir M03 ficam no [relatório da M02](../missoes/M02-RELATORIO.md).

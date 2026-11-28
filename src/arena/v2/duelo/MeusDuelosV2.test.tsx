@@ -8,7 +8,7 @@ const soltar = vi.hoisted(() => vi.fn());
 vi.mock('../../../plataforma/web/enderecoDeAudio', () => ({ criarEnderecoLocal: () => 'blob:teste', soltarEnderecoLocal: soltar }));
 afterEach(() => { cleanup(); soltar.mockClear(); });
 const item: MeuDueloV2 = { id: 'duelo-privado', gravacaoPropriaId: 'audio-privado', lado: 'criador', estado: 'respondido', versao: 1, prazo: '2027-01-01T12:00:00Z' };
-const revelado: RecuperacaoV2 = { estado: 'revelado', resultado: { criador: { duracaoMs: 1500 }, desafiante: { duracaoMs: 1000 }, resultadoProvisorio: 'criador', versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } };
+const revelado: RecuperacaoV2 = { estado: 'revelado', resultado: { criador: { duracaoMs: 1500 }, desafiante: { duracaoMs: 1000 }, efeitoCompetitivo: false, versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } };
 function portas() {
   const d = {
     listarMeusDuelos: vi.fn(async (_offset: number) => ({ ok: true as const, valor: { itens: [item], temMais: false } })),
@@ -39,7 +39,7 @@ it('recupera resultado pelo servidor e só baixa o áudio ao pedir', async () =>
   const { d, duelo } = portas();
   render(<MeusDuelosV2 duelo={duelo} aoVoltar={vi.fn()} />);
   fireEvent.click(await screen.findByRole('button', { name: 'Abrir desafio 1' }));
-  expect(await screen.findByText('Você levou esta rodada.')).toBeTruthy();
+  expect(await screen.findByText('Compare as duas durações. Isso não define vitória, placar ou ranking.')).toBeTruthy();
   expect(d.recuperar).toHaveBeenCalledExactlyOnceWith(item.id);
   expect(d.baixarAudioRecuperado).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Abrir áudio do adversário' }));
@@ -54,7 +54,7 @@ it('usa o lado da sessão ao apresentar resultado do respondente', async () => {
   d.listarMeusDuelos.mockResolvedValueOnce({ ok: true, valor: { itens: [{ ...item, lado: 'desafiante' }], temMais: false } });
   render(<MeusDuelosV2 duelo={duelo} aoVoltar={vi.fn()} />);
   fireEvent.click(await screen.findByRole('button', { name: 'Abrir desafio 1' }));
-  expect(await screen.findByText('Seu adversário levou esta rodada.')).toBeTruthy();
+  expect(await screen.findByText('Compare as duas durações. Isso não define vitória, placar ou ranking.')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Abrir minha gravação' }));
   expect(await screen.findByLabelText('Sua gravação')).toBeTruthy();
   expect(d.baixarAudioRecuperado).toHaveBeenCalledExactlyOnceWith(item.id, 'desafiante');
@@ -66,7 +66,7 @@ it('não mostra nem baixa resultado se o servidor recusar recuperação', async 
   render(<MeusDuelosV2 duelo={duelo} aoVoltar={vi.fn()} />);
   fireEvent.click(await screen.findByRole('button', { name: 'Abrir desafio 1' }));
   expect(await screen.findByText('Este desafio está indisponível.')).toBeTruthy();
-  expect(screen.queryByRole('heading', { name: 'RESULTADO PROVISÓRIO' })).toBeNull();
+  expect(screen.queryByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' })).toBeNull();
   expect(d.baixarAudioRecuperado).not.toHaveBeenCalled();
 });
 
@@ -97,7 +97,7 @@ it('ignora resposta tardia depois de voltar à lista', async () => {
   fireEvent.click(await screen.findByRole('button', { name: 'Abrir desafio 1' }));
   fireEvent.click(screen.getByRole('button', { name: 'Voltar para desafios' }));
   await act(async () => { concluir({ ok: true, valor: revelado }); });
-  expect(screen.queryByRole('heading', { name: 'RESULTADO PROVISÓRIO' })).toBeNull();
+  expect(screen.queryByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' })).toBeNull();
   expect(screen.getByRole('button', { name: 'Abrir desafio 1' })).toBeTruthy();
 });
 

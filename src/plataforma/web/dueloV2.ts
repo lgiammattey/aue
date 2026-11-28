@@ -57,10 +57,10 @@ function interpretarConvite(valor: unknown): ConviteProprioV2 | null {
 type RevelacaoInterna = { id: string; publico: RevelacaoV2; caminhos: { criador: string; desafiante: string } };
 function interpretarRevelacao(valor: unknown): RevelacaoInterna | null {
   const r = objeto(valor); const a = objeto(r?.criador); const b = objeto(r?.desafiante);
-  if (r?.estado !== 'revelado' || !uuid(r.id) || r.bucket !== BUCKET || r.versao_regua !== REGUA || r.origem_medicao !== 'cliente_nao_verificada' ||
+  if (r?.estado !== 'revelado' || !uuid(r.id) || r.bucket !== BUCKET || r.versao_regua !== REGUA || r.origem_medicao !== 'cliente_nao_verificada' || r.efeito_competitivo === true ||
       !a || !b || !duracao(a.duracao_ms) || !duracao(b.duracao_ms) || !caminhoValido(a.caminho) || !caminhoValido(b.caminho) ||
-      (r.resultado_provisorio !== 'criador' && r.resultado_provisorio !== 'desafiante' && r.resultado_provisorio !== 'empate')) return null;
-  return { id: r.id as string, publico: { ...(r.lado_sessao === 'criador' || r.lado_sessao === 'desafiante' ? { ladoSessao: r.lado_sessao } : {}), criador: { duracaoMs: a.duracao_ms }, desafiante: { duracaoMs: b.duracao_ms }, resultadoProvisorio: r.resultado_provisorio, versaoRegua: REGUA, origemMedicao: 'cliente_nao_verificada' }, caminhos: { criador: a.caminho, desafiante: b.caminho } };
+      (r.efeito_competitivo !== undefined && typeof r.efeito_competitivo !== 'boolean')) return null;
+  return { id: r.id as string, publico: { ...(r.lado_sessao === 'criador' || r.lado_sessao === 'desafiante' ? { ladoSessao: r.lado_sessao } : {}), criador: { duracaoMs: a.duracao_ms }, desafiante: { duracaoMs: b.duracao_ms }, efeitoCompetitivo: false, versaoRegua: REGUA, origemMedicao: 'cliente_nao_verificada' }, caminhos: { criador: a.caminho, desafiante: b.caminho } };
 }
 
 export function criarDueloV2(transporte: TransporteDueloV2 = transporteWeb): DueloV2 {

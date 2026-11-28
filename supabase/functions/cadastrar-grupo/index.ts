@@ -20,12 +20,10 @@
  * ver ADR 0003 §10.2 e ADR 0004).
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { lerFormulario } from './corpo.ts';
 import { detectarImagem, gerarSlug, LIMITES, TIPO_MIME, validarCadastro } from './regras.ts';
 
-const ENVIOS_POR_HORA_POR_ORIGEM = 3;
-const ENVIOS_POR_HORA_NO_TOTAL = 100;
 const TENTATIVAS_DE_SLUG = 6;
-const FOLGA_DO_CORPO_BYTES = 64 * 1024;
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -51,8 +49,9 @@ async function embaralhar(valor: string, sal: string): Promise<string> {
 }
 
 function origemDaRequisicao(req: Request): string {
-  const encaminhado = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return req.headers.get('cf-connecting-ip') ?? encaminhado ?? 'desconhecida';
+  // Na entrada hospedada, o gateway define o IP. Sem ele, os cadastros
+  // dividem a mesma cota de origem até o gateway voltar a informá-lo.
+  return req.headers.get('cf-connecting-ip')?.trim() || 'desconhecida';
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -66,14 +65,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return erro(500, 'O cadastro está fora do ar agora. Tenta de novo daqui a pouco.');
   }
 
-  const tamanhoDeclarado = Number(req.headers.get('content-length') ?? '0');
-  if (tamanhoDeclarado > LIMITES.imagemBytesMax + FOLGA_DO_CORPO_BYTES) {
-    return erro(413, 'A imagem passa de 1 MB. Escolha uma menor.', 'imagem');
-  }
-
   let form: FormData;
   try {
-    form = await req.formData();
+    const recebido = await lerFormulario(req);
+    if (!recebido) return erro(413, 'A imagem passa de 1 MB. Escolha uma menor.', 'imagem');
+    form = recebido;
   } catch {
     return erro(400, 'Não consegui ler o envio. Manda o formulário de novo.');
   }
@@ -104,29 +100,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // Limite de envios por origem e no total. A origem é guardada embaralhada.
   const origemHash = await embaralhar(origemDaRequisicao(req), chaveDeServico);
-  const umaHoraAtras = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-
-  const [daOrigem, doTotal] = await Promise.all([
-    servidor
-      .from('envios_de_grupos')
-      .select('id', { count: 'exact', head: true })
-      .eq('origem_hash', origemHash)
-      .gte('criado_em', umaHoraAtras),
-    servidor
-      .from('envios_de_grupos')
-      .select('id', { count: 'exact', head: true })
-      .gte('criado_em', umaHoraAtras),
-  ]);
-  if (daOrigem.error || doTotal.error) {
-    console.error('cadastrar-grupo: falha ao ler o limite de envios', daOrigem.error ?? doTotal.error);
-    return erro(500, 'O cadastro está fora do ar agora. Tenta de novo daqui a pouco.');
-  }
-  if ((daOrigem.count ?? 0) >= ENVIOS_POR_HORA_POR_ORIGEM) {
-    return erro(429, 'Você já cadastrou grupos demais por agora. Tenta de novo daqui a uma hora.');
-  }
-  if ((doTotal.count ?? 0) >= ENVIOS_POR_HORA_NO_TOTAL) {
-    return erro(429, 'Chegou cadastro demais de uma vez. Tenta de novo daqui a pouco.');
-  }
 
   // Se veio de alguém logado, guarda quem foi. Visitante fica sem autor.
   let criadoPor: string | null = null;
@@ -145,18 +118,23 @@ Deno.serve(async (req: Request): Promise<Response> => {
   for (let i = 0; i < TENTATIVAS_DE_SLUG && !gravado; i++) {
     const slug = i === 0 ? slugBase : `${slugBase.slice(0, 55)}-${i + 1}`;
     const { data, error } = await servidor
-      .from('grupos_externos')
-      .insert({
-        slug,
-        nome: grupo.nome,
-        descricao: grupo.descricao,
-        tipo_de_plataforma: grupo.plataforma,
-        link_do_convite: grupo.link,
-        criado_por: criadoPor,
+      .rpc('cadastrar_grupo_com_limite', {
+        p_origem_hash: origemHash,
+        p_slug: slug,
+        p_nome: grupo.nome,
+        p_descricao: grupo.descricao,
+        p_plataforma: grupo.plataforma,
+        p_link: grupo.link,
+        p_criado_por: criadoPor,
       })
-      .select('id, slug')
-      .single();
+      .single<{ id: string; slug: string }>();
 
+    if (error?.code === 'P1001') {
+      return erro(429, 'Você já cadastrou grupos demais por agora. Tenta de novo daqui a uma hora.');
+    }
+    if (error?.code === 'P1002') {
+      return erro(429, 'Chegou cadastro demais de uma vez. Tenta de novo daqui a pouco.');
+    }
     if (!error) {
       gravado = data;
       break;
@@ -165,14 +143,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (error.message.includes('grupos_externos_link_unico')) {
         return erro(409, 'Esse grupo já está cadastrado.', 'link');
       }
-      continue; // slug ocupado: tenta o próximo
+      if (error.message.includes('grupos_externos_slug_unico')) continue;
     }
-    console.error('cadastrar-grupo: falha ao gravar o grupo', error);
+    console.error('cadastrar-grupo: falha ao gravar o grupo', error.code);
     return erro(500, 'Não consegui salvar o grupo. Tenta de novo daqui a pouco.');
   }
   if (!gravado) return erro(409, 'Já existe um grupo com esse nome. Muda um pouco o nome e tenta de novo.', 'nome');
-
-  await servidor.from('envios_de_grupos').insert({ origem_hash: origemHash });
 
   // Imagem depois do grupo: se falhar, o grupo fica e a resposta conta a verdade.
   let imagemSalva = false;

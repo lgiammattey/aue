@@ -1,8 +1,10 @@
-# M02 — Integrity: cartão proposto
+# M02 · Integridade
 
-**Estado: BLOQUEADA.** Esta proposta não autoriza execução, mudança de código, acesso a dados reais, migration, merge ou deploy. O PO decide se a missão começa e aprova seu escopo em decisão própria. A M01 recebeu parecer `APROVADO COM RESSALVAS` e aguarda aceite formal do PO. A M01.1 tem parecer e aceite próprios.
+O PO aceitou M00, M01 e M01.1 com as ressalvas registradas e autorizou a execução em branch isolada da Foundation, até o PR em rascunho. A autorização de banco cobre apenas ambiente descartável.
 
-## Enquadramento
+As decisões e os testes de encerramento estão no [relatório da M02](M02-RELATORIO.md).
+
+## Enquadramento original
 
 - **Problema:** a nota pode usar métricas manipuláveis e o limite de cadastro de grupos falhou sob concorrência em laboratório. Políticas efetivas, Auth, Storage e worker implantados não foram comprovados.
 - **Pessoas e impacto:** jogadores precisam confiar no resultado e na privacidade de seus áudios; moderadores e visitantes precisam de limites e erros honestos.
@@ -14,7 +16,7 @@
 - **Reaproveitamento:** contratos, migrations, RPCs, worker, testes SQL, harnesses de concorrência e fluxos de áudio já versionados. Manter URLs, dados e compatibilidade; avaliar alternativas antes de dependência nova.
 - **Riscos:** falso positivo de fraude, vazamento de áudio, bloqueio de usuário legítimo, compatibilidade de resultados antigos, concorrência, custo de processamento e uma migração parcial fabricar sucesso aparente.
 
-## Evidência de PostgreSQL descartável
+## Evidência da Foundation, anterior à M02
 
 Em 27/11/2026, em PostgreSQL local sem conexão a serviço Supabase, os stubs canônicos permitiram aplicar 98 de 117 migrations. A cadeia parou na migration do duelo privado por falta de pré-requisito de Storage. Com a fixture local do bucket, a mesma migration parou na ausência de um helper. Com fixture, helper, superfícies e grants sintéticos, aplicaram-se 117 de 117. Das sete suítes sem macro psql, duas passaram e cinco falharam. As duas suítes sociais adaptadas também pararam na primeira asserção. As asserções posteriores dessas duas suítes seguem sem execução. O ambiente não comprova Auth, Storage, RLS, worker ou privilégios implantados.
 
@@ -22,9 +24,7 @@ No mesmo schema simulado, duas transações do mesmo usuário contra o wrapper d
 
 ## Subentregas candidatas, pequenas e reversíveis
 
-As etapas abaixo são opções de fatiamento para o Cartão definitivo. Nenhuma é
-iniciada por este texto, e uma etapa posterior não é automaticamente autorizada
-por uma anterior.
+O PO autorizou A, D, B, C, E quando necessária e F nesta missão.
 
 | Etapa candidata | Recorte, dependências e reaproveitamento | Critério verificável e reversão |
 |---|---|---|
@@ -46,4 +46,27 @@ por uma anterior.
 | Runner SQL não certifica migration que falhou | Falha proposital em banco descartável compatível, saída não mascarada e suites sociais executadas até o ponto aplicável. |
 | Compatibilidade, UX e rollback são definidos antes de alterar contrato/dados | Consumidores, dados, links e estados de erro revisados; plano de reversão proporcional. Mudança visual só recebe revisão de rota/capturas/E2E quando ela realmente existir. |
 
-**Testes:** typecheck, lint, unitários e integração, build, segurança e SQL em banco descartável sem runner que mascare falha. E2E, aparelhos reais, captura visual e revisão de não-overflow são aplicáveis apenas quando o recorte toca fluxo ou interface; staging não é produção. Registrar ambiente, falhas, retries e ignorados. **Rollback:** cada subentrega que altere contrato ou dado define e exercita seu plano antes da mudança; migrations reais dependem de autorização separada. **Pareceres e evidências:** pendentes; Renan conduz Prova de Fogo sem auditar a própria implementação, Felipe avalia a experiência quando houver impacto visível, Camillo fecha o Gate aplicável e Marcelo consolida para decisão do PO.
+**Testes:** typecheck, lint, unitários e integração, build, segurança e SQL em banco descartável sem runner que mascare falha. E2E, aparelhos reais, captura visual e revisão de não-overflow são aplicáveis apenas quando o recorte toca fluxo ou interface; staging não é produção. Registrar ambiente, falhas, retries e ignorados. **Rollback:** cada subentrega que altere contrato ou dado define e exercita seu plano antes da mudança; migrations reais dependem de autorização separada. O relatório final identifica quem executou cada papel e os limites da prova.
+
+## Gate de engenharia
+
+### Decisão
+
+O laudo da Arena continua disponível para quem acabou de gravar. As quatro métricas recebidas pela RPC são declaradas pelo navegador e a fórmula executada no banco não prova que elas vieram do áudio. Por isso, um resultado novo nasce como `nao_verificado` e não pode gerar XP, conquista, ranking público, desafio legado ou vitória de round.
+
+O estado `verificado_servidor` fica reservado para um contrato posterior que vincule sessão ou autoria, objeto de áudio aceito, versão do avaliador e resultado. A migração não cria esse carimbo por inferência. Sem essa confirmação, a consequência competitiva fica bloqueada.
+
+### Mapa e reaproveitamento
+
+- `enviar_resultado` cria o laudo e recebe as métricas. `definir_audio_do_resultado` anexa o objeto depois, em outra chamada. A separação existente impede afirmar vínculo atômico entre áudio e nota.
+- `calcular_xp_do_resultado`, `conceder_conquistas_do_resultado`, `pode_usar_como_desafiante`, `pode_usar_como_desafiado`, `aue_compare_results_v1` e `vencedor_do_round` são as portas de consequência do resultado da Arena.
+- As portas de posse seguem acessíveis apenas a `anon` e `authenticated`, pois são predicados das policies de INSERT/UPDATE de `desafios`; o trigger chama o comparador durante a execução de RPCs privilegiadas. O cliente não tem execução direta do comparador. Os três perdem o grant implícito de `PUBLIC`. `vencedor_do_round` não participa desse caminho e continua sem EXECUTE desses papéis.
+- `top_cinco_arrotadores` reaproveita a fila e o worker de notas para áudio publicado com consentimento. Para a Arena, a entrada exige tópico público ativo, mesmo autor do tópico e do resultado, caminho do objeto, e proprietário do objeto em `storage.objects`; eTag, token de trabalho, lock e conclusão idempotente vinculam a nota ao objeto efetivamente medido. A nota do worker pode ranquear a publicação, mas não muda a integridade, XP, X1 ou desempate das métricas declaradas pelo navegador.
+- Consequência competitiva exige sessão autenticada, inclusive conta anônima, correspondente a `resultados.usuario_id`. A janela de visitante continua servindo para o laudo, nunca como prova de posse para desafio ou batalha.
+- Duelo V2 também recebe uma restrição na resposta pública. Revelar e recuperar preservam somente as durações e `origem_medicao=cliente_nao_verificada`, declaram `efeito_competitivo=false` e não entregam `resultado_provisorio`, vencedor, XP, ranking ou vitória competitiva persistida.
+
+### Dados, falhas e reversão
+
+Linhas antigas recebem `legado` sem alteração de nota, áudio, autoria ou resultado histórico. Elas não servem de entrada para uma nova consequência competitiva. A reversão da contenção exige uma migration nova que mantenha a restrição enquanto não houver avaliador de servidor. Remover a barreira restauraria o defeito e não é rollback aceitável.
+
+O banco descartável PostgreSQL aplicou as migrations da M02 sobre o schema da Foundation. Por RPC normal, um laudo novo ficou `nao_verificado`, com XP zero e sem elegibilidade; a role `authenticated` não tinha inserção direta em `resultados`. Uma fixture sintética de tópico pessoal consentido, resultado, objeto `audio_records` e mesma autoria foi reivindicada pelo worker, concluída uma vez e reavaliada só após troca de eTag. A nota do worker entrou no top de publicações sem entrar no ranking global do laudo. Isso não comprova Auth, Storage ou Edge Functions implantados.

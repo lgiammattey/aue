@@ -21,7 +21,7 @@ function dados() {
     criar: vi.fn(async () => ({ ok: true as const, valor: { estado: 'aguardando_resposta', id: 'duelo', versao: 1, prazo: '2027-01-01' } })),
     abrir: vi.fn(async () => ({ ok: true as const, valor: 'aguardando_resposta' })),
     responder: vi.fn(async () => ({ ok: true as const, valor: 'respondido' })),
-    revelar: vi.fn(async () => ({ ok: true as const, valor: { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1000 }, resultadoProvisorio: 'criador', versaoRegua: 'x', origemMedicao: 'cliente_nao_verificada' } })),
+    revelar: vi.fn(async () => ({ ok: true as const, valor: { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1000 }, efeitoCompetitivo: false, versaoRegua: 'x', origemMedicao: 'cliente_nao_verificada' } })),
     baixarAudio: vi.fn(),
   };
   const compartilhar = { compartilhar: vi.fn(), copiar: vi.fn(), sabeMandarImagem: () => false } as unknown as Compartilhamento;
@@ -56,7 +56,7 @@ it('grava resposta sem carregar áudio do adversário e só revela depois de con
   expect(d.d.responder).not.toHaveBeenCalled();
   fireEvent.click(screen.getByLabelText(/Autorizo enviar minha gravação/));
   fireEvent.click(screen.getByRole('button', { name: 'Confirmar resposta' }));
-  await screen.findByRole('heading', { name: 'RESULTADO PROVISÓRIO' });
+  await screen.findByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' });
   expect(d.d.responder).toHaveBeenCalledOnce();
   expect(d.d.baixarAudio).not.toHaveBeenCalled();
 });
@@ -69,14 +69,14 @@ it('permite pré-visualizar o placar e iniciar outra disputa sem enviar automati
   fireEvent.click(screen.getByRole('button', { name: 'Usar esta gravação' }));
   fireEvent.click(screen.getByRole('checkbox', { name: /Autorizo enviar minha gravação/ }));
   fireEvent.click(screen.getByRole('button', { name: 'Confirmar resposta' }));
-  await screen.findByRole('heading', { name: 'RESULTADO PROVISÓRIO' });
+  await screen.findByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' });
   fireEvent.click(screen.getByRole('button', { name: 'Compartilhar resultado' }));
-  expect(screen.getByText(/Resultado provisório no Auê:/).textContent).not.toContain(token);
+  expect(screen.getByText(/Medições experimentais no Auê:/).textContent).not.toContain(token);
   expect(d.compartilhar.compartilhar).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Abrir compartilhamento' }));
   await waitFor(() => expect(d.compartilhar.compartilhar).toHaveBeenCalledOnce());
   expect(vi.mocked(d.compartilhar.compartilhar).mock.calls[0][0].texto).not.toContain(token);
-  fireEvent.click(screen.getByRole('button', { name: 'Pedir revanche' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Novo desafio' }));
   expect(screen.getByRole('button', { name: 'Gravar agora' })).toBeTruthy();
   expect(d.d.criar).not.toHaveBeenCalled();
   await gravar(d);

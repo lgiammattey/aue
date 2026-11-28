@@ -27,3 +27,18 @@ Storage reais, e não mede carga. Depois do merge, confira em leitura (`list_mig
 
 Rollback: `supabase/rollback/*.down.sql`, na ordem inversa (16, 15 e depois 14). O rollback não é
 aplicado automaticamente.
+
+## Integridade em banco descartável
+
+Com PostgreSQL local, configure `PGHOST` para o diretório do socket Unix e `PGUSER` para o dono do cluster. Use `PSQL` se o binário estiver fora do PATH.
+
+```bash
+bash supabase/tests/local/rodar.sh aue_integridade --somente-migracoes
+psql -X -v ON_ERROR_STOP=1 -d aue_integridade -f supabase/tests/local/storage_sessao.sql
+psql -X -v ON_ERROR_STOP=1 -d aue_integridade -f supabase/tests/local/duelo_medicoes.sql
+psql -X -v ON_ERROR_STOP=1 -d aue_integridade -f supabase/tests/local/resultado_worker.sql
+node --test supabase/tests/local/integridade-grupos.test.mjs
+node --test supabase/functions/cadastrar-grupo/corpo.test.mjs
+```
+
+O teste concorrente cria e remove dois bancos com nomes aleatórios no cluster indicado. Ele mede as vagas por origem e no total, confere a contagem após falha de persistência e verifica o código de saída do runner com uma migration inválida. Os testes de Storage exercitam policies do PostgreSQL com usuários e metadados sintéticos. A configuração e os limites das suítes antigas estão no relatório da M02.

@@ -9,7 +9,7 @@ import '../src/index.css';
 const parametros = new URLSearchParams(window.location.search);
 const estado = parametros.get('estado') ?? 'criar';
 const token = 'a'.repeat(64);
-const resultado = { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1830 }, resultadoProvisorio: 'desafiante', ladoSessao: 'desafiante', versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } as const;
+const resultado = { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1830 }, efeitoCompetitivo: false, ladoSessao: 'desafiante', versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } as const;
 function audioSintetico() {
   const taxa = 8000; const amostras = taxa; const dados = new ArrayBuffer(44 + amostras * 2); const visao = new DataView(dados);
   const texto = (offset: number, valor: string) => [...valor].forEach((letra, i) => visao.setUint8(offset + i, letra.charCodeAt(0)));

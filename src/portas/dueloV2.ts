@@ -1,4 +1,4 @@
-/** Contrato do duelo experimental. O servidor decide acesso e resultado. */
+/** Contrato do duelo experimental. O servidor decide acesso, sem vencedor competitivo. */
 export type FalhaDueloV2 = 'sem_sessao' | 'entrada_invalida' | 'falha_rede' | 'resposta_invalida' | 'envio_falhou' | 'resultado_indisponivel' | 'criacao_incerta' | 'cancelada';
 export type ResultadoDueloV2<T> = { readonly ok: true; readonly valor: T } | { readonly ok: false; readonly motivo: FalhaDueloV2; readonly tentativaId?: string };
 export type EstadoCancelamentoV2 = 'cancelada_local' | 'preparacao_incerta' | 'removida' | 'remocao_pendente' | 'remocao_nao_verificada' | 'bloqueio_nao_confirmado';
@@ -16,7 +16,8 @@ export interface RevelacaoV2 {
   readonly ladoSessao?: 'criador' | 'desafiante';
   readonly criador: { readonly duracaoMs: number };
   readonly desafiante: { readonly duracaoMs: number };
-  readonly resultadoProvisorio: 'criador' | 'desafiante' | 'empate';
+  /** Declaração explícita do servidor: a comparação não tem efeito competitivo. */
+  readonly efeitoCompetitivo: false;
   readonly versaoRegua: 'experimental-2';
   readonly origemMedicao: 'cliente_nao_verificada';
 }

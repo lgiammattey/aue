@@ -181,9 +181,9 @@ export function MeusDuelosV2({ duelo, aoVoltar, compartilhar, origem, aoNovoDesa
         {link && <><label>Link do desafio<input readOnly value={link} /></label><button type="button" disabled={ocupado} onClick={mandar}>Compartilhar convite</button><button type="button" disabled={ocupado} onClick={copiar}>Copiar link</button></>}
       </>}
       {resultado && proprio && <>
-        <h3>RESULTADO PROVISÓRIO</h3><p>As medições são informadas pelos aparelhos e ainda não foram verificadas.</p>
+        <h3>MEDIÇÕES DO DESAFIO</h3><p>As medições são informadas pelos aparelhos e ainda não foram verificadas.</p>
         <dl><div><dt>Você</dt><dd>{duracao(resultado[proprio].duracaoMs)}</dd></div><div><dt>Adversário</dt><dd>{duracao(resultado[outro].duracaoMs)}</dd></div></dl>
-        <p>{resultado.resultadoProvisorio === 'empate' ? 'Empate.' : resultado.resultadoProvisorio === proprio ? 'Você levou esta rodada.' : 'Seu adversário levou esta rodada.'}</p>
+        <p>Compare as duas durações. Isso não define vitória, placar ou ranking.</p>
         <button type="button" onClick={() => void ouvir(proprio)}>Abrir minha gravação</button><button type="button" onClick={() => void ouvir(outro)}>Abrir áudio do adversário</button>
         {audio && endereco && <PlayerDeAudio endereco={endereco} rotulo={audio.lado === proprio ? 'Sua gravação' : 'Áudio do adversário'} />}
         <ProximosPassosDuelo resultado={resultado} compartilhar={compartilhar} origem={origem} aoNovoDesafio={aoNovoDesafio} />

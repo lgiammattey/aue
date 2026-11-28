@@ -8,7 +8,7 @@ import { CriarDueloV2, ResponderDueloV2 } from './DueloV2';
 const token = 'a'.repeat(64);
 const audio = new Blob(['audio'], { type: 'audio/wav' });
 const tentativa = { audio, duracaoMs: 1400 };
-const resultado = { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1400 }, resultadoProvisorio: 'desafiante', versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } as const;
+const resultado = { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1400 }, efeitoCompetitivo: false, versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } as const;
 function portas() {
   const duelo = {
     enviarGravacao: vi.fn(async () => ({ ok: true as const, valor: { id: 'gravacao' } })),
@@ -82,7 +82,7 @@ describe('convite do duelo v2', () => {
     expect(d.revelar).not.toHaveBeenCalled();
     expect(d.baixarAudio).not.toHaveBeenCalled();
     confirmar({ ok: true, valor: 'respondido' });
-    expect(await screen.findByRole('heading', { name: 'RESULTADO PROVISÓRIO' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' })).toBeTruthy();
     expect(d.revelar).toHaveBeenCalledOnce();
     expect(d.baixarAudio).not.toHaveBeenCalled();
   });
@@ -102,11 +102,11 @@ describe('convite do duelo v2', () => {
     const { d, duelo } = portas();
     d.abrir.mockResolvedValueOnce({ ok: true, valor: 'respondido' } as never);
     render(<ResponderDueloV2 duelo={duelo} token={token} tentativa={null} aoGravar={vi.fn()} aoVoltar={vi.fn()} />);
-    expect(await screen.findByRole('heading', { name: 'RESULTADO PROVISÓRIO' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' })).toBeTruthy();
     expect(d.revelar).toHaveBeenCalledExactlyOnceWith(token);
     expect(screen.getByText('Quem criou')).toBeTruthy();
     expect(screen.getByText('Quem respondeu')).toBeTruthy();
-    expect(screen.getByText('Quem respondeu levou esta rodada.')).toBeTruthy();
+    expect(screen.getByText('Compare as duas durações. Isso não define vitória, placar ou ranking.')).toBeTruthy();
     expect(screen.queryByText('Você')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Denunciar áudio do adversário' })).toBeNull();
     expect(d.baixarAudio).not.toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe('convite do duelo v2', () => {
     d.revelar.mockResolvedValueOnce({ ok: false, motivo: 'resultado_indisponivel' } as never);
     render(<ResponderDueloV2 duelo={duelo} token={token} tentativa={null} aoGravar={vi.fn()} aoVoltar={vi.fn()} />);
     expect(await screen.findByText('Não foi possível abrir o resultado. Tente novamente.')).toBeTruthy();
-    expect(screen.queryByRole('heading', { name: 'RESULTADO PROVISÓRIO' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' })).toBeNull();
     expect(d.baixarAudio).not.toHaveBeenCalled();
   });
 
@@ -128,7 +128,7 @@ describe('convite do duelo v2', () => {
     d.revelar.mockResolvedValueOnce({ ok: false, motivo: 'falha_rede' } as never);
     render(<ResponderDueloV2 duelo={duelo} token={token} tentativa={null} aoGravar={vi.fn()} aoVoltar={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Tentar abrir resultado' }));
-    expect(await screen.findByRole('heading', { name: 'RESULTADO PROVISÓRIO' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' })).toBeTruthy();
     expect(d.revelar).toHaveBeenCalledTimes(2);
     expect(screen.getByText('Quem criou')).toBeTruthy();
   });
@@ -278,9 +278,9 @@ describe('convite do duelo v2', () => {
 it('identifica a pessoa ao reabrir e denuncia somente o adversário', async () => {
   const { d, duelo } = portas();
   d.abrir.mockResolvedValueOnce({ ok: true, valor: 'respondido' } as never);
-  d.revelar.mockResolvedValueOnce({ ok: true, valor: { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1400 }, resultadoProvisorio: 'desafiante', versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada', ladoSessao: 'criador' } } as never);
+  d.revelar.mockResolvedValueOnce({ ok: true, valor: { criador: { duracaoMs: 1200 }, desafiante: { duracaoMs: 1400 }, efeitoCompetitivo: false, versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada', ladoSessao: 'criador' } } as never);
   render(<ResponderDueloV2 duelo={duelo} token={token} tentativa={null} aoGravar={vi.fn()} aoVoltar={vi.fn()} />);
-  expect(await screen.findByText('Seu adversário levou esta rodada.')).toBeTruthy();
+  expect(await screen.findByText('Compare as duas durações. Isso não define vitória, placar ou ranking.')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Denunciar áudio do adversário' }));
   fireEvent.click(screen.getByLabelText('Conteúdo ofensivo'));
   fireEvent.click(screen.getByRole('button', { name: 'Enviar denúncia' }));

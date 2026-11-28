@@ -38,8 +38,9 @@ describe('contrato SQL dos duelos v2', () => {
         CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
           SELECT nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
         $$;
-        CREATE FUNCTION public.aue_e_administrador() RETURNS boolean LANGUAGE sql STABLE AS $$
-          SELECT auth.uid() = '00000000-0000-0000-0000-000000000004'::uuid
+        CREATE TABLE public.administradores_do_aue(usuario_id uuid PRIMARY KEY REFERENCES auth.users(id));
+        CREATE FUNCTION public.aue_e_administrador() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
+          SELECT EXISTS(SELECT 1 FROM public.administradores_do_aue WHERE usuario_id = auth.uid())
         $$;
         CREATE FUNCTION storage.allow_any_operation(expected_operations text[]) RETURNS boolean LANGUAGE sql STABLE AS $$
           SELECT coalesce(replace(current_setting('storage.operation', true), 'storage.', '') = ANY(expected_operations), false)

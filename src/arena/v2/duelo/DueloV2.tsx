@@ -310,7 +310,7 @@ export function ResponderDueloV2({ duelo, token, tentativa, aoGravar, aoVoltar, 
   };
 
   return <section className="duelo-v2" aria-labelledby="responder-duelo-titulo">
-    <h2 id="responder-duelo-titulo">{estado === 'revelado' ? 'PLACAR DO DESAFIO' : 'VOCÊ FOI DESAFIADO'}</h2>
+    <h2 id="responder-duelo-titulo">{estado === 'revelado' ? 'COMPARAÇÃO EXPERIMENTAL' : 'VOCÊ FOI DESAFIADO'}</h2>
     {estado === 'aberto' && <><p>Grave sua resposta para revelar o confronto.</p>{tentativa ? <><label><input type="checkbox" checked={consentiu} onChange={(evento) => setConsentiu(evento.target.checked)} /> Autorizo enviar minha gravação para o Auê e permitir que quem criou o desafio a ouça após minha resposta.</label><button type="button" className="duelo-v2__principal" disabled={!consentiu} onClick={() => void responder()}>Confirmar resposta</button></> : <button type="button" className="duelo-v2__principal" onClick={aoGravar}>Aceitar e gravar</button>}<button type="button" onClick={aoVoltar}>Voltar</button></>}
     {(estado === 'abrindo' || estado === 'enviando' || estado === 'respondendo' || estado === 'revelando' || estado === 'descarte') && <p role="status">{estado === 'descarte' ? 'Solicitando exclusão…' : 'Um instante…'}</p>}
     {estado === 'enviando' && <button type="button" onClick={() => void cancelarEnvio()}>Cancelar envio</button>}
@@ -364,9 +364,9 @@ function ResultadoDoDuelo({ duelo, token, resultado, neutro, aoVoltar, compartil
   };
   const duracao = (ms: number) => `${(ms / 1000).toFixed(2).replace('.', ',')} s`;
   return <div className="duelo-v2__resultado">
-    <h3>RESULTADO PROVISÓRIO</h3><p>As medições são informadas pelos aparelhos e ainda não foram verificadas.</p>
+    <h3>MEDIÇÕES DO DESAFIO</h3><p>As medições são informadas pelos aparelhos e ainda não foram verificadas.</p>
     <dl><div><dt>{neutro ? 'Quem criou' : resultado.ladoSessao === 'criador' ? 'Você' : 'Adversário'}</dt><dd>{duracao(resultado.criador.duracaoMs)}</dd></div><div><dt>{neutro ? 'Quem respondeu' : resultado.ladoSessao === 'criador' ? 'Adversário' : 'Você'}</dt><dd>{duracao(resultado.desafiante.duracaoMs)}</dd></div></dl>
-    <p>{resultado.resultadoProvisorio === 'empate' ? 'Empate.' : neutro ? (resultado.resultadoProvisorio === 'criador' ? 'Quem criou levou esta rodada.' : 'Quem respondeu levou esta rodada.') : resultado.resultadoProvisorio === (resultado.ladoSessao ?? 'desafiante') ? 'Você levou esta rodada.' : 'Seu adversário levou esta rodada.'}</p>
+    <p>Compare as duas durações. Isso não define vitória, placar ou ranking.</p>
     <button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao !== 'criador'} onClick={() => void ouvir('criador')}>{neutro ? 'Abrir áudio de quem criou' : resultado.ladoSessao === 'criador' ? 'Abrir minha gravação' : 'Abrir áudio do adversário'}</button><button type="button" disabled={denuncia === 'registrada' && resultado.ladoSessao === 'criador'} onClick={() => void ouvir('desafiante')}>{neutro ? 'Abrir áudio de quem respondeu' : resultado.ladoSessao === 'criador' ? 'Abrir áudio do adversário' : 'Abrir minha gravação'}</button>
     {audio && endereco && <PlayerDeAudio endereco={endereco} rotulo={neutro ? (audio.lado === 'criador' ? 'Áudio de quem criou' : 'Áudio de quem respondeu') : (audio.lado === (resultado.ladoSessao ?? 'desafiante') ? 'Sua gravação' : 'Áudio do adversário')} />}
     {erro && <p role="alert">{erro}</p>}

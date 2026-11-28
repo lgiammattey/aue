@@ -14,8 +14,7 @@ export function ProximosPassosDuelo({ resultado, compartilhar, origem, aoNovoDes
   const [previaAberta, setPreviaAberta] = useState(false);
   const [aviso, setAviso] = useState('');
   const tempo = (ms: number) => `${(ms / 1000).toFixed(2).replace('.', ',')} s`;
-  const vencedor = resultado.resultadoProvisorio === 'empate' ? 'Empate.' : resultado.resultadoProvisorio === 'criador' ? 'Quem criou venceu.' : 'Quem respondeu venceu.';
-  const texto = `Resultado provisório no Auê: quem criou ${tempo(resultado.criador.duracaoMs)} × ${tempo(resultado.desafiante.duracaoMs)} quem respondeu. ${vencedor} Medições ainda não verificadas.`;
+  const texto = `Medições experimentais no Auê: quem criou ${tempo(resultado.criador.duracaoMs)} × ${tempo(resultado.desafiante.duracaoMs)} quem respondeu. Não definem vitória, placar ou ranking.`;
   const enviar = async () => {
     if (!compartilhar) return;
     try {
@@ -29,7 +28,7 @@ export function ProximosPassosDuelo({ resultado, compartilhar, origem, aoNovoDes
   };
   if (!aoNovoDesafio && !compartilhar) return null;
   return <section className="duelo-v2__proximos" aria-label="Depois do resultado">
-    {aoNovoDesafio && <><button type="button" className="duelo-v2__principal" onClick={aoNovoDesafio}>Pedir revanche</button><p>Grave um novo desafio e envie para a mesma pessoa. A nova disputa não fica ligada a este placar.</p></>}
+    {aoNovoDesafio && <><button type="button" className="duelo-v2__principal" onClick={aoNovoDesafio}>Novo desafio</button><p>Grave um novo desafio e envie para a mesma pessoa. A nova comparação fica separada desta.</p></>}
     {compartilhar && <><button type="button" onClick={() => { setPreviaAberta(!previaAberta); setAviso(''); }} aria-expanded={previaAberta}>Compartilhar resultado</button>
       {previaAberta && <div className="duelo-v2__previa"><p>Texto para compartilhar:</p><p>{texto}</p>{origem && <p>Link: {origem}</p>}<button type="button" onClick={() => void enviar()}>Abrir compartilhamento</button><button type="button" onClick={() => void copiar()}>Copiar texto</button></div>}
     </>}

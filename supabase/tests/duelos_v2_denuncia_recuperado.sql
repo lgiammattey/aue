@@ -5,6 +5,8 @@ INSERT INTO auth.users(id) VALUES
  ('00000000-0000-0000-0000-000000000012'),
  ('00000000-0000-0000-0000-000000000013'),
  ('00000000-0000-0000-0000-000000000004');
+-- O moderador sintético exerce a mesma autorização consultada pelo produto.
+INSERT INTO public.administradores_do_aue(usuario_id) VALUES ('00000000-0000-0000-0000-000000000004');
 CREATE TEMP TABLE prova_denuncia(chave text PRIMARY KEY, valor text);
 GRANT ALL ON prova_denuncia TO authenticated;
 SET LOCAL ROLE authenticated;

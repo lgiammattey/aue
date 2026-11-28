@@ -19,7 +19,29 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SEL
 CREATE OR REPLACE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT coalesce(nullif(current_setting('request.jwt.claim.role', true), ''), 'anon') $$;
 CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE AS $$ SELECT coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb $$;
 CREATE TABLE storage.buckets (id text PRIMARY KEY, name text, public boolean DEFAULT false, file_size_limit bigint, allowed_mime_types text[]);
-CREATE TABLE storage.objects (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), bucket_id text, name text, owner uuid, metadata jsonb, created_at timestamptz DEFAULT now());
+CREATE TABLE storage.objects (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), bucket_id text, name text, owner uuid, owner_id text, metadata jsonb, created_at timestamptz DEFAULT now(), UNIQUE(bucket_id, name));
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-CREATE OR REPLACE FUNCTION storage.foldername(name text) RETURNS text[] LANGUAGE sql AS $$ SELECT string_to_array(name, '/') $$;
+ALTER TABLE storage.buckets ENABLE ROW LEVEL SECURITY;
+-- Fixture da superfície SQL do Storage, antes das policies do Auê. Privilégios
+-- de objetos e revogações nos arquivos 0046 e 0073 do storage upstream:
+-- https://github.com/supabase/storage/tree/abd21c24f5a62416ed8cd2cb4c6eee160a2c4f94/migrations/tenant
+GRANT SELECT, INSERT, UPDATE, DELETE ON storage.objects, storage.buckets TO anon, authenticated, service_role;
+CREATE OR REPLACE FUNCTION storage.foldername(name text) RETURNS text[] LANGUAGE sql AS $$ SELECT (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1)-1] $$;
 GRANT USAGE ON SCHEMA auth, storage, extensions TO anon, authenticated, service_role;
+
+-- Pré-requisitos provisionados pela API Storage fora das migrations do jogo.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('duelos_v2', 'duelos_v2', false, 5242880, ARRAY['audio/wav']);
+CREATE FUNCTION storage.allow_any_operation(operacoes text[]) RETURNS boolean
+LANGUAGE sql STABLE AS $$
+  -- Como no helper 0058 do Storage, o prefixo storage. é opcional.
+  SELECT EXISTS (
+    SELECT 1 FROM unnest(operacoes) AS op
+    WHERE op <> '' AND regexp_replace(current_setting('storage.operation', true), '^storage\.', '') =
+                       regexp_replace(op, '^storage\.', '')
+  )
+$$;
+CREATE TABLE auth.sessions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE
+);

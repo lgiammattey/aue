@@ -134,9 +134,9 @@ BEGIN
     ('criar_comentario', 'p_conteudo text, p_post_id uuid, p_result_id uuid, p_resposta_a_id uuid', 'comentarios'),
     ('apagar_meu_causo', 'p_post_id uuid', 'boolean'),
     ('denunciar_causo', 'p_post_id uuid, p_motivo text', 'boolean'),
-    ('listar_comentarios', 'p_post_id uuid, p_result_id uuid', 'TABLE(id uuid, content text, created_at timestamp with time zone, user_id uuid, apelido text, avatar_url text, resposta_a_id uuid, nivel smallint, handle text)'),
+    ('listar_comentarios', 'p_post_id uuid, p_result_id uuid', 'TABLE(id uuid, content text, created_at timestamp with time zone, user_id uuid, apelido text, avatar_url text, resposta_a_id uuid, nivel smallint, handle text, removido boolean)'),
     ('listar_feed_de_causos', 'p_topico text, p_limite integer, p_autor_id uuid, p_curtidos_por uuid, p_post_id uuid, p_seguindo boolean',
-     'TABLE(id uuid, user_id uuid, apelido text, handle text, url_do_avatar text, topico text, conteudo text, resultado_id uuid, nota numeric, duracao numeric, subtipo_de_origem text, caminho_do_audio text, criado_em timestamp with time zone, total_comentarios bigint, curtidas bigint, reposts bigint, fogo bigint, nojo bigint, trofeu bigint, minhas text[], caminho_do_audio_da_casa text, comunidade_id uuid, comunidade_slug text, comunidade_nome text)')
+     'TABLE(id uuid, user_id uuid, apelido text, handle text, url_do_avatar text, topico text, conteudo text, resultado_id uuid, nota numeric, duracao numeric, subtipo_de_origem text, caminho_do_audio text, criado_em timestamp with time zone, total_comentarios bigint, curtidas bigint, reposts bigint, fogo bigint, nojo bigint, trofeu bigint, minhas text[], caminho_do_audio_da_casa text, comunidade_id uuid, comunidade_slug text, comunidade_nome text, rede_social text, url_social text)')
   ) AS v(nome, args, retorno) LOOP
     PERFORM t_topicos.ok((SELECT count(*) FROM pg_proc p WHERE p.pronamespace = 'public'::regnamespace AND p.proname = r.nome) = 1,
       'RPC antiga ' || r.nome || ' continua com uma só assinatura');

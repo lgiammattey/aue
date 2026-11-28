@@ -1,6 +1,7 @@
 -- Banco descartável e Storage simulado; NÃO demonstra HTTP nem remoção física.
 BEGIN;
 INSERT INTO auth.users(id) VALUES ('00000000-0000-0000-0000-000000000001'),('00000000-0000-0000-0000-000000000002'),('00000000-0000-0000-0000-000000000003'),('00000000-0000-0000-0000-000000000004');
+INSERT INTO public.administradores_do_aue(usuario_id) VALUES ('00000000-0000-0000-0000-000000000004');
 CREATE TEMP TABLE dados_privacidade(chave text PRIMARY KEY, valor text);
 GRANT ALL ON dados_privacidade TO authenticated, anon;
 SET LOCAL ROLE authenticated;

@@ -87,6 +87,12 @@ export interface ResultadoRow {
   /** Um humano já decidiu sobre este resultado; o gatilho de denúncias não mexe. */
   esta_travado_por_moderacao: boolean;
   /**
+   * Um laudo criado com métricas do navegador continua jogável e visível para
+   * quem o gravou, mas só o estado confirmado pelo servidor pode gerar XP,
+   * ranking ou decisão de X1.
+   */
+  integridade: 'legado' | 'nao_verificado' | 'verificado_servidor';
+  /**
    * Caminho do objeto no bucket `audio_records`, ou `null` quando não há áudio.
    *
    * `null` é o caso NORMAL, não excepcional: gravação anônima nunca tem áudio

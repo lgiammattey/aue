@@ -16,7 +16,7 @@ for (const viewport of [{ width: 320, height: 720 }, { width: 390, height: 844 }
     await expect(page.getByRole('button', { name: 'Aceitar e gravar' })).toBeVisible();
     await expect(page.getByText('1,20 s')).toHaveCount(0);
     await page.goto(`${origem}?estado=placar`);
-    await expect(page.getByRole('heading', { name: 'RESULTADO PROVISÓRIO' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'MEDIÇÕES DO DESAFIO' })).toBeVisible();
     await expect(page.getByText('1,20 s')).toBeVisible();
     await expect(page.getByText('1,83 s')).toBeVisible();
     await page.getByRole('button', { name: 'Abrir áudio do adversário' }).click();
@@ -24,9 +24,9 @@ for (const viewport of [{ width: 320, height: 720 }, { width: 390, height: 844 }
     await expect(page.getByRole('button', { name: 'Reproduzir gravação' })).toBeVisible();
     await page.getByRole('button', { name: 'Reproduzir gravação' }).click();
     await expect(page.getByRole('button', { name: 'Pausar gravação' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Pedir revanche' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Novo desafio' })).toBeVisible();
     await page.getByRole('button', { name: 'Compartilhar resultado' }).click();
-    await expect(page.getByText(/Resultado provisório no Auê:/)).toBeVisible();
+    await expect(page.getByText(/Medições experimentais no Auê:/)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.goto(`${origem}?estado=meus`);
     await expect(page.getByText('Nenhum desafio encontrado nesta sessão.')).toBeVisible();

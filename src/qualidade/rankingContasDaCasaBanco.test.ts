@@ -15,10 +15,10 @@ describe('Ranking com contas da casa', () => {
         CREATE TABLE public.pautas_de_topicos (pauta_id uuid);
         CREATE TABLE public.contas_da_casa (usuario_id uuid);
         CREATE TABLE public.topicos (id uuid, autor_id uuid, status text, origem text, comunidade_id uuid, anexo_tipo text, anexo_caminho text, criado_em timestamptz, resultado_id uuid, consentimento_audio_publico boolean, caminho_do_audio_da_casa text);
-        CREATE TABLE public.resultados (id uuid, nota numeric, caminho_do_audio text, esta_escondido boolean);
+        CREATE TABLE public.resultados (id uuid, nota numeric, caminho_do_audio text, esta_escondido boolean, integridade text);
         CREATE TABLE public.respostas (id uuid, autor_id uuid, topico_id uuid, status text, anexo_tipo text, anexo_caminho text, criado_em timestamptz);
         CREATE TABLE storage.buckets (id text, public boolean);
-        CREATE TABLE storage.objects (bucket_id text, name text, metadata jsonb);
+        CREATE TABLE storage.objects (bucket_id text, name text, owner uuid, metadata jsonb);
         CREATE TABLE aue_privado.notas_retrospectivas (bucket text, caminho text, etag text, nota numeric, versao text);
         INSERT INTO public.perfis VALUES ('00000000-0000-0000-0000-000000000010','giam','Giam',null);
         INSERT INTO public.contas_da_casa VALUES ('00000000-0000-0000-0000-000000000010');
@@ -28,7 +28,7 @@ describe('Ranking com contas da casa', () => {
           ('00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000010','aberto','comunidade','00000000-0000-0000-0000-000000000099',null,null,now(),null,true,'som1'),
           ('00000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000010','oculto','comunidade','00000000-0000-0000-0000-000000000099',null,null,now(),null,true,'oculto'),
           ('00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000010','aberto','comunidade','00000000-0000-0000-0000-000000000099',null,null,now(),null,false,'sem-consentimento');
-        INSERT INTO storage.objects SELECT 'audio_da_casa', v, '{"eTag":"a"}'::jsonb FROM unnest(ARRAY['som1','oculto','sem-consentimento']) v;
+        INSERT INTO storage.objects SELECT 'audio_da_casa', v, NULL::uuid, '{"eTag":"a"}'::jsonb FROM unnest(ARRAY['som1','oculto','sem-consentimento']) v;
         INSERT INTO aue_privado.notas_retrospectivas VALUES
           ('audio_da_casa','som1','a',80,'retrospectiva-acustica-legado-v1'),
           ('audio_da_casa','oculto','a',100,'retrospectiva-acustica-legado-v1'),

@@ -22,7 +22,7 @@ Deno.serve(criarHandler({
     return rows?.[0] ?? null;
   },
   async baixar(bucket: string, caminho: string, etag: string) {
-    if (!['anexos_do_forum', 'arrotos_de_perfil', 'audio_da_casa'].includes(bucket)) return null;
+    if (!['anexos_do_forum', 'arrotos_de_perfil', 'audio_da_casa', 'audio_records'].includes(bucket)) return null;
     const path = caminho.split('/').map(encodeURIComponent).join('/');
     const resposta = await fetch(`${url}/storage/v1/object/authenticated/${bucket}/${path}`, {
       headers: { apikey: service, Authorization: `Bearer ${service}` },
@@ -33,14 +33,19 @@ Deno.serve(criarHandler({
     if (tamanho > 12_582_912) return null;
     if (!resposta.body) return null;
     const leitor = resposta.body.getReader();
-    const blocos: Uint8Array[] = [];
+    const blocos: ArrayBuffer[] = [];
     let total = 0;
     while (true) {
       const parte = await leitor.read();
       if (parte.done) break;
       total += parte.value.byteLength;
       if (total > 12_582_912) { await leitor.cancel(); return null; }
-      blocos.push(parte.value);
+      // O leitor pode entregar uma view sobre um buffer compartilhado. Copiar
+      // exatamente o trecho recebido mantém o Blob independente e compatível
+      // com o BlobPart aceito pelo runtime Deno.
+      const copia = new Uint8Array(parte.value.byteLength);
+      copia.set(parte.value);
+      blocos.push(copia.buffer);
     }
     return new Blob(blocos);
   },

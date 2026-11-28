@@ -71,6 +71,17 @@ const APOSENTADOS = [
   'get_user_conquistas_catalog',
 ] as const;
 
+/**
+ * Views públicas anteriores à tradução ainda expõem estes nomes como contrato
+ * de leitura. A exceção é deliberadamente estreita: não autoriza recolocar os
+ * identificadores nas tabelas do MVP1, só preserva a forma já publicada da
+ * view enquanto seus consumidores são migrados.
+ */
+const EXCECOES_DE_COMPATIBILIDADE: Partial<Record<(typeof APOSENTADOS)[number], string[]>> = {
+  score: ['20261128000004_worker_para_audio_publicado_da_arena.sql'],
+  player_name: ['20261128000004_worker_para_audio_publicado_da_arena.sql'],
+};
+
 /** Migrações posteriores à tradução, em ordem de aplicação. */
 function migracoesPosteriores(): string[] {
   return readdirSync(DIR_MIGRACOES)
@@ -96,7 +107,8 @@ describe('nomenclatura PT-BR — as tabelas do MVP1 não voltam para o inglês',
 
   it.each(APOSENTADOS)('nenhuma migração posterior reintroduz "%s"', (identificador) => {
     const reincidentes = migracoesPosteriores().filter((nome) =>
-      new RegExp(`\\b${identificador}\\b`).test(readFileSync(`${DIR_MIGRACOES}/${nome}`, 'utf8')),
+      new RegExp(`\\b${identificador}\\b`).test(readFileSync(`${DIR_MIGRACOES}/${nome}`, 'utf8')) &&
+      !EXCECOES_DE_COMPATIBILIDADE[identificador]?.includes(nome),
     );
 
     expect(

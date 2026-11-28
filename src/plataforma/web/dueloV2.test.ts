@@ -8,7 +8,7 @@ const outra = '00000000-0000-4000-8000-000000000003';
 const token = 'a'.repeat(64);
 const audio = () => new Blob([new Uint8Array(50)], { type: 'audio/wav' });
 const caminho = `${usuario}/${gravacao}.wav`;
-const revelado = { id: outra, estado: 'revelado', bucket: 'duelos_v2', versao_regua: 'experimental-2', origem_medicao: 'cliente_nao_verificada', resultado_provisorio: 'criador', criador: { duracao_ms: 1500, caminho }, desafiante: { duracao_ms: 900, caminho: `${outra}/${outra}.wav` } };
+const revelado = { id: outra, estado: 'revelado', bucket: 'duelos_v2', versao_regua: 'experimental-2', origem_medicao: 'cliente_nao_verificada', efeito_competitivo: false, criador: { duracao_ms: 1500, caminho }, desafiante: { duracao_ms: 900, caminho: `${outra}/${outra}.wav` } };
 function transporte() {
   return {
     sessao: vi.fn(async () => ({ user: { id: usuario } })),
@@ -405,9 +405,20 @@ describe('duelo v2 — adaptador', () => {
     const d = criarDueloV2(t);
     const r = await d.recuperar(gravacao);
     expect(r.ok && JSON.stringify(r)).not.toContain('caminho');
+    expect(r).toEqual({ ok: true, valor: { estado: 'revelado', resultado: { criador: { duracaoMs: 1500 }, desafiante: { duracaoMs: 900 }, efeitoCompetitivo: false, versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } } });
     expect(await d.baixarAudioRecuperado(gravacao, 'desafiante')).toEqual({ ok: true, valor: expect.any(Blob) });
     expect(t.download).toHaveBeenCalledWith(gravacao, 'desafiante');
     expect(t.rpc).toHaveBeenCalledWith('aue_v2_recuperar_duelo', { p_duelo_id: gravacao });
+  });
+  it('ignora resultado provisório antigo e nunca o repassa à experiência', async () => {
+    const t = transporte();
+    t.rpc.mockResolvedValueOnce({ data: { ...revelado, resultado_provisorio: 'criador' }, error: null });
+    expect(await criarDueloV2(t).recuperar(gravacao)).toEqual({ ok: true, valor: { estado: 'revelado', resultado: { criador: { duracaoMs: 1500 }, desafiante: { duracaoMs: 900 }, efeitoCompetitivo: false, versaoRegua: 'experimental-2', origemMedicao: 'cliente_nao_verificada' } } });
+  });
+  it('recusa payload que afirme efeito competitivo', async () => {
+    const t = transporte();
+    t.rpc.mockResolvedValueOnce({ data: { ...revelado, efeito_competitivo: true }, error: null });
+    expect(await criarDueloV2(t).recuperar(gravacao)).toEqual({ ok: false, motivo: 'resposta_invalida' });
   });
   it('reemitir com rede incerta não cria outro token automaticamente', async () => {
     const t = transporte(); t.rpc.mockRejectedValueOnce(new Error('perdeu resposta'));

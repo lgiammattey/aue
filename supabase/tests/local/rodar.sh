@@ -4,6 +4,7 @@
 #
 # Uso:   supabase/tests/local/rodar.sh [banco] [ate_versao]
 #   banco       nome do banco descartável (padrão: aue_teste). É APAGADO e recriado.
+#   --somente-migracoes  aplica a cadeia sem rodar as suítes sociais
 #   ate_versao  para antes de uma migração (ex.: 20261019000013 para testar a 14 e a 15 à parte)
 #
 # Variável PSQL (padrão "psql"). Como root numa máquina onde só o usuário postgres entra no
@@ -13,23 +14,32 @@ AQUI="$(cd "$(dirname "$0")" && pwd)"
 RAIZ="$(cd "$AQUI/../../.." && pwd)"
 DB="${1:-aue_teste}"
 ATE="${2:-}"
-PSQL="${PSQL:-psql}"
+read -r -a psql_cmd <<< "${PSQL:-psql}"
+# O runner recria o banco. Aceita apenas um nome simples e uma conexão local.
+[[ "$DB" =~ ^[a-z_][a-z0-9_]*$ && ${#DB} -le 63 && "$DB" != postgres && "$DB" != template[01] ]] || { echo 'use um nome de banco descartável' >&2; exit 2; }
+case "${PGHOST:-}" in ""|/*|localhost|127.0.0.1|::1) ;; *) echo 'use PostgreSQL local' >&2; exit 2 ;; esac
+[[ -z "${PGSERVICE:-}${PGHOSTADDR:-}" ]] || { echo 'use PGHOST local explícito' >&2; exit 2; }
+export PGOPTIONS="${PGOPTIONS:-} -c client_min_messages=warning"
+psql_local() { "${psql_cmd[@]}" -X -q -v ON_ERROR_STOP=1 "$@"; }
 
-$PSQL -q -d postgres -c "DROP DATABASE IF EXISTS $DB" -c "CREATE DATABASE $DB" >/dev/null
-$PSQL -q -d "$DB" -v ON_ERROR_STOP=1 < "$AQUI/stubs.sql"
+psql_local -d postgres -c "DROP DATABASE IF EXISTS $DB" -c "CREATE DATABASE $DB" >/dev/null
+psql_local -d "$DB" < "$AQUI/stubs.sql"
 
-for f in $(ls "$RAIZ"/supabase/migrations/*.sql | sort); do
+export LC_ALL=C
+anterior=''
+for f in "$RAIZ"/supabase/migrations/*.sql; do
   v=$(basename "$f" | cut -d_ -f1)
+  if [[ -n "$ATE" && "$ATE" != --somente-migracoes && "$v" > "$ATE" ]]; then echo "parou antes de $v"; exit 0; fi
+  if [[ "$v" = "$anterior" ]]; then echo "versão de migration duplicada: $v" >&2; exit 1; fi
+  anterior="$v"
   # O prelude simula os default privileges do Supabase: entra antes das migrações de tópicos.
-  if [[ "$v" == "20261019000014" ]]; then $PSQL -q -d "$DB" -v ON_ERROR_STOP=1 < "$AQUI/prelude.sql"; fi
-  if [[ -n "$ATE" && "$v" > "$ATE" ]]; then echo "parou antes de $v"; exit 0; fi
-  $PSQL -q -d "$DB" -v ON_ERROR_STOP=1 -1 < "$f" 2>&1 | grep -v "NOTICE\|skipping" || true
+  if [[ "$v" == "20261019000014" ]]; then psql_local -d "$DB" < "$AQUI/prelude.sql"; fi
+  psql_local -d "$DB" -1 -f "$f"
 done
 echo "migrações aplicadas em $DB"
 
 if [[ -z "$ATE" ]]; then
-  # pipefail + grep: se o psql falhar, o runner falha (o grep só tira ruído).
   for teste in topicos forum_leituras; do
-    $PSQL -q -d "$DB" -v ON_ERROR_STOP=1 < "$RAIZ/supabase/tests/$teste.sql" 2>&1 | grep -v "WARNING\|^CONTEXT\|PL/pgSQL"
+    psql_local -d "$DB" -f "$RAIZ/supabase/tests/$teste.sql"
   done
 fi

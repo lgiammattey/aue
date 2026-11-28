@@ -222,10 +222,15 @@ describe('feed e perfil (20261018000009)', () => {
     const nomes = readdirSync(`${RAIZ}/supabase/migrations`).filter((n) => n.endsWith('.sql')).sort();
     for (const [funcao, arquivoEsperado] of [
       ['listar_feed_de_causos', '20261020060000_comunidade_arrotos_youtube.sql'],
-      ['obter_perfil_publico', '20261020000017_capa_de_perfil.sql'],
+      ['obter_perfil_publico', '20261128000010_notas_do_perfil_e_placares.sql'],
     ]) {
       const definem = nomes.filter((n) => new RegExp(`CREATE\\s+(?:OR REPLACE\\s+)?FUNCTION public\\.${funcao}\\(`).test(semComentarios(lerMigracao(n))));
       expect(definem.at(-1), funcao).toBe(arquivoEsperado);
+      if (funcao === 'obter_perfil_publico') {
+        expect(semComentarios(lerMigracao(arquivoEsperado))).toMatch(
+          /EXISTS\s*\(SELECT 1 FROM public\.contas_da_casa cc WHERE cc\.usuario_id = p\.id\)/i,
+        );
+      }
     }
   });
 });

@@ -97,7 +97,6 @@ describe('registrar', () => {
     const linha = inserts[0];
     expect(Object.keys(linha).sort()).toEqual(
       [
-        'batalha_codigo',
         'campanha',
         'conteudo',
         'evento',
@@ -123,18 +122,14 @@ describe('registrar', () => {
     }
   });
 
-  it('inclui batalha_codigo só quando o detalhe manda', () => {
+  it('mantém o código de acesso ao X1 fora do envio de telemetria', () => {
     const telemetria = criarTelemetriaWeb(montarArmazenamento());
 
     telemetria.registrar('criou_x1', { batalhaCodigo: 'ABCDEFGHJK' });
 
-    expect(inserts[0].batalha_codigo).toBe('ABCDEFGHJK');
-  });
-
-  it('sem detalhe, batalha_codigo vai null', () => {
-    const telemetria = criarTelemetriaWeb(montarArmazenamento());
-    telemetria.registrar('abriu_arena');
-    expect(inserts[0].batalha_codigo).toBeNull();
+    expect(inserts[0].evento).toBe('criou_x1');
+    expect(inserts[0]).not.toHaveProperty('batalha_codigo');
+    expect(JSON.stringify(inserts[0])).not.toContain('ABCDEFGHJK');
   });
 
   it('grava apenas a categoria permitida da página, uma vez por sessão', () => {
@@ -147,7 +142,6 @@ describe('registrar', () => {
 
     expect(inserts).toHaveLength(1);
     expect(inserts[0].pagina).toBe('comunidade');
-    expect(inserts[0].batalha_codigo).toBeNull();
   });
 
   it('só confirma a página na sessão depois do insert aceito', async () => {

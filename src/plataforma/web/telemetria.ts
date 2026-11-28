@@ -144,7 +144,6 @@ export function criarTelemetriaWeb(armazenamento: ArmazenamentoLocal): Telemetri
         conteudo: sessao.conteudo,
         plataforma: PLATAFORMA,
         versao_app: VERSAO_APP,
-        batalha_codigo: detalhe?.batalhaCodigo ?? null,
         pagina: detalhe?.pagina ?? null,
       });
 

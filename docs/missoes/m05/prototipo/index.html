@@ -4,10 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Auê! M05, protótipo de experiência</title>
+    <title>Auê! M05, protótipo V2</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="clube.css" />
+    <link rel="stylesheet" href="players.css" />
+    <link rel="stylesheet" href="edicao-v2.css" />
   </head>
-  <body>
+  <body data-surface="public">
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
     <header class="topbar">
       <button class="brand" data-view="home" aria-label="Ir para início">AUÊ<span>!</span></button>
@@ -25,66 +28,59 @@
       </div>
     </header>
 
+    <nav class="club-nav" aria-label="Navegação do clube">
+      <div class="club-nav-label">Clube <span class="demo">V2 demo</span></div>
+      <button data-view="arena"><span aria-hidden="true">◉</span>Arena</button>
+      <button data-action="see-invite"><span aria-hidden="true">×</span>Desafios</button>
+      <button data-view="mural"><span aria-hidden="true">≋</span>Mural</button>
+      <button data-view="perfil"><span aria-hidden="true">◌</span>Perfil</button>
+    </nav>
     <main id="conteudo" tabindex="-1">
       <section class="screen home-screen active" id="home" aria-labelledby="home-title">
-        <div class="hero hero-photo">
-          <div class="eyebrow">O jogo de arroto <span class="demo">Demonstração</span></div>
-          <h1 id="home-title">SOLTA O<br /><em>ARROTO.</em><br />CHAMA NO X1.</h1>
-          <p class="lede">Grave um arroto na Arena, receba o laudo experimental e chame alguém pra responder.</p>
-          <div class="hero-actions">
-            <button class="cta" data-view="arena">Entrar na Arena <b aria-hidden="true">→</b></button>
-            <button class="text-btn" data-action="see-invite">Ver um X1</button>
+        <div class="public-hero">
+          <div class="public-pitch">
+            <span class="eyebrow">O clube do arroto <span class="demo">Protótipo V2</span></span>
+            <h1 id="home-title">SOLTA O <em>ARROTO.</em><br />CHAMA NO X1.</h1>
+            <p>Grave na Arena, receba o laudo experimental e mande um desafio pra quem topa responder.</p>
+            <div class="public-actions">
+              <button class="cta" data-view="arena">Entrar na Arena <span aria-hidden="true">→</span></button>
+              <button class="outline" data-action="see-invite">Ver um X1</button>
+            </div>
+            <p class="fine">18+ · Dá pra jogar solo como visitante. Você escolhe se quer publicar.</p>
           </div>
-          <p class="fine">18+ · Dá pra jogar solo como visitante. Você escolhe se quer publicar.</p>
+          <img class="rivalry-art" src="hero-rivalidade.webp" width="1360" height="907" alt="Dois amigos se provocam num X1 de arroto, com ondas laranja e a turma rindo ao fundo." />
         </div>
-        <aside class="home-side" aria-label="Como funciona">
-          <div class="side-kicker">O caminho do arroto</div>
-          <div class="event-row">
-            <span class="event-dot" aria-hidden="true"></span>
-            <span><b>Grave na Arena</b><small>Ouça a tentativa e mande pro juiz.</small></span>
-          </div>
-          <div class="event-row">
-            <span class="event-dot" aria-hidden="true"></span>
-            <span><b>Chame no X1</b><small>O link abre um convite privado.</small></span>
-          </div>
-          <div class="division"></div>
-          <h2>Depois do X1, resenha.</h2>
-          <p>Ouça os arrotos que a galera decidiu publicar.</p>
-          <button class="text-btn" data-view="mural">Abrir o Mural <span aria-hidden="true">→</span></button>
-        </aside>
+        <div class="public-guide" aria-label="Como funciona">
+          <section><h2>Grave na Arena</h2><p>Ouça a tentativa e mande pro juiz quando estiver pronta.</p></section>
+          <section><h2>Chame no X1</h2><p>Mande um convite privado. Cada um grava na sua hora.</p></section>
+          <section><h2>Caia na resenha</h2><p>Ouça as jogadas que a galera quis compartilhar.</p><button class="text-btn" data-view="mural">Abrir o Mural <span aria-hidden="true">→</span></button></section>
+        </div>
       </section>
 
       <section lang="en" class="screen home-screen" id="home-en" aria-labelledby="home-title-en" hidden>
-        <div class="hero hero-photo">
-          <div class="eyebrow">The burp game <span class="demo">Demo</span></div>
-          <h1 id="home-title-en">LET IT<br /><em>RIP.</em><br />CALL A FRIEND.</h1>
-          <p class="lede">Record a burp, get an experimental score and send a friend a one-on-one challenge.</p>
-          <div class="hero-actions">
-            <button class="cta" data-view="arena">Enter the Arena <b aria-hidden="true">→</b></button>
-            <button class="text-btn" data-action="see-invite">See a challenge</button>
+        <div class="public-hero">
+          <div class="public-pitch">
+            <span class="eyebrow">The burp club <span class="demo">V2 demo</span></span>
+            <h1 id="home-title-en">LET IT <em>RIP.</em><br />CALL A FRIEND.</h1>
+            <p>Record a burp, get an experimental score and send a friend a one-on-one challenge.</p>
+            <div class="public-actions">
+              <button class="cta" data-view="arena">Enter the Arena <span aria-hidden="true">→</span></button>
+              <button class="outline" data-action="see-invite">See a challenge</button>
+            </div>
+            <p class="fine">18+ · Play solo as a guest. You choose what to post. The game demo is in Portuguese.</p>
           </div>
-          <p class="fine">18+ · Play solo as a guest. You choose what to post. The game demo is in Portuguese.</p>
+          <img class="rivalry-art" src="hero-rivalidade.webp" width="1360" height="907" alt="Two adult friends in a playful burping face-off, with orange sound waves and their friends laughing." />
         </div>
-        <aside class="home-side" aria-label="How to play">
-          <div class="side-kicker">How to play</div>
-          <div class="event-row">
-            <span class="event-dot" aria-hidden="true"></span>
-            <span><b>Record in the Arena</b><small>Listen back before you send it to the judge.</small></span>
-          </div>
-          <div class="event-row">
-            <span class="event-dot" aria-hidden="true"></span>
-            <span><b>Invite a friend</b><small>Share a link to a private one-on-one challenge.</small></span>
-          </div>
-          <div class="division"></div>
-          <h2>Hang out after the match.</h2>
-          <p>Listen to the clips other players chose to post.</p>
-          <button class="text-btn" data-view="mural">Visit the Wall <span aria-hidden="true">→</span></button>
-        </aside>
+        <div class="public-guide" aria-label="How to play">
+          <section><h2>Record in the Arena</h2><p>Listen back and send your attempt to the judge.</p></section>
+          <section><h2>Invite a friend</h2><p>Share a private link and take your turns whenever you're ready.</p></section>
+          <section><h2>Join the banter</h2><p>Listen to the clips other players chose to post.</p><button class="text-btn" data-view="mural">Visit the Wall <span aria-hidden="true">→</span></button></section>
+        </div>
       </section>
 
       <section class="screen" id="arena" aria-labelledby="arena-title" hidden>
         <div class="arena-head">
-          <div><span class="eyebrow">Arena</span><h1 id="arena-title">SUA VEZ.</h1></div>
+          <div><span class="eyebrow">O clube do arroto <span class="demo">Demo</span></span><h1 id="arena-title">Arena</h1></div>
           <button class="outline" data-action="history">Meus X1</button>
         </div>
         <div class="arena-grid">
@@ -92,10 +88,10 @@
             <div class="stage-label"><span data-capture-mode>Tentativa solo</span> <span class="demo">Demo</span></div>
             <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div role="status">
-              <h2 data-arena-title>Preparado?</h2>
+              <h2 data-arena-title>Gravação solo</h2>
               <p data-arena-copy>A tentativa só começa quando você aciona o gravador.</p>
             </div>
-            <audio class="sample" data-capture-audio controls preload="none" src="amostra-curta.wav" aria-label="Áudio sintético da tentativa" hidden></audio>
+            <audio data-aue-player class="sample" data-capture-audio controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético da tentativa" hidden></audio>
             <button class="record" data-action="record"><span aria-hidden="true"></span><b data-record-label>Gravar tentativa</b></button>
             <button class="text-btn" data-action="cancel-capture" hidden>Cancelar tentativa</button>
             <div class="state-controls" aria-label="Cenários da demonstração">
@@ -105,38 +101,43 @@
             </div>
           </div>
           <aside class="arena-rail">
-            <div class="rail-label">NA ARENA</div>
+            <h2 class="lobby-title">Mesa de desafios <span class="demo">Exemplos</span></h2>
+            <button class="outline arena-challenge" data-action="new-challenge">Desafiar no X1</button>
             <ul>
-              <li><b>Laudo experimental</b><span>Uma leitura da tentativa.</span></li>
+              <li><span class="lobby-state">Recebido · exemplo</span><b>Convite do Rafa</b><button class="text-btn" data-action="see-invite">Abrir convite <span aria-hidden="true">→</span></button></li>
+              <li><span class="lobby-state">Em andamento · exemplo</span><b>Aguardando Bel</b><button class="text-btn" data-action="see-invite">Acompanhar</button></li>
+              <li><span class="lobby-state">Encerrado · exemplo</span><b>Rafa × Bel</b><button class="text-btn" data-action="responded">Ver comparação</button></li>
               <li><b>Seus registros</b><span>Confira as notas de áudios que você publicou.</span><button class="text-btn" data-view="perfil">Ver perfil</button></li>
-              <li><b>X1 por link</b><span>Grave e mande o convite pra quem você quer desafiar.</span><button class="text-btn" data-action="see-invite">Ver um convite</button></li>
             </ul>
-            <p class="rail-rule">Demonstração local. O gravador usa um áudio sintético.</p>
+            <p class="rail-rule">Os convites são fictícios. O gravador usa um áudio sintético.</p>
           </aside>
         </div>
       </section>
 
       <section class="screen" id="result" aria-labelledby="result-title" hidden>
-        <div class="result-wrap">
-          <span class="eyebrow">Laudo experimental <span class="demo">Demo</span></span>
-          <h1 id="result-title">83<span>,4</span></h1>
-          <p class="grade">Faixa: pesado</p>
-          <div class="result-copy">
-            <p>Resultado de exemplo. A nota descreve a tentativa, sem efeito competitivo.</p>
-            <audio controls preload="none" src="amostra-curta.wav" aria-label="Áudio sintético do laudo"></audio>
-          </div>
-          <div class="result-actions">
-            <button class="cta" data-action="create-link">Criar convite X1 <b aria-hidden="true">→</b></button>
-            <button class="outline" data-view="arena">Tentar de novo</button>
-            <button class="text-btn" data-action="publish">Publicar no Mural</button>
-          </div>
+        <header class="section-head"><div><span class="eyebrow">Tentativa solo <span class="demo">Demo</span></span><h1 id="result-title">Laudo experimental</h1></div></header>
+        <div class="result-workspace">
+          <section class="result-score" aria-label="Nota de exemplo">
+            <strong>83<span>,4</span></strong>
+            <p>Faixa pesado</p>
+            <small>Este número descreve a tentativa de exemplo. Sem efeito competitivo.</small>
+          </section>
+          <section class="result-replay" aria-label="Rever tentativa">
+            <h2>Ouça sua tentativa</h2>
+            <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético do laudo"></audio>
+            <div class="result-actions">
+              <button class="cta" data-action="create-link">Criar convite X1 <span aria-hidden="true">→</span></button>
+              <button class="outline" data-view="arena">Tentar de novo</button>
+              <button class="text-btn" data-action="publish">Publicar no Mural</button>
+            </div>
+          </section>
         </div>
       </section>
 
       <section class="screen" id="x1" aria-labelledby="x1-title" hidden>
         <div class="x1-head">
           <span class="eyebrow">X1 assíncrono <span class="demo">Demo</span></span>
-          <h1 id="x1-title">X1 POR LINK.</h1>
+          <h1 id="x1-title">X1 por link</h1>
           <p>Convite privado. Ouça, responda e compare as duas tentativas.</p>
         </div>
         <div class="invite-panel" data-invite-panel hidden>
@@ -149,20 +150,24 @@
         </div>
         <div class="versus">
           <article>
-            <div class="avatar copper" aria-hidden="true">R</div>
-            <span>RAFA RONCO</span><b data-x1-first>1,20 s</b><small>Medição experimental</small>
+            <div class="avatar mural-avatar rafa" aria-hidden="true"></div>
+            <span class="fighter-name">Rafa Ronco</span><b data-x1-first>1,20 s</b><small>Medição experimental</small>
+            <div class="fighter-player" data-x1-audio><audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético de Rafa no X1"></audio></div>
           </article>
           <div class="vs" aria-hidden="true">×</div>
           <article class="await">
-            <div class="avatar" data-x1-avatar aria-hidden="true">?</div>
-            <span data-x1-status>AGUARDANDO RESPOSTA</span>
-            <b data-x1-second>…</b>
-            <small data-x1-copy>Convite disponível por 7 dias.</small>
+            <div class="avatar mural-avatar bel" data-x1-avatar aria-hidden="true"></div>
+            <span class="fighter-name" data-x1-name>Convidado</span>
+                        <b data-x1-second>…</b>
+            <small>Medição experimental</small>
+            <div class="fighter-player" data-x1-response hidden><audio data-aue-player controls preload="metadata" src="amostra-longa.wav" aria-label="Áudio sintético da resposta no X1"></audio></div>
           </article>
         </div>
+        <div class="x1-context" role="status">
+          <span class="fighter-status" data-x1-status>AGUARDANDO RESPOSTA</span>
+          <p data-x1-copy>Convite disponível por 7 dias.</p>
+        </div>
         <div class="sample-list">
-          <label data-x1-audio>Áudio sintético de Rafa <audio controls preload="none" src="amostra-curta.wav" aria-label="Áudio sintético de Rafa"></audio></label>
-          <label data-x1-response hidden>Áudio sintético da resposta <audio controls preload="none" src="amostra-longa.wav" aria-label="Áudio sintético da resposta"></audio></label>
           <button class="cta" data-action="start-reply">Responder ao X1</button>
         </div>
         <div class="x1-states" aria-label="Cenários do convite">
@@ -178,76 +183,112 @@
         </details>
       </section>
 
-      <section class="screen" id="mural" aria-labelledby="mural-title" hidden>
+      <section class="screen mural-clube" id="mural" aria-labelledby="mural-title" hidden>
         <header class="section-head">
-          <div><span class="eyebrow">Mural <span class="demo">Demo</span></span><h1 id="mural-title">A RESENHA.</h1></div>
-          <div class="tabs" role="group" aria-label="Filtrar Mural">
-            <button class="selected" data-action="all-posts" aria-pressed="true">Tudo</button>
-            <button data-action="following" aria-pressed="false">Seguindo</button>
-          </div>
-        </header>
-        <div class="mural-layout">
           <div>
+            <h1 id="mural-title">Mural</h1>
+            <p>As jogadas que a galera publicou e a resenha que veio junto.</p>
+          </div>
+          <button class="outline" data-action="compose-post">Escrever no Mural</button>
+        </header>
+        <div class="mural-clube-grid">
+          <div class="mural-main">
+            <div class="tabs mural-tabs" role="group" aria-label="Filtrar Mural">
+              <button class="selected" data-action="all-posts" aria-pressed="true">Tudo</button>
+              <button data-action="audio-posts" aria-pressed="false">Áudios</button>
+              <button data-action="media-posts" aria-pressed="false">Mídia</button>
+              <button data-action="following" aria-pressed="false">Seguindo</button>
+            </div>
             <div class="empty-state" data-following-empty hidden>
               <h2>Ninguém na sua roda ainda.</h2>
               <p>Siga alguém para ver os posts aqui.</p>
               <button class="text-btn" data-view="perfil">Conhecer Rafa</button>
             </div>
-            <section class="feed" aria-label="Publicações demonstrativas">
-              <article class="post" data-demo-post hidden>
-                <header><div class="avatar" aria-hidden="true">V</div><div><b>Você</b><span>Agora · demonstração</span></div></header>
-                <p>Minha tentativa na Arena.</p>
-                <audio controls preload="none" src="amostra-curta.wav" aria-label="Áudio sintético da sua publicação"></audio>
+            <section class="feed mural-feed" aria-label="Publicações demonstrativas">
+              <article class="post mural-post" data-text-post hidden>
+                <header><span class="avatar self" aria-hidden="true">V</span><div><b>Você</b><span>Agora · texto de demonstração</span></div></header>
+                <p data-text-post-body></p>
               </article>
-              <article class="post" data-rafa-post>
-                <header><div class="avatar copper" aria-hidden="true">R</div><div><b>Rafa Ronco</b><span>@rafaronco · demonstração</span></div></header>
-                <p>83,4 no teste. Quem encara?</p>
-                <audio controls preload="none" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
-                <small class="synthetic">Áudio sintético de demonstração.</small>
+              <article class="post mural-post" data-demo-post hidden>
+                <header><span class="avatar self" aria-hidden="true">V</span><div><b>Você</b><span>Agora · áudio de demonstração</span></div></header>
+                <p>Minha tentativa na Arena.</p>
+                <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético da sua publicação"></audio>
+              </article>
+              <article class="post mural-post audio-post" data-rafa-post data-post-kind="audio" data-post-author="rafa">
+                <header>
+                  <span class="avatar mural-avatar rafa" aria-hidden="true"></span>
+                  <div><b>Rafa Ronco</b><span>@rafaronco · áudio · demo</span></div>
+                  <span class="post-tag">Da Arena</span>
+                </header>
+                <p class="post-lead">Treinei a semana toda pra isso. Quem puxa a revanche?</p>
+                <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
                 <footer>
-                  <button data-action="comment">Abrir conversa</button>
-                  <button data-action="react" aria-pressed="false">Apoiar <span>12</span></button>
-                  <button data-view="perfil">Abrir perfil</button>
+                  <button data-action="react" aria-pressed="false">Apoiar <span aria-label="Apoios de exemplo">12</span></button>
+                  <button data-action="comment">Abrir conversa <span data-mural-comment-count>2</span></button>
+                  <button data-view="perfil">Ver ficha <span aria-hidden="true">↗</span></button>
                 </footer>
               </article>
-              <article class="post battle" data-proposal-post>
-                <header><span class="tag">Formato proposto</span></header>
-                <h2>Batalha publicada</h2>
-                <p>Quando as duas pessoas autorizarem, a resenha pode reunir as duas tentativas em uma publicação.</p>
+              <article class="post mural-post" data-post-kind="text">
+                <header>
+                  <span class="avatar mural-avatar bel" aria-hidden="true"></span>
+                  <div><b>Bel da Roda</b><span>@beldaroda · texto · demo</span></div>
+                </header>
+                <p class="post-lead">Eu vim só ouvir. Agora tô devendo um X1 pro Rafa.</p>
+                <footer><button data-action="comment">Ver a resenha</button><button data-action="see-invite">Ver convite de exemplo</button></footer>
+              </article>
+              <article class="post mural-post" data-post-kind="media">
+                <header><span class="avatar self" aria-hidden="true">D</span><div><b>Deni</b><span>@denidaarea · imagem · demo</span></div></header>
+                <p>A cara da roda depois da primeira tentativa.</p>
+                <img class="mural-image" src="../../../../public/ilustracoes/como-arrotar-postura-codex.png" width="1254" height="1254" alt="Ilustração do Auê com uma roda de amigos adultos rindo." loading="lazy" />
+              </article>
+              <article class="post mural-post" data-post-kind="media">
+                <header><span class="avatar self" aria-hidden="true">C</span><div><b>Cadu</b><span>@cadu · vídeo ilustrado · demo</span></div></header>
+                <p>O replay da resenha em dois quadros.</p>
+                <video controls playsinline preload="none" src="resenha-demo.mp4" poster="../../../../public/ilustracoes/como-arrotar-comando-codex.png" aria-label="Clipe ilustrado da resenha, sem fala"></video>
               </article>
             </section>
           </div>
-          <aside class="mural-rail">
-            <b>Da Arena pro Mural.</b>
-            <p>Áudio, imagem, vídeo e texto têm espaço na resenha.</p>
-            <button class="outline" data-action="empty">Ver Mural vazio</button>
+          <aside class="mural-guide" aria-label="Sobre o Mural">
+            <h2>Da Arena pro Mural</h2>
+            <p>As publicações acima são exemplos do protótipo. Gravar na Arena e responder a um X1 são ações privadas.</p>
+            <button class="text-btn" data-view="arena">Ir pra Arena <span aria-hidden="true">→</span></button>
+            <section class="mural-proposals">
+              <h2>Formatos em proposta</h2>
+              <dl>
+                <div><dt>Batalha publicada</dt><dd>O confronto pode ganhar um post quando os dois participantes autorizarem.</dd></div>
+                <div><dt>Recorde pessoal</dt><dd>Um destaque pode identificar a melhor tentativa quando houver uma fonte aprovada.</dd></div>
+              </dl>
+            </section>
+            <button class="text-btn" data-action="empty">Ver estado vazio</button>
           </aside>
         </div>
       </section>
 
       <section class="screen" id="perfil" aria-labelledby="perfil-title" hidden>
         <div class="profile-hero">
-          <div class="avatar huge copper" aria-hidden="true">R</div>
+          <div class="avatar huge mural-avatar rafa" aria-hidden="true"></div>
           <div>
             <span class="eyebrow">Perfil <span class="demo">Demo</span></span>
-            <h1 id="perfil-title">RAFA RONCO</h1>
+            <h1 id="perfil-title">Rafa Ronco</h1>
             <p>@rafaronco</p><p class="bio">Voltei pra gravar mais um.</p>
-            <p>28 seguidores · 12 seguindo</p>
+            <p>28 seguidores · 12 seguindo · exemplo</p>
           </div>
           <button class="outline" data-action="follow" aria-pressed="false">Seguir</button>
         </div>
         <div class="stats">
-          <div><span>Melhor nota publicada</span><b>83,4</b></div>
-          <div><span>Publicações</span><b>1</b></div>
+          <div><span>Nota publicada de exemplo</span><b>83,4</b></div>
+          <div><span>Publicações de exemplo</span><b>1</b></div>
           <div><span>Disputas oficiais</span><b>—</b></div>
           <div><span>Patente e ranking</span><b>—</b></div>
         </div>
+        <nav class="profile-tabs" aria-label="Seções do perfil"><a href="#perfil-publicacoes">Publicações</a><a href="#perfil-historico">Histórico</a><button class="outline" data-action="new-challenge">Desafiar</button></nav>
         <div class="profile-content">
-          <section>
+          <section id="perfil-publicacoes">
             <div class="section-line"><h2>Publicações</h2><button class="text-btn" data-view="mural">Abrir no Mural</button></div>
-            <p>83,4 no teste. Quem encara?</p>
-            <audio controls preload="none" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
+            <p>83,4 no teste de exemplo. Quem encara?</p>
+            <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Áudio sintético publicado por Rafa"></audio>
           </section>
+          <section id="perfil-historico"><div class="section-line"><h2>Histórico de X1</h2><button class="text-btn" data-action="history">Meus X1</button></div><p>Seu histórico é privado.</p><button class="outline" data-action="responded">Ver comparação de exemplo</button></section>
           <aside>
             <b data-profile-session>VOCÊ ESTÁ COMO VISITANTE</b>
             <p data-profile-session-copy>Dá pra ouvir e acompanhar. Entre na demo para experimentar ações de conta.</p>
@@ -272,7 +313,7 @@
     </main>
 
     <nav class="mobile-nav" aria-label="Navegação do jogo">
-      <button data-view="home"><b aria-hidden="true">⌂</b><span>Início</span></button>
+      <button data-action="see-invite"><b aria-hidden="true">×</b><span>Desafios</span></button>
       <button data-view="arena"><b aria-hidden="true">◉</b><span>Arena</span></button>
       <button data-view="mural"><b aria-hidden="true">≋</b><span>Mural</span></button>
       <button data-view="perfil"><b aria-hidden="true">◌</b><span>Perfil</span></button>
@@ -290,7 +331,7 @@
     <dialog id="publish-dialog" aria-labelledby="publish-title">
       <h2 id="publish-title">Publicar no Mural</h2>
       <p>Seu áudio apareceria numa publicação pública. Ouça a amostra antes de decidir.</p>
-      <audio controls preload="none" src="amostra-curta.wav" aria-label="Prévia sintética para publicação"></audio>
+      <audio data-aue-player controls preload="metadata" src="amostra-curta.wav" aria-label="Prévia sintética para publicação"></audio>
       <label class="consent-check"><input type="checkbox" /> Autorizo publicar este áudio de demonstração no Mural.</label>
       <div class="dialog-actions">
         <button class="outline" data-action="close-dialog">Cancelar</button>
@@ -299,13 +340,33 @@
     </dialog>
 
     <dialog id="thread-dialog" aria-labelledby="thread-title">
-      <h2 id="thread-title">Conversa</h2>
+      <h2 id="thread-title">Conversa da roda</h2>
       <p><b>Bel</b> Vou gravar minha resposta depois do almoço.</p>
       <p class="thread-reply"><b>Rafa</b> Puxa o X1 que eu respondo.</p>
-      <div class="dialog-actions"><button class="outline" data-action="close-dialog">Fechar</button></div>
+      <div data-mural-comments></div>
+      <form data-mural-comment-form>
+        <label class="mural-field">Responder na demo<textarea rows="2" required maxlength="240"></textarea></label>
+        <div class="dialog-actions">
+          <button type="button" class="outline" data-action="close-dialog">Fechar</button>
+          <button class="cta" type="submit">Responder</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="mural-composer" aria-labelledby="mural-composer-title">
+      <h2 id="mural-composer-title">Escrever no Mural</h2>
+      <p>O post aparece só na sessão desta demonstração.</p>
+      <form data-mural-post-form>
+        <label class="mural-field">Sua resenha<textarea rows="4" required maxlength="280"></textarea></label>
+        <div class="dialog-actions">
+          <button type="button" class="outline" data-action="close-dialog">Cancelar</button>
+          <button class="cta" type="submit">Publicar texto</button>
+        </div>
+      </form>
     </dialog>
 
     <div class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>
+    <script src="players.js"></script>
   </body>
 </html>

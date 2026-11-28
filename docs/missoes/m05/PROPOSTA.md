@@ -1,5 +1,7 @@
 # M05 | Experience
 
+[Segunda rodada do protótipo e comparativo V1 → V2](REVISAO-V2.md). O registro abaixo descreve a primeira proposta.
+
 **Definição funcional e visual para aprovação de Luiz.** A autorização de 28/11/2026 cobre a integração da M04 e esta etapa de desenho. A implementação aguarda aceite.
 
 [Protótipo navegável](prototipo/index.html) · [Prévia mobile a 390 px](prototipo/mobile.html) · [Backlog estratégico](https://chatgpt.com/space/page_78a57da82f108191baa7cafabdbac7dc)

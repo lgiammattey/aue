@@ -1,0 +1,595 @@
+:root[data-accent="saturado"] {
+  --copper: #ff5500;
+  --copper2: #ff9b68;
+}
+
+.club-nav {
+  display: none;
+}
+body[data-surface="public"] .mobile-nav,
+body[data-surface="club"] .topbar > nav,
+body[data-surface="club"] .language-toggle {
+  display: none;
+}
+.club-nav button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
+  padding: 0 12px;
+  text-align: left;
+  font-weight: 700;
+  background: transparent;
+  border-inline-start: 2px solid transparent;
+}
+.club-nav button > span {
+  width: 20px;
+  text-align: center;
+  font-size: 19px;
+  color: var(--muted);
+}
+.club-nav button[aria-current],
+.club-nav button:hover {
+  color: var(--copper2);
+  border-inline-start-color: var(--copper);
+  background: var(--charcoal);
+}
+.club-nav-label {
+  padding: 4px 12px 18px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.home-screen {
+  max-width: 1500px;
+  padding: clamp(28px, 5vw, 76px) clamp(20px, 5vw, 82px) 50px;
+}
+.public-hero {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+  gap: clamp(24px, 4vw, 68px);
+  align-items: center;
+}
+.public-pitch {
+  min-width: 0;
+}
+.public-pitch h1 {
+  margin: 16px 0 20px;
+  font: 400 clamp(51px, 6.1vw, 100px)/.93 var(--display);
+  letter-spacing: -.02em;
+}
+.public-pitch h1 em {
+  color: var(--copper);
+  font-style: normal;
+}
+.public-pitch > p {
+  max-width: 40ch;
+  line-height: 1.5;
+}
+.public-pitch > p:not(.fine) {
+  color: #ddd8d2;
+  font-size: clamp(16px, 1.4vw, 21px);
+}
+.public-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+.public-actions .cta,
+.public-actions .outline {
+  min-height: 48px;
+}
+.public-actions .cta {
+  gap: 14px;
+}
+.rivalry-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-bottom: 2px solid var(--copper);
+}
+.public-guide {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  border-top: 1px solid var(--line);
+  margin-top: clamp(24px, 4vw, 52px);
+  padding-top: 20px;
+}
+.public-guide h2 {
+  margin: 0 0 5px;
+  font: 25px var(--display);
+}
+.public-guide p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 14px;
+}
+.public-guide .text-btn {
+  min-height: 44px;
+  padding-left: 0;
+}
+
+body[data-surface="club"] .screen {
+  padding-top: clamp(22px, 3vw, 44px);
+}
+.arena-head h1,
+.section-head h1,
+.x1-head h1,
+.profile-hero h1,
+.status-screen h1 {
+  font: 400 clamp(38px, 4.1vw, 65px)/1 var(--display);
+  margin: 5px 0 0;
+}
+.arena-head,
+.section-head {
+  padding-bottom: 17px;
+}
+.arena-grid {
+  gap: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(235px, .55fr);
+}
+.arena-stage {
+  min-height: 390px;
+  padding: 26px 20px;
+  border-right: 0;
+  background: var(--charcoal);
+}
+.arena-stage h2 {
+  font-size: clamp(32px, 4vw, 52px);
+  margin-top: 12px;
+}
+.arena-stage p {
+  margin: 8px auto;
+}
+.arena-stage .meter {
+  height: 76px;
+}
+.arena-stage .meter i {
+  max-height: 58px;
+}
+.arena-stage .record {
+  margin-top: 18px;
+}
+.arena-stage .record span {
+  width: 56px;
+  height: 56px;
+}
+.arena-stage .state-controls {
+  margin-top: 14px;
+}
+.arena-rail {
+  padding: 22px 0 0 25px;
+}
+.arena-rail ul {
+  margin: 8px 0 10px;
+}
+.arena-rail li {
+  padding: 11px 0;
+}
+.arena-rail li::before {
+  content: none;
+}
+.arena-rail li > .text-btn {
+  padding-left: 0;
+  min-height: 44px;
+  text-align: left;
+}
+.lobby-title {
+  font: 28px var(--display);
+  margin: 0 0 10px;
+}
+.lobby-state {
+  color: var(--copper2);
+}
+.result-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr);
+  margin-top: 18px;
+}
+.result-score,
+.result-replay {
+  min-width: 0;
+  padding: 20px;
+}
+.result-score {
+  border-right: 1px solid var(--line);
+}
+.result-score strong {
+  font: clamp(70px, 10vw, 132px)/1 var(--display);
+  color: var(--copper);
+}
+.result-score strong span {
+  font-size: .63em;
+}
+.result-score p {
+  margin: 10px 0 5px;
+  font-size: 19px;
+  font-weight: 800;
+}
+.result-score small {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.result-replay h2 {
+  margin: 0 0 16px;
+  font: 32px var(--display);
+}
+.result-actions {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 18px;
+}
+#x1 .versus {
+  grid-template-columns: minmax(0, 1fr) 66px minmax(0, 1fr);
+  margin: 20px auto;
+  padding: 0;
+  background: none;
+}
+#x1 .versus article {
+  border: 0;
+  padding: 18px;
+  min-width: 0;
+  min-height: 235px;
+  text-align: center;
+}
+#x1 .versus article b {
+  font-size: clamp(33px, 5vw, 56px);
+}
+.fighter-player {
+  width: 100%;
+  max-width: 345px;
+  min-width: 0;
+}
+.fighter-name {
+  font-weight: 800;
+}
+.fighter-status {
+  color: var(--copper2);
+  font-size: 10px;
+  font-weight: 800;
+}
+#x1 .sample-list {
+  margin-top: 8px;
+  padding-top: 0;
+  border: 0;
+}
+#x1 .x1-states {
+  justify-content: flex-start;
+}
+#x1 .x1-options {
+  max-width: none;
+}
+.m05-player {
+  --m05-accent: var(--copper);
+  background: var(--charcoal);
+  border-color: var(--line);
+}
+.m05-player__botao,
+.m05-player__trilho {
+  min-height: 44px;
+}
+.m05-player__tempo {
+  white-space: nowrap;
+}
+.sample + .m05-player {
+  width: min(100%, 350px);
+}
+.mural-avatar {
+  background-image: url("hero-rivalidade.webp");
+  background-size: 350% auto;
+  background-repeat: no-repeat;
+  flex: 0 0 auto;
+}
+.mural-avatar.rafa {
+  background-position: 12% 30%;
+}
+.mural-avatar.bel {
+  background-position: 99% 37%;
+}
+[data-x1-avatar]:not(.bel) {
+  background-image: none;
+}
+
+.mural-clube .section-head p {
+  color: var(--muted);
+  margin: 7px 0 0;
+}
+.mural-clube-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, .42fr);
+  gap: clamp(18px, 3vw, 42px);
+}
+.mural-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: 10px 0 3px;
+  border-bottom: 1px solid var(--line);
+}
+.mural-tabs button,
+.mural-post footer button {
+  min-height: 44px;
+}
+.mural-feed {
+  border: 0;
+  min-width: 0;
+}
+.mural-post {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mural-post header {
+  align-items: center;
+  gap: 12px;
+}
+.mural-post header > div {
+  min-width: 0;
+}
+.mural-post .post-tag {
+  color: var(--copper2);
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 12px;
+}
+.mural-post .post-lead {
+  font-size: clamp(16px, 1.5vw, 20px);
+}
+.mural-post footer {
+  margin-top: 6px;
+  flex-wrap: wrap;
+  gap: 3px 18px;
+}
+.mural-post footer [aria-pressed="true"] {
+  color: var(--copper2);
+}
+.mural-post video,
+.mural-image {
+  display: block;
+  width: min(100%, 560px);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center 38%;
+  background: var(--charcoal);
+  color-scheme: dark;
+}
+.mural-guide {
+  min-width: 0;
+  padding: 20px 0 0 20px;
+  border-left: 1px solid var(--line);
+}
+.mural-guide h2 {
+  font: 25px var(--display);
+  margin: 0 0 8px;
+}
+.mural-guide p,
+.mural-guide dd {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.mural-guide .text-btn {
+  padding-left: 0;
+  min-height: 44px;
+}
+.mural-proposals {
+  border-block: 1px solid var(--line);
+  padding: 16px 0;
+}
+.mural-proposals dl,
+.mural-proposals dd {
+  margin: 0;
+}
+.mural-proposals dl > div + div {
+  margin-top: 14px;
+}
+.mural-proposals dt {
+  margin-bottom: 4px;
+  font-weight: 800;
+}
+.mural-field {
+  display: grid;
+  gap: 7px;
+  font-weight: 700;
+}
+.mural-field textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 10px;
+}
+#perfil .profile-hero {
+  background: none;
+  padding: 10px 0 20px;
+}
+#perfil .profile-hero h1 {
+  font-size: clamp(40px, 4.5vw, 64px);
+}
+#perfil .stats {
+  background: none;
+}
+#perfil .stats b {
+  font-size: clamp(25px, 3vw, 47px);
+}
+#perfil .profile-content {
+  grid-template-columns: minmax(0, 1fr) minmax(0, .9fr);
+  gap: 22px;
+}
+#perfil .profile-content aside {
+  grid-column: 1 / -1;
+  border-left: 0;
+  border-top: 1px solid var(--line);
+  padding: 14px 0 0;
+}
+.profile-tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.outline,
+.login,
+.brand {
+  min-height: 44px;
+}
+dialog {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+@media (min-width: 901px) {
+  body[data-surface="club"] .club-nav {
+    display: grid;
+    align-content: start;
+    position: fixed;
+    inset: 72px auto 0 0;
+    width: 170px;
+    padding: 23px 14px;
+    border-right: 1px solid var(--line);
+  }
+  body[data-surface="club"] #conteudo {
+    margin-left: 170px;
+  }
+  body[data-surface="club"] .screen {
+    padding-inline: clamp(24px, 4vw, 65px);
+  }
+}
+
+@media (max-width: 900px) {
+  body[data-surface="club"] .screen {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+  body[data-surface="club"] .mobile-nav {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 10;
+    min-height: 62px;
+    padding-bottom: env(safe-area-inset-bottom);
+    justify-content: space-around;
+    background: var(--charcoal);
+    border-top: 1px solid var(--line);
+  }
+  body[data-surface="club"] .mobile-nav button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 7px 10px;
+    display: grid;
+    justify-items: center;
+    background: transparent;
+    color: var(--muted);
+  }
+  body[data-surface="club"] .mobile-nav [aria-current] {
+    color: var(--copper2);
+  }
+  .mobile-nav span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 680px) {
+  .public-hero,
+  .arena-grid,
+  .mural-clube-grid,
+  .result-workspace,
+  #perfil .profile-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .public-hero {
+    gap: 14px;
+  }
+  .public-pitch h1 {
+    font-size: clamp(42px, 11vw, 68px);
+    margin: 12px 0;
+  }
+  .public-pitch p {
+    margin: 10px 0;
+  }
+  .public-actions {
+    margin-top: 12px;
+  }
+  .public-guide {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .public-guide > section {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+  }
+  .arena-stage {
+    min-height: 0;
+    padding: 20px 13px 12px;
+  }
+  .arena-rail,
+  .mural-guide {
+    border-left: none;
+    padding-left: 0;
+  }
+  .mural-guide {
+    border-top: 1px solid var(--line);
+  }
+  .result-score {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .result-score,
+  .result-replay {
+    padding: 15px 0;
+  }
+  #x1 .versus {
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+  }
+  #x1 .versus article {
+    padding: 9px 2px;
+    min-height: 182px;
+  }
+  #x1 .vs {
+    order: 0;
+    width: 26px;
+    height: 34px;
+    line-height: 34px;
+  }
+  #x1 .versus article.await {
+    order: 0;
+  }
+  #x1 .fighter-player .m05-player {
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+  }
+  #x1 .fighter-player .m05-player__trilho {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+  .mural-clube .section-head {
+    gap: 12px;
+  }
+  .mural-feed .post-tag {
+    display: none;
+  }
+}
+
+#x1 .versus {
+  align-items: stretch;
+}
+#x1 .versus article {
+  justify-content: flex-start;
+}
+.x1-context {
+  padding: 8px 0 12px;
+  text-align: center;
+}
+.x1-context p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.x1-states [aria-pressed="true"] {
+  color: var(--copper2);
+  border-bottom-color: var(--copper);
+}

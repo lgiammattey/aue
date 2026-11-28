@@ -1,0 +1,25 @@
+/* Camada V2 competitiva. Carregar depois de style.css. */
+.arena-grid { grid-template-columns: minmax(0, 1fr) 330px; }
+.arena-stage { background-image: linear-gradient(90deg, rgb(236 107 58 / 8%) 1px, transparent 1px), linear-gradient(rgb(236 107 58 / 8%) 1px, transparent 1px); background-size: 32px 32px; }
+.arena-head h1, .x1-head h1 { font-size: clamp(44px, 6vw, 84px); }
+.arena-rail { border-left: 1px solid var(--line); padding-left: 28px; }
+.arena-rail li { position: relative; }
+.arena-rail li::before { background: var(--copper); content: ''; height: 6px; left: -12px; position: absolute; top: 22px; width: 6px; }
+.arena-challenge { width: 100%; margin: 14px 0; font-size: 12px; }
+.versus article audio { max-width: min(90%, 180px); margin-top: 8px; }
+.profile-tabs { display: flex; align-items: center; gap: 18px; border-bottom: 1px solid var(--line); padding: 16px 0; }
+.profile-tabs a { color: var(--muted); font-weight: 800; font-size: 13px; text-decoration: none; }
+.profile-tabs a:hover { color: var(--copper2); }
+.profile-tabs .outline { margin-left: auto; }
+.invite-panel { align-items: center; grid-template-columns: 1fr auto auto; }
+.versus { background: repeating-linear-gradient(90deg, transparent 0 39px, rgb(255 255 255 / 4%) 40px); border-block: 1px solid var(--line); padding: 22px 0; }
+.versus article { background: transparent; border-top: 0; min-height: 230px; }
+.versus article:first-child { border-right: 1px solid var(--line); }
+.vs { background: var(--copper); color: var(--bg); height: 58px; line-height: 58px; margin: auto; transform: skewX(-10deg); width: 58px; }
+.sample-list label { align-items: center; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) 190px; }
+.profile-hero { background: linear-gradient(90deg, rgb(236 107 58 / 12%), transparent 42%); padding: 28px 0 38px; }
+.stats { background: repeating-linear-gradient(90deg, transparent 0 79px, rgb(255 255 255 / 3%) 80px); }
+.profile-content > section { min-width: 0; }
+.section-line h2 { letter-spacing: .02em; text-transform: uppercase; }
+@media (max-width: 900px) { .arena-grid { grid-template-columns: 1fr; }.arena-rail { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; }.invite-panel { grid-template-columns: 1fr auto; }.invite-panel > :first-child { grid-column: 1 / -1; } }
+@media (max-width: 620px) { .arena-stage { background-size: 24px 24px; }.versus { grid-template-columns: 1fr; }.versus article:first-child { border-bottom: 1px solid var(--line); border-right: 0; }.vs { order: 1; }.sample-list label { grid-template-columns: 1fr; }.invite-panel { grid-template-columns: 1fr; }.invite-panel > :first-child { grid-column: auto; } }

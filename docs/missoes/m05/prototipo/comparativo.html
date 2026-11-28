@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Auê! M05, comparativo V1 e V2</title>
+  <style>
+    @font-face { font-family: Anton; src: url("../../../../public/fonts/anton-latin.woff2"); font-display: swap; }
+    @font-face { font-family: Archivo; src: url("../../../../public/fonts/archivo-latin.woff2"); font-display: swap; }
+    * { box-sizing: border-box; }
+    html { color-scheme: dark; }
+    body { margin: 0; background: #151515; color: #f2efe9; font: 16px/1.5 Archivo, system-ui, sans-serif; }
+    a { color: #ff9a63; text-underline-offset: 4px; }
+    button, select, a { min-height: 44px; }
+    :focus-visible { outline: 2px solid #ff9a63; outline-offset: 3px; }
+    main { max-width: 1540px; margin: auto; padding: 28px clamp(16px, 4vw, 56px) 48px; }
+    h1, h2 { font-family: Anton, Impact, sans-serif; font-weight: 400; line-height: 1.1; }
+    h1 { font-size: clamp(37px, 6vw, 62px); margin: 0 0 10px; }
+    h2 { font-size: 23px; margin: 8px 0 14px; }
+    p { color: #bdb9b3; }
+    .preview-links, .settings { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 24px; }
+    .preview-links a { display: inline-flex; align-items: center; }
+    .settings { border-block: 1px solid #42413e; padding: 16px 0; margin: 12px 0; }
+    .settings label { display: grid; gap: 5px; min-width: min(100%, 190px); }
+    select { padding: 6px 10px; background: #242423; color: #f2efe9; border: 1px solid #575650; font: inherit; }
+    figure, figcaption { margin: 0; }
+    .comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .comparison figure { min-width: 0; }
+    .comparison a { display: block; height: clamp(300px, 58vh, 630px); overflow: auto; background: #0f1010; border: 1px solid #41403c; }
+    .comparison img { display: block; width: 100%; height: auto; }
+    .comparison[data-device="mobile"] a { max-width: 390px; }
+    .comparison figcaption { color: #bdb9b3; font-size: 14px; margin: 9px 0 0; }
+    .colors { margin-top: 30px; padding-top: 18px; border-top: 1px solid #42413e; }
+    .color-list { display: flex; flex-wrap: wrap; gap: 12px; }
+    .color-list a { display: inline-flex; align-items: center; color: #111212; padding: 0 16px; font-weight: 800; }
+    .cobre { background: #ec6b3a; }
+    .saturado { background: #ff5500; }
+    @media (max-width: 620px) {
+      .comparison { grid-template-columns: minmax(0, 1fr); }
+      .comparison a { height: min(62vh, 460px); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Auê! da V1 à V2</h1>
+    <p>Capturas no mesmo estado do jogo, com dados de demonstração. Abra uma imagem para ampliá-la.</p>
+    <nav class="preview-links" aria-label="Protótipo V2">
+      <a href="index.html">Navegar em desktop</a>
+      <a href="mobile.html">Navegar em mobile</a>
+    </nav>
+    <div class="settings">
+      <label>Tela
+        <select id="screen">
+          <option value="home">Home</option>
+          <option value="arena">Arena</option>
+          <option value="gravacao">Gravação</option>
+          <option value="resultado">Resultado</option>
+          <option value="x1">X1</option>
+          <option value="mural">Mural</option>
+          <option value="perfil">Perfil</option>
+        </select>
+      </label>
+      <label>Tamanho
+        <select id="device">
+          <option value="desktop">Desktop · 1440 × 900</option>
+          <option value="mobile">Mobile · 390 × 844</option>
+        </select>
+      </label>
+    </div>
+    <p id="change" aria-live="polite">A ilustração de rivalidade substitui a foto de microfone. O convite, a Arena e a resenha aparecem na primeira página.</p>
+    <div class="comparison" data-device="desktop">
+      <figure>
+        <h2>V1</h2>
+        <a href="capturas/v1-desktop-home.jpg" target="_blank" rel="noopener"><img src="capturas/v1-desktop-home.jpg" alt="Home da V1 em desktop" /></a>
+        <figcaption>Protótipo apresentado na primeira rodada.</figcaption>
+      </figure>
+      <figure>
+        <h2>V2</h2>
+        <a href="capturas/v2-desktop-home.jpg" target="_blank" rel="noopener"><img src="capturas/v2-desktop-home.jpg" alt="Home da V2 em desktop" /></a>
+        <figcaption>Protótipo para avaliação visual e funcional.</figcaption>
+      </figure>
+    </div>
+    <section class="colors">
+      <h2>Qual laranja combina com o clube?</h2>
+      <p>Os dois links abrem a mesma V2. A cor muda nos botões, nos estados ativos e nos players.</p>
+      <div class="color-list">
+        <a class="cobre" href="index.html?cor=cobre">Cobre da V2 · #EC6B3A</a>
+        <a class="saturado" href="index.html?cor=saturado">Laranja do Auê · #FF5500</a>
+      </div>
+    </section>
+  </main>
+  <script>
+    const descriptions = {
+      home: 'A ilustração de rivalidade substitui a foto de microfone. O convite, a Arena e a resenha aparecem na primeira página.',
+      arena: 'A mesa de desafios reúne recebido, em andamento e histórico, enquanto gravar continua sendo a ação principal.',
+      gravacao: 'O gravador continua no lobby. O estado de captura fica visível ao lado dos caminhos para voltar ao jogo.',
+      resultado: 'A nota ficou menor. O player e as ações de convidar, tentar de novo ou publicar passaram a dividir a tela.',
+      x1: 'O confronto reúne avatares, medição e player de cada pessoa no próprio lado. A comparação continua experimental.',
+      mural: 'O Mural ganhou filtros, publicações de áudio, texto, imagem e vídeo, composição de exemplo e conversa encadeada.',
+      perfil: 'O nome ficou menor. Avatar, nota publicada de exemplo, histórico e botão de desafiar formam a ficha.',
+    };
+    const screen = document.querySelector('#screen');
+    const device = document.querySelector('#device');
+    const comparison = document.querySelector('.comparison');
+
+    function update() {
+      comparison.dataset.device = device.value;
+      document.querySelector('#change').textContent = descriptions[screen.value];
+      [...comparison.querySelectorAll('figure')].forEach((figure, index) => {
+        const version = 'v' + (index + 1);
+        const file = 'capturas/' + version + '-' + device.value + '-' + screen.value + '.jpg';
+        const photo = figure.querySelector('img');
+        photo.src = file;
+        photo.alt = screen.selectedOptions[0].text + ' da ' + version.toUpperCase() + ' em ' + device.value;
+        figure.querySelector('a').href = file;
+      });
+    }
+
+    screen.addEventListener('change', update);
+    device.addEventListener('change', update);
+  </script>
+</body>
+</html>

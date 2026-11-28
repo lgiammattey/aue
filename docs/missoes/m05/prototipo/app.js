@@ -9,6 +9,9 @@ const publishButton = find('[data-action="confirm-publish"]');
 const consentAudio = publishDialog.querySelector('audio');
 const soloAudio = 'amostra-curta.wav';
 const responseAudio = 'amostra-longa.wav';
+const muralComposer = find('#mural-composer');
+const accent = new URLSearchParams(location.search).get('cor');
+document.documentElement.dataset.accent = accent === 'saturado' ? 'saturado' : 'cobre';
 
 let language = 'pt';
 let session = false;
@@ -21,11 +24,12 @@ let inviteState = 'pending';
 let followingRafa = false;
 let filter = 'all';
 let published = false;
+let textPost = '';
 let pendingSessionAction;
 let emptyReturn = 'arena';
 
 const captureSteps = {
-  ready: ['Preparado?', 'A tentativa só começa quando você aciona o gravador.', 'Gravar tentativa'],
+  ready: ['Gravação solo', 'A tentativa só começa quando você aciona o gravador.', 'Gravar tentativa'],
   permission: ['Permissão de microfone', 'No jogo, o navegador pede acesso. Aqui a permissão é simulada.', 'Continuar na demo'],
   calibrating: ['Calibrando', 'A Arena mede o ruído do ambiente antes da tentativa.', 'Começar gravação'],
   recording: ['Gravando', 'O gravador está em demonstração. Você pode parar quando quiser.', 'Parar e revisar'],
@@ -42,7 +46,7 @@ const inviteSteps = {
 };
 
 function pauseAudio(container = document) {
-  for (const audio of container.querySelectorAll('audio')) audio.pause();
+  for (const audio of container.querySelectorAll('audio, video')) audio.pause();
 }
 
 function show(view) {
@@ -50,14 +54,17 @@ function show(view) {
   pauseAudio();
   activeView = view === 'home' && language === 'en' ? 'home-en' : view;
 
+  document.body.dataset.surface = view === 'home' ? 'public' : 'club';
+
   for (const screen of screens) {
     const active = screen.id === activeView;
     screen.hidden = !active;
     screen.classList.toggle('active', active);
   }
 
-  for (const button of document.querySelectorAll('nav [data-view]')) {
-    if (button.dataset.view === view) button.setAttribute('aria-current', 'page');
+  const navView = view === 'result' || view === 'error' ? 'arena' : view === 'empty' ? emptyReturn : view;
+  for (const button of document.querySelectorAll('nav [data-view], nav [data-action="see-invite"]')) {
+    if (button.dataset.view === navView || (navView === 'x1' && button.dataset.action === 'see-invite')) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   }
 
@@ -77,7 +84,10 @@ function speak(message) {
 function setCapture(step) {
   const [title, copy, label] = captureSteps[step];
   arenaStage.dataset.state = step;
-  find('[data-arena-title]').textContent = title;
+  const captureTitle = step === 'ready' && captureMode !== 'solo'
+    ? captureMode === 'reply' ? 'Grave sua resposta' : 'Grave para o X1'
+    : title;
+  find('[data-arena-title]').textContent = captureTitle;
   find('[data-arena-copy]').textContent = copy;
   find('[data-record-label]').textContent = step === 'review' && captureMode === 'reply' ? 'Enviar resposta' : label;
   find('[data-action="record"]').disabled = step === 'finalizing';
@@ -91,7 +101,7 @@ function setCapture(step) {
 function openCapture(mode = 'solo') {
   captureMode = mode;
   const x1 = mode === 'reply';
-  find('[data-capture-mode]').textContent = x1 ? 'Resposta do X1' : 'Tentativa solo';
+  find('[data-capture-mode]').textContent = x1 ? 'Resposta do X1' : mode === 'challenge' ? 'Nova gravação para o X1' : 'Tentativa solo';
   const audio = find('[data-capture-audio]');
   audio.src = x1 ? responseAudio : soloAudio;
   setCapture('ready');
@@ -132,10 +142,17 @@ function showInvite(state, fromCreator = false) {
   find('[data-x1-status]').textContent = status;
   find('[data-x1-second]').textContent = second;
   find('[data-x1-copy]').textContent = copy;
-  find('[data-x1-avatar]').textContent = avatar;
+  const playerAvatar = find('[data-x1-avatar]');
+  playerAvatar.textContent = state === 'responded' ? '' : avatar;
+  playerAvatar.classList.toggle('bel', state === 'responded');
+  find('[data-x1-name]').textContent = state === 'responded' ? 'Bel da Roda' : 'Convidado';
   find('[data-x1-audio]').hidden = !available;
   find('[data-x1-response]').hidden = state !== 'responded';
+  find('.versus article.await audio').hidden = state !== 'responded';
   find('[data-action="start-reply"]').hidden = state !== 'pending';
+  for (const control of document.querySelectorAll('.x1-states button')) {
+    control.setAttribute('aria-pressed', String(control.dataset.action === state));
+  }
   show('x1');
 }
 
@@ -167,16 +184,25 @@ function startPublish() {
 
 function setMuralFilter(next) {
   filter = next;
+  const actionByFilter = { all: 'all-posts', audio: 'audio-posts', media: 'media-posts', following: 'following' };
   pauseAudio(find('#mural'));
-  for (const button of find('.tabs').querySelectorAll('button')) {
-    const current = button.dataset.action === (filter === 'all' ? 'all-posts' : 'following');
+
+  for (const button of find('.mural-tabs').querySelectorAll('button')) {
+    const current = button.dataset.action === actionByFilter[filter];
     button.setAttribute('aria-pressed', String(current));
     button.classList.toggle('selected', current);
   }
-  find('[data-following-empty]').hidden = filter === 'all' || followingRafa;
-  find('[data-rafa-post]').hidden = filter !== 'all' && !followingRafa;
-  find('[data-demo-post]').hidden = filter !== 'all' || !published;
-  find('[data-proposal-post]').hidden = filter !== 'all';
+
+  for (const post of document.querySelectorAll('#mural [data-post-kind]')) {
+    const relevant = filter === 'all' || (
+      filter === 'following' ? followingRafa && post.dataset.postAuthor === 'rafa' : post.dataset.postKind === filter
+    );
+    post.hidden = !relevant;
+  }
+
+  find('[data-following-empty]').hidden = filter !== 'following' || followingRafa;
+  find('[data-demo-post]').hidden = !published || (filter !== 'all' && filter !== 'audio');
+  find('[data-text-post]').hidden = !textPost || filter !== 'all';
 }
 
 function toggleFollow() {
@@ -252,6 +278,7 @@ const actions = {
   },
   fallback: () => setCapture('fallback'),
   'see-invite': () => showInvite('pending'),
+  'new-challenge': () => openCapture('challenge'),
   'create-link': () => withSession(() => {
     inviteCreated = true;
     find('[data-link-message]').textContent = 'Use este link para abrir a tela de quem recebe.';
@@ -300,6 +327,9 @@ const actions = {
   follow: () => withSession(toggleFollow),
   following: () => withSession(() => setMuralFilter('following')),
   'all-posts': () => setMuralFilter('all'),
+  'audio-posts': () => setMuralFilter('audio'),
+  'media-posts': () => setMuralFilter('media'),
+  'compose-post': () => withSession(() => muralComposer.showModal()),
 };
 
 document.addEventListener('click', (event) => {
@@ -322,6 +352,39 @@ consentCheckbox.addEventListener('change', () => {
 publishDialog.addEventListener('close', () => consentAudio.pause());
 sessionDialog.addEventListener('close', () => {
   pendingSessionAction = undefined;
+});
+
+find('[data-mural-post-form]').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const field = event.currentTarget.querySelector('textarea');
+  const text = field.value.trim();
+  if (!text) return;
+  textPost = text;
+  find('[data-text-post-body]').textContent = text;
+  field.value = '';
+  muralComposer.close();
+  setMuralFilter('all');
+  speak('Seu texto entrou neste Mural de demonstração.');
+});
+
+find('[data-mural-comment-form]').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const field = event.currentTarget.querySelector('textarea');
+  const text = field.value.trim();
+  if (!text) return;
+  const threadDialog = find('#thread-dialog');
+  if (!session) threadDialog.close();
+  withSession(() => {
+    const response = document.createElement('p');
+    response.className = 'thread-reply';
+    response.textContent = 'Você · ' + text;
+    find('[data-mural-comments]').append(response);
+    const count = find('[data-mural-comment-count]');
+    count.textContent = String(Number(count.textContent) + 1);
+    field.value = '';
+    if (!threadDialog.open) threadDialog.showModal();
+    speak('Resposta adicionada à conversa de demonstração.');
+  });
 });
 
 window.addEventListener('hashchange', openInviteFromHash);
